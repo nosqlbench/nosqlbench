@@ -4,6 +4,25 @@ This project combines upstream projects of engineblock and virtualdataset into o
 
 This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.
 
+# Project Structure
+
+NoSQLBench is a large project. It has lots of advanced functionality built-in that you won't find in any other performance testing tool.
+
+The modules are named in a consistent way. The naming conventions are as follows:
+
+- All virtdata-... modules are the procedural generation system.
+- All virtdata-lib-... modules are function libraries for mapping coordinates to virtual data.
+- All nb-... modules are part of the nosqlbench runtime engine.
+- The main module that users interact with comes from the `nb` project. The binary is simply named `nb`, and the executable jar is `nb.jar`.
+
+## System Compatibility
+
+This is a Linux targeted tool, as most cloud/nosql testing is done on Linux instances. Some support for other systems is available, but more work is needed to support them fully. Here is what is supported for each:
+
+1. on Linux, all features are supported, for both `nb.jar` as well as the appimage binary `nb`
+2. on Mac, with `nb.jar` all features are supported, except --docker-metrics
+3. On Windows, with `nb.jar` all features are supported, except --docker-metrics
+
 ## nosqlbench
 
 This project aims to provide a missing power tool in the test tooling arsenal.
