@@ -1,0 +1,1 @@
+long -> Func2() -> long; Func3('literal','literal2'); func4(1.23,4.5d); f5("ABC") -> String

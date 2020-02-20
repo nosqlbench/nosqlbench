@@ -1,0 +1,16 @@
+<html>
+<head>
+ <title>Virtdata Docs Design</title>
+</head>
+<body>
+<h1>topics list</h1>
+
+<UL>
+{{# topics }}
+  <LI>{{name}}</LI>
+{{/ topics }}
+</UL>
+
+</body>
+</html>
+

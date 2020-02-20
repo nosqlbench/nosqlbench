@@ -1,0 +1,13 @@
+@startuml
+scale 350 width
+[*] --> long
+long --> long
+long --> int
+long --> double
+int --> String
+double --> String
+long --> String
+long --> Date
+long --> Bytes
+long --> T
+@enduml

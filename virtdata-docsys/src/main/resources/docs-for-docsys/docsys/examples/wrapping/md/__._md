@@ -1,0 +1,11 @@
+## Begin Hierarchic Wrapping Layer
+
+```
+inner.rendered follows
+```
+
+{{ inner.rendered }}
+
+```
+End Hierarchic Wrapping Layer
+```

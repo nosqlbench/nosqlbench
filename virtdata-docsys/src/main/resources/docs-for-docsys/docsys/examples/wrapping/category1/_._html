@@ -1,0 +1,6 @@
+<HTML>
+<HEAD>Heading Test</HEAD>
+<BODY>
+  {{{ inner.rendered }}}
+</BODY>
+</HTML>

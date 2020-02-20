@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>virtdata-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>2.12.16-SNAPSHOT</version>
+        <relativePath>../virtdata-defaults</relativePath>
+    </parent>
+
+    <artifactId>virtdata-lib-curves4</artifactId>
+    <packaging>jar</packaging>
+    <name>virtdata-lib-curves4</name>
+    <url>http://virtdata.io/</url>
+    <description>
+        Statistical sampling library for use in virtualdataset libraries, based on apache commons math 4
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-api</artifactId>
+            <version>2.12.16-SNAPSHOT</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            &lt;!&ndash; key methods were exposed in the commons math4 statistics library-->
+<!--                 which allow direct access to cumulative distribution calculations.-->
+<!--                 It appears there is no way to access them via a regular release.-->
+<!--                 This small enhancement is being held back from release by many other things-->
+<!--                 which are unrelated. It is not satisfying to embed this, but it is less-->
+<!--                 bad than breaking builds due to snapshot repo limits. &ndash;&gt;-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-math4</artifactId>-->
+<!--            <version>4.0-SNAPSHOT</version>-->
+<!--            <optional>true</optional>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-statistics-distribution</artifactId>-->
+<!--            <version>0.1-SNAPSHOT</version>-->
+<!--            <optional>true</optional>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.13.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core-java8</artifactId>
+            <version>1.0.0m1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- TODO: Replace this or bundle internal artifact -->
+        <!--<dependency>-->
+        <!--<groupId>org.apache.commons</groupId>-->
+        <!--<artifactId>commons-statistics-distribution</artifactId>-->
+        <!--<version>1.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>org.apache.commons</groupId>-->
+        <!--<artifactId>commons-statistics-distribution</artifactId>-->
+        <!--<version>0.1-SNAPSHOT</version>-->
+        <!--</dependency>-->
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>shade</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>7.0</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.commons.statistics</pattern>
+                                    <shadedPattern>io.virtdata.shaded.oac.statistics</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.math4.stat</pattern>
+                                    <shadedPattern>io.virtdata.shaded.oac.statistics</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.statistics.distribution</pattern>
+                                    <shadedPattern>io.virtdata.shaded.oac.statistics.distribution</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
