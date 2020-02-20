@@ -33,7 +33,7 @@ The design goals:
 2. Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an [open javascript sandbox](http://docs.nosqlbench.io/user-guide/scripting/). This makes more sophisticated scenarios possible when needed.
 3. Minimize the amount of effort required to get empirical results from a test cycle. For this, [metrics reporting](http://docs.nosqlbench.io/user-guide/metrics/) is baked in.
 
-In short, Engine Block wishes to be a programmable power tool for performance
+In short, NoSQLBench wishes to be a programmable power tool for performance
 testing. However, it is somewhat generic. It doesn't know directly about a
 particular type of system, or protocol. It simply provides a suitable machine
 harness in which to put your drivers and testing logic. If you know how to build
@@ -47,9 +47,8 @@ drivers.
 
 ## History
 
-The Engine Block project started as a branch of [test
-client](http://github.com/jshook/testclient). It has since evolved to be more
-generic.
+The NoSQLBench project started as a branch of [test
+client](http://github.com/jshook/testclient). It has since evolved to be more generic and capable.
 
 ## License
 
