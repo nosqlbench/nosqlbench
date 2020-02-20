@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=nosqlbench
+Exec=eb %F
+Icon=eb
+Type=Application
+Categories=Development;Network;Utility;Science;
+Comment=nosqlbench Core Module
+MimeType=text/yaml;application/yaml;
+Name[en]=eb
+Terminal=false
+StartupNotify=true
+NoDisplay=false

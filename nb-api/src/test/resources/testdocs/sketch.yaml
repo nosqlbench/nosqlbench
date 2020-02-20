@@ -1,0 +1,52 @@
+name: repeated-block
+tags:
+ root1: val1
+ root2: val2
+blocks:
+ - name: oneline-repeated #
+   statements:
+    - g()..... param1 param2
+    - g()..... param3 param4
+   repeat-cycles: 10
+   bindings:
+     param1: override-b11
+     param2: overized-beez
+ - name: multiline-repeated
+   statements:
+    - |
+     [repeat:100]
+     g().....
+     var foo= ...
+     g() ... .foo param3
+     g()..... barbaz
+   repeat-cycles: 10
+   bindings:
+    clustercol: Identity()
+ - name: composited-to-oneline
+   statements:
+    - g()..... param1
+    - g()..... param2
+    - g()..... param3
+   concatenate: true
+bindings:
+ partitionkey: Identity()
+
+#
+
+new SimpleGraphStatement("
+     g() ... .foo1 param3
+     g()..... barbaz
+     g() ... .foo2 param3
+     g()..... barbaz", new Map ....{foo1, foo2, foo3, })
+
+
+# Must anchor with :? {} ...
+
+# repeating
+# concatenation
+# R
+# C
+# R+C
+
+
+

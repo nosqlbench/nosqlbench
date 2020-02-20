@@ -1,0 +1,16 @@
+# eb run type=stdout yaml=examples/sequences cycles=20 seq=concat
+# yields ABBCCCDDDDABBCCCDDDD
+# eb run type=stdout yaml=examples/sequences cycles=20 seq=interval
+# yeilds ABCDDCBDCDABCDDCBDCD
+# eb run type=stdout yaml=examples/sequences cycles=20 seq=bucket
+# yeilds ABCDBCDCDDABCDBCDCDD
+
+statements:
+ - A1: "|"
+   ratio: 1
+ - B2: "_"
+   ratio: 2
+ - C3: "="
+   ratio: 3
+ - D4: ":"
+   ratio: 4

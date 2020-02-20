@@ -1,0 +1,6 @@
+blocks:
+ - name: b1
+   statements:
+     - b1s1
+   bindings:
+     bl1b1 : bl1b1d

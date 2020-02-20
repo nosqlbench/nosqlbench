@@ -1,0 +1,9 @@
+tags:
+ tag1: val1
+name: name
+params:
+ timeout: 2343
+statements:
+ - generic statement syntax here
+bindings:
+ bindpoint1: bindvalue

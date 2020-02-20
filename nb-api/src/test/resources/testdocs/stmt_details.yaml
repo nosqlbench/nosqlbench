@@ -1,0 +1,30 @@
+statements:
+ - globalstatement1
+
+blocks:
+ - name: testblock1
+   statements:
+    - astatement1
+    - s2name: s2statement data
+    - s3: statement three
+      bindings:
+       bn1: bv1
+       bn2: bv2
+      params:
+       pkey1: pval1
+       global_param1: anothervalue
+      tags:
+       tname1: tval1
+      freeparam1: "free parameter value"
+    - name: s4
+      stmt: statement 4
+
+bindings:
+ global_bind1: binding value
+
+params:
+ global_param1: param value
+
+tags:
+ global_tag1: tag value
+

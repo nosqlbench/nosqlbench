@@ -1,0 +1,62 @@
+#!/bin/bash
+
+export AUTO_INSTALL=${AUTO_INSTALL:-"true"}
+export FORCE_INSTALL=${FORCE_INSTALL:-"false"}
+export FETCH_ONLY=${FETCH_ONLY:-"false"}
+export STALE_DAYS=${STALE_DAYS:-"2"}
+
+if ! which curl >> /dev/null 2>&1
+then
+ printf "$0 requires curl to be in the path.\n";
+ exit 2
+fi
+
+export NB_JARNAME="nb.jar"
+
+DOINSTALL="false"
+if [ ! -f "${NB_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
+then DOINSTALL="true"
+elif [ "${FORCE_INSTALL}" = "true" ]
+then DOINSTALL="true"
+elif find ${NB_JARNAME} -mtime ${STALE_DAYS} | grep ${NB_JARNAME}
+# 2>&1 >>/dev/null
+then
+ DOINSTALL="true"
+ printf "forcing download because the jar is more than %s days old\n" ${STALE_DAYS}
+fi
+
+if [ "${DOINSTALL}" = "true" ]
+then
+
+export central_runtime_version=$(
+   curl -s -L \
+   'http://search.maven.org/solrsearch/select?q=g:"io
+   .nosqlbench"%20AND%20a:"nb-cli"%20AND%20p:"jar"&wt=json&rows=1' \
+   | perl -pe 'if (/"latestVersion":"([\d\.]+?)"/) { $_ = $1 } else {$_="nope"}'
+)
+export DOWNLOAD_VERSION=${central_runtime_version:?"Unable to find a downloadble version via maven central search."}
+printf 'Downloading version: %s\n...' ${DOWNLOAD_VERSION} 1>&2
+export DOWNLOAD_URL="https://repo1.maven
+.org/maven2/io/nosqlbench/nb-cli/${DOWNLOAD_VERSION}/nb-cli-$
+{DOWNLOAD_VERSION}.jar"
+printf 'Download URL: %s\n' ${DOWNLOAD_URL}
+
+printf 'fetching nosqlbench CLI from %s...\n' "${DOWNLOAD_URL}" 1>&2
+
+(
+ cd /tmp ;
+ curl -s -L -o 'nb.jar' "${DOWNLOAD_URL}"
+)
+mv /tmp/nb.jar ${NB_JARNAME}
+printf "The NB jar has been saved as %s\n" ${NB_JARNAME}
+fi
+
+if [ "${FETCH_ONLY}" = "true" ]
+then
+ printf "fetching client only, exiting\n" 1>&2
+ exit 0;
+fi;
+
+java -jar ${NB_JARNAME} \
+ $*
+

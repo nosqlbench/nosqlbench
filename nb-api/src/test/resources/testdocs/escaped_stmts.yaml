@@ -1,0 +1,7 @@
+statements:
+  stmt1: "This is a \"statement\""
+  stmt2: |
+    This is a \"statement\".
+  stmt3: |
+    This is a """statement""".
+

@@ -1,0 +1,32 @@
+# this directory was added by nosqlbench for docker-metrics
+# it is used by the prometheus docker container
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+    scheme: http
+    timeout: 10s
+
+scrape_configs:
+  - job_name: prometheus
+    scrape_interval: 15s
+    scrape_timeout: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+    - targets:
+      - localhost:9090
+
+  - job_name: graphite_import 
+    scrape_interval: 15s 
+    scrape_timeout: 15s 
+    metrics_path: /metrics 
+    scheme: http 
+    static_configs: 
+    - targets: 
+      - !!!GRAPHITE_IP!!!:9108

@@ -1,0 +1,14 @@
+name: invalid-both-statements-and-blocks
+statements:
+ - s1
+ - s2
+blocks:
+ - name: block1
+   tags:
+     once: twice
+   statements:
+    - st1
+    - st2
+ - statements:
+    - st5
+    - st6

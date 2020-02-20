@@ -1,0 +1,16 @@
+csv:
+  - outdir: '/tmp/metricsout'
+    period: 10
+    timeunit: 'SECONDS'
+graphite:
+  - period: 10
+    timeunit: 'SECONDS'
+    hosts:
+    - host: '54.84.116.100'
+      port: 2003
+    prefix: 'densitytest.'
+    predicate:
+      color: "white"
+      useQualifiedName: true
+      patterns:
+        - ".*"

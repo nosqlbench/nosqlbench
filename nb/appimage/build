@@ -1,0 +1,73 @@
+#!/bin/bash
+set -x
+mkdir -p target/NB.AppDir
+
+if [ ! -f ../target/nb.jar ]
+then
+ print "../target/nb.jar does not exist"
+ exit 2
+fi
+
+if [ -x "target/nb" ]
+then
+ printf "Removing stale target/nb...\n"
+ rm target/nb
+fi
+
+rsync -av skel/ target/NB.AppDir/
+cp ../target/nb.jar target/NB.AppDir/usr/bin/nb.jar
+
+
+( cd target/NB.AppDir && (
+  if [ ! -d "usr/bin/jre" ]
+  then
+   printf "getting jre...\n";
+   # JRE 12
+   wget -c https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   tar xf OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   mv jdk-12.0.2+10-jre usr/bin/jre
+   rm OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+
+   # JRE 13
+   # wget -c https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33/OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+   # tar xf OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+   #mv jdk-13+33-jre usr/bin/jre
+   #rm OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+  else
+   printf "jre directory present, skipping...\n";
+  fi
+
+  if [ -f "AppRun" ]
+  then
+   printf "Removing stale AppRun...\n";
+   rm AppRun
+  fi
+
+  if [ ! -f "AppRun" ]
+  then
+   printf "Linking AppRun...\n";
+   ln -s usr/bin/nb AppRun
+  fi
+ 
+ )
+)
+
+printf "getting appimage tool and building image...\n";
+
+( cd target && (
+  if [ ! -x "appimagetool-x86_64.AppImage" ]
+  then
+   wget -c https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage
+   chmod +x appimagetool-x86_64.AppImage
+  fi
+
+  ARCH=x86_64 ./appimagetool-x86_64.AppImage NB.AppDir nb
+  # && chmod +x nb
+ )
+)
+
+if [ -x "target/nb" ]
+then
+ printf "nosqlbench AppImage binary was built at target/nb\n";
+fi
+
