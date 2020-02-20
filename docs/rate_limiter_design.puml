@@ -1,0 +1,82 @@
+@startuml
+
+Participant "Calling\nThread" as t
+Participant "Limiter\nlogic" as l
+Participant "Allocated\nnanos" as a
+Participant "Elapsed\nnanos" as e
+Participant "Clock\nSource" as c
+
+t -> l : acquire(nanos)
+
+group allocate start time
+l -> a : getAndIncrement(nanos)
+activate a #black
+note over l,a
+ **allocated** is an atomic accumulator
+ which represents scheduled time. Each
+ op causes it to be atomically incremented
+ by a time slice of nanos.
+end note
+a -> l : <scheduled_at>
+deactivate a
+end
+
+group calculate delay (cached)
+l -> e : get()
+activate e
+note over e
+ **elapsed** is an
+ atomic register
+ which caches
+ system time.
+end note
+e -> l : <elapsed>
+deactivate e
+l -> l : delay = \nelapsed - scheduled_at
+
+note right
+ **delay** measures external delay
+ that causes an op to fire after
+ the ideal time. **positive delay**
+ thus means the rate limiter doesn't
+ need to impose its own blocking delay
+ in order to ensure delay>=0.
+end note
+
+end
+
+group if delay<0 (cached)
+note over l,c
+ If delay<0, then this operation is too soon according
+ to the cached clock value. Since this could be stale
+ and cause us to block needlessly, we update the cached
+ clock value and recompute delay.
+end note
+l -> c : get() (~25ns)
+activate c #orange
+c -> l : <elapsed>
+deactivate c
+
+l -> e : store(<elapsed>)
+activate e #black
+e -> l
+deactivate e
+l -> l : delay = \nelapsed - scheduled_at
+
+group if delay<0 (updated)
+ l->l: sleep(-delay);\ndelay=0
+ note right
+  If delay is negative, we sleep
+  in the calling thread and
+  set delay=0
+ end note
+ activate l
+ deactivate l
+end
+
+end
+
+l->t: <delay>
+
+
+@enduml

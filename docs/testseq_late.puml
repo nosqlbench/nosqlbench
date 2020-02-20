@@ -1,0 +1,51 @@
+@startuml
+scale 100 as 100 pixels
+
+Title Rate Limit **LATE**
+concise "clock" as C
+concise "elapsed" as E
+concise "scheduled" as S
+concise "allocated" as A
+
+C is the_past #red
+E is NOWTIME #lightblue
+S is scheduled #orange
+A is allocated #yellow
+
+@0
+S is idle #grey
+
+@100
+A is unallocated #white
+S is scheduled #orange
+
+@200
+S is unscheduled #white
+
+@500
+E is unseen #white
+A -> C
+
+@632
+C is future #white
+E->C
+
+@A
+@100 <-> @500: **wait_time** =\nelapsed - allocated = 400
+@E
+@500 <-> @632: **error** = 132
+@S
+@200 <-> @500: **scheduling_delay** =\nelapsed - scheduled = 300
+
+concise "Ops" as O
+@O
+0 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
+@enduml

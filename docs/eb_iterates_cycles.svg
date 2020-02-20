@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     contentScriptType="application/ecmascript" contentStyleType="text/css" height="687.6px" preserveAspectRatio="none"
+     style="width:919px;height:687px;" version="1.1" viewBox="0 0 919 687" width="919.8px" zoomAndPan="magnify">
+    <defs>
+        <filter height="300%" id="f1a0022fu680ij" width="300%" x="-1" y="-1">
+            <feGaussianBlur result="blurOut" stdDeviation="3.5999999046325684"/>
+            <feColorMatrix in="blurOut" result="blurOut2" type="matrix"
+                           values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/>
+            <feOffset dx="7.199999809265137" dy="7.199999809265137" in="blurOut2" result="blurOut3"/>
+            <feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/>
+        </filter>
+    </defs>
+    <g>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="52.4391"
+              style="stroke: #A80036; stroke-width: 1.7999999523162842;" width="18" x="80.1" y="245.8125"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="52.4391"
+              style="stroke: #A80036; stroke-width: 1.7999999523162842;" width="18" x="639.9" y="493.6078"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="135.7172"
+              style="stroke: #000000; stroke-width: 3.5999999046325684;" width="486" x="23.4" y="177.1734"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="247.7953"
+              style="stroke: #000000; stroke-width: 3.5999999046325684;" width="563.4" x="316.8" y="338.0906"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="191.7562"
+              style="stroke: #000000; stroke-width: 3.5999999046325684;" width="527.4" x="334.8" y="381.5297"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="135.7172"
+              style="stroke: #000000; stroke-width: 3.5999999046325684;" width="369" x="352.8" y="424.9687"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842; stroke-dasharray: 5.0,5.0;" x1="88.2" x2="88.2"
+              y1="68.9344" y2="616.4859"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842; stroke-dasharray: 5.0,5.0;" x1="430.2"
+              x2="430.2" y1="68.9344" y2="616.4859"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842; stroke-dasharray: 5.0,5.0;" x1="648" x2="648"
+              y1="68.9344" y2="616.4859"/>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="88.2" x="41.4" y="5.4"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="63"
+              x="54" y="41.3912">Input
+        </text>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="88.2" x="41.4" y="614.6859"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="63"
+              x="54" y="650.6771">Input
+        </text>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="113.4" x="370.8" y="5.4"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="88.2"
+              x="383.4" y="41.3912">Thread
+        </text>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="113.4" x="370.8" y="614.6859"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="88.2"
+              x="383.4" y="650.6771">Thread
+        </text>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="102.6" x="594" y="5.4"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="77.4"
+              x="606.6" y="41.3912">Action
+        </text>
+        <rect fill="#FEFECE" filter="url(#f1a0022fu680ij)" height="54.5344"
+              style="stroke: #A80036; stroke-width: 2.6999999284744263;" width="102.6" x="594" y="614.6859"/>
+        <text fill="#000000" font-family="sans-serif" font-size="25.2" lengthAdjust="spacingAndGlyphs" textLength="77.4"
+              x="606.6" y="650.6771">Action
+        </text>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="52.4391"
+              style="stroke: #A80036; stroke-width: 1.7999999523162842;" width="18" x="80.1" y="245.8125"/>
+        <rect fill="#FFFFFF" filter="url(#f1a0022fu680ij)" height="52.4391"
+              style="stroke: #A80036; stroke-width: 1.7999999523162842;" width="18" x="639.9" y="493.6078"/>
+        <rect fill="#EEEEEE" filter="url(#f1a0022fu680ij)" height="5.4"
+              style="stroke: #EEEEEE; stroke-width: 1.7999999523162842;" width="892.8" x="5.4" y="123.9539"/>
+        <line style="stroke: #000000; stroke-width: 1.7999999523162842;" x1="5.4" x2="898.2" y1="123.9539"
+              y2="123.9539"/>
+        <line style="stroke: #000000; stroke-width: 1.7999999523162842;" x1="5.4" x2="898.2" y1="129.3539"
+              y2="129.3539"/>
+        <rect fill="#EEEEEE" filter="url(#f1a0022fu680ij)" height="41.6391"
+              style="stroke: #000000; stroke-width: 3.5999999046325684;" width="210.6" x="346.5" y="104.9344"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="176.4" x="357.3" y="133.8548">acquire input
+        </text>
+        <rect fill="none" height="135.7172" style="stroke: #000000; stroke-width: 3.5999999046325684;" width="486"
+              x="23.4" y="177.1734"/>
+        <polygon fill="#EEEEEE"
+                 points="23.4,177.1734,331.2,177.1734,331.2,189.7734,313.2,207.7734,23.4,207.7734,23.4,177.1734"
+                 style="stroke: #000000; stroke-width: 3.5999999046325684;"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="226.8" x="50.4" y="200.6938">TIMER read-input
+        </text>
+        <polygon fill="#A80036" points="117.9,238.6125,99.9,245.8125,117.9,253.0125,110.7,245.8125"
+                 style="stroke: #A80036; stroke-width: 1.7999999523162842;"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842;" x1="107.1" x2="429.3" y1="245.8125"
+              y2="245.8125"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" lengthAdjust="spacingAndGlyphs"
+              textLength="230.4" x="128.7" y="236.9329">get segment(stride)
+        </text>
+        <polygon fill="#A80036" points="409.5,291.0516,427.5,298.2516,409.5,305.4516,416.7,298.2516"
+                 style="stroke: #A80036; stroke-width: 1.7999999523162842;"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842;" x1="89.1" x2="420.3" y1="298.2516"
+              y2="298.2516"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" lengthAdjust="spacingAndGlyphs"
+              textLength="289.8" x="101.7" y="289.372">&lt;cycle segment&gt;[stride]
+        </text>
+        <rect fill="none" height="247.7953" style="stroke: #000000; stroke-width: 3.5999999046325684;" width="563.4"
+              x="316.8" y="338.0906"/>
+        <polygon fill="#EEEEEE"
+                 points="316.8,338.0906,577.8,338.0906,577.8,350.6906,559.8,368.6906,316.8,368.6906,316.8,338.0906"
+                 style="stroke: #000000; stroke-width: 3.5999999046325684;"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="180" x="343.8" y="361.611">TIMER strides
+        </text>
+        <rect fill="none" height="191.7562" style="stroke: #000000; stroke-width: 3.5999999046325684;" width="527.4"
+              x="334.8" y="381.5297"/>
+        <polygon fill="#EEEEEE"
+                 points="334.8,381.5297,473.4,381.5297,473.4,394.1297,455.4,412.1297,334.8,412.1297,334.8,381.5297"
+                 style="stroke: #000000; stroke-width: 3.5999999046325684;"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="57.6" x="361.8" y="405.0501">loop
+        </text>
+        <text fill="#000000" font-family="sans-serif" font-size="19.8" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="352.8" x="500.4" y="403.5085">[over cycle values in segment]
+        </text>
+        <rect fill="none" height="135.7172" style="stroke: #000000; stroke-width: 3.5999999046325684;" width="369"
+              x="352.8" y="424.9687"/>
+        <polygon fill="#EEEEEE"
+                 points="352.8,424.9687,707.4,424.9687,707.4,437.5687,689.4,455.5687,352.8,455.5687,352.8,424.9687"
+                 style="stroke: #000000; stroke-width: 3.5999999046325684;"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" font-weight="bold"
+              lengthAdjust="spacingAndGlyphs" textLength="273.6" x="379.8" y="448.4891">TIMER cycle &amp; phase
+        </text>
+        <polygon fill="#A80036" points="618.3,486.4078,636.3,493.6078,618.3,500.8078,625.5,493.6078"
+                 style="stroke: #A80036; stroke-width: 1.7999999523162842;"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842;" x1="431.1" x2="629.1" y1="493.6078"
+              y2="493.6078"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" lengthAdjust="spacingAndGlyphs"
+              textLength="174.6" x="443.7" y="484.7282">runCycle(cycle)
+        </text>
+        <polygon fill="#A80036" points="450.9,538.8469,432.9,546.0469,450.9,553.2469,443.7,546.0469"
+                 style="stroke: #A80036; stroke-width: 1.7999999523162842;"/>
+        <line style="stroke: #A80036; stroke-width: 1.7999999523162842;" x1="440.1" x2="647.1" y1="546.0469"
+              y2="546.0469"/>
+        <text fill="#000000" font-family="sans-serif" font-size="23.4" lengthAdjust="spacingAndGlyphs" textLength="64.8"
+              x="461.7" y="537.1673">result
+        </text><!--
+@startuml
+
+Participant Input as i
+Participant Thread as t
+Participant Action as a
+
+== acquire input ==
+
+group TIMER read-input
+ t -> i : get segment(stride)
+ activate i
+ t <- i : <cycle segment>[stride]
+ deactivate i
+end
+
+group TIMER strides
+
+ loop over cycle values in segment
+  group TIMER cycle & phase
+    t -> a : runCycle(cycle)
+    activate a
+    t <- a : result
+    deactivate a
+   end
+end
+
+end # strides
+
+@enduml
+
+PlantUML version 1.2017.15(Mon Jul 03 11:45:34 CDT 2017)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_152-release-1024-b11
+Operating System: Linux
+OS Version: 4.10.0-42-generic
+Default Encoding: UTF-8
+Language: en
+Country: US
+-->
+    </g>
+</svg>
