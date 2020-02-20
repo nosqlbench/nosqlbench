@@ -1,0 +1,162 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>nosqlbench</artifactId>
+    <packaging>pom</packaging>
+
+    <parent>
+        <artifactId>nb-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>2.12.66-SNAPSHOT</version>
+        <relativePath>nb-defaults</relativePath>
+    </parent>
+
+    <name>${project.artifactId}</name>
+    <url>http://nosqlbench.io/</url>
+    <description>A reusable machine pattern for building dynamic load testing systems</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>coremodules</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <modules>
+                <module>nb-docs</module> <!-- Holds only docs for nb -->
+                <module>nb-defaults</module> <!-- Holds project level defaults -->
+                <module>at-diag</module> <!-- ActivityType driver for diagnostics, file, etc -->
+                <module>nb-api</module> <!-- APIs needed to implement drivers
+        to be loaded by the core -->
+                <module>nb-core</module> <!-- Scripting harness and executive
+        logic -->
+                <module>nb-cli</module> <!-- restful server for NB
+                runtime -->
+                <module>nb-extensions</module> <!-- scripting sandbox
+        extensions for NB -->
+                <!--        <module>nb-vis</module>-->
+                <module>at-stdout</module>
+                <module>at-tcp</module> <!-- A TCP enabled version of stdout, client and server -->
+                <module>at-http</module> <!-- An HTTP activity type -->
+                <module>nb</module> <!-- a binary (appimage) build option for
+        nb -->
+                <module>nb-docker</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>virtdatamodules</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <modules>
+                <module>virtdata-defaults</module>
+                <module>virtdata-annotations</module>
+                <module>virtdata-processors</module>
+
+                <module>virtdata-api</module>
+                <module>virtdata-userlibs</module>
+                <module>virtdata-lang</module>
+
+                <module>virtdata-realdata</module>
+                <module>virtdata-lib-basics</module>
+                <module>virtdata-lib-random</module>
+                <module>virtdata-lib-curves4</module>
+                <module>virtdata-lib-realer</module>
+
+                <module>virtdata-docsys</module>
+            </modules>
+
+        </profile>
+
+    </profiles>
+
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <build>
+        <plugins>
+            <!-- Force version on maven-release-plugin -->
+            <plugin>
+                <version>2.5.3</version>
+                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <useReleaseProfile>true</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>exec-maven-plugin</artifactId>-->
+<!--                <version>1.6.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>wrap-nb</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <executable>${project.basedir}/wrap_nb-->
+<!--                                .sh</executable>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    &lt;!&ndash;<execution>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<id>find-help-topics</id>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<phase>prepare-package</phase>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<goals>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<goal>exec</goal>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</goals>&ndash;&gt;-->
+<!--                        &lt;!&ndash;<configuration>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<executable>${project.basedir}/find_help_topics.sh}</executable>&ndash;&gt;-->
+<!--                        &lt;!&ndash;</configuration>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</execution>&ndash;&gt;-->
+
+<!--                    &lt;!&ndash;<execution>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<id>publish-eb</id>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<phase>deploy</phase>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<goals>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<goal>exec</goal>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</goals>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<configuration>&ndash;&gt;-->
+<!--                    &lt;!&ndash;<executable>${project.basedir}/publish.sh</executable>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</configuration>&ndash;&gt;-->
+<!--                    &lt;!&ndash;</execution>&ndash;&gt;-->
+
+<!--                </executions>-->
+<!--            </plugin>-->
+
+        </plugins>
+    </build>
+
+
+    <developers>
+        <developer>
+            <name>Jonathan Shook</name>
+            <email>jshook@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/nosqlbench/nosqlbench.git</connection>
+        <developerConnection>scm:git:https://github.com/nosqlbench/nosqlbench.git</developerConnection>
+        <url>scm:git:git@github.com:nosqlbench/nosqlbench.git</url>
+        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>
