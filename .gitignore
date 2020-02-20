@@ -1,0 +1,14 @@
+local/**
+**/.idea
+**/*.iml
+**/target
+**/.classpath
+**/.project
+**/.settings
+**/*.log
+**/logs
+**/*.csv
+**/*.*log
+**/.DS_Store
+metrics/**
+bin/**
