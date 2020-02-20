@@ -1,0 +1,4 @@
+bindings:
+ alpha: Identity()
+ beta: NumberNameToString()
+ gamma: Combinations('0-9A-F;0-9;A-Z;_;p;r;o;')
