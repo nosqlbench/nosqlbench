@@ -30,8 +30,8 @@
             <version>2.12.16-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <artifactId>virtdata-lib-random</artifactId>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-random</artifactId>
             <version>2.12.16-SNAPSHOT</version>
         </dependency>
         <dependency>
