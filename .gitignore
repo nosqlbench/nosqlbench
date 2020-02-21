@@ -7,7 +7,6 @@ local/**
 **/.settings
 **/*.log
 **/logs
-**/*.csv
 **/*.*log
 **/.DS_Store
 metrics/**
