@@ -130,7 +130,8 @@ public class AsyncScriptIntegrationTests {
     @Test
     public void testExtensionCsvLogger() {
         ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
-        assertThat(scenarioResult.getIOLog()).contains("started new csvlogger: csvmetricstestdir");
+        assertThat(scenarioResult.getIOLog()).contains("started new " +
+                "csvlogger: logs/csvmetricstestdir");
     }
 
 
@@ -147,8 +148,10 @@ public class AsyncScriptIntegrationTests {
     @Test
     public void testExtensionHistoStatsLogger() throws IOException {
         ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
-        assertThat(scenarioResult.getIOLog()).contains("stdout started logging to histostats.csv");
-        List<String> strings = Files.readAllLines(Paths.get("histostats.csv"));
+        assertThat(scenarioResult.getIOLog()).contains("stdout started " +
+                "logging to logs/histostats.csv");
+        List<String> strings = Files.readAllLines(Paths.get(
+                "logs/histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
         assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);

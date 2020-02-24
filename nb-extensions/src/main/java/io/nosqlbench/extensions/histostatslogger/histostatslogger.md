@@ -6,7 +6,8 @@ a matching set of histogram or timer metrics, at some interval you specify.
 
 ### Example
 ~~~
-histostatslogger.logHistoStats("test run 42", ".*", "histostats.csv", "0.5s");
+histostatslogger.logHistoStats("test run 42", ".*", "logs/histostats
+.csv", "0.5s");
 ~~~
 
 The arguments to logHistoStats are:

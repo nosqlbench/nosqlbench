@@ -1,4 +1,4 @@
-var csvlogger = csvmetrics.log("csvmetricstestdir");
+var csvlogger = csvmetrics.log("logs/csvmetricstestdir");
 
 activitydef = {
     "alias" : "csvmetrics",
