@@ -5,10 +5,10 @@
     <packaging>jar</packaging>
 
     <parent>
-        <artifactId>virtdata-defaults</artifactId>
+        <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>2.12.16-SNAPSHOT</version>
-        <relativePath>../virtdata-defaults</relativePath>
+        <version>2.12.66-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
     </parent>
 
     <name>virtdata-annotations</name>

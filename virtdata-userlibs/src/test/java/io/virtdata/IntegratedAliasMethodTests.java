@@ -1,8 +1,8 @@
 package io.virtdata;
 
-import io.virtdata.libbasics.shared.distributions.DelimFrequencySampler;
-import io.virtdata.libbasics.shared.distributions.WeightedStringsFromCSV;
-import io.virtdata.libbasics.shared.distributions.CSVFrequencySampler;
+import io.nosqlbench.virtdata.library.basics.shared.distributions.DelimFrequencySampler;
+import io.nosqlbench.virtdata.library.basics.shared.distributions.WeightedStringsFromCSV;
+import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVFrequencySampler;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -8,12 +8,19 @@ This is in active development. Collaborators are welcome. However, there is stil
 
 NoSQLBench is a large project. It has lots of advanced functionality built-in that you won't find in any other performance testing tool.
 
-The modules are named in a consistent way. The naming conventions are as follows:
+To make it easier to find the module you are looking for (for developers),
+the following strict naming conventions have been adopted:
 
-- All virtdata-... modules are the procedural generation system.
-- All virtdata-lib-... modules are function libraries for mapping coordinates to virtual data.
-- All nb-... modules are part of the nosqlbench runtime engine.
-- The main module that users interact with comes from the `nb` project. The binary is simply named `nb`, and the executable jar is `nb.jar`.
+- All original packages of this project start with `io.nosqlbench`.
+- All original packages within each module are based directly on the above root package and the module name together. For example, the 'engine-api' module contains packages in `io.nosqlbench.engine.api`.
+
+The procedural generation support that has been imported from the VirtualDataSet project now lives in virtdata-* modules.
+The core runtime that used to be called EngineBlock now lives in engine-* modules.
+
+The binary packaging support for Linux (with AppImage) is contained in the nb module. It provides a binary `nb` which is the main command-line artifact from this project.
+
+The defaults that are used by all modules are contained in the mvn-defaults module.
+
 
 ## System Compatibility
 

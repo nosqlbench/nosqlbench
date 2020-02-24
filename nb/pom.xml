@@ -3,10 +3,10 @@
 
 
     <parent>
-        <artifactId>nb-defaults</artifactId>
+        <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
         <version>2.12.66-SNAPSHOT</version>
-        <relativePath>../nb-defaults</relativePath>
+        <relativePath>../mvn-defaults</relativePath>
     </parent>
 
     <artifactId>nb</artifactId>
@@ -23,49 +23,49 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-cli</artifactId>
+            <artifactId>engine-cli</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-docs</artifactId>
+            <artifactId>engine-docs</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-core</artifactId>
+            <artifactId>engine-core</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-extensions</artifactId>
+            <artifactId>engine-extensions</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>at-stdout</artifactId>
+            <artifactId>activitytype-stdout</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>at-diag</artifactId>
+            <artifactId>activitytype-diag</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>at-tcp</artifactId>
+            <artifactId>activitytype-tcp</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>at-http</artifactId>
+            <artifactId>activitytype-http</artifactId>
             <version>2.12.66-SNAPSHOT</version>
         </dependency>
 
@@ -78,7 +78,7 @@
 
         <!--        <dependency>-->
         <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>nb-vis</artifactId>-->
+        <!--            <artifactId>engine-vis</artifactId>-->
         <!--            <version>2.11.31-SNAPSHOT</version>-->
         <!--        </dependency>-->
 
@@ -178,7 +178,7 @@
                         <configuration>
                             <transformers combine.children="append">
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.nosqlbench.cli.NBCLI</mainClass>
+                                    <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                                 </transformer>
                             </transformers>
                             <finalName>${project.artifactId}</finalName>

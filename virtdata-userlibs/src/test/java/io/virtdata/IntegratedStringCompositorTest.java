@@ -1,8 +1,8 @@
 package io.virtdata;
 
-import io.virtdata.core.Bindings;
-import io.virtdata.core.BindingsTemplate;
-import io.virtdata.templates.StringCompositor;
+import io.nosqlbench.virtdata.api.Bindings;
+import io.nosqlbench.virtdata.api.BindingsTemplate;
+import io.nosqlbench.virtdata.api.templates.StringCompositor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

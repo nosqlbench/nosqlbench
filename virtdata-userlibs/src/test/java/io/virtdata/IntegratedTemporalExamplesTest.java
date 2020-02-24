@@ -1,7 +1,7 @@
 package io.virtdata;
 
-import io.virtdata.api.DataMapper;
-import io.virtdata.core.VirtData;
+import io.nosqlbench.virtdata.api.DataMapper;
+import io.nosqlbench.virtdata.api.VirtData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.annotations.Test;

@@ -1,0 +1,46 @@
+package io.nosqlbench.virtdata.library.curves4.continuous.int_double;
+
+import io.nosqlbench.virtdata.annotations.Categories;
+import io.nosqlbench.virtdata.annotations.Category;
+import io.nosqlbench.virtdata.annotations.Example;
+import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import org.apache.commons.math4.distribution.EnumeratedRealDistribution;
+
+/**
+ * Creates a probability density given the values and optional weights provided, in "value:weight value:weight ..." form.
+ * The weight can be elided for any value to use the default weight of 1.0d.
+ *
+ * @see <a href="http://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math4/distribution/EnumeratedRealDistribution.html">Commons JavaDoc: EnumeratedRealDistribution</a>
+ *
+ * {@inheritDoc}
+ */
+@ThreadSafeMapper
+@Categories({Category.distributions})
+public class Enumerated extends IntToDoubleContinuousCurve {
+
+    @Example({"Enumerated('1 2 3 4 5 6')", "a fair six-sided die roll",
+    "[1-10]/"})
+    @Example({"Enumerated('1:2.0 2 3 4 5 6')", "an unfair six-sided die roll, where 1 has probability mass 2.0, and everything else has only 1.0",})
+    public Enumerated(String data, String... mods) {
+        super(new EnumeratedRealDistribution(parseWeights(data)[0],parseWeights(data)[1]), mods);
+    }
+
+    private static double[][] parseWeights(String input) {
+        String[] entries = input.split("[;, ]");
+        double[][] elements = new double[2][entries.length];
+        for (int i = 0; i < entries.length; i++) {
+            String[] parts = entries[i].split(":");
+            elements[1][i]=1.0d;
+            switch(parts.length) {
+                case 2:
+                    elements[1][i] = Double.parseDouble(parts[1]);
+                case 1:
+                    elements[0][i] = Double.parseDouble(parts[0]);
+                    break;
+                default:
+                    throw new RuntimeException("Unable to parse entry or weight from '" + entries[i] + "'");
+            }
+        }
+        return elements;
+    }
+}

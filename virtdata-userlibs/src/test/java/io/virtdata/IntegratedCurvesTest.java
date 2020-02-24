@@ -1,7 +1,7 @@
 package io.virtdata;
 
-import io.virtdata.api.DataMapper;
-import io.virtdata.core.VirtData;
+import io.nosqlbench.virtdata.api.DataMapper;
+import io.nosqlbench.virtdata.api.VirtData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;

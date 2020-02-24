@@ -1,0 +1,22 @@
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_short;
+
+import io.nosqlbench.virtdata.annotations.Categories;
+import io.nosqlbench.virtdata.annotations.Category;
+import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
+import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+
+import java.util.function.LongFunction;
+
+/**
+ * Convert the input value from long to short.
+ */
+@ThreadSafeMapper
+@DeprecatedFunction("This function is being replaced by ToShort() for naming consistency.")
+@Categories({Category.conversion})
+public class LongToShort implements LongFunction<Short> {
+
+    @Override
+    public Short apply(long value) {
+        return (short) (value & Short.MAX_VALUE);
+    }
+}

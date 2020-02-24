@@ -1,10 +1,10 @@
 package io.virtdata;
 
-import io.virtdata.api.DataMapper;
-import io.virtdata.core.VirtData;
-import io.virtdata.libbasics.shared.from_long.to_long.Identity;
-import io.virtdata.libbasics.shared.from_long.to_string.NumberNameToString;
-import io.virtdata.libbasics.shared.from_long.to_string.Template;
+import io.nosqlbench.virtdata.api.DataMapper;
+import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Identity;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
 import org.apache.commons.lang3.ClassUtils;
 import org.testng.annotations.Test;
 

@@ -1,0 +1,22 @@
+{
+  "name": "guidebook",
+  "version": "1.0.0",
+  "description": "Docs App for NoSQLBench",
+  "author": "Sebastian Estevez & Jonathan Shook",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.9.3",
+    "@nuxtjs/vuetify": "^1.9.0",
+    "front-matter": "^3.0.2",
+    "markdown-it-smartarrows": "^1.0.1",
+    "markdown-it-vue": "^1.0.11",
+    "node-fetch": "^2.6.0",
+    "nuxt": "^2.11.0"
+  }
+}
