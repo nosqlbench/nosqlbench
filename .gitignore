@@ -1,4 +1,6 @@
 local/**
+metrics/**
+bin/**
 **/.idea
 **/*.iml
 **/target
@@ -8,6 +10,5 @@ local/**
 **/*.log
 **/logs
 **/*.*log
+**/generated
 **/.DS_Store
-metrics/**
-bin/**
