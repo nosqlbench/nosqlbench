@@ -18,8 +18,6 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.engine.api.activityapi.sysperf.SysPerf;
-import io.nosqlbench.engine.api.activityapi.sysperf.SysPerfData;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.slf4j.Logger;
@@ -33,7 +31,8 @@ public class TokenFiller implements Runnable {
 
     public final static double MIN_PER_SECOND = 10D;
     public final static double MAX_PER_SECOND = 1000D;
-    private final SysPerfData PERFDATA = SysPerf.get().getPerfData(false);
+//    private final SysPerfData PERFDATA = SysPerf.get().getPerfData
+//    (false);
     private final long interval = (long) 1E6;
 
     private final TokenPool tokenPool;

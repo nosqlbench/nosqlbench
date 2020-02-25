@@ -41,10 +41,12 @@ public class SysPerf {
     }
 
     public synchronized static SysPerf get() {
-        if (instance == null) {
-            instance = new SysPerf();
-        }
-        return instance;
+        throw new RuntimeException("This should not be used in this " +
+                "release.");
+//        if (instance == null) {
+//            instance = new SysPerf();
+//        }
+//        return instance;
     }
 
     private static File getPerfCacheFile() {

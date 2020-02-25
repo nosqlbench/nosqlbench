@@ -25,8 +25,14 @@ import java.util.concurrent.locks.LockSupport;
 public class LeastWorstDelay {
 
     public final static SysPerfData perfdata = SysPerf.get().getPerfData(false);
-    private final static long sleepThreshold = (long) perfdata.getAvgNanos_Thread_Sleep();
-    private final static long parkThreshold = (long) perfdata.getAvgNanos_LockSupport_ParkNanos();
+
+    //private final static long sleepThreshold = (long) perfdata
+    //.getAvgNanos_Thread_Sleep();
+    //private final static long parkThreshold = (long) perfdata
+    //.getAvgNanos_LockSupport_ParkNanos();
+
+    private final static long sleepThreshold = 1_000_000;
+    private final static long parkThreshold = 20;
 
     /**
      * We wish for the JVM to inline this.
@@ -46,13 +52,13 @@ public class LeastWorstDelay {
     public static void delayAsIfFor(long nanos) {
         if (nanos > 0) {
             if (nanos > sleepThreshold) {
-                nanos-=sleepThreshold;
+                nanos -= sleepThreshold;
                 try {
                     Thread.sleep((nanos / 1000000), (int) (nanos % 1000000));
                 } catch (InterruptedException ignored) {
                 }
             } else if (nanos > parkThreshold) {
-                nanos-=parkThreshold;
+                nanos -= parkThreshold;
                 LockSupport.parkNanos(nanos);
             }
         }
@@ -86,20 +92,19 @@ public class LeastWorstDelay {
      * this method in other scenarios.
      *
      * @param targetNanoTime The system nanos that the delay should attempt to return at.
-     * perfect accuracy, which doesn't happen
-     *
+     *                       perfect accuracy, which doesn't happen
      */
     public void delayAsIfUntil(long targetNanoTime) {
-        long nanos = Math.max(targetNanoTime - System.nanoTime(),0L);
+        long nanos = Math.max(targetNanoTime - System.nanoTime(), 0L);
         if (nanos > 0) {
             if (nanos > sleepThreshold) {
-                nanos-=sleepThreshold;
+                nanos -= sleepThreshold;
                 try {
                     Thread.sleep((nanos / 1000000), (int) (nanos % 1000000));
                 } catch (InterruptedException ignored) {
                 }
             } else if (nanos > parkThreshold) {
-                nanos-=parkThreshold;
+                nanos -= parkThreshold;
                 LockSupport.parkNanos(nanos);
             } // else there is nothing shorter than this besides spinning, and we're not doing that
         }
