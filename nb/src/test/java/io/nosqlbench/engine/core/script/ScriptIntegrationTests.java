@@ -84,7 +84,7 @@ public class ScriptIntegrationTests {
     // The async versions are higher sensitivity and equivalent in
     // every other way.
     // This should reduce the build time for integrated testing.
-    
+
 //    @Test
 //    public void testStrideRateOnly() {
 //        ScenarioResult scenarioResult = runScenario("stride_rate");

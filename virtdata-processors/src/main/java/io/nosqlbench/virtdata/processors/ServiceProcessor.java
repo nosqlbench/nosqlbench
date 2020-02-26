@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * <pre>classes/META-INF/services/servicename</pre> file for each
  * implemented and annotated service name.
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_12)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class ServiceProcessor extends AbstractProcessor {
 
     @Override
