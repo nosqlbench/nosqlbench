@@ -9,7 +9,7 @@ export default {
     ** Headers of the page
     */
     head: {
-        titleTemplate: '%s' + "DSBench Guidebook",
+        titleTemplate: '%s' + "NoSqlBench Guidebook",
         title: process.env.npm_package_name || '',
         meta: [
             {charset: 'utf-8'},

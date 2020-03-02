@@ -1,0 +1,25 @@
+package io.nosqlbench.activitytype.cql.datamappers.functions.long_localdate;
+
+import com.datastax.driver.core.LocalDate;
+import io.nosqlbench.virtdata.annotations.Example;
+import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+
+import java.util.function.LongFunction;
+
+/**
+ * Converts epoch millis to a
+ * com.datastax.driver.core.{@link LocalDate} object, as
+ * the number of milliseconds since January 1st, 1970 GMT.
+ */
+@ThreadSafeMapper
+public class EpochMillisToCqlLocalDate implements LongFunction<LocalDate> {
+
+    @Example({"EpochMillisToJavaLocalDate()", "Yields the LocalDate for the millis in GMT"})
+    public EpochMillisToCqlLocalDate() {
+    }
+
+    @Override
+    public LocalDate apply(long value) {
+        return LocalDate.fromMillisSinceEpoch(value);
+    }
+}

@@ -1,9 +1,9 @@
 package io.nosqlbench.engine.docs;
 
-import io.nosqlbench.virtdata.annotations.Service;
 import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;
+import io.nosqlbench.virtdata.annotations.Service;
 
 @Service(DocsysDynamicManifest.class)
 public class NBMarkdownManifest implements DocsysDynamicManifest {

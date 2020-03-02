@@ -73,6 +73,17 @@
     </profile>
 
     <profile>
+      <id>cqlmodules</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>activitytype-cql</module>
+        <module>activitytype-cqlverify</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>virtdatamodules</id>
       <activation>
         <activeByDefault>true</activeByDefault>
