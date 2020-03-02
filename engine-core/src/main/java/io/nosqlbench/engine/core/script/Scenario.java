@@ -20,7 +20,7 @@ import io.nosqlbench.engine.core.ProgressIndicator;
 import io.nosqlbench.engine.core.ScenarioController;
 import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.core.UserException;
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.MetricRegistryBindings;
@@ -156,7 +156,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 logger.error(errorDesc, e);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
-            } catch (UserException ue) {
+            } catch (BasicError ue) {
                 logger.error(ue.getMessage());
                 scenarioController.forceStopScenario(5000);
                 throw ue;

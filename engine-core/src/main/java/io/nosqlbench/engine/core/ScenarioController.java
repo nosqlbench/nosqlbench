@@ -19,6 +19,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,7 +185,7 @@ public class ScenarioController {
         String alias = appliedParams.get("alias");
 
         if (alias == null) {
-            throw new UserException("alias must be provided");
+            throw new BasicError("alias must be provided");
         }
 
         ActivityExecutor executor = activityExecutors.get(alias);
@@ -250,7 +251,7 @@ public class ScenarioController {
                 if (activityTypeName==null) {
                     String errmsg = "You must provide a type=<activity type> parameter. Valid examples are:\n" +
                             knownTypes.stream().map(t -> " type="+t+"\n").collect(Collectors.joining());
-                    throw new UserException(errmsg);
+                    throw new BasicError(errmsg);
                 }
 
                 ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);

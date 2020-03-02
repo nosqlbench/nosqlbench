@@ -17,6 +17,7 @@
 
 package io.nosqlbench.engine.core.script;
 
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class ScenariosExecutor {
     public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
         scenario.setScenarioLogger(scenarioLogger);
         if (submitted.get(scenario.getName()) != null) {
-            throw new UserException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
+            throw new BasicError("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }
         Future<ScenarioResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
@@ -83,7 +84,7 @@ public class ScenariosExecutor {
      */
     public ScenariosResults awaitAllResults(long timeout, long updateInterval) {
         if (updateInterval > timeout) {
-            throw new UserException("timeout must be equal to or greater than updateInterval");
+            throw new BasicError("timeout must be equal to or greater than updateInterval");
         }
         long timeoutAt = System.currentTimeMillis() + timeout;
 
@@ -181,7 +182,7 @@ public class ScenariosExecutor {
 
         Future<ScenarioResult> resultFuture1 = submitted.get(scenarioName).resultFuture;
         if (resultFuture1 == null) {
-            throw new UserException("Unknown scenario name:" + scenarioName);
+            throw new BasicError("Unknown scenario name:" + scenarioName);
         }
         if (resultFuture1.isDone()) {
             try {
