@@ -8,7 +8,7 @@
     <relativePath>../mvn-defaults</relativePath>
   </parent>
 
-  <artifactId>at-cqlverify</artifactId>
+  <artifactId>activitytype-cqlverify</artifactId>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
 
@@ -23,7 +23,7 @@
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
-      <artifactId>at-cql</artifactId>
+      <artifactId>activitytype-cql</artifactId>
       <version>3.12.2-SNAPSHOT</version>
     </dependency>
 
