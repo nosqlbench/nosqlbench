@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import javax.script.ScriptContext;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<ConcurrentHashMap> {
+public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<ConcurrentHashMap<String,Object>> {
     @Override
     public String getDescription() {
         return "The global access map from shared state";
