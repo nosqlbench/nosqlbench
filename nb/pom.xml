@@ -69,6 +69,19 @@
             <version>3.12.2-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>activitytype-cql</artifactId>
+            <version>3.12.2-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>activitytype-cqlverify</artifactId>
+            <version>3.12.2-SNAPSHOT</version>
+        </dependency>
+
+
         <!--        <dependency>-->
 <!--            <groupId>io.nosqlbench</groupId>-->
 <!--            <artifactId>nb-runtime</artifactId>-->
