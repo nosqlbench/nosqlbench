@@ -1,12 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
-    <version>3.12.2-SNAPSHOT</version>
+    <version>3.12.2</version>
     <relativePath>../mvn-defaults</relativePath>
   </parent>
 
@@ -31,7 +29,7 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>virtdata-docsys</artifactId>
-      <version>3.12.2-SNAPSHOT</version>
+      <version>3.12.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -59,8 +57,7 @@
             <version>3.2.0</version>
             <configuration>
               <transformers combine.children="append">
-                <transformer
-                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>io.nosqlbench.cli.EBCLI</mainClass>
                 </transformer>
               </transformers>
