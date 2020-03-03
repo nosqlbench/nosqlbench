@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>nosqlbench</artifactId>
@@ -21,104 +23,45 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>coremodules</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
+  <modules>
 
-        <!-- COMMON MODULES -->
-        <!-- Holds project level defaults -->
-        <module>mvn-defaults</module>
-        <module>docsys</module>
+    <!-- project level defaults -->
+    <module>mvn-defaults</module>
+    <!-- web apps and service hooks -->
+    <module>docsys</module>
 
-        <!-- ENGINE MODULES -->
-        <!-- Holds only docs for nb -->
-        <module>engine-docs</module>
+    <!-- ENGINE MODULES -->
+    <module>engine-api</module>
+    <module>engine-core</module>
+    <module>engine-cli</module>
+    <module>engine-extensions</module>
+    <module>engine-docker</module>
+    <module>engine-docs</module>
 
-        <!-- APIs needed to implement various types -->
-        <module>engine-api</module>
+    <!-- a binary (appimage) build option for nb -->
+    <module>nb</module>
+    <module>activitytype-diag</module>
+    <module>activitytype-stdout</module>
+    <module>activitytype-tcp</module>
+    <module>activitytype-http</module>
+    <module>activitytype-cql</module>
+    <module>activitytype-cqlverify</module>
 
-        <!-- Scripting harness and executive logic -->
-        <module>engine-core</module>
+    <!-- VIRTDATA MODULES -->
 
-        <!-- restful server for NB runtime -->
-        <module>engine-cli</module>
+    <module>virtdata-annotations</module>
+    <module>virtdata-processors</module>
+    <module>virtdata-lang</module>
+    <module>virtdata-api</module>
+    <module>virtdata-realdata</module>
+    <module>virtdata-lib-basics</module>
+    <module>virtdata-lib-random</module>
+    <module>virtdata-lib-curves4</module>
+    <module>virtdata-lib-realer</module>
 
-        <!-- scripting sandbox extensions for NB -->
-        <module>engine-extensions</module>
+    <module>virtdata-userlibs</module>
 
-        <!-- local docker automation -->
-        <module>engine-docker</module>
-
-        <!-- a binary (appimage) build option for nb -->
-        <module>nb</module>
-
-
-        <!-- ActivityType driver for diagnostics, file, etc -->
-        <module>activitytype-diag</module>
-
-        <!-- activity type that prints to stdout -->
-        <module>activitytype-stdout</module>
-
-        <!-- A TCP enabled version of stdout, client and server -->
-        <module>activitytype-tcp</module>
-
-        <!-- An HTTP activity type -->
-        <module>activitytype-http</module>
-
-      </modules>
-    </profile>
-
-    <profile>
-      <id>cqlmodules</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-        <module>activitytype-cql</module>
-        <module>activitytype-cqlverify</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>virtdatamodules</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <modules>
-
-        <!-- COMMON MODULES -->
-
-        <!-- Holds project level defaults -->
-        <module>mvn-defaults</module>
-        <module>docsys</module>
-
-        <!-- VIRTDATA MODULES -->
-
-        <!-- API assembly -->
-        <module>virtdata-annotations</module>
-        <module>virtdata-processors</module>
-        <module>virtdata-lang</module>
-        <module>virtdata-api</module>
-
-        <!-- libraries -->
-        <module>virtdata-realdata</module>
-        <module>virtdata-lib-basics</module>
-        <module>virtdata-lib-random</module>
-        <module>virtdata-lib-curves4</module>
-        <module>virtdata-lib-realer</module>
-
-        <module>virtdata-userlibs</module>
-
-      </modules>
-
-    </profile>
-
-  </profiles>
-
+  </modules>
 
   <licenses>
     <license>
@@ -140,48 +83,6 @@
           <autoVersionSubmodules>true</autoVersionSubmodules>
         </configuration>
       </plugin>
-
-      <!--            <plugin>-->
-      <!--                <groupId>org.codehaus.mojo</groupId>-->
-      <!--                <artifactId>exec-maven-plugin</artifactId>-->
-      <!--                <version>1.6.0</version>-->
-      <!--                <executions>-->
-      <!--                    <execution>-->
-      <!--                        <id>wrap-nb</id>-->
-      <!--                        <phase>package</phase>-->
-      <!--                        <goals>-->
-      <!--                            <goal>exec</goal>-->
-      <!--                        </goals>-->
-      <!--                        <configuration>-->
-      <!--                            <executable>${project.basedir}/wrap_nb-->
-      <!--                                .sh</executable>-->
-      <!--                        </configuration>-->
-      <!--                    </execution>-->
-      <!--                    &lt;!&ndash;<execution>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;<id>find-help-topics</id>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;<phase>prepare-package</phase>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;<goals>&ndash;&gt;-->
-      <!--                            &lt;!&ndash;<goal>exec</goal>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;</goals>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;<configuration>&ndash;&gt;-->
-      <!--                            &lt;!&ndash;<executable>${project.basedir}/find_help_topics.sh}</executable>&ndash;&gt;-->
-      <!--                        &lt;!&ndash;</configuration>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;</execution>&ndash;&gt;-->
-
-      <!--                    &lt;!&ndash;<execution>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<id>publish-eb</id>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<phase>deploy</phase>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<goals>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<goal>exec</goal>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;</goals>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<configuration>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;<executable>${project.basedir}/publish.sh</executable>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;</configuration>&ndash;&gt;-->
-      <!--                    &lt;!&ndash;</execution>&ndash;&gt;-->
-
-      <!--                </executions>-->
-      <!--            </plugin>-->
-
     </plugins>
   </build>
 
