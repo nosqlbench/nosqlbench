@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.2</version>
+        <version>3.12.3-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,61 +24,61 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-stdout</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-diag</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-tcp</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-http</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cql</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cqlverify</artifactId>
-            <version>3.12.2</version>
+            <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
 
