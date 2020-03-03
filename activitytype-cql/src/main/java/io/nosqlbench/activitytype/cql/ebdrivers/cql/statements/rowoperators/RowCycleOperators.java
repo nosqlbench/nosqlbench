@@ -4,8 +4,9 @@ import io.nosqlbench.activitytype.cql.ebdrivers.cql.api.RowCycleOperator;
 
 public enum RowCycleOperators {
 
-    saverows(SaveRows.class),
-    savevars(SaveVars.class),
+    saverows(SaveThreadRows.class),
+    savevars(SaveThreadVars.class),
+    saveglobalvars(SaveGlobalVars.class),
     print(Print.class);
 
     private final Class<? extends RowCycleOperator> implClass;

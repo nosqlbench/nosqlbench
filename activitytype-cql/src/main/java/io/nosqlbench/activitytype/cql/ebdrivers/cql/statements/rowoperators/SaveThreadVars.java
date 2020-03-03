@@ -8,7 +8,7 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.List;
 
-public class SaveVars implements RowCycleOperator {
+public class SaveThreadVars implements RowCycleOperator {
 
     ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 

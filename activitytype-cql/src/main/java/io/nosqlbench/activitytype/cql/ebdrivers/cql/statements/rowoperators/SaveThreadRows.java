@@ -6,7 +6,7 @@ import io.nosqlbench.activitytype.cql.ebdrivers.cql.statements.rsoperators.PerTh
 
 import java.util.LinkedList;
 
-public class SaveRows implements RowCycleOperator {
+public class SaveThreadRows implements RowCycleOperator {
 
     @Override
     public int apply(Row row, long cycle) {
