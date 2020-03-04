@@ -7,6 +7,8 @@ import org.mvel2.MVEL;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
@@ -22,7 +24,14 @@ public class Expr implements LongUnaryOperator {
 
     @Override
     public long applyAsLong(long operand) {
+        ConcurrentHashMap<String, Object> gl_map = SharedState.gl_ObjectMap;
         HashMap<String, Object> map = SharedState.tl_ObjectMap.get();
+
+        // merge gl into tl, for duplicates use the value from tl
+        for (Map.Entry<String, Object> stringObjectEntry : gl_map.entrySet()) {
+            map.merge(stringObjectEntry.getKey(), stringObjectEntry.getValue(), (entry1, entry2) -> entry1);
+        }
+
         map.put("cycle",operand);
         long result = MVEL.executeExpression(compiledExpr, map, long.class);
         return result;

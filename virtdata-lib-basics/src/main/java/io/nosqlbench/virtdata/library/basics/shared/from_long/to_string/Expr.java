@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.library.basics.shared.from_double.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
@@ -9,23 +9,22 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.DoubleUnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.LongFunction;
+import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
-public class Expr implements DoubleUnaryOperator {
+public class Expr implements LongFunction<String> {
 
     private final String expr;
     private final Serializable compiledExpr;
 
     public Expr(String expr) {
         this.expr = expr;
-        this.compiledExpr = MVELExpr.compile(double.class, "cycle", expr);
+        this.compiledExpr = MVELExpr.compile(long.class, "cycle", expr);
     }
 
     @Override
-    public double applyAsDouble(double operand) {
+    public String apply(long operand) {
         ConcurrentHashMap<String, Object> gl_map = SharedState.gl_ObjectMap;
         HashMap<String, Object> map = SharedState.tl_ObjectMap.get();
 
@@ -35,7 +34,7 @@ public class Expr implements DoubleUnaryOperator {
         }
 
         map.put("cycle",operand);
-        double result = MVEL.executeExpression(compiledExpr, map, double.class);
+        String result = MVEL.executeExpression(compiledExpr, map, String.class);
         return result;
     }
 }

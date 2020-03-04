@@ -18,6 +18,9 @@ public class SaveGlobalVars implements RowCycleOperator {
         for (ColumnDefinitions.Definition definition : cdlist) {
             String name = definition.getName();
             Object object = row.getObject(name);
+            if (object == null){
+                object = "";
+            }
             gl_vars.put(name,object);
         }
         return 0;
