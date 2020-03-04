@@ -18,7 +18,8 @@ public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<Concur
 
     @Override
     public ConcurrentHashMap<String, Object> getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        return SharedState.gl_ObjectMap;
+        ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
+        return map;
     }
 
     @Override
