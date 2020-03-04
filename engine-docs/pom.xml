@@ -28,7 +28,7 @@
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
-      <artifactId>virtdata-docsys</artifactId>
+      <artifactId>docsys</artifactId>
       <version>3.12.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
