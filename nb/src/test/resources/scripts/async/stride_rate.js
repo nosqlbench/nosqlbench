@@ -18,10 +18,10 @@
 stride_rate = {
     "alias" : "stride_rate",
     "type" : "diag",
-    "cycles" : "0..500000",
+    "cycles" : "0..12500",
     "stride" : "1",
     "threads" : "5",
-    "striderate" : "5000",
+    "striderate" : "2500",
     "interval" : "1000",
     "async" : 1000
 };

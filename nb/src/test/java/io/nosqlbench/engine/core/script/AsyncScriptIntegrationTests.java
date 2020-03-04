@@ -110,7 +110,7 @@ public class AsyncScriptIntegrationTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(5000.0D, Offset.offset(500D));
+        assertThat(rate).isCloseTo(2500, Offset.offset(500D));
     }
 
     @Test
