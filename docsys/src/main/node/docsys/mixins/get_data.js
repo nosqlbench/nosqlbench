@@ -31,6 +31,8 @@ export default {
       });
 
     let imports = [];
+    let promises = [];
+
     for (let index in paths) {
       let key = paths[index];
       if (key == null || key == "") {
@@ -40,22 +42,32 @@ export default {
       let detailName = key.split("/").filter(x => x.includes(".md"))[0];
       detailName = detailName.substr(0, detailName.length - 3);
 
+      let categories = key.split("/").filter(x => !x.includes("."))
       //const mdMeta = resolve(key);
-      let rawMD = "";
-      await fetch(services + "/docs/markdown/" + key)
+      promises.push(fetch(services + "/docs/markdown/" + key)
         .then(res => res.text())
-        .then(body => rawMD = body);
+        .then(body => {
+          return {"rawMD": body, "detailName": detailName, "categories": categories}
+        }));
+    }
+    var mdData = await Promise.all(
+      promises
+    );
+
+    for(var data of mdData){
+
+      let rawMD = data.rawMD;
 
       var mdMeta = fm(rawMD);
 
       if (mdMeta.attributes == null || mdMeta.attributes.title == null) {
-        mdMeta.attributes.title = detailName;
+        mdMeta.attributes.title = data.detailName;
       }
       if (typeof mdMeta.attributes.weight === 'undefined') {
         mdMeta.attributes.weight = 0;
       }
 
-      mdMeta.categories = key.split("/").filter(x => !x.includes("."));
+      mdMeta.categories = data.categories;
       mdMeta.filename = encodeURIComponent(name);
 
       //console.log("mdMeta:" + JSON.stringify(mdMeta));
@@ -113,7 +125,11 @@ export default {
       active_category = active_category.substr(0,active_category.length-3);
     }
 
-    active_category_name = categories.find(c => c.category === active_category).categoryName;
+    let foundCategory = categories.find(c => c.category === active_category);
+
+    if (foundCategory != undefined){
+      active_category_name = categories.find(c => c.category === active_category).categoryName;
+    }
 
     console.log("active_category:" + active_category);
     console.log("active_topic:" + active_topic);
@@ -135,11 +151,10 @@ export default {
 
     let mdPath = services + '/docs/markdown/' + docname;
 
-    // let rawMD = await context.$axios.$get(mdPath);
-
     let rawMD = await fetch(services + "/docs/markdown/" + docname)
       .then(res => res.text())
       .then(body => docbody = body);
+
 
     var markdown = fm(rawMD);
 
