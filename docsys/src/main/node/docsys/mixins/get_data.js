@@ -55,7 +55,12 @@ export default {
       promises.push(fetch(services + "/docs/markdown/" + key)
         .then(res => res.text())
         .then(body => {
-          return {"rawMD": body, "detailName": detailName, "categories": categories}
+          return {
+            "rawMD": body,
+            "detailName": detailName,
+            "categories": categories,
+            "name": name
+          }
         }));
     }
     var mdData = await Promise.all(
@@ -76,7 +81,7 @@ export default {
       }
 
       mdMeta.categories = data.categories;
-      mdMeta.filename = encodeURIComponent(name);
+      mdMeta.filename = encodeURIComponent(data.name);
 
       //console.log("mdMeta:" + JSON.stringify(mdMeta));
       imports.push(mdMeta);
