@@ -71,10 +71,11 @@ public class VirtData {
      * Instantiate an optional data mapping function if possible.
      *
      * @param flowSpec The VirtData specifier for the mapping function
+     * @param config   A map of configuration objects
      * @param <T>      The parameterized return type of the function
      * @return An optional function which will be empty if the function could not be resolved.
      */
-    public static <T> Optional<DataMapper<T>> getOptionalMapper(String flowSpec, Map<String,?> cfg) {
+    public static <T> Optional<DataMapper<T>> getOptionalMapper(String flowSpec, Map<String,?> config) {
         flowSpec = CompatibilityFixups.fixup(flowSpec);
         VirtDataDSL.ParseResult parseResult = VirtDataDSL.parse(flowSpec);
         if (parseResult.throwable != null) {
@@ -82,7 +83,7 @@ public class VirtData {
         }
         VirtDataFlow flow = parseResult.flow;
         VirtDataComposer composer = new VirtDataComposer();
-        composer.addCustomElements(cfg);
+        composer.addCustomElements(config);
         Optional<ResolvedFunction> resolvedFunction = composer.resolveFunctionFlow(flow);
         return resolvedFunction.map(ResolvedFunction::getFunctionObject).map(DataMapperFunctionMapper::map);
     }
@@ -242,6 +243,7 @@ public class VirtData {
      *
      * @param flowSpec The VirtData specifier for the mapping function
      * @param <T>      The parameterized return type of the function
+     * @param config   A map of configuration objects
      * @return A data mapping function
      * @throws RuntimeException if the function could not be resolved
      */
@@ -259,6 +261,7 @@ public class VirtData {
      * @param flowSpec The VirtData flow specifier for the function to be returned
      * @param clazz    The class of the data mapping function return type
      * @param <T>      The parameterized class of the data mapping return type
+     * @param config   A map of configuration objects
      * @return A new data mapping function.
      * @throws RuntimeException if the function could not be resolved
      */
