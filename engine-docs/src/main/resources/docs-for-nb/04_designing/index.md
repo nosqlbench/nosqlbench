@@ -21,8 +21,8 @@ You will notice that this guide is not overly CQL-specific. That is because DSBe
 
 The built-in workloads that are include with DSBench are also shared on the github site where we manage the DSBench project:
 
-- [baselines](https://github.com/datastax/dsbench-labs/tree/master/sample-activities/baselines)
-- [bindings](https://github.com/datastax/dsbench-labs/tree/master/sample-activities/bindings)
+- [baselines](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/baselines)
+- [bindings](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/bindings)
 
 ### Follow the conventions
 

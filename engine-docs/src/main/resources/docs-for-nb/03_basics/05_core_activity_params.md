@@ -13,7 +13,7 @@ either on the command line or via a scenario script. On the command line, these 
 Some activity parameters are universal in that they can be used with any activity type. These parameters are recognized by DSBench whether or not they are recognized by a particular activity type implementation. These are called _core parameters_. Only core activity parameters are documented here.
 
 :::info
-To see what activity parameters are valid for a given activity type, see the documentation for that activity type with `dsbench help <activity type>`.
+To see what activity parameters are valid for a given activity type, see the documentation for that activity type with `nosqlbench help <activity type>`.
 :::
 
 ## type
