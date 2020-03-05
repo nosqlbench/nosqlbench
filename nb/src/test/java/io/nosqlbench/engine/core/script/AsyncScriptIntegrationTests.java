@@ -98,20 +98,22 @@ public class AsyncScriptIntegrationTests {
         assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
     }
 
-    @Test
-    public void testStrideRateOnly() {
-        ScenarioResult scenarioResult = runScenario("stride_rate");
-        String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n" + iolog);
-        Pattern p = Pattern.compile(".*stride_rate.strides.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
-        Matcher m = p.matcher(iolog);
-        assertThat(m.matches()).isTrue();
-
-        String digits = m.group(1);
-        assertThat(digits).isNotEmpty();
-        double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(2500, Offset.offset(500D));
-    }
+// The coverage of this test is also covered by the rate limiter
+// specific tests
+//    @Test
+//    public void testStrideRateOnly() {
+//        ScenarioResult scenarioResult = runScenario("stride_rate");
+//        String iolog = scenarioResult.getIOLog();
+//        System.out.println("iolog\n" + iolog);
+//        Pattern p = Pattern.compile(".*stride_rate.strides.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
+//        Matcher m = p.matcher(iolog);
+//        assertThat(m.matches()).isTrue();
+//
+//        String digits = m.group(1);
+//        assertThat(digits).isNotEmpty();
+//        double rate = Double.valueOf(digits);
+//        assertThat(rate).isCloseTo(2500, Offset.offset(500D));
+//    }
 
     @Test
     public void testExtensionPoint() {
