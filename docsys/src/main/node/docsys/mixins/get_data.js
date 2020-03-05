@@ -2,6 +2,14 @@
 export default {
   async asyncData(context) {
 
+    function fetchStatusHandler(response) {
+      if (response.status === 200) {
+        return response;
+      } else {
+        throw new Error(response.statusText);
+      }
+    }
+
     if (context.req) {
       console.log("avoiding server-side async");
       return;
@@ -152,8 +160,12 @@ export default {
     let mdPath = services + '/docs/markdown/' + docname;
 
     let rawMD = await fetch(services + "/docs/markdown/" + docname)
+      .then(fetchStatusHandler)
       .then(res => res.text())
-      .then(body => docbody = body);
+      .then(body => docbody = body)
+      .catch(function(error) {
+          console.log(error);
+      });;
 
 
     var markdown = fm(rawMD);
