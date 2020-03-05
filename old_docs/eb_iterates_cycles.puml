@@ -1,0 +1,29 @@
+@startuml
+
+Participant Input as i
+Participant Thread as t
+Participant Action as a
+
+== acquire input ==
+
+group TIMER read-input
+ t -> i : get segment(stride)
+ activate i
+ t <- i : <cycle segment>[stride]
+ deactivate i
+end
+
+group TIMER strides
+
+ loop over cycle values in segment
+  group TIMER cycle & phase
+    t -> a : runCycle(cycle)
+    activate a
+    t <- a : result
+    deactivate a
+   end
+end
+
+end # strides
+
+@enduml
