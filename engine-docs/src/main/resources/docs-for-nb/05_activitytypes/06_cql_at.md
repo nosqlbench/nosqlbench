@@ -51,7 +51,7 @@ activity types.
 - **driver** - default: dse - The type of driver to use, either dse, or
   oss. If you need DSE-specific features, use the dse driver. If you are
   connecting to an OSS Apache Cassandra cluster, you must use the oss
-  driver. The oss driver option is only available in ebdse.
+  driver. The oss driver option is only available in nosqlbench.
 - **host** - The host or hosts to use for connection points to
     the cluster. If you specify multiple values here, use commas
     with no spaces.
@@ -229,7 +229,7 @@ activity types.
     The clusterid specified is included so that separate cluster and session
     contexts can be reported independently for advanced tests.
 - **usercodecs** - enable the loading of user codec libraries
-    for more details see: com.datastax.codecs.framework.UDTCodecInjector in the ebdse
+    for more details see: com.datastax.codecs.framework.UDTCodecInjector in the nosqlbench
     code base. This is for dynamic codec loading with user-provided codecs mapped
     via the internal UDT APIs.
     default: false
@@ -410,4 +410,4 @@ There is a basic example below that can be copied as a starting template.
 
 ## YAML Examples
 
-Please see the bundled activities with ebdse for examples.
+Please see the bundled activities with nosqlbench for examples.

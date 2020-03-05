@@ -124,7 +124,7 @@ Verify the the same 100K cycles of telemetry data
 
     ... run type=cqlverify alias=verify yaml=telemetry tags=group:verify cycles=100000 host=...
     
-To see how these examples work, consult the telemetry.yaml file in the ebdse.jar.
+To see how these examples work, consult the telemetry.yaml file in the nosqlbench.jar.
 
 ### CQLVerify ActivityType Parameters
 
