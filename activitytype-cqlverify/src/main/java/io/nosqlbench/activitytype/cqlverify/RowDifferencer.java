@@ -1,8 +1,8 @@
 package io.nosqlbench.activitytype.cqlverify;
 
 import com.datastax.driver.core.*;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.api.RowCycleOperator;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.errorhandling.exceptions.RowVerificationException;
+import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
+import io.nosqlbench.activitytype.cql.errorhandling.exceptions.RowVerificationException;
 import io.nosqlbench.virtdata.api.Bindings;
 
 import java.math.BigDecimal;

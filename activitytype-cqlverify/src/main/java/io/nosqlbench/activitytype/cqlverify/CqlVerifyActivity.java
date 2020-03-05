@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cqlverify;
 
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CqlActivity;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.statements.rsoperators.AssertSingleRowResultSet;
+import io.nosqlbench.activitytype.cql.core.CqlActivity;
+import io.nosqlbench.activitytype.cql.statements.rsoperators.AssertSingleRowResultSet;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.virtdata.api.Bindings;
 import io.nosqlbench.virtdata.api.BindingsTemplate;

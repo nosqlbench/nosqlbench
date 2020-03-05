@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cqlverify;
 
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CqlActionDispenser;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CqlActivity;
+import io.nosqlbench.activitytype.cql.core.CqlActionDispenser;
+import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 
 public class CqlVerifyActionDispenser extends CqlActionDispenser {
