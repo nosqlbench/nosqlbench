@@ -1,6 +1,6 @@
 package com.datastax.ebdrivers.cql.statements;
 
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.statements.core.CQLStatementDefParser;
+import io.nosqlbench.activitytype.cql.statements.core.CQLStatementDefParser;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;

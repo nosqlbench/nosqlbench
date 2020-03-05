@@ -31,20 +31,6 @@
             <version>3.12.3-SNAPSHOT</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.labs</groupId>-->
-<!--            <artifactId>dsbench-virtdata</artifactId>-->
-<!--            <version>3.12.1-SNAPSHOT</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.labs</groupId>-->
-<!--            <artifactId>dsbench-udts</artifactId>-->
-<!--            <version>3.12.1-SNAPSHOT</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>

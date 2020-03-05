@@ -5,7 +5,7 @@ import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CQLOptions;
+import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

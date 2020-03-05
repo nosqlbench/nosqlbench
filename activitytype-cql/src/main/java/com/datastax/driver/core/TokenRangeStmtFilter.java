@@ -1,6 +1,6 @@
 package com.datastax.driver.core;
 
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.api.StatementFilter;
+import io.nosqlbench.activitytype.cql.api.StatementFilter;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

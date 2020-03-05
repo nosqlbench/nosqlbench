@@ -1,7 +1,7 @@
 package com.datastax.ebdrivers.cql;
 
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CqlAction;
-import io.nosqlbench.activitytype.cql.ebdrivers.cql.core.CqlActivity;
+import io.nosqlbench.activitytype.cql.core.CqlAction;
+import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
