@@ -7,7 +7,7 @@ weight: 06
 
 This is the same documentation that you get when you run
 
-    dsbench help stdout
+    ./nb help stdout
 
 To select this activity type, pass `type=stdout` to a run or start command.
 

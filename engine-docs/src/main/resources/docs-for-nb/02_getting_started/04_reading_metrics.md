@@ -11,7 +11,7 @@ A set of core metrics are provided for every workload that runs with DSBench, re
 
 This is the primary metric that should be used to get a quick idea of the throughput and latency for a given run. It encapsulates the entire operation life cycle ( ie. bind, execute, get result back ).
 
-For this example we see that we averaged 3732 operations / second with 3.6ms 75th percentile latency and 23.9ms 99th percentile latency. Note the raw metrics are in microseconds. This duration_unit may change depending on how a user configures dsbench, so always double-check it.
+For this example we see that we averaged 3732 operations / second with 3.6ms 75th percentile latency and 23.9ms 99th percentile latency. Note the raw metrics are in microseconds. This duration_unit may change depending on how a user configures nosqlbench, so always double-check it.
 
 ```
 2019-08-12 15:46:01,310 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=TIMER, name=baselines/cql-keyvalue.result, count=100000, min=233.48, max=358596.607, mean=3732.00338612, stddev=10254.850416061185, median=1874.815, p75=3648.767, p95=10115.071, p98=15855.615, p99=23916.543, p999=111292.415, mean_rate=4024.0234405430424, m1=3514.053841156124, m5=3307.431472596865, m15=3268.6786509004132, rate_unit=events/second, duration_unit=microseconds
@@ -55,7 +55,7 @@ DSBench extends many ways to report the metrics from a run, including:
 
 To get more information on these options, see the output of
 
-    dsbench --help
+    ./nb --help
 
 ### Congratulations
 

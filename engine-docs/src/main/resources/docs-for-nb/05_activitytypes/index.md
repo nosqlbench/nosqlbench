@@ -7,4 +7,4 @@ Each DSBench scenario is comprised of one or more activities of a specific type.
 
 Additional activity types will be added in future releases. This section is a reference section that shows the help you would get with a command like:
 
-    dsbench help <activity type>
+    ./nb help <activity type>

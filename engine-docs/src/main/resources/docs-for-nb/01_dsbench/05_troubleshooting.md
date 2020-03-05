@@ -8,7 +8,7 @@ weight: 05
 This section will contain some troubleshooting guidance for
 common issue as we uncover them.
 
-## Errors while starting dsbench binary
+## Errors while starting nosqlbench binary
 
 If you get an error while trying to run the Linux DSBench binary, ensure that you have the system module installed for fuse. This module is used by the AppImage runtime that allows for a bundled binary.
 
@@ -20,5 +20,5 @@ You will need to make sure that the java binary is the correct one that is being
 
 ### Verify java version
 
-Each version of dsbench requires a particular major version of Java. For example, dsbench version 2.12.26 requires at least Java 12.
+Each version of nosqlbench requires a particular major version of Java. For example, nosqlbench version 2.12.26 requires at least Java 12.
 You can quickly check which version of java you have on your path with `java -version`

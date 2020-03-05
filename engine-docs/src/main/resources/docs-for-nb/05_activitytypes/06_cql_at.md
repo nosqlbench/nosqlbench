@@ -7,7 +7,7 @@ weight: 06
 
 This is the same documentation that you get when you run
 
-    dsbench help cql
+    ./nb help cql
 
 To select this activity type, pass `type=cql` to a run or start command.
 
