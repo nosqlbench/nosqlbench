@@ -10,8 +10,7 @@ public class NBMarkdownManifest implements DocsysDynamicManifest {
     @Override
     public DocsBinder getDocs() {
         return new Docs().namespace("docs-for-eb")
-                .addFirstFoundPath("engine-cli/src/main/resources/docs-for" +
-                                "-nb/",
+                .addFirstFoundPath("engine-docs/src/main/resources/docs-for-nb/",
                         "docs-for-nb/")
                 .setEnabledByDefault(false)
                 .asDocsBinder();

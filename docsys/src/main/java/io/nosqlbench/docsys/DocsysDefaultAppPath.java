@@ -10,7 +10,7 @@ public class DocsysDefaultAppPath implements DocsysStaticManifest {
     @Override
     public DocsBinder getDocs() {
         return new Docs().namespace("docsys-default-app").addFirstFoundPath(
-                "virtdata-docsys/src/main/resources/docsys-guidebook/",
+                "docsys/src/main/resources/docsys-guidebook/",
                 "docsys-guidebook/")
                 .setEnabledByDefault(true)
                 .asDocsBinder();
