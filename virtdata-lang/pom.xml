@@ -12,7 +12,7 @@
     </parent>
 
     <name>virtdata-lang</name>
-    <url>http://virtdata.io/</url>
+    <url>http://nosqlbench.io/</url>
 
     <dependencies>
         <dependency>

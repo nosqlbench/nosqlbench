@@ -11,7 +11,7 @@
     <artifactId>virtdata-userlibs</artifactId>
     <packaging>jar</packaging>
     <name>virtdata-userlibs</name>
-    <url>http://virtdata.io/</url>
+    <url>http://nosqlbench.io/</url>
 
     <dependencies>
         <dependency>

@@ -11,7 +11,7 @@
     <artifactId>virtdata-lib-realer</artifactId>
     <packaging>jar</packaging>
     <name>virtdata-lib-realer</name>
-    <url>http://virtdata.io/</url>
+    <url>http://nosqlbench.io/</url>
 
     <description>With inspiration from other libraries</description>
 
