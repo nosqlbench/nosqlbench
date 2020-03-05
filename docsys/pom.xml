@@ -137,13 +137,11 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-annotations</artifactId>
             <version>3.12.3-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
             <version>3.12.3-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

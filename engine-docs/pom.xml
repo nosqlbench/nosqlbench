@@ -30,7 +30,6 @@
       <groupId>io.nosqlbench</groupId>
       <artifactId>docsys</artifactId>
       <version>3.12.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
 
   </dependencies>

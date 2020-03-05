@@ -55,7 +55,6 @@
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-docker</artifactId>
       <version>3.12.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
 
 
