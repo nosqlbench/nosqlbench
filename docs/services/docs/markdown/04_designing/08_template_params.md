@@ -21,10 +21,10 @@ statements:
  - "<<linetoprint:MISSING>>\n"
 # EOF (control-D in your terminal)
 
-[test]$ dsbench run type=stdout yaml=stdout-test cycles=1
+[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=1
 MISSING
 
-[test]$ dsbench run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
+[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
 THIS IS IT
 ```
 

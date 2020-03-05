@@ -13,7 +13,7 @@ DSBench runs on Linux as a binary distribution. Any modern Linux which can run A
 
 # Activity Types
 
-In dsbench terms, this means:
+In nosqlbench terms, this means:
 
 Activity types are how DSBench gets its support for different protocols or client drivers. The initial release of DSBench includes support for
 these activity types:

@@ -21,7 +21,7 @@ They are part of the core API and used by every activity type. Core activity par
 These parameters are explained individually under the next section.
 
 *Custom* Activity Parameters are those provided by an activity type.
-These parameters are documented for each activity type. You can see them by running `dsbench help <activity type>`.
+These parameters are documented for each activity type. You can see them by running `nosqlbench help <activity type>`.
 
 Activity type parameters may be dynamic. *Dynamic* Activity Parameters are parameters which may be changed while an activity is running. This means that scenario scripting logic may change some variables while an activity is running, and that the runtime should dynamically adjust to match. Dynamic parameters are mainly used in more advanced scripting scenarios.
 

@@ -6,7 +6,7 @@ weight: 01
 # DSBench CLI Options
 
 This is the same documentation you get in markdown format with the
-`dsbench --help` command.
+`nb --help` command.
 
 ---------------------------------------
 
@@ -20,7 +20,7 @@ Using multiples increases the level of the option, like '-vvv'.
 
 Long options, like '--help' are top-level options that may only be
 used once. These modify general behavior, or allow you to get more
-details on how to use dsbench.
+details on how to use nosqlbench.
 
 All other options are either commands, or named arguments to commands.
 Any single word without dashes is a command that will be converted
@@ -29,21 +29,21 @@ named argument to the previous command. The following example
 is a commandline with a command *start*, and two named arguments
 to that command.
 
-    dsbench start type=diag alias=example    
+    ./nb start type=diag alias=example    
 
 ### Discovery options ###
 
-These options help you learn more about running dsbench, and
+These options help you learn more about running nosqlbench, and
 about the plugins that are present in your particular version.
 
 Get a list of additional help topics that have more detailed
 documentation:
 
-    dsbench help topics
+    ./nb help topics
 
 Provide specific help for the named activity type:
 
-    dsbench help <activity type>
+    ./nb help <activity type>
 
 List the available activity types
 
@@ -55,7 +55,7 @@ Provide the metrics that are available for scripting
 
 ### Execution Options ###
 
-This is how you actually tell dsbench what scenario to run. Each of these
+This is how you actually tell nosqlbench what scenario to run. Each of these
 commands appends script logic to the scenario that will be executed.
 These are considered as commands, can occur in any order and quantity.
 The only rule is that arguments in the arg=value form will apply to
