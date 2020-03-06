@@ -4,14 +4,14 @@ weight: 2
 ---
 
 # (docker-based) Grafana Metrics
-DSBench comes with a built-in helper to get you up and running quickly
+nosqlbench comes with a built-in helper to get you up and running quickly
 with client-side testing metrics.
 
 :::warning
 This feature requires that you have docker running on the local system and that your user is in a group that is allowed to manage docker. Using the `--docker-metrics` command *will* attempt to manage docker on your local system.
 :::
 
-To ask DSBench to stand up your metrics infrastructure using a local docker runtime, use this command line option with any other DSBench commands:
+To ask nosqlbench to stand up your metrics infrastructure using a local docker runtime, use this command line option with any other nosqlbench commands:
 
     --docker-metrics
 

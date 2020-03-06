@@ -16,11 +16,6 @@ virtdata-funcref/funcref_general.md
 04_builtins/index.md
 04_builtins/cql-keyvalue.md
 04_builtins/cql-widerows.md
-01_dsbench/02_compatibility.md
-01_dsbench/05_troubleshooting.md
-01_dsbench/03_release_notes.md
-01_dsbench/index.md
-01_dsbench/04_support_options.md
 09_reference/06_advanced_metrics.md
 09_reference/05_timing_terms.md
 09_reference/index.md
@@ -46,6 +41,11 @@ virtdata-funcref/funcref_general.md
 03_basics/index.md
 03_basics/02_grafana_metrics.md
 03_basics/01_command_line.md
+01_nosqlbench/02_compatibility.md
+01_nosqlbench/05_troubleshooting.md
+01_nosqlbench/03_release_notes.md
+01_nosqlbench/index.md
+01_nosqlbench/04_support_options.md
 02_getting_started/03_getting_results.md
 02_getting_started/05_next_steps.md
 02_getting_started/04_reading_metrics.md

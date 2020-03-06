@@ -9,7 +9,7 @@
 
     <v-app-bar app dark color="secondary" collapse-on-scroll dense >
       <v-app-bar-nav-icon @click.stop="toggleDrawer"/>
-      <v-toolbar-title>DS Bench Documentation</v-toolbar-title>
+      <v-toolbar-title>nosqlbench docs</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
       </v-toolbar-items>

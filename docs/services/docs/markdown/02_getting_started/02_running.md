@@ -3,9 +3,9 @@ title: 02 Running
 weight: 2
 ---
 
-# 2. Running DSBench
+# 2. Running nosqlbench
 
-Now that we have DSBench installed, we will run a simple test against a DSE cluster to establish some basic familiarity with the tool.
+Now that we have nosqlbench installed, we will run a simple test against a DSE cluster to establish some basic familiarity with the tool.
 
 ## Create Schema
 
@@ -28,20 +28,20 @@ CREATE TABLE baselines.keyvalue (
 
 Let's break down each of those command line options.
 
-`start` tells DSBench to start an activity.
+`start` tells nosqlbench to start an activity.
 
-`type=...` is used to specify the activity type. In this case we are using `cql`, which tells DSBench to use the DataStax Java Driver and execute CQL statements against a database.
+`type=...` is used to specify the activity type. In this case we are using `cql`, which tells nosqlbench to use the DataStax Java Driver and execute CQL statements against a database.
 
 `yaml=...` is used to specify the yaml file that defines the activity.
 All activities require a yaml in which you configure things such as data bindings and CQL statements, but don't worry about those details right now.
 
-In this example, we use `baselines/cql-keyvalue` which is a pre-built workload that is packaged with DSBench.
+In this example, we use `baselines/cql-keyvalue` which is a pre-built workload that is packaged with nosqlbench.
 
-`tags=phase:schema` tells DSBench to run the yaml block that has the `phase:schema` defined as one of its tags.
+`tags=phase:schema` tells nosqlbench to run the yaml block that has the `phase:schema` defined as one of its tags.
 
 In this example, that is the DDL portion of the `baselines/cql-keyvalue` workload.
 
-`host=...` tells DSBench how to connect to your database, only one host is necessary.
+`host=...` tells nosqlbench how to connect to your database, only one host is necessary.
 
 If you like, you can verify the result of this command by decribing your keyspace in cqlsh or DataStax Studio with `DESCRIBE KEYSPACE baselines`.
 
@@ -49,7 +49,7 @@ If you like, you can verify the result of this command by decribing your keyspac
 
 Before running a test of typical access patterns where you want to capture the results, you need to make the test more interesting than loading an empty table. For this, we use the rampup phase.
 
-Before sending our test writes to the database, we will use the `stdout` activity type so we can see what DSBench is generating for CQL statements.
+Before sending our test writes to the database, we will use the `stdout` activity type so we can see what nosqlbench is generating for CQL statements.
 
 Go ahead and execute the following command:
 
@@ -70,7 +70,7 @@ insert into baselines.keyvalue (key, value) values (8,296173906);
 insert into baselines.keyvalue (key, value) values (9,97405552);
 ```
 
-One thing to know is that DSBench deterministically generates data, so the generated values will be the same from run to run.
+One thing to know is that nosqlbench deterministically generates data, so the generated values will be the same from run to run.
 
 Now we are ready to write some data to our database. Go ahead and execute the following from your command line:
 
@@ -140,12 +140,12 @@ We have a few new command line options here:
 
 `tags=phase:main` is using a new block in our activity's yaml that contains both read and write queries.
 
-`threads=50` is an important one. The default for DSBench is to run with a single thread. This is not adequate for workloads that will be running many operations, so threads is used as a way to increase concurrency on the client side.
+`threads=50` is an important one. The default for nosqlbench is to run with a single thread. This is not adequate for workloads that will be running many operations, so threads is used as a way to increase concurrency on the client side.
 
-`cyclerate=5000` is used to control the operations per second that are initiated by DSBench. This command line option is the primary means to rate limit the workload and here we are running at 5000 ops/sec.
+`cyclerate=5000` is used to control the operations per second that are initiated by nosqlbench. This command line option is the primary means to rate limit the workload and here we are running at 5000 ops/sec.
 
 ## Now What?
 
 Note in the above output, we see `Logging to logs/scenario_20190812_154431_028.log`.
 
-By default DSBench records the metrics from the run in this file, we will go into detail about these metrics in the next section Viewing Results.
+By default nosqlbench records the metrics from the run in this file, we will go into detail about these metrics in the next section Viewing Results.

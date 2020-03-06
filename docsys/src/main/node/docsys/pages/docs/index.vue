@@ -8,10 +8,10 @@
 
     <v-app-bar app dark color="secondary">
       <v-app-bar-nav-icon color="primary" @click.stop="toggleDrawer"/>
-      <v-toolbar-title>DS Bench Documentation</v-toolbar-title>
+      <v-toolbar-title>nosqlbench docs</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn text href="https://github.com/datastax/dsbench-labs/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
+        <v-btn text href="https://github.com/datastax/nosqlbench-labs/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
       </v-toolbar-items>
     </v-app-bar>
 

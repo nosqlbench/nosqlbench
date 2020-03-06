@@ -10,7 +10,7 @@ common issue as we uncover them.
 
 ## Errors while starting nosqlbench binary
 
-If you get an error while trying to run the Linux DSBench binary, ensure that you have the system module installed for fuse. This module is used by the AppImage runtime that allows for a bundled binary.
+If you get an error while trying to run the Linux nosqlbench binary, ensure that you have the system module installed for fuse. This module is used by the AppImage runtime that allows for a bundled binary.
 
 ## Errors when running java -jar
 

@@ -5,7 +5,7 @@ weight: 02
 
 ## Data Bindings
 
-Procedural data generation is built-in to the DSBench runtime by way of the [Virtual DataSet](http://virtdata.io/) library. This allows us to create named data generation recipes. These named recipes for generated data are called bindings. Procedural generation for test data has [many benefits](http://docs.virtdata.io/why_virtdata/why_virtdata/) over shipping bulk test data around, including speed and deterministic behavior. With the VirtData approach, most of the hard work is already done for us. We just have to pull in the recipes we want.
+Procedural data generation is built-in to the nosqlbench runtime by way of the [Virtual DataSet](http://virtdata.io/) library. This allows us to create named data generation recipes. These named recipes for generated data are called bindings. Procedural generation for test data has [many benefits](http://docs.virtdata.io/why_virtdata/why_virtdata/) over shipping bulk test data around, including speed and deterministic behavior. With the VirtData approach, most of the hard work is already done for us. We just have to pull in the recipes we want.
 
 You can add a bindings section like this:
 
@@ -30,7 +30,7 @@ The above bindings block is also a valid activity YAML, at least for the _stdout
      delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
 0,zero,00A_pro,six
 1,one,00B_pro,six
 2,two,00C_pro,three
@@ -45,7 +45,7 @@ The above bindings block is also a valid activity YAML, at least for the _stdout
 
 Above, you can see that the stdout activity type is idea for experimenting with data generation recipes. It uses the default `format=csv` parameter above, but it also supports formats like json, inlinejson, readout, and assignments.
 
-This is all you need to provide a formulaic recipe for converting an ordinal value to a set of field values. Each time DSBench needs to create a set of values as parameters to a statement, the functions are called with an input, known as the cycle. The functions produce a set of named values that, when combined with a statement template, can yield an individual statement for a database operation. In this way, each cycle represents a specific operation. Since the functions above are pure functions, the cycle number of an operation will always produce the same operation, thus making all DSBench workloads deterministic.
+This is all you need to provide a formulaic recipe for converting an ordinal value to a set of field values. Each time nosqlbench needs to create a set of values as parameters to a statement, the functions are called with an input, known as the cycle. The functions produce a set of named values that, when combined with a statement template, can yield an individual statement for a database operation. In this way, each cycle represents a specific operation. Since the functions above are pure functions, the cycle number of an operation will always produce the same operation, thus making all nosqlbench workloads deterministic.
 
 In the example above, you can see the cycle numbers down the left.
 
@@ -66,7 +66,7 @@ bindings:
  delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
 This is a statement, and the file format doesn't
 know how statements will be used!
 submit job 1 on queue one with options 00B_pro;

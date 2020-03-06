@@ -9,15 +9,15 @@ These guidelines are mirrored at the [Submitting Feedback](https://github.com/da
 
 ## Community Support
 
-It is supported by a community of active users at [DataStax DSBench Community](https://community.datastax.com/spaces/51/index.html).
+It is supported by a community of active users at [DataStax nosqlbench Community](https://community.datastax.com/spaces/51/index.html).
 
 ## Bug Fixes
 
-If you think you have found a bug, please [file a bug report](https://github.com/datastax/nosqlbench-labs/issues/new?labels=bug). DSBench is actively used within DataStax, and verified bugs will get attention as resources permit. Bugs reports which are more detailed, or bug reports which include steps to reproduce will get attention first.
+If you think you have found a bug, please [file a bug report](https://github.com/datastax/nosqlbench-labs/issues/new?labels=bug). nosqlbench is actively used within DataStax, and verified bugs will get attention as resources permit. Bugs reports which are more detailed, or bug reports which include steps to reproduce will get attention first.
 
 ## Feature Requests
 
-If you would like to see something in DSBench that is not there yet,
+If you would like to see something in nosqlbench that is not there yet,
 please [submit a feature request](https://github.com/datastax/nosqlbench-labs/issues/new?labels=feature).
 
 ## Documentation Requests

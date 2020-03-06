@@ -5,7 +5,7 @@ weight: 08
 
 # Template Params
 
-All DSBench YAML formats support a parameter macro format that applies before YAML processing starts. It is a basic macro facility that allows named anchors to be placed in the document as a whole:
+All nosqlbench YAML formats support a parameter macro format that applies before YAML processing starts. It is a basic macro facility that allows named anchors to be placed in the document as a whole:
 
 ```text
 <<varname:defaultval>>
@@ -21,10 +21,10 @@ statements:
  - "<<linetoprint:MISSING>>\n"
 # EOF (control-D in your terminal)
 
-[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=1
+[test]$ ./nb run type=stdout yaml=stdout-test cycles=1
 MISSING
 
-[test]$ nosqlbench run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
+[test]$ ./nb run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
 THIS IS IT
 ```
 

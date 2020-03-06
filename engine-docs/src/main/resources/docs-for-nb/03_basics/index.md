@@ -1,8 +1,8 @@
 ---
-title: DSBench Basics
+title: nosqlbench Basics
 weight: 30
 ---
 
 This section covers the essential details that you'll need to
-run DSBench in different ways.
+run nosqlbench in different ways.
 
