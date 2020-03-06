@@ -1,14 +1,3 @@
-virtdata-dev/concepts.md
-virtdata-funcref/funcref_premade.md
-virtdata-funcref/funcref_functional.md
-virtdata-funcref/funcref_diagnostics.md
-virtdata-funcref/funcref_state.md
-virtdata-funcref/funcref_nulls.md
-virtdata-funcref/funcref_datetime.md
-virtdata-funcref/funcref_conversion.md
-virtdata-funcref/funcref_collections.md
-virtdata-funcref/funcref_distributions.md
-virtdata-funcref/funcref_general.md
 05_activitytypes/06_cql_at.md
 05_activitytypes/06_stdout_at.md
 05_activitytypes/index.md
