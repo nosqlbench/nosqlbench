@@ -61,7 +61,7 @@ When an error occurs, you can control how it is handled for the most part.
 This is the error handler stack:
 
 - **stop** - logs an error, and then rethrows the causing exception,
-    causing ebdse to shutdown the current scenario.
+    causing nosqlbench to shutdown the current scenario.
 - **warn** - log a warning in the log, with details about the error 
     and associated statement.
 - **retry** - Retry the operation if the number of retries hasn't been 
@@ -99,15 +99,15 @@ handler assigned to it.
 
 The errors that can be handled are simply all the exception types that
 can be thrown by either the DataStax Java Driver for DSE, *or* the
-ebdse client itself. This includes errors that indicate a potentially
+nosqlbench client itself. This includes errors that indicate a potentially
 intermittent failure condition. It also includes errors that are more
 permanent in nature, like WriteFailure, which would continue to occur
-on subsequent retries without some form of intervention. The ebdse 
+on subsequent retries without some form of intervention. The nosqlbench 
 application will also generate some additional exceptions that capture 
 common error cases that the Java driver doesn't or shouldn't have a 
-special case for, but which may be important for ebdse testing purposes.
+special case for, but which may be important for nosqlbench testing purposes.
 
-In ebdse, all error handlers are specific to a particular kind of
+In nosqlbench, all error handlers are specific to a particular kind of
 exception that you would catch in a typical application that uses DSE,
 although you can tell a handler to take care of a whole category
 of problems as long as you know the right name to use.
@@ -178,7 +178,7 @@ with the default configuration shown.
 
 ##### Additional Exceptions
 
-The following exceptions are synthesized directly by ebdse, but get
+The following exceptions are synthesized directly by nosqlbench, but get
 handled alongside the normal exceptions as explained above.
 
 1. ChangeUnappliedException - The change unapplied condition is important to

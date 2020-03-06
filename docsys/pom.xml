@@ -143,6 +143,12 @@
             <artifactId>virtdata-api</artifactId>
             <version>3.12.3-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.29</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 

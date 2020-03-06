@@ -1,11 +1,17 @@
 package io.nosqlbench.docsys.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DocServerApp {
     public final static String APPNAME_DOCSERVER = "docserver";
-//    private final static Logger logger;
+    private static Logger logger = LoggerFactory.getLogger(DocServerApp.class);
 
 //    static {
 //        // defer to an extant logger context if it is there, otherwise
@@ -25,8 +31,56 @@ public class DocServerApp {
     public static void main(String[] args) {
         if (args.length > 0 && args[0].contains("help")) {
             showHelp();
-        } else {
+        } else if (args.length > 0 && args[0].contains("generate")) {
+            try {
+                generate();
+            } catch (IOException e) {
+                logger.error("could not generate files");
+                e.printStackTrace();
+            }
+        }
+        else {
             runServer(args);
+        }
+    }
+
+    private static boolean deleteDirectory(File directoryToBeDeleted){
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
+    }
+    private static void generate() throws IOException {
+        DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
+        String markdownList = dds.getMarkdownList(true);
+
+        File file = new File("docs/services/docs/markdown.csv");
+        file.getParentFile().mkdirs();
+
+
+        FileWriter fw = new FileWriter(file);
+
+        fw.write(markdownList);
+        fw.close();
+
+        file = new File("docs/services/docs/markdown/");
+        deleteDirectory(file);
+
+        String[] markdownFileArray = markdownList.split("\n");
+
+        for (String markdownFile : markdownFileArray) {
+            String markdown = dds.getFileByPath(markdownFile);
+
+            file = new File("docs/services/docs/markdown/" + markdownFile);
+            file.getParentFile().mkdirs();
+
+            fw = new FileWriter(file);
+            fw.write(markdown);
+            fw.close();
+
         }
     }
 

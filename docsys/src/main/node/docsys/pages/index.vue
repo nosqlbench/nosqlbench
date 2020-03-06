@@ -4,9 +4,8 @@
 <!--        <recursive-menu/>-->
         <div>
             <logo/>
-            <h1 class="title">Virtdata Guidebook</h1>
-            <h2 class="subtitle">Virtual Datasets for Scalable
-              Testing</h2>
+            <h1 class="title">nosqlbench</h1>
+            <h2 class="subtitle">open source, pluggable, nosql benchmarking suite</h2>
             <div class="links">
                 <nuxt-link to="/docs/" class="button--purple">Documentation</nuxt-link>
                 <a href="https://community.datastax.com/spaces/51/index.html" class="button--purple">Community Site</a>
