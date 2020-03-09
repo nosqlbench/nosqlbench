@@ -25,12 +25,20 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
+      
     - name: upload artifacts
       run: mkdir staging && cp nb/target/nb.jar nb/appimage/target/nb staging
     - uses: actions/upload-artifact@v1
       with: 
        name: binaries
        path: staging
+    
+    - name: upload guidebook
+      run: mkdir guidebook && cp -R nb/target/guidebook guidebook
+    - uses: actions/upload-artifact@v1
+      with:
+        name: guidebook
+        path: guidebook
       
 #     - name: Run a one-line script
 #       run: echo Hello, world!
