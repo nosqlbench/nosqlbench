@@ -180,21 +180,30 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <id>build-nb-appimage</id>
-                        <phase>package</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <basedir>${project.basedir}/appimage</basedir>
-                            <executable>${project.basedir}/appimage/build</executable>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                 <groupId>org.codehaus.mojo</groupId>
+                 <artifactId>exec-maven-plugin</artifactId>
+                 <version>1.6.0</version>
+                 <executions>
+                     <execution>
+                         <id>build-nb-appimage</id>
+                         <phase>package</phase>
+                         <goals><goal>exec</goal></goals>
+                         <configuration>
+                             <basedir>${project.basedir}/appimage</basedir>
+                             <executable>${project.basedir}/appimage/build</executable>
+                         </configuration>
+                     </execution>
+                     <execution>
+                         <id>build-static-guidebook</id>
+                         <phase>package</phase>
+                         <goals><goal>exec</goal></goals>
+                         <configuration>
+                             <basedir>${project.basedir}</basedir>
+			     <executable>${project.basedir}/gendocs.sh</executable>
+                         </configuration>
+                     </execution>
+                  </executions>
+             </plugin>
 
         </plugins>
     </build>
