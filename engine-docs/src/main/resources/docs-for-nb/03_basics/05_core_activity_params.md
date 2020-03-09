@@ -10,7 +10,7 @@ either on the command line or via a scenario script. On the command line, these 
 
     <paramname>=<paramvalue>
 
-Some activity parameters are universal in that they can be used with any activity type. These parameters are recognized by DSBench whether or not they are recognized by a particular activity type implementation. These are called _core parameters_. Only core activity parameters are documented here.
+Some activity parameters are universal in that they can be used with any activity type. These parameters are recognized by nosqlbench whether or not they are recognized by a particular activity type implementation. These are called _core parameters_. Only core activity parameters are documented here.
 
 :::info
 To see what activity parameters are valid for a given activity type, see the documentation for that activity type with `nosqlbench help <activity type>`.
@@ -25,7 +25,7 @@ To see what activity parameters are valid for a given activity type, see the doc
 
 Every activity is powered by a named ActivityType. Thus, you must set the `type` parameter. If you do not specify this parameter, it will be inferred from a substring match against the alias and/or yaml parameters. If there is more than one valid match for a valid type value, then you must set the type parameter directly.
 
-Telling DSBench what type of an activity will be run also determines what other parameters are considered valid and how they will be used. So in this way, the type parameter is actually the base parameter for any activity. When used with scenario commands like `run` or `start`, an activity of the named type will be initialized, and then further activity parameters on the command line will be used to configure it before it is started.
+Telling nosqlbench what type of an activity will be run also determines what other parameters are considered valid and how they will be used. So in this way, the type parameter is actually the base parameter for any activity. When used with scenario commands like `run` or `start`, an activity of the named type will be initialized, and then further activity parameters on the command line will be used to configure it before it is started.
 
 ## alias
 
@@ -52,13 +52,13 @@ _default value_ : The name of any provided YAML filename is used as the basis fo
 
 You *should* set the _threads_ parameter when you need to ramp up a workload.
 
-Each activity can be created with a number of threads. It is important to adjust this setting to the system types used by DSBench.
+Each activity can be created with a number of threads. It is important to adjust this setting to the system types used by nosqlbench.
 
 _default value_ : For now, the default is simply *1*. Users must be aware of
  this setting and adjust it to a reasonable value for their workloads.
 
 :::info
-The threads parameter will work slightly differently for activities using the async parameter. For example, when `async=500` is provided, then the number of async operations is split between all configured threads, and each thread will juggle a number of in-flight operations asynchronously. Without the async parameter, threads determines the logical concurrency level of DSBench in the classic 'request-per-thread' mode. Neither mode is strictly correct, and both modes can be used for more accurate testing depending on the constraints of your environment.
+The threads parameter will work slightly differently for activities using the async parameter. For example, when `async=500` is provided, then the number of async operations is split between all configured threads, and each thread will juggle a number of in-flight operations asynchronously. Without the async parameter, threads determines the logical concurrency level of nosqlbench in the classic 'request-per-thread' mode. Neither mode is strictly correct, and both modes can be used for more accurate testing depending on the constraints of your environment.
 :::
 
 A good rule of thumb for setting threads for maximum effect is to set it relatively high, such as 10XvCPU when running synchronous workloads (when not providing the async parameter), and to 5XvCPU for all async workloads. Variation in system dynamics make it difficult to peg an ideal number, so experimentation is encouraged while you dial in your settings initially.
@@ -85,7 +85,7 @@ In the `cycles=<cycle count>` version, the count indicates the total number of c
 - _required_: no
 - _dynamic_: no
 
-Usually, you don't want to provide a setting for stride, but it is still important to understand what it does. Within DSBench, each time a thread needs to allocate a set of cycles to operate on, it takes a contiguous range of values from a shared atomic value. Thus, the stride is the unit of micro-batching within DSBench. It also means that you can use stride to optimize a workload by setting the value higher than the default. For example if you are running a single-statement workload at a very high rate, it doesn't make sense for threads to allocate one op at a time from a shared atomic value. You can simply set `stride=1000` to cause (ballpark estimation) about 1000X less internal contention.
+Usually, you don't want to provide a setting for stride, but it is still important to understand what it does. Within nosqlbench, each time a thread needs to allocate a set of cycles to operate on, it takes a contiguous range of values from a shared atomic value. Thus, the stride is the unit of micro-batching within nosqlbench. It also means that you can use stride to optimize a workload by setting the value higher than the default. For example if you are running a single-statement workload at a very high rate, it doesn't make sense for threads to allocate one op at a time from a shared atomic value. You can simply set `stride=1000` to cause (ballpark estimation) about 1000X less internal contention.
 
 The stride is initialized to the calculated sequence length. The sequence length is simply the number of operations in the op sequence that is planned from your active statements and their ratios.
 
@@ -136,7 +136,7 @@ This is only an optional part of the cyclerate as shown in examples above. If yo
 _default_: `1.1`
 _dynamic_: yes
 
-The DSBench rate limiter provides a sliding scale between strict rate limiting and average rate limiting. The difference between them is controlled by a _burst ratio_ parameter. When the burst ratio is 1.0 (burst up to 100% relative rate), the rate limiter acts as a strict rate limiter, disallowing faster operations from using time that was previously forfeited by prior slower operations. This is a "use it  or lose it" mode that means things like GC events can steal throughput from a running client  as a necessary effect of losing time in a strict timing sense.
+The nosqlbench rate limiter provides a sliding scale between strict rate limiting and average rate limiting. The difference between them is controlled by a _burst ratio_ parameter. When the burst ratio is 1.0 (burst up to 100% relative rate), the rate limiter acts as a strict rate limiter, disallowing faster operations from using time that was previously forfeited by prior slower operations. This is a "use it  or lose it" mode that means things like GC events can steal throughput from a running client  as a necessary effect of losing time in a strict timing sense.
 
 When the burst ratio is set to higher than 1.0, faster operations may recover lost time from previously slower operations. For example, a burst ratio of 1.3 means that the rate limiter will allow bursting up to 130% of the base rate, but only until the average rate is back to 100% relative speed. This means that any valleys created in the actual op rate of the client can be converted into plateaus of throughput above the strict rate, but only at a speed that fits within (op rate * burst ratio). This allows for workloads to approximate the average target rate over time, with controllable bursting rates. This ability allows for near-strict behavior while allowing clients to still track truer to rate limit expectations, so long as the overall workload is not saturating resources.
 
@@ -154,7 +154,7 @@ The default burst ratio of 1.1 makes testing results slightly more stable on ave
 
 The `striderate` parameter allows you to limit the start of a stride according to some rate. This works almost exactly like the cyclerate parameter, except that it blocks a whole group of operations from starting instead of a single operation. The striderate can use a burst ratio just as the cyclerate.
 
-This sets the target rate for strides. In DSBench, a stride is a group of
+This sets the target rate for strides. In nosqlbench, a stride is a group of
 operations that are dispatched and executed together within the same thread.
 This is useful, for example, to emulate application behaviors in which some
 outside request translates to multiple internal requests. It is also a way

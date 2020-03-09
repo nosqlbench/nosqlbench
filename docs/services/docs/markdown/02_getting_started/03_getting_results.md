@@ -5,14 +5,14 @@ weight: 3
 
 # 3. Getting Results
 
-Coming off of our first run with DSBench, we ran a very simple workload against our database. In that example, we saw that DSBench writes to a log file and it is in that log file where the most basic form of metrics are displayed.
+Coming off of our first run with nosqlbench, we ran a very simple workload against our database. In that example, we saw that nosqlbench writes to a log file and it is in that log file where the most basic form of metrics are displayed.
 
 ## Log File Metrics
 
-For our previous run, we saw that DSBench was writing to `logs/scenario_20190812_154431_028.log`
+For our previous run, we saw that nosqlbench was writing to `logs/scenario_20190812_154431_028.log`
 
-Even when you don't configure DSBench to write its metrics to another location, it will periodically report all the metrics to the log file.
-At the end of a scenario, before DSBench shuts down, it will flush the partial reporting interval again to the logs. This means you can always
+Even when you don't configure nosqlbench to write its metrics to another location, it will periodically report all the metrics to the log file.
+At the end of a scenario, before nosqlbench shuts down, it will flush the partial reporting interval again to the logs. This means you can always
 look in the logs for metrics information.
 
 :::warning
@@ -32,7 +32,7 @@ Below is a sample of the log that gives us our basic metrics. There is a lot to 
 ```
 
 
-The log contains lots of information on metrics, but this is obviously _not_ the most desirable way to consume metrics from DSBench.
+The log contains lots of information on metrics, but this is obviously _not_ the most desirable way to consume metrics from nosqlbench.
 
 We recommend that you use one of these methods, according to your environment or tooling available:
 

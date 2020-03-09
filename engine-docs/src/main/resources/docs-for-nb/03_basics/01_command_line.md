@@ -1,9 +1,9 @@
 ---
-title: DSBench CLI Options
+title: nosqlbench CLI Options
 weight: 01
 ---
 
-# DSBench CLI Options
+# nosqlbench CLI Options
 
 This is the same documentation you get in markdown format with the
 `nb --help` command.

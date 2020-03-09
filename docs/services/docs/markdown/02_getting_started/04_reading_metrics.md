@@ -5,7 +5,7 @@ weight: 4
 
 # 4. Reading Metrics
 
-A set of core metrics are provided for every workload that runs with DSBench, regardless of the activity type and protocol used. This section explains each of these metrics and shows an example of them from the log file.
+A set of core metrics are provided for every workload that runs with nosqlbench, regardless of the activity type and protocol used. This section explains each of these metrics and shows an example of them from the log file.
 
 ## metric: result
 
@@ -29,7 +29,7 @@ Here we see that all 100k of our cycles succeeded. Note that the metrics for thr
 
 ## metric: resultset-size
 
-For read workloads, this metric shows the size of result sent back to DSBench from the server. This is useful to confirm that you are reading rows that already exist in the database.
+For read workloads, this metric shows the size of result sent back to nosqlbench from the server. This is useful to confirm that you are reading rows that already exist in the database.
 
 TODO: talk about mix of read / writes and how that affects this metric
 ```
@@ -38,14 +38,14 @@ TODO: talk about mix of read / writes and how that affects this metric
 
 #### metric: tries
 
-DSBench will retry failures 10 times by default, this is configurable via the `maxtries` command line option < link >. This metric shows a histogram of the number of tries that each operation required, in this example, there were no retries as the `count` is 100k.
+nosqlbench will retry failures 10 times by default, this is configurable via the `maxtries` command line option < link >. This metric shows a histogram of the number of tries that each operation required, in this example, there were no retries as the `count` is 100k.
 ```
 2019-08-12 15:46:00,341 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=HISTOGRAM, name=baselines/cql-keyvalue.tries, count=100000, min=1, max=1, mean=1.0, stddev=0.0, median=1.0, p75=1.0, p95=1.0, p98=1.0, p99=1.0, p999=1.0
 ```
 
 ### More Metrics
 
-DSBench extends many ways to report the metrics from a run, including:
+nosqlbench extends many ways to report the metrics from a run, including:
 
 - Built-in Docker Dashboard
 - Reporting to CSV
@@ -59,5 +59,5 @@ To get more information on these options, see the output of
 
 ### Congratulations
 
-You have completed your first run with DSBench! Let's head over to the Next Steps section < link > to talk about the possibilities that are now at our fingertips.
+You have completed your first run with nosqlbench! Let's head over to the Next Steps section < link > to talk about the possibilities that are now at our fingertips.
 

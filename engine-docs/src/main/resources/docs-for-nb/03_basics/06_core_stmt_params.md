@@ -5,7 +5,7 @@ weight: 06
 
 # Core Statement Parameters
 
-Some statement parameters are recognized by the DSBench runtime and can be used on any statement in a YAML file.
+Some statement parameters are recognized by the nosqlbench runtime and can be used on any statement in a YAML file.
 
 ## *ratio*
 

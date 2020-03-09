@@ -25,7 +25,7 @@ With the exception of the `--docker-metrics` approach, these forms may be combin
 
 If you like to have all of your testing data in one place, then you may be
 interested in reporting your measurements to a monitoring system. For this,
-DSBench includes a [Metrics Library](https://github.com/dropwizard/metrics).
+nosqlbench includes a [Metrics Library](https://github.com/dropwizard/metrics).
 Graphite reporting is baked in as the default reporter.
 
 In order to enable graphite reporting, use one of these options formats:

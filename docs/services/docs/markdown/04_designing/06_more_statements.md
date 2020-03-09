@@ -113,5 +113,5 @@ statements:
 
 Specifically, the first statement is a simple statement body, the second is a named statement (via free param `<name>: statement` form), the third is a statement config map, and the fourth is a combination of the previous two.
 
-The above is valid DSBench YAML, although a reader would need
+The above is valid nosqlbench YAML, although a reader would need
 to know about the rules explained above in order to really make sense of it. For most cases, it is best to follow one format convention, but there is flexibility for overrides and naming when you need it.

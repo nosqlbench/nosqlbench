@@ -13,7 +13,7 @@ built-in workloads. It is strongly advised that new workload YAMLs use the same 
 
 ### Schema phase
 
-The schema phase is simply a phase of your test which creates the necessary schema on your target system. For CQL, this generally consists of a keyspace and one ore more table statements. There is no special schema layer in DSBench. All statements executed are simply statements. This provides the greatest flexibility in testing since every activity type is allowed to control its DDL and DML using the same machinery.
+The schema phase is simply a phase of your test which creates the necessary schema on your target system. For CQL, this generally consists of a keyspace and one ore more table statements. There is no special schema layer in nosqlbench. All statements executed are simply statements. This provides the greatest flexibility in testing since every activity type is allowed to control its DDL and DML using the same machinery.
 
 The schema phase is normally executed with defaults for most parameters. This means that statements will execute in the order specified in the YAML, in serialized form, exactly once. This is a welcome side-effect of how the initial parameters like _cycles_ is set from the statements which are activated by tagging.
 
@@ -37,7 +37,7 @@ You can mark statements as rampup phase statements by adding this set of tags to
 
 ### Main phase
 
-The main phase of a DSBench scenario is the one during which you really care about the metric. This is the actual test that everything else has prepared your system for.
+The main phase of a nosqlbench scenario is the one during which you really care about the metric. This is the actual test that everything else has prepared your system for.
 
 You can mark statement as schema phase statements by adding this set of tags to the statements, either directly, or by block:
 

@@ -3,7 +3,7 @@ title: 01 Installing
 weight: 1
 ---
 
-# 1. Installing DSBench
+# 1. Installing nosqlbench
 
 If you are viewing this via the guidebook, you've already completed this step and you can move on to the next section.
 

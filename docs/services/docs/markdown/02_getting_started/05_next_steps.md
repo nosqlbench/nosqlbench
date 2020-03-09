@@ -9,7 +9,7 @@ Now that you've run nosqlbench for the first time and seen what it does, you can
 
 The sections below describe key areas that users typically customize when working with nosqlbench.
 
-Everyone who uses DSBench will want to get familiar with the basics section below. This is essential reading for new and experienced testers alike.
+Everyone who uses nosqlbench will want to get familiar with the basics section below. This is essential reading for new and experienced testers alike.
 
 ## High-Level Users
 
@@ -17,7 +17,7 @@ Several canonical workloads are already baked-in to nosqlbench for immediate use
 
 Recommended reading for this is:
 1. 'Built-In Workloads'
-2. 'DSBench Basics'
+2. 'nosqlbench Basics'
 
 ## Workload Builders
 
@@ -25,7 +25,7 @@ If you want to use nosqlbench to build a tailored workload that closely emulates
 
 The recommended reading for this is:
 
-1. 'DSBench Basics'
+1. 'nosqlbench Basics'
 2. All of the 'Designing Workloads' section.
 3. The online examples (find the links in the Designing Workloads section.)
 
