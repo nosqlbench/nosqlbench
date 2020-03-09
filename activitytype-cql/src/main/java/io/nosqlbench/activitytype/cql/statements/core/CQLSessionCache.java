@@ -79,6 +79,11 @@ public class CQLSessionCache implements Shutdownable {
         String[] contactPoints = activityDef.getParams().getOptionalString("host")
                 .map(h -> h.split(",")).orElse(null);
 
+        if (contactPoints == null) {
+            contactPoints = activityDef.getParams().getOptionalString("hosts")
+                    .map(h -> h.split(",")).orElse(null);
+        }
+
         if (contactPoints != null) {
             builder.addContactPoints(contactPoints);
         }else if (scb.isEmpty()){
