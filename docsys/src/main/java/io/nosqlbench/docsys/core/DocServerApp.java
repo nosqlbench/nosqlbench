@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class DocServerApp {
@@ -62,33 +64,19 @@ public class DocServerApp {
         DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
         String markdownList = dds.getMarkdownList(true);
 
-        Path markdownCsvPath = dirpath.resolve(Path.of("services/docs" +
-                "/markdown.csv"));
-        File file = markdownCsvPath.toFile();
-        if (!file.getParentFile().mkdirs()) {
-            throw new RuntimeException("Unable to make directories for " + file.getCanonicalPath());
-        }
-
-        FileWriter fw = new FileWriter(file);
-
-        fw.write(markdownList);
-        fw.close();
-
-        file = new File("docs/services/docs/markdown/");
-        deleteDirectory(file);
+        Path markdownCsvPath = dirpath.resolve(Path.of("services/docs/markdown.csv"));
+        Files.createDirectories(markdownCsvPath.getParent());
+        Files.writeString(markdownCsvPath, markdownList,StandardOpenOption.TRUNCATE_EXISTING);
 
         String[] markdownFileArray = markdownList.split("\n");
 
         for (String markdownFile : markdownFileArray) {
+            Path relativePath = dirpath.resolve(Path.of("services/docs/markdown",markdownFile));
+            logger.debug("Creating " + relativePath.toString());
+
             String markdown = dds.getFileByPath(markdownFile);
-
-            file = new File("docs/services/docs/markdown/" + markdownFile);
-            file.getParentFile().mkdirs();
-
-            fw = new FileWriter(file);
-            fw.write(markdown);
-            fw.close();
-
+            Files.createDirectories(relativePath.getParent());
+            Files.writeString(relativePath,markdown, StandardOpenOption.TRUNCATE_EXISTING);
         }
     }
 

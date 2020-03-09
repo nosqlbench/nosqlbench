@@ -1,270 +1,276 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.nosqlbench</groupId>
-  <artifactId>mvn-defaults</artifactId>
-  <version>3.12.3-SNAPSHOT</version>
-  <packaging>pom</packaging>
+    <groupId>io.nosqlbench</groupId>
+    <artifactId>mvn-defaults</artifactId>
+    <version>3.12.3-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <javadoc.name>nosqlbench</javadoc.name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <javadoc.name>nosqlbench</javadoc.name>
 
-    <commons-lang-version>3.9</commons-lang-version>
-    <metrics-version>3.2.6</metrics-version>
-    <jetty-version>9.4.25.v20191220</jetty-version>
-    <jersey.version>2.27</jersey.version>
-    <jackson.version>2.9.8</jackson.version>
-    <jackson-jaxrs.version>2.9.8</jackson-jaxrs.version>
-  </properties>
+        <commons-lang-version>3.9</commons-lang-version>
+        <metrics-version>3.2.6</metrics-version>
+        <jetty-version>9.4.25.v20191220</jetty-version>
+        <jersey.version>2.27</jersey.version>
+        <jackson.version>2.9.8</jackson.version>
+        <jackson-jaxrs.version>2.9.8</jackson-jaxrs.version>
+    </properties>
 
-  <name>${project.artifactId}</name>
-  <url>http://nosqlbench.io/</url>
-  <description>
-    nosqlbench is the core of a programmable workload simulation runtime.
-    This module acts as the parent pom for nosqlbench Maven modules.
-  </description>
+    <name>${project.artifactId}</name>
+    <url>http://nosqlbench.io/</url>
+    <description>
+        nosqlbench is the core of a programmable workload simulation runtime.
+        This module acts as the parent pom for nosqlbench Maven modules.
+    </description>
 
-  <licenses>
-    <license>
-      <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
-  <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/nosqlbench/nosqlbench/issues</url>
-  </issueManagement>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/nosqlbench/nosqlbench/issues</url>
+    </issueManagement>
 
-  <scm>
-    <url>scm:git:https://github.com/nosqlbench/nosqlbench.git</url>
-    <!--        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>-->
-    <tag>HEAD</tag>
-  </scm>
+    <scm>
+        <url>scm:git:https://github.com/nosqlbench/nosqlbench.git</url>
+        <!--        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>-->
+        <tag>HEAD</tag>
+    </scm>
 
-  <dependencyManagement>
+    <dependencyManagement>
 
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>2.13.0</version>
-      </dependency>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.13.0</version>
+            </dependency>
 
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>2.13.0</version>
-      </dependency>
-    </dependencies>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>2.13.0</version>
+            </dependency>
+        </dependencies>
 
-  </dependencyManagement>
+    </dependencyManagement>
 
-  <build>
-    <plugins>
-
-      <!-- Compile & Source 1.8 -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <debug>true</debug>
-          <release>11</release>
-          <source>11</source>
-          <target>11</target>
-          <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
-          <compilerArgument>-Xlint:all</compilerArgument>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
-        <configuration>
-          <excludes>
-            <exclude>**/*Integrated*Test*.java</exclude>
-            <exclude>**/*IntegrationTest.java</exclude>
-            <exclude>**/*IntegrationTests.java</exclude>
-          </excludes>
-          <includes>
-            <include>**/*Test*.java</include>
-          </includes>
-          <useSystemClassLoader>false</useSystemClassLoader> <!-- fixes reflection tests -->
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.22.1</version>
-        <executions>
-          <execution>
-            <id>run-tests</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <forkMode>always</forkMode>
-          <includes>
-            <include>**/*Integrated*Test*.java</include>
-            <include>**/*IntegrationTest.java</include>
-            <include>**/*IntegrationTests.java</include>
-          </includes>
-          <properties>
-          </properties>
-        </configuration>
-      </plugin>
-
-    <!-- TODO: make sure the IT settings above work for EB IT-->
-
-      <!-- Javadoc -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
-        <configuration>
-          <doctitle>${javadoc.name}</doctitle>
-          <windowtitle>${javadoc.name}</windowtitle>
-          <isOffline>false</isOffline>
-          <detectJavaApiLink>false</detectJavaApiLink>
-          <detectLinks>false</detectLinks>
-          <detectOfflineLinks>false</detectOfflineLinks>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadoc</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Sources -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Distribution -->
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.8</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-
-    </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <!-- Shading -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
-          <executions>
-            <execution>
-              <phase>package</phase>
-              <goals>
-                <goal>shade</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <transformers>
-              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-            </transformers>
-            <createSourcesJar>true</createSourcesJar>
-            <createDependencyReducedPom>false</createDependencyReducedPom>
-            <minimizeJar>false</minimizeJar>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-  </build>
-
-
-  <developers>
-    <developer>
-      <name>Jonathan Shook</name>
-      <email>jshook@gmail.com</email>
-      <organization>nosqlbench.io</organization>
-      <organizationUrl>http://nosqlbench.io/</organizationUrl>
-    </developer>
-    <developer>
-      <name>Sebastián Estévez</name>
-      <email>estevezsebastian@gmail.com</email>
-      <organization>nosqlbench.io</organization>
-      <organizationUrl>http://nosqlbench.io/</organizationUrl>
-    </developer>
-  </developers>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh-snapshot</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh-staging</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2
-      </url>
-    </repository>
-  </distributionManagement>
-
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
+    <build>
         <plugins>
-          <!-- Signing -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <configuration>
-                  <gpgArguments>
-                    <arg>--pinentry-mode</arg>
-                    <arg>loopback</arg>
-                  </gpgArguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
-  </profiles>
+            <!-- Compile & Source 1.8 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <debug>true</debug>
+                    <release>11</release>
+                    <source>11</source>
+                    <target>11</target>
+                    <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Integrated*Test*.java</exclude>
+                        <exclude>**/*IntegrationTest.java</exclude>
+                        <exclude>**/*IntegrationTests.java</exclude>
+                    </excludes>
+                    <includes>
+                        <include>**/*Test*.java</include>
+                    </includes>
+                    <useSystemClassLoader>false</useSystemClassLoader> <!-- fixes reflection tests -->
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
+                <executions>
+                    <execution>
+                        <id>run-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <forkMode>always</forkMode>
+                    <includes>
+                        <include>**/*Integrated*Test*.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                        <include>**/*IntegrationTests.java</include>
+                    </includes>
+                    <properties>
+                    </properties>
+                </configuration>
+            </plugin>
+
+            <!-- TODO: make sure the IT settings above work for EB IT-->
+
+            <!-- Javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <doctitle>${javadoc.name}</doctitle>
+                    <windowtitle>${javadoc.name}</windowtitle>
+                    <isOffline>false</isOffline>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <detectLinks>false</detectLinks>
+                    <detectOfflineLinks>false</detectOfflineLinks>
+                    <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
+                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                    <additionalJOption>-Xdoclint:none</additionalJOption>
+                    <doclint>none</doclint>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Sources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Distribution -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <!-- Shading -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <transformers>
+                            <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        </transformers>
+                        <createSourcesJar>true</createSourcesJar>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <minimizeJar>false</minimizeJar>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+
+    <developers>
+        <developer>
+            <name>Jonathan Shook</name>
+            <email>jshook@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Sebastián Estévez</name>
+            <email>estevezsebastian@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh-snapshot</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh-staging</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2
+            </url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Signing -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 </project>

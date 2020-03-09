@@ -37,6 +37,7 @@ public interface VirtDataFunctionLibrary extends Named {
      * @param inputType      The class which the unary apply method should take as an
      *                       argument, or null if unspecified
      * @param functionName   The name of the implementation to match
+     * @param customConfigs  Optional initializer configuration
      * @param parameters A list of arguments which will be used to instantiate
      *                       any matching implementations
      * @return A list, possibly empty, of matching functions

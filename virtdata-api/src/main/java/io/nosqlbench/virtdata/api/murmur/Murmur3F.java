@@ -132,6 +132,7 @@ public class Murmur3F implements Checksum128 {
     /**
      * Special update method to hash long values very efficiently using Java's native little endian (LE) byte order.
      * Note, that you cannot mix this with other (previous) hash updates, because it only supports 8-bytes alignment.
+     * @param value The long value to update
      */
     public void updateLongLE(long value) {
         finished = false;
@@ -156,6 +157,7 @@ public class Murmur3F implements Checksum128 {
 
     /**
      * Consider {@link #updateLongLE(long)} for better performance if you do not rely on big endian (BE) byte order.
+     * @param value value to update
      */
     public void updateLongBE(long value) {
         updateLongLE(Long.reverseBytes(value));

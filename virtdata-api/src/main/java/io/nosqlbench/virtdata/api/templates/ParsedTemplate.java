@@ -111,7 +111,7 @@ public class ParsedTemplate {
      * Parse the given raw template, check the bind points against the provide bindings, and
      * provide detailed template checks for validity.
      *
-     * <H2>Overriding Patterns</H2>
+     * <H4>Overriding Patterns</H4>
      * <P>
      * If patterns are not provided then {@link ParsedTemplate#DEFAULT_PATTERNS} are used, which includes
      * the ability to match {var1} and ?var1 style anchors. If patterns are
@@ -342,7 +342,7 @@ public class ParsedTemplate {
     /**
      * Return the parsed template in (<em>literal, variable, ..., ..., literal</em>) form.
      *
-     * @return
+     * @return the sections of spans within the template
      */
     public String[] getSpans() {
         return spans;
