@@ -36,18 +36,19 @@ public class DocServerApp {
             showHelp();
         } else if (args.length > 0 && args[0].contains("generate")) {
             try {
-                generate(Arrays.copyOfRange(args,1,args.length-1));
+                String[] genargs = Arrays.copyOfRange(args, 1, args.length);
+                logger.info("Generating with args ["+String.join("][",args)+"]");
+                generate(genargs);
             } catch (IOException e) {
-                logger.error("could not generate files");
+                logger.error("could not generate files with command " + String.join(" ", args));
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
             runServer(args);
         }
     }
 
-    private static boolean deleteDirectory(File directoryToBeDeleted){
+    private static boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
@@ -56,27 +57,35 @@ public class DocServerApp {
         }
         return directoryToBeDeleted.delete();
     }
+
     private static void generate(String[] args) throws IOException {
-        Path dirpath = args.length==0 ?
+        Path dirpath = args.length == 0 ?
                 Path.of("docs") :
                 Path.of(args[0]);
+
+        StandardOpenOption[] OVERWRITE = {StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE,StandardOpenOption.WRITE};
+
+        logger.info("generating to directory " + dirpath.toString());
+
 
         DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
         String markdownList = dds.getMarkdownList(true);
 
         Path markdownCsvPath = dirpath.resolve(Path.of("services/docs/markdown.csv"));
+        logger.info("markdown.csv located at " + markdownCsvPath.toString());
+
         Files.createDirectories(markdownCsvPath.getParent());
-        Files.writeString(markdownCsvPath, markdownList,StandardOpenOption.TRUNCATE_EXISTING);
+        Files.writeString(markdownCsvPath, markdownList, OVERWRITE);
 
         String[] markdownFileArray = markdownList.split("\n");
 
         for (String markdownFile : markdownFileArray) {
-            Path relativePath = dirpath.resolve(Path.of("services/docs/markdown",markdownFile));
-            logger.debug("Creating " + relativePath.toString());
+            Path relativePath = dirpath.resolve(Path.of("services/docs/markdown", markdownFile));
+            logger.info("Creating " + relativePath.toString());
 
             String markdown = dds.getFileByPath(markdownFile);
             Files.createDirectories(relativePath.getParent());
-            Files.writeString(relativePath,markdown, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(relativePath, markdown, OVERWRITE);
         }
     }
 
@@ -105,7 +114,7 @@ public class DocServerApp {
             String arg = serverArgs[i];
             if (arg.matches(".*://.*")) {
                 if (!arg.toLowerCase().contains("http://")) {
-                    String suggested = arg.toLowerCase().replaceAll("https","http");
+                    String suggested = arg.toLowerCase().replaceAll("https", "http");
                     throw new RuntimeException("ERROR:\nIn this release, only 'http://' URLs are supported.\nTLS will be added in a future release.\nSee https://github.com/nosqlbench/nosqlbench/issues/35\n" +
                             "Consider using " + suggested);
                 }
