@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class DocServerApp {
     public final static String APPNAME_DOCSERVER = "docserver";
@@ -33,7 +34,7 @@ public class DocServerApp {
             showHelp();
         } else if (args.length > 0 && args[0].contains("generate")) {
             try {
-                generate();
+                generate(Arrays.copyOfRange(args,1,args.length-1));
             } catch (IOException e) {
                 logger.error("could not generate files");
                 e.printStackTrace();
@@ -53,13 +54,20 @@ public class DocServerApp {
         }
         return directoryToBeDeleted.delete();
     }
-    private static void generate() throws IOException {
+    private static void generate(String[] args) throws IOException {
+        Path dirpath = args.length==0 ?
+                Path.of("docs") :
+                Path.of(args[0]);
+
         DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
         String markdownList = dds.getMarkdownList(true);
 
-        File file = new File("docs/services/docs/markdown.csv");
-        file.getParentFile().mkdirs();
-
+        Path markdownCsvPath = dirpath.resolve(Path.of("services/docs" +
+                "/markdown.csv"));
+        File file = markdownCsvPath.toFile();
+        if (!file.getParentFile().mkdirs()) {
+            throw new RuntimeException("Unable to make directories for " + file.getCanonicalPath());
+        }
 
         FileWriter fw = new FileWriter(file);
 
