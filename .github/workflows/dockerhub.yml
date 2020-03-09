@@ -25,10 +25,10 @@ jobs:
       id: vars
       run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
     - name: Build the tagged Docker image
-      run: docker build . --file Dockerfile --tag nosqlbench/nosqlbench:${{steps.vars.outputs.tag}}
+      run: docker build ./nb/ --file Dockerfile --tag nosqlbench/nosqlbench:${{steps.vars.outputs.tag}}
     - name: Push the tagged Docker image
       run: docker push nosqlbench/nosqlbench:${{steps.vars.outputs.tag}}
     - name: Build the latest Docker image
-      run: docker build . --file Dockerfile --tag nosqlbench/nosqlbench:latest
+      run: docker build ./nb/ --file Dockerfile --tag nosqlbench/nosqlbench:latest
     - name: Push the latest Docker image
       run: docker push nosqlbench/nosqlbench:latest
