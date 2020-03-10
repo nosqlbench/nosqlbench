@@ -25,7 +25,7 @@ jobs:
       run: |
         set -x
         echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
-        gpg --import ./private.key
+        gpg --import --batch ./private.key
         rm ./private.key
         echo "gnupg files:"
         ls -l ~/.gnupg/
