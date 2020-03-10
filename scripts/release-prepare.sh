@@ -33,20 +33,20 @@ git checkout ${GITHUB_REF##*/}
 echo "Git reset hard to ${GITHUB_SHA}"
 git reset --hard ${GITHUB_SHA}
 
-# This script will do a release of the artifact according to http://maven.apache.org/maven-release/maven-release-plugin/
-echo "Setup git user name to '$GIT_RELEASE_BOT_NAME'"
-git config --global user.name "$GIT_RELEASE_BOT_NAME";
-echo "Setup git user email to '$GIT_RELEASE_BOT_EMAIL'"
-git config --global user.email "$GIT_RELEASE_BOT_EMAIL";
-
-# Setup GPG
-echo "Import the GPG key"
-export GPG_TTY=$(tty)
-echo "$GPG_KEY" | base64 -d > private.key
-gpg --batch --no-tty --import ./private.key
-chmod -R 777 ~/.gnupg/
-ls -ahl ~/.gnupg/
-rm ./private.key
+## This script will do a release of the artifact according to http://maven.apache.org/maven-release/maven-release-plugin/
+#echo "Setup git user name to '$GIT_RELEASE_BOT_NAME'"
+#git config --global user.name "$GIT_RELEASE_BOT_NAME";
+#echo "Setup git user email to '$GIT_RELEASE_BOT_EMAIL'"
+#git config --global user.email "$GIT_RELEASE_BOT_EMAIL";
+#
+## Setup GPG
+#echo "Import the GPG key"
+#export GPG_TTY=$(tty)
+#echo "$GPG_KEY" | base64 -d > private.key
+#gpg --batch --no-tty --import ./private.key
+#chmod -R 777 ~/.gnupg/
+#ls -ahl ~/.gnupg/
+#rm ./private.key
 
 #echo "Override the java home as gitactions is seting up the JAVA_HOME env variable"
 #JAVA_HOME="/usr/local/openjdk-11/"
@@ -58,5 +58,5 @@ rm ./private.key
 # Do the release
 echo "Do mvn release:prepare..."
 #mvn $MAVEN_REPO_LOCAL --batch-mode --global-settings release.xml -Dusername=$GITHUB_ACCESS_TOKEN release:prepare
-mvn --batch-mode --global-settings release.xml -Dusername=$GITHUB_ACCESS_TOKEN clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
+mvn -X --batch-mode --global-settings release.xml -Dusername=$GITHUB_ACCESS_TOKEN clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
 
