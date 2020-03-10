@@ -43,12 +43,12 @@ jobs:
       run: ./release.sh
       env: 
        RELEASE_BRANCH_NAME: "testbranch"
-       git-release-bot-name: "nb-droid"
-       git-release-bot-email: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-       access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+       GIT_RELEASE_BOT_NAME: "nb-droid"
+       GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
+       ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
        GPG_ENABLED: "true"
        GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
-       gpg-key: ${{ secrets.GITHUB_GPG_KEY }}
+       GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
        MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
