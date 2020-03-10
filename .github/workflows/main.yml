@@ -22,6 +22,11 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2   
+    - name: set git username
+      run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+    - name: set git email
+      run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+
     - name: read versions
       run: |
         set -x
@@ -33,14 +38,26 @@ jobs:
         NEXT_SNAPSHOT="${BASE_VERSION}.${NEXT_MINOR_VERSION}-SNAPSHOT"
         echo "::set-env name=NEXT_SNAPSHOT::${NEXT_SNAPSHOT}"
         echo "::set-env name=RELEASE_VERSION::${RELEASE_VERSION}"  
-    - name: set git username
-      run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-    - name: set git email
-      run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-    - name: prepare_release
-      run: mvn --global-settings deploy.xml --batch-mode clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
-    - name: perform_release
-      run: mvn --global-settings deploy.xml --batch-mode release:perform
+        
+    - name: prepare-release
+      run: ./release.sh
+      env: 
+       RELEASE_BRANCH_NAME: "testbranch"
+       git-release-bot-name: "nb-droid"
+       git-release-bot-email: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
+       access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+       GPG_ENABLED: "true"
+       GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
+       gpg-key: ${{ secrets.GITHUB_GPG_KEY }}
+       MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+       MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+       MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+       
+#     - name: prepare_release
+#       run: mvn --global-settings deploy.xml --batch-mode clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
+#     - name: perform_release
+#       run: mvn --global-settings deploy.xml --batch-mode release:perform
+
     - name: upload artifacts
       run: mkdir staging && cp nb/target/nb.jar nb/appimage/target/nb staging
     - uses: actions/upload-artifact@v1
