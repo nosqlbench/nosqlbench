@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>3.12.3-SNAPSHOT</version>
+    <version>3.12.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -42,7 +41,7 @@
     <scm>
         <url>scm:git:https://github.com/nosqlbench/nosqlbench.git</url>
         <!--        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>-->
-        <tag>HEAD</tag>
+        <tag>nosqlbench-3.12.3</tag>
     </scm>
 
     <dependencyManagement>
@@ -201,8 +200,7 @@
                     </executions>
                     <configuration>
                         <transformers>
-                            <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                         </transformers>
                         <createSourcesJar>true</createSourcesJar>
                         <createDependencyReducedPom>false</createDependencyReducedPom>
