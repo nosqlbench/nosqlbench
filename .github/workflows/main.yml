@@ -16,12 +16,18 @@ jobs:
         java-package: jdk
         architecture: x64
         
+    - name: capture tty
+      run: echo "::set-env name=TTY::"$(tty)
+
     - name: initialize gpg
+      env:
+        GPG_TTY=${TTY}
       run: |
         set -x
         echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
         gpg --import ./private.key
-        rm .private.key
+        rm ./private.key
+        echo "gnupg files:"
         ls -l ~/.gnupg/
         
     - name: set git username
