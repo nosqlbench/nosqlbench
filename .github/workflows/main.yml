@@ -40,6 +40,9 @@ jobs:
         name: guidebook
         path: guidebook
       
+    - name: test for gpg
+      run: gpg --version
+      
 #     - name: Run a one-line script
 #       run: echo Hello, world!
 #     - name: Run a multi-line script
