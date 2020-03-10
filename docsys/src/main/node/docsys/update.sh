@@ -10,6 +10,7 @@ then
  ./install_npm
 fi
 
+npm install
 npm run generate
 rm -rf ../../resources/docsys-guidebook
 mv dist ../../resources/docsys-guidebook
