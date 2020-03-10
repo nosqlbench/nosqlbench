@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH=node_modules/nuxt/bin/:$PATH
 rm -rf dist .nuxt
 if ! which npm >/dev/null 2>&1
 then
