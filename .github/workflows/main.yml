@@ -39,8 +39,22 @@ jobs:
         echo "::set-env name=NEXT_SNAPSHOT::${NEXT_SNAPSHOT}"
         echo "::set-env name=RELEASE_VERSION::${RELEASE_VERSION}"  
         
-    - name: prepare-release
-      run: ./release.sh
+    - name: prepare release
+      run: scripts/release-prepare.sh
+      env: 
+       RELEASE_BRANCH_NAME: "testbranch"
+       GIT_RELEASE_BOT_NAME: "nb-droid"
+       GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
+       ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+       GPG_ENABLED: "true"
+       GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
+       GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
+       MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+       MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+       MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+
+    - name: perform release
+      run: scripts/release-perform.sh
       env: 
        RELEASE_BRANCH_NAME: "testbranch"
        GIT_RELEASE_BOT_NAME: "nb-droid"
