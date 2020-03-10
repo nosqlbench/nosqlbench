@@ -52,8 +52,6 @@ jobs:
        MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
-       NEXT_SNAPSHOT: ${{ NEXT_SNAPSHOT }}
-       RELEASE_VERSION: ${{ RELEASE_VERSION }}
        
 #     - name: prepare_release
 #       run: mvn --global-settings deploy.xml --batch-mode clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
