@@ -16,16 +16,25 @@ jobs:
         java-package: jdk
         architecture: x64
         
+    - name: initialize gpg
+      run: |
+        set -x
+        echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
+        gpg --import ./private.key
+        rm .private.key
+        ls -l ~/.gnupg/
+        
+    - name: set git username
+      run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+    - name: set git email
+      run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+
     - name: Cache Maven packages
       uses: actions/cache@v1
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2   
-    - name: set git username
-      run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-    - name: set git email
-      run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
     - name: read versions
       run: |
