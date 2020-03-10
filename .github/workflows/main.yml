@@ -6,7 +6,7 @@ on:
      - testbranch
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
 
     - name: initialize gpg
       env:
-        GPG_TTY=${TTY}
+        GPG_TTY: ${TTY}
       run: |
         set -x
         echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
