@@ -5,10 +5,10 @@
   "author": "Sebastian Estevez & Jonathan Shook",
   "private": true,
   "scripts": {
-    "dev": "./node_modules/nuxt/bin/nuxt.js",
-    "build": "./node_modules/nuxt/bin/nuxt.js build",
-    "start": "./node_modules/nuxt/bin/nuxt.js start",
-    "generate": "./node_modules/nuxt/bin/nuxt.js generate"
+    "dev": "/usr/bin/env local/node12/bin/node node_modules/nuxt/bin/nuxt.js",
+    "build": "/usr/bin/env local/node12/bin/node node_modules/nuxt/bin/nuxt.js build",
+    "start": "/usr/bin/env local/node12/bin/node node_modules/nuxt/bin/nuxt.js start",
+    "generate": "/usr/bin/env local/node12/bin/node node_modules/nuxt/bin/nuxt.js generate"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.9.3",
