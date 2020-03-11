@@ -257,6 +257,7 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+
                                 <configuration>
                                     <gpgArguments>
                                         <arg>--pinentry-mode</arg>
