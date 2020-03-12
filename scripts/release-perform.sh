@@ -11,7 +11,7 @@ RELEASE_BRANCH_NAME=${RELEASE_BRANCH_NAME:?RELEASE_BRANCH_NAME must be provided}
 #MAVEN_ARGS=${MAVEN_ARGS:?MAVEN_ARGS must be provided}
 
 # avoid the release loop by checking if the latest commit is a release commit
-readonly local last_release_commit_hash=$(git log --author="$GIT_RELEASE_BOT_NAME" --pretty=format:"%H" -1)
+readonly local last_release_commit_hash=$(git log --pretty=format:"%H" -1)
 echo "Last $GIT_RELEASE_BOT_NAME commit: ${last_release_commit_hash}"
 echo "Current commit: ${GITHUB_SHA}"
 if [[ "${last_release_commit_hash}" = "${GITHUB_SHA}" ]]; then
