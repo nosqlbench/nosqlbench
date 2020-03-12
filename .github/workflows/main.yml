@@ -111,8 +111,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/download-artifact@latest
-        name: guidebook
-        path: guidebook
+        with:
+         name: guidebook
+         path: guidebook
       - run: ls -la
       - name: checkout docs
         env:
