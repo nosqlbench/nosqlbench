@@ -64,6 +64,8 @@ jobs:
        GPG_ENABLED: "true"
        GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
        GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
+       GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
+       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
        MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
