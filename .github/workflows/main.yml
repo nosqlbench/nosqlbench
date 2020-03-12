@@ -16,6 +16,11 @@ jobs:
         java-package: jdk
         architecture: x64
         
+    - name: avoid release loop
+      run: scripts/avoid-release-loop.sh
+      env:
+       GIT_RELEASE_BOT_NAME: "nb-droid"
+       
     - name: capture tty
       run: |
        echo "::set-env name=TTY::"$(tty)
