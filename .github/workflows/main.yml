@@ -94,7 +94,10 @@ jobs:
 #       run: mvn --global-settings deploy.xml --batch-mode release:perform
 
     - name: upload artifacts
-      run: mkdir staging && cp nb/target/nb.jar nb/appimage/target/nb staging
+      run: |
+        pwd
+        ls -l
+        mkdir staging && cp nb/target/nb.jar nb/appimage/target/nb staging
     - uses: actions/upload-artifact@v1
       with: 
        name: binaries
