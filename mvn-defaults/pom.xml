@@ -258,16 +258,15 @@
                                     <goal>sign</goal>
                                 </goals>
 
-                                <configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-
+<!--                                <configuration>-->
+<!--                                    <gpgArguments>-->
+<!--                                        <arg>&#45;&#45;pinentry-mode</arg>-->
+<!--                                        <arg>loopback</arg>-->
 <!--                                        <arg>&#45;&#45;no-tty</arg>-->
 <!--                                        <arg>&#45;&#45;batch</arg>-->
 <!--                                        <arg>&#45;&#45;no-permission-warning</arg>-->
-                                    </gpgArguments>
-                                </configuration>
+<!--                                    </gpgArguments>-->
+<!--                                </configuration>-->
                             </execution>
                         </executions>
                     </plugin>
