@@ -35,5 +35,5 @@ git reset --hard ${GITHUB_SHA}
 
 echo "Do mvn release:perform..."
 #mvn $MAVEN_REPO_LOCAL --batch-mode --global-settings release.xml release:perform
-mvn --batch-mode --global-settings release.xml release:perform
+mvn -X --batch-mode --global-settings release.xml release:perform
 
