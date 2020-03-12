@@ -12,7 +12,8 @@
             <properties>
                 <gpg.executable>gpg</gpg.executable>
                 <gpg.keyname>${env.GPG_KEY_NAME}</gpg.keyname>
-                <gpg.passphraseServerId>${env.GPG_SERVER_NAME}</gpg.passphraseServerId>
+                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+<!--                <gpg.passphraseServerId>${env.GPG_SERVER_NAME}</gpg.passphraseServerId>-->
 <!--                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>-->
             </properties>
         </profile>

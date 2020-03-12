@@ -44,6 +44,13 @@
         <tag>HEAD</tag>
     </scm>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
 
         <dependencies>
