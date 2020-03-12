@@ -17,11 +17,13 @@ jobs:
         architecture: x64
         
     - name: capture tty
-      run: echo "::set-env name=TTY::"$(tty)
+      run: |
+       echo "::set-env name=TTY::"$(tty)
+       echo "::set-env name=GPG_TTY::"$(tty)
 
     - name: initialize gpg
-      env:
-        GPG_TTY: ${TTY}
+#       env:
+#         GPG_TTY: ${TTY}
       run: |
         set -x
         echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
@@ -80,6 +82,8 @@ jobs:
        GPG_ENABLED: "true"
        GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
        GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
+       GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
+       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
        MAVEN_REPO_SERVER_ID: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
