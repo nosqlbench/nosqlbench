@@ -70,7 +70,6 @@
 
   <build>
     <plugins>
-      <!-- Force version on maven-release-plugin -->
       <plugin>
         <version>2.5.3</version>
         <artifactId>maven-release-plugin</artifactId>
@@ -83,8 +82,7 @@
       </plugin>
     </plugins>
   </build>
-
-
+  
   <developers>
     <developer>
       <name>Jonathan Shook</name>

@@ -263,9 +263,9 @@
                                         <arg>--pinentry-mode</arg>
                                         <arg>loopback</arg>
 
-                                        <arg>--no-tty</arg>
-                                        <arg>--batch</arg>
-                                        <arg>--no-permission-warning</arg>
+<!--                                        <arg>&#45;&#45;no-tty</arg>-->
+<!--                                        <arg>&#45;&#45;batch</arg>-->
+<!--                                        <arg>&#45;&#45;no-permission-warning</arg>-->
                                     </gpgArguments>
                                 </configuration>
                             </execution>
