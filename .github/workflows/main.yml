@@ -106,3 +106,19 @@ jobs:
       with:
         name: guidebook
         path: guidebook
+  docs:
+    needs: release
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/download-artifact@latest
+        name: guidebook
+        path: guidebook
+      - run: ls -la
+      - name: checkout docs
+        env:
+          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+        run: git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+      
+        
+        
