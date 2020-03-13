@@ -146,21 +146,36 @@ activity types.
     ignored if passfile is also present.
 - **passfile** - the file to read the password from. The first
     line of this file is used as the password.
-- **ssl** - enable ssl if you want transport level encryption.
-    Examples:
-    - `ssl=true`
-      enable ssl
-    - `ssl=false`
-      disable ssl (the default)
-- **keystore** - specify the keystore location for SSL.
-    Examples:
-    - `keystore=JKS` (the default)
-- **kspass** - specify the password to the keystore for SSL.
-    Examples:
-    - `kspass=mypass`
+- **ssl** - specifies the type of the SSL implementation.
+    Disabled by default, possible values are `jdk`, and `openssl`.
+    Depending on type, additional parameters need to be provided.
 - **tlsversion** - specify the TLS version to use for SSL.
     Examples:
     - `tlsversion=TLSv1.2` (the default)
+- **truststore** (`jdk`, `openssl`) - specify the path to the SSL truststore.
+    Examples:
+    - `truststore=file.truststore`
+- **tspass** (`jdk`, `openssl`) - specify the password for the SSL truststore.
+    Examples:
+    - `tspass=mypass`
+- **keystore** (`jdk`) - specify the path to the SSL keystore.
+    Examples:
+    - `keystore=file.keystore`
+- **kspass** (`jdk`) - specify the password for the SSL keystore.
+    Examples:
+    - `kspass=mypass`
+- **keyFilePath** (`openssl`) - path to the OpenSSL key file.
+    Examples:
+    - `keyFilePath=file.key`
+- **keyPassword** (`openssl`) - key password;
+    Examples:
+    - `keyPassword=password`
+- **caCertFilePath** (`openssl`) - path to the X509 CA certificate file.
+    Examples:
+    - `caCertFilePath=cacert.pem`
+- **certFilePath** (`openssl`) - path to the X509 certificate file.
+    Examples:
+    - `certFilePath=ca.pem`
 - **jmxreporting** - enable JMX reporting if needed.
     Examples:
     - `jmxreporting=true`
