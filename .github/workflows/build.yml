@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: 
+     - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      name: checkout nosqlbench
+    - uses: actions/setup-java@v1
+      name: setup java
+      with:
+        java-version: '12'
+        java-package: jdk
+        architecture: x64
+        
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2   
+
+    - name: mvn package nosqlbench
+      run: mvn package
