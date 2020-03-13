@@ -5,7 +5,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 
-public abstract class CQLResultSetException extends CqlCycleException {
+public abstract class CQLResultSetException extends CqlGenericCycleException {
 
     private final Statement statement;
     private final ResultSet resultSet;

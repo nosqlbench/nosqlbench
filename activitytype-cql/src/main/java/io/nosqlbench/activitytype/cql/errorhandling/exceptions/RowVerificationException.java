@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * This exception is thrown when read verification fails.
  */
-public class RowVerificationException extends CqlCycleException {
+public class RowVerificationException extends CqlGenericCycleException {
 
     private Map<String, Object> expected;
     private Row row;

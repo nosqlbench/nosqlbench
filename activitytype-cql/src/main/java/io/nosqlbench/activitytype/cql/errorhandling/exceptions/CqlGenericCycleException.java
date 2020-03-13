@@ -1,25 +1,25 @@
 package io.nosqlbench.activitytype.cql.errorhandling.exceptions;
 
-public abstract class CqlCycleException extends RuntimeException {
+public abstract class CqlGenericCycleException extends RuntimeException {
 
     private long cycle;
 
-    public CqlCycleException(long cycle, Throwable cause) {
+    public CqlGenericCycleException(long cycle, Throwable cause) {
         super(cause);
         this.cycle = cycle;
     }
 
-    public CqlCycleException(long cycle, String message) {
+    public CqlGenericCycleException(long cycle, String message) {
         super(message);
         this.cycle = cycle;
     }
 
-    public CqlCycleException(long cycle, String message, Throwable cause) {
+    public CqlGenericCycleException(long cycle, String message, Throwable cause) {
         super(message, cause);
         this.cycle = cycle;
     }
 
-    public CqlCycleException(long cycle) {
+    public CqlGenericCycleException(long cycle) {
         super();
         this.cycle = cycle;
     }

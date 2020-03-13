@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cql.errorhandling.exceptions;
 
-public class MaxTriesExhaustedException extends CqlCycleException {
+public class MaxTriesExhaustedException extends CqlGenericCycleException {
 
     private int maxtries;
 

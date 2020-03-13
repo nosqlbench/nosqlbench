@@ -8,7 +8,7 @@ import com.datastax.driver.core.ResultSet;
  * to respond to different result outcomes, it
  * is just simpler to have a single type of error-handling logic for all outcomes.
  */
-public class ChangeUnappliedCycleException extends CqlCycleException {
+public class ChangeUnappliedCycleException extends CqlGenericCycleException {
 
     private final ResultSet resultSet;
     private final String queryString;

@@ -61,7 +61,7 @@ public enum CQLExceptionEnum implements ResultReadable {
     ResultSetVerificationException(io.nosqlbench.activitytype.cql.errorhandling.exceptions.ResultSetVerificationException.class, 39),
     RowVerificationException(io.nosqlbench.activitytype.cql.errorhandling.exceptions.RowVerificationException.class, 40),
     UnexpectedPagingException(io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException.class, 41),
-    EbdseCycleException(CqlCycleException.class, 42),
+    EbdseCycleException(CqlGenericCycleException.class, 42),
     MaxTriesExhaustedException(io.nosqlbench.activitytype.cql.errorhandling.exceptions.MaxTriesExhaustedException.class,43);
 
     private final static Logger logger = LoggerFactory.getLogger(CQLExceptionEnum.class);

@@ -53,11 +53,11 @@ public class ExceptionMap {
             put(UnsupportedFeatureException.class, DriverException.class);
             put(BusyConnectionException.class, DriverException.class);
 
-            put(ChangeUnappliedCycleException.class, CqlCycleException.class);
-            put(ResultSetVerificationException.class, CqlCycleException.class);
-            put(RowVerificationException.class, CqlCycleException.class);
-            put(UnexpectedPagingException.class, CqlCycleException.class);
-            put(CqlCycleException.class, RuntimeException.class);
+            put(ChangeUnappliedCycleException.class, CqlGenericCycleException.class);
+            put(ResultSetVerificationException.class, CqlGenericCycleException.class);
+            put(RowVerificationException.class, CqlGenericCycleException.class);
+            put(UnexpectedPagingException.class, CqlGenericCycleException.class);
+            put(CqlGenericCycleException.class, RuntimeException.class);
         }
     };
 

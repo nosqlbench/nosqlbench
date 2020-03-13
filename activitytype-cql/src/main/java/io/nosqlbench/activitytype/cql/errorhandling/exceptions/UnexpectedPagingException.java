@@ -17,7 +17,7 @@ import com.datastax.driver.core.ResultSet;
  * fetchsize or maxpages in order to open up paging to the degree that is allowable or
  * expected.
  */
-public class UnexpectedPagingException extends CqlCycleException {
+public class UnexpectedPagingException extends CqlGenericCycleException {
 
     private final ResultSet resultSet;
     private final String queryString;
