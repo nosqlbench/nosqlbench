@@ -9,7 +9,7 @@ import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.api.StatementFilter;
 import io.nosqlbench.activitytype.cql.errorhandling.ErrorStatus;
 import io.nosqlbench.activitytype.cql.errorhandling.HashedCQLErrorHandler;
-import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleException;
+import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleWithStatementException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cql.statements.core.ReadyCQLStatement;
@@ -195,7 +195,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
             cqlop.readyCQLStatement.onError(cqlop.cycle, currentServiceTime, e);
 
-            CQLCycleException cqlCycleException = new CQLCycleException(cqlop.cycle, currentServiceTime, e, cqlop.readyCQLStatement);
+            CQLCycleWithStatementException cqlCycleException = new CQLCycleWithStatementException(cqlop.cycle, currentServiceTime, e, cqlop.readyCQLStatement);
             ErrorStatus errorStatus = cqlActivityErrorHandler.handleError(cqlop.cycle, cqlCycleException);
 
             if (errorStatus.isRetryable() && ++cqlop.triesAttempted < maxTries) {
@@ -223,7 +223,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         cqlop.readyCQLStatement.onError(startedOp.getCycle(),serviceTime,cqlop.throwable);
 
         long cycle = startedOp.getCycle();
-        CQLCycleException cqlCycleException1 = new CQLCycleException(cqlop.cycle, serviceTime, cqlop.throwable, cqlop.readyCQLStatement);
+        CQLCycleWithStatementException cqlCycleException1 = new CQLCycleWithStatementException(cqlop.cycle, serviceTime, cqlop.throwable, cqlop.readyCQLStatement);
         ErrorStatus errorStatus = cqlActivityErrorHandler.handleError(startedOp.getCycle(), cqlCycleException1);
 
         if (errorStatus.getResponse() == ErrorResponse.stop) {

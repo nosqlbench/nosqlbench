@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.errorhandling;
 
 import com.datastax.driver.core.exceptions.*;
-import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleException;
+import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleWithStatementException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ResultSetVerificationException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.RowVerificationException;
@@ -54,8 +54,8 @@ public class HashedCQLErrorHandler extends HashedErrorHandler<Throwable, ErrorSt
     @Override
     public ErrorStatus handleError(long cycle, Throwable throwable, String errMsg) {
         int resultCode = 127;
-        if (throwable instanceof CQLCycleException) {
-            CQLCycleException cce = (CQLCycleException) throwable;
+        if (throwable instanceof CQLCycleWithStatementException) {
+            CQLCycleWithStatementException cce = (CQLCycleWithStatementException) throwable;
             Throwable cause = cce.getCause();
             try {
                 String simpleName = cause.getClass().getSimpleName();
