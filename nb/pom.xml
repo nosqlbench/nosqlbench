@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.3-SNAPSHOT</version>
+        <version>3.12.25-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,61 +24,61 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-stdout</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-diag</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-tcp</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-http</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cql</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cqlverify</artifactId>
-            <version>3.12.3-SNAPSHOT</version>
+            <version>3.12.25-SNAPSHOT</version>
         </dependency>
 
 
@@ -180,21 +180,30 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <id>build-nb-appimage</id>
-                        <phase>package</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <basedir>${project.basedir}/appimage</basedir>
-                            <executable>${project.basedir}/appimage/build</executable>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                 <groupId>org.codehaus.mojo</groupId>
+                 <artifactId>exec-maven-plugin</artifactId>
+                 <version>1.6.0</version>
+                 <executions>
+                     <execution>
+                         <id>build-nb-appimage</id>
+                         <phase>package</phase>
+                         <goals><goal>exec</goal></goals>
+                         <configuration>
+                             <basedir>${project.basedir}</basedir>
+                             <executable>${project.basedir}/build-bin.sh</executable>
+                         </configuration>
+                     </execution>
+                     <execution>
+                         <id>build-static-guidebook</id>
+                         <phase>package</phase>
+                         <goals><goal>exec</goal></goals>
+                         <configuration>
+                             <basedir>${project.basedir}</basedir>
+			     <executable>${project.basedir}/gendocs.sh</executable>
+                         </configuration>
+                     </execution>
+                  </executions>
+             </plugin>
 
         </plugins>
     </build>

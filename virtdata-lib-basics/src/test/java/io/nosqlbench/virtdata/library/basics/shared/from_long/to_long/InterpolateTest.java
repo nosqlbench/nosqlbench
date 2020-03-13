@@ -10,6 +10,12 @@ public class InterpolateTest {
     public void testDeciles() {
         long topvalue = 1_000_000_000L;
 
+        Interpolate t = new Interpolate(10L, 100L);
+        long mint = t.applyAsLong(0L);
+        assertThat(mint).isEqualTo(10L);
+        long maxt = t.applyAsLong(Long.MAX_VALUE);
+        assertThat(maxt).isEqualTo(100L);
+
         Interpolate f = new Interpolate(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, topvalue);
         long min = f.applyAsLong(0L);
         assertThat(min).isEqualTo(0L);

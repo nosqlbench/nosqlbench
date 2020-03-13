@@ -1,32 +1,28 @@
 #!/bin/bash
 # update nuxt
 
-GUIDEBOOK="nb/target"
+GUIDEBOOK="target/guidebook"
 
-if [ ! -d "nb/target" ]
+if [ ! -f "target/nb.jar" ]
 then
- printf "You should not run this unless you have an nb/target directory.\n"
- printf "It depends on the Java components to be built first.\n"
+ printf "You should not run this unless you have target/nb.jar\n"
  exit 6
 fi
 
-if [ ! -d "nb/target/guidebook" ]
+if [ ! -d "target/guidebook" ]
 then
 
- pushd docsys/src/main/node/docsys
+ pushd ../docsys/src/main/node/docsys
  if ! ./update.sh $@
  then
    printf "Unable to update the guidebook static app\n"
    exit 2;
  fi
- 
  popd
  
- printf "PWD: %s\n" $(pwd)
- 
- cp -R docsys/src/main/resources/docsys-guidebook/ nb/target/guidebook/
+ cp -R ../docsys/src/main/resources/docsys-guidebook/ target/guidebook/
 else
- printf "nb/target/guidebook exists, not building again until mvn clean\n"
+ printf "target/guidebook exists, not building again until mvn clean\n"
 fi
 
 JAVA=$(which java)
@@ -38,7 +34,7 @@ then
  exit 5
 fi
 
-$JAVA -jar nb/target/nb.jar docserver generate nb/target/guidebook
+$JAVA -jar target/nb.jar docserver generate target/guidebook
 
 #JAVA_HOME=${JAVA_HOME:-JAVA_HOME must be specified if java isn not in the path}
 #

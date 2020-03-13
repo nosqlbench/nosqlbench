@@ -1,4 +1,7 @@
 #!/bin/bash
+set -x
+pwd
+export PATH=local/node12/bin:node_modules/nuxt/bin/:$PATH
 rm -rf dist .nuxt
 if ! which npm >/dev/null 2>&1
 then
@@ -7,6 +10,7 @@ then
  ./install_npm
 fi
 
+npm install
 npm run generate
 rm -rf ../../resources/docsys-guidebook
 mv dist ../../resources/docsys-guidebook
