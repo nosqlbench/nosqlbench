@@ -189,8 +189,8 @@
                          <phase>package</phase>
                          <goals><goal>exec</goal></goals>
                          <configuration>
-                             <basedir>${project.basedir}/appimage</basedir>
-                             <executable>${project.basedir}/appimage/build</executable>
+                             <basedir>${project.basedir}</basedir>
+                             <executable>${project.basedir}/build-bin.sh</executable>
                          </configuration>
                      </execution>
                      <execution>
