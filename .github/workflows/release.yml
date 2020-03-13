@@ -102,7 +102,7 @@ jobs:
       run: |
         pwd
         ls -l
-        mkdir staging && cp nb/target/nb.jar nb/appimage/target/nb staging
+        mkdir staging && cp nb/target/nb.jar nb/target/nb staging
     - uses: actions/upload-artifact@v1
       with: 
        name: binaries
