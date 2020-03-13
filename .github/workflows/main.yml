@@ -131,7 +131,7 @@ jobs:
         run: |
          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
          rsync -av --delete guidebook/ nosqlbench-docs/docs/
-         cd nosqlbench
+         cd nosqlbench-docs
          git add docs
          git add -u
          git commit -m"docs update for $GITHUB_REF"
