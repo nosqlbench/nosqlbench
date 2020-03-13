@@ -118,7 +118,7 @@ jobs:
     needs: release
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+#       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v1
         with:
          name: guidebook
@@ -129,6 +129,10 @@ jobs:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+      - run: rsync -av --delete guidebook/ docs/
+      - run: git add docs
+      - run: git commit -m'docs update for $GITHUB_REF'
+      - run: git push
       
         
         
