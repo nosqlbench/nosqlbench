@@ -1,4 +1,8 @@
-# CATEGORY nulls
+---
+title: null functions
+weight: 40
+---
+
 ## NullIfCloseTo
 
 Returns null if the input value is within range of the specified value.

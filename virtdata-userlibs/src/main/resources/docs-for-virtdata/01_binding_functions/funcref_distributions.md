@@ -1,4 +1,8 @@
-# CATEGORY distributions
+---
+title: distribution functions
+weight: 30
+---
+
 ## Beta
 
 @see [Wikipedia: Beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) @see [Commons JavaDoc: BetaDistribution](https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/BetaDistribution.html)

@@ -1,4 +1,8 @@
-# CATEGORY functional
+---
+title: utility functions
+weight: 40
+---
+
 ## IntFlow
 
 Combine multiple IntUnaryOperators into a single function.

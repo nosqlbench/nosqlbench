@@ -1,4 +1,8 @@
-# CATEGORY state
+---
+title: state functions
+weight: 30
+---
+
 ## Clear
 
 Clears the per-thread map which is used by the Expr function.

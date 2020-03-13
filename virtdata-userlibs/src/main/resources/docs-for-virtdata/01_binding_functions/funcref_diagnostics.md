@@ -1,4 +1,8 @@
-# CATEGORY diagnostics
+---
+title: diagnostic functions
+weight: 40
+---
+
 ## Show
 
 Show diagnostic values for the thread-local variable map.

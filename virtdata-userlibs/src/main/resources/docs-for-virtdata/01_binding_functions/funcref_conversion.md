@@ -1,4 +1,8 @@
-# CATEGORY conversion
+---
+title: conversion functions
+weight: 30
+---
+
 ## DigestToByteBuffer
 
 Computes the digest of the ByteBuffer on input and stores it in the output ByteBuffer. The digestTypes available are:

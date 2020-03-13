@@ -1,6 +1,6 @@
 ---
 title: CLI Scripting
---------------------
+---
 
 # CLI Scripting
 
