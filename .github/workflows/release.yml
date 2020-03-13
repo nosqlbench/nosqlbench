@@ -136,7 +136,11 @@ jobs:
          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
          cd nosqlbench-docs
          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
+         git remote -v
       - name: push changes
+        env:
+          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
          rsync -av --delete guidebook/ nosqlbench-docs/docs/
          cd nosqlbench-docs
