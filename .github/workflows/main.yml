@@ -128,11 +128,14 @@ jobs:
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-        run: git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
-      - run: rsync -av --delete guidebook/ docs/
-      - run: git add docs
-      - run: git commit -m'docs update for $GITHUB_REF'
-      - run: git push
+        run: |
+         git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+         rsync -av --delete guidebook/ nosqlbench-docs/docs/
+         cd nosqlbench
+         git add docs
+         git add -u
+         git commit -m"docs update for $GITHUB_REF"
+         git push
       
         
         
