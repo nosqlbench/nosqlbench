@@ -1,4 +1,8 @@
-# CATEGORY datetime
+---
+title: datetime functions
+weight: 20
+---
+
 ## DateTimeParser
 
 This function will parse a String containing a formatted date time, yielding a DateTime object. If no arguments are provided, then the format is set to

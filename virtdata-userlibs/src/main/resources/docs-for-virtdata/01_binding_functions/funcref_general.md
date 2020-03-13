@@ -1,4 +1,8 @@
-# CATEGORY general
+---
+title: general functions
+weight: 20
+---
+
 ## Add
 
 Adds a value to the input.

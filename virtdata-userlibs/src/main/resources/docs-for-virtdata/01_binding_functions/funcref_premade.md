@@ -1,4 +1,8 @@
-# CATEGORY premade
+---
+title: pre-made functions
+weight: 20
+---
+
 ## FirstNames
 
 Return a pseudo-randomly sampled first name from the last US census data on first names occurring more than 100 times. Both male and female names are combined in this function.

@@ -1,4 +1,8 @@
-# CATEGORY collections
+---
+title: collections functions
+weight: 40
+---
+
 ## HashedLineToStringList
 
 Creates a List\<String\> from a list of words in a file.
