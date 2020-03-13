@@ -1,4 +1,4 @@
-![maven build](https://github.com/nosqlbench/nosqlbench/workflows/CI/badge.svg)
+![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg)
 
 This project combines upstream projects of engineblock and virtualdataset into one main project. More details on release practices and contributor guidelines are on the way.
 
