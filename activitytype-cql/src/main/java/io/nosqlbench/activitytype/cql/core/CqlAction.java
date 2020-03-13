@@ -7,7 +7,7 @@ import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.api.StatementFilter;
 import io.nosqlbench.activitytype.cql.errorhandling.ErrorStatus;
 import io.nosqlbench.activitytype.cql.errorhandling.HashedCQLErrorHandler;
-import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleException;
+import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleWithStatementException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.MaxTriesExhaustedException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException;
@@ -221,7 +221,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     long resultNanos = resultTime.stop();
                     resultTime = null;
                     readyCQLStatement.onError(cycleValue, resultNanos, e);
-                    CQLCycleException cqlCycleException = new CQLCycleException(cycleValue, resultNanos, e, readyCQLStatement);
+                    CQLCycleWithStatementException cqlCycleException = new CQLCycleWithStatementException(cycleValue, resultNanos, e, readyCQLStatement);
                     ErrorStatus errorStatus = ebdseErrorHandler.handleError(cycleValue, cqlCycleException);
                     if (!errorStatus.isRetryable()) {
                         cqlActivity.triesHisto.update(tries);
@@ -313,7 +313,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                         resultTime = null;
 
                         pagingReadyStatement.onError(cycleValue, resultNanos, e);
-                        CQLCycleException cqlCycleException = new CQLCycleException(cycleValue, resultNanos, e, pagingReadyStatement);
+                        CQLCycleWithStatementException cqlCycleException = new CQLCycleWithStatementException(cycleValue, resultNanos, e, pagingReadyStatement);
                         ErrorStatus errorStatus = ebdseErrorHandler.handleError(cycleValue, cqlCycleException);
                         if (!errorStatus.isRetryable()) {
                             cqlActivity.triesHisto.update(tries);

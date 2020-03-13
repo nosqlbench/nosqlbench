@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.errorhandling;
 
 import io.nosqlbench.activitytype.cql.api.ErrorResponse;
-import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleException;
+import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleWithStatementException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLExceptionDetailer;
 import io.nosqlbench.engine.api.activityapi.errorhandling.CycleErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
@@ -62,7 +62,7 @@ public class EbdseCycleErrorHandler implements CycleErrorHandler<Throwable, Erro
 
     @Override
     public ErrorStatus handleError(long cycle, Throwable contextError) {
-        CQLCycleException cce = (CQLCycleException) contextError;
+        CQLCycleWithStatementException cce = (CQLCycleWithStatementException) contextError;
         Throwable error = cce.getCause();
 
         boolean retry = false;
