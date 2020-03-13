@@ -122,17 +122,20 @@ jobs:
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-      - uses: actions/download-artifact@v1
+      - name: download guidebook
+        uses: actions/download-artifact@v1
         with:
          name: guidebook
          path: guidebook
       - run: ls -la
-      - name: checkout docs
+      - name: clone nosqlbench-docs
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+         git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
+      - name: push changes
          rsync -av --delete guidebook/ nosqlbench-docs/docs/
          cd nosqlbench-docs
          git add docs
