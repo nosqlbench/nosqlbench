@@ -1,0 +1,86 @@
+# ebdse -v run type=cql yaml=baselines/cql-widerows tags=phase:schema host=dsehost
+bindings:
+  # for ramp-up and verify
+  part_layout: Div(<<partsize:1000000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150)
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  # for write
+  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    params:
+      prepared: false
+    statements:
+    - create-keyspace: |
+        create keyspace if not exists <<keyspace:baselines>>
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        AND durable_writes = true;
+      tags:
+        name: create-keyspace
+    - create-table: |
+        create table if not exists <<keyspace:baselines>>.<<table:widerows>> (
+         part text,
+         clust text,
+         data text,
+         PRIMARY KEY (part,clust)
+        );
+      tags:
+        name: create-table
+  - name: rampup
+    tags:
+      phase: rampup
+    params:
+      cl: <<write_cl:LOCAL_QUORUM>>
+    statements:
+      - rampup-insert: |
+         insert into <<keyspace:baselines>>.<<table:widerows>>
+         (part,clust,data)
+         values ({part_layout},{clust_layout},{data})
+        tags:
+          name: rampup-insert
+  - name: verify
+    tags:
+      phase: verify
+      type: read
+    params:
+      cl: <<read_cl:LOCAL_QUORUM>>
+    statements:
+      - verify-select: |
+          select * from <<keyspace:baselines>>.<<table:widerows>> where part={part_layout} and clust={clust_layout}
+        tags:
+          name: verify-select
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 5
+      cl: <<read_cl:LOCAL_QUORUM>>
+    statements:
+    - main-select: |
+        select * from <<keyspace:baselines>>.<<table:widerows>> where part={part_read} limit {limit};
+      tags:
+        name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 5
+      cl: <<write_cl:LOCAL_QUORUM>>
+    statements:
+    - main-write: |
+        insert into <<keyspace:baselines>>.<<table:widerows>>
+        (part, clust, data)
+        values ({part_write},{clust_write},{data_write})
+      tags:
+        name: main-write
