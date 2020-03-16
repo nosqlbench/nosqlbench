@@ -6,7 +6,7 @@
         <h1 v-else>
             {{ otherError }}
         </h1>
-        <a href="https://github.com/datastax/nosqlbench-labs/issues/new?labels=APPUSE,UX,documentation">
+        <a href="https://github.com/nosqlbench/nosqlbench/issues/new?labels=bug">
             File A UI Bug Report
         </a>
         <NuxtLink to="/">

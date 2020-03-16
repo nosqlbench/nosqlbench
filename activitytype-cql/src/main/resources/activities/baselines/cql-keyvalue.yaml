@@ -1,4 +1,4 @@
-# dsbench -v run type=cql yaml=baselines/cql-keyvalue tags=phase:schema
+# nb -v run type=cql yaml=baselines/cql-keyvalue tags=phase:schema
   host=dsehost
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String

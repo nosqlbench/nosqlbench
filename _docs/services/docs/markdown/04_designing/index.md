@@ -21,7 +21,7 @@ You will notice that this guide is not overly CQL-specific. That is because nosq
 
 The built-in workloads that are include with nosqlbench are also shared on the github site where we manage the nosqlbench project:
 
-- [baselines](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/baselines)
+- [baselines](https://github.com/nosqlbench/nosqlbnech/tree/master/sample-activities/baselines)
 - [bindings](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/bindings)
 
 ### Follow the conventions

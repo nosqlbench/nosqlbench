@@ -1,4 +1,4 @@
-# dsbench -v run type=cql yaml=baselines/cql-iot tags=phase:schema
+# nb -v run type=cql yaml=baselines/cql-iot tags=phase:schema
   host=dsehost
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
