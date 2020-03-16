@@ -18,7 +18,8 @@
 package io.nosqlbench.engine.cli;
 
 
-
+import io.nosqlbench.engine.cli.EBCLIOptions;
+import io.nosqlbench.engine.cli.EBCLIScriptAssembly;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
