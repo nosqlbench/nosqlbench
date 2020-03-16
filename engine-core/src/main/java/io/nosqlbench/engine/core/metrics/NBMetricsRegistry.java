@@ -23,7 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
 
-public class EBMetricsRegistry extends MetricRegistry {
+public class NBMetricsRegistry extends MetricRegistry {
 
     @Override
     public Timer timer(String name) {

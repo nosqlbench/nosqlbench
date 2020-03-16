@@ -27,19 +27,19 @@ public class NBCLIScriptAssemblyTest {
 
     @Test
     public void testScriptParamsSingle() {
-        EBCLIOptions opts = new EBCLIOptions(new String[] {
+        NBCLIOptions opts = new NBCLIOptions(new String[] {
                 "script",
                 "testscripts/printscript.js",
                 "param1=value1"
         });
-        EBCLIScriptAssembly.ScriptData sd = EBCLIScriptAssembly.assembleScript(opts);
+        NBCLIScriptAssembly.ScriptData sd = NBCLIScriptAssembly.assembleScript(opts);
         String assembledScript = sd.getScriptTextIgnoringParams();
         assertThat(assembledScript).matches("(?s).*a single line.*");
     }
 
     @Test
     public void testScriptParamsMulti() {
-        EBCLIOptions opts = new EBCLIOptions(new String[] {
+        NBCLIOptions opts = new NBCLIOptions(new String[] {
                 "script",
                 "testscripts/printscript.js",
                 "param1=value1",
@@ -48,7 +48,7 @@ public class NBCLIScriptAssemblyTest {
                 "paramname=another",
                 "param2=andanother"
         });
-        EBCLIScriptAssembly.ScriptData sd = EBCLIScriptAssembly.assembleScript(opts);
+        NBCLIScriptAssembly.ScriptData sd = NBCLIScriptAssembly.assembleScript(opts);
         String assembledScript = sd.getScriptTextIgnoringParams();
         assertThat(assembledScript).matches("(?s).*a single line.*");
     }
