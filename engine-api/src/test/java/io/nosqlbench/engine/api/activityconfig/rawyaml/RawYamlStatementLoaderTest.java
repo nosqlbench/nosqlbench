@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,7 @@ public class RawYamlStatementLoaderTest {
     private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoaderTest.class);
 
     @Test
-    public void tetLoadPropertiesBlock() {
+    public void testLoadPropertiesBlock() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
         RawStmtsDocList rawBlockDocs = ysl.load(logger, "testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
@@ -56,5 +57,28 @@ public class RawYamlStatementLoaderTest {
         assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
     }
 
+    @Test
+    public void testLoadScenarios() {
+        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsDocList erthing = ysl.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
+        assertThat(rawStmtsDocs).hasSize(2);
+        RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
+        List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
+        RawScenarios rawScenarios = rawStmtsDoc.getScenarios();
+        assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
+        List<String> defaultScenario = rawScenarios.getNamedScenario("default");
+        assertThat(defaultScenario).containsExactly("run type=stdout alias=step1","run type=stdout alias=step2");
+        List<String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
+        assertThat(schemaOnlyScenario).containsExactly("run type=blah tags=phase:schema");
+
+        assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
+        assertThat(blocks).hasSize(1);
+        RawStmtsBlock rawStmtsBlock = blocks.get(0);
+        assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
+
+
+
+    }
 
 }

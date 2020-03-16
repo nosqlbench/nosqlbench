@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class RawStmtsDoc extends StatementsOwner {
 
+    private RawScenarios scenarios = new RawScenarios();
     private List<RawStmtsBlock> blocks = new ArrayList<>();
 
     /**
@@ -56,5 +57,13 @@ public class RawStmtsDoc extends StatementsOwner {
     public void setBlocks(List<RawStmtsBlock> blocks) {
         this.blocks.clear();
         this.blocks.addAll(blocks);
+    }
+
+    public RawScenarios getScenarios() {
+        return this.scenarios;
+    }
+
+    public void setScenarios(RawScenarios scenarios) {
+        this.scenarios = scenarios;
     }
 }
