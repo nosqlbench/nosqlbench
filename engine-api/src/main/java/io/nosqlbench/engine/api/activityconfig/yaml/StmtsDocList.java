@@ -17,6 +17,7 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawScenarios;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
 
@@ -81,5 +82,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
                 .map(StmtsDoc::getBindings)
                 .forEach(docBindings::putAll);
         return docBindings;
+    }
+
+    public List<Scenarios> getDocScenarios() {
+        return this.getStmtDocs().stream().map(StmtsDoc::getScenarios).collect(Collectors.toList());
     }
 }

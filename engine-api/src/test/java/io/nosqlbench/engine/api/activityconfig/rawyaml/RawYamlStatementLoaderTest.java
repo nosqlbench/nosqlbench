@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,7 +64,7 @@ public class RawYamlStatementLoaderTest {
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
         List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
-        RawScenarios rawScenarios = rawStmtsDoc.getScenarios();
+        RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
         List<String> defaultScenario = rawScenarios.getNamedScenario("default");
         assertThat(defaultScenario).containsExactly("run type=stdout alias=step1","run type=stdout alias=step2");

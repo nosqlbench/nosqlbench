@@ -59,7 +59,7 @@ public class RawStmtsDoc extends StatementsOwner {
         this.blocks.addAll(blocks);
     }
 
-    public RawScenarios getScenarios() {
+    public RawScenarios getRawScenarios() {
         return this.scenarios;
     }
 
