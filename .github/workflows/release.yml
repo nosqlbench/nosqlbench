@@ -145,6 +145,7 @@ jobs:
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
          rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
+         echo "docs.nosqlbench.io" > nosqlbench-docs/docs/CNAME
          cd nosqlbench-docs
          git add docs
          git add -u
