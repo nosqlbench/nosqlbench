@@ -144,9 +144,7 @@ jobs:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
-         rsync -av --delete guidebook/ nosqlbench-docs/docs/
-         echo "files listing"
-         find .
+         rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
          cd nosqlbench-docs
          git add docs
          git add -u
