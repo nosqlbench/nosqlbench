@@ -1,7 +1,7 @@
 # Forward
 
 This document reflects a commitment to maintain respect and civility
-within the ebdse project. It is the maintainers' wish that a code of
+within the NoSQLBench project. It is the maintainers' wish that a code of
 conduct is not needed, as all contributors should be excellent to
 each other by default. However, even in such case, it is important to
 set expectations for other contributors who are looking for projects to
