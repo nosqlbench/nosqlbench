@@ -84,7 +84,12 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         return docBindings;
     }
 
-    public List<Scenarios> getDocScenarios() {
-        return this.getStmtDocs().stream().map(StmtsDoc::getScenarios).collect(Collectors.toList());
+    /**
+     * This returns all the `scenarios` blocs across multiple docs, per the description in issue-67 there should only be one
+     * on the first doc, any `scenarios` defined in different docs will be ignored.
+     */
+
+    public Scenarios getDocScenarios() {
+        return this.getStmtDocs().get(0).getScenarios();
     }
 }

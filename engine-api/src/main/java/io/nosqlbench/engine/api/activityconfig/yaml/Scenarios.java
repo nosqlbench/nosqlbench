@@ -15,7 +15,7 @@ public class Scenarios {
         return rawScenarios.getScenarioNames();
     }
 
-    public List<String> getNamedScneario(String scenarioName) {
+    public List<String> getNamedScenario(String scenarioName) {
         return rawScenarios.getNamedScenario(scenarioName);
     }
 }

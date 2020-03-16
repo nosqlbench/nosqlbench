@@ -1,0 +1,26 @@
+# nb -v run type=cql yaml=baselines/cql-iot tags=phase:schema host=dsehost
+scenarios:
+  default:
+    - run type=stdout yaml=scenario-test tags=phase:schema
+    - run type=stdout yaml=scenario-test tags=phase:rampup cycles=TEMPLATE(cycles,10)
+    - run type=stdout yaml=scenario-test tags=phase:main cycles=TEMPLATE(cycles,10)
+  schema-only:
+    - run type=stdout yaml=scenario-test tags=phase:schema
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - create-keyspace: |
+          create keyspace if not exists puppies
+  - tags:
+      phase: rampup
+    statements:
+      - insert: |
+         insert into puppies (test) values (1) ;
+  - tags:
+      phase: main
+    statements:
+      - insert: |
+          insert into puppies (test) values (1) ;
+      - select: |
+          select * from puppies;
