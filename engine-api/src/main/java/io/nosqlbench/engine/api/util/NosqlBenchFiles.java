@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.util;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -52,6 +53,30 @@ public class NosqlBenchFiles {
             Optional<InputStream> stream = getInputStream(path);
             if (stream.isPresent()) {
                 return stream;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<Path> findOptionalPath(String basename, String extension, String... searchPaths) {
+
+        boolean needsExtension = (extension != null && !extension.isEmpty() && !basename.endsWith("." + extension));
+        String filename = basename + (needsExtension ? "." + extension : "");
+
+        ArrayList<String> paths = new ArrayList<String>() {{
+            add(filename);
+            if (!isRemote(basename)) {
+                addAll(Arrays.stream(searchPaths).map(s -> s + File.separator + filename)
+                        .collect(Collectors.toCollection(ArrayList::new)));
+            }
+
+        }};
+
+        for (String path : paths) {
+            Optional<InputStream> stream = getInputStream(path);
+            if (stream.isPresent()) {
+                return Optional.of(Path.of(path));
             }
         }
 
