@@ -10,7 +10,7 @@ import io.nosqlbench.activitytype.cql.api.ErrorResponse;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.api.StatementFilter;
-import io.nosqlbench.activitytype.cql.errorhandling.EbdseCycleErrorHandler;
+import io.nosqlbench.activitytype.cql.errorhandling.NBCycleErrorHandler;
 import io.nosqlbench.activitytype.cql.errorhandling.HashedCQLErrorHandler;
 import io.nosqlbench.activitytype.cql.statements.binders.CqlBinderTypes;
 import io.nosqlbench.activitytype.cql.statements.core.*;
@@ -505,7 +505,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             if (keyval.length == 1) {
                 String verb = keyval[0];
                 newerrorHandler.setDefaultHandler(
-                        new EbdseCycleErrorHandler(
+                        new NBCycleErrorHandler(
                                 ErrorResponse.valueOf(verb),
                                 exceptionCountMetrics,
                                 exceptionHistoMetrics,
@@ -516,8 +516,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 String pattern = keyval[0];
                 String verb = keyval[1];
                 if (newerrorHandler.getGroupNames().contains(pattern)) {
-                    EbdseCycleErrorHandler handler =
-                            new EbdseCycleErrorHandler(
+                    NBCycleErrorHandler handler =
+                            new NBCycleErrorHandler(
                                     ErrorResponse.valueOf(verb),
                                     exceptionCountMetrics,
                                     exceptionHistoMetrics,
@@ -526,7 +526,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     logger.info("Handling error group '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForGroup(pattern, handler);
                 } else {
-                    EbdseCycleErrorHandler handler = new EbdseCycleErrorHandler(
+                    NBCycleErrorHandler handler = new NBCycleErrorHandler(
                             ErrorResponse.valueOf(keyval[1]),
                             exceptionCountMetrics,
                             exceptionHistoMetrics,

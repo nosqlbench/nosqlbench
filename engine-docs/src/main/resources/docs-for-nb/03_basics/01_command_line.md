@@ -1,9 +1,7 @@
 ---
-title: nosqlbench CLI Options
+title: NoSQLBench CLI Options
 weight: 01
 ---
-
-# nosqlbench CLI Options
 
 This is the same documentation you get in markdown format with the
 `nb --help` command.
@@ -29,7 +27,7 @@ named argument to the previous command. The following example
 is a commandline with a command *start*, and two named arguments
 to that command.
 
-    ./nb start type=diag alias=example    
+    ./nb start type=diag alias=example
 
 ### Discovery options ###
 
@@ -160,7 +158,7 @@ When this option is set, engineblock will start graphite, prometheus, and grafan
 ### Console Options ###
 Increase console logging levels: (Default console logging level is *warning*)
 
-    -v         (info)         
+    -v         (info)
     -vv        (debug)
     -vvv       (trace)
 

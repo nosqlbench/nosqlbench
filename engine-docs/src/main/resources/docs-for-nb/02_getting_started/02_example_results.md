@@ -1,22 +1,24 @@
 ---
-title: 03 Getting Results
+title: 02 Results
 weight: 3
 ---
 
-# 3. Getting Results
-
-Coming off of our first run with nosqlbench, we ran a very simple workload against our database. In that example, we saw that nosqlbench writes to a log file and it is in that log file where the most basic form of metrics are displayed.
+We just ran a very simple workload against our database. In that example, we saw that
+nosqlbench writes to a log file and it is in that log file where the most basic form of metrics are displayed.
 
 ## Log File Metrics
 
 For our previous run, we saw that nosqlbench was writing to `logs/scenario_20190812_154431_028.log`
 
-Even when you don't configure nosqlbench to write its metrics to another location, it will periodically report all the metrics to the log file.
-At the end of a scenario, before nosqlbench shuts down, it will flush the partial reporting interval again to the logs. This means you can always
-look in the logs for metrics information.
+Even when you don't configure nosqlbench to write its metrics to another location, it
+will periodically report all the metrics to the log file. At the end of a scenario,
+before nosqlbench shuts down, it will flush the partial reporting interval again to
+the logs. This means you can always look in the logs for metrics information.
 
 :::warning
-If you look in the logs for metrics, be aware that the last report will only contain a partial interval of results. When looking at the last partial window, only metrics which average over time or which compute the mean for the whole test will be meaningful.
+If you look in the logs for metrics, be aware that the last report will only contain a
+partial interval of results. When looking at the last partial window, only metrics which
+average over time or which compute the mean for the whole test will be meaningful.
 :::
 
 

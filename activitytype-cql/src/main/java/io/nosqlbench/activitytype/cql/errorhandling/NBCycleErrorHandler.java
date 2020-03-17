@@ -40,16 +40,16 @@ import org.slf4j.LoggerFactory;
  * simply a no-op that allows you to specify it as the minimum case.
  */
 @SuppressWarnings("Duplicates")
-public class EbdseCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorStatus> {
+public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorStatus> {
 
-    private static final Logger logger = LoggerFactory.getLogger(EbdseCycleErrorHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NBCycleErrorHandler.class);
 
     private ErrorResponse errorResponse;
     private ExceptionCountMetrics exceptionCountMetrics;
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private boolean throwExceptionOnStop=false;
 
-    public EbdseCycleErrorHandler(
+    public NBCycleErrorHandler(
             ErrorResponse errorResponse,
             ExceptionCountMetrics exceptionCountMetrics,
             ExceptionHistoMetrics exceptionHistoMetrics,

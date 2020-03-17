@@ -1,28 +1,71 @@
 ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg)
 
-This project combines upstream projects of engineblock and virtualdataset into one main project. More details on release practices and contributor guidelines are on the way.
+# NoSQLBench
 
-# Status
+**The Open Source, Pluggable, NoSQL Benchmarking Suite**
 
-This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.
+## What is NoSQLBench?
 
-# Project Structure
+NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.
+It brings together features and capabilities that are not found in any
+other tool.
 
-NoSQLBench is a large project. It has lots of advanced functionality built-in that you won't find in any other performance testing tool.
+- You can run common testing workloads directly from the command line. You
+  can start doing this within 5 minutes of reading this.
+- You can generate virtual data sets of arbitrary size, with deterministic
+  data and statistically shaped values.
+- You can design custom workloads that emulate your application, contained
+  in a single file, based on statement templates - no IDE or coding required.
+- You can immediately plot your results in a docker and grafana stack on Linux
+  with a single command line option.
+- When needed, you can open the access panels and rewire the runtime behavior
+  of NoSQLBench to do advanced testing, including a full scripting environment
+  with Javascript.
 
-To make it easier to find the module you are looking for (for developers),
-the following strict naming conventions have been adopted:
+The core machinery of NoSQLBench has been built with attention to detail.
+It has been battle tested within DataStax as a way to help users validate their
+data models, baseline system performance, and qualify system designs for scale.
 
-- All original packages of this project start with `io.nosqlbench`.
-- All original packages within each module are based directly on the above root package and the module name together. For example, the 'engine-api' module contains packages in `io.nosqlbench.engine.api`.
+In short, NoSQLBench wishes to be a programmable power tool for performance
+testing. However, it is somewhat generic. It doesn't know directly about a
+particular type of system, or protocol. It simply provides a suitable machine
+harness in which to put your drivers and testing logic. If you know how to build
+a client for a particular kind of system, EB will let you load it like a plugin
+and control it dynamically.
 
-The procedural generation support that has been imported from the VirtualDataSet project now lives in virtdata-* modules.
-The core runtime that used to be called EngineBlock now lives in engine-* modules.
+Initially, NoSQLBench comes with support for CQL, but we would like to see this
+expanded with contributions from others.
 
-The binary packaging support for Linux (with AppImage) is contained in the nb module. It provides a binary `nb` which is the main command-line artifact from this project.
+## Origins
 
-The defaults that are used by all modules are contained in the mvn-defaults module.
+The code in this project comes from multiple sources. The procedural data
+generation capability was known before as 'Virtual Data Set'. The core runtime
+and scripting harness was from the 'EngineBlock' project. The CQL support was
+previously used within DataStax. In March of 2020, DataStax and the project
+maintainers for these projects decided to put everything into one OSS project
+in order to make contributions and sharing easier for everyone. Thus, the new
+project name and structure was launched as nosqlbench.io. NoSQLBench is an
+independent project that is sponsored by DataStax.
 
+We offer NoSQLBench as a new way of thinking about testing systems. It is not
+limited to testing only one type of system. It is our wish to build a community
+of users and practice around this project so that everyone in the NoSQL ecosystem
+can benefit from common concepts and understanding and reliable patterns of use.
+
+## Contributing
+
+We are actively looking for contributors to help make NoSQLBench better.
+This is an ambitious project that is just finding its stride. If you want
+to be part of the next chapter in NoSQLBench development please look at
+[CONTRIBUTING](CONTRIBUTING.md) for ideas, and jump in where you feel comfortable.
+
+All contributors are expected to abide by the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
+
+## License
+
+All of the code in this repository is licensed under the APL version 2. If you contribute
+to this project, then you must agree to license all of your construbutions under
+this license.
 
 ## System Compatibility
 
@@ -32,46 +75,19 @@ This is a Linux targeted tool, as most cloud/nosql testing is done on Linux inst
 2. on Mac, with `nb.jar` all features are supported, except --docker-metrics
 3. On Windows, with `nb.jar` all features are supported, except --docker-metrics
 
-## nosqlbench
-
-This project aims to provide a missing power tool in the test tooling arsenal.
-
-The design goals:
-
-1. Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on [simple and tangible core concepts](http://docs.nosqlbench.io/user-guide/concepts/).
-2. Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an [open javascript sandbox](http://docs.nosqlbench.io/user-guide/scripting/). This makes more sophisticated scenarios possible when needed.
-3. Minimize the amount of effort required to get empirical results from a test cycle. For this, [metrics reporting](http://docs.nosqlbench.io/user-guide/metrics/) is baked in.
-
-In short, NoSQLBench wishes to be a programmable power tool for performance
-testing. However, it is somewhat generic. It doesn't know directly about a
-particular type of system, or protocol. It simply provides a suitable machine
-harness in which to put your drivers and testing logic. If you know how to build
-a client for a particular kind of system, EB will let you load it like a plugin
-and control it dynamically.
-
-The most direct way to do this, if you are a tool developer, is to build your
-own activity type drivers and embed EB as the core runtime. You can always
-experiment with it and learn how it works by using the built-in diagnostic
-drivers.
-
-## History
-
-The NoSQLBench project started as a branch of [test
-client](http://github.com/jshook/testclient). It has since evolved to be more generic and capable.
-
-## License
-
-nosqlbench is licensed under the Apache Public License 2.0
-
 ## Thanks
 
 [![DataStax Logo](https://www.datastax.com/sites/default/files/content/graphics/logo/DS-logo-2019_1-25percent.png)](http://datastax.com/)
 
-This project is sponsored by [DataStax](http://datstax.com/) -- The always-on, active everywhere, distributed hybrid cloud database built on Apache Cassandra™, and designed from the ground up to run anywhere, on any cloud, in any datacenter, and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
+This project is sponsored by [DataStax](http://datstax.com/) -- The always-on,
+active everywhere, distributed hybrid cloud database built on Apache Cassandra™,
+and designed from the ground up to run anywhere, on any cloud, in any datacenter,
+and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
 
 ![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
 
-This project uses tools provided by YourKit, LLC. YourKit supports open source projects with its full-featured Java Profiler.
-YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>
+This project uses tools provided by YourKit, LLC. YourKit supports open source projects
+with its full-featured Java Profiler.  YourKit, LLC is the creator of
+<a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>
 and <a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
 innovative and intelligent tools for profiling Java and .NET applications.

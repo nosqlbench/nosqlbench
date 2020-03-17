@@ -53,7 +53,7 @@ public class NBCLI {
             System.exit(0);
         }
 
-        EBCLIOptions options = new EBCLIOptions(args);
+        NBCLIOptions options = new NBCLIOptions(args);
 
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("commandline.md"));
@@ -161,13 +161,13 @@ public class NBCLI {
             }
         }
 
-        for (EBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
+        for (NBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         }
-        for (EBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
+        for (NBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
-        for (EBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
+        for (NBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
         }
 
@@ -183,7 +183,7 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        EBCLIScriptAssembly.ScriptData scriptData = EBCLIScriptAssembly.assembleScript(options);
+        NBCLIScriptAssembly.ScriptData scriptData = NBCLIScriptAssembly.assembleScript(options);
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
             System.out.println(scriptData.getScriptParamsAndText());

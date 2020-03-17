@@ -17,8 +17,11 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import oshi.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.HardwareAbstractionLayer;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,88 +31,54 @@ import java.util.*;
 public class CpuInfo {
     private final static Logger logger = LoggerFactory.getLogger(CpuInfo.class);
 
-    public static Optional<ProcDetails> getProcDetails() {
-        List<Map<String, String>> cpuinfo = new ArrayList<>();
-        try {
-            String data = Files.readString(Path.of("/proc/cpuinfo"), StandardCharsets.UTF_8);
-            String[] sections = data.split("\n\n");
-            for (String section : sections) {
-                Map<String, String> cpuMap = new HashMap<>();
-                cpuinfo.add(cpuMap);
+    final private static SystemInfo SYSTEM_INFO = new SystemInfo();
 
-                String[] props = section.split("\n");
-                for (String prop : props) {
-                    String[] assignment = prop.split("\\s*:\\s*");
-                    if (assignment.length == 2) {
-                        String property = assignment[0].trim();
-                        String value = assignment[1].trim();
-                        cpuMap.put(property, value);
-                    } else {
-                        cpuMap.put(assignment[0], "");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Unable to learn about CPU architecture: " + e.getMessage());
-            return Optional.empty();
-        }
-        return Optional.of(new ProcDetails(cpuinfo));
+    public static Optional<ProcDetails> getProcDetails() {
+        return Optional.of(new ProcDetails(SYSTEM_INFO));
     }
 
-
     public static class ProcDetails {
-        private final List<Map<String, String>> details;
+        SystemInfo si;
+        HardwareAbstractionLayer hal;
+        CentralProcessor processor;
 
-        public ProcDetails(List<Map<String, String>> details) {
-            this.details = details;
+        public ProcDetails(SystemInfo si) {
+            this.si = si;
+            this.hal = si.getHardware();
+            this.processor = hal.getProcessor();
         }
 
         public int getCoreCount() {
-            return (int) details.stream()
-                    .map(m -> m.get("core id"))
-                    .distinct()
-                    .count();
+            return processor.getLogicalProcessorCount();
         }
 
         public int getCpuCount() {
-            return (int) details.stream()
-                    .map(m -> m.get("processor"))
-                    .distinct()
-                    .count();
+            return processor.getPhysicalProcessorCount();
         }
 
         public String getModelName() {
-            return details.stream()
-                    .map(m -> m.get("model name")).findFirst().orElseThrow();
+            return processor.getProcessorIdentifier().toString();
         }
 
         public String getMhz() {
-            return details.stream()
-                    .map(m -> m.get("cpu MHz")).findFirst().orElseThrow();
-        }
-
-        public String getCacheInfo() {
-            return details.stream()
-                    .map(m -> m.get("cache size")).findFirst().orElseThrow();
+            // or use processor.getCurrentFreq, and average, or min?
+            return Long.toString(processor.getMaxFreq()/ (1024*1024));
         }
 
         public String toString() {
             return "cores=" + getCoreCount() +
                     " cpus=" + getCpuCount() + " mhz=" + getMhz() +
                     " speedavg=" + getCurrentSpeed().getAverage() +
-                    " cache=" + getCacheInfo() + " model='" + getModelName() + "'";
+                    " model='" + getModelName() + "'";
 
         }
 
 
         public double getMaxFreq(int cpu) {
-            return readFile("/sys/devices/system/cpu/cpu" + cpu + "/cpufreq/cpuinfo_max_freq",Double.NaN);
+            return (double)processor.getMaxFreq();
         }
         public double getCurFreq(int cpu) {
-            return readFile("/sys/devices/system/cpu/cpu" + cpu + "/cpufreq/cpuinfo_max_freq",Double.NaN);
-        }
-        public double getMinFreq(int cpu) {
-            return readFile("/sys/devices/system/cpu/cpu" + cpu + "/cpufreq/cpuinfo_min_freq",Double.NaN);
+            return (double)processor.getCurrentFreq()[cpu];
         }
 
         public double getCurrentSpeed(int cpu) {
@@ -132,14 +101,5 @@ public class CpuInfo {
             return dss;
         }
 
-        private double readFile(String path, double defaultValue) {
-            try {
-                Path readPath = Path.of(path);
-                String content = Files.readString(readPath);
-                return Double.parseDouble(content);
-            } catch (Exception e) {
-                return defaultValue;
-            }
-        }
     }
 }

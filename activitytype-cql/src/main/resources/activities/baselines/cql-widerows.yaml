@@ -1,4 +1,4 @@
-# ebdse -v run type=cql yaml=baselines/cql-widerows tags=phase:schema host=dsehost
+# nb -v run type=cql yaml=baselines/cql-widerows tags=phase:schema host=dsehost
 bindings:
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String

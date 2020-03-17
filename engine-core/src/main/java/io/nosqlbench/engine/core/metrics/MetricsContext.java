@@ -27,7 +27,7 @@ public class MetricsContext implements MetricRegistryService {
     private static MetricsContext instance;
 
     private MetricReporters metricReporters = MetricReporters.getInstance();
-    private MetricRegistry metrics = new EBMetricsRegistry();
+    private MetricRegistry metrics = new NBMetricsRegistry();
 
     public static MetricsContext getInstance() {
         synchronized (MetricsContext.class) {
