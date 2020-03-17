@@ -4,9 +4,13 @@ import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.engine.api.util.Unit;
+import org.apache.commons.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -321,7 +325,7 @@ public class EBCLIOptions {
                         if(path.isPresent()){
                             arglist.removeFirst();
                             String scenarioFilter = null;
-                            if (arglist.size() > 0 && arglist.peekFirst().contains("=")){
+                            if (arglist.size() > 0 && !arglist.peekFirst().contains("=")){
                                 scenarioFilter = arglist.peekFirst();
                                 arglist.removeFirst();
                             };
@@ -349,10 +353,33 @@ public class EBCLIOptions {
 
         List<String> cmds = scenarios.getNamedScenario(scenarioName);
 
+        if (cmds == null){
+            List<String> names = scenarios.getScenarioNames();
+            throw new RuntimeException("Unknown scenaro name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
+        }
+
         for (String cmd : cmds) {
+            String[] cmdArray = cmd.split(" ");
+
+            Map<String, String> paramMap = new HashMap<>();
+            for (String parameter: cmdArray) {
+                if (parameter.contains("=")){
+                    if ( !parameter.contains("TEMPLATE(") && !parameter.contains("<<")) {
+                        String[] paramArray = parameter.split("=");
+                        paramMap.put(paramArray[0], paramArray[1]);
+                    }
+                }
+            }
+
+            StrSubstitutor sub1 = new StrSubstitutor(paramMap, "<<", ">>", '\\', ",");
+            StrSubstitutor sub2 = new StrSubstitutor(paramMap, "TEMPLATE(", ")", '\\', ",");
+
+            cmd = sub2.replace(sub1.replace(cmd));
+
             // Is there a better way to do this than regex?
             parse(cmd.split(" "));
         }
+
         arglist.removeFirst();
     }
 

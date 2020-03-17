@@ -32,7 +32,7 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
-import io.nosqlbench.engine.api.util.StrInterpolater;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.virtdata.api.BindingsTemplate;
 import io.nosqlbench.virtdata.api.templates.StringBindings;
 import io.nosqlbench.virtdata.api.templates.StringBindingsTemplate;
@@ -71,7 +71,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     public StdoutActivity(ActivityDef activityDef) {
         super(activityDef);
-        StrInterpolater interp = new StrInterpolater(activityDef);
+        StrInterpolator interp = new StrInterpolator(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
         this.fileName = activityDef.getParams().getOptionalString("filename").orElse("stdout");

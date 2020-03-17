@@ -195,7 +195,7 @@ public class TestNBCLIOptions {
 
     @Test
     public void cqlIotYamlScenarioSchemaOnly() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{ "scenario-test", "stdout"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "scenario-test", "schema-only"});
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
     }
 
