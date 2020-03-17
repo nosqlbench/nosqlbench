@@ -56,7 +56,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_threadexception", 30,
-                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "throwoncycle=10", "cycles=20", "-vvv"
+                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "throwoncycle=10", "cycles=1000", "cyclerate=10", "-vvv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was asked to throw an error on cycle 10");
