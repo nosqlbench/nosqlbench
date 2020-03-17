@@ -55,7 +55,7 @@ for (i = 0; i < 10; i++) {
     );
 
     scenario.waitMillis(1000);
-    if (metrics.co_cycle_delay.cycles.waittime.value < 10000000) {
+    if (metrics.co_cycle_delay.cycles.waittime.value < 50000000) {
         print("waittime trended back down as expected, exiting on iteration " + i);
         break;
     }

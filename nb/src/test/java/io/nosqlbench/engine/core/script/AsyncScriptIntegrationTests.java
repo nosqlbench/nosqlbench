@@ -230,7 +230,7 @@ public class AsyncScriptIntegrationTests {
         assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
         String iolog = scenarioResult.getIOLog();
         System.out.println(iolog);
-        assertThat(iolog).contains("waittime trended back down as expected");
+        assertThat(iolog).contains("waittime trended back down as expected")
     }
 
     @Test
