@@ -124,7 +124,7 @@ jobs:
           asset_path: nb/target/nb.jar
           asset_name: nb.jar
           asset_content_type: application/octet-stream
-          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${RELEASE_TAGNAME}/assets
+          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${RELEASE_TAGNAME}/assets?name=nb.jar
     - name: upload binary
       uses: actions/upload-release-asset@v1
       env:
@@ -133,7 +133,7 @@ jobs:
           asset_path: nb/target/nb
           asset_name: nb
           asset_content_type: application/octet-stream
-          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${RELEASE_TAGNAME}/assets
+          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${RELEASE_TAGNAME}/assets?name=nb
 
   docs:
     needs: release
