@@ -1,5 +1,4 @@
-# nb -v run type=cql yaml=baselines/cql-keyvalue tags=phase:schema
-  host=dsehost
+# nb -v run type=cql yaml=baselines/cql-keyvalue tags=phase:schema host=dsehost
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String

@@ -1,5 +1,5 @@
 ---
-title: nosqlbench Basics
+title: NoSQLBench Basics
 weight: 30
 ---
 

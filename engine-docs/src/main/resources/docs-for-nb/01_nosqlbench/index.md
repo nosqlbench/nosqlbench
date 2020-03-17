@@ -1,5 +1,5 @@
 ---
-title: Introducing nosqlbench
+title: Introducing NoSQLBench
 weight: 10
 ---
 
@@ -8,21 +8,11 @@ weight: 10
 Welcome to the documentation for NoSQLBench. This is a power tool that emulates real application workloads.
 This means that you can fast-track performance, sizing and data model testing without writing your own testing harness.
 
-NoSQLBench endeavors to be valuable to all users. We do this by making it easy for you, our user, to
-do just what you need without worrying about the rest. If you need to do something simple, it should
-be simple to find the right settings and just do it. If you need something more sophisticated, then you
-should be able to find what you need with a reasonable amount of effort and no surprises.
-
-Doing this well requires a coordinated effort in how the tools are documented and layered. We're just
-getting started with the bundled docs that you are reading now. Look for new and expanded content in this
-guidebook with each major release. We will be adding docs for more advanced users to unlock based on a how-to format.
-
-
 ## What is NoSQLBench?
 
 NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.
-It brings together features and capabilities that are not found in any
-other tool.
+
+**NoSQLBench brings advanced testing capabilities into one tool that are not found in other testing tools.**
 
 - You can run common testing workloads directly from the command line. You
   can start doing this within 5 minutes of reading this.
@@ -66,4 +56,12 @@ limited to testing only one type of system. It is our wish to build a community
 of users and practice around this project so that everyone in the NoSQL ecosystem
 can benefit from common concepts and understanding and reliable patterns of use.
 
+## Scalable User Experience
+
+NoSQLBench endeavors to be valuable to all users. We do this by making it easy for you, our user, to
+do just what you need without worrying about the rest. If you need to do something simple, it should
+be simple to find the right settings and just do it. If you need something more sophisticated, then you
+should be able to find what you need with a reasonable amount of effort and no surprises.
+
+That is the core design principle behind NoSQLBench. We hope you like it.
 

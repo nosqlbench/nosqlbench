@@ -1,19 +1,19 @@
 ---
-title: 02 Running
+title: 01 Commands
 weight: 2
 ---
 
-# 2. Running nosqlbench
+Let's run a simple test against a cluster to establish some basic familiarity with the NoSQLBench.
 
-Now that we have nosqlbench installed, we will run a simple test against a DSE cluster to establish some basic familiarity with the tool.
-
-## Create Schema
+## Create a Schema
 
 We will start by creating a simple schema in the database.
 From your command line, go ahead and execute the following command,
 replacing the `host=<dse-host-or-ip>` with that of one of your database nodes.
 
-    ./nb run type=cql yaml=baselines/cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
+```
+./nb run type=cql yaml=baselines/cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
+```
 
 This command is creating the following schema in your database:
 
@@ -100,7 +100,7 @@ baselines/cql-keyvalue: 8.87%/Running (details: min=0 cycle=8868 max=100000)
 baselines/cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
 ```
 
-## Run main workload
+## Run the main test phase
 
 Now that we have a base dataset of 100k rows in the database, we will now run a mixed read / write workload, by default this runs a 50% read / 50% write workload.
 
