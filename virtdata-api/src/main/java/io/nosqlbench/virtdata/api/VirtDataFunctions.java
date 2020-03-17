@@ -9,6 +9,7 @@ import java.util.function.*;
 public class VirtDataFunctions {
 
     private enum FuncType {
+        LongToDoubleFunction(java.util.function.LongToDoubleFunction.class, double.class),
         LongFunction(LongFunction.class, long.class),
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class),
