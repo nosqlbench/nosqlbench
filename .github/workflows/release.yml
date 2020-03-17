@@ -118,7 +118,7 @@ jobs:
         path: guidebook
     - name: find latest release
       run: |
-        LATEST_GH_RELEASE_ID=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | jq -r .id)
+        LATEST_GH_RELEASE_ID=$(curl --silent "https://api.github.com/repos/nosqlbench/nosqlbench/releases/latest" | jq -r .id)
         echo "::set-env name=LATEST_GH_RELEASE_ID::${LATEST_GH_RELEASE_ID}"
     - name: upload jar
       uses: actions/upload-release-asset@v1
