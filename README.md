@@ -8,7 +8,7 @@
 
 NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.
 It brings together features and capabilities that are not found in any
-other tool. 
+other tool.
 
 - You can run common testing workloads directly from the command line. You
   can start doing this within 5 minutes of reading this.
@@ -45,7 +45,7 @@ previously used within DataStax. In March of 2020, DataStax and the project
 maintainers for these projects decided to put everything into one OSS project
 in order to make contributions and sharing easier for everyone. Thus, the new
 project name and structure was launched as nosqlbench.io. NoSQLBench is an
-independent project that is primarily sponsored by DataStax.
+independent project that is sponsored by DataStax.
 
 We offer NoSQLBench as a new way of thinking about testing systems. It is not
 limited to testing only one type of system. It is our wish to build a community
@@ -80,13 +80,13 @@ This is a Linux targeted tool, as most cloud/nosql testing is done on Linux inst
 [![DataStax Logo](https://www.datastax.com/sites/default/files/content/graphics/logo/DS-logo-2019_1-25percent.png)](http://datastax.com/)
 
 This project is sponsored by [DataStax](http://datstax.com/) -- The always-on,
-active everywhere, distributed hybrid cloud database built on Apache Cassandra™, 
-and designed from the ground up to run anywhere, on any cloud, in any datacenter, 
+active everywhere, distributed hybrid cloud database built on Apache Cassandra™,
+and designed from the ground up to run anywhere, on any cloud, in any datacenter,
 and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
 
 ![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
 
-This project uses tools provided by YourKit, LLC. YourKit supports open source projects 
+This project uses tools provided by YourKit, LLC. YourKit supports open source projects
 with its full-featured Java Profiler.  YourKit, LLC is the creator of
 <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>
 and <a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
