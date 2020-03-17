@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
  * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is good enough.
  * If something better is needed later, this can be replaced.
  */
-public class EBCLIOptions {
+public class NBCLIOptions {
 
     public static final String docoptFileName = "commandline.md";
-    private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
+    private final static Logger logger = LoggerFactory.getLogger(NBCLIOptions.class);
 
     // Discovery
     private static final String HELP = "--help";
@@ -108,7 +108,7 @@ public class EBCLIOptions {
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
 
-    public EBCLIOptions(String[] args) {
+    public NBCLIOptions(String[] args) {
         parse(args);
     }
 

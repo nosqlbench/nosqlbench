@@ -11,15 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EBCLIScriptAssembly {
-    private final static Logger logger = LoggerFactory.getLogger(EBCLIScriptAssembly.class);
+public class NBCLIScriptAssembly {
+    private final static Logger logger = LoggerFactory.getLogger(NBCLIScriptAssembly.class);
 
-    public static ScriptData assembleScript(EBCLIOptions options) {
+    public static ScriptData assembleScript(NBCLIOptions options) {
         StringBuilder sb = new StringBuilder();
         Map<String,String> params = new HashMap<>();
-        for (EBCLIOptions.Cmd cmd : options.getCommands()) {
+        for (NBCLIOptions.Cmd cmd : options.getCommands()) {
             String cmdSpec = cmd.getCmdSpec();
-            EBCLIOptions.CmdType cmdType = cmd.getCmdType();
+            NBCLIOptions.CmdType cmdType = cmd.getCmdType();
             ActivityDef activityDef;
             switch (cmd.getCmdType()) {
                 case script:
@@ -71,7 +71,7 @@ public class EBCLIScriptAssembly {
         return new ScriptData(sb.toString(), params);
     }
 
-    private static ScriptData loadScript(EBCLIOptions.Cmd cmd) {
+    private static ScriptData loadScript(NBCLIOptions.Cmd cmd) {
         String scriptData;
 
         try {
