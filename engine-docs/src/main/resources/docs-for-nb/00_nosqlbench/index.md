@@ -1,6 +1,6 @@
 ---
-title: Introducing NoSQLBench
-weight: 10
+title: NoSQLBench Intro
+weight: 0
 ---
 
 ## Welcome to NoSQLBench
