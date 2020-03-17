@@ -27,7 +27,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class StrInterpolaterTest {
+public class StrInterpolatorTest {
 
     private static List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{
         add(
@@ -54,7 +54,7 @@ public class StrInterpolaterTest {
         );
     }};
 
-    private static StrInterpolater interp = new StrInterpolater(abcd);
+    private static StrInterpolator interp = new StrInterpolator(abcd);
 
     @Test
     public void shouldReturnIdentity() {

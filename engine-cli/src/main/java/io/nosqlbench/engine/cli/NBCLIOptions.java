@@ -1,9 +1,16 @@
 package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.engine.api.util.Unit;
+import org.apache.commons.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -314,24 +321,66 @@ public class NBCLIOptions {
                         Cmd script = parseScriptCmd(arglist);
                         cmdList.add(script);
                     } else {
-                        Optional<Path> path = NosqlBenchFiles.findOptionalPath(word, "yaml", "activities");
+                        Optional<Path> path = NosqlBenchFiles.findOptionalPath(word, "yaml", "activities", "activities/baselines");
                         if(path.isPresent()){
                             arglist.removeFirst();
-                            arglist.addFirst("yaml="+path.toString());
-                            Cmd script = parseWorkloladYamlCmd(arglist);
-                            cmdList.add(script);
+                            String scenarioFilter = null;
+                            if (arglist.size() > 0 && !arglist.peekFirst().contains("=")){
+                                scenarioFilter = arglist.peekFirst();
+                                arglist.removeFirst();
+                            };
+                            arglist.addFirst("yaml="+path.get().toString());
+                            parseWorkloadYamlCmds(path.get().toString(), arglist, scenarioFilter);
                         }
                         else {
                             throw new InvalidParameterException("unrecognized option:" + word);
                         }
                     }
+                    break;
             }
         }
     }
 
-    private Cmd parseWorkloladYamlCmd(LinkedList<String> arglist) {
+    private void parseWorkloadYamlCmds(String yamlPath, LinkedList<String> arglist, String scenarioFilter) {
+        StmtsDocList stmts = StatementsLoader.load(logger, yamlPath);
 
-        return null;
+        Scenarios scenarios = stmts.getDocScenarios();
+
+        String scenarioName = "default";
+        if (scenarioFilter != null){
+            scenarioName = scenarioFilter;
+        }
+
+        List<String> cmds = scenarios.getNamedScenario(scenarioName);
+
+        if (cmds == null){
+            List<String> names = scenarios.getScenarioNames();
+            throw new RuntimeException("Unknown scenaro name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
+        }
+
+        for (String cmd : cmds) {
+            String[] cmdArray = cmd.split(" ");
+
+            Map<String, String> paramMap = new HashMap<>();
+            for (String parameter: cmdArray) {
+                if (parameter.contains("=")){
+                    if ( !parameter.contains("TEMPLATE(") && !parameter.contains("<<")) {
+                        String[] paramArray = parameter.split("=");
+                        paramMap.put(paramArray[0], paramArray[1]);
+                    }
+                }
+            }
+
+            StrSubstitutor sub1 = new StrSubstitutor(paramMap, "<<", ">>", '\\', ",");
+            StrSubstitutor sub2 = new StrSubstitutor(paramMap, "TEMPLATE(", ")", '\\', ",");
+
+            cmd = sub2.replace(sub1.replace(cmd));
+
+            // Is there a better way to do this than regex?
+            parse(cmd.split(" "));
+        }
+
+        arglist.removeFirst();
     }
 
     private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
@@ -564,100 +613,100 @@ public class NBCLIOptions {
         histoLoggerConfigs.add(String.format("%s:%s:%s",file,pattern,interval));
     }
 
-public static enum CmdType {
-    start,
-    start2,
-    run,
-    run2,
-    stop,
-    await,
-    script,
-    fragment,
-    waitmillis,
-}
-
-public static class Cmd {
-    private CmdType cmdType;
-    private String cmdSpec;
-    private Map<String, String> cmdArgs;
-
-    public Cmd(CmdType cmdType, String cmdSpec) {
-        this.cmdSpec = cmdSpec;
-        this.cmdType = cmdType;
+    public static enum CmdType {
+        start,
+        start2,
+        run,
+        run2,
+        stop,
+        await,
+        script,
+        fragment,
+        waitmillis,
     }
 
-    public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
-        this(cmdType, cmdSpec);
-        this.cmdArgs = cmdArgs;
-    }
+    public static class Cmd {
+        private CmdType cmdType;
+        private String cmdSpec;
+        private Map<String, String> cmdArgs;
 
-    public String getCmdSpec() {
-
-        if (cmdSpec.startsWith("'") && cmdSpec.endsWith("'")) {
-            return cmdSpec.substring(1,cmdSpec.length()-1);
+        public Cmd(CmdType cmdType, String cmdSpec) {
+            this.cmdSpec = cmdSpec;
+            this.cmdType = cmdType;
         }
-        if (cmdSpec.startsWith("\"") && cmdSpec.endsWith("\"")) {
-            return cmdSpec.substring(1,cmdSpec.length()-1);
+
+        public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
+            this(cmdType, cmdSpec);
+            this.cmdArgs = cmdArgs;
         }
-        return cmdSpec;
-    }
 
-    public CmdType getCmdType() {
-        return cmdType;
-    }
+        public String getCmdSpec() {
 
-    public void setCmdType(CmdType cmdType) {
-        this.cmdType = cmdType;
-    }
+            if (cmdSpec.startsWith("'") && cmdSpec.endsWith("'")) {
+                return cmdSpec.substring(1,cmdSpec.length()-1);
+            }
+            if (cmdSpec.startsWith("\"") && cmdSpec.endsWith("\"")) {
+                return cmdSpec.substring(1,cmdSpec.length()-1);
+            }
+            return cmdSpec;
+        }
 
-    public Map<String, String> getCmdArgs() {
-        return cmdArgs;
-    }
+        public CmdType getCmdType() {
+            return cmdType;
+        }
 
-    public String toString() {
-        return "type:" + cmdType + ";spec=" + cmdSpec
-                + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
-    }
-}
+        public void setCmdType(CmdType cmdType) {
+            this.cmdType = cmdType;
+        }
 
-public static class LoggerConfig {
-    public String file = "";
-    public String pattern = ".*";
-    public String interval = "30 seconds";
+        public Map<String, String> getCmdArgs() {
+            return cmdArgs;
+        }
 
-    public LoggerConfig(String histoLoggerSpec) {
-        String[] words = histoLoggerSpec.split(":");
-        switch (words.length) {
-            case 3:
-                interval = words[2].isEmpty() ? interval : words[2];
-            case 2:
-                pattern = words[1].isEmpty() ? pattern : words[1];
-            case 1:
-                file = words[0];
-                if (file.isEmpty()) {
-                    throw new RuntimeException("You must not specify an empty file here for logging data.");
-                }
-                break;
-            default:
-                throw new RuntimeException(
-                        LOG_HISTO +
-                                " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
-                );
+        public String toString() {
+            return "type:" + cmdType + ";spec=" + cmdSpec
+                    + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
         }
     }
 
-    public String getFilename() {
-        return file;
-    }
-}
+    public static class LoggerConfig {
+        public String file = "";
+        public String pattern = ".*";
+        public String interval = "30 seconds";
 
-private static class ProgressSpec {
-    public String intervalSpec;
-    public IndicatorMode indicatorMode;
-    public String toString() {
-        return indicatorMode.toString()+":" + intervalSpec;
+        public LoggerConfig(String histoLoggerSpec) {
+            String[] words = histoLoggerSpec.split(":");
+            switch (words.length) {
+                case 3:
+                    interval = words[2].isEmpty() ? interval : words[2];
+                case 2:
+                    pattern = words[1].isEmpty() ? pattern : words[1];
+                case 1:
+                    file = words[0];
+                    if (file.isEmpty()) {
+                        throw new RuntimeException("You must not specify an empty file here for logging data.");
+                    }
+                    break;
+                default:
+                    throw new RuntimeException(
+                            LOG_HISTO +
+                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                    );
+            }
+        }
+
+        public String getFilename() {
+            return file;
+        }
     }
-}
+
+    private static class ProgressSpec {
+        public String intervalSpec;
+        public IndicatorMode indicatorMode;
+        public String toString() {
+            return indicatorMode.toString()+":" + intervalSpec;
+        }
+    }
 
     private ProgressSpec parseProgressSpec(String interval) {
         ProgressSpec progressSpec = new ProgressSpec();

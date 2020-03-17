@@ -2,7 +2,7 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
-import io.nosqlbench.engine.api.util.StrInterpolater;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +86,8 @@ public class NBCLIScriptAssembly {
         } catch (Throwable t) {
             throw new RuntimeException("Unable to buffer " + cmd.getCmdSpec() + ": " + t);
         }
-        StrInterpolater interpolater = new StrInterpolater(cmd.getCmdArgs());
-        scriptData = interpolater.apply(scriptData);
+        StrInterpolator interpolator = new StrInterpolator(cmd.getCmdArgs());
+        scriptData = interpolator.apply(scriptData);
         return new ScriptData(scriptData,cmd.getCmdArgs());
     }
 

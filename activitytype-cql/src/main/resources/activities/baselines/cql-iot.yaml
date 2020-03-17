@@ -1,4 +1,13 @@
 # nb -v run type=cql yaml=baselines/cql-iot tags=phase:schema host=dsehost
+scenarios:
+  default:
+    - run type=cql yaml=baselines/cql-iot tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=baselines/cql-iot tags=phase:rampup cycles=TEMPLATE(cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=baselines/cql-iot tags=phase:main cycles=TEMPLATE(cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+  stdout:
+    - run type=cql yaml=baselines/cql-iot tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=baselines/cql-iot tags=phase:rampup cycles=TEMPLATE(cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=baselines/cql-iot tags=phase:main cycles=TEMPLATE(cycles,10000000) hosts=TEMPLATE(hosts,localhost)
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')

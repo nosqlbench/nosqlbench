@@ -38,7 +38,7 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import io.nosqlbench.engine.api.util.StrInterpolater;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.engine.api.util.Unit;
 import org.slf4j.Logger;
@@ -276,7 +276,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         StmtsDocList doclist = null;
 
         String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
-        StrInterpolater interp = new StrInterpolater(activityDef);
+        StrInterpolator interp = new StrInterpolator(activityDef);
 
         String yamlVersion = "unset";
         if (yaml_loc.endsWith(":1") || yaml_loc.endsWith(":2")) {
@@ -329,7 +329,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     }
 
     @Deprecated
-    private StmtsDocList getVersion1StmtsDoc(StrInterpolater interp, String yaml_loc) {
+    private StmtsDocList getVersion1StmtsDoc(StrInterpolator interp, String yaml_loc) {
         StmtsDocList unfiltered;
         List<RawStmtsBlock> blocks = new ArrayList<>();
 

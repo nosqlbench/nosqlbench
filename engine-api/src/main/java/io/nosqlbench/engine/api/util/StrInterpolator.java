@@ -27,23 +27,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class StrInterpolater implements Function<String, String> {
+public class StrInterpolator implements Function<String, String> {
 
     private MultiMap multimap = new MultiMap();
     private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\');
     private StrSubstitutor substitutor2 = new StrSubstitutor(multimap, "TEMPLATE(", ")", '\\');
 
-    public StrInterpolater(ActivityDef... activityDefs) {
+    public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
                 .map(ad -> ad.getParams().getStringStringMap())
                 .forEach(multimap::add);
     }
-    public StrInterpolater(Map<String,String> basicMap) {
+    public StrInterpolator(Map<String,String> basicMap) {
         multimap.add(basicMap);
     }
 
     // for testing
-    protected StrInterpolater(List<Map<String, String>> maps) {
+    protected StrInterpolator(List<Map<String, String>> maps) {
         maps.forEach(multimap::add);
     }
 
@@ -52,7 +52,7 @@ public class StrInterpolater implements Function<String, String> {
         return substitutor.replace(substitutor2.replace(s));
     }
 
-    private static class MultiMap extends StrLookup<String> {
+    public static class MultiMap extends StrLookup<String> {
 
         private List<Map<String, String>> maps = new ArrayList<>();
         private String warnPrefix = "UNSET";
