@@ -10,7 +10,8 @@ NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.
 It brings together features and capabilities that are not found in any
 other tool. 
 
-- You can run common testing workloads directly from the command line.
+- You can run common testing workloads directly from the command line. You
+  can start doing this within 5 minutes of reading this.
 - You can generate virtual data sets of arbitrary size, with deterministic
   data and statistically shaped values.
 - You can design custom workloads that emulate your application, contained
