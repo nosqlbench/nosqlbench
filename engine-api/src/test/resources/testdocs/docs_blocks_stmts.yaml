@@ -1,40 +1,46 @@
+scenarios:
+  default:
+    - run type=stdout alias=step1
+    - run type=stdout alias=step2
+  schema-only:
+    - run type=blah tags=phase:schema
 tags:
- atagname: atagvalue
+  atagname: atagvalue
 name: doc1
 statements:
- - s1
- - s2
+  - s1
+  - s2
 bindings:
- b1 : b1d
- b2 : b2d
+  b1: b1d
+  b2: b2d
 params:
- param1: value1
+  param1: value1
 ---
 name: doc2
 tags:
- root1: val1
- root2: val2
+  root1: val1
+  root2: val2
 blocks:
- - name: block1
-   tags:
-    block1tag: tag-value1
-   params:
-     timeout: 23423
-     foobar: baz
-   bindings:
-     b11: override-b11
-     foobar: overized-beez
-   statements:
-    - s11
-    - s12
- - name: block2
-   tags:
-     root1: value23
-   statements:
-    s13: statement thirteen
-    s14: statement fourteen
+  - name: block1
+    tags:
+      block1tag: tag-value1
+    params:
+      timeout: 23423
+      foobar: baz
+    bindings:
+      b11: override-b11
+      foobar: overized-beez
+    statements:
+      - s11
+      - s12
+  - name: block2
+    tags:
+      root1: value23
+    statements:
+      s13: statement thirteen
+      s14: statement fourteen
 params:
- foobar: beez
+  foobar: beez
 bindings:
- b11: b11d
- b12: b12d
+  b11: b11d
+  b12: b12d
