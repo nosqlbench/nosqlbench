@@ -3,7 +3,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>3.12.36</version>
+    <version>3.12.37-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -41,7 +41,7 @@
     <scm>
         <url>scm:git:https://github.com/nosqlbench/nosqlbench.git</url>
         <!--        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>-->
-        <tag>nosqlbench-3.12.36</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
