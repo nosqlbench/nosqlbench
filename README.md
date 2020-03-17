@@ -30,7 +30,7 @@ In short, NoSQLBench wishes to be a programmable power tool for performance
 testing. However, it is somewhat generic. It doesn't know directly about a
 particular type of system, or protocol. It simply provides a suitable machine
 harness in which to put your drivers and testing logic. If you know how to build
-a client for a particular kind of system, EB will let you load it like a plugin
+a client for a particular kind of system, it will let you load it like a plugin
 and control it dynamically.
 
 Initially, NoSQLBench comes with support for CQL, but we would like to see this
