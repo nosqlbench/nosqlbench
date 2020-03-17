@@ -355,7 +355,7 @@ public class NBCLIOptions {
 
         if (cmds == null){
             List<String> names = scenarios.getScenarioNames();
-            throw new RuntimeException("Unknown scenaro name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
+            throw new RuntimeException("Unknown scenario name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
         }
 
         for (String cmd : cmds) {
