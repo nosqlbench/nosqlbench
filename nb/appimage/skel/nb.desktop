@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=nosqlbench
+Exec=nb %F
+Icon=nb
+Type=Application
+Categories=Development;Network;Utility;Science;
+Comment=nosqlbench
+MimeType=text/yaml;application/yaml;
+Name[nb]=nb
+Terminal=false
+StartupNotify=true
+NoDisplay=false
