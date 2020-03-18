@@ -83,7 +83,9 @@ public class BucketSequencer<T> implements ElementSequencer<T> {
         for (int i = 0; i < elems.size(); i++) {
             T elem = elems.get(i);
             long ratio = ratios.get(i);
-            buckets.add(new OpBucket<>(elem,i,ratio));
+            if (ratio>0) {
+                buckets.add(new OpBucket<>(elem,i,ratio));
+            }
         }
 
         while(!buckets.isEmpty()) {
