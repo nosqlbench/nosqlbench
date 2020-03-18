@@ -40,6 +40,13 @@ public class ConcatSequencerTest {
         assertThat(ints).containsExactly(0,0,1,1,1,1,1);
     }
 
+    @Test
+    public void testSeqIndexWithZeroRatios() {
+        ConcatSequencer<String> concat = new ConcatSequencer<>();
+        int[] ints = concat.seqIndexesByRatios(strings(a,b), ratios(0,3));
+        assertThat(ints).containsExactly(1,1,1);
+    }
+
     private static List<String> strings(String... strings) {
         return Arrays.asList(strings);
     }
