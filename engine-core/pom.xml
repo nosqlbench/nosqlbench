@@ -34,37 +34,31 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
         </dependency>
 
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>${metrics-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.mpierce.metrics.reservoir</groupId>
             <artifactId>hdrhistogram-metrics-reservoir</artifactId>
-            <version>1.1.0</version>
             <type>jar</type>
         </dependency>
 
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-graphite</artifactId>
-            <version>${metrics-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
         </dependency>
 
         <!-- only testing scope -->
@@ -72,7 +66,6 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.13.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -86,7 +79,6 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core-java8</artifactId>
-            <version>1.0.0m1</version>
             <scope>test</scope>
         </dependency>
 

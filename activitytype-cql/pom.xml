@@ -16,11 +16,6 @@
         A CQL ActivityType driver for http://nosqlbench.io/
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dse-driver-version>1.9.0</dse-driver-version>
-    </properties>
-
     <dependencies>
 
         <!-- core dependencies -->
@@ -34,31 +29,26 @@
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>
-            <version>${dse-driver-version}</version>
         </dependency>
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-extras</artifactId>
-            <version>${dse-driver-version}</version>
         </dependency>
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-mapping</artifactId>
-            <version>${dse-driver-version}</version>
         </dependency>
 
         <!-- For CQL compression option -->
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
-            <version>1.4.1</version>
         </dependency>
 
         <!-- For CQL compression option -->
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
-            <version>1.1.2.6</version>
         </dependency>
 
 <!--        <dependency>-->
@@ -91,14 +81,12 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.13.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core-java8</artifactId>
-            <version>1.0.0m1</version>
             <scope>test</scope>
         </dependency>
 

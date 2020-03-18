@@ -17,7 +17,6 @@
         <dependency>
             <groupId>com.squareup</groupId>
             <artifactId>javapoet</artifactId>
-            <version>1.11.1</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
