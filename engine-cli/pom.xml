@@ -33,6 +33,13 @@
       <classifier>shaded</classifier>
     </dependency>
 
+    <!-- TODO: do we need this, if we're using shaded variant? -->
+    <dependency>
+      <groupId>io.nosqlbench</groupId>
+      <artifactId>engine-docker</artifactId>
+      <version>3.12.43-SNAPSHOT</version>
+    </dependency>
+
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -50,14 +57,10 @@
       <artifactId>assertj-core-java8</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>engine-docker</artifactId>
-      <version>3.12.43-SNAPSHOT</version>
     </dependency>
 
 
