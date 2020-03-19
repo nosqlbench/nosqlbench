@@ -231,7 +231,7 @@ public class TestNBCLIOptions {
 
     @Test
     public void clTest() {
-        String dir= "activities/";
+        String dir= "./";
         URL resource = getClass().getClassLoader().getResource(dir);
         assertThat(resource);
         Path basePath = VirtDataResources.findPathIn(dir);

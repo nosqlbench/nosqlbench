@@ -24,10 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NBCLI {
@@ -85,17 +82,25 @@ public class NBCLI {
 
         if (options.wantsWorkloads()) {
             //ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
-            Map<String, List<String>> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
-            for (Map.Entry<String, List<String>> entry : workloads.entrySet()) {
-                System.out.println("# from: "+ entry.getKey());
-                List<String> scenarioList = entry.getValue();
-                String workloadName = entry.getKey().replaceAll("\\.yaml", "") ;
+            List<NosqlBenchFiles.WorkloadDesc> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
+            for (NosqlBenchFiles.WorkloadDesc workload : workloads) {
+                System.out.println("# from: "+ workload.getYamlPath());
+                List<String> scenarioList = workload.getScenarioNames();
+                String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
+                Set<String> templates = workload.getTemlpates();
 
                 for (String scenario : scenarioList) {
                     if (scenario.equals("default")) {
                         scenario = scenario +  " # same as running ./nb " + workloadName ;
                     }
                     System.out.println("  ./nb " + workloadName + " " + scenario);
+                }
+                if (templates.size()>0){
+                    System.out.println("# with the following optional parameters and defaults: ");
+                    templates.stream()
+                        .map(x -> x.replaceAll(",","="))
+                        .map(x -> "# "+x)
+                        .forEach(System.out::println);
                 }
             }
             System.exit(0);
