@@ -95,11 +95,6 @@ jobs:
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
        
-#     - name: prepare_release
-#       run: mvn --global-settings deploy.xml --batch-mode clean release:prepare -DdevelopmentVersion=${NEXT_SNAPSHOT} -DreleaseVersion=${RELEASE_VERSION}
-#     - name: perform_release
-#       run: mvn --global-settings deploy.xml --batch-mode release:perform
-
     - name: upload artifacts
       run: |
         pwd
@@ -116,28 +111,60 @@ jobs:
       with:
         name: guidebook
         path: guidebook
-    - name: find latest release
-      run: |
-        LATEST_GH_RELEASE_ID=$(curl --silent "https://api.github.com/repos/nosqlbench/nosqlbench/releases/latest" | jq -r .id)
-        echo "::set-env name=LATEST_GH_RELEASE_ID::${LATEST_GH_RELEASE_ID}"
-    - name: upload jar
-      uses: actions/upload-release-asset@v1
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          asset_path: nb/target/nb.jar
-          asset_name: nb.jar
-          asset_content_type: application/octet-stream
-          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${{ env.LATEST_GH_RELEASE_ID }}/assets?name=nb.jar
-    - name: upload binary
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload nb.jar
+      id: upload-nb-jar
       uses: actions/upload-release-asset@v1
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with: 
-          asset_path: nb/target/nb
-          asset_name: nb
-          asset_content_type: application/octet-stream
-          upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${{ env.LATEST_GH_RELEASE_ID }}/assets?name=nb
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: nb/target/nb.jar
+        asset_name: nb.jar
+        asset_content_type: application/octet-stream
+    - name: Upload nb
+      id: upload-nb-binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: nb/target/nb
+        asset_name: nb
+        asset_content_type: application/octet-stream
+
+#     - name: find latest release
+#       run: |
+#         LATEST_GH_RELEASE_ID=$(curl --silent "https://api.github.com/repos/nosqlbench/nosqlbench/releases/latest" | jq -r .id)
+#         echo "::set-env name=LATEST_GH_RELEASE_ID::${LATEST_GH_RELEASE_ID}"
+#     - name: upload jar
+#       uses: actions/upload-release-asset@v1
+#       env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#           asset_path: nb/target/nb.jar
+#           asset_name: nb.jar
+#           asset_content_type: application/octet-stream
+#           upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${{ env.LATEST_GH_RELEASE_ID }}/assets{?name,label}
+#     - name: upload binary
+#       uses: actions/upload-release-asset@v1
+#       env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with: 
+#           asset_path: nb/target/nb
+#           asset_name: nb
+#           asset_content_type: application/octet-stream
+#           upload_url: https://uploads.github.com/repos/nosqlbench/nosqlbench/releases/${{ env.LATEST_GH_RELEASE_ID }}/assets{?name,label}
 
   docs:
     needs: release
