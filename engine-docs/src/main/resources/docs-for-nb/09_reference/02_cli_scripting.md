@@ -17,7 +17,7 @@ As the command line is parsed, from left to right, the scenario script is built 
 Newlines are not allowed when building scripts from the command line. As long as you follow the allowed forms below, you can simply string multiple commands together with spaces between. As usual, single word options without double dashes are commands, key=value style parameters apply to the previous command, and all other commands with
 
     --this-style
-    
+
 are non-scripting options.
 
 ## Concurrency & Control
@@ -64,8 +64,8 @@ Add the contents of the next argument to the scenario script buffer.
 
 ~~~
 ./run-eb \
-start type=stdout alias=a cycles=100K yaml=baselines/cql-iot tags=phase:main\
-start type=stdout alias=b cycles=200K yaml=baselines/cql-iot tags=phase:main\
+start type=stdout alias=a cycles=100K yaml=cql-iot tags=phase:main\
+start type=stdout alias=b cycles=200K yaml=cql-iot tags=phase:main\
 waitmillis 10000 \
 await one \
 stop two
