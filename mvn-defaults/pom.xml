@@ -3,7 +3,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>3.12.43-SNAPSHOT</version>
+    <version>3.12.48-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -12,7 +12,7 @@
         <javadoc.name>nosqlbench</javadoc.name>
 
         <java.target.version>12</java.target.version>
-        
+
         <!-- properties for package versions -->
         <antlr4.version>4.7.2</antlr4.version>
         <ascii.data.version>1.2.0</ascii.data.version>
@@ -216,20 +216,20 @@
             <artifactId>snappy-java</artifactId>
             <version>${snappy.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler</artifactId>
             <version>${netty.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-epoll</artifactId>
             <version>${netty.version}</version>
             <classifier>linux-x86_64</classifier>
           </dependency>
-          
+
           <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-api</artifactId>
@@ -253,7 +253,7 @@
             <artifactId>docker-java</artifactId>
             <version>${docker.java.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
@@ -271,7 +271,7 @@
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>com.elega9t</groupId>
             <artifactId>number-to-words</artifactId>
@@ -283,7 +283,7 @@
             <artifactId>essentials</artifactId>
             <version>${greenrobot.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -301,7 +301,7 @@
             <artifactId>joda-time</artifactId>
             <version>${joda.time.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
@@ -382,7 +382,7 @@
             <artifactId>javax.ws.rs-api</artifactId>
             <version>${javax.ws.rs.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
@@ -407,20 +407,20 @@
             <artifactId>jaxb-core</artifactId>
             <version>${jaxb.core.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>${jaxb.impl.version}</version>
           </dependency>
-          
+
           <!-- test dependencies -->
           <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core-java8</artifactId>
@@ -432,13 +432,13 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.jupiter.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
           </dependency>
-        
+
         </dependencies>
     </dependencyManagement>
 
