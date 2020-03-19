@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.util.NosqlBenchFiles;
 import io.nosqlbench.engine.core.MarkdownDocInfo;
 import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenariosResults;
@@ -24,6 +25,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,7 +46,7 @@ public class NBCLI {
         cli.run(args);
     }
 
-    public void run(String[] args) { 
+    public void run(String[] args) {
         if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
@@ -77,6 +80,24 @@ public class NBCLI {
 
         if (options.wantsActivityTypes()) {
             ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            System.exit(0);
+        }
+
+        if (options.wantsWorkloads()) {
+            //ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            Map<String, List<String>> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
+            for (Map.Entry<String, List<String>> entry : workloads.entrySet()) {
+                System.out.println("# from: "+ entry.getKey());
+                List<String> scenarioList = entry.getValue();
+                String workloadName = entry.getKey().replaceAll("\\.yaml", "") ;
+
+                for (String scenario : scenarioList) {
+                    if (scenario.equals("default")) {
+                        scenario = scenario +  " # same as running ./nb " + workloadName ;
+                    }
+                    System.out.println("  ./nb " + workloadName + " " + scenario);
+                }
+            }
             System.exit(0);
         }
 

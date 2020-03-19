@@ -17,15 +17,28 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.docsys.core.PathWalker;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.virtdata.api.VirtDataResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NosqlBenchFiles {
+
+    private final static Logger logger = LoggerFactory.getLogger(NosqlBenchFiles.class);
 
     public static InputStream findRequiredStreamOrFile(String basename, String extension, String... searchPaths) {
         Optional<InputStream> optionalStreamOrFile = findOptionalStreamOrFile(basename, extension, searchPaths);
@@ -131,4 +144,29 @@ public class NosqlBenchFiles {
             throw new RuntimeException("Error while reading required file to string", ioe);
         }
     }
+
+    public static Map<String, List<String>> getWorkloadsWithScenarioScripts() {
+
+        String dir = "activities/";
+
+        Path basePath = VirtDataResources.findPathIn(dir);
+        List<Path> yamlPathList = PathWalker.findAll(basePath).stream().filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
+
+        HashMap workloadMap = new HashMap();
+        for (Path yamlPath : yamlPathList) {
+            String substring = yamlPath.toString().substring(1);
+            StmtsDocList stmts = StatementsLoader.load(logger, substring);
+
+            Scenarios scenarios = stmts.getDocScenarios();
+
+            List<String> scenarioNames = scenarios.getScenarioNames();
+
+            if (scenarioNames != null && scenarioNames.size() >0){
+                workloadMap.put(yamlPath.getFileName().toString(), scenarioNames);
+            }
+        }
+
+        return workloadMap;
+    }
+
 }
