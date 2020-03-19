@@ -11,7 +11,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench</javadoc.name>
 
-        <java.target.version>11</java.target.version>
+        <java.target.version>12</java.target.version>
         
         <!-- properties for package versions -->
         <antlr4.version>4.7.2</antlr4.version>
