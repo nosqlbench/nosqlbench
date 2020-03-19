@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.48-SNAPSHOT</version>
+    <version>3.12.49-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -55,17 +55,6 @@
             <artifactId>docker-java-transport-okhttp</artifactId>
         </dependency>
 
-        <!--    <dependency>-->
-        <!--      <groupId>com.github.docker-java</groupId>-->
-        <!--      <artifactId>docker-java-transport-jersey</artifactId>-->
-        <!--    </dependency>-->
-
-        <!--    <dependency>-->
-        <!--      <groupId>com.github.docker-java</groupId>-->
-        <!--      <artifactId>docker-java-transport-netty</artifactId>-->
-        <!--      <version>3.2.0-rc2</version>-->
-        <!--    </dependency>-->
-
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
@@ -89,7 +78,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>3.12.48-SNAPSHOT</version>
+      <version>3.12.49-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
