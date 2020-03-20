@@ -9,7 +9,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.43-SNAPSHOT</version>
+        <version>3.12.48-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -105,17 +105,17 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-processors</artifactId>
-            <version>3.12.43-SNAPSHOT</version>
+            <version>3.12.48-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-annotations</artifactId>
-            <version>3.12.43-SNAPSHOT</version>
+            <version>3.12.48-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>3.12.43-SNAPSHOT</version>
+            <version>3.12.48-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -127,15 +127,6 @@
 
     <build>
         <plugins>
-          <plugin>
-            <!-- TODO: change to Java 12 everywhere? -->
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>12</release>
-                    <source>12</source>
-                    <target>12</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>

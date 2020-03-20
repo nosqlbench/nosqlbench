@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.engine.api.util;
+package io.nosqlbench.engine.api.activityapi.planning;
 
 import io.nosqlbench.engine.api.activityapi.planning.ElementSequencer;
 import io.nosqlbench.engine.api.activityapi.planning.IntervalSequencer;
@@ -32,6 +32,7 @@ public class IntervalSequencerTest {
 
     private static ElementSequencer<AnEvent> seqr = new IntervalSequencer<>();
 
+
     @Test
     public void testFixture() {
         List<AnEvent> events = fromText("A:1,B:15");
@@ -47,6 +48,13 @@ public class IntervalSequencerTest {
         List<AnEvent> events = fromText("A:8,B:4,C:2,D:1");
         String seq = seqr.sequenceSummary(events, ratioFunc, "");
         assertThat(seq).isEqualTo("ABCDAABAABCAABA");
+    }
+
+    @Test
+    public void testO4I3L0() {
+        List<AnEvent> events = fromText("O:4,I:3,L:0");
+        String seq = seqr.sequenceSummary(events, ratioFunc, "");
+        assertThat(seq).isEqualTo("OIOIOIO");
     }
 
     @Test
