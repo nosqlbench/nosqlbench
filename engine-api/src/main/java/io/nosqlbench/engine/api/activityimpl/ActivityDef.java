@@ -95,7 +95,7 @@ public class ActivityDef {
     }
 
     public String getActivityType() {
-        return parameterMap.getOptionalString("type").orElse(DEFAULT_ATYPE);
+        return parameterMap.getOptionalString("type", "driver").orElse(DEFAULT_ATYPE);
     }
 
     /**

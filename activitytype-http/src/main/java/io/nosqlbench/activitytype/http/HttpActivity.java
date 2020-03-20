@@ -54,12 +54,10 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
         this.activityDef = activityDef;
+
         String yaml_loc = activityDef.getParams()
-                .getOptionalString("yaml")
+                .getOptionalString("yaml", "workload")
                 .orElse("default");
-        if (yaml_loc.equals("default")) {
-            yaml_loc = activityDef.getParams().getOptionalString("workload").orElse("default");
-        }
 
         stmtsDocList = StatementsLoader.load(logger,yaml_loc, "activities");
     }

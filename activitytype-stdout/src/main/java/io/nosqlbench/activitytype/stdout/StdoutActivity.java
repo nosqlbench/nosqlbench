@@ -72,10 +72,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public StdoutActivity(ActivityDef activityDef) {
         super(activityDef);
         StrInterpolator interp = new StrInterpolator(activityDef);
-        String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
-        if (yaml_loc.equals("default")) {
-            yaml_loc = activityDef.getParams().getOptionalString("workload").orElse("default");
-        }
+        String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
 
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
         this.fileName = activityDef.getParams().getOptionalString("filename").orElse("stdout");

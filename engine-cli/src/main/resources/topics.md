@@ -1,3 +1,3 @@
 # global help topics
 - commandline
-- cli_scripting
+- cli-scripting

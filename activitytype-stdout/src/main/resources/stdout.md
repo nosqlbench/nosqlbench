@@ -9,17 +9,17 @@ that uses the curly brace token form in statements.
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
 ~~~
-... type=stdout yaml=stdout-test
+... driver=stdout workload=stdout-test
 ~~~
 
 Only run statement groups which match a tag regex
 ~~~
-... type=stdout yaml=stdout-test tags=group:'ddl.*'
+... driver=stdout workload=stdout-test tags=group:'ddl.*'
 ~~~
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
 ~~~
-... type=stdout yaml=stdout-test tags=group:'dml.*' cycles=1000..11000 filename=test.csv
+... driver=stdout workload=stdout-test tags=group:'dml.*' cycles=1000..11000 filename=test.csv
 ~~~
 
 This last example shows that the cycle range is [inclusive..exclusive),

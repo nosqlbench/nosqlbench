@@ -17,10 +17,8 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
 
     @Override
     public CqlActivity getActivity(ActivityDef activityDef) {
-        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml");
-        if (!yaml.isPresent()) {
-            yaml = activityDef.getParams().getOptionalString("workload");
-        }
+
+        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml", "workload");
 
         // sanity check that we have a yaml parameter, which contains our statements and bindings
         if (yaml.isEmpty()) {

@@ -45,7 +45,7 @@ with their own.
 The command line has the form of basic test commands and parameters.
 These command get converted directly into scenario control script
 in the order they appear. The user can choose whether to stay in
-high level executive mode, with simple commands like "run yaml=...",
+high level executive mode, with simple commands like "run workload=...",
 or to drop down directly into script design. They can look at the
 equivalent script for any command line by running --show-script.
 If you take the script that is dumped to console and run it, it should

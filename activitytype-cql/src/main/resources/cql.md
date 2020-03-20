@@ -1,30 +1,30 @@
 # cql activity type
 
 This is an activity type which allows for the execution of CQL statements.
-This particular activity type is wired synchronously within each client 
-thread, however the async API is used in order to expose fine-grain 
+This particular activity type is wired synchronously within each client
+thread, however the async API is used in order to expose fine-grain
 metrics about op binding, op submission, and waiting for a result.
 
 ### Example activity definitions
 
 Run a cql activity named 'cql1', with definitions from activities/cqldefs.yaml
 ~~~
-... type=cql alias=cql1 yaml=cqldefs
+... driver=cql alias=cql1 workload=cqldefs
 ~~~
 
 Run a cql activity defined by cqldefs.yaml, but with shortcut naming
 ~~~
-... type=cql yaml=cqldefs
+... driver=cql workload=cqldefs
 ~~~
 
 Only run statement groups which match a tag regex
 ~~~
-... type=cql yaml=cqldefs tags=group:'ddl.*'
+... driver=cql workload=cqldefs tags=group:'ddl.*'
 ~~~
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
 ~~~
-... type=cql yaml=cqldefs tags=group:'dml.*' cycles=1000..1100
+... driver=cql workload=cqldefs tags=group:'dml.*' cycles=1000..1100
 ~~~
 This last example shows that the cycle range is [inclusive..exclusive),
 to allow for stacking test intervals. This is standard across all
@@ -42,7 +42,8 @@ activity types.
     Examples:
     - `host=192.168.1.25`
     - `host=`192.168.1.25,testhost42`
-- **yaml** - The file which holds the schema and statement defs.
+- **workload** - The workload definition which holds the schema and statement defs.
+     see workload yaml location for additional details
     (no default, required)
 - **port** - The port to connect with
 - **cl** - An override to consistency levels for the activity. If
@@ -51,7 +52,7 @@ activity types.
     the difference with respect to the yaml will be emitted.
     This is not a dynamic parameter. It will only be applied at
     activity start.
-- **cbopts** - default: none - this is how you customize the cluster 
+- **cbopts** - default: none - this is how you customize the cluster
     settings for the client, including policies, compression, etc. This
     is a string of *Java*-like method calls just as you would use them
     in the Cluster.Builder fluent API. They are evaluated inline
@@ -75,7 +76,7 @@ activity types.
     - `pooling=4:10,2:5`
       keep 4-10 connections to LOCAL hosts and 2-5 to REMOTE
     - `pooling=4:10:2000`
-      keep between 4-10 connections to LOCAL hosts with 
+      keep between 4-10 connections to LOCAL hosts with
       up to 2000 requests per connection
   -   `pooling=5:10:2000,2:4:1000` keep between 5-10 connections to
       LOCAL hosts with up to 2000 requests per connection, and 2-4
@@ -112,7 +113,7 @@ activity types.
     Examples:
     - tokens=1:10000,100000:1000000
     - tokens=1:123456
-- **maxtries** - default: 10 - how many times an operation may be 
+- **maxtries** - default: 10 - how many times an operation may be
     attempted before it is disregarded
 - **maxpages** - default: 1 - how many pages can be read from a query which
     is larger than the fetchsize. If more than this number of pages
@@ -121,14 +122,14 @@ activity types.
 - **fetchsize** - controls the driver parameter of the same name.
     Suffixed units can be used here, such as "50K". If this parameter
     is not present, then the driver option is not set.
-- **cycles** - standard, however the cql activity type will default 
-    this to however many statements are included in the current 
+- **cycles** - standard, however the cql activity type will default
+    this to however many statements are included in the current
     activity, after tag filtering, etc.
-- **username** - the user to authenticate as. This option requires 
+- **username** - the user to authenticate as. This option requires
     that one of **password** or **passfile** also be defined.
-- **password** - the password to authenticate with. This will be 
+- **password** - the password to authenticate with. This will be
     ignored if passfile is also present.
-- **passfile** - the file to read the password from. The first 
+- **passfile** - the file to read the password from. The first
     line of this file is used as the password.
 - **ssl** - specifies the type of the SSL implementation.
     Disabled by default, possible values are `jdk`, and `openssl`.
@@ -164,8 +165,8 @@ activity types.
     Examples:
     - `jmxreporting=true`
     - `jmxreporting=false` (the default)
-- **alias** - this is a standard engineblock parameter, however 
-    the cql type will use the yaml value also as the alias value 
+- **alias** - this is a standard engineblock parameter, however
+    the cql type will use the workload value also as the alias value
     when not specified.
 - **errors** - error handler configuration.
     (default errors=stop,retryable->retry,unverified->stop)
@@ -173,8 +174,8 @@ activity types.
     - errors=stop,WriteTimeoutException=histogram
     - errors=count
     - errors=warn,retryable=count
-    See the separate help on 'cqlerrors' for detailed 
-    configuration options.        
+    See the separate help on 'cqlerrors' for detailed
+    configuration options.
 - **defaultidempotence** - sets default idempotence on the
     driver options, but only if it has a value.
     (default unset, valid values: true or false)
@@ -199,8 +200,8 @@ activity types.
     (default: bucket)
     (options: concat | bucket | interval)
     The concat sequencer repeats each statement in order until the ratio
-    is achieved.    
-    The bucket sequencer uses simple round-robin distribution to plan 
+    is achieved.
+    The bucket sequencer uses simple round-robin distribution to plan
     statement ratios, a simple but unbalanced form of interleaving.
     The interval sequencer apportions statements over time and then by
     order of appearance for ties. This has the effect of interleaving
@@ -209,7 +210,7 @@ activity types.
     All of the sequencers create deterministic schedules which use an internal
     lookup table for indexing into a list of possible statements.
 - **trace** - enables a trace on a subset of operations. This is disabled
-    by default. 
+    by default.
     Examples:
     `trace=modulo:100,filename:trace.log`
     The above traces every 100th cycle to a file named trace.log.
@@ -258,36 +259,36 @@ now **they are limited to a YAML params block**:
     params:
 
      ratio: 1
-     # Sets the statement ratio within the operation sequencer 
+     # Sets the statement ratio within the operation sequencer
      # scheme. Integers only.
-     # When preparing the operation order (AKA sequencing), 
+     # When preparing the operation order (AKA sequencing),
      # frequency of the associated statements.
 
      cl: ONE
      # Sets the consistency level, using any of the standard
-     # identifiers from com.datastax.driver.core.ConsistencyLevel, 
-     # any one of: 
-     # LOCAL_QUORUM, ANY, ONE, TWO, THREE, QUORUM, ALL, 
+     # identifiers from com.datastax.driver.core.ConsistencyLevel,
+     # any one of:
+     # LOCAL_QUORUM, ANY, ONE, TWO, THREE, QUORUM, ALL,
      # EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE
 
      prepared: true
-     # By default, all statements are prepared. If you are 
+     # By default, all statements are prepared. If you are
      # creating schema, set this to false.
 
      idempotent: false
-     # For statements that are known to be idempotent, set this 
+     # For statements that are known to be idempotent, set this
      # to true
 
      instrument: false
-     # If a statement has instrument set to true, then 
+     # If a statement has instrument set to true, then
      # individual Timer metrics will be tracked for
-     # that statement for both successes and errors, 
+     # that statement for both successes and errors,
      # using the given statement name.
-    
+
     logresultcsv: true
     OR
     logresultcsv: myfilename.csv
-    # If a statement has logresultcsv set to true, 
+    # If a statement has logresultcsv set to true,
     # then individual operations will be logged to a CSV file.
     # In this case the CSV file will be named as
     # <statement-name>--results.csv.
@@ -334,7 +335,7 @@ now **they are limited to a YAML params block**:
 - alias.tries - A histogram of how many tries were required to get a
     completed operation
 - alias.pages - A timer which tracks the performance of paging, specific
-    to more than 1-page query results. i.e., if all reads return within 1 
+    to more than 1-page query results. i.e., if all reads return within 1
     page, this metric will not have any data.
 - alias.strides - A timer around each stride of operations within a thread
 - alias.skipped-tokens - A histogram that records the count and cycle values
@@ -344,7 +345,7 @@ now **they are limited to a YAML params block**:
     set that it returns, across all pages. This metric is only counted
     for non-exceptional results, while the result metric above includes
     all operations.
-    
+
 ##### Metrics Details
 
 The cycles metric captures data on the outside of each operation, but it also
@@ -366,17 +367,17 @@ The YAML file for a CQL activity has the following structure:
    1. An optional tag map
    2. One or more statements
       1. a descriptive name
-      2. prepared: false, if you want to modify the default (prepared:true) 
+      2. prepared: false, if you want to modify the default (prepared:true)
       3. statement CQL
       4. statement data bindings
-      
+
 Each section is a separate yaml document internally to the yaml file. The
-tags that are provided allow for subgroups of statements to be activated. 
-All statements in a matching document (when filtered by tags) are included 
+tags that are provided allow for subgroups of statements to be activated.
+All statements in a matching document (when filtered by tags) are included
 in the statement rotation.
 
-If no tags are provided in a document section, then it will be matched by 
-all possible tag filters. Conversely, if no tag filter is applied in 
+If no tags are provided in a document section, then it will be matched by
+all possible tag filters. Conversely, if no tag filter is applied in
 the activity definition, all tagged documents will match.
 
 Data bindings specify how values are generated to plug into each operation. More
@@ -384,23 +385,23 @@ details on data bindings are available in the activity usage guide.
 
 ### Parameter Templating
 
-Double angle brackets may be used to drop parameters into the YAML 
+Double angle brackets may be used to drop parameters into the YAML
 arbitrarily. When the YAML file is loaded, and only then, these parameters
 are interpolated from activity parameters like those above. This allows you
 to create activity templates that can be customized simply by providing
-additional parameters to the activity. There are two forms, 
+additional parameters to the activity. There are two forms,
 \<\<some_var_name:default_value\>\> and \<\<some_var_name\>\>. The first
 form contains a default value. In any case, if one of these parameters is
 encountered and a qualifying value is not found, an error will be thrown.
 
-### YAML Location
+### Workload YAML Location
 
-The YAML file referenced in the yaml= parameter will be searched for in the following places, in this order:
+The YAML file referenced in the workload= parameter will be searched for in the following places, in this order:
 1. A URL, if it starts with 'http:' or 'https:'
 2. The local filesystem, if it exists there
 3. The internal classpath and assets in the jar.
 
-The '.yaml' suffix is not required in the yaml= parameter, however it is
+The '.yaml' suffix is not required in the workload= parameter, however it is
 required on the actual file. As well, the logical search path "activities/"
 will be used if necessary to locate the file, both on the filesystem and in
 the classpath.

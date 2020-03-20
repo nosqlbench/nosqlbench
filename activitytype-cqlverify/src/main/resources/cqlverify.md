@@ -40,7 +40,7 @@ mapping functions containing the word "Random", as these are the ones that have
 historically used internal RNG state. Instead, swap in their replacements that
 start with "Hashed". There is a hashed equivalent to all of the original random
 functions. The rng-based functions will be deprecated in a future release.
- 
+
 In a typical cql activity, you are allowed to name the bindings however you
 like, so long as the binding names match the anchor names in your statement
 template. Because we need to match reference field data to actual row data
@@ -53,9 +53,9 @@ The simplest way to do this is to follow this recipe:
 1. Make the binding names the same as the field names that you use in
    in your write statements.
 2. When you configure your read statement for the cqlverify activity,
-   simply include the same bindings as-is, using the partition and 
+   simply include the same bindings as-is, using the partition and
    clustering fields in the appropriate where clauses.
-   
+
 *note*: It used to be an error to have bindings names in excess of what anchor
 names would match. Now, it is only an error if an anchor is not qualified with
 a matching binding name. This allows you to simply copy your bindings as-is
@@ -77,7 +77,7 @@ as well.
 
 If more than one statement is active for a cqlverify activity, then an error is
 thrown. This may change in the future, but for now it is a requirement.
- 
+
 ### Handling Verification Errors
 
 The cqlverify activity extends on the error handling stack mechanism that is
@@ -86,7 +86,7 @@ used by the cql activity type, by introducing a new error category:
 
     unverified=stop
 
-However, the usual options, including "stop", "warn", "retry", "histogram", 
+However, the usual options, including "stop", "warn", "retry", "histogram",
 "count", and "ignore" are also allowed.
 
 Care should be taken to set the other error handling categories to be strict
@@ -101,7 +101,7 @@ be thrown and the client will exit by default. If you wish for something less
 dramatic, then set it to
 
     errors=...,unverified->count
-    
+
 or
 
     errors=...,unverified->warn
@@ -118,12 +118,12 @@ A future release may allow for paged reads for quicker verification.
 
 Write 100K cycles of telemetry data
 
-    ... run type=cql alias=writesome yaml=telemetry tags=group:write cycles=100000 host=...
-    
+    ... run driver=cql alias=writesome workload=cql-iot tags=group:write cycles=100000 host=...
+
 Verify the the same 100K cycles of telemetry data
 
-    ... run type=cqlverify alias=verify yaml=telemetry tags=group:verify cycles=100000 host=...
-    
+    ... run driver=cqlverify alias=verify workload=cql-iot tags=group:verify cycles=100000 host=...
+
 To see how these examples work, consult the telemetry.yaml file in the nosqlbench.jar.
 
 ### CQLVerify ActivityType Parameters
@@ -157,10 +157,10 @@ To see how these examples work, consult the telemetry.yaml file in the nosqlbenc
   then the field is added to the list of fields to verify.
   This parameter is useful if you have a set of default bindings and want
   to specify which subset of them of them will be used just for this statement.
-  
+
   If any of the added fields is in the form "f->b", then it is taken as a mapping
   from the field name _f_ in the schema to a binding _b_.
-   
+
 ### Metrics
 
 The cqlverify activity type adds some verification-specific metrics:

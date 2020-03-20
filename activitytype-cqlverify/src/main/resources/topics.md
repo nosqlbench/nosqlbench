@@ -1,2 +1,2 @@
-# cql-verify help topics
+# cqlverify help topics
 - cqlverify

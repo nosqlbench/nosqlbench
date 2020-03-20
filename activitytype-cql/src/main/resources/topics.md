@@ -1,4 +1,4 @@
 # cql help topics
 - cql
-- cqlerrors
-- cqlexceptionlist
+- cql-errors
+- cql-exception-list

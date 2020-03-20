@@ -18,10 +18,7 @@ public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
     @Override
     public StdoutActivity getActivity(ActivityDef activityDef) {
-        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml");
-        if (!yaml.isPresent()) {
-            yaml= activityDef.getParams().getOptionalString("workload");
-        }
+        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml", "workload");
 
 
         // sanity check that we have a yaml parameter, which contains our statements and bindings
