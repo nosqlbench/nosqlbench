@@ -29,7 +29,7 @@ bindings:
 statements:
  - "doc2.number {numname}\n"
 # EOF (control-D in your terminal)
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=10
 doc1.form1 doc1.1
 doc1.form2 doc1.2
 doc2.number two

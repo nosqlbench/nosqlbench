@@ -31,7 +31,6 @@ public class NBCLIOptions {
 
     // Discovery
     private static final String HELP = "--help";
-    private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WORKLOADS = "--list-workloads";
@@ -98,7 +97,6 @@ public class NBCLIOptions {
     private int reportInterval = 10;
     private String metricsPrefix = "nosqlbench.";
     private String wantsMetricsForActivity;
-    private boolean wantsAdvancedHelp = false;
     private String sessionName = "";
     private boolean showScript = false;
     private Level consoleLevel = Level.WARN;
@@ -221,10 +219,6 @@ public class NBCLIOptions {
                 case WANTS_VERSION_COORDS:
                     arglist.removeFirst();
                     wantsVersionCoords = true;
-                    break;
-                case ADVANCED_HELP:
-                    arglist.removeFirst();
-                    wantsAdvancedHelp = true;
                     break;
                 case ENABLE_CHART:
                     arglist.removeFirst();
@@ -468,10 +462,6 @@ public class NBCLIOptions {
 
     public boolean wantsBasicHelp() {
         return wantsBasicHelp;
-    }
-
-    public boolean wantsAdvancedHelp() {
-        return wantsAdvancedHelp;
     }
 
     public boolean wantsEnableChart() {

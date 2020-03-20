@@ -12,7 +12,7 @@ The EngineBlock runtime is a combination of a scripting sandbox and a workload e
 
 All of the heavy lifting is left to Java and the core nosqlbench runtime. This includes the iterative workloads that are meant to test the target system. This is combined with a control layer which is provided by Nashorn and eventually GraalVM. This division of responsibility allows the high-level test logic to be "script" and the low-level activity logic to be "machinery".  While the scenario script has the most control, it also is the least busy relative to activity workloads. The net effect is that you have the efficiency of the iterative test loads in conjunction with the open design palette of a first-class scripting language.
 
-Essentially, the ActivityType drivers are meant to handle the workload-specific machinery. They also provide dynamic control points and parameters which special to that activity type. This exposes a full feedback loop between a running scenario script and the activities that it runs. The scenario is free to read the performance metrics from a running activity and make changes to it on the fly.
+Essentially, the ActivityType drivers are meant to handle the workload-specific machinery. They also provide dynamic control points and parameters which special to that activity type (driver). This exposes a full feedback loop between a running scenario script and the activities that it runs. The scenario is free to read the performance metrics from a running activity and make changes to it on the fly.
 
 ## Scripting Environment
 
@@ -44,7 +44,7 @@ Interaction with the nosqlbench runtime and the activities therein is made easy
 by the above variables and objects. When an assignment is made to any of these variables, the changes are propagated to internal listeners. For changes to _threads_, the thread pool responsible for the affected activity adjusts the number of active threads (AKA slots). Other changes are further propagated directly to the thread harnesses and components which implement the ActivityType.
 
 :::warning
-Assignment to the _type_ and _alias_ activity parameters has no special effect, as you can't change an activity to a different type once it has been created.
+Assignment to the _workload_ and _alias_ activity parameters has no special effect, as you can't change an activity to a different driver once it has been created.
 :::
 
 You can make use of more extensive Java or Javascript libraries as needed,
@@ -80,7 +80,7 @@ When a script is run, it has absolute control over the scenario runtime while it
 
 ## Strategies
 
-You can use nosqlbench in the classic form with `run type=<type> param=value ...` command line syntax. There are reasons, however, that you will sometimes want customize and modify your scripts directly, such as:
+You can use nosqlbench in the classic form with `run driver=<activity_type> param=value ...` command line syntax. There are reasons, however, that you will sometimes want customize and modify your scripts directly, such as:
 
 - Permute test variables to cover many sub-conditions in a test.
 - Automatically adjust load factors to identify the nominal capacity of a system.

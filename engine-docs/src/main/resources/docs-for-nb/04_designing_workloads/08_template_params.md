@@ -21,10 +21,10 @@ statements:
  - "<<linetoprint:MISSING>>\n"
 # EOF (control-D in your terminal)
 
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=1
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=1
 MISSING
 
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=1 linetoprint="THIS IS IT"
 THIS IS IT
 ```
 

@@ -25,7 +25,7 @@ blocks:
     beta: Combinations('b;l;o;c;k;2;-;COMBINATIONS;')
 # EOF (control-D in your terminal)
 
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=10
 0,block1-C
 1,block2-O
 2,block1-M

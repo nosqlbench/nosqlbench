@@ -4,7 +4,7 @@ title: Standard Metrics
 
 # Standard Metrics
 
-nosqlbench comes with a set of standard metrics that will be part of every activity type. Each activity type enhances the metrics available by adding their own metrics with the nosqlbench APIs. This section explains what the standard metrics are, and how to interpret them.
+nosqlbench comes with a set of standard metrics that will be part of every activity type (driver). Each activity type (driver) enhances the metrics available by adding their own metrics with the nosqlbench APIs. This section explains what the standard metrics are, and how to interpret them.
 
 ## read-input
 

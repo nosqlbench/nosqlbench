@@ -27,7 +27,7 @@ named argument to the previous command. The following example
 is a commandline with a command *start*, and two named arguments
 to that command.
 
-    ./nb start type=diag alias=example
+    ./nb start driver=diag alias=example
 
 ### Discovery options ###
 
