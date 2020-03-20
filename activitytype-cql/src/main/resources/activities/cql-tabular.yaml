@@ -1,4 +1,13 @@
-# nb -v run type=cql yaml=baselines/cql-widerows tags=phase:schema host=dsehost
+# nb -v run type=cql yaml=cql-tabular tags=phase:schema host=dsehost
+scenarios:
+  default:
+    - run type=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+  stdout:
+    - run type=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run type=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
 bindings:
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -27,7 +36,7 @@ blocks:
       tags:
         name: create-keyspace
     - create-table: |
-        create table if not exists <<keyspace:baselines>>.<<table:widerows>> (
+        create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
          part text,
          clust text,
          data text,
@@ -42,7 +51,7 @@ blocks:
       cl: <<write_cl:LOCAL_QUORUM>>
     statements:
       - rampup-insert: |
-         insert into <<keyspace:baselines>>.<<table:widerows>>
+         insert into <<keyspace:baselines>>.<<table:tabular>>
          (part,clust,data)
          values ({part_layout},{clust_layout},{data})
         tags:
@@ -55,7 +64,7 @@ blocks:
       cl: <<read_cl:LOCAL_QUORUM>>
     statements:
       - verify-select: |
-          select * from <<keyspace:baselines>>.<<table:widerows>> where part={part_layout} and clust={clust_layout}
+          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_layout} and clust={clust_layout}
         tags:
           name: verify-select
   - name: main-read
@@ -67,7 +76,7 @@ blocks:
       cl: <<read_cl:LOCAL_QUORUM>>
     statements:
     - main-select: |
-        select * from <<keyspace:baselines>>.<<table:widerows>> where part={part_read} limit {limit};
+        select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
       tags:
         name: main-select
   - name: main-write
@@ -79,7 +88,7 @@ blocks:
       cl: <<write_cl:LOCAL_QUORUM>>
     statements:
     - main-write: |
-        insert into <<keyspace:baselines>>.<<table:widerows>>
+        insert into <<keyspace:baselines>>.<<table:tabular>>
         (part, clust, data)
         values ({part_write},{clust_write},{data_write})
       tags:

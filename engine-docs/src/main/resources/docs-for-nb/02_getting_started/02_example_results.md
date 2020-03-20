@@ -26,10 +26,10 @@ Below is a sample of the log that gives us our basic metrics. There is a lot to 
 
 ```
 2019-08-12 15:46:00,274 INFO [main] i.e.c.ScenarioResult [ScenarioResult.java:48] -- BEGIN METRICS DETAIL --
-2019-08-12 15:46:00,294 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=baselines/cql-keyvalue.cycles.config.burstrate, value=5500.0
-2019-08-12 15:46:00,295 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=baselines/cql-keyvalue.cycles.config.cyclerate, value=5000.0
-2019-08-12 15:46:00,295 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=baselines/cql-keyvalue.cycles.waittime, value=3898782735
-2019-08-12 15:46:00,298 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=HISTOGRAM, name=baselines/cql-keyvalue.resultset-size, count=100000, min=0, max=1, mean=8.0E-5, stddev=0.008943914131967056, median=0.0, p75=0.0, p95=0.0, p98=0.0, p99=0.0, p999=0.0
+2019-08-12 15:46:00,294 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=cql-keyvalue.cycles.config.burstrate, value=5500.0
+2019-08-12 15:46:00,295 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=cql-keyvalue.cycles.config.cyclerate, value=5000.0
+2019-08-12 15:46:00,295 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=cql-keyvalue.cycles.waittime, value=3898782735
+2019-08-12 15:46:00,298 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=HISTOGRAM, name=cql-keyvalue.resultset-size, count=100000, min=0, max=1, mean=8.0E-5, stddev=0.008943914131967056, median=0.0, p75=0.0, p95=0.0, p98=0.0, p99=0.0, p999=0.0
 2019-08-12 15:46:01,703 INFO [main] i.e.c.ScenarioResult [ScenarioResult.java:56] -- END METRICS DETAIL --
 ```
 

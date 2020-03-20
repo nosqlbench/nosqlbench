@@ -34,6 +34,7 @@ public class NBCLIOptions {
     private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
+    private static final String WORKLOADS = "--list-workloads";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
     private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
     private static final String WANTS_VERSION_COORDS = "--version-coords";
@@ -115,6 +116,7 @@ public class NBCLIOptions {
     private Map<String,Level> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
+    private boolean wantsWorkloads = false;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -311,25 +313,33 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
                     break;
+                case WORKLOADS:
+                    arglist.removeFirst();
+                    wantsWorkloads = true;
+                    break;
                 default:
                     Optional<InputStream> optionalScript =
                             NosqlBenchFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
+                    //Script
                     if (optionalScript.isPresent()) {
                         arglist.removeFirst();
                         arglist.addFirst("scripts/auto/" + word);
                         arglist.addFirst("script");
                         Cmd script = parseScriptCmd(arglist);
                         cmdList.add(script);
+                        //Scripted yaml
                     } else {
-                        Optional<Path> path = NosqlBenchFiles.findOptionalPath(word, "yaml", "activities", "activities/baselines");
+                        Optional<Path> path = NosqlBenchFiles.findOptionalPath(word, "yaml", "activities");
                         if(path.isPresent()){
                             arglist.removeFirst();
                             String scenarioFilter = null;
+                            //Named scenario
                             if (arglist.size() > 0 && !arglist.peekFirst().contains("=")){
                                 scenarioFilter = arglist.peekFirst();
                                 arglist.removeFirst();
-                            };
-                            arglist.addFirst("yaml="+path.get().toString());
+                            }
+
+                            //arglist.addFirst("yaml="+path.get().toString());
                             parseWorkloadYamlCmds(path.get().toString(), arglist, scenarioFilter);
                         }
                         else {
@@ -353,6 +363,23 @@ public class NBCLIOptions {
 
         List<String> cmds = scenarios.getNamedScenario(scenarioName);
 
+        Map<String, String> paramMap = new HashMap<>();
+        while(arglist.size() > 0 && arglist.peekFirst().contains("=")){
+            String arg = arglist.removeFirst();
+            for(int i =0 ; i< cmds.size(); i++){
+                String yamlCmd = cmds.get(i);
+                String[] argArray = arg.split("=");
+                String argKey = argArray[0];
+                String argValue = argArray[1];
+                if (!yamlCmd.contains(argKey)) {
+                    cmds.set(i, yamlCmd +" " + arg);
+                }else{
+                    paramMap.put(argKey, argValue);
+                }
+            }
+        }
+
+
         if (cmds == null){
             List<String> names = scenarios.getScenarioNames();
             throw new RuntimeException("Unknown scenario name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
@@ -361,7 +388,6 @@ public class NBCLIOptions {
         for (String cmd : cmds) {
             String[] cmdArray = cmd.split(" ");
 
-            Map<String, String> paramMap = new HashMap<>();
             for (String parameter: cmdArray) {
                 if (parameter.contains("=")){
                     if ( !parameter.contains("TEMPLATE(") && !parameter.contains("<<")) {
@@ -378,9 +404,8 @@ public class NBCLIOptions {
 
             // Is there a better way to do this than regex?
             parse(cmd.split(" "));
-        }
 
-        arglist.removeFirst();
+        }
     }
 
     private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
@@ -517,7 +542,7 @@ public class NBCLIOptions {
         assertNotParameter(scriptName);
         Map<String, String> scriptParams = new LinkedHashMap<>();
         while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
-                && arglist.peekFirst().contains("=")) {
+            && arglist.peekFirst().contains("=")) {
             String[] split = arglist.removeFirst().split("=", 2);
             scriptParams.put(split[0], split[1]);
         }
@@ -534,8 +559,8 @@ public class NBCLIOptions {
         String cmdType = arglist.removeFirst();
         List<String> activitydef = new ArrayList<String>();
         while (arglist.size() > 0 &&
-                !reserved_words.contains(arglist.peekFirst())
-                && arglist.peekFirst().contains("=")) {
+            !reserved_words.contains(arglist.peekFirst())
+            && arglist.peekFirst().contains("=")) {
             activitydef.add(arglist.removeFirst());
         }
         return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
@@ -544,7 +569,7 @@ public class NBCLIOptions {
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
         if (spec.indicatorMode == IndicatorMode.console
-                && Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
+            && Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
             logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
             spec.indicatorMode = IndicatorMode.logonly;
         }
@@ -556,7 +581,7 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
             if (files.contains(s)) {
                 logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                        "in the first matching config. Reorder your options if you need to control this.");
+                    "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
@@ -613,6 +638,10 @@ public class NBCLIOptions {
         histoLoggerConfigs.add(String.format("%s:%s:%s",file,pattern,interval));
     }
 
+    public boolean wantsWorkloads() {
+        return wantsWorkloads;
+    }
+
     public static enum CmdType {
         start,
         start2,
@@ -665,7 +694,7 @@ public class NBCLIOptions {
 
         public String toString() {
             return "type:" + cmdType + ";spec=" + cmdSpec
-                    + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
+                + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
         }
     }
 
@@ -689,8 +718,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                            LOG_HISTO +
-                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                        LOG_HISTO +
+                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -714,7 +743,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

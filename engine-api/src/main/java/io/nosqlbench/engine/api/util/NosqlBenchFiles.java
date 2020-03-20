@@ -17,15 +17,29 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.docsys.core.PathWalker;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.virtdata.api.VirtDataResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class NosqlBenchFiles {
+
+    private final static Logger logger = LoggerFactory.getLogger(NosqlBenchFiles.class);
+    private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+)\\)");
+    private static Pattern templatePattern2 = Pattern.compile("<<(.+)>>");
+
 
     public static InputStream findRequiredStreamOrFile(String basename, String extension, String... searchPaths) {
         Optional<InputStream> optionalStreamOrFile = findOptionalStreamOrFile(basename, extension, searchPaths);
@@ -129,6 +143,79 @@ public class NosqlBenchFiles {
             return filedata;
         } catch (IOException ioe) {
             throw new RuntimeException("Error while reading required file to string", ioe);
+        }
+    }
+
+    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
+
+        String dir = "./";
+
+        Path basePath = VirtDataResources.findPathIn(dir);
+        List<Path> yamlPathList = PathWalker.findAll(basePath)
+            .stream()
+            .filter(f -> f.toString().endsWith(".yaml"))
+            .filter(f -> f.toString().contains("activities"))
+            .collect(Collectors.toList());
+
+        List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
+        for (Path yamlPath : yamlPathList) {
+            String substring = yamlPath.toString().substring(2);
+            StmtsDocList stmts = StatementsLoader.load(logger, substring);
+
+            Set<String> templates = new HashSet<>();
+            try {
+                List<String> lines = Files.readAllLines(yamlPath);
+                for (String line : lines) {
+                    Matcher matcher = templatePattern.matcher(line);
+
+                    while (matcher.find()) {
+                        templates.add(matcher.group(1));
+                    }
+                    matcher = templatePattern2.matcher(line);
+
+                    while (matcher.find()) {
+                        templates.add(matcher.group(1));
+                    }
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            Scenarios scenarios = stmts.getDocScenarios();
+
+            List<String> scenarioNames = scenarios.getScenarioNames();
+
+            if (scenarioNames != null && scenarioNames.size() >0){
+                workloadDescriptions.add(new WorkloadDesc(yamlPath.getFileName().toString(), scenarioNames, templates));
+            }
+        }
+
+        return workloadDescriptions;
+    }
+
+    public static class WorkloadDesc {
+        private final String yamlPath;
+        private final List<String> scenarioNames;
+        private final Set<String> temlpates;
+
+        public WorkloadDesc(String yamlPath, List<String> scenarioNames, Set<String> templates) {
+            this.yamlPath = yamlPath;
+            this.scenarioNames = scenarioNames;
+            this.temlpates = templates;
+        }
+
+        public String getYamlPath() {
+            return yamlPath;
+        }
+
+        public List<String> getScenarioNames() {
+            return scenarioNames;
+        }
+
+        public Set<String> getTemlpates() {
+            return temlpates;
         }
     }
 }

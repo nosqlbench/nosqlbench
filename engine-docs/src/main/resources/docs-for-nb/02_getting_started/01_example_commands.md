@@ -12,7 +12,7 @@ From your command line, go ahead and execute the following command,
 replacing the `host=<dse-host-or-ip>` with that of one of your database nodes.
 
 ```
-./nb run type=cql yaml=baselines/cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
+./nb run type=cql yaml=cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
 ```
 
 This command is creating the following schema in your database:
@@ -35,11 +35,11 @@ Let's break down each of those command line options.
 `yaml=...` is used to specify the yaml file that defines the activity.
 All activities require a yaml in which you configure things such as data bindings and CQL statements, but don't worry about those details right now.
 
-In this example, we use `baselines/cql-keyvalue` which is a pre-built workload that is packaged with nosqlbench.
+In this example, we use `cql-keyvalue` which is a pre-built workload that is packaged with nosqlbench.
 
 `tags=phase:schema` tells nosqlbench to run the yaml block that has the `phase:schema` defined as one of its tags.
 
-In this example, that is the DDL portion of the `baselines/cql-keyvalue` workload.
+In this example, that is the DDL portion of the `cql-keyvalue` workload.
 
 `host=...` tells nosqlbench how to connect to your database, only one host is necessary.
 
@@ -53,7 +53,7 @@ Before sending our test writes to the database, we will use the `stdout` activit
 
 Go ahead and execute the following command:
 
-    ./nb start type=stdout yaml=baselines/cql-keyvalue tags=phase:rampup cycles=10
+    ./nb start type=stdout yaml=cql-keyvalue tags=phase:rampup cycles=10
 
 You should see 10 of the following statements in your console
 
@@ -74,11 +74,11 @@ One thing to know is that nosqlbench deterministically generates data, so the ge
 
 Now we are ready to write some data to our database. Go ahead and execute the following from your command line:
 
-    ./nb start type=cql yaml=baselines/cql-keyvalue tags=phase:rampup host=<dse-host-or-ip> cycles=100k --progress console:1s
+    ./nb start type=cql yaml=cql-keyvalue tags=phase:rampup host=<dse-host-or-ip> cycles=100k --progress console:1s
 
 Note the differences between this and the command that we used to generate the schema.
 
-`tags=phase:rampup` is running the yaml block in `baselines/cql-keyvalue` that has only INSERT statements.
+`tags=phase:rampup` is running the yaml block in `cql-keyvalue` that has only INSERT statements.
 
 `cycles=100k` will run a total of 100,000 operations, in this case, 100,000 writes. You will want to pick an appropriately large number of cycles in actual testing to make your main test meaningful.
 
@@ -86,54 +86,54 @@ Note the differences between this and the command that we used to generate the s
 
 You should see output that looks like this
 ```
-baselines/cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
-baselines/cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
-baselines/cql-keyvalue: 0.32%/Running (details: min=0 cycle=325 max=100000)
-baselines/cql-keyvalue: 1.17%/Running (details: min=0 cycle=1171 max=100000)
-baselines/cql-keyvalue: 2.36%/Running (details: min=0 cycle=2360 max=100000)
-baselines/cql-keyvalue: 3.65%/Running (details: min=0 cycle=3648 max=100000)
-baselines/cql-keyvalue: 4.61%/Running (details: min=0 cycle=4613 max=100000)
-baselines/cql-keyvalue: 5.59%/Running (details: min=0 cycle=5593 max=100000)
-baselines/cql-keyvalue: 7.14%/Running (details: min=0 cycle=7138 max=100000)
-baselines/cql-keyvalue: 8.87%/Running (details: min=0 cycle=8868 max=100000)
+cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
+cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
+cql-keyvalue: 0.32%/Running (details: min=0 cycle=325 max=100000)
+cql-keyvalue: 1.17%/Running (details: min=0 cycle=1171 max=100000)
+cql-keyvalue: 2.36%/Running (details: min=0 cycle=2360 max=100000)
+cql-keyvalue: 3.65%/Running (details: min=0 cycle=3648 max=100000)
+cql-keyvalue: 4.61%/Running (details: min=0 cycle=4613 max=100000)
+cql-keyvalue: 5.59%/Running (details: min=0 cycle=5593 max=100000)
+cql-keyvalue: 7.14%/Running (details: min=0 cycle=7138 max=100000)
+cql-keyvalue: 8.87%/Running (details: min=0 cycle=8868 max=100000)
 ...
-baselines/cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
+cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
 ```
 
 ## Run the main test phase
 
 Now that we have a base dataset of 100k rows in the database, we will now run a mixed read / write workload, by default this runs a 50% read / 50% write workload.
 
-    ./nb start type=cql yaml=baselines/cql-keyvalue tags=phase:main host=<dse-host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
+    ./nb start type=cql yaml=cql-keyvalue tags=phase:main host=<dse-host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
 
 You should see output that looks like this:
 ```
 Logging to logs/scenario_20190812_154431_028.log
-baselines/cql-keyvalue: 0.50%/Running (details: min=0 cycle=500 max=100000)
-baselines/cql-keyvalue: 2.50%/Running (details: min=0 cycle=2500 max=100000)
-baselines/cql-keyvalue: 6.70%/Running (details: min=0 cycle=6700 max=100000)
-baselines/cql-keyvalue: 11.16%/Running (details: min=0 cycle=11160 max=100000)
-baselines/cql-keyvalue: 14.25%/Running (details: min=0 cycle=14250 max=100000)
-baselines/cql-keyvalue: 18.41%/Running (details: min=0 cycle=18440 max=100000)
-baselines/cql-keyvalue: 22.76%/Running (details: min=0 cycle=22760 max=100000)
-baselines/cql-keyvalue: 27.27%/Running (details: min=0 cycle=27300 max=100000)
-baselines/cql-keyvalue: 31.81%/Running (details: min=0 cycle=31810 max=100000)
-baselines/cql-keyvalue: 36.34%/Running (details: min=0 cycle=36340 max=100000)
-baselines/cql-keyvalue: 40.90%/Running (details: min=0 cycle=40900 max=100000)
-baselines/cql-keyvalue: 45.48%/Running (details: min=0 cycle=45480 max=100000)
-baselines/cql-keyvalue: 50.05%/Running (details: min=0 cycle=50050 max=100000)
-baselines/cql-keyvalue: 54.36%/Running (details: min=0 cycle=54360 max=100000)
-baselines/cql-keyvalue: 58.91%/Running (details: min=0 cycle=58920 max=100000)
-baselines/cql-keyvalue: 63.40%/Running (details: min=0 cycle=63400 max=100000)
-baselines/cql-keyvalue: 66.96%/Running (details: min=0 cycle=66970 max=100000)
-baselines/cql-keyvalue: 71.61%/Running (details: min=0 cycle=71610 max=100000)
-baselines/cql-keyvalue: 76.11%/Running (details: min=0 cycle=76130 max=100000)
-baselines/cql-keyvalue: 80.66%/Running (details: min=0 cycle=80660 max=100000)
-baselines/cql-keyvalue: 85.22%/Running (details: min=0 cycle=85220 max=100000)
-baselines/cql-keyvalue: 89.80%/Running (details: min=0 cycle=89800 max=100000)
-baselines/cql-keyvalue: 94.46%/Running (details: min=0 cycle=94460 max=100000)
-baselines/cql-keyvalue: 98.93%/Running (details: min=0 cycle=98930 max=100000)
-baselines/cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
+cql-keyvalue: 0.50%/Running (details: min=0 cycle=500 max=100000)
+cql-keyvalue: 2.50%/Running (details: min=0 cycle=2500 max=100000)
+cql-keyvalue: 6.70%/Running (details: min=0 cycle=6700 max=100000)
+cql-keyvalue: 11.16%/Running (details: min=0 cycle=11160 max=100000)
+cql-keyvalue: 14.25%/Running (details: min=0 cycle=14250 max=100000)
+cql-keyvalue: 18.41%/Running (details: min=0 cycle=18440 max=100000)
+cql-keyvalue: 22.76%/Running (details: min=0 cycle=22760 max=100000)
+cql-keyvalue: 27.27%/Running (details: min=0 cycle=27300 max=100000)
+cql-keyvalue: 31.81%/Running (details: min=0 cycle=31810 max=100000)
+cql-keyvalue: 36.34%/Running (details: min=0 cycle=36340 max=100000)
+cql-keyvalue: 40.90%/Running (details: min=0 cycle=40900 max=100000)
+cql-keyvalue: 45.48%/Running (details: min=0 cycle=45480 max=100000)
+cql-keyvalue: 50.05%/Running (details: min=0 cycle=50050 max=100000)
+cql-keyvalue: 54.36%/Running (details: min=0 cycle=54360 max=100000)
+cql-keyvalue: 58.91%/Running (details: min=0 cycle=58920 max=100000)
+cql-keyvalue: 63.40%/Running (details: min=0 cycle=63400 max=100000)
+cql-keyvalue: 66.96%/Running (details: min=0 cycle=66970 max=100000)
+cql-keyvalue: 71.61%/Running (details: min=0 cycle=71610 max=100000)
+cql-keyvalue: 76.11%/Running (details: min=0 cycle=76130 max=100000)
+cql-keyvalue: 80.66%/Running (details: min=0 cycle=80660 max=100000)
+cql-keyvalue: 85.22%/Running (details: min=0 cycle=85220 max=100000)
+cql-keyvalue: 89.80%/Running (details: min=0 cycle=89800 max=100000)
+cql-keyvalue: 94.46%/Running (details: min=0 cycle=94460 max=100000)
+cql-keyvalue: 98.93%/Running (details: min=0 cycle=98930 max=100000)
+cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
 ```
 
 We have a few new command line options here:

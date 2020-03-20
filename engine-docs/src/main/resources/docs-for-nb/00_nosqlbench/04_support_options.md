@@ -1,9 +1,9 @@
 ---
-title: Support Options
+title: Getting Support
 weight: 10
 ---
 
-# Support Options
+# Getting Support
 
 These guidelines are mirrored at the [Submitting Feedback](https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback)
 wiki page at the nosqlbench project site, which is also where any `[Submit Feedback]` links should will take you.

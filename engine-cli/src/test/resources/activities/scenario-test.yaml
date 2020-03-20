@@ -1,4 +1,4 @@
-# nb -v run type=cql yaml=baselines/cql-iot tags=phase:schema host=dsehost
+# nb -v run type=cql yaml=cql-iot tags=phase:schema host=dsehost
 scenarios:
   default:
     - run type=stdout yaml=scenario-test tags=phase:schema
