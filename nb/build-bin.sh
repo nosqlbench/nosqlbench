@@ -1,6 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -x
-mkdir -p target/NB.AppDir
+
+APPDIR=target/NB.AppDir
+mkdir -p ${APPDIR}
 
 if [ ! -f target/nb.jar ]
 then
@@ -14,8 +17,8 @@ fi
 # rm target/nb
 #fi
 
-rsync -av appimage/skel/ target/NB.AppDir/
-cp target/nb.jar target/NB.AppDir/usr/bin/nb.jar
+rsync -av appimage/skel/ "${APPDIR}/"
+cp target/nb.jar "${APPDIR}/usr/bin/nb.jar"
 
 if [ ! -d "cache/jre" ]
 then
@@ -29,18 +32,18 @@ then
   ))
 fi
 
-mkdir -p target/NB.AppDir/usr/bin/jre
-rsync -av cache/jre/ target/NB.AppDir/usr/bin/jre/
+mkdir -p "${APPDIR}/usr/bin/jre"
+rsync -av cache/jre/ "${APPDIR}/usr/bin/jre/"
 
-if [ ! -f "target/NB.AppDir/AppRun" ]
+if [ ! -f "${APPDIR}/AppRun" ]
   then
-  ( cd target/NB.AppDir && (
+  ( cd ${APPDIR} && (
    printf "Linking AppRun...\n";
    ln -s usr/bin/nb AppRun
   ))
 fi
 
-#( cd target/NB.AppDir && (
+#( cd ${APPDIR} && (
 #  rsync -av ..
 #  if [ ! -d "usr/bin/jre" ]
 #  then
