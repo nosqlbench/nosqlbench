@@ -194,13 +194,13 @@ public class TestNBCLIOptions {
     }
 
     @Test
-    public void scenarioYaml() {
+    public void defaultScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
     }
 
     @Test
-    public void scenarioYamlCliArgs() {
+    public void defaultScenarioWithParams() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "cycles=100"});
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
@@ -208,13 +208,13 @@ public class TestNBCLIOptions {
     }
 
     @Test
-    public void scenarioYamlFilter() {
+    public void namedScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only"});
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
     }
 
     @Test
-    public void scenarioYamlFilterCliArgs() {
+    public void namedScenarioWithParams() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles=100"});
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
