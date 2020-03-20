@@ -241,6 +241,8 @@ public class TestNBCLIOptions {
 
     @Test
     public void nbcli() {
-        NBCLI.main(new String[]{"--list-workloads"});
+        NBCLI nb = new NBCLI("--list-workloads");
+        nb.printWorkloads();
+
     }
 }

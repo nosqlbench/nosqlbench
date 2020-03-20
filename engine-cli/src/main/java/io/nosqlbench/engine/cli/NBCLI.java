@@ -81,28 +81,7 @@ public class NBCLI {
         }
 
         if (options.wantsWorkloads()) {
-            //ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
-            List<NosqlBenchFiles.WorkloadDesc> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
-            for (NosqlBenchFiles.WorkloadDesc workload : workloads) {
-                System.out.println("# from: "+ workload.getYamlPath());
-                List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
-                Set<String> templates = workload.getTemlpates();
-
-                for (String scenario : scenarioList) {
-                    if (scenario.equals("default")) {
-                        scenario = scenario +  " # same as running ./nb " + workloadName ;
-                    }
-                    System.out.println("  ./nb " + workloadName + " " + scenario);
-                }
-                if (templates.size()>0){
-                    System.out.println("# with the following optional parameters and defaults: ");
-                    templates.stream()
-                        .map(x -> x.replaceAll(",","="))
-                        .map(x -> "# "+x)
-                        .forEach(System.out::println);
-                }
-            }
+            printWorkloads();
             System.exit(0);
         }
 
@@ -243,6 +222,31 @@ public class NBCLI {
         } else {
             System.exit(0);
         }
+    }
+
+    public void printWorkloads() {
+        List<NosqlBenchFiles.WorkloadDesc> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
+        for (NosqlBenchFiles.WorkloadDesc workload : workloads) {
+            System.out.println("# from: "+ workload.getYamlPath());
+            List<String> scenarioList = workload.getScenarioNames();
+            String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
+            Set<String> templates = workload.getTemlpates();
+
+            for (String scenario : scenarioList) {
+                if (scenario.equals("default")) {
+                    scenario = scenario +  " # same as running ./nb " + workloadName ;
+                }
+                System.out.println("  ./nb " + workloadName + " " + scenario);
+            }
+            if (templates.size()>0){
+                System.out.println("# with the following optional parameters and defaults: ");
+                templates.stream()
+                    .map(x -> x.replaceAll(",","="))
+                    .map(x -> "# "+x)
+                    .forEach(System.out::println);
+            }
+        }
+
     }
 
     private String loadHelpFile(String filename) {
