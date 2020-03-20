@@ -55,7 +55,7 @@ public class CQLSessionCache implements Shutdownable {
         String host = activityDef.getParams().getOptionalString("host").orElse("localhost");
         int port = activityDef.getParams().getOptionalInteger("port").orElse(9042);
 
-        String driverType = activityDef.getParams().getOptionalString("driver").orElse("dse");
+        String driverType = activityDef.getParams().getOptionalString("cqldriver").orElse("dse");
 
         Cluster.Builder builder =
                 driverType.toLowerCase().equals("dse") ? DseCluster.builder() :
