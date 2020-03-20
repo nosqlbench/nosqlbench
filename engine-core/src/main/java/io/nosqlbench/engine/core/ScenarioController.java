@@ -241,6 +241,7 @@ public class ScenarioController {
                             n ->
                                     activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
                                             || activityDef.getParams().getOptionalString("yaml").orElse("").contains(n)
+                                                || activityDef.getParams().getOptionalString("workload").orElse("").contains(n)
                     ).collect(Collectors.toList());
                     if (matching.size()==1) {
                         activityTypeName=matching.get(0);

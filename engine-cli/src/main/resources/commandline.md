@@ -1,4 +1,4 @@
-### Basic Command-Line Options ###
+### Command-Line Options ###
 
 Help ( You're looking at it. )
 
@@ -18,7 +18,7 @@ named argument to the previous command. The following example
 is a commandline with a command *start*, and two named arguments
 to that command.
 
-    PROG start type=diag alias=example    
+    PROG start type=diag alias=example
 
 ### Discovery options ###
 
@@ -79,7 +79,7 @@ where `<level>` can be one of OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL
 Specify an override for one or more classes:
 
     --log-level-override com.foobarbaz:DEBUG,com.barfoobaz:TRACE
-    
+
 Specify the logging pattern:
 
     --with-logging-pattern '%date %level [%thread] %logger{10} [%file:%line] %msg%n'
@@ -90,7 +90,7 @@ Specify the logging pattern:
 Specify a directory and enable CSV reporting of metrics:
 
     --report-csv-to <dirname>
-    
+
 Specify the graphite destination and enable reporting
 
     --report-graphite-to <addr>[:<port>]
@@ -116,11 +116,11 @@ Log HDR histogram stats to a CSV file
     --log-histostats 'stats.csv:.*'       # same as above
     --log-histostats 'stats.csv:.*:1m'    # with 1-minute interval
     --log-histostats 'stats.csv:.*specialmetrics:10s'
-    
+
 Adjust the progress reporting inverval
 
     --progress console:10s
-    
+
 or
 
     --progress logonly:5m
@@ -131,8 +131,8 @@ for your histograms and timers, you may do so with this option:
     --classic-histograms prefix
     --classic-histograms 'prefix:.*'               # same as above
     --classic-histograms 'prefix:.*specialmetrics' # subset of names
-    
-    
+
+
 Name the current session, for logfile naming, etc
 By default, this will be "scenario-TIMESTAMP", and a logfile will be created
 for this name.
@@ -153,15 +153,15 @@ with the default credentials admin/admin).
 ### Console Options ###
 Increase console logging levels: (Default console logging level is *warning*)
 
-    -v         (info)         
+    -v         (info)
     -vv        (debug)
     -vvv       (trace)
 
     --progress console:1m (disables itself if -v options are used)
 
 These levels affect *only* the console output level. Other logging level
-parameters affect logging to the scenario log, stored by default in logs/...    
-    
+parameters affect logging to the scenario log, stored by default in logs/...
+
 Show version, long form, with artifact coordinates.
 
     --version
