@@ -3,6 +3,8 @@ title: 02 Results
 weight: 3
 ---
 
+# Example Results
+
 We just ran a very simple workload against our database. In that example, we saw that
 nosqlbench writes to a log file and it is in that log file where the most basic form of metrics are displayed.
 

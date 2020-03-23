@@ -3,6 +3,8 @@ title: Next Steps
 weight: 5
 ---
 
+# Next Steps
+
 Now that you've run nosqlbench for the first time and seen what it does, you can
 choose what level of customization you want for further testing.
 

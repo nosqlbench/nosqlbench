@@ -3,6 +3,8 @@ title: 01 Commands
 weight: 2
 ---
 
+# Example Commands
+
 Let's run a simple test against a cluster to establish some basic familiarity with the NoSQLBench.
 
 ## Create a Schema

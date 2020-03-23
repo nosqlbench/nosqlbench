@@ -3,6 +3,8 @@ title: NoSQLBench Showcase
 weight: 10
 ---
 
+# NoSQLBench Showcase
+
 Since NoSQLBench is new on the scene in its current form, you may be wondering
 why you would want to use it over any other tool. That is what this section is all
 about.

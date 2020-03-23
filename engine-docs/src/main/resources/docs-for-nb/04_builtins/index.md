@@ -3,9 +3,21 @@ title: Built-In Workloads
 weight: 40
 ---
 
-There are a few built-in workloads which you may want to run. These workloads can be run from a command without having to configure anything, or they can be tailored with their built-in parameters.
+# Built-In Workloads
 
-This section of the guidebook will explain each of them in detail.
+There are a few built-in workloads which you may want to run.
+These workloads can be run from a command without having to configure anything,
+or they can be tailored with their built-in parameters.
+
+There is now a way to list the built-in workloads:
+
+`nb --list-workloads` will give you a list of all the pre-defined workloads
+which have a named scenarios built-in.
+
+## Common Built-Ins
+
+This section of the guidebook will explain a couple of the common
+scenarios in detail.
 
 ## Built-In Workload Conventions
 
@@ -22,6 +34,7 @@ Each built-in contains the following tags that can be used to break the workload
 
 ### Parameters
 
-Each built-in has a set of adjustable parameters which is documented below per workload. For example, the cql-iot workload has a `sources` parameter which determines the number of unique devices in the dataset.
+Each built-in has a set of adjustable parameters which is documented below per workload. For example,
+the cql-iot workload has a `sources` parameter which determines the number of unique devices in the dataset.
 
 

@@ -3,6 +3,8 @@ title: Core Concepts
 weight: 2
 ---
 
+# Refined Core Concepts
+
 The core concepts that NoSQLBench is built on have been scrutinized,
 replaced, refined, and hardened through several years of use
 by users of various needs and backgrounds.

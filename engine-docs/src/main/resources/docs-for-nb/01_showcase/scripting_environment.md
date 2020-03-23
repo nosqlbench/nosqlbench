@@ -3,6 +3,8 @@ title: Scripting Environment
 weight: 3
 ---
 
+# Scripting Environment
+
 The ability to write open-ended testing simulations is provided in
 EngineBlock by means of a scripted runtime, where each scenario is
 driven from a control script that can do anything the user wants.

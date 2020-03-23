@@ -1,7 +1,9 @@
 ---
-title: Virtual DataSets
+title: Virtual Datasets
 weight: 1
 ---
+
+# Virtual Datasets
 
 The _Virtual Dataset_ capabilities within NoSQLBench allow you to
 generate data on the fly. There are many reasons for using this technique
