@@ -1,11 +1,4 @@
-# additional help topics
-
-## (activity types)
-
+# cql help topics
 - cql
-- cqlverify
-
-## general topics
-
-- cqlerrors
-- cqlexceptionlist
+- cql-errors
+- cql-exception-list

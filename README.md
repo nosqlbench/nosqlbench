@@ -4,6 +4,8 @@
 
 **The Open Source, Pluggable, NoSQL Benchmarking Suite**
 
+[Get it Here](DOWNLOADS.md)
+
 ## What is NoSQLBench?
 
 NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.

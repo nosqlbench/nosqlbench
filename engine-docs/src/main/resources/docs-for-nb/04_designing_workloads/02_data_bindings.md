@@ -30,7 +30,7 @@ The above bindings block is also a valid activity YAML, at least for the _stdout
      delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=10
 0,zero,00A_pro,six
 1,one,00B_pro,six
 2,two,00C_pro,three
@@ -66,7 +66,7 @@ bindings:
  delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ ./nb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./nb run driver=stdout workload=stdout-test cycles=10
 This is a statement, and the file format doesn't
 know how statements will be used!
 submit job 1 on queue one with options 00B_pro;

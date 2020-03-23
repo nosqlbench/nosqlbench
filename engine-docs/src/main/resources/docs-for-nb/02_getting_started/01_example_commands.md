@@ -12,7 +12,7 @@ From your command line, go ahead and execute the following command,
 replacing the `host=<dse-host-or-ip>` with that of one of your database nodes.
 
 ```
-./nb run type=cql yaml=cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
+./nb run driver=cql workload=cql-keyvalue tags=phase:schema host=<dse-host-or-ip>
 ```
 
 This command is creating the following schema in your database:
@@ -30,10 +30,9 @@ Let's break down each of those command line options.
 
 `start` tells nosqlbench to start an activity.
 
-`type=...` is used to specify the activity type. In this case we are using `cql`, which tells nosqlbench to use the DataStax Java Driver and execute CQL statements against a database.
+`driver=...` is used to specify the activity type (driver). In this case we are using `cql`, which tells nosqlbench to use the DataStax Java Driver and execute CQL statements against a database.
 
-`yaml=...` is used to specify the yaml file that defines the activity.
-All activities require a yaml in which you configure things such as data bindings and CQL statements, but don't worry about those details right now.
+`workload=...` is used to specify the workload definition file that defines the activity.
 
 In this example, we use `cql-keyvalue` which is a pre-built workload that is packaged with nosqlbench.
 
@@ -53,7 +52,7 @@ Before sending our test writes to the database, we will use the `stdout` activit
 
 Go ahead and execute the following command:
 
-    ./nb start type=stdout yaml=cql-keyvalue tags=phase:rampup cycles=10
+    ./nb start driver=stdout workload=cql-keyvalue tags=phase:rampup cycles=10
 
 You should see 10 of the following statements in your console
 
@@ -74,7 +73,7 @@ One thing to know is that nosqlbench deterministically generates data, so the ge
 
 Now we are ready to write some data to our database. Go ahead and execute the following from your command line:
 
-    ./nb start type=cql yaml=cql-keyvalue tags=phase:rampup host=<dse-host-or-ip> cycles=100k --progress console:1s
+    ./nb start driver=cql workload=cql-keyvalue tags=phase:rampup host=<dse-host-or-ip> cycles=100k --progress console:1s
 
 Note the differences between this and the command that we used to generate the schema.
 
@@ -104,7 +103,7 @@ cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
 
 Now that we have a base dataset of 100k rows in the database, we will now run a mixed read / write workload, by default this runs a 50% read / 50% write workload.
 
-    ./nb start type=cql yaml=cql-keyvalue tags=phase:main host=<dse-host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
+    ./nb start driver=cql workload=cql-keyvalue tags=phase:main host=<dse-host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
 
 You should see output that looks like this:
 ```

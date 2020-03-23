@@ -153,12 +153,19 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--                    <shadedClassifierName>jarapp</shadedClassifierName>-->
+<!--                    <shadedArtifactId>${project.artifactId}</shadedArtifactId>-->
+
                     <transformers combine.children="append">
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                            <resource>topics.md</resource>
+                        </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
                     </transformers>
-                    <finalName>${project.artifactId}</finalName>
+<!--                    <finalName>${project.artifactId}</finalName>-->
 
                     <filters>
                         <filter>
@@ -177,12 +184,15 @@
                  <artifactId>exec-maven-plugin</artifactId>
                  <executions>
                      <execution>
-                         <id>build-nb-appimage</id>
+                         <id>link-nb-jar-name</id>
                          <phase>package</phase>
                          <goals><goal>exec</goal></goals>
                          <configuration>
+                             <environmentVariables>
+                                 <NBJAR_VERSION>${project.version}</NBJAR_VERSION>
+                             </environmentVariables>
                              <basedir>${project.basedir}</basedir>
-                             <executable>${project.basedir}/build-bin.sh</executable>
+                             <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
                          </configuration>
                      </execution>
                      <execution>
@@ -201,8 +211,35 @@
     </build>
 
     <profiles>
-
-        <profile>
+      <profile>
+        <activation>
+          <os>
+            <family>unix</family>
+            <name>linux</name>
+            <arch>amd64</arch>
+          </os>
+        </activation>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>build-nb-appimage</id>
+                  <phase>package</phase>
+                  <goals><goal>exec</goal></goals>
+                  <configuration>
+                    <basedir>${project.basedir}</basedir>
+                    <executable>${project.basedir}/build-bin.sh</executable>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+      <profile>
             <id>enforce</id>
             <activation>
                 <activeByDefault>false</activeByDefault>

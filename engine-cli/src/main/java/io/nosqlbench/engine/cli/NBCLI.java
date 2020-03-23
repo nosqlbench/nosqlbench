@@ -56,12 +56,7 @@ public class NBCLI {
         NBCLIOptions options = new NBCLIOptions(args);
 
         if (options.wantsBasicHelp()) {
-            System.out.println(loadHelpFile("commandline.md"));
-            System.exit(0);
-        }
-
-        if (options.wantsAdvancedHelp()) {
-            System.out.println(loadHelpFile("cli_scripting.md"));
+            System.out.println(loadHelpFile("basic.md"));
             System.exit(0);
         }
 

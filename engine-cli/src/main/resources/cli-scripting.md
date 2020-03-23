@@ -30,10 +30,10 @@ Anywhere you need to specify a time, you can use standard unit suffixes,
 like "1 day", "1m", etc. Both long names and short names work in any
 case. The valid time suffixes are ns, us, ms, s, m, h, d, w, y, for
 nanoseconds, microseconds, milliseconds, seconds, minutes, hours,
-days, weeks, or years, respectively.  
+days, weeks, or years, respectively.
 
 As well, when specifying sizes, standard SI and IEC units apply for suffixes like
-KB, KiB. For more details, see 
+KB, KiB. For more details, see
 [The Wikipedia Page](https://en.wikipedia.org/wiki/Binary_prefix).
 
 For Scenario Designers
@@ -43,7 +43,7 @@ You can build up a complex scenario by combining scripts and activities.
 If this scenario needs to have some cross-shared logic, that is up to you,
 the scenario designer.
 
-## Script Parameters    
+## Script Parameters
 
 Any arguments following a script in name=value form will be used to parameterize
 the script. Script parameters are simply macro tokens in the form &lt;&lt;NAME:default&gt;&gt;.
@@ -67,7 +67,7 @@ to make a list that you can copy metric names from for scripting. If you provide
 an example activity alias that matches one of your scripts, you can use it exactly
 as it appears.
 ~~~
-PROG --list-metrics type=diag alias=anexample
+PROG --list-metrics driver=diag alias=anexample
 ~~~
 This will dump a list of metric names in the shortened format that is most suitable
 for scenario script development. This format is required for the --list-metrics
@@ -111,7 +111,7 @@ fragment '<ecmascript>...'
 These can all be used on the command line in any order. The scenario script is assembled
 from them before it is executed. If you want to see the resulting script, use the
  --show-script option to dump the script to the console instead of running it.
- 
+
 By combining these activity commands on the command line, you can construct a non-trivial
 scenario from other snippets, control activity sequencing and concurrency, etc. This does
 not replace what is possible for direct scripting, but it does allow for many custom

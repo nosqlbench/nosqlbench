@@ -5,6 +5,18 @@ weight: 10
 
 # Getting Support
 
+In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like
+a suit of armor, so that they feel capable of doing most things without having to ask for help. Please
+keep this in mind when looking for personal support form our community, and help us find those places
+where the docs are lacking. Maybe you can help us by adding some missing docs!
+     
+## NoSQLBench Slack
+
+There is a new [slack channel](https://join.slack.com/t/nosqlbench/shared_invite/zt-cu9f2jpe-XiHN3SsUDcjkVgxaURFuaw) for NoSQLBench.
+Please join it if you are a new or existing NoSQLBench user and help us get it going!
+
+## General Feedback
+
 These guidelines are mirrored at the [Submitting Feedback](https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback)
 wiki page at the nosqlbench project site, which is also where any `[Submit Feedback]` links should will take you.
 

@@ -17,11 +17,12 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
 
     @Override
     public CqlActivity getActivity(ActivityDef activityDef) {
-        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml");
+
+        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml", "workload");
 
         // sanity check that we have a yaml parameter, which contains our statements and bindings
         if (yaml.isEmpty()) {
-            throw new RuntimeException("Currently, the cql activity type requires yaml activity parameter.");
+            throw new RuntimeException("Currently, the cql activity type requires yaml/workload activity parameter.");
         }
 
         // allow shortcut: yaml parameter provide the default alias name
@@ -41,7 +42,5 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
     public ActionDispenser getActionDispenser(CqlActivity activity) {
         return new CqlActionDispenser(activity);
     }
-
-
 
 }
