@@ -3,6 +3,8 @@ title: 03 Metrics
 weight: 4
 ---
 
+# Example Metrics
+
 A set of core metrics are provided for every workload that runs with nosqlbench,
  regardless of the activity type and protocol used. This section explains each of
   these metrics and shows an example of them from the log file.

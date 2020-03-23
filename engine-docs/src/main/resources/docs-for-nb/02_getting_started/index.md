@@ -3,6 +3,8 @@ title: Quick Start Example
 weight: 20
 ---
 
+# Quick Start Example
+
 ## Downloading
 
 NoSQLBench is packaged directly as a Linux binary named `nb` and as

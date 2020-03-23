@@ -1,6 +1,6 @@
 ---
-title: 10 YAML Diagnostics
-weight: 10
+title: YAML Diagnostics
+weight: 99
 ---
 
 ## Diagnostics

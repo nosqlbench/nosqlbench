@@ -3,6 +3,8 @@ title: Modular Architecture
 weight: 11
 ---
 
+# Modular Architecture
+
 The internal architecture of NoSQLBench is modular throughout.
 Everything from the scripting extensions to the data generation functions
 is enumerated at compile time into a service descriptor, and then discovered
