@@ -14,7 +14,7 @@
         <java.target.version>12</java.target.version>
 
         <!-- properties for package versions -->
-        <antlr4.version>4.7.2</antlr4.version>
+        <antlr4.version>4.8</antlr4.version>
         <ascii.data.version>1.2.0</ascii.data.version>
         <assertj.java8.version>1.0.0m1</assertj.java8.version>
         <commons.codec.version>1.14</commons.codec.version>
