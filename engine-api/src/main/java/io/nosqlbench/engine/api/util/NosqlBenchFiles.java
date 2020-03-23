@@ -148,7 +148,7 @@ public class NosqlBenchFiles {
 
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
 
-        String dir = "./";
+        String dir = "activities/";
 
         Path basePath = VirtDataResources.findPathIn(dir);
         List<Path> yamlPathList = PathWalker.findAll(basePath)
@@ -159,7 +159,7 @@ public class NosqlBenchFiles {
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
         for (Path yamlPath : yamlPathList) {
-            String substring = yamlPath.toString().substring(2);
+            String substring = yamlPath.toString().substring(1);
             StmtsDocList stmts = StatementsLoader.load(logger, substring);
 
             Set<String> templates = new HashSet<>();

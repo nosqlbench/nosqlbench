@@ -1,0 +1,10 @@
+# example-scenarios.yaml
+scenarios:
+  default:
+    - run cycles=3 alias=A type=stdout
+    - run cycles=5 alias=B type=stdout
+bindings:
+  cycle: Identity()
+  name: NumberNameToCycle()
+statements:
+  - cycle: "cycle {cycle}\n"

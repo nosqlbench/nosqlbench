@@ -194,6 +194,12 @@ public class TestNBCLIOptions {
     }
 
     @Test
+    public void providePathForScenario() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example-scenarios" });
+        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+    }
+
+    @Test
     public void defaultScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
@@ -239,10 +245,5 @@ public class TestNBCLIOptions {
         assertThat(yamlPathList);
     }
 
-    @Test
-    public void nbcli() {
-        NBCLI nb = new NBCLI("--list-workloads");
-        nb.printWorkloads();
 
-    }
 }

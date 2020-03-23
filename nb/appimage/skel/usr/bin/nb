@@ -1,15 +1,14 @@
 #!/bin/bash
-#set -x 
+#set -x
 DIR="$(dirname "$(readlink -f "$0")")"
 if [ "$1" = "-DN" ]
 then
  shift
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nb.jar "$@"
 elif [ "$1" = "-DY" ]
 then
  shift
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nb.jar "$@"
 else
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -jar $DIR/nb.jar "$@"
 fi
-

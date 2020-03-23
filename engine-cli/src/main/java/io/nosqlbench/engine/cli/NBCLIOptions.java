@@ -333,7 +333,6 @@ public class NBCLIOptions {
                                 arglist.removeFirst();
                             }
 
-                            //arglist.addFirst("yaml="+path.get().toString());
                             parseWorkloadYamlCmds(path.get().toString(), arglist, scenarioFilter);
                         }
                         else {
@@ -360,6 +359,14 @@ public class NBCLIOptions {
         Map<String, String> paramMap = new HashMap<>();
         while(arglist.size() > 0 && arglist.peekFirst().contains("=")){
             String arg = arglist.removeFirst();
+            String oldArg = arg;
+            arg = arg
+                .replaceAll("\\stype=", " driver=")
+                .replaceAll("\\syaml=", " workload=");
+
+            if (!arg.equals(oldArg)){
+                logger.warn("Identified deprecated usage of parameter name yaml or type. The new parameters are now workload and driver respectively");
+            }
             for(int i =0 ; i< cmds.size(); i++){
                 String yamlCmd = cmds.get(i);
                 String[] argArray = arg.split("=");
@@ -396,8 +403,13 @@ public class NBCLIOptions {
 
             cmd = sub2.replace(sub1.replace(cmd));
 
+            if (cmd.contains("yaml=") || cmd.contains("workload=")){
+                parse(cmd.split(" "));
+            }else{
+                parse((cmd + " workload="+yamlPath).split(" "));
+            }
+
             // Is there a better way to do this than regex?
-            parse(cmd.split(" "));
 
         }
     }
