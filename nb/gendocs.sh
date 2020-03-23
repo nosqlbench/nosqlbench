@@ -12,13 +12,13 @@ fi
 if [ ! -d "target/guidebook" ]
 then
 
- pushd ../docsys/src/main/node/docsys || exit 1
- if ! ./update.sh "$@"
- then
-   printf "Unable to update the guidebook static app\n"
-   exit 2;
- fi
- popd
+# pushd ../docsys/src/main/node/docsys || exit 1
+# if ! ./update.sh "$@"
+# then
+#   printf "Unable to update the guidebook static app\n"
+#   exit 2;
+# fi
+# popd
  
  cp -R ../docsys/src/main/resources/docsys-guidebook/ ${GUIDEBOOK}/
 else
