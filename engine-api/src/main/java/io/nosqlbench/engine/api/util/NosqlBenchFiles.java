@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 public class NosqlBenchFiles {
 
     private final static Logger logger = LoggerFactory.getLogger(NosqlBenchFiles.class);
-    private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+)\\)");
-    private static Pattern templatePattern2 = Pattern.compile("<<(.+)>>");
+    private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
 
     public static InputStream findRequiredStreamOrFile(String basename, String extension, String... searchPaths) {
