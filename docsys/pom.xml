@@ -125,23 +125,31 @@
     </dependencies>
 
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <groupId>org.apache.maven.plugins</groupId>
-                <configuration>
-                    <transformers combine.children="append">
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>io.nosqlbench.docsys.core.DocServerApp</mainClass>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    </transformers>
-                    <minimizeJar>false</minimizeJar>
-                    <finalName>${project.artifactId}</finalName>
-                </configuration>
-            </plugin>
+    <profiles>
+        <profile>
+            <id>shade</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <configuration>
+                            <transformers combine.children="append">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>io.nosqlbench.docsys.core.DocServerApp</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
+                            <minimizeJar>false</minimizeJar>
+                            <finalName>${project.artifactId}</finalName>
+                        </configuration>
+                    </plugin>
 
-        </plugins>
-    </build>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
