@@ -9,7 +9,7 @@ This is the same documentation that you get when you run
 
     ./nb help cql
 
-To select this activity type, pass `type=cql` to a run or start command.
+To select this activity type, pass `driver=cql` to a run or start command.
 
 ---------
 
@@ -25,22 +25,22 @@ metrics about op binding, op submission, and waiting for a result.
 
 Run a cql activity named 'cql1', with definitions from activities/cqldefs.yaml
 ~~~
-... type=cql alias=cql1 yaml=cqldefs
+... driver=cql alias=cql1 workload=cqldefs
 ~~~
 
 Run a cql activity defined by cqldefs.yaml, but with shortcut naming
 ~~~
-... type=cql yaml=cqldefs
+... driver=cql workload=cqldefs
 ~~~
 
 Only run statement groups which match a tag regex
 ~~~
-... type=cql yaml=cqldefs tags=group:'ddl.*'
+... driver=cql workload=cqldefs tags=group:'ddl.*'
 ~~~
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
 ~~~
-... type=cql yaml=cqldefs tags=group:'dml.*' cycles=1000..1100
+... driver=cql workload=cqldefs tags=group:'dml.*' cycles=1000..1100
 ~~~
 This last example shows that the cycle range is [inclusive..exclusive),
 to allow for stacking test intervals. This is standard across all
@@ -48,17 +48,15 @@ activity types.
 
 ### CQL ActivityType Parameters
 
-- **driver** - default: dse - The type of driver to use, either dse, or
-  oss. If you need DSE-specific features, use the dse driver. If you are
-  connecting to an OSS Apache Cassandra cluster, you must use the oss
-  driver. The oss driver option is only available in nosqlbench.
 - **host** - The host or hosts to use for connection points to
     the cluster. If you specify multiple values here, use commas
     with no spaces.
     Examples:
     - `host=192.168.1.25`
     - `host=`192.168.1.25,testhost42`
-- **yaml** - The file which holds the schema and statement defs.
+- **workload** - Workload definition which is also the name of the yaml file or path to the yaml file
+    which holds the schema and statement defs.
+    see workload yaml locations below.
     (no default, required)
 - **port** - The port to connect with
 - **cl** - An override to consistency levels for the activity. If
@@ -181,7 +179,7 @@ activity types.
     - `jmxreporting=true`
     - `jmxreporting=false` (the default)
 - **alias** - this is a standard engineblock parameter, however
-    the cql type will use the yaml value also as the alias value
+    the cql type will use the workload value also as the alias value
     when not specified.
 - **errors** - error handler configuration.
     (default errors=stop,retryable->retry,unverified->stop)
@@ -215,7 +213,7 @@ activity types.
     (default: bucket)
     (options: concat | bucket | interval)
     The concat sequencer repeats each statement in order until the ratio
-    is achieved.  
+    is achieved.
     The bucket sequencer uses simple round-robin distribution to plan
     statement ratios, a simple but unbalanced form of interleaving.
     The interval sequencer apportions statements over time and then by
@@ -274,36 +272,36 @@ now **they are limited to a YAML params block**:
     params:
 
      ratio: 1
-     # Sets the statement ratio within the operation sequencer 
+     # Sets the statement ratio within the operation sequencer
      # scheme. Integers only.
-     # When preparing the operation order (AKA sequencing), 
+     # When preparing the operation order (AKA sequencing),
      # frequency of the associated statements.
 
      cl: ONE
      # Sets the consistency level, using any of the standard
-     # identifiers from com.datastax.driver.core.ConsistencyLevel, 
-     # any one of: 
-     # LOCAL_QUORUM, ANY, ONE, TWO, THREE, QUORUM, ALL, 
+     # identifiers from com.datastax.driver.core.ConsistencyLevel,
+     # any one of:
+     # LOCAL_QUORUM, ANY, ONE, TWO, THREE, QUORUM, ALL,
      # EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE
 
      prepared: true
-     # By default, all statements are prepared. If you are 
+     # By default, all statements are prepared. If you are
      # creating schema, set this to false.
 
      idempotent: false
-     # For statements that are known to be idempotent, set this 
+     # For statements that are known to be idempotent, set this
      # to true
 
      instrument: false
-     # If a statement has instrument set to true, then 
+     # If a statement has instrument set to true, then
      # individual Timer metrics will be tracked for
-     # that statement for both successes and errors, 
+     # that statement for both successes and errors,
      # using the given statement name.
-    
+
     logresultcsv: true
     OR
     logresultcsv: myfilename.csv
-    # If a statement has logresultcsv set to true, 
+    # If a statement has logresultcsv set to true,
     # then individual operations will be logged to a CSV file.
     # In this case the CSV file will be named as
     # <statement-name>--results.csv.
@@ -375,7 +373,7 @@ no operation had to be retried.
 As for a normal single page read result, both the execute and result timers
 are included within the code block wrapped by the pages metric.
 
-### YAML Format
+### Workload YAML Format
 
 The YAML file for a CQL activity has the following structure:
 1. One or more document sections, separated with '---' and a newline.
@@ -409,14 +407,14 @@ additional parameters to the activity. There are two forms,
 form contains a default value. In any case, if one of these parameters is
 encountered and a qualifying value is not found, an error will be thrown.
 
-### YAML Location
+### Workload YAML Location
 
-The YAML file referenced in the yaml= parameter will be searched for in the following places, in this order:
+The YAML file referenced in the workload= parameter will be searched for in the following places, in this order:
 1. A URL, if it starts with 'http:' or 'https:'
 2. The local filesystem, if it exists there
 3. The internal classpath and assets in the jar.
 
-The '.yaml' suffix is not required in the yaml= parameter, however it is
+The '.yaml' suffix is not required in the workload= parameter, however it is
 required on the actual file. As well, the logical search path "activities/"
 will be used if necessary to locate the file, both on the filesystem and in
 the classpath.

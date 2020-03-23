@@ -4,7 +4,7 @@ This is a diagnostic activity type. Its action simply reports the cycle number a
 
 ## example activitydef
 
-alias=testdiag;type=diag;threads=50;interval=2000;
+alias=testdiag;driver=diag;threads=50;interval=2000;
 
 ## controls
 
@@ -17,7 +17,7 @@ active motor.
   ( default: 1000ms )
 - modulo - The cycle rate at which to generate a single output status line.
   ( default: modulo=10000000 )
-- errormodulo - The cycle rate at which to generate a non-zero status code 
+- errormodulo - The cycle rate at which to generate a non-zero status code
   (1=every cycle, 10=every 10th cycle)
   ( default: errormodule=1000 )
 - phases - The number of phases to run.

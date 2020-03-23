@@ -5,6 +5,12 @@ weight: 50
 
 Each nosqlbench scenario is comprised of one or more activities of a specific type. The types of activities available are provided by the version of nosqlbench.
 
-Additional activity types will be added in future releases. This section is a reference section that shows the help you would get with a command like:
+Additional activity types will be added in future releases. There are command line help topics for each activity type (driver).
 
-    ./nb help <activity type>
+To get a list of topics run:
+
+    ./nb help topics
+
+To get the help for a particular topic run:
+
+    ./nb help <topic>

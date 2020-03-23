@@ -275,7 +275,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private StmtsDocList loadStmtsYaml() {
         StmtsDocList doclist = null;
 
-        String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
+
+        String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
+
         StrInterpolator interp = new StrInterpolator(activityDef);
 
         String yamlVersion = "unset";

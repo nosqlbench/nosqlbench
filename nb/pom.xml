@@ -181,15 +181,6 @@
                  <artifactId>exec-maven-plugin</artifactId>
                  <executions>
                      <execution>
-                         <id>build-nb-appimage</id>
-                         <phase>package</phase>
-                         <goals><goal>exec</goal></goals>
-                         <configuration>
-                             <basedir>${project.basedir}</basedir>
-                             <executable>${project.basedir}/build-bin.sh</executable>
-                         </configuration>
-                     </execution>
-                     <execution>
                          <id>build-static-guidebook</id>
                          <phase>package</phase>
                          <goals><goal>exec</goal></goals>
@@ -205,8 +196,35 @@
     </build>
 
     <profiles>
-
-        <profile>
+      <profile>
+        <activation>
+          <os>
+            <family>unix</family>
+            <name>linux</name>
+            <arch>amd64</arch>
+          </os>
+        </activation>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>build-nb-appimage</id>
+                  <phase>package</phase>
+                  <goals><goal>exec</goal></goals>
+                  <configuration>
+                    <basedir>${project.basedir}</basedir>
+                    <executable>${project.basedir}/build-bin.sh</executable>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+      <profile>
             <id>enforce</id>
             <activation>
                 <activeByDefault>false</activeByDefault>

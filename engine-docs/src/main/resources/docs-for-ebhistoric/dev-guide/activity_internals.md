@@ -38,7 +38,7 @@ common parameters.
 
 On the command line, you can specify parameters for an activity in the form:
 ~~~
-type=cql alias=activity1 yaml=inserts_cql.yaml cycles=0..1000 threads=10
+driver=cql alias=activity1 workload=inserts_cql.yaml cycles=0..1000 threads=10
 ~~~
 
 Other convenient forms are available when needed -- a JSON map for example.
@@ -53,7 +53,7 @@ for a couple of reasons:
 
 1. The client behavior can emulate typical threading dynamics of real
    applications more accurately than a task-and-queue-only abstraction.
-2. The synthetic thread ID can be borrowed and used to directly 
+2. The synthetic thread ID can be borrowed and used to directly
    map some measure of concurrency of data flow.
 3. It is a familiar concurrency primitive that is used in many other testing tools.
 

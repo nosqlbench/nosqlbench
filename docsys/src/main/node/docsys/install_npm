@@ -1,6 +1,7 @@
-#!/usr/bin/bash
-if ! which curl >/dev/null 2>&1
-then
+#!/usr/bin/env bash
+
+CURL="$(command -v curl)"
+if [ -z "$CURL" ]; then
  printf "attempting to install curl\n";
  sudo apt install curl
 fi
@@ -12,7 +13,7 @@ then
 fi
 
 mkdir -p local
-pushd local
+pushd local || exit
 curl -O https://nodejs.org/dist/v12.16.1/node-v12.16.1-linux-x64.tar.xz
 tar xf node-v12.16.1-linux-x64.tar.xz
 rm node*.xz
