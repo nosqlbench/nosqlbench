@@ -153,7 +153,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <shadedArtifactAttached>false</shadedArtifactAttached>
+<!--                    <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--                    <shadedClassifierName>jarapp</shadedClassifierName>-->
+<!--                    <shadedArtifactId>${project.artifactId}</shadedArtifactId>-->
+
                     <transformers combine.children="append">
                         <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                             <resource>topics.md</resource>
@@ -162,7 +165,7 @@
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
                     </transformers>
-                    <finalName>${project.artifactId}</finalName>
+<!--                    <finalName>${project.artifactId}</finalName>-->
 
                     <filters>
                         <filter>
@@ -180,6 +183,18 @@
                  <groupId>org.codehaus.mojo</groupId>
                  <artifactId>exec-maven-plugin</artifactId>
                  <executions>
+                     <execution>
+                         <id>link-nb-jar-name</id>
+                         <phase>package</phase>
+                         <goals><goal>exec</goal></goals>
+                         <configuration>
+                             <environmentVariables>
+                                 <NBJAR_VERSION>${project.version}</NBJAR_VERSION>
+                             </environmentVariables>
+                             <basedir>${project.basedir}</basedir>
+                             <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
+                         </configuration>
+                     </execution>
                      <execution>
                          <id>build-static-guidebook</id>
                          <phase>package</phase>
