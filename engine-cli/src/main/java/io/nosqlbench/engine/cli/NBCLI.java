@@ -237,6 +237,7 @@ public class NBCLI {
                 System.out.println("# with the following optional parameters and defaults: ");
                 templates.stream()
                     .map(x -> x.replaceAll(",","="))
+                    .map(x -> x.replaceAll(":","="))
                     .map(x -> " # "+x)
                     .forEach(System.out::println);
             }
