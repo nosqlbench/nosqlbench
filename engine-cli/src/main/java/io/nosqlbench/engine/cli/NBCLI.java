@@ -227,7 +227,7 @@ public class NBCLI {
     public void printWorkloads() {
         List<NosqlBenchFiles.WorkloadDesc> workloads = NosqlBenchFiles.getWorkloadsWithScenarioScripts();
         for (NosqlBenchFiles.WorkloadDesc workload : workloads) {
-            System.out.println("# from: "+ workload.getYamlPath());
+            System.out.println("\n# from: "+ workload.getYamlPath());
             List<String> scenarioList = workload.getScenarioNames();
             String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
             Set<String> templates = workload.getTemlpates();
@@ -242,7 +242,7 @@ public class NBCLI {
                 System.out.println("# with the following optional parameters and defaults: ");
                 templates.stream()
                     .map(x -> x.replaceAll(",","="))
-                    .map(x -> "# "+x)
+                    .map(x -> " # "+x)
                     .forEach(System.out::println);
             }
         }
