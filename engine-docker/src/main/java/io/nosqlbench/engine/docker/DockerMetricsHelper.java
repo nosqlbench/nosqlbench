@@ -19,17 +19,19 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
-import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
+//import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
+import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 import com.sun.security.auth.module.UnixSystem;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.*;
+import java.net.Authenticator;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,7 +47,8 @@ public class DockerMetricsHelper {
     private static final String DOCKER_HOST = "DOCKER_HOST";
     private static final String DOCKER_HOST_ADDR = "unix:///var/run/docker.sock";
     String userHome = System.getProperty("user.home");
-    private Client rsClient = ClientBuilder.newClient();
+//    private Client rsClient = ClientBuilder.newClient();
+
     private DockerClientConfig config;
     private DockerClient dockerClient;
     private Logger logger = LoggerFactory.getLogger(DockerMetricsHelper.class);
@@ -53,9 +56,13 @@ public class DockerMetricsHelper {
     public DockerMetricsHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(DOCKER_HOST_ADDR).build();
-        DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
-                .withReadTimeout(1000)
-                .withConnectTimeout(1000);
+        DockerCmdExecFactory dockerCmdExecFactory = new OkHttpDockerCmdExecFactory()
+            .withReadTimeout(1000)
+            .withConnectTimeout(1000);
+
+//        DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
+//                .withReadTimeout(1000)
+//                .withConnectTimeout(1000);
 
         this.dockerClient = DockerClientBuilder.getInstance(config)
                 .withDockerCmdExecFactory(dockerCmdExecFactory)
@@ -240,36 +247,41 @@ public class DockerMetricsHelper {
 
 
     private void configureGrafana() {
-        Response response = post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true);
-
-        response = post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true);
+        post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true);
+        post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true);
     }
 
-    private Response post(String url, String path, boolean auth) {
+    private static String basicAuth(String username, String password) {
+        return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+    }
+
+
+    private HttpResponse<String> post(String url, String path, boolean auth) {
+        HttpClient.Builder clientBuilder = HttpClient.newBuilder();
+        HttpClient httpClient = clientBuilder.build();
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder();
+        builder = builder.uri(URI.create(url));
         if (auth) {
-            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("admin", "admin");
-            rsClient.register(feature);
+            builder = builder.header("Authorization", basicAuth("username", "password"));
         }
 
-        WebTarget webTarget
-                = rsClient.target(url);
-        Invocation.Builder invocationBuilder
-                = webTarget.request(MediaType.APPLICATION_JSON);
-
-        Response response;
-        if (path != null) {
+        if (path !=null) {
             String dashboard = NosqlBenchFiles.readFile(path);
-            response
-                    = invocationBuilder
-                    .post(Entity.entity(dashboard, MediaType.APPLICATION_JSON));
+            builder = builder.POST(HttpRequest.BodyPublishers.ofString(dashboard));
         } else {
-            response
-                    = invocationBuilder
-                    .post(Entity.entity(null, MediaType.APPLICATION_JSON));
-
+            builder = builder.GET();
         }
 
-        return response;
+        HttpRequest request = builder.build();
+
+        try {
+            HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            logger.debug("http response for configuring grafana:\n" + resp);
+            return resp;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

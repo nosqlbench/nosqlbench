@@ -1,125 +1,137 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>mvn-defaults</artifactId>
-    <groupId>io.nosqlbench</groupId>
-    <version>3.12.48-SNAPSHOT</version>
-    <relativePath>../mvn-defaults</relativePath>
-  </parent>
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>3.12.48-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
 
-  <artifactId>engine-docker</artifactId>
-  <packaging>jar</packaging>
-  <name>${project.artifactId}</name>
-  <description>java-docker module for nosqlbench</description>
+    <artifactId>engine-docker</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>java-docker module for nosqlbench</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javadoc.name>nosqlbench Java Docker Module</javadoc.name>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.name>nosqlbench Java Docker Module</javadoc.name>
+    </properties>
 
-  <dependencies>
+    <dependencies>
 
-    <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport-native-epoll</artifactId>
-      <classifier>linux-x86_64</classifier>
-    </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
 
-    <dependency>
-      <groupId>com.github.docker-java</groupId>
-      <artifactId>docker-java-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.docker-java</groupId>
-      <artifactId>docker-java-core</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-core</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>com.github.docker-java</groupId>
-      <artifactId>docker-java-transport-jersey</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-okhttp</artifactId>
+        </dependency>
 
-<!--    <dependency>-->
-<!--      <groupId>com.github.docker-java</groupId>-->
-<!--      <artifactId>docker-java-transport-netty</artifactId>-->
-<!--      <version>3.2.0-rc2</version>-->
-<!--    </dependency>-->
+        <!--    <dependency>-->
+        <!--      <groupId>com.github.docker-java</groupId>-->
+        <!--      <artifactId>docker-java-transport-jersey</artifactId>-->
+        <!--    </dependency>-->
 
-    <dependency>
-      <groupId>com.github.docker-java</groupId>
-      <artifactId>docker-java</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>docker-java-transport-netty</artifactId>
-          <groupId>com.github.docker-java</groupId>
-        </exclusion>
-      </exclusions>
-      <!--      <exclusions>-->
-<!--        <exclusion>-->
-<!--          <artifactId>docker-java-transport-jersey</artifactId>-->
-<!--          <groupId>com.github.docker-java</groupId>-->
-<!--        </exclusion>-->
-<!--      </exclusions>-->
-    </dependency>
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>engine-api</artifactId>
-      <version>3.12.48-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
+        <!--    <dependency>-->
+        <!--      <groupId>com.github.docker-java</groupId>-->
+        <!--      <artifactId>docker-java-transport-netty</artifactId>-->
+        <!--      <version>3.2.0-rc2</version>-->
+        <!--    </dependency>-->
 
-  <profiles>
-    <profile>
-      <id>shade</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <executions>
-              <execution>
-                <goals><goal>shade</goal></goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>shaded</shadedClassifierName>
-              <minimizeJar>true</minimizeJar>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>docker-java-transport-netty</artifactId>
+                    <groupId>com.github.docker-java</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>docker-java-transport-jersey</artifactId>
+                    <groupId>com.github.docker-java</groupId>
+                </exclusion>
+            </exclusions>
+            <!--      <exclusions>-->
+            <!--        <exclusion>-->
+            <!--          <artifactId>docker-java-transport-jersey</artifactId>-->
+            <!--          <groupId>com.github.docker-java</groupId>-->
+            <!--        </exclusion>-->
+            <!--      </exclusions>-->
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>3.12.48-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>shade</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>shaded</shadedClassifierName>
+                            <minimizeJar>true</minimizeJar>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>
