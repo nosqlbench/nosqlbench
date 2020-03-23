@@ -10,6 +10,20 @@ The latest release of NoSQLBench is always available from github releases.
   single-jar application.
   - This requires java 12 or later, make sure your `java -version` command says that you are on Java 12 or later.
 
+## Docker
+
+You can use a live docker image for the latest nosqlbench.
+
+1. run `docker pull nosqlbench/nosqlbench`
+2. docserver `docker run -p 12345:12345 --rm --name nb-docs nosqlbench/nosqlbench docserver http://0.0.0.0:12345
+`
+3. Any other command can be run against your nosqlbench docker images using this form.
+
+Links to docker images:
+
+- [nosqlbench/nosqlbench:latest](https://hub.docker.com/r/nosqlbench/nosqlbench/tags?page=1&name=latest)
+- [All tagged docker images](https://hub.docker.com/r/nosqlbench/nosqlbench/tags)
+
 ## Maven
 
 The latest release of NoSQLBench is always available fro Maven Central.
