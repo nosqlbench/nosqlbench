@@ -90,6 +90,29 @@
     }
 </script>
 <style>
+
+    .v-list-item {
+            color: #FFFFFF;
+    }
+
+    .v-list-item--title {
+            color: #FFFFFF;
+    }
+
+    .v-list-item--active {
+        color: #FFFFFF !important;
+    }
+    .v-list-item--disabled {
+        color: #DDDDDD !important;
+    }
+    .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+        color: #DDDDDD !important;
+    }
+
+    /*.v-list-item .theme--light.v-list-item {*/
+    /*    color: #FFFFFF;*/
+    /*}*/
+
     .nuxt-link-exact-active {
         /*color: #52c41a;*/
         background-color: #7F828B;
