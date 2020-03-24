@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
 import io.nosqlbench.engine.core.MarkdownDocInfo;
 import io.nosqlbench.engine.core.ScenarioLogger;
@@ -39,8 +40,17 @@ public class NBCLI {
     }
 
     public static void main(String[] args) {
-        NBCLI cli = new NBCLI("eb");
-        cli.run(args);
+        try {
+            NBCLI cli = new NBCLI("eb");
+            cli.run(args);
+        } catch (Exception e) {
+            if (e instanceof BasicError) {
+                logger.error("ERROR: " + e.getMessage());
+                System.exit(2);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public void run(String[] args) {
