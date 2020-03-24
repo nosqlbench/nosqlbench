@@ -1,21 +1,13 @@
 package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
-import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.engine.api.util.Unit;
-import org.apache.commons.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,9 +69,9 @@ public class NBCLIOptions {
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
-                Arrays.asList(
-                        ACTIVITY, SCRIPT, ACTIVITY_TYPES, HELP, METRICS_PREFIX, REPORT_GRAPHITE_TO
-                )
+            Arrays.asList(
+                ACTIVITY, SCRIPT, ACTIVITY_TYPES, HELP, METRICS_PREFIX, REPORT_GRAPHITE_TO
+            )
         );
     }};
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
@@ -105,13 +97,13 @@ public class NBCLIOptions {
     private List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logsDirectory = "logs";
-    private boolean wantsInputTypes=false;
-    private boolean wantsMarkerTypes=false;
+    private boolean wantsInputTypes = false;
+    private boolean wantsMarkerTypes = false;
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
     private String logsLevel = "INFO";
-    private Map<String,Level> logLevelsOverrides = new HashMap<>();
+    private Map<String, Level> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
     private boolean wantsWorkloads = false;
@@ -198,7 +190,7 @@ public class NBCLIOptions {
                     break;
                 case LOGS_MAX:
                     arglist.removeFirst();
-                    logsMax = Integer.valueOf(readWordOrThrow(arglist,"max logfiles to keep"));
+                    logsMax = Integer.valueOf(readWordOrThrow(arglist, "max logfiles to keep"));
                     break;
                 case LOGS_LEVEL:
                     arglist.removeFirst();
@@ -237,7 +229,7 @@ public class NBCLIOptions {
                         logger.info("getting basic help");
                     } else {
                         wantsActivityHelp = true;
-                        wantsActivityHelpFor = readWordOrThrow(arglist,"topic");
+                        wantsActivityHelpFor = readWordOrThrow(arglist, "topic");
                     }
                     break;
                 case DUMP_CYCLELOG:
@@ -313,7 +305,7 @@ public class NBCLIOptions {
                     break;
                 default:
                     Optional<InputStream> optionalScript =
-                            NosqlBenchFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
+                        NosqlBenchFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
                     //Script
                     if (optionalScript.isPresent()) {
                         arglist.removeFirst();
@@ -322,101 +314,25 @@ public class NBCLIOptions {
                         Cmd script = parseScriptCmd(arglist);
                         cmdList.add(script);
                         //Scripted yaml
+                    } else if (NBCLIScenarioParser.isFoundWorkload(word)) {
+                        NBCLIScenarioParser.parseScenarioCommand(arglist);
                     } else {
-                        Optional<Path> path = NosqlBenchFiles.findOptionalPath(word, "yaml", "activities");
-                        if(path.isPresent()){
-                            arglist.removeFirst();
-                            String scenarioFilter = null;
-                            //Named scenario
-                            if (arglist.size() > 0 && !arglist.peekFirst().contains("=")){
-                                scenarioFilter = arglist.peekFirst();
-                                arglist.removeFirst();
-                            }
-
-                            parseWorkloadYamlCmds(path.get().toString(), arglist, scenarioFilter);
-                        }
-                        else {
-                            throw new InvalidParameterException("unrecognized option:" + word);
-                        }
+                        throw new InvalidParameterException("unrecognized option:" + word);
                     }
                     break;
             }
         }
     }
 
-    private void parseWorkloadYamlCmds(String yamlPath, LinkedList<String> arglist, String scenarioFilter) {
-        StmtsDocList stmts = StatementsLoader.load(logger, yamlPath);
-
-        Scenarios scenarios = stmts.getDocScenarios();
-
-        String scenarioName = "default";
-        if (scenarioFilter != null){
-            scenarioName = scenarioFilter;
-        }
-
-        List<String> cmds = scenarios.getNamedScenario(scenarioName);
-
-        Map<String, String> paramMap = new HashMap<>();
-        while(arglist.size() > 0 && arglist.peekFirst().contains("=")){
-            String arg = arglist.removeFirst();
-            String oldArg = arg;
-            arg = Synonyms.canonicalize(arg, logger);
-
-            for(int i =0 ; i< cmds.size(); i++){
-                String yamlCmd = cmds.get(i);
-                String[] argArray = arg.split("=");
-                String argKey = argArray[0];
-                String argValue = argArray[1];
-                if (!yamlCmd.contains(argKey)) {
-                    cmds.set(i, yamlCmd +" " + arg);
-                }else{
-                    paramMap.put(argKey, argValue);
-                }
-            }
-        }
-
-
-        if (cmds == null){
-            List<String> names = scenarios.getScenarioNames();
-            throw new RuntimeException("Unknown scenario name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
-        }
-
-        for (String cmd : cmds) {
-            String[] cmdArray = cmd.split(" ");
-
-            for (String parameter: cmdArray) {
-                if (parameter.contains("=")){
-                    if ( !parameter.contains("TEMPLATE(") && !parameter.contains("<<")) {
-                        String[] paramArray = parameter.split("=");
-                        paramMap.put(paramArray[0], paramArray[1]);
-                    }
-                }
-            }
-
-            StrSubstitutor sub1 = new StrSubstitutor(paramMap, "<<", ">>", '\\', ",");
-            StrSubstitutor sub2 = new StrSubstitutor(paramMap, "TEMPLATE(", ")", '\\', ",");
-
-            cmd = sub2.replace(sub1.replace(cmd));
-
-            if (cmd.contains("yaml=") || cmd.contains("workload=")){
-                parse(cmd.split(" "));
-            }else{
-                parse((cmd + " workload="+yamlPath).split(" "));
-            }
-
-            // Is there a better way to do this than regex?
-
-        }
-    }
 
     private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
-        Map<String,Level> levels = new HashMap<>();
+        Map<String, Level> levels = new HashMap<>();
         Arrays.stream(levelsSpec.split("[,;]")).forEach(kp -> {
             String[] ll = kp.split(":");
-            if (ll.length!=2) {
+            if (ll.length != 2) {
                 throw new RuntimeException("Log level must have name:level format");
             }
-            levels.put(ll[0],Level.toLevel(ll[1]));
+            levels.put(ll[0], Level.toLevel(ll[1]));
         });
         return levels;
     }
@@ -549,7 +465,7 @@ public class NBCLIOptions {
     private Cmd parseFragmentCmd(LinkedList<String> arglist) {
         String cmdType = arglist.removeFirst();
         String scriptFragment = arglist.removeFirst();
-        return new Cmd(CmdType.valueOf(cmdType),scriptFragment);
+        return new Cmd(CmdType.valueOf(cmdType), scriptFragment);
     }
 
     private Cmd parseActivityCmd(LinkedList<String> arglist) {
@@ -609,15 +525,17 @@ public class NBCLIOptions {
     }
 
     public boolean wantsToDumpCyclelog() {
-        return rleDumpOptions.length>0;
+        return rleDumpOptions.length > 0;
     }
+
     public boolean wantsToImportCycleLog() {
-        return cyclelogImportOptions.length>0;
+        return cyclelogImportOptions.length > 0;
     }
 
     public String[] getCyclelogImportOptions() {
         return cyclelogImportOptions;
     }
+
     public String[] getCycleLogExporterOptions() {
         return rleDumpOptions;
     }
@@ -632,7 +550,7 @@ public class NBCLIOptions {
 
     public void setHistoLoggerConfigs(String pattern, String file, String interval) {
         //--log-histograms 'hdrdata.log:.*:2m'
-        histoLoggerConfigs.add(String.format("%s:%s:%s",file,pattern,interval));
+        histoLoggerConfigs.add(String.format("%s:%s:%s", file, pattern, interval));
     }
 
     public boolean wantsWorkloads() {
@@ -669,10 +587,10 @@ public class NBCLIOptions {
         public String getCmdSpec() {
 
             if (cmdSpec.startsWith("'") && cmdSpec.endsWith("'")) {
-                return cmdSpec.substring(1,cmdSpec.length()-1);
+                return cmdSpec.substring(1, cmdSpec.length() - 1);
             }
             if (cmdSpec.startsWith("\"") && cmdSpec.endsWith("\"")) {
-                return cmdSpec.substring(1,cmdSpec.length()-1);
+                return cmdSpec.substring(1, cmdSpec.length() - 1);
             }
             return cmdSpec;
         }
@@ -729,8 +647,9 @@ public class NBCLIOptions {
     private static class ProgressSpec {
         public String intervalSpec;
         public IndicatorMode indicatorMode;
+
         public String toString() {
-            return indicatorMode.toString()+":" + intervalSpec;
+            return indicatorMode.toString() + ":" + intervalSpec;
         }
     }
 
@@ -751,7 +670,6 @@ public class NBCLIOptions {
         }
         return progressSpec;
     }
-
 
 
 }

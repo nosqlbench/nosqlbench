@@ -193,39 +193,6 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test
-    public void providePathForScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example-scenarios" });
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-    }
-
-    @Test
-    public void defaultScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test" });
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-    }
-
-    @Test
-    public void defaultScenarioWithParams() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "cycles=100"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=");
-    }
-
-    @Test
-    public void namedScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-    }
-
-    @Test
-    public void namedScenarioWithParams() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles=100"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=");
-    }
 
     @Test
     public void listWorkloads() {
