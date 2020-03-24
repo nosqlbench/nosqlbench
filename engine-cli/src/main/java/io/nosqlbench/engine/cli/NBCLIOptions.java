@@ -33,11 +33,11 @@ public class NBCLIOptions {
     private static final String SHOW_SCRIPT = "--show-script";
 
     // Execution
+    private static final String SCRIPT = "script";
     private static final String ACTIVITY = "activity";
+    private static final String SCENARIO = "scenario";
     private static final String RUN_ACTIVITY = "run";
     private static final String START_ACTIVITY = "start";
-    private static final String START_ACTIVITY2 = "start2";
-    private static final String RUN_ACTIVITY2 = "run2";
     private static final String SCRIPT_FRAGMENT = "fragment";
     private static final String STOP_ACTIVITY = "stop";
     private static final String AWAIT_ACTIVITY = "await";
@@ -46,7 +46,6 @@ public class NBCLIOptions {
     private static final String IMPORT_CYCLELOG = "--import-cycle-log";
 
     // Execution Options
-    private static final String SCRIPT = "script";
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
     private static final String LOGS_MAX = "--logs-max";
@@ -67,13 +66,15 @@ public class NBCLIOptions {
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
 
-    private static final Set<String> reserved_words = new HashSet<String>() {{
+    public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
             Arrays.asList(
-                ACTIVITY, SCRIPT, ACTIVITY_TYPES, HELP, METRICS_PREFIX, REPORT_GRAPHITE_TO
+                SCRIPT, ACTIVITY, SCENARIO, RUN_ACTIVITY, START_ACTIVITY,
+                SCRIPT_FRAGMENT, STOP_ACTIVITY, AWAIT_ACTIVITY, WAIT_MILLIS, ACTIVITY_TYPES, HELP
             )
         );
     }};
+
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
@@ -140,11 +141,6 @@ public class NBCLIOptions {
                 case START_ACTIVITY:
                 case RUN_ACTIVITY:
                     Cmd activity = parseActivityCmd(arglist);
-                    cmdList.add(activity);
-                    break;
-                case START_ACTIVITY2:
-                case RUN_ACTIVITY2:
-                    activity = parseActivityCmd(arglist);
                     cmdList.add(activity);
                     break;
                 case METRICS:
@@ -426,7 +422,7 @@ public class NBCLIOptions {
     }
 
     private void assertNotReserved(String name) {
-        if (reserved_words.contains(name)) {
+        if (RESERVED_WORDS.contains(name)) {
             throw new InvalidParameterException(name + " is a reserved word and may not be used here.");
         }
     }
@@ -454,7 +450,7 @@ public class NBCLIOptions {
         assertNotReserved(scriptName);
         assertNotParameter(scriptName);
         Map<String, String> scriptParams = new LinkedHashMap<>();
-        while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
+        while (arglist.size() > 0 && !RESERVED_WORDS.contains(arglist.peekFirst())
             && arglist.peekFirst().contains("=")) {
             String[] split = arglist.removeFirst().split("=", 2);
             scriptParams.put(split[0], split[1]);
@@ -472,7 +468,7 @@ public class NBCLIOptions {
         String cmdType = arglist.removeFirst();
         List<String> activitydef = new ArrayList<String>();
         while (arglist.size() > 0 &&
-            !reserved_words.contains(arglist.peekFirst())
+            !RESERVED_WORDS.contains(arglist.peekFirst())
             && arglist.peekFirst().contains("=")) {
             activitydef.add(arglist.removeFirst());
         }
