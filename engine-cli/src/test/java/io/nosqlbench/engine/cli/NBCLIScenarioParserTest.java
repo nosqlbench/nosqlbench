@@ -62,4 +62,11 @@ public class NBCLIScenarioParserTest {
     public void testThatMissingScenarioNameThrowsError() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"});
     }
+
+    @Test
+    public void testThatMultipleScenariosConcatenate() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "default", "default"});
+        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(6);
+    }
 }

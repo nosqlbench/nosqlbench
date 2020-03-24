@@ -27,69 +27,79 @@ public class NBCLIScenarioParser {
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist) {
+
         String workloadName = arglist.removeFirst();
         Optional<Path> workloadPathSearch = NosqlBenchFiles.findOptionalPath(workloadName, "yaml", "activities");
         Path workloadPath = workloadPathSearch.orElseThrow();
 
-        String scenarioName = (arglist.size()>0 && !arglist.peekFirst().contains("=")) ? arglist.removeFirst() : "default";
+        List<String> scenarioNames = new ArrayList<>();
+        while (arglist.size() > 0 && !arglist.peekFirst().contains("=") && !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())) {
+            scenarioNames.add(arglist.removeFirst());
+        }
+        if (scenarioNames.size() == 0) {
+            scenarioNames.add("default");
+        }
 
         // Load in user's CLI options
-        LinkedHashMap<String,String> userCli = new LinkedHashMap<>();
-        while (arglist.size()>0 && arglist.peekFirst().contains("=")) {
+        LinkedHashMap<String, String> userCli = new LinkedHashMap<>();
+        while (arglist.size() > 0 && arglist.peekFirst().contains("=")) {
             String[] arg = arglist.removeFirst().split("=");
             arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userCli.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurence of option on command line: " + arg[0]);
             }
-            userCli.put(arg[0],arg[1]);
-        }
-
-        // Load in named scenario
-        StmtsDocList stmts = StatementsLoader.load(logger, workloadPath.toString());
-        Scenarios scenarios = stmts.getDocScenarios();
-        List<String> cmds = scenarios.getNamedScenario(scenarioName);
-        if (cmds==null) {
-            throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-            +", but you can pick from " + String.join(",",scenarios.getScenarioNames()));
+            userCli.put(arg[0], arg[1]);
         }
 
         // This will hold the command to be prepended to the main arglist
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
 
-        Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
-        for (String cmd : cmds) {  // each command line of the named scenario
-            LinkedHashMap<String,String> usersCopy = new LinkedHashMap<>(userCli);
-            LinkedHashMap<String,CmdArg> cmdline = new LinkedHashMap<>();
+        for (String scenarioName : scenarioNames) {
 
-            String[] cmdparts = cmd.split(" ");
-            for (String cmdpart : cmdparts) {
-                Matcher matcher = cmdpattern.matcher(cmdpart);
-                if (!matcher.matches()) {
-                    throw new BasicError("Unable to recognize scenario cmd spec in '" + cmdpart + "'");
+            // Load in named scenario
+            StmtsDocList stmts = StatementsLoader.load(logger, workloadPath.toString());
+            Scenarios scenarios = stmts.getDocScenarios();
+            List<String> cmds = scenarios.getNamedScenario(scenarioName);
+            if (cmds == null) {
+                throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                    + ", but you can pick from " + String.join(",", scenarios.getScenarioNames()));
+            }
+
+            Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
+            for (String cmd : cmds) {  // each command line of the named scenario
+                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userCli);
+                LinkedHashMap<String, CmdArg> cmdline = new LinkedHashMap<>();
+
+                String[] cmdparts = cmd.split(" ");
+                for (String cmdpart : cmdparts) {
+                    Matcher matcher = cmdpattern.matcher(cmdpart);
+                    if (!matcher.matches()) {
+                        throw new BasicError("Unable to recognize scenario cmd spec in '" + cmdpart + "'");
+                    }
+                    String name = Synonyms.canonicalize(matcher.group("name"), logger);
+                    String oper = matcher.group("oper");
+                    String val = matcher.group("val");
+                    cmdline.put(name, new CmdArg(name, oper, val));
                 }
-                String name = Synonyms.canonicalize(matcher.group("name"),logger);
-                String oper = matcher.group("oper");
-                String val = matcher.group("val");
-                cmdline.put(name,new CmdArg(name,oper,val));
-            }
 
-            LinkedHashMap<String,String> builtcmd = new LinkedHashMap<>();
+                LinkedHashMap<String, String> builtcmd = new LinkedHashMap<>();
 
-            for (CmdArg cmdarg : cmdline.values()) {
-                if (usersCopy.containsKey(cmdarg.getName())) {
-                    cmdarg = cmdarg.override(usersCopy.remove(cmdarg.getName()));
+                for (CmdArg cmdarg : cmdline.values()) {
+                    if (usersCopy.containsKey(cmdarg.getName())) {
+                        cmdarg = cmdarg.override(usersCopy.remove(cmdarg.getName()));
+                    }
+                    builtcmd.put(cmdarg.getName(), cmdarg.toString());
                 }
-                builtcmd.put(cmdarg.getName(),cmdarg.toString());
-            }
-            usersCopy.forEach((k,v)-> builtcmd.put(k,k+"="+v));
-            if (!builtcmd.containsKey("workload")) {
-                builtcmd.put("workload", "workload="+workloadPath.toString());
+                usersCopy.forEach((k, v) -> builtcmd.put(k, k + "=" + v));
+                if (!builtcmd.containsKey("workload")) {
+                    builtcmd.put("workload", "workload=" + workloadPath.toString());
+                }
+
+                logger.debug("Named scenario built command: " + String.join(" ", builtcmd.values()));
+                buildCmdBuffer.addAll(builtcmd.values());
             }
 
-            logger.debug("Named scenario built command: " + String.join(" ",builtcmd.values()));
-            buildCmdBuffer.addAll(builtcmd.values());
         }
-
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
 
     }
@@ -109,12 +119,15 @@ public class NBCLIScenarioParser {
         public boolean isReassignable() {
             return "=".equals(operator);
         }
+
         public boolean isFinalVerbose() {
             return "===".equals(operator);
         }
+
         public boolean isFinalSilent() {
             return "==".equals(operator);
         }
+
         public CmdArg override(String value) {
             if (isReassignable()) {
                 return new CmdArg(this.name, this.operator, value);
@@ -129,7 +142,7 @@ public class NBCLIScenarioParser {
 
         @Override
         public String toString() {
-            return name + (operator!=null ? "=" : "") + (value!=null ? value : "");
+            return name + (operator != null ? "=" : "") + (value != null ? value : "");
         }
 
         public String getName() {
