@@ -14,6 +14,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NBCLIScenarioParser {
+
+    public final static String SILENT_LOCKED = "==";
+    public final static String VERBOSE_LOCKED = "===";
+    public final static String UNLOCKED = "=";
+
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
 
     public static boolean isFoundWorkload(String word) {
@@ -50,7 +55,7 @@ public class NBCLIScenarioParser {
         // This will hold the command to be prepended to the main arglist
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
 
-        Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>==|:=|=:|=)(?<val>.+))?");
+        Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
         for (String cmd : cmds) {  // each command line of the named scenario
             LinkedHashMap<String,String> usersCopy = new LinkedHashMap<>(userCli);
             LinkedHashMap<String,CmdArg> cmdline = new LinkedHashMap<>();
@@ -104,10 +109,10 @@ public class NBCLIScenarioParser {
             return "=".equals(operator);
         }
         public boolean isFinalVerbose() {
-            return "==".equals(operator);
+            return "===".equals(operator);
         }
         public boolean isFinalSilent() {
-            return ":=".equals(operator) || "=:".equals(operator);
+            return "==".equals(operator);
         }
         public CmdArg override(String value) {
             if (isReassignable()) {
