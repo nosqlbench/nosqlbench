@@ -117,10 +117,9 @@ export default {
           active_topic = categories[0].docs[0].filename;
       }
     } else {
-      console.log("params.slug was defined:" + context.params.slug);
       let parts = context.params.slug.split("/",2);
       active_category=parts[0];
-      console.log("active_cateogory: " + active_category);
+      console.log("==> params.slug[" + context.params.slug + "] active_category[" + active_category + "]");
       active_topic = parts.length>1 ? parts[1] : null;
     }
 
@@ -144,8 +143,7 @@ export default {
       active_category_name = categories.find(c => c.category === active_category).categoryName;
     }
 
-    console.log("active_category:" + active_category);
-    console.log("active_topic:" + active_topic);
+    console.log("==> active category[" + active_category + "] topic["+ active_topic +"]");
 
     // At this point, we have an active category or even a topic.
     // We're all in on loading markdown, but which one?
