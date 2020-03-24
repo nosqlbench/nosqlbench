@@ -1,10 +1,14 @@
-# eb run type=stdout yaml=examples/sequences cycles=20 seq=concat
+# eb sequences concat
 # yields ABBCCCDDDDABBCCCDDDD
-# eb run type=stdout yaml=examples/sequences cycles=20 seq=interval
-# yeilds ABCDDCBDCDABCDDCBDCD
-# eb run type=stdout yaml=examples/sequences cycles=20 seq=bucket
-# yeilds ABCDBCDCDDABCDBCDCDD
+# eb run driver=stdout workload=examples/sequences cycles=20 seq=interval
+# yields ABCDDCBDCDABCDDCBDCD
+# eb run driver=stdout workload=examples/sequences cycles=20 seq=bucket
+# yields ABCDBCDCDDABCDBCDCDD
 
+scenarios:
+  concat: driver===stdout seq===concat
+  bucket: driver===stdout seq===bucket
+  interval: driver===stdout seq===interval
 statements:
  - A1: "|"
    ratio: 1

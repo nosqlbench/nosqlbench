@@ -49,7 +49,8 @@ public class NBCLIScenarioParser {
         Scenarios scenarios = stmts.getDocScenarios();
         List<String> cmds = scenarios.getNamedScenario(scenarioName);
         if (cmds==null) {
-            throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName);
+            throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+            +", but you can pick from " + String.join(",",scenarios.getScenarioNames()));
         }
 
         // This will hold the command to be prepended to the main arglist
