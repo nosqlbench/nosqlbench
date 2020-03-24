@@ -360,13 +360,8 @@ public class NBCLIOptions {
         while(arglist.size() > 0 && arglist.peekFirst().contains("=")){
             String arg = arglist.removeFirst();
             String oldArg = arg;
-            arg = arg
-                .replaceAll("\\stype=", " driver=")
-                .replaceAll("\\syaml=", " workload=");
+            arg = Synonyms.canonicalize(arg, logger);
 
-            if (!arg.equals(oldArg)){
-                logger.warn("Identified deprecated usage of parameter name yaml or type. The new parameters are now workload and driver respectively");
-            }
             for(int i =0 ; i< cmds.size(); i++){
                 String yamlCmd = cmds.get(i);
                 String[] argArray = arg.split("=");
