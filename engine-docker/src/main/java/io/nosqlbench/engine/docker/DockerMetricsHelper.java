@@ -185,7 +185,11 @@ public class DockerMetricsHelper {
         datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
 
         File prometheusDir = new File(userHome, ".nosqlbench/prometheus");
-        prometheusDir.mkdir();
+        if(!prometheusDir.mkdir()){
+            System.out.println("Could not create directory "+ userHome + "./nosqlbench/prometheus");
+            System.out.println("fix directory permissions to run --docker-metrics");
+            System.exit(1);
+        }
 
         new File(userHome, ".nosqlbench/prometheus-conf").mkdir();
 
