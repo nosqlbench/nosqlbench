@@ -4,8 +4,9 @@ on:
   push:
     branches: 
      - master
-    tags-ignore:
-     - invoke-release
+     - testbranch
+    tags:
+     - '!invoke-release'
 
 jobs:
   build:
