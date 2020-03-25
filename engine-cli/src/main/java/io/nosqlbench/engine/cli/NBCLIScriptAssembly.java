@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -116,12 +118,8 @@ public class NBCLIScriptAssembly {
 
     private static String toJSON(Map<?,?> map) {
         StringBuilder sb = new StringBuilder();
-        sb.append("params={\n");
-        map.forEach((k,v) -> {
-            sb.append(" '").append(k.toString()).append("': '").append(v.toString()).append("',\n");
-        });
-        sb.setLength(sb.length()-2);
-        sb.append("\n};\n");
-        return sb.toString();
+        List<String> l = new ArrayList<>();
+        map.forEach((k,v) -> l.add("'" + k + "': '" + v + "'"));
+        return "params={"+String.join(",\n  ",l)+"};\n";
     }
 }
