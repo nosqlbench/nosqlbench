@@ -1,13 +1,13 @@
-# nb -v run type=cql yaml=cql-tabular tags=phase:schema host=dsehost
+# nb -v run driver=cql yaml=cql-tabular tags=phase:schema host=dsehost
 scenarios:
   default:
-    - run type=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
-    - run type=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
-    - run type=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
   stdout:
-    - run type=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
-    - run type=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
-    - run type=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:schema hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:rampup cycles=TEMPLATE(rampup-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
+    - run driver=cql yaml=cql-tabular tags=phase:main cycles=TEMPLATE(main-cycles,10000000) hosts=TEMPLATE(hosts,localhost)
 bindings:
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String

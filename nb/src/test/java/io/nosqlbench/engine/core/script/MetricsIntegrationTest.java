@@ -31,7 +31,7 @@ public class MetricsIntegrationTest {
 
     @Test
     public void testHistogramLogger() {
-        ActivityDef ad = ActivityDef.parseActivityDef("alias=foo;type=diag");
+        ActivityDef ad = ActivityDef.parseActivityDef("alias=foo;driver=diag");
         Histogram testhistogram = ActivityMetrics.histogram(ad, "testhistogram");
         ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log","1s");
         testhistogram.update(400);

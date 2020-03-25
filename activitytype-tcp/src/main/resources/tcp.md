@@ -7,12 +7,12 @@ allow for the generation of data via a tcp client or server.
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
 ~~~
-... type=tcpclient yaml=stdout-test
+... driver=tcpclient yaml=stdout-test
 ~~~
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
 ~~~
-... type=tcpserver yaml=stdout-test
+... driver=tcpserver yaml=stdout-test
 ~~~
 
 ## ActivityType Parameters

@@ -16,9 +16,12 @@ Some activity parameters are universal in that they can be used with any activit
 To see what activity parameters are valid for a given activity type, see the documentation for that activity type with `nosqlbench help <activity type>`.
 :::
 
-## type
+## driver
 
-- `type=<activity type>`
+For historic reasons, you can also use `type`. They both mean the same thing for now, but `driver` is more descriptive.
+The `type` parameter will continue to be supported in this major version (3.x), but it will be an error to use it in 4.x and newer.
+
+- `driver=<activity type>`
 - _default_: inferred from `alias` or `yaml` parameters, or unset
 - _required_: yes, unless inferred
 - _dynamic_: no

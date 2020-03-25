@@ -67,9 +67,9 @@ public class RawYamlStatementLoaderTest {
         RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
         List<String> defaultScenario = rawScenarios.getNamedScenario("default");
-        assertThat(defaultScenario).containsExactly("run type=stdout alias=step1","run type=stdout alias=step2");
+        assertThat(defaultScenario).containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
         List<String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
-        assertThat(schemaOnlyScenario).containsExactly("run type=blah tags=phase:schema");
+        assertThat(schemaOnlyScenario).containsExactly("run driver=blah tags=phase:schema");
 
         assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);

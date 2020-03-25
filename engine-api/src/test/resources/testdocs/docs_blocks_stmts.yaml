@@ -1,9 +1,9 @@
 scenarios:
   default:
-    - run type=stdout alias=step1
-    - run type=stdout alias=step2
+    - run driver=stdout alias=step1
+    - run driver=stdout alias=step2
   schema-only:
-    - run type=blah tags=phase:schema
+    - run driver=blah tags=phase:schema
 tags:
   atagname: atagvalue
 name: doc1

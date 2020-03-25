@@ -1,5 +1,5 @@
 # You can run this file with this command line to see the values printed to stdout:
-# ./ebdse run type=stdout yaml=bindings/timeuuid.yaml cycles=10
+# ./ebdse run driver=stdout yaml=bindings/timeuuid.yaml cycles=10
 
 # This file demonstrates different types of timestamp recipes
 # that you can use with virtdata. (The bindings used in ebdse)

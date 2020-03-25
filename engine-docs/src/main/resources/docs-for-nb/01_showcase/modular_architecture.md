@@ -16,7 +16,7 @@ manageable.
 It also means that it is relatively easy to provide a suitable
 API for multi-protocol support. In fact, there are several drivers
 avaialble in the current NoSQLBench distribution. You can list them
-out with `./nb --list-activity-types`, and you can get help on
+out with `./nb --list-drivers`, and you can get help on
 how to use each of them with `./nb help <name>`.
 
 This also is a way for us to encourage and empower other contributors

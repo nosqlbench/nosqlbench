@@ -41,7 +41,7 @@ public class ActivityExecutorTest {
 
     @Test
     public void testDelayedStartSanity() {
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;initdelay=5000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
@@ -64,7 +64,7 @@ public class ActivityExecutorTest {
 
     @Test(enabled=true)
     public void testNewActivityExecutor() {
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Input longSupplier = new AtomicInput(ad);
         MotorDispenser<?> cmf = getActivityMotorFactory(

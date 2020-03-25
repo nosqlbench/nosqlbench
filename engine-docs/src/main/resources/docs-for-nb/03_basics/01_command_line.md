@@ -47,7 +47,7 @@ Provide specific help for the named activity type:
 
 List the available activity types
 
-    --list-activity-types
+    --list-drivers
 
 Provide the metrics that are available for scripting
 

@@ -24,6 +24,7 @@ public class NBCLIOptions {
     // Discovery
     private static final String HELP = "--help";
     private static final String METRICS = "--list-metrics";
+    private static final String DRIVER_TYPES = "--list-drivers";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WORKLOADS = "--list-workloads";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
@@ -267,6 +268,7 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     metricsPrefix = arglist.removeFirst();
                     break;
+                case DRIVER_TYPES:
                 case ACTIVITY_TYPES:
                     arglist.removeFirst();
                     wantsActivityTypes = true;

@@ -23,7 +23,7 @@ public class MetricsMapperIntegrationTest {
 
     @Test
     public void testDiagMetrics() {
-        String diagMetrics = MetricsMapper.metricsDetail("type=diag;alias=foo;cycles=1");
+        String diagMetrics = MetricsMapper.metricsDetail("driver=diag;alias=foo;cycles=1");
         assertThat(diagMetrics).contains("metrics.foo.diagdelay.snapshot.p98ms");
     }
 

@@ -26,7 +26,7 @@ public class DiagActivityTypeTest {
     public void testDiagActivity() {
         DiagActivityType da = new DiagActivityType();
         da.getName();
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;");
         DiagActivity a = da.getActivity(ad);
         a.initActivity();
 

@@ -66,6 +66,9 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsActivityTypes()).isTrue();
         opts = new NBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
+        opts = new NBCLIOptions(new String[]{"--list-drivers"});
+        assertThat(opts.wantsActivityTypes()).isTrue();
+        
     }
 
     @Test
@@ -129,7 +132,7 @@ public class TestNBCLIOptions {
 
     @Test
     public void shouldRecognizeStartActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "type=woot" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "driver=woot" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(NBCLIOptions.CmdType.start);
@@ -138,7 +141,7 @@ public class TestNBCLIOptions {
 
     @Test
     public void shouldRecognizeRunActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "run", "type=runwoot" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "run", "driver=runwoot" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(NBCLIOptions.CmdType.run);

@@ -1,5 +1,5 @@
 # You can run this file with this command line to see the values printed to stdout:
-# ./ebdse run type=stdout yaml=bindings/text.yaml cycles=10
+# ./ebdse run driver=stdout yaml=bindings/text.yaml cycles=10
 
 # This file demonstrates different types of timestamp recipes
 # that you can use with virtdata. (The bindings used in ebdse)
@@ -62,7 +62,7 @@ bindings:
 
 #  Example output:
 
-#    $ ebdse run type=stdout yaml=example-bindings format=readout cycles=10
+#    $ ebdse run driver=stdout yaml=example-bindings format=readout cycles=10
 #  phone : 241-478-6787
 #  phone : 784-482-7668
 #  phone : 804-068-5502

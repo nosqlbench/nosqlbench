@@ -14,7 +14,7 @@ public class HttpActivityTypeTest {
         String atname = httpAt.getName();
         assertThat(atname.equals("http"));
 
-        ActivityDef ad = ActivityDef.parseActivityDef("type=http; yaml=http-google.yaml; host=google.com; port=80; cycles=1;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=http; yaml=http-google.yaml; host=google.com; port=80; cycles=1;");
         HttpActivity httpActivity = httpAt.getActivity(ad);
         httpActivity.initActivity();
         ActionDispenser actionDispenser = httpAt.getActionDispenser(httpActivity);

@@ -18,7 +18,7 @@ named argument to the previous command. The following example
 is a commandline with a command *start*, and two named arguments
 to that command.
 
-    PROG start type=diag alias=example
+    PROG start driver=diag alias=example
 
 ### Discovery options ###
 
@@ -36,7 +36,7 @@ Provide specific help for the named activity type:
 
 List the available activity types
 
-    --list-activity-types
+    --list-drivers
 
 Provide the metrics that are available for scripting
 

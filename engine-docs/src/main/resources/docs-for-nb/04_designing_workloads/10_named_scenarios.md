@@ -13,10 +13,10 @@ You can provide named scenarios for a workload like this:
 # contents of myworkloads.yaml
 scenarios:
  default:
-  - run type=diag cycles=10 alias=first-ten
-  - run type=diag cycles=10..20 alias=second-ten
+  - run driver=diag cycles=10 alias=first-ten
+  - run driver=diag cycles=10..20 alias=second-ten
  longrun:
-  - run type=diag cycles=10M
+  - run driver=diag cycles=10M
 ```
 
 This provides a way to specify more detailed workflows that users may want
@@ -51,8 +51,8 @@ in the named scenario's script.
 # example-scenarios.yaml
 scenarios:
  default:
-  - run cycles=3 alias=A type=stdout
-  - run cycles=5 alias=B type=stdout
+  - run cycles=3 alias=A driver=stdout
+  - run cycles=5 alias=B driver=stdout
 bindings:
  cycle: Identity()
  name: NumberNameToCycle()

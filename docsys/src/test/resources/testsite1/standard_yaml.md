@@ -76,7 +76,7 @@ statement template from the provided bindings if needed, so this is valid:
      delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=10
 0,zero,00A_pro,six
 1,one,00B_pro,six
 2,two,00C_pro,three
@@ -109,7 +109,7 @@ bindings:
  delta: WeightedStrings('one:1;six:6;three:3;')
 # EOF (control-D in your terminal)
 
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=10
 This is a statement, and the file format doesn't
 know how statements will be used!
 submit job 1 on queue one with options 00B_pro;
@@ -201,39 +201,39 @@ statements:
 # EOF (control-D in your terminal)
 
 # no tag filter matches any
-[test]$ ./eb run type=stdout yaml=stdout-test
+[test]$ ./eb run driver=stdout yaml=stdout-test
 I'm alive!
 
 # tag name assertion matches
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name
 I'm alive!
 
 # tag name assertion does not match
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name2
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name2
 02:25:28.158 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
 
 # tag value assertion does not match
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name:bravo
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name:bravo
 02:25:42.584 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
 
 # tag value assertion matches
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name:foxtrot
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name:foxtrot
 I'm alive!
 
 # tag pattern assertion matches
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name:'fox.*'
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name:'fox.*'
 I'm alive!
 
 # tag pattern assertion does not match
-[test]$ ./eb run type=stdout yaml=stdout-test tags=name:'tango.*'
+[test]$ ./eb run driver=stdout yaml=stdout-test tags=name:'tango.*'
 02:26:05.149 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
 
 # compound tag predicate matches every assertion
-[test]$ ./eb run type=stdout yaml=stdout-test tags='name=fox.*',unit=bravo
+[test]$ ./eb run driver=stdout yaml=stdout-test tags='name=fox.*',unit=bravo
 I'm alive!
 
 # compound tag predicate does not fully match
-[test]$ ./eb run type=stdout yaml=stdout-test tags='name=fox.*',unit=delta
+[test]$ ./eb run driver=stdout yaml=stdout-test tags='name=fox.*',unit=delta
 11:02:53.490 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
 
 
@@ -267,7 +267,7 @@ blocks:
     beta: Combinations('b;l;o;c;k;2;-;COMBINATIONS;')
 # EOF (control-D in your terminal)
 
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=10
 0,block1-C
 1,block2-O
 2,block1-M
@@ -462,7 +462,7 @@ bindings:
 statements:
  - "doc2.number {numname}\n"
 # EOF (control-D in your terminal)
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=10
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=10
 doc1.form1 doc1.1
 doc1.form2 doc1.2
 doc2.number two
@@ -497,10 +497,10 @@ statements:
  - "<<linetoprint:MISSING>>\n"
 # EOF (control-D in your terminal)
 
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=1
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=1
 MISSING
 
-[test]$ ./eb run type=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
+[test]$ ./eb run driver=stdout yaml=stdout-test cycles=1 linetoprint="THIS IS IT"
 THIS IS IT
 ```
 

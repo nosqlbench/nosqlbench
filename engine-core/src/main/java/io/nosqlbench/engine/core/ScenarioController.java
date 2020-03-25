@@ -232,7 +232,7 @@ public class ScenarioController {
 
             if (executor == null && createIfMissing) {
 
-                String activityTypeName = activityDef.getParams().getOptionalString("type").orElse(null);
+                String activityTypeName = activityDef.getParams().getOptionalString("driver","type").orElse(null);
                 List<String> knownTypes = ActivityType.FINDER.getAll().stream().map(ActivityType::getName).collect(Collectors.toList());
 
                 // Infer the type from either alias or yaml if possible (exactly one matches)
@@ -249,7 +249,7 @@ public class ScenarioController {
                 }
 
                 if (activityTypeName==null) {
-                    String errmsg = "You must provide a driver=<activity type> parameter. Valid examples are:\n" +
+                    String errmsg = "You must provide a driver=<driver> parameter. Valid examples are:\n" +
                             knownTypes.stream().map(t -> " driver="+t+"\n").collect(Collectors.joining());
                     throw new BasicError(errmsg);
                 }

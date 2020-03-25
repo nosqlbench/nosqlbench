@@ -44,7 +44,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_initexception", 15,
-                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
+                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "driver=diag", "initdelay=notanumber"
         );
         String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("Error initializing activity 'ALIAS_UNSET': For input string: \"notanumber\"");
@@ -59,7 +59,7 @@ public class ExitStatusIntegrationTests {
 //        ProcessInvoker invoker = new ProcessInvoker();
 //        invoker.setLogDir("logs/test");
 //        ProcessResult result = invoker.run("exitstatus_threadexception", 30,
-//                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "throwoncycle=10", "cycles=1000", "cyclerate=10", "-vvv"
+//                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "driver=diag", "throwoncycle=10", "cycles=1000", "cyclerate=10", "-vvv"
 //        );
 //        String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
 //        assertThat(stdout).contains("Diag was asked to throw an error on cycle 10");
@@ -71,7 +71,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
-                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "async=1", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vvv"
+                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "driver=diag", "async=1", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vvv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was requested to stop on cycle 10");

@@ -33,7 +33,7 @@ public class StdoutActivityTypeTest {
         StdoutActivityType stdoutAt = new StdoutActivityType();
         String atname = stdoutAt.getName();
         assertThat(atname.equals("stdout"));
-        ActivityDef ad = ActivityDef.parseActivityDef("type=stdout; yaml=stdout-test;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=stdout; yaml=stdout-test;");
         StdoutActivity stdoutActivity = stdoutAt.getActivity(ad);
         ActionDispenser actionDispenser = stdoutAt.getActionDispenser(stdoutActivity);
         Action action = actionDispenser.getAction(1);

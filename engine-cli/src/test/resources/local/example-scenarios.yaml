@@ -1,8 +1,8 @@
 # example-scenarios.yaml
 scenarios:
   default:
-    - run cycles=3 alias=A type=stdout
-    - run cycles=5 alias=B type=stdout
+    - run cycles=3 alias=A driver=stdout
+    - run cycles=5 alias=B driver=stdout
 bindings:
   cycle: Identity()
   name: NumberNameToCycle()
