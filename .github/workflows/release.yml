@@ -120,8 +120,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ RELEASE_TAGNAME }}
-        release_name: Release ${{ RELEASE_TAGNAME }}
+        tag_name: ${{ env.RELEASE_TAGNAME }}
+        release_name: Release ${{ env.RELEASE_TAGNAME }}
         draft: false
         prerelease: false
     - name: Upload nb.jar
