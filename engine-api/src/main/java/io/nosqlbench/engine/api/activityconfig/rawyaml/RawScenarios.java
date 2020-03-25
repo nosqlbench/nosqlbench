@@ -21,7 +21,7 @@ public class RawScenarios extends LinkedHashMap<String, LinkedList<String>> {
             Object[] o = ((Map) v).values().toArray();
             ArrayList<String> strings = new ArrayList<>(o.length);
             for (Object o1 : o) {
-                strings.add(o.toString());
+                strings.add(o1.toString());
             }
             return strings;
         } else {
