@@ -71,7 +71,7 @@ public class DockerMetricsHelper {
 
     public void startMetrics() {
 
-        logger.info("preparing to startg graphite exporter container");
+        logger.info("preparing to start graphite exporter container...");
 
         //docker run -d -p 9108:9108 -p 9109:9109 -p 9109:9109/udp prom/graphite-exporter
         String GRAPHITE_EXPORTER_IMG = "prom/graphite-exporter";
@@ -269,8 +269,8 @@ public class DockerMetricsHelper {
 
 
     private void configureGrafana() {
-        post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true);
-        post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true);
+        post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true, "load analysis dashboard");
+        post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true, "configure datasource");
     }
 
     private static String basicAuth(String username, String password) {
@@ -278,20 +278,27 @@ public class DockerMetricsHelper {
     }
 
 
-    private HttpResponse<String> post(String url, String path, boolean auth) {
+    private HttpResponse<String> post(String url, String path, boolean auth, String taskname) {
+        logger.debug("posting to " + url + " with path:" + path +", auth: " + auth + " task:" + taskname);
         HttpClient.Builder clientBuilder = HttpClient.newBuilder();
         HttpClient httpClient = clientBuilder.build();
 
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         builder = builder.uri(URI.create(url));
         if (auth) {
-            builder = builder.header("Authorization", basicAuth("username", "password"));
+            // do not, DO NOT put authentication here that is not a well-known default already
+            // DO prompt the user to configure a new password on first authentication
+            builder = builder.header("Authorization", basicAuth("admin", "admin"));
         }
 
         if (path !=null) {
+            logger.debug("POSTing " + path + " to " + url);
             String dashboard = NosqlBenchFiles.readFile(path);
+            logger.debug("length of content for " + path + " is " + dashboard.length());
             builder = builder.POST(HttpRequest.BodyPublishers.ofString(dashboard));
+            builder.setHeader("Content-Type", "application/json");
         } else {
+            logger.debug(("GETing " + url));
             builder = builder.GET();
         }
 
@@ -300,6 +307,13 @@ public class DockerMetricsHelper {
         try {
             HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             logger.debug("http response for configuring grafana:\n" + resp);
+            logger.debug("response status code: " + resp.statusCode());
+            logger.debug("response body: " + resp.body());
+            if (resp.statusCode()<200 || resp.statusCode()>200) {
+                logger.error("while trying to " + taskname +", received status code " + resp.statusCode() + " while trying to auto-configure grafana, with body:");
+                logger.error(resp.body());
+                throw new RuntimeException("while trying to " + taskname + ", received status code " + resp.statusCode() + " response for " + url + " with body: " + resp.body());
+            }
             return resp;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -432,7 +446,7 @@ public class DockerMetricsHelper {
             logger.info(String.format("Hupping config"));
 
             if (reload != null) {
-                post(reload, null, false);
+                post(reload, null, false, "reloading config");
             }
 
             return runningContainers.get(0);

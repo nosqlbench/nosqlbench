@@ -66,6 +66,8 @@ public class NBCLI {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
+        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
+
 
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("basic.md"));
@@ -183,7 +185,6 @@ public class NBCLI {
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
         }
 
-        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.wantsConsoleLogLevel());
 
