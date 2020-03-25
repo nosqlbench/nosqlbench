@@ -14,3 +14,4 @@ if [[ "${last_release_commit_hash}" = "${GITHUB_SHA}" ]]; then
      echo "Skipping for $GIT_RELEASE_BOT_NAME commit"
      exit 1
 fi
+
