@@ -244,12 +244,6 @@
 
             <dependency>
                 <groupId>com.github.docker-java</groupId>
-                <artifactId>docker-java-transport-jersey</artifactId>
-                <version>${docker.java.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-transport-okhttp</artifactId>
                 <version>${docker.java.version}</version>
             </dependency>
@@ -530,6 +524,7 @@
                             <goal>jar</goal>
                         </goals>
                     </execution>
+
                 </executions>
             </plugin>
 

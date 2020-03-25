@@ -9,8 +9,15 @@ cd target
 if [ -e "nb.jar" ]
 then
  echo "nb.jar link exists, skipping"
-else
- echo "linking $JARNAME to nb.jar"
- ln -s $JARNAME nb.jar
+ exit 0
 fi
+if [ ! -e "$JARNAME" ]
+then
+ echo "$JARNAME does not exist, skipping"
+ exit 0
+fi
+
+echo "linking $JARNAME to nb.jar"
+ln -s $JARNAME nb.jar
+echo "linked $JARNAME to nb.jar, exiting"
 

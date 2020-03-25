@@ -1,5 +1,7 @@
 #!/bin/bash
 # update nuxt
+set -x
+set -e
 
 GUIDEBOOK="target/guidebook"
 
