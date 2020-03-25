@@ -26,7 +26,7 @@ import static io.nosqlbench.virtdata.processors.ProcessorClassNames.ThreadSafeMa
  * enumerate candidate functions without requiring them to have a no-args constructor.
  */
 @SupportedOptions({"title"})
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_12)
 @SupportedAnnotationTypes({
         ThreadSafeMapper,
         PerThreadMapper

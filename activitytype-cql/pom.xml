@@ -30,6 +30,7 @@
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-extras</artifactId>
