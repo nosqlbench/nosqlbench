@@ -33,7 +33,10 @@ public class NBCLIScenarioParser {
         Path workloadPath = workloadPathSearch.orElseThrow();
 
         List<String> scenarioNames = new ArrayList<>();
-        while (arglist.size() > 0 && !arglist.peekFirst().contains("=") && !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())) {
+        while (arglist.size() > 0
+            && !arglist.peekFirst().contains("=")
+            && !arglist.peekFirst().startsWith("-")
+            && !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.size() == 0) {
@@ -42,7 +45,9 @@ public class NBCLIScenarioParser {
 
         // Load in user's CLI options
         LinkedHashMap<String, String> userCli = new LinkedHashMap<>();
-        while (arglist.size() > 0 && arglist.peekFirst().contains("=")) {
+        while (arglist.size() > 0
+            && arglist.peekFirst().contains("=")
+            && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=");
             arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userCli.containsKey(arg[0])) {
@@ -119,14 +124,13 @@ public class NBCLIScenarioParser {
         public boolean isReassignable() {
             return "=".equals(operator);
         }
-
+        public boolean isFinalSilent() {
+            return "==".equals(operator);
+        }
         public boolean isFinalVerbose() {
             return "===".equals(operator);
         }
 
-        public boolean isFinalSilent() {
-            return "==".equals(operator);
-        }
 
         public CmdArg override(String value) {
             if (isReassignable()) {
