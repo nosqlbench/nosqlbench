@@ -6,6 +6,8 @@
 
 [Get it Here](DOWNLOADS.md)
 
+[Read the Docs](http://docs.nosqlbench.io/)
+
 ## What is NoSQLBench?
 
 NoSQLBench is a serious performance testing tool for the NoSQL ecosystem.
