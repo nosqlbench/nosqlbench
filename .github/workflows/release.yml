@@ -3,7 +3,9 @@ name: release
 on:
   push:
     branches: 
-     - releases
+     - master
+    tags:
+     - invoke-release
 
 jobs:
   release:
@@ -66,7 +68,7 @@ jobs:
     - name: prepare release
       run: scripts/release-prepare.sh
       env: 
-       RELEASE_BRANCH_NAME: "releases"
+       RELEASE_BRANCH_NAME: "master"
        GIT_RELEASE_BOT_NAME: "nb-droid"
        GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
        ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
@@ -82,7 +84,7 @@ jobs:
     - name: perform release
       run: scripts/release-perform.sh
       env: 
-       RELEASE_BRANCH_NAME: "releases"
+       RELEASE_BRANCH_NAME: "master"
        GIT_RELEASE_BOT_NAME: "nb-droid"
        GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
        ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
