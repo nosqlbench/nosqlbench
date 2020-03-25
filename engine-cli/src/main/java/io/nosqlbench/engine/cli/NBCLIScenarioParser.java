@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +45,18 @@ public class NBCLIScenarioParser {
         }
 
         // Load in user's CLI options
-        LinkedHashMap<String, String> userCli = new LinkedHashMap<>();
+        LinkedHashMap<String, String> userParams = new LinkedHashMap<>();
         while (arglist.size() > 0
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=");
             arg[0] = Synonyms.canonicalize(arg[0], logger);
-            if (userCli.containsKey(arg[0])) {
-                throw new BasicError("duplicate occurence of option on command line: " + arg[0]);
+            if (userParams.containsKey(arg[0])) {
+                throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
             }
-            userCli.put(arg[0], arg[1]);
+            userParams.put(arg[0], arg[1]);
         }
+        StrInterpolator userParamsInterp = new StrInterpolator(userParams);
 
         // This will hold the command to be prepended to the main arglist
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
@@ -72,7 +74,8 @@ public class NBCLIScenarioParser {
 
             Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
             for (String cmd : cmds) {  // each command line of the named scenario
-                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userCli);
+                cmd = userParamsInterp.apply(cmd);
+                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userParams);
                 LinkedHashMap<String, CmdArg> cmdline = new LinkedHashMap<>();
 
                 String[] cmdparts = cmd.split(" ");
