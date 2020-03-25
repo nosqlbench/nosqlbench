@@ -45,6 +45,8 @@ public class NBCLI {
             cli.run(args);
         } catch (Exception e) {
             if (e instanceof BasicError) {
+                System.out.println("ERROR: " + e.getMessage());
+                System.out.flush();
                 logger.error("ERROR: " + e.getMessage());
                 System.exit(2);
             } else {
