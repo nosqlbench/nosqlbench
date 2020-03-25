@@ -42,29 +42,30 @@ public class NBCliIntegrationTests {
         assertThat(result.exitStatus).isEqualTo(0);
     }
     // disabled till after release
-    @Test
-    public void dockerMetrics() {
-        ProcessInvoker invoker = new ProcessInvoker();
-        invoker.setLogDir("logs/test");
-
-        // check for docker
-        ProcessResult result = invoker.run("docker-detection-test", 15,
-            "docker", "ps"
-        );
-
-        System.out.println(result.getStdoutData());
-        System.out.println(result.getStderrData());
-
-       if(result.exitStatus ==0) {
-           result = invoker.run("docker-metrics-test", 15,
-               "java", "-jar", JARNAME, "--logs-dir", "logs/test", "--docker-metrics"
-           );
-           System.out.println(result.getStdoutData());
-           System.out.println(result.getStderrData());
-           assertThat(result.exitStatus).isEqualTo(0);
-           return;
-       }
-
-       logger.warn("skipped docker-metrics test because docker is not available");
-   }
+    // This is not disabled on testbranch, only on master
+//    @Test
+//    public void dockerMetrics() {
+//        ProcessInvoker invoker = new ProcessInvoker();
+//        invoker.setLogDir("logs/test");
+//
+//        // check for docker
+//        ProcessResult result = invoker.run("docker-detection-test", 15,
+//            "docker", "ps"
+//        );
+//
+//        System.out.println(result.getStdoutData());
+//        System.out.println(result.getStderrData());
+//
+//       if(result.exitStatus ==0) {
+//           result = invoker.run("docker-metrics-test", 15,
+//               "java", "-jar", JARNAME, "--logs-dir", "logs/test", "--docker-metrics"
+//           );
+//           System.out.println(result.getStdoutData());
+//           System.out.println(result.getStderrData());
+//           assertThat(result.exitStatus).isEqualTo(0);
+//           return;
+//       }
+//
+//       logger.warn("skipped docker-metrics test because docker is not available");
+//   }
 }
