@@ -69,4 +69,21 @@ public class NBCLIScenarioParserTest {
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(6);
     }
+
+    @Test
+    public void testThatTemplatesAreExpandedDefault() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test"});
+        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;cycles=10;workload=activities/scenario-test.yaml;");
+    }
+    @Test
+    public void testThatTemplatesAreExpandedOverride() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
+        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;cycles=20;cycles-test=20;workload=activities/scenario-test.yaml;");
+    }
+
+
 }
