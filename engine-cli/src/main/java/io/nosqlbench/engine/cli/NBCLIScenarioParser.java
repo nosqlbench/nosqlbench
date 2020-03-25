@@ -67,7 +67,7 @@ public class NBCLIScenarioParser {
             List<String> cmds = scenarios.getNamedScenario(scenarioName);
             if (cmds == null) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + ", but you can pick from " + String.join(",", scenarios.getScenarioNames()));
+                    + "', but you can pick from " + String.join(",", scenarios.getScenarioNames()));
             }
 
             Pattern cmdpattern = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
@@ -113,9 +113,9 @@ public class NBCLIScenarioParser {
         private final String name;
         private final String operator;
         private final String value;
+        private String scenarioName;
 
         public CmdArg(String name, String operator, String value) {
-
             this.name = name;
             this.operator = operator;
             this.value = value;
@@ -138,7 +138,7 @@ public class NBCLIScenarioParser {
             } else if (isFinalSilent()) {
                 return this;
             } else if (isFinalVerbose()) {
-                throw new BasicError("Unable to reassign value for named scenario: '" + value + "'");
+                throw new BasicError("Unable to reassign value for locked param '" + name + operator + value + "'");
             } else {
                 throw new RuntimeException("impossible!");
             }
