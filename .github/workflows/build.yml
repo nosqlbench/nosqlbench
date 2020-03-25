@@ -2,9 +2,6 @@ name: build
 
 on:
   push:
-    branches: 
-     - master
-     - testbranch
     tags:
      - '!invoke-release'
 
@@ -17,7 +14,7 @@ jobs:
     - uses: actions/setup-java@v1
       name: setup java
       with:
-        java-version: '12'
+        java-version: '14'
         java-package: jdk
         architecture: x64
         
