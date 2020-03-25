@@ -9,7 +9,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.60-SNAPSHOT</version>
+        <version>3.12.60</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -105,17 +105,17 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-processors</artifactId>
-            <version>3.12.60-SNAPSHOT</version>
+            <version>3.12.60</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-annotations</artifactId>
-            <version>3.12.60-SNAPSHOT</version>
+            <version>3.12.60</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>3.12.60-SNAPSHOT</version>
+            <version>3.12.60</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
