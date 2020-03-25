@@ -237,7 +237,7 @@ public class DockerMetricsHelper {
             if( dir.canRead()){
                 System.out.println("no read access");
             }
-            System.out.println("Could not create directory "+ userHome + "/.nosqlbench/prometheus");
+            System.out.println("Could not create directory " + dir.getPath());
             System.out.println("fix directory permissions to run --docker-metrics");
             System.exit(1);
         }
