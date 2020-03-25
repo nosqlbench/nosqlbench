@@ -184,22 +184,17 @@ public class DockerMetricsHelper {
 
         datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
 
-        File prometheusDir = new File(userHome, ".nosqlbench/prometheus");
-        if(!prometheusDir.mkdir()){
-            if(prometheusDir.canWrite()){
-                System.out.println("no write access");
-            }
-            if(prometheusDir.canRead()){
-                System.out.println("no read access");
-            }
-            System.out.println("Could not create directory "+ userHome + "./nosqlbench/prometheus");
-            System.out.println("fix directory permissions to run --docker-metrics");
-            System.exit(1);
-        }
+        File nosqlbenchDir = new File(userHome, "/.nosqlbench/");
+        mkdir(nosqlbenchDir);
 
-        new File(userHome, ".nosqlbench/prometheus-conf").mkdir();
 
-        Path prometheusDirPath = Paths.get(userHome, ".nosqlbench" +
+        File prometheusDir = new File(userHome, "/.nosqlbench/prometheus");
+        mkdir(prometheusDir);
+
+        File promConfDir = new File(userHome, "/.nosqlbench/prometheus-conf");
+        mkdir(promConfDir);
+
+        Path prometheusDirPath = Paths.get(userHome, "/.nosqlbench" +
                 "/prometheus");
 
         Set<PosixFilePermission> perms = new HashSet<>();
@@ -211,7 +206,7 @@ public class DockerMetricsHelper {
             Files.setPosixFilePermissions(prometheusDirPath, perms);
         } catch (IOException e) {
             logger.error("failed to set permissions on prom backup " +
-                    "directory (~/.nosqlbench/prometheus)");
+                    "directory " + userHome + "/.nosqlbench/prometheus)");
             e.printStackTrace();
             System.exit(1);
         }
@@ -231,13 +226,30 @@ public class DockerMetricsHelper {
         }
     }
 
+    private void mkdir(File dir) {
+        if(dir.exists()){
+            return;
+        }
+        if(! dir.mkdir()){
+            if( dir.canWrite()){
+                System.out.println("no write access");
+            }
+            if( dir.canRead()){
+                System.out.println("no read access");
+            }
+            System.out.println("Could not create directory "+ userHome + "/.nosqlbench/prometheus");
+            System.out.println("fix directory permissions to run --docker-metrics");
+            System.exit(1);
+        }
+    }
+
 
     private void setupGrafanaFiles(String ip) {
 
-        File grafanaDir = new File(userHome, ".nosqlbench/grafana");
-        grafanaDir.mkdir();
+        File grafanaDir = new File(userHome, "/.nosqlbench/grafana");
+        mkdir(grafanaDir);
 
-        Path grafanaDirPath = Paths.get(userHome, ".nosqlbench/grafana");
+        Path grafanaDirPath = Paths.get(userHome, "/.nosqlbench/grafana");
 
         Set<PosixFilePermission> perms = new HashSet<>();
 
@@ -248,8 +260,8 @@ public class DockerMetricsHelper {
         try {
             Files.setPosixFilePermissions(grafanaDirPath, perms);
         } catch (IOException e) {
-            logger.error("failed to set permissions on prom backup " +
-                    "directory (~/.nosqlbench/prometheus)");
+            logger.error("failed to set permissions on grafana directory " +
+                "directory " + userHome + "/.nosqlbench/grafana)");
             e.printStackTrace();
             System.exit(1);
         }
