@@ -1,4 +1,4 @@
-# nb -v run driver=cql yaml=cql-tabular tags=phase:schema host=dsehost
+# nb -v cql-tabular rampup-cycles=1E6 main-cycles=1E9
 scenarios:
   default:
     - run driver=cql tags==phase:schema threads==1

@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.49-SNAPSHOT</version>
+        <version>3.12.50-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -25,61 +24,61 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-stdout</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-diag</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-tcp</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-http</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cql</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-cqlverify</artifactId>
-            <version>3.12.49-SNAPSHOT</version>
+            <version>3.12.50-SNAPSHOT</version>
         </dependency>
 
 
@@ -164,8 +163,7 @@
                         <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                             <resource>topics.md</resource>
                         </transformer>
-                        <transformer
-                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
                     </transformers>
@@ -269,7 +267,7 @@
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <configuration>
                             <rules>
-                                <dependencyConvergence/>
+                                <dependencyConvergence />
                             </rules>
                         </configuration>
                     </plugin>
