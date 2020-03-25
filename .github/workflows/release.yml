@@ -83,6 +83,7 @@ jobs:
 
     - name: perform release
       run: scripts/release-perform.sh
+      continue-on-error: true
       env: 
        RELEASE_BRANCH_NAME: "master"
        GIT_RELEASE_BOT_NAME: "nb-droid"
@@ -96,6 +97,7 @@ jobs:
        MAVEN_REPO_SERVER_ID: ${{ secrets.MAVEN_REPO_SERVER_ID }}
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+      
        
     - name: upload artifacts
       run: |
