@@ -22,6 +22,7 @@ import com.github.dockerjava.core.command.PullImageResultCallback;
 //import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 import com.sun.security.auth.module.UnixSystem;
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.util.NosqlBenchFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 //import io.nosqlbench.util.nosqlbenchFiles;
 
@@ -270,7 +272,7 @@ public class DockerMetricsHelper {
 
     private void configureGrafana() {
         post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true, "load analysis dashboard");
-        post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true, "configure datasource");
+        post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true, "configure data source");
     }
 
     private static String basicAuth(String username, String password) {
@@ -309,7 +311,19 @@ public class DockerMetricsHelper {
             logger.debug("http response for configuring grafana:\n" + resp);
             logger.debug("response status code: " + resp.statusCode());
             logger.debug("response body: " + resp.body());
-            if (resp.statusCode()<200 || resp.statusCode()>200) {
+            if (resp.statusCode()==412) {
+                logger.warn("Unable to configure dashboard, grafana precondition failed (status 412): " + resp.body());
+                String err = "When trying to configure grafana, any errors indicate that you may be trying to RE-configure an instance." +
+                    " This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'\n" +
+                    " instead of --docker-metrics.";
+                throw new BasicError(err);
+            } else if (resp.statusCode()==401 && resp.body().contains("Invalid username")) {
+                logger.warn("Unable to configure dashboard, grafana authentication failed (status " + resp.statusCode() + "): " + resp.body());
+                String err = "Grafana does not have the same password as expected for a new container. We shouldn't be trying to add dashboards on an" +
+                    " existing container. This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'" +
+                    " instead of --docker-metrics.";
+                throw new BasicError(err);
+            } else if (resp.statusCode()<200 || resp.statusCode()>200) {
                 logger.error("while trying to " + taskname +", received status code " + resp.statusCode() + " while trying to auto-configure grafana, with body:");
                 logger.error(resp.body());
                 throw new RuntimeException("while trying to " + taskname + ", received status code " + resp.statusCode() + " response for " + url + " with body: " + resp.body());
@@ -322,6 +336,8 @@ public class DockerMetricsHelper {
 
 
     private String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload) {
+        logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
+            "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("exited"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
         List<Container> stoppedContainers = null;
