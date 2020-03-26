@@ -298,8 +298,8 @@ public class DockerMetricsHelper {
             builder = builder.POST(HttpRequest.BodyPublishers.ofString(dashboard));
             builder.setHeader("Content-Type", "application/json");
         } else {
-            logger.debug(("GETing " + url));
-            builder = builder.GET();
+            logger.debug(("POSTing empty body to " + url));
+            builder = builder.POST(HttpRequest.BodyPublishers.noBody());
         }
 
         HttpRequest request = builder.build();
