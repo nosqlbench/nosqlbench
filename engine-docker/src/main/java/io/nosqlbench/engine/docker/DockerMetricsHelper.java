@@ -57,8 +57,8 @@ public class DockerMetricsHelper {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(DOCKER_HOST_ADDR).build();
         DockerCmdExecFactory dockerCmdExecFactory = new OkHttpDockerCmdExecFactory()
-            .withReadTimeout(10000)
-            .withConnectTimeout(10000);
+            .withReadTimeout(60000)
+            .withConnectTimeout(60000);
 
 //        DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
 //                .withReadTimeout(1000)
