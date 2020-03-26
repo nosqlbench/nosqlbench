@@ -20,13 +20,16 @@ name: doc2
 ...
 ```
 
-This provides a layered naming scheme for the statements themselves. It is not usually important to name things except for documentation or metric naming purposes.
+This provides a layered naming scheme for the statements themselves. It is not usually important to name things except
+for documentation or metric naming purposes.
 
-If no names are provided, then names are automatically created for blocks and statements. Statements assigned at the document level are assigned to "block0". All other statements are named with the format `doc#--block#--stmt#`.
+If no names are provided, then names are automatically created for blocks and statements. Statements assigned at the
+document level are assigned to "block0". All other statements are named with the format `doc#--block#--stmt#`.
 
 For example, the full name of statement1 above would be `doc1--block1--stmt1`.
 
 :::info
-If you anticipate wanting to get metrics for a specific statement in addition to the other metrics, then you will want to adopt the habit of naming all your statements something basic and descriptive.
+If you anticipate wanting to get metrics for a specific statement in addition to the other metrics, then you will want
+to adopt the habit of naming all your statements something basic and descriptive.
 :::
 

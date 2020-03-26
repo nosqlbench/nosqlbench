@@ -5,7 +5,11 @@ weight: 05
 
 ## Statement Blocks
 
-All the basic primitives described above (names, statements, bindings, params, tags) can be used to describe and parameterize a set of statements in a yaml document. In some scenarios, however, you may need to structure your statements in a more sophisticated way. You might want to do this if you have a set of common statement forms or parameters that need to apply to many statements, or perhaps if you have several *different* groups of statements that need to be configured independently.
+All the basic primitives described above (names, statements, bindings, params, tags) can be used to describe and
+parameterize a set of statements in a yaml document. In some scenarios, however, you may need to structure your
+statements in a more sophisticated way. You might want to do this if you have a set of common statement forms or
+parameters that need to apply to many statements, or perhaps if you have several *different* groups of statements that
+need to be configured independently.
 
 This is where blocks become useful:
 
@@ -38,5 +42,7 @@ blocks:
 9,block2-O
 ```
 
-This shows a couple of important features of blocks. All blocks inherit defaults for bindings, params, and tags from the root document level. Any of these values that are defined at the base document level apply to all blocks contained in that document, unless specifically overridden within a given block.
+This shows a couple of important features of blocks. All blocks inherit defaults for bindings, params, and tags from the
+root document level. Any of these values that are defined at the base document level apply to all blocks contained in
+that document, unless specifically overridden within a given block.
 

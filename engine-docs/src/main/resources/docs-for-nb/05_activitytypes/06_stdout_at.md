@@ -23,19 +23,16 @@ that uses the curly brace token form in statements.
 ## Example activity definitions
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
-~~~
-... driver=stdout workload=stdout-test
-~~~
+
+    ... driver=stdout workload=stdout-test
 
 Only run statement groups which match a tag regex
-~~~
-... driver=stdout workload=stdout-test tags=group:'ddl.*'
-~~~
+
+    ... driver=stdout workload=stdout-test tags=group:'ddl.*'
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
-~~~
-... driver=stdout workload=stdout-test tags=group:'dml.*' cycles=1000..11000 filename=test.csv
-~~~
+
+    ... driver=stdout workload=stdout-test tags=group:'dml.*' cycles=1000..11000 filename=test.csv
 
 This last example shows that the cycle range is [inclusive..exclusive),
 to allow for stacking test intervals. This is standard across all
@@ -54,45 +51,50 @@ activity types.
 
 ## Configuration
 
-This activity type uses the uniform yaml configuration format.
-For more details on this format, please refer to the
+This activity type uses the uniform yaml configuration format. For more details on this format, please refer to the
 [Standard YAML Format](http://docs.engineblock.io/user-guide/standard_yaml/)
 
 ## Configuration Parameters
 
-- **newline** - If a statement has this param defined, then it determines
-  whether or not to automatically add a missing newline for that statement
-  only. If this is not defined for a statement, then the activity-level
-  parameter takes precedence.
+- **newline** - If a statement has this param defined, then it determines whether or not to automatically add a missing
+  newline for that statement only. If this is not defined for a statement, then the activity-level parameter takes
+  precedence.
 
 ## Statement Format
 
-The statement format for this activity type is a simple string. Tokens between
-curly braces are used to refer to binding names, as in the following example:
+The statement format for this activity type is a simple string. Tokens between curly braces are used to refer to binding
+names, as in the following example:
 
-    statements:
-     - "It is {minutes} past {hour}."
+```yaml
+statements:
+- "It is {minutes} past {hour}."
+```
 
 If you want to suppress the trailing newline that is automatically added, then
 you must either pass `newline=false` as an activity param, or specify it
 in the statement params in your config as in:
 
+```yaml
     params:
      newline: false
+```
 
 ### Auto-generated statements
 
-If no statement is provided, then the defined binding names are used as-is
-to create a CSV-style line format. The values are concatenated with
-comma delimiters, so a set of bindings like this:
+If no statement is provided, then the defined binding names are used as-is to create a CSV-style line format. The values
+are concatenated with comma delimiters, so a set of bindings like this:
 
-    bindings:
-     one: Identity()
-     two: NumberNameToString()
+```yaml
+bindings:
+ one: Identity()
+ two: NumberNameToString()
+```
 
 would create an automatic string template like this:
 
-    statements:
-     - "{one},{two}\n"
+```yaml
+statements:
+- "{one},{two}\n"
+```
 
 The auto-generation behavior is forced when the format parameter is supplied.

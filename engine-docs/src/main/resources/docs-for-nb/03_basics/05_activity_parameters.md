@@ -1,9 +1,9 @@
 ---
-title: Core Activity Params
+title: Activity Parameters
 weight: 05
 ---
 
-# Core Activity Parameters
+# Activity Parameters
 
 Activity parameters are passed as named arguments for an activity,
 either on the command line or via a scenario script. On the command
@@ -12,14 +12,16 @@ line, these take the form of
     <paramname>=<paramvalue>
 
 Some activity parameters are universal in that they can be used with any
-activity type. These parameters are recognized by nosqlbench whether or
-not they are recognized by a particular activity type implementation.
-These are called _core parameters_. Only core activity parameters are
-documented here.
+driver type. These parameters are recognized by nosqlbench whether or
+not they are recognized by a particular driver implementation. These are
+called _core parameters_. Only core activity parameters are documented
+here.
 
-:::info To see what activity parameters are valid for a given activity
-type, see the documentation for that activity type with `nosqlbench
-help <activity type>`. :::
+:::info
+To see what activity parameters are valid for a given activity type, see
+the documentation for that activity type with `nosqlbench help <activity
+type>`.
+:::
 
 ## driver
 

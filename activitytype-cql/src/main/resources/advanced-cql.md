@@ -1,16 +1,17 @@
-# cql activity type - advanced features
+# cql driver - advanced features
 
-This is an addendum to the standard CQL Activity Type docs. For that, see "cql".
-Use the features in this guide carefully. They do not come with as much documentation
-as they are less used than the main CQL features.
+This is an addendum to the standard CQL Activity Type docs. For that,
+see "cql". Use the features in this guide carefully. They do not come
+with as much documentation as they are less used than the main CQL
+features.
 
 ### ResultSet and Row operators
 
-Within the CQL Activity type, synchronous mode (activities with out
-the async= parameter), you have the ability to attach operators to a
-given statement such that it will get per-statement handling. These
-operators are ways of interrogating the result of an operation, saving
-values, or managing other side-effects for specific types of testing.
+Within the CQL Activity type, synchronous mode (activities with out the
+async= parameter), you have the ability to attach operators to a given
+statement such that it will get per-statement handling. These operators
+are ways of interrogating the result of an operation, saving values, or
+managing other side-effects for specific types of testing.
 
 When enabled for a statement, operators are applied in this order:
 
@@ -35,7 +36,7 @@ row data, you must apply a row operator as explained below.
 - **rowoperators** - If provided as a CQL statement param, then the
     list of operator names that follow, separated by a comma, will
     be used to attache Row operators to the given statement.
-    
+
 ## Available ResultSet Operators
 
 - pushvars - Push a copy of the current thread local variables onto
@@ -44,11 +45,11 @@ row data, you must apply a row operator as explained below.
   conjunction with the row operators below.
 - popvars - Pop the last thread local variable set from the thread-local
   stack into vars, replacing the previous content. This does nothing
-  with the ResultSet data. 
+  with the ResultSet data.
 - clearvars - Clears the contents of the thread local variables. This
-  does nothign with the ResultSet data. 
-- trace - Flags a statement to be traced on the server-side and then logs
-  the details of the trace to the trace log file. 
+  does nothign with the ResultSet data.
+- trace - Flags a statement to be traced on the server-side and then
+  logs the details of the trace to the trace log file.
 - log - Logs basic data to the main log. This is useful to verify that
   operators are loading and triggering as expected.
 - assert_singlerow - Throws an exception (ResultSetVerificationException)
@@ -61,22 +62,22 @@ Examples:
    - s1: |
       a statement
      rsoperators: pushvars, clearvars
-```  
+```
 ## Available Row Operators:
 
 - savevars - Copies the values of the row into the thread-local variables.
 - saverows - Copies the rows into a special CQL-only thread local row state.
-  
+
 Examples:
 
 ```
   statements:
     - s2: |
-       a statement       
+       a statement
       rowoperators: saverows
 ```
 
-## Injecting additional Queries
+## Injecting additional Queries (Future)
 
 It is possible to inject new operations to an activity. However, such
 operations are _indirect_ to cycles, since they must be based on the results

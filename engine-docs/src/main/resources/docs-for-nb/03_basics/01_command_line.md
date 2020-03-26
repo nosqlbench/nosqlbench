@@ -10,34 +10,28 @@ This is the same documentation you get in markdown format with the
 
 ---------------------------------------
 
-
 Help ( You're looking at it. )
 
     --help
 
-Short options, like '-v' represent simple options, like verbosity.
-Using multiples increases the level of the option, like '-vvv'.
+Short options, like '-v' represent simple options, like verbosity. Using multiples increases the level of the option,
+like '-vvv'.
 
-Long options, like '--help' are top-level options that may only be
-used once. These modify general behavior, or allow you to get more
-details on how to use nosqlbench.
+Long options, like '--help' are top-level options that may only be used once. These modify general behavior, or allow
+you to get more details on how to use nosqlbench.
 
-All other options are either commands, or named arguments to commands.
-Any single word without dashes is a command that will be converted
-into script form. Any option that includes an equals sign is a
-named argument to the previous command. The following example
-is a commandline with a command *start*, and two named arguments
-to that command.
+All other options are either commands, or named arguments to commands. Any single word without dashes is a command that
+will be converted into script form. Any option that includes an equals sign is a named argument to the previous command.
+The following example is a commandline with a command *start*, and two named arguments to that command.
 
     ./nb start driver=diag alias=example
 
 ### Discovery options ###
 
-These options help you learn more about running nosqlbench, and
-about the plugins that are present in your particular version.
+These options help you learn more about running nosqlbench, and about the plugins that are present in your particular
+version.
 
-Get a list of additional help topics that have more detailed
-documentation:
+Get a list of additional help topics that have more detailed documentation:
 
     ./nb help topics
 
@@ -55,11 +49,9 @@ Provide the metrics that are available for scripting
 
 ### Execution Options ###
 
-This is how you actually tell nosqlbench what scenario to run. Each of these
-commands appends script logic to the scenario that will be executed.
-These are considered as commands, can occur in any order and quantity.
-The only rule is that arguments in the arg=value form will apply to
-the preceding script or activity.
+This is how you actually tell nosqlbench what scenario to run. Each of these commands appends script logic to the
+scenario that will be executed. These are considered as commands, can occur in any order and quantity. The only rule is
+that arguments in the arg=value form will apply to the preceding script or activity.
 
 Add the named script file to the scenario, interpolating named parameters:
 
@@ -136,17 +128,16 @@ or
 
     --progress logonly:5m
 
-If you want to add in classic time decaying histogram metrics
-for your histograms and timers, you may do so with this option:
+If you want to add in classic time decaying histogram metrics for your histograms and timers, you may do so with this
+option:
 
     --classic-histograms prefix
     --classic-histograms 'prefix:.*'               # same as above
     --classic-histograms 'prefix:.*specialmetrics' # subset of names
 
 
-Name the current session, for logfile naming, etc
-By default, this will be "scenario-TIMESTAMP", and a logfile will be created
-for this name.
+Name the current session, for logfile naming, etc By default, this will be "scenario-TIMESTAMP", and a logfile will be
+created for this name.
 
     --session-name <name>
 
@@ -154,10 +145,13 @@ Enlist engineblock to stand up your metrics infrastructure using a local docker 
 
     --docker-metrics
 
-When this option is set, engineblock will start graphite, prometheus, and grafana automatically on your local docker, configure them to work together, and point engineblock to send metrics the system automatically. It also imports a base dashboard for engineblock and configures grafana snapshot export to share with a central DataStax grafana instance (grafana can be found on localhost:3000 with the default credentials admin/admin).
-
+When this option is set, engineblock will start graphite, prometheus, and grafana automatically on your local docker,
+configure them to work together, and point engineblock to send metrics the system automatically. It also imports a base
+dashboard for engineblock and configures grafana snapshot export to share with a central DataStax grafana instance
+(grafana can be found on localhost:3000 with the default credentials admin/admin).
 
 ### Console Options ###
+
 Increase console logging levels: (Default console logging level is *warning*)
 
     -v         (info)
@@ -166,8 +160,8 @@ Increase console logging levels: (Default console logging level is *warning*)
 
     --progress console:1m (disables itself if -v options are used)
 
-These levels affect *only* the console output level. Other logging level
-parameters affect logging to the scenario log, stored by default in logs/...
+These levels affect *only* the console output level. Other logging level parameters affect logging to the scenario log,
+stored by default in logs/...
 
 Show version, long form, with artifact coordinates.
 

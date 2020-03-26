@@ -1,4 +1,4 @@
-# cqlverify activity type
+# cqlverify
 
 This activity type allows you to read values from a database and compare them to
 the generated values that were expected to be written, row-by-row, producing a

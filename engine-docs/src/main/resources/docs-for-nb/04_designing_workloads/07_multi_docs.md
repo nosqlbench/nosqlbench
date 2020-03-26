@@ -5,14 +5,15 @@ weight: 07
 
 # Multi-Docs
 
-The YAML spec allows for multiple yaml documents to be concatenated in the
-same file with a separator:
+The YAML spec allows for multiple yaml documents to be concatenated in the same file with a separator:
 
 ```yaml
 ---
 ```
 
-This offers an additional convenience when configuring activities. If you want to parameterize or tag some a set of statements with their own bindings, params, or tags, but alongside another set of uniquely configured statements, you need only put them in separate logical documents, separated by a triple-dash.
+This offers an additional convenience when configuring activities. If you want to parameterize or tag some a set of
+statements with their own bindings, params, or tags, but alongside another set of uniquely configured statements, you
+need only put them in separate logical documents, separated by a triple-dash.
 
 For example:
 
@@ -42,8 +43,11 @@ doc2.number eight
 doc1.form1 doc1.1
 ```
 
-This shows that you can use the power of blocks and tags together at one level and also allow statements to be broken apart into a whole other level of partitioning if desired.
+This shows that you can use the power of blocks and tags together at one level and also allow statements to be broken
+apart into a whole other level of partitioning if desired.
 
 :::warning
-The multi-doc support is there as a ripcord when you need it. However, it is strongly advised that you keep your YAML workloads simple to start and only use features like the multi-doc when you absolutely need it. For this, blocks are generally a better choice. See examples in the standard workloads.
+The multi-doc support is there as a ripcord when you need it. However, it is strongly advised that you keep your YAML
+workloads simple to start and only use features like the multi-doc when you absolutely need it. For this, blocks are
+generally a better choice. See examples in the standard workloads.
 :::

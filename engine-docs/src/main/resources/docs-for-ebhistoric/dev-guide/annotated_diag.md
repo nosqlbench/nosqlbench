@@ -1,5 +1,5 @@
 ---
-title: Diag ActivityType    
+title: Diag ActivityType
 weight: 32
 menu:
   main:
@@ -8,10 +8,9 @@ menu:
     weight: 12
 ---
 
-{{< warning >}}
-This section is out of date, and will be updated after the next major release
-with details on building async activity types.
-{{< /warning >}}
+{{< warning >}} This section is out of date, and will be updated after
+the next major release with details on building async drivers. {{<
+/warning >}}
 
 If you take all the code chunks from this document and concatenate them
 together, you'll have 'diag', one of the in-build activity types for
@@ -241,4 +240,3 @@ report. If it is time to report, we mark the time in lastUpdate.
 
 This is all there is to making an activity react to real-time changes in the activity definition.
 
-    

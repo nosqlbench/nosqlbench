@@ -1,5 +1,5 @@
 ---
-title: Building ActivityTypes    
+title: Building ActivityTypes
 weight: 32
 menu:
   main:
@@ -15,7 +15,7 @@ menu:
 - Maven
 
 
-## Building new Activity Types
+## Building new Driver Types
 
 1. Add the nosqlbench API to your project via Maven:
 

@@ -5,17 +5,15 @@ weight: 2
 
 ## Description
 
-The CQL IoT workload demonstrates a time-series telemetry system as typically
-found in IoT applications. The bulk of the traffic is telemetry ingest. This is
-useful for establishing steady-state capacity with an actively managed data
-lifecycle. This is a steady-state workload, where inserts are 90% of the
-operations and queries are the remaining 10%.
+The CQL IoT workload demonstrates a time-series telemetry system as typically found in IoT applications. The bulk of the
+traffic is telemetry ingest. This is useful for establishing steady-state capacity with an actively managed data
+lifecycle. This is a steady-state workload, where inserts are 90% of the operations and queries are the remaining 10%.
 
 ## Schema
 
-    CREATE KEYSPACE baselines WITH replication = 
+    CREATE KEYSPACE baselines WITH replication =
         { 'class': 'NetworkTopologyStrategy', 'dc1': 3 };
-    
+
     CREATE TABLE baselines.iot (
             station_id UUID,
             machine_id UUID,
@@ -33,9 +31,8 @@ operations and queries are the remaining 10%.
 2. rampup - Ramp-Up to steady state for normative density, writes only 100M rows
 3. main - Run at steady state with 10% reads and 90% writes, 100M rows
 
-For in-depth testing, this workload will take some time to build up data density
-where TTLs begin purging expired data. At this point, the test should be
-considered steady-state.
+For in-depth testing, this workload will take some time to build up data density where TTLs begin purging expired data.
+At this point, the test should be considered steady-state.
 
 ## Data Set
 
@@ -60,7 +57,7 @@ considered steady-state.
     select * from baselines.iot
     where machine_id=? and sensor_name=?
     limit 10
-    
+
 ## Workload Parameters
 
 This workload has no adjustable parameters when used in the baseline tests.
@@ -74,17 +71,14 @@ When used for additional testing, the following parameters should be supported:
 - compression - enabled or disabled, to disable, set compression=''
 - write_cl - the consistency level for writes (default: LOCAL_QUORUM)
 - read_cl - the consistency level for reads (defaultL LOCAL_QUORUM)
-    
+
 ## Key Performance Metrics
 
-Client side metrics are a more accurate measure of the system behavior from a
-user's perspective. For microbench and baseline tests, these are the only
-required metrics. When gathering metrics from multiple server nodes, they should
-be kept in aggregate form, for min, max, and average for each time interval in
-monitoring. For example, the avg p99 latency for reads should be kept, as well
-as the min p99 latency for reads. If possible metrics, should be kept in plot
-form, with discrete histogram values per interval.
-
+Client side metrics are a more accurate measure of the system behavior from a user's perspective. For microbench and
+baseline tests, these are the only required metrics. When gathering metrics from multiple server nodes, they should be
+kept in aggregate form, for min, max, and average for each time interval in monitoring. For example, the avg p99 latency
+for reads should be kept, as well as the min p99 latency for reads. If possible metrics, should be kept in plot form,
+with discrete histogram values per interval.
 
 ### Client-Side
 

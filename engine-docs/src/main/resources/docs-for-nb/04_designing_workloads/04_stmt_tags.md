@@ -5,7 +5,8 @@ weight: 04
 
 ## Statement Tags
 
-Tags are used to mark and filter groups of statements for controlling which ones get used in a given scenario. Tags are generally free-form, but there is a set of conventions that can make your testing easier.
+Tags are used to mark and filter groups of statements for controlling which ones get used in a given scenario. Tags are
+generally free-form, but there is a set of conventions that can make your testing easier.
 
 An example:
 
@@ -17,7 +18,8 @@ tags:
 
 ### Tag Filtering
 
-The tag filters provide a flexible set of conventions for filtering tagged statements. Tag filters are usually provided as an activity parameter when an activity is launched. The rules for tag filtering are:
+The tag filters provide a flexible set of conventions for filtering tagged statements. Tag filters are usually provided
+as an activity parameter when an activity is launched. The rules for tag filtering are:
 
 1. If no tag filter is specified, then the statement matches.
 2. A tag name predicate like `tags=name` asserts the presence of a specific
@@ -74,7 +76,5 @@ I'm alive!
 # compound tag predicate does not fully match
 [test]$ ./nb run driver=stdout workload=stdout-test tags='name=fox.*',unit=delta
 11:02:53.490 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
-
-
 ```
 

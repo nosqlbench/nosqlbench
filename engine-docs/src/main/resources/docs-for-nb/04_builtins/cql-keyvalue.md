@@ -5,22 +5,19 @@ weight: 1
 
 ## Description
 
-The CQL Key-Value workload demonstrates the simplest possible schema with
-payload data. This is useful for measuring system capacity most directly in
-terms of raw operations. As a reference point, provides some insight around
-types of workloads that are constrained around messaging, threading, and
-tasking, rather than bulk throughput.
+The CQL Key-Value workload demonstrates the simplest possible schema with payload data. This is useful for measuring
+system capacity most directly in terms of raw operations. As a reference point, provides some insight around types of
+workloads that are constrained around messaging, threading, and tasking, rather than bulk throughput.
 
-During preload, all keys are set with a value. During the main phase of the
-workload, random keys from the known population are replaced with new values
-which never repeat. During the main phase, random partitions are selected for
+During preload, all keys are set with a value. During the main phase of the workload, random keys from the known
+population are replaced with new values which never repeat. During the main phase, random partitions are selected for
 upsert, with row values never repeating.
 
 ## Schema
 
-    CREATE KEYSPACE baselines IF NOT EXISTS WITH replication = 
+    CREATE KEYSPACE baselines IF NOT EXISTS WITH replication =
         { 'class': 'NetworkTopologyStrategy', 'dc1': 3 };
-    
+
     CREATE TABLE baselines.keyvalue (
             user_id UUID,
             user_code text
@@ -31,7 +28,7 @@ upsert, with row values never repeating.
 
 1. schema - Initialize the schema.
 2. rampup - Load data according to the data set size.
-3. main - Run the workload 
+3. main - Run the workload
 
 ## Operations
 
@@ -41,19 +38,19 @@ upsert, with row values never repeating.
 
 ### read (main)
 
-    select * from baselines.keyvalue where key=?key;    
+    select * from baselines.keyvalue where key=?key;
 
 ## Data Set
 
 ### baselines.keyvalue insert (rampup)
 
 - key - text, number as string, selected sequentially up to keycount
-- value - text, number as string, selected sequentially up to valuecount 
+- value - text, number as string, selected sequentially up to valuecount
 
 ### baselines.keyvalue insert (main)
 
 - key - text, number as string, selected uniformly within keycount
-- value - text, number as string, selected uniformly within valuecount 
+- value - text, number as string, selected uniformly within valuecount
 
 ### baselines.keyvalue read (main)
 
@@ -70,13 +67,11 @@ When used for additional testing, the following parameters should be supported:
 
 ## Key Performance Metrics
 
-Client side metrics are a more accurate measure of the system behavior from a
-user's perspective. For microbench and baseline tests, these are the only
-required metrics. When gathering metrics from multiple server nodes, they should
-be kept in aggregate form, for min, max, and average for each time interval in
-monitoring. For example, the avg p99 latency for reads should be kept, as well
-as the min p99 latency for reads. If possible metrics, should be kept in plot
-form, with discrete histogram values per interval.
+Client side metrics are a more accurate measure of the system behavior from a user's perspective. For microbench and
+baseline tests, these are the only required metrics. When gathering metrics from multiple server nodes, they should be
+kept in aggregate form, for min, max, and average for each time interval in monitoring. For example, the avg p99 latency
+for reads should be kept, as well as the min p99 latency for reads. If possible metrics, should be kept in plot form,
+with discrete histogram values per interval.
 
 ### Client-Side
 
@@ -95,6 +90,5 @@ form, with discrete histogram values per interval.
 
 # Notes on Interpretation
 
-Once the average ratio of overwrites starts to balance with the rate of
-compaction, a steady state should be achieved. At this point, pending
-compactions and bytes compacted should be mostly flat over time.
+Once the average ratio of overwrites starts to balance with the rate of compaction, a steady state should be achieved.
+At this point, pending compactions and bytes compacted should be mostly flat over time.
