@@ -208,6 +208,7 @@ jobs:
          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
          echo "found $CHANGES to push for doc updates"
          if (( $CHANGES > 0 ))
+         then
            git commit -m"docs update for $GITHUB_REF"
            git push
          fi
