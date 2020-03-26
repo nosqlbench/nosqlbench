@@ -34,6 +34,9 @@ public class RawStmtsDoc extends StatementsOwner {
     private RawScenarios scenarios = new RawScenarios();
     private List<RawStmtsBlock> blocks = new ArrayList<>();
 
+    // no-args ctor is required
+    public RawStmtsDoc() {}
+
     /**
      * Return the list of statement blocks in this RawStmtsDoc.
      * If raw statements are defined on this RawStmtsDoc, then a single
