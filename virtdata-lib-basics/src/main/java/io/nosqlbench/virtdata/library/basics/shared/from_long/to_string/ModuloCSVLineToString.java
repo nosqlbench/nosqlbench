@@ -26,8 +26,10 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 /**
@@ -37,7 +39,9 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 public class ModuloCSVLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);private List<String> lines = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);
+
+    private List<String> lines = new ArrayList<>();
 
     private String filename;
 
@@ -45,7 +49,17 @@ public class ModuloCSVLineToString implements LongFunction<String> {
     public ModuloCSVLineToString(String filename, String fieldname) {
         this.filename = filename;
         CSVParser csvp = VirtDataResources.readFileCSV(filename);
-        int column = csvp.getHeaderMap().get(fieldname);
+        Map<String, Integer> headerMap = csvp.getHeaderMap();
+
+        if (headerMap==null || headerMap.isEmpty()) {
+            throw new RuntimeException("There were not headers for file "+ filename + ". " + ModuloCSVLineToString.class.getSimpleName() + " requires headers.");
+        }
+
+        Integer column = headerMap.get(fieldname);
+        if (column==null) {
+            throw new RuntimeException("Could not find the named column header '" + fieldname + "' in file " + filename);
+        }
+
         for (CSVRecord strings : csvp) {
             lines.add(strings.get(column));
         }
