@@ -1,9 +1,7 @@
-# cql activity type
+# cql driver
 
-This is an activity type which allows for the execution of CQL statements.
-This particular activity type is wired synchronously within each client
-thread, however the async API is used in order to expose fine-grain
-metrics about op binding, op submission, and waiting for a result.
+This is an driver which allows for the execution of CQL statements. This driver supports both sync and async modes, with
+detailed metrics provided for both.
 
 ### Example activity definitions
 
@@ -308,30 +306,19 @@ now **they are limited to a YAML params block**:
     #    applies to all statements, and the only value values
     #    there are true and false.
 
-
-
-### Generic Parameters
-
-*provided by the runtime*
-- **targetrate** - The target rate in ops/s
-- **linkinput** - if the name of another activity is specified, this activity
-    will only go as fast as that one.
-- **tags** - optional filter for matching tags in yaml sections (detailed help
-    link needed)
-- **threads** - the number of client threads driving this activity
-
 ### Metrics
 
-- alias.cycles - (provided by engineblock) A timer around the whole cycle
-- alias.phase - (provided by engineblock) A timer around additional phases
-  within a cycle. For this driver, it captures all the work in the client
-  around fetching additional pages for paged reads.
+- alias.result - A timer which tracks the performance of an op result only.
+    This is the async get on the future, broken out as a separate step.
+- alias.result-success - A timer that records rate and histograms of the time
+    it takes from submitting a query to completely reading the result
+    set that it returns, across all pages. This metric is only counted
+    for non-exceptional results, while the result metric above includes
+    all operations.
 - alias.bind - A timer which tracks the performance of the statement
     binding logic, including the generation of data immediately prior
 - alias.execute - A timer which tracks the performance of op submission
     only. This is the async execution call, broken out as a separate step.
-- alias.result - A timer which tracks the performance of an op result only.
-    This is the async get on the future, broken out as a separate step.
 - alias.tries - A histogram of how many tries were required to get a
     completed operation
 - alias.pages - A timer which tracks the performance of paging, specific
@@ -340,73 +327,6 @@ now **they are limited to a YAML params block**:
 - alias.strides - A timer around each stride of operations within a thread
 - alias.skipped-tokens - A histogram that records the count and cycle values
     of skipped tokens.
-- alias.result-success - A timer that records rate and histograms of the time
-    it takes from submitting a query to completely reading the result
-    set that it returns, across all pages. This metric is only counted
-    for non-exceptional results, while the result metric above includes
-    all operations.
-
-##### Metrics Details
-
-The cycles metric captures data on the outside of each operation, but it also
-includes any internal processing time needed by the client. Within the
-cycles metric, bind, execute, and result all occur in sequence. There may
-be multiple values recorded for submit and execute for a single bind event.
-This is because a bind exception is final, but an execute and result may
-both be retried. The tries metric captures how many tries were required. It
-is a histogram only. If the metric for tries is 1 across the board, then
-no operation had to be retried.
-
-As for a normal single page read result, both the execute and result timers
-are included within the code block wrapped by the pages metric.
-
-### YAML Format
-
-The YAML file for a CQL activity has the following structure:
-1. One or more document sections, separated with '---' and a newline.
-   1. An optional tag map
-   2. One or more statements
-      1. a descriptive name
-      2. prepared: false, if you want to modify the default (prepared:true)
-      3. statement CQL
-      4. statement data bindings
-
-Each section is a separate yaml document internally to the yaml file. The
-tags that are provided allow for subgroups of statements to be activated.
-All statements in a matching document (when filtered by tags) are included
-in the statement rotation.
-
-If no tags are provided in a document section, then it will be matched by
-all possible tag filters. Conversely, if no tag filter is applied in
-the activity definition, all tagged documents will match.
-
-Data bindings specify how values are generated to plug into each operation. More
-details on data bindings are available in the activity usage guide.
-
-### Parameter Templating
-
-Double angle brackets may be used to drop parameters into the YAML
-arbitrarily. When the YAML file is loaded, and only then, these parameters
-are interpolated from activity parameters like those above. This allows you
-to create activity templates that can be customized simply by providing
-additional parameters to the activity. There are two forms,
-\<\<some_var_name:default_value\>\> and \<\<some_var_name\>\>. The first
-form contains a default value. In any case, if one of these parameters is
-encountered and a qualifying value is not found, an error will be thrown.
-
-### Workload YAML Location
-
-The YAML file referenced in the workload= parameter will be searched for in the following places, in this order:
-1. A URL, if it starts with 'http:' or 'https:'
-2. The local filesystem, if it exists there
-3. The internal classpath and assets in the jar.
-
-The '.yaml' suffix is not required in the workload= parameter, however it is
-required on the actual file. As well, the logical search path "activities/"
-will be used if necessary to locate the file, both on the filesystem and in
-the classpath.
-
-There is a basic example below that can be copied as a starting template.
 
 ## YAML Examples
 
