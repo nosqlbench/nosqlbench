@@ -17,12 +17,12 @@
 
 package io.nosqlbench.engine.extensions.files;
 
-import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.NBFiles;
 
 public class FileAccess extends FileAccessPluginData {
 
     public String read(String filepath) {
-        String filedata = NosqlBenchFiles.readFile(filepath);
+        String filedata = NBFiles.readFile(filepath);
         return filedata;
 
     }

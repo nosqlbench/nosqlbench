@@ -34,9 +34,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class NosqlBenchFiles {
+public class NBFiles {
 
-    private final static Logger logger = LoggerFactory.getLogger(NosqlBenchFiles.class);
+    private final static Logger logger = LoggerFactory.getLogger(NBFiles.class);
     private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
     private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
@@ -127,7 +127,7 @@ public class NosqlBenchFiles {
         }
 
         // Classpath
-        ClassLoader classLoader = NosqlBenchFiles.class.getClassLoader();
+        ClassLoader classLoader = NBFiles.class.getClassLoader();
         InputStream stream = classLoader.getResourceAsStream(path);
         if (stream != null) {
             return Optional.of(stream);

@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.NBFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.TypeDescription;
@@ -32,7 +32,7 @@ public class YamlCQLStatementLoader {
 
     public AvailableCQLStatements load(String fromPath, String... searchPaths) {
 
-        InputStream stream = NosqlBenchFiles.findRequiredStreamOrFile(fromPath,
+        InputStream stream = NBFiles.findRequiredStreamOrFile(fromPath,
                 "yaml", searchPaths);
         String data = "";
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {

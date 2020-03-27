@@ -2,7 +2,7 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.NBFiles;
 import io.nosqlbench.engine.api.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,7 +303,7 @@ public class NBCLIOptions {
                     break;
                 default:
                     Optional<InputStream> optionalScript =
-                        NosqlBenchFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
+                        NBFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
                     //Script
                     if (optionalScript.isPresent()) {
                         arglist.removeFirst();
