@@ -11,7 +11,7 @@ import io.nosqlbench.engine.core.MarkdownDocInfo;
 import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenariosResults;
 import io.nosqlbench.engine.core.ShutdownManager;
-import io.nosqlbench.engine.docker.DockerMetricsHelper;
+import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
@@ -132,7 +132,7 @@ public class NBCLI {
         String reportGraphiteTo = options.wantsReportGraphiteTo();
         if (options.wantsDockerMetrics()){
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
-            DockerMetricsHelper dmh= new DockerMetricsHelper();
+            DockerMetricsManager dmh= new DockerMetricsManager();
             dmh.startMetrics();
             logger.info("Docker Containers are started, for grafana and prometheus, hit" +
                     "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
