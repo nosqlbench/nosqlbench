@@ -5,13 +5,13 @@ weight: 03
 
 # Parameter Types
 
-To configure an nosqlbench activity to do something meaningful, you have to provide parameters to it. This can occur in
-one of several ways. This section is a guide on nosqlbench parameters, how they layer together, and when to use one form
+To configure a NoSQLBench activity to do something meaningful, you have to provide parameters to it. This can occur in
+one of several ways. This section is a guide on NoSQLBench parameters, how they layer together, and when to use one form
 over another.
 
-The command line is used to configure both the overall nosqlbench runtime (logging, etc) as well as the individual
-activities and scripts. Global nosqlbench options can be distinguished from scenario commands and their parameters
-because because global options always start with a single or --double-hyphen.
+The command line is used to configure both the overall runtime (logging, etc) as well as the individual activities and
+scripts. Global options can be distinguished from scenario commands and their parameters because global options always
+start with a -single or --double-hyphen.
 
 ## Activity Parameters
 
@@ -20,21 +20,20 @@ follow a command, such as `run` or `start`, for example. Scenario commands are a
 hyphens. Every command-line argument that follows a scenario command in the form of `<name>=<value>` is a parameter to
 that command.
 
-Activity parameters can be provided by the nosqlbench core runtime or they can be provided by the activity type. All of
-the params are usable to configure an activity together. It's not important where they are provided from so long as you
-know what they do for your workloads, how to configure them, and where to find the docs.
+Activity parameters can be provided by the core runtime or they can be provided by the activity type. It's not important
+where they are provided from so long as you know what they do for your workloads, how to configure them, and where to
+find the docs. Core parameters are documented
 
-*Core* Activity Parameters are those provided by the core runtime. They are part of the core API and used by every
+*Core* Parameters are those provided by the core runtime. They are part of the core API and used by every
 activity type. Core activity params include type*, *alias*, and *threads*, for example. These parameters are explained
 individually under the next section.
 
-*Custom* Activity Parameters are those provided by an activity type. These parameters are documented for each activity
-type. You can see them by running `nosqlbench help <activity type>`.
+*Driver* Parameters are those provided by an activity type. These parameters are documented for each activity type. You
+can see them by running `nosqlbench help <activity type>`.
 
-Activity type parameters may be dynamic. *Dynamic* Activity Parameters are parameters which may be changed while an
-activity is running. This means that scenario scripting logic may change some variables while an activity is running,
-and that the runtime should dynamically adjust to match. Dynamic parameters are mainly used in more advanced scripting
-scenarios.
+Driver parameters may be dynamic. *Dynamic* Activity Parameters are parameters which may be changed while an activity is
+running. This means that scenario scripting logic may change some variables while an activity is running, and that the
+runtime should dynamically adjust to match. Dynamic parameters are mainly used in more advanced scripting scenarios.
 
 Parameters that are dynamic should be documented as such in the respective activity type's help page.
 
@@ -61,7 +60,7 @@ line or script, the parameters are resolved in the following order:
 
 ## Statement Parameters
 
-Some activities make use of a parameters for statements. These are called _statement parameters_ and are completely
+Some activities make use of parameters for statements. These are called _statement parameters_ and are completely
 different than _activity parameters_. Statement parameters in a YAML allow you to affect *how* a statement is used in a
 workload. Just as with activity level parameters, statement parameters may be supported by the core runtime or by an
 activity type. These are also documented in the respective activity type's documentation included in the 'Activity
