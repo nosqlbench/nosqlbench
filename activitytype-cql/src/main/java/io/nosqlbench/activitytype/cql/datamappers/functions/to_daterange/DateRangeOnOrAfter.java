@@ -1,6 +1,8 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.to_daterange;
 
 import com.datastax.driver.dse.search.DateRange;
+import io.nosqlbench.virtdata.annotations.Categories;
+import io.nosqlbench.virtdata.annotations.Category;
 import io.nosqlbench.virtdata.annotations.Example;
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
 
@@ -25,6 +27,7 @@ import java.util.function.LongFunction;
  * </ul>
  */
 @ThreadSafeMapper
+@Categories(Category.datetime)
 public class DateRangeOnOrAfter implements LongFunction<DateRange> {
 
     private final DateRange.DateRangeBound.Precision precision;
