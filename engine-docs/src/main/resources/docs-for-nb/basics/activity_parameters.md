@@ -86,15 +86,13 @@ _default value_ : For now, the default is simply *1*. Users must be
 aware of this setting and adjust it to a reasonable value for their
 workloads.
 
-:::info The threads parameter will work slightly differently for
-activities using the async parameter. For example, when `async=500` is
-provided, then the number of async operations is split between all
-configured threads, and each thread will juggle a number of in-flight
-operations asynchronously. Without the async parameter, threads
-determines the logical concurrency level of nosqlbench in the classic
-'request-per-thread' mode. Neither mode is strictly correct, and both
-modes can be used for more accurate testing depending on the constraints
-of your environment. :::
+:::info
+The threads parameter will work slightly differently for activities using the async parameter. For example, when
+`async=500` is provided, then the number of async operations is split between all configured threads, and each thread
+will juggle a number of in-flight operations asynchronously. Without the async parameter, threads determines the logical
+concurrency level of nosqlbench in the classic 'request-per-thread' mode. Neither mode is strictly correct, and both
+modes can be used for more accurate testing depending on the constraints of your environment.
+:::
 
 A good rule of thumb for setting threads for maximum effect is to set it
 relatively high, such as 10XvCPU when running synchronous workloads

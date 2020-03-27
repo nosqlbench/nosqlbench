@@ -25,11 +25,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class NosqlBenchFilesTest {
+public class NBFilesTest {
 
     @Test
     public void testNestedClasspathLoading() {
-        Optional<InputStream> optionalStreamOrFile = NosqlBenchFiles.findOptionalStreamOrFile("nested/testfile", "txt", "activities");
+        Optional<InputStream> optionalStreamOrFile = NBFiles.findOptionalStreamOrFile("nested/testfile", "txt", "activities");
         assertThat(optionalStreamOrFile).isPresent();
     }
 

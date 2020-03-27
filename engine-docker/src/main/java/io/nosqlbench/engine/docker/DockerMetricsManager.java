@@ -12,7 +12,7 @@ import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.NBFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +147,7 @@ public class DockerMetricsManager {
     }
 
     private void setupPromFiles(String ip) {
-        String datasource = NosqlBenchFiles.readFile("docker/prometheus/prometheus.yml");
+        String datasource = NBFiles.readFile("docker/prometheus/prometheus.yml");
 
         if (ip == null) {
             logger.error("IP for graphite container not found");

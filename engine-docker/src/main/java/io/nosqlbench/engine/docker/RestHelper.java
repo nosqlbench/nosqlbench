@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.docker;
 
 import io.nosqlbench.engine.api.exceptions.BasicError;
-import io.nosqlbench.engine.api.util.NosqlBenchFiles;
+import io.nosqlbench.engine.api.util.NBFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class RestHelper {
 
         if (path !=null) {
             logger.debug("POSTing " + path + " to " + url);
-            String dashboard = NosqlBenchFiles.readFile(path);
+            String dashboard = NBFiles.readFile(path);
             logger.debug("length of content for " + path + " is " + dashboard.length());
             builder = builder.POST(HttpRequest.BodyPublishers.ofString(dashboard));
             builder.setHeader("Content-Type", "application/json");

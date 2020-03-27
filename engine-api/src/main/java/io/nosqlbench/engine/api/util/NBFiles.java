@@ -34,9 +34,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class NosqlBenchFiles {
+public class NBFiles {
 
-    private final static Logger logger = LoggerFactory.getLogger(NosqlBenchFiles.class);
+    private final static Logger logger = LoggerFactory.getLogger(NBFiles.class);
     private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
     private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
@@ -73,7 +73,15 @@ public class NosqlBenchFiles {
         return Optional.empty();
     }
 
-    public static Optional<Path> findOptionalPath(String basename, String extension, String... searchPaths) {
+    /**
+     * Search for the path
+     * @param basename Basename of path, with or without extension
+     * @param extension The extension of the filename
+     * @param searchWithin If enabled, all searchPaths are traversed, looking for a matching suffix pattern.
+     * @param searchPaths Additional places to look for the path suffix
+     * @return An optional path
+     */
+    public static Optional<Path> findOptionalPath(String basename, String extension, boolean searchWithin, String... searchPaths) {
 
         boolean needsExtension = (extension != null && !extension.isEmpty() && !basename.endsWith("." + extension));
         String filename = basename + (needsExtension ? "." + extension : "");
@@ -95,6 +103,12 @@ public class NosqlBenchFiles {
             }
         }
 
+        if (searchWithin) {
+            throw new RuntimeException("not implemented");
+//            for (String searchPath : searchPaths) {
+//                NBPathWalker.findEndMatching(Path.of(searchPath), Path.of(filename));
+//            }
+        }
         return Optional.empty();
     }
 
@@ -127,7 +141,7 @@ public class NosqlBenchFiles {
         }
 
         // Classpath
-        ClassLoader classLoader = NosqlBenchFiles.class.getClassLoader();
+        ClassLoader classLoader = NBFiles.class.getClassLoader();
         InputStream stream = classLoader.getResourceAsStream(path);
         if (stream != null) {
             return Optional.of(stream);
