@@ -45,8 +45,6 @@ public class DockerMetricsManager {
 
         startGrafana(ip);
 
-         configureGrafana();
-
     }
 
     private void startGrafana(String ip) {
@@ -74,10 +72,15 @@ public class DockerMetricsManager {
 
         String reload = null;
         String containerId = dh.startDocker(GRAFANA_IMG, tag, name, port, volumeDescList, envList, null, reload);
+        if (containerId == null){
+            return;
+        }
 
         dh.pollLog(containerId, new LogCallback());
 
         logger.info("grafana container started, http listening");
+
+        configureGrafana();
     }
 
     private void startPrometheus(String ip) {

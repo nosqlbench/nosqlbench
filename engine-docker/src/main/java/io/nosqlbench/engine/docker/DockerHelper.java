@@ -48,27 +48,19 @@ public class DockerHelper {
     public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload) {
         logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
             "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
-        ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("exited"));
-        listContainersCmd.getFilters().put("name", Arrays.asList(name));
-        List<Container> stoppedContainers = null;
-        try {
-            stoppedContainers = listContainersCmd.exec();
-            for (Container stoppedContainer : stoppedContainers) {
-                String id = stoppedContainer.getId();
-                logger.info("Removing exited container: " + id);
-                dockerClient.removeContainerCmd(id).exec();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("Unable to contact docker, make sure docker is up and try again.");
-            logger.error("If docker is installed make sure this user has access to the docker group.");
-            logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
-            System.exit(1);
-        }
+
+        boolean existingContainer = removeExitedContainers(name);
+
+        /*
+        if(startStoppedContainer(name)){
+            return null;
+        };
+         */
 
         Container containerId = searchContainer(name, reload);
         if (containerId != null) {
-            return containerId.getId();
+            logger.debug("container is already up with the id: "+ containerId.getId());
+            return null;
         }
 
         Info info = dockerClient.infoCmd().exec();
@@ -148,8 +140,57 @@ public class DockerHelper {
 
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
 
+        if (existingContainer){
+            logger.debug("Started existing container");
+            return null;
+        }
+
         return containerResponse.getId();
 
+    }
+
+    private boolean startStoppedContainer(String name) {
+        ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("stopped"));
+        listContainersCmd.getFilters().put("name", Arrays.asList(name));
+        List<Container> stoppedContainers = null;
+        try {
+            stoppedContainers = listContainersCmd.exec();
+            for (Container stoppedContainer : stoppedContainers) {
+                String id = stoppedContainer.getId();
+                logger.info("Removing exited container: " + id);
+                dockerClient.removeContainerCmd(id).exec();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Unable to contact docker, make sure docker is up and try again.");
+            logger.error("If docker is installed make sure this user has access to the docker group.");
+            logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
+            System.exit(1);
+        }
+
+        return false;
+    }
+
+    private boolean removeExitedContainers(String name) {
+        ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("exited"));
+        listContainersCmd.getFilters().put("name", Arrays.asList(name));
+        List<Container> stoppedContainers = null;
+        try {
+            stoppedContainers = listContainersCmd.exec();
+            for (Container stoppedContainer : stoppedContainers) {
+                String id = stoppedContainer.getId();
+                logger.info("Removing exited container: " + id);
+                dockerClient.removeContainerCmd(id).exec();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Unable to contact docker, make sure docker is up and try again.");
+            logger.error("If docker is installed make sure this user has access to the docker group.");
+            logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
+            System.exit(1);
+        }
+        return false;
     }
 
     public Container searchContainer(String name, String reload) {
