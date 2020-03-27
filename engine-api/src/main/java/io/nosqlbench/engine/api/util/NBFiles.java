@@ -73,7 +73,15 @@ public class NBFiles {
         return Optional.empty();
     }
 
-    public static Optional<Path> findOptionalPath(String basename, String extension, String... searchPaths) {
+    /**
+     * Search for the path
+     * @param basename Basename of path, with or without extension
+     * @param extension The extension of the filename
+     * @param searchWithin If enabled, all searchPaths are traversed, looking for a matching suffix pattern.
+     * @param searchPaths Additional places to look for the path suffix
+     * @return An optional path
+     */
+    public static Optional<Path> findOptionalPath(String basename, String extension, boolean searchWithin, String... searchPaths) {
 
         boolean needsExtension = (extension != null && !extension.isEmpty() && !basename.endsWith("." + extension));
         String filename = basename + (needsExtension ? "." + extension : "");
@@ -95,6 +103,12 @@ public class NBFiles {
             }
         }
 
+        if (searchWithin) {
+            throw new RuntimeException("not implemented");
+//            for (String searchPath : searchPaths) {
+//                NBPathWalker.findEndMatching(Path.of(searchPath), Path.of(filename));
+//            }
+        }
         return Optional.empty();
     }
 
