@@ -25,6 +25,7 @@ public class WeightedLongs implements LongFunction<Long> {
     private long[] values;
 
     @Example({"WeightedLongs('1:10;3;5;12345;1","Yield 1 62.5% of the time, 3 31.25% of the time, and 12345 6.2% of the time"})
+    @Example({"WeightedLongs('1,6,7","Yield 1 33.3% of the time, 6 33.3% of the time, and 7 33.3% of the time"})
     public WeightedLongs(String valuesAndWeights) {
         this.valuesAndWeights = valuesAndWeights;
         parseWeights();
