@@ -89,9 +89,10 @@ Note the differences between this and the command that we used to generate the s
 appropriately large number of cycles in actual testing to make your main test meaningful.
 
 :::info
-The cycles parameter is not just a quantity. It is a range of values. The `cycles=n` format is short for `cycles=0..n`,
-which makes cycles a zero-based quantity by default. For example, cycles=5 means that the activity will use cycles
-0,1,2,3,4, but not 5. The reason for this is explained in detail in the Activity Parameters section.
+The cycles parameter is not just a quantity. It is a range of values. The `cycles=n` format is short for
+`cycles=0..n`, which makes cycles a zero-based range. For example, cycles=5 means that the activity will use cycles
+0,1,2,3,4, but
+not 5. The reason for this is explained in detail in the Activity Parameters section.
 :::
 
 These parameters are explained in detail in the section on _Activity Parameters_.

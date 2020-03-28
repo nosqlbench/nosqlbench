@@ -31,12 +31,12 @@ parameter. This is a way of templating a workload and make it multi-purpose or a
 
 ## Experimentation Friendly
 
-Because the workload YAML format is generic across activity types, it is possible to ask one acivity type to interpret
-the statements that are meant for another. This isn't generally a good idea, but it becomes extremely handy when you
-want to have a very high level activity type like `stdout` use a lower-level syntax like that of the `cql` activity
-type. When you do this, the stdout activity type _plays_ the statements to your console as they would be executed in
-CQL, data bindings and all.
+Because the workload YAML format is generic across driver types, it is possible to ask one driver type to interpret the
+statements that are meant for another. This isn't generally a good idea, but it becomes extremely handy when you want to
+have a high level driver type like `stdout` interpret the syntax of another driver like `cql`. When you do this, the
+stdout activity type _plays_ the statements to your console as they would be executed in CQL, data bindings and all.
 
 This means you can empirically and substantively demonstrate and verify access patterns, data skew, and other dataset
-details before you change back to cql mode and turn up the settings for a higher scale test.
+details before you change back to cql mode and turn up the settings for a higher scale test. It takes away the guess
+work about what your test is actually doing, and it works for all drivers.
 

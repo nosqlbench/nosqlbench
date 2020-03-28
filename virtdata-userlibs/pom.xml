@@ -106,6 +106,7 @@
                     <include>META-INF/functions</include>
                     <include>data/**</include>
                     <include>docs-for-virtdata/**</include>
+                    <include>docs/**</include>
                 </includes>
             </resource>
         </resources>
