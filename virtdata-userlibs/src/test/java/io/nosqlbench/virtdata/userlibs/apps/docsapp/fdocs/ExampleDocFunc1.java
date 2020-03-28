@@ -1,28 +1,31 @@
-package io.nosqlbench.virtdata.processors;
+package io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs;
 
 import io.nosqlbench.virtdata.annotations.Category;
+import io.nosqlbench.virtdata.processors.DocCtorData;
+import io.nosqlbench.virtdata.processors.DocForFuncCtor;
+import io.nosqlbench.virtdata.processors.DocFuncData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- * Example class doc.
+ * Example class doc part 1.
  *
- * Example unordered list:
+ * Example unordered list part 1:
  * <UL>
- *     <LI>An item1</LI>
- *     <LI>An item2</LI>
+ *     <LI>An item1 part 1</LI>
+ *     <LI>An item2 part 1</LI>
  * </UL>
  *
  * An example class doc paragraph.
  *
  */
-public class ExampleDocData implements DocFuncData {
+public class ExampleDocFunc1 implements DocFuncData {
 
     @Override
     public String getPackageName() {
-        return "packagename";
+        return "package.name.one";
     }
 
     @Override
@@ -32,7 +35,7 @@ public class ExampleDocData implements DocFuncData {
 
     @Override
     public String getClassName() {
-        return "classname";
+        return "ClassName1";
     }
 
     @Override
@@ -57,9 +60,10 @@ public class ExampleDocData implements DocFuncData {
         // for each ctor
         LinkedHashMap<String, String> args = new LinkedHashMap<>();
         args.put("arg1", "val1");
+        args.put("arg2", "val2");
         List<List<String>> examples = new ArrayList<>();
         examples.add(new ArrayList<>() {{ add("example"); add("one"); }});
-        DocForFuncCtor ctordoc = new DocForFuncCtor("name", "ctordoc", args, examples);
+        DocForFuncCtor ctordoc = new DocForFuncCtor("ClassName1", "ctordoc", args, examples);
         ctors.add(ctordoc);
 
         return ctors;
@@ -67,7 +71,7 @@ public class ExampleDocData implements DocFuncData {
 
     public List<DocForFuncCtor> getCtorsAlternate() {
         return new ArrayList<>() {{
-            add(new DocForFuncCtor("name", "ctordoc",
+            add(new DocForFuncCtor("ClassName1", "ctordoc",
                     new LinkedHashMap<>() {{
                         put("aname", "atype");
                     }},
@@ -78,7 +82,7 @@ public class ExampleDocData implements DocFuncData {
                         }});
                     }}
             ));
-            add(new DocForFuncCtor("name", "ctordoc",
+            add(new DocForFuncCtor("ClassName1", "ctordoc",
                     new LinkedHashMap<>() {{
                         put("aname", "atype");
                     }},

@@ -35,7 +35,9 @@ import java.util.stream.Collectors;
 
 public class VirtDataResources {
     public final static String DATA_DIR = "data";
-    private final static Logger logger  = LogManager.getLogger(VirtDataResources.class);public static CharBuffer readDataFileToCharBuffer(String basename) {
+    private final static Logger logger = LogManager.getLogger(VirtDataResources.class);
+
+    public static CharBuffer readDataFileToCharBuffer(String basename) {
         return loadFileToCharBuffer(basename, DATA_DIR);
     }
 
@@ -50,23 +52,23 @@ public class VirtDataResources {
     public static InputStream findRequiredStreamOrFile(String basename, String extension, String... searchPaths) {
         Optional<InputStream> optionalStreamOrFile = findOptionalStreamOrFile(basename, extension, searchPaths);
         return optionalStreamOrFile.orElseThrow(() -> new RuntimeException(
-                "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
-                        + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
+            "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
+                + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
         ));
     }
 
     public static Reader findRequiredReader(String basename, String extension, String... searchPaths) {
         Optional<Reader> optionalReader = findOptionalReader(basename, extension, searchPaths);
         return optionalReader.orElseThrow(() -> new RuntimeException(
-                "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
-                        + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
+            "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
+                + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
         ));
     }
 
     public static Optional<Reader> findOptionalReader(String basename, String extenion, String... searchPaths) {
         return findOptionalStreamOrFile(basename, extenion, searchPaths)
-                .map(InputStreamReader::new)
-                .map(BufferedReader::new);
+            .map(InputStreamReader::new)
+            .map(BufferedReader::new);
     }
 
     public static Optional<Path> findOptionalDirPath(String pathName) {
@@ -92,7 +94,7 @@ public class VirtDataResources {
             add(filename);
             if (!isRemote(basename)) {
                 addAll(Arrays.stream(searchPaths).map(s -> s + File.separator + filename)
-                        .collect(Collectors.toCollection(ArrayList::new)));
+                    .collect(Collectors.toCollection(ArrayList::new)));
             }
         }};
 
@@ -108,7 +110,7 @@ public class VirtDataResources {
 
     private static boolean isRemote(String path) {
         return (path.toLowerCase().startsWith("http:")
-                || path.toLowerCase().startsWith("https:"));
+            || path.toLowerCase().startsWith("https:"));
     }
 
     public static Optional<InputStream> getInputStream(String path) {
@@ -224,9 +226,14 @@ public class VirtDataResources {
      * @throws RuntimeException if none of the specified paths is found in any of the locations
      */
     public static Path findPathIn(String... pathspecs) {
+        Optional<Path> found = FindOptionalPathIn(pathspecs);
+        return found.orElseThrow();
+    }
 
+    public static Optional<Path> FindOptionalPathIn(String... pathspecs) {
+
+        Path foundPath = null;
         for (String pathspec : pathspecs) {
-            Path foundPath = null;
 
             if (isRemote(pathspec)) {
                 try {
@@ -248,9 +255,9 @@ public class VirtDataResources {
                     boolean foundADirectory = attrs.isDirectory();
                     if (wantsADirectory != foundADirectory) {
                         throw new RuntimeException("for path " + pathspec + ", user wanted a " +
-                                (wantsADirectory ? "directory" : "file") + ", but found a " +
-                                (foundADirectory ? "directory" : "file") + " while searching paths " +
-                                Arrays.toString(pathspecs));
+                            (wantsADirectory ? "directory" : "file") + ", but found a " +
+                            (foundADirectory ? "directory" : "file") + " while searching paths " +
+                            Arrays.toString(pathspecs));
                     }
                     foundPath = candidate;
                 } catch (Exception ignored) {
@@ -269,13 +276,10 @@ public class VirtDataResources {
 
                 }
             }
-
-            if (foundPath != null) {
-                return foundPath;
-            }
         }
-        throw new RuntimeException("Unable to find path in " + Arrays.toString(pathspecs));
+        return Optional.ofNullable(foundPath);
     }
+
 
     private synchronized static Path getPathInFilesystem(URI uri) {
         FileSystem fileSystem = null;

@@ -37,6 +37,7 @@ then
 fi
 
 $JAVA -jar target/nb.jar docserver generate ${GUIDEBOOK}/
+$JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/markdown/binding_functions
 
 #JAVA_HOME=${JAVA_HOME:-JAVA_HOME must be specified if java isn not in the path}
 #
