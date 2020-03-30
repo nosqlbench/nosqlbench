@@ -49,6 +49,7 @@ do
  targetmd="${driversdir}/${driver}.md"
  echo "targetmd: $targetmd"
  printf -- "---\ntitle: driver - $driver\nweight: 50\n---\n" > $targetmd
+ printf -- "drivers/${driver}.md\n" >> ${GUIDEBOOK}/services/docs/markdown.csv
  $JAVA -jar target/nb.jar help $driver >> $targetmd
 done
 

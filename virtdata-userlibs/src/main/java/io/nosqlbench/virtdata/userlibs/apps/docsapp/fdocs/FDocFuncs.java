@@ -66,6 +66,10 @@ public class FDocFuncs implements Iterable<FDocFunc> {
                 sb.append(ctor.asMarkdown());
             }
         }
-        return sb.toString();
+        return sb.toString()
+            .replaceAll("java.lang.","")
+            .replaceAll("java.util.","")
+            .replaceAll("java.net.","")
+            .replaceAll("java.io.","");
     }
 }
