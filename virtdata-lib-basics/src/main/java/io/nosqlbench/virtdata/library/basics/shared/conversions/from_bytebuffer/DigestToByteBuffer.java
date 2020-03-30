@@ -15,19 +15,8 @@ import java.util.stream.Collectors;
 /**
  * Computes the digest of the ByteBuffer on input and stores it in the output
  * ByteBuffer. The digestTypes available are:
- * <UL>
- *     <LI>MD2</LI>
- *     <LI>MD5</LI>
- *     <LI>SHA-1</LI>
- *     <LI>SHA-224</LI>
- *     <LI>SHA-256</LI>
- *     <LI>SHA-384</LI>
- *     <LI>SHA-512</LI>
- *     <LI>SHA3-224</LI>
- *     <LI>SHA3-256</LI>
- *     <LI>SHA3-384</LI>
- *     <LI>SHA3-512</LI>
- * </UL>
+ * MD2 MD5 SHA-1 SHA-224 SHA-256 SHA-384 SHA-512 SHA3-224 SHA3-256
+ * SHA3-384 SHA3-512
  */
 @Categories(Category.conversion)
 @ThreadSafeMapper

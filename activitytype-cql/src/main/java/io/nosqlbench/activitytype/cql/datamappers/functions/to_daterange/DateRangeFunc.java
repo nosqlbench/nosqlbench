@@ -14,16 +14,7 @@ import java.util.function.LongUnaryOperator;
 /**
  * Uses the precision and the two functions provided to create a DateRange.
  * You can use any of these precisions to control the bounds
- * around the provided timestamp:
- * <ul>
- *     <LI>millisecond</LI>
- *     <LI>second</LI>
- *     <LI>minute</LI>
- *     <LI>hour</LI>
- *     <li>day</li>
- *     <li>month</li>
- *     <li>year</li>
- * </ul>
+ * around the provided timestamp: millisecond, second, minute, hour, day, month, or year.
  */
 @ThreadSafeMapper
 @Categories(Category.datetime)

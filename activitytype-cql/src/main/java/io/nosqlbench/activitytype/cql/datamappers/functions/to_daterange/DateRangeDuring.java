@@ -14,16 +14,7 @@ import java.util.function.LongFunction;
  * Takes an input as a reference point in epoch time, and converts it to a DateRange,
  * with the bounds set to the lower and upper timestamps which align to the
  * specified precision. You can use any of these precisions to control the bounds
- * around the provided timestamp:
- * <ul>
- *     <LI>millisecond</LI>
- *     <LI>second</LI>
- *     <LI>minute</LI>
- *     <LI>hour</LI>
- *     <li>day</li>
- *     <li>month</li>
- *     <li>year</li>
- * </ul>
+ * around the provided timestamp: millisecond, second, minute, hour, day, month, or year.
  */
 @ThreadSafeMapper
 @Categories(Category.datetime)

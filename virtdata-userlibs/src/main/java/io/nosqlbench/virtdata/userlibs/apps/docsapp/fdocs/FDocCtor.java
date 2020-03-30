@@ -37,7 +37,7 @@ public class FDocCtor {
             sb.append("  - *notes:* ").append(ctorJavaDoc).append("\n");
         }
         for (List<String> example : examples) {
-            sb.append("  - *ex:* `").append(example.get(0)).append("`\n");
+            sb.append("  - *example:* `").append(example.get(0)).append("`\n");
             if (example.size()>1) {
                 sb.append("  - *").append(example.get(1)).append("*\n");
             }

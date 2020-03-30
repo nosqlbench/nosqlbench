@@ -15,16 +15,7 @@ import java.util.function.LongFunction;
  * with the lower bounds set to the lower bound of the precision and millisecond
  * provided, and with no upper bound.
  * You can use any of these precisions to control the bounds
- * around the provided timestamp:
- * <ul>
- *     <LI>millisecond</LI>
- *     <LI>second</LI>
- *     <LI>minute</LI>
- *     <LI>hour</LI>
- *     <li>day</li>
- *     <li>month</li>
- *     <li>year</li>
- * </ul>
+ * around the provided timestamp: millisecond, second, minute, hour, day, month, or year.
  */
 @ThreadSafeMapper
 @Categories(Category.datetime)
