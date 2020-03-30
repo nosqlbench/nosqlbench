@@ -78,13 +78,13 @@ examples that are known to load cleanly, then please review your document for co
 [YAML Specification]().
 
 If you are sure that the YAML should load, then please
-[submit a bug report](https://github.com/engineblock/engineblock/issues/new?labels=bug) with details on the type of YAML
+[submit a bug report](https://github.com/nosqlbench/nosqlbench/issues/new?labels=bug) with details on the type of YAML
 file you are trying to load.
 
 ### YAML Construction Error
 
 This exception is thrown when the YAML was loaded, but the configuration object was not able to be constructed from the
 in-memory YAML document. If this error occurs, it may be a bug in the YAML loader implementation. Please
-[submit a bug report](https://github.com/engineblock/engineblock/issues/new?labels=bug) with details on the type of YAML
+[submit a bug report](https://github.com/nosqlbench/nosqlbench/issues/new?labels=bug) with details on the type of YAML
 file you are trying to load.
 

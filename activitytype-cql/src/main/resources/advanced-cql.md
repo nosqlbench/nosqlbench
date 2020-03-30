@@ -79,13 +79,11 @@ Examples:
 
 ## Injecting additional Queries (Future)
 
-It is possible to inject new operations to an activity. However, such
-operations are _indirect_ to cycles, since they must be based on the results
-of other operations. As such, they will not be represented in cycle output or
-other advanced features. This is a specific feature for the CQL activity --
-implemented internal to the way a CQL cycle is processed. A future version
-of EngineBlock will provide a more uniform way to achieve this result across
-activity types. For now, remember that this is a CQL-only capability.
+It is possible to inject new operations to an activity. However, such operations are _indirect_ to cycles, since they
+must be based on the results of other operations. As such, they will not be represented in cycle output or other
+advanced features. This is a specific feature for the CQL activity -- implemented internal to the way a CQL cycle is
+processed. A future version of NoSQLBench will provide a more uniform way to achieve this result across activity types.
+For now, remember that this is a CQL-only capability.
 
 - subquery-statement - Adds additional operations to the current cycle, based
   on the contents of the thread-local row state. The value to this parameter

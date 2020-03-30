@@ -39,6 +39,19 @@ fi
 $JAVA -jar target/nb.jar docserver generate ${GUIDEBOOK}/
 $JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/markdown/binding_functions
 
+driversdir="${GUIDEBOOK}/services/docs/markdown/drivers"
+mkdir -p $driversdir
+
+drivers=$($JAVA -jar target/nb.jar --list-drivers)
+for driver in $drivers
+do
+ echo "driver: $driver"
+ targetmd="${driversdir}/${driver}.md"
+ echo "targetmd: $targetmd"
+ printf -- "---\ntitle: driver - $driver\nweight: 50\n---\n" > $targetmd
+ $JAVA -jar target/nb.jar help $driver >> $targetmd
+done
+
 #JAVA_HOME=${JAVA_HOME:-JAVA_HOME must be specified if java isn not in the path}
 #
 ## static site for gh pages

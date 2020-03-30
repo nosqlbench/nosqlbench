@@ -28,25 +28,19 @@ how you configure for verifiable data and error handling.
 
 ##### Writing verifiable data
 
-The cqlverify activity type does not retain logged data for verification. Still,
-it is able to compare data as if it had a separate data set to compare to. This
-is possibly only because the data generation facilities used by ebcql (and
-engineblock) provide realistic and voluminous synthetic data that can be
-recalled from a recipe and accessed dynamically.
+The cqlverify driver does not retain logged data for verification. Still, it is able to compare data as if it had a
+separate data set to compare to. This is possible only because the data generation facilities used by NoSQLBench provide
+realistic and voluminous synthetic data that can be recalled from a recipe and accessed dynamically.
 
-That means, however, that you must avoid using the non-stable data mapping
-functions when writing data. The rule of thumb is to avoid using any data
-mapping functions containing the word "Random", as these are the ones that have
-historically used internal RNG state. Instead, swap in their replacements that
-start with "Hashed". There is a hashed equivalent to all of the original random
-functions. The rng-based functions will be deprecated in a future release.
+That means, however, that you must avoid using the non-stable data mapping functions when writing data. The rule of
+thumb is to avoid using any data mapping functions containing the word "Random", as these are the ones that have
+historically used internal RNG state. Instead, swap in their replacements that start with "Hashed". There is a hashed
+equivalent to all of the original random functions. The rng-based functions will be deprecated in a future release.
 
-In a typical cql activity, you are allowed to name the bindings however you
-like, so long as the binding names match the anchor names in your statement
-template. Because we need to match reference field data to actual row data
-pair-wise by field name, there is a more strict requirement for cqlverify
-activities. The binding names themselves are now required to match the field
-names that they are expected to be compared to.
+In a typical cql activity, you are allowed to name the bindings however you like, so long as the binding names match the
+anchor names in your statement template. Because we need to match reference field data to actual row data pair-wise by
+field name, there is a more strict requirement for cqlverify activities. The binding names themselves are now required
+to match the field names that they are expected to be compared to.
 
 The simplest way to do this is to follow this recipe:
 

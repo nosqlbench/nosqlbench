@@ -37,7 +37,6 @@ The recommended reading for this is:
 
 ## Scenario Developers
 
-The underlying runtime for a scenario in nosqlbench is based on EngineBlock, which means it has all the scripting power
-that comes with that. For advanced scenario designs, iterative testing models, or analysis methods, you can use
+For advanced scenario designs, iterative testing models, or analysis methods, you can use
 ECMAScript to control the scenario from start to finish. This is an advanced feature that is not recommended for
 first-time users. A guide for scenario developers will be released in increments.

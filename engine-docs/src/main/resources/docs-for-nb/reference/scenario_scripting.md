@@ -6,11 +6,10 @@ title: Scenario Scripting
 
 ## Motive
 
-The EngineBlock runtime is a combination of a scripting sandbox and a workload execution machine. This is not
-accidental. With this particular arrangement, it should be possible to build sophisticated tests across a variety of
-scenarios. In particular, logic which can observe and react to the system under test can be powerful. With this
-approach, it becomes possible to break away from the conventional run-interpret-adjust cycle which is all too often done
-by human hands.
+The NoSQLBench runtime is a combination of a scripting sandbox and a workload execution machine. This is not accidental.
+With this particular arrangement, it should be possible to build sophisticated tests across a variety of scenarios. In
+particular, logic which can observe and react to the system under test can be powerful. With this approach, it becomes
+possible to break away from the conventional run-interpret-adjust cycle which is all too often done by human hands.
 
 ## Machinery, Controls & Instruments
 

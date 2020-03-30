@@ -163,9 +163,8 @@ activity types.
     Examples:
     - `jmxreporting=true`
     - `jmxreporting=false` (the default)
-- **alias** - this is a standard engineblock parameter, however
-    the cql type will use the workload value also as the alias value
-    when not specified.
+- **alias** - this is a standard nosqlbench parameter, however the cql type will use the workload value also as the
+  alias value when not specified.
 - **errors** - error handler configuration.
     (default errors=stop,retryable->retry,unverified->stop)
     Examples:

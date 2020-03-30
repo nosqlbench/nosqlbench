@@ -43,14 +43,17 @@ public class TCPServerActivity extends StdoutActivity {
 
     private final static Logger logger = LoggerFactory.getLogger(TCPServerActivity.class);
     private final ServerSocketFactory socketFactory;
-    private BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
+    private LinkedBlockingQueue<String> queue;
     private ServerSocket listenerSocket;
     private List<Shutdown> managedShutdown = new ArrayList<>();
+    private int capacity=10;
 
 
     public TCPServerActivity(ActivityDef activityDef) {
         super(activityDef);
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
+        this.capacity=activityDef.getParams().getOptionalInteger("capacity").orElse(10);
+        queue = new LinkedBlockingQueue<>(capacity);
 
         if (sslEnabled) {
             socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef);
@@ -62,7 +65,6 @@ public class TCPServerActivity extends StdoutActivity {
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
-
     }
 
     @Override

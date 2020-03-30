@@ -38,7 +38,7 @@ In order to enable graphite reporting, use one of these options formats:
 
 ## Prefix
 
-Core metrics use the prefix _engineblock_ by default. You can override this with the ``--metrics-prefix` option:
+Core metrics use the prefix _nosqlbench_ by default. You can override this with the ``--metrics-prefix` option:
 
     --metrics-prefix myclient.group5
 
