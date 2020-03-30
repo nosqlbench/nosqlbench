@@ -26,5 +26,3 @@ can run this command:
 The help for any topic can be read this way:
 
     nb help <topic>
-
-Additional drivers will be added in future releases. There are command line help topics for each activity type (driver).
