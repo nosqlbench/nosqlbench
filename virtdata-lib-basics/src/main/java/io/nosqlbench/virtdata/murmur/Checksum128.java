@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.murmur;
+package io.nosqlbench.virtdata.murmur;
 
 import java.math.BigInteger;
 import java.util.zip.Checksum;
