@@ -17,9 +17,7 @@
 
 package io.nosqlbench.engine.api.activityapi.planning;
 
-import io.nosqlbench.engine.api.activityapi.planning.ElementSequencer;
-import io.nosqlbench.engine.api.activityapi.planning.IntervalSequencer;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +25,6 @@ import java.util.function.ToLongFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntervalSequencerTest {
 
     private static ElementSequencer<AnEvent> seqr = new IntervalSequencer<>();

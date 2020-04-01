@@ -17,15 +17,15 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StmtVariationTests {
 
     private final static Logger logger = LoggerFactory.getLogger(StmtVariationTests.class);
@@ -93,6 +93,7 @@ public class StmtVariationTests {
         assertThat(stmts.get(1).getStmt()).isEqualTo("statement two");
     }
 
+    @Test
     public void testMixedForms() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
         RawStmtsDocList docs = ysl.loadString(logger,

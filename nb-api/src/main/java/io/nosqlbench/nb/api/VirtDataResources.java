@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.virtdata.api;
+package io.nosqlbench.nb.api;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

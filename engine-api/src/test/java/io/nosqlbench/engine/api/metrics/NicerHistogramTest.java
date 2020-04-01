@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.metrics;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

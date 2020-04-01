@@ -19,13 +19,12 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class RawYamlStatementLoaderTest {
     private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoaderTest.class);
 
@@ -75,8 +74,6 @@ public class RawYamlStatementLoaderTest {
         assertThat(blocks).hasSize(1);
         RawStmtsBlock rawStmtsBlock = blocks.get(0);
         assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
-
-
 
     }
 

@@ -18,11 +18,10 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class EnumReadableMappingFilterTest {
 
     @Test

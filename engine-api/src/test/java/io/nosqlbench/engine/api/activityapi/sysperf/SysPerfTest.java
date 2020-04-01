@@ -17,16 +17,18 @@
 
 package io.nosqlbench.engine.api.activityapi.sysperf;
 
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.nio.file.attribute.FileTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test(singleThreaded = true, enabled = false)
 public class SysPerfTest {
 
+    @Test
+    @Ignore
     public void testForcedBench() {
 
 //        SysPerf.get().reset();

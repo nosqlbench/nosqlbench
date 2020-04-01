@@ -21,7 +21,7 @@ package io.nosqlbench.activitytype.cql.datamappers.functions.long_string;
 
 import io.nosqlbench.virtdata.annotations.Example;
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.VirtDataResources;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.ModuloLineToString;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;

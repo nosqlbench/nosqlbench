@@ -6,7 +6,7 @@ import io.nosqlbench.virtdata.lang.generated.VirtDataParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +20,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class VirtdataBuilderTest {
 
     private static char[] readFile(String filename) {
@@ -43,7 +42,7 @@ public class VirtdataBuilderTest {
     }
 
     @Test
-    private void testFullSyntax() {
+    public void testFullSyntax() {
         char[] chars = readFile("test-syntax.virtdata");
         CodePointCharStream ais = CharStreams.fromString(new String(chars));
         String inputString = new String(chars);
@@ -99,6 +98,7 @@ public class VirtdataBuilderTest {
 
     }
 
+    @Test
     public void testEscapedDoubleQuotedLiteralISEscaped() {
         VirtDataDSL.ParseResult r = VirtDataDSL.parse(
                 "Template(\"A \\value\")"
@@ -116,6 +116,7 @@ public class VirtdataBuilderTest {
 
     }
 
+    @Test
     public void testEscapedSingleQuotedLiteralIsNotEscaped() {
         VirtDataDSL.ParseResult r = VirtDataDSL.parse(
                 "Template('{\"q\":\"*:*\", \"fq\":\"point:\\\"IsWithin(BUFFER(POINT(40.71 74.3), 50.0))}');"

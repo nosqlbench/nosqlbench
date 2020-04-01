@@ -1,14 +1,13 @@
 package com.datastax.ebdrivers.cql.statements;
 
 import io.nosqlbench.activitytype.cql.statements.core.CQLStatementDefParser;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CQLCQLStatementDefParserTest {
 
     // TODO: Implment support for default values in yaml

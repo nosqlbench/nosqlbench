@@ -20,13 +20,12 @@ package io.nosqlbench.engine.api.activityapi.cyclelog;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CycleResultsArraySegmentReadableTest {
 
     @Test

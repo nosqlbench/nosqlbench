@@ -21,8 +21,9 @@ import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
 import org.assertj.core.data.Offset;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,7 +37,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test(singleThreaded = true)
 public class AsyncScriptIntegrationTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
@@ -63,7 +63,7 @@ public class AsyncScriptIntegrationTests {
     }
 
     @BeforeClass
-    public void logit() {
+    public static void logit() {
         System.out.println("Running ASYNC version of Script Integration Tests.");
     }
 
@@ -245,7 +245,8 @@ public class AsyncScriptIntegrationTests {
     }
 
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void testCycleRateChangeOldMetrics() {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change_deprecated");
         String ioLog = scenarioResult.getIOLog();

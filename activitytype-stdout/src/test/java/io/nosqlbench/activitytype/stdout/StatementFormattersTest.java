@@ -17,13 +17,12 @@
 
 package io.nosqlbench.activitytype.stdout;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StatementFormattersTest {
 
     @Test

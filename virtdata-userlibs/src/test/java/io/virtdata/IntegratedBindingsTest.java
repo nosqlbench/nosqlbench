@@ -18,7 +18,7 @@ package io.virtdata;
 import io.nosqlbench.virtdata.api.DataMapper;
 import io.nosqlbench.virtdata.api.Bindings;
 import io.nosqlbench.virtdata.api.VirtData;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +28,6 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedBindingsTest {
 
     @Test
@@ -59,7 +58,7 @@ public class IntegratedBindingsTest {
         assertThat(map.get("mod71")).isEqualTo(5L);
     }
 
-
+    @Test
     public void testIteratedMaps() {
         Bindings bindings = VirtData.getTemplate(
                 "mod5", "Mod(5)",

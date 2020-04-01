@@ -15,22 +15,24 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.core.ScenarioResult;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 
 /**
  * These is here for experimentation on microbench scripts without requiring
  * them to be included in builds
  */
-@Test
 public class SpeedCheckIntegrationTests {
 
-    @Test(enabled = false)
+    @Test
+    @Ignore
     public void testSpeedSanity() {
         ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("speedcheck");
     }
 
-    @Test(enabled = false)
+    @Test
+    @Ignore
     public void testThreadSpeeds() {
         ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("threadspeeds");
     }

@@ -15,7 +15,7 @@ import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Optional;
 
@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-@Test(enabled=true)
 public class ActivityExecutorTest {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutorTest.class);
 
@@ -61,8 +60,7 @@ public class ActivityExecutorTest {
 
     }
 
-
-    @Test(enabled=true)
+    @Test
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
@@ -98,8 +96,8 @@ public class ActivityExecutorTest {
 
     }
 
-    private MotorDispenser getActivityMotorFactory(final ActivityDef ad, Action lc, final Input ls) {
-        MotorDispenser<?> cmf = new MotorDispenser() {
+    private MotorDispenser<?> getActivityMotorFactory(final ActivityDef ad, Action lc, final Input ls) {
+        MotorDispenser<?> cmf = new MotorDispenser<>() {
             @Override
             public Motor getMotor(ActivityDef activityDef, int slotId) {
                 Activity activity = new SimpleActivity(activityDef);

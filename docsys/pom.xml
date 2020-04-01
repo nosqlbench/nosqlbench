@@ -17,18 +17,6 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-processors</artifactId>
-            <version>3.12.73-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-annotations</artifactId>
-            <version>3.12.73-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
             <version>3.12.73-SNAPSHOT</version>
         </dependency>
@@ -38,21 +26,21 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core-java8</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
+        <!-- test -->
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- jetty -->
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -127,11 +115,6 @@
 <!--            <artifactId>virtdata-api</artifactId>-->
 <!--            <version>3.12.73-SNAPSHOT</version>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
 

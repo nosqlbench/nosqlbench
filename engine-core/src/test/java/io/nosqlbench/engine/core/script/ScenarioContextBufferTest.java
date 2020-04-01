@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 

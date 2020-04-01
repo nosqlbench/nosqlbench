@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.api.DataMapper;
 import io.nosqlbench.virtdata.api.VirtData;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;

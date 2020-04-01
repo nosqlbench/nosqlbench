@@ -17,13 +17,13 @@
 
 package io.nosqlbench.testutils;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class BoundsTest {
 
+    @Test
     public void testProgression2() {
         Bounds bounds = new Bounds(3000, 2);
         assertThat(bounds.getValue()).isEqualTo(3000L);
@@ -35,6 +35,7 @@ public class BoundsTest {
         assertThat(bounds.getNextValue()).isEqualTo(15000L);
     }
 
+    @Test
     public void testProgression1() {
         Bounds bounds = new Bounds(100, 1);
         assertThat(bounds.getValue()).isEqualTo(100L);

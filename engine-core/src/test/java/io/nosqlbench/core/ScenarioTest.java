@@ -2,7 +2,7 @@ package io.nosqlbench.core;
 
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.script.Scenario;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

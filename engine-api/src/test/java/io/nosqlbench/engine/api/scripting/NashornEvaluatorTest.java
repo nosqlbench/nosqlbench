@@ -17,13 +17,12 @@
 
 package io.nosqlbench.engine.api.scripting;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class NashornEvaluatorTest {
 
     @Test

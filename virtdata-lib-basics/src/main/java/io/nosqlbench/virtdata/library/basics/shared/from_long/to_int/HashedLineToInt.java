@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.VirtDataResources;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

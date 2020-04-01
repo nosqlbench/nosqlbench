@@ -5,7 +5,7 @@ import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-@Test
 public class CoreMotorTest {
 
     @Test

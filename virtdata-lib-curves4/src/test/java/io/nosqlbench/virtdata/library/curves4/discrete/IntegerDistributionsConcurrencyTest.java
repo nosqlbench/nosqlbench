@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.api.DataMapper;
 import io.nosqlbench.virtdata.api.VirtData;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
 import org.assertj.core.data.Offset;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

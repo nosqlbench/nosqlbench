@@ -3,14 +3,13 @@ package io.virtdata;
 import io.nosqlbench.virtdata.api.Bindings;
 import io.nosqlbench.virtdata.api.BindingsTemplate;
 import io.nosqlbench.virtdata.api.templates.StringCompositor;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedStringCompositorTest {
 
     private BindingsTemplate template;

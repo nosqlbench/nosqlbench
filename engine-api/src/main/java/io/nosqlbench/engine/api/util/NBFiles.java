@@ -21,7 +21,7 @@ import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.VirtDataResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

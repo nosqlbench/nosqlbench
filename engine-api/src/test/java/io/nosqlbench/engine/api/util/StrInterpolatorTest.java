@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.util;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +26,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StrInterpolatorTest {
 
     private static List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{

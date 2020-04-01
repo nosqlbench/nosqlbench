@@ -2,12 +2,13 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.Snapshot;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
-@Test
 public class TestHistoTypes {
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void compareHistos() {
         Clock c = new Clock();
 

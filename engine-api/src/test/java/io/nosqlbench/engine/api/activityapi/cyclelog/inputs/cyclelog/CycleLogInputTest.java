@@ -19,21 +19,20 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogOutput;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CycleLogInputTest {
 
     private final static String filepath="cycle-log-reader-test";
-    private File cyclefile;
+    private static File cyclefile;
 
     @BeforeClass
-    public void createTempFile() {
+    public static void createTempFile() {
         try {
             cyclefile = File.createTempFile(filepath, "cyclelog");
             System.out.println("tmp file for testing:" + cyclefile.getPath());
@@ -73,8 +72,6 @@ public class CycleLogInputTest {
         c = i1.nextCycle();
         assertThat(c).isEqualTo(5L);
         assertThat(i1.isExhausted()).isTrue();
-
-
     }
 
 }

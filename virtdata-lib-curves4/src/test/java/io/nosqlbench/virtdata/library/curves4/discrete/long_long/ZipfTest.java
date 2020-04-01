@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.curves4.discrete.long_long;
 
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class ZipfTest {
 

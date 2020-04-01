@@ -20,13 +20,12 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.annotations.Example;
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.VirtDataResources;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

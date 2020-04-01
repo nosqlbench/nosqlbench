@@ -1,9 +1,8 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Snapshot;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-@Test
 public class DeltaHdrHistogramReservoirTest {
 
 //    @Test

@@ -6,7 +6,7 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Identity;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
 import org.apache.commons.lang3.ClassUtils;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -15,7 +15,6 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedComposerLogicTest {
 
     @Test
@@ -25,6 +24,7 @@ public class IntegratedComposerLogicTest {
         assertThat(o).isOfAnyClassIn(Long.class);
     }
 
+    @Test
     public void testSignatureMapping() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(
                 "compose HashRange(1000000000,9999999999L); ToString() -> String"
@@ -35,6 +35,7 @@ public class IntegratedComposerLogicTest {
         assertThat(v).isNotNull();
     }
 
+    @Test
     public void  testIntegratedComposer() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(
                 "binomial(8,0.5); ToDate() -> java.util.Date"
@@ -44,6 +45,7 @@ public class IntegratedComposerLogicTest {
         assertThat(dataMapper.get().get(1)).isNotNull();
     }
 
+    @Test
     public void testComplexComposition() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(
                 "Hash(); Normal(50,10.0,'map'); Add(50); ToString(); Suffix('avgdays') -> String"
@@ -56,11 +58,13 @@ public class IntegratedComposerLogicTest {
 //        }
     }
 
+    @Test
     public void testComposerOnly() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper("Add(5)");
         assertThat(dataMapper.isPresent()).isTrue();
     }
 
+    @Test
     public void testResourceLoader() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(" ModuloLineToString('data/variable_words.txt') -> String");
         assertThat(dataMapper).isPresent();
@@ -70,12 +74,7 @@ public class IntegratedComposerLogicTest {
         assertThat(dataMapper.get().get(1)).isEqualToComparingFieldByField("completion_count");
     }
 
-//    public void testPOJOTypeSpecializer() {
-//        Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper("compose LongToLongPOJO() -> io.virtdata.testing.ARandomPOJO");
-//        assertThat(dataMapper).isPresent();
-//        assertThat(dataMapper.get().get(1)).isOfAnyClassIn(ARandomPOJO.class);
-//    }
-
+    @Test
     public void testNestedFunction() {
         Template t = new Template("_{}_{}_", (Function) String::valueOf, (LongFunction<?>) String::valueOf);
         String r = t.apply(5);
@@ -87,6 +86,7 @@ public class IntegratedComposerLogicTest {
 
     }
 
+    @Test
     public void testBrokenTemplate() {
         Optional<DataMapper<String>> m2 = VirtData.getOptionalMapper("Template('{\"alt1-{}\",\"alt2-{}\"}',ToLongFunction(Identity()),ToLongFunction(Identity()))");
         assertThat(m2).isPresent();
@@ -95,6 +95,7 @@ public class IntegratedComposerLogicTest {
 
     }
 
+    @Test
     public void testNegativeLongs() {
         Optional<DataMapper<Long>> mo = VirtData.getOptionalMapper("HashRange(-2147483648L,2147483647L) -> long");
         assertThat(mo).isPresent();
@@ -104,12 +105,14 @@ public class IntegratedComposerLogicTest {
         assertThat(result).isEqualTo(1398623797L);
     }
 
+    @Test
     public void testBrokenFlow() {
         Optional<DataMapper<String>> mo = VirtData.getOptionalMapper("HashRange(-2147483648L,2147483647L) -> long");
         assertThat(mo).isPresent();
 
     }
 
+    @Test
     public void testConversionMatchingManual() {
         Optional<DataMapper<String>> tm = VirtData.getOptionalMapper("ToEpochTimeUUID(); java.lang.Object -> ToString() -> String");
         assertThat(tm).isPresent();
@@ -117,6 +120,7 @@ public class IntegratedComposerLogicTest {
         assertThat(s).isEqualTo("1389a470-1dd2-11b2-8000-000000000000");
     }
 
+    @Test
     public void testConversionMatchingAuto() {
         Optional<DataMapper<String>> tm = VirtData.getOptionalMapper("ToEpochTimeUUID(); ToString()");
         assertThat(tm).isPresent();
@@ -138,7 +142,7 @@ public class IntegratedComposerLogicTest {
 
     }
 
-    @Test(expectedExceptions = {RuntimeException.class}, expectedExceptionsMessageRegExp = ".*but this type is not assignable.*")
+    @Test(expected = RuntimeException.class)
     public void testVirtDataTypeVarianceError() {
         DataMapper mapper = VirtData.getMapper("Uniform(0.0D,1.0D) -> java.lang.String", long.class);
     }

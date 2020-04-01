@@ -17,25 +17,27 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class RateSpecTest {
 
+    @Test
     public void testDefaultRateSpecPattern() {
         RateSpec r = new RateSpec("523");
         assertThat(r.getRate()).isEqualTo(523.0d);
         assertThat(r.getBurstRatio()).isEqualTo(1.1d);
     }
 
+    @Test
     public void testBurstRatioPattern() {
         RateSpec r = new RateSpec("12345,1.3");
         assertThat(r.getRate()).isEqualTo(12345.0d);
         assertThat(r.getBurstRatio()).isEqualTo(1.3d);
     }
 
+    @Test
     public void testTypeSelection() {
         RateSpec a = new RateSpec("12345,1.4,configure");
         assertThat(a.getVerb()).isEqualTo(RateSpec.Verb.configure);

@@ -20,7 +20,7 @@ package io.nosqlbench.activitytype.stdout;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Created by sebastianestevez on 5/5/17.
  */
 public class StdoutActivityTypeTest {
+
     @Test
     public void testDiagActivity() {
         StdoutActivityType stdoutAt = new StdoutActivityType();

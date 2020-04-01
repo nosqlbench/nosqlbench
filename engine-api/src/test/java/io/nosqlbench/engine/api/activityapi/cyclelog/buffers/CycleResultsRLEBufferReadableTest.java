@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferTarget;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test(singleThreaded = true)
 public class CycleResultsRLEBufferReadableTest {
 
     @Test
