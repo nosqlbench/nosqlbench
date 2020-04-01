@@ -9,7 +9,7 @@ Welcome to the documentation for NoSQLBench. This is a power tool that emulates 
 that you can fast-track performance, sizing and data model testing without writing your own testing harness.
 
 To get started right away, jump to the
-[Quick Start Example](/index.html#/docs/02_getting_started.html) from the menu on the left.
+[Quick Start Example](/index.html#/docs/getting_started) from the menu on the left.
 
 To see the ways you can get NoSQLBench, check out the project site
 [DOWNLOADS.md](https://github.com/nosqlbench/nosqlbench/blob/master/DOWNLOADS.md).
