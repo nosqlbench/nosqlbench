@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;

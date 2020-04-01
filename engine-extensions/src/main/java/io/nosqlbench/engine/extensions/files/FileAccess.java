@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.extensions.files;
 
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 
 public class FileAccess extends FileAccessPluginData {
 

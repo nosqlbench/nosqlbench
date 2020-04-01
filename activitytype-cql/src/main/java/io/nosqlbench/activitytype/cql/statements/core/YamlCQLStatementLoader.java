@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.TypeDescription;

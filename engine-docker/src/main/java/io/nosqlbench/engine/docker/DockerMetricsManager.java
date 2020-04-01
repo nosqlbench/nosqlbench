@@ -12,7 +12,7 @@ import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

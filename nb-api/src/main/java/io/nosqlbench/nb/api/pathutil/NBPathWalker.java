@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.api.util;
+package io.nosqlbench.nb.api.pathutil;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

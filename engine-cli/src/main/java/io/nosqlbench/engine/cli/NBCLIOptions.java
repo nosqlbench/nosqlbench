@@ -2,7 +2,7 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 import io.nosqlbench.engine.api.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

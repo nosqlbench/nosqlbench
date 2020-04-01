@@ -17,6 +17,7 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.nb.api.pathutil.NBFiles;
 import org.junit.Test;
 
 import java.io.InputStream;
