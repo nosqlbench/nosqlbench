@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
-import io.nosqlbench.nb.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.VirtDataResources;
 import org.junit.Test;
 
 import java.net.URL;

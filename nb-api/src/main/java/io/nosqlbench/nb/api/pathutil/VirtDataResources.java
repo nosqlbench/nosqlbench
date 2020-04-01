@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.nb.api;
+package io.nosqlbench.nb.api.pathutil;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

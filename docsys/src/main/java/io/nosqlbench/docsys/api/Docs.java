@@ -1,6 +1,6 @@
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.nb.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.VirtDataResources;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
-import io.nosqlbench.nb.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.VirtDataResources;
 import io.nosqlbench.virtdata.api.processors.DocFuncData;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDoc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocCat;

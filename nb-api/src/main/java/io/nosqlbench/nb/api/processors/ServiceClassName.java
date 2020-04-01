@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api;
+package io.nosqlbench.nb.api.processors;
 
 /**
  * Statically defined names which need to be visible for refactoring

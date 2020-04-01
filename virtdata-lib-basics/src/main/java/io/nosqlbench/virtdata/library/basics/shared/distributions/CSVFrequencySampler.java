@@ -14,7 +14,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
-import io.nosqlbench.nb.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.VirtDataResources;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.math3.stat.Frequency;

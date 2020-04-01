@@ -5,7 +5,7 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.exceptions.BasicError;
-import io.nosqlbench.nb.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.VirtDataResources;
 import io.nosqlbench.nb.api.pathutil.NBFiles;
 import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
