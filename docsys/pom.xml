@@ -14,6 +14,25 @@
     </parent>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-processors</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-annotations</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
@@ -102,16 +121,7 @@
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-processors</artifactId>
-            <version>3.12.73-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-annotations</artifactId>
-            <version>3.12.73-SNAPSHOT</version>
-        </dependency>
+
 <!--        <dependency>-->
 <!--            <groupId>io.nosqlbench</groupId>-->
 <!--            <artifactId>virtdata-api</artifactId>-->
