@@ -19,11 +19,17 @@
 
     <dependencies>
 
-<!--        <dependency>-->
-<!--            <groupId>io.nosqlbench</groupId>-->
-<!--            <artifactId>virtdata-api</artifactId>-->
-<!--            <version>3.12.73-SNAPSHOT</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-api</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-basics</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
 
 <!--        <dependency>-->
 <!--            &lt;!&ndash; key methods were exposed in the commons math4 statistics library-->

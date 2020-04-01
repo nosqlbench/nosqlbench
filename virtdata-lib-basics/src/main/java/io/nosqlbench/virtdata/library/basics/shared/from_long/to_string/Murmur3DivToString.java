@@ -20,7 +20,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
 import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.murmur.Murmur3F;
+import io.nosqlbench.virtdata.murmur.Murmur3F;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.DivideToLong;
 
 import java.util.function.LongFunction;

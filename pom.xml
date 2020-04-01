@@ -44,6 +44,7 @@
 
     <!-- VIRTDATA MODULES -->
 
+    <module>virtdata-api</module>
     <module>virtdata-annotations</module>
     <module>virtdata-processors</module>
     <module>virtdata-lang</module>

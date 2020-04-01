@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>virtdata-api</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>mvn-defaults</artifactId>
+        <version>3.12.73-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <name>virtdata-api</name>
+    <url>http://nosqlbench.io/</url>
+    <description>
+        The internal API module for Virtual Data Set modules. Each module that provides
+        mapping functions should only have to depend on this module to get all the dependencies
+        it needs.
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-processors</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-annotations</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lang</artifactId>
+            <version>3.12.73-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core-java8</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
