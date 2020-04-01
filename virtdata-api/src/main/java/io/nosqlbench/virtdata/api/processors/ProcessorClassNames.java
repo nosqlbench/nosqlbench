@@ -6,7 +6,7 @@ package io.nosqlbench.virtdata.api.processors;
  */
 public class ProcessorClassNames {
     public final static String ThreadSafeMapper =
-            "io.nosqlbench.virtdata.annotations.ThreadSafeMapper";
+            "io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper";
     public final static String PerThreadMapper =
-            "io.nosqlbench.virtdata.annotations.PerThreadMapper";
+            "io.nosqlbench.virtdata.api.annotations.PerThreadMapper";
 }

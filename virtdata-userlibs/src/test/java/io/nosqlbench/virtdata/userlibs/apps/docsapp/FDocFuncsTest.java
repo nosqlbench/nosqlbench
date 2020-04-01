@@ -1,6 +1,5 @@
 package io.nosqlbench.virtdata.userlibs.apps.docsapp;
 
-import io.nosqlbench.virtdata.processors.ExampleDocData;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc1;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc2;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFunc;
