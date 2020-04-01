@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.util;
 
-import io.nosqlbench.virtdata.api.VirtDataFunctions;
+import io.nosqlbench.virtdata.core.bindings.VirtDataFunctions;
 import org.junit.Test;
 
 import java.security.InvalidParameterException;

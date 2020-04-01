@@ -1,12 +1,12 @@
 package io.nosqlbench.virtdata.library.basics.shared.functionadapters;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.composers.FunctionAssembly;
-import io.nosqlbench.virtdata.api.composers.FunctionComposer;
-import io.nosqlbench.virtdata.api.ResolvedFunction;
-import io.nosqlbench.virtdata.api.VirtDataFunctions;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.core.composers.FunctionAssembly;
+import io.nosqlbench.virtdata.core.composers.FunctionComposer;
+import io.nosqlbench.virtdata.core.bindings.ResolvedFunction;
+import io.nosqlbench.virtdata.core.bindings.VirtDataFunctions;
 
 import java.util.function.LongFunction;
 

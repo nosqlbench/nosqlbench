@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.function.LongToDoubleFunction;
@@ -20,7 +20,7 @@ public class HashedRangedToNonuniformDouble implements LongToDoubleFunction {
     private final long max;
     private final double length;
     private final Hash hash;
-    
+
     public HashedRangedToNonuniformDouble(long min, long max) {
         this.hash = new Hash();
         if (max<=min) {

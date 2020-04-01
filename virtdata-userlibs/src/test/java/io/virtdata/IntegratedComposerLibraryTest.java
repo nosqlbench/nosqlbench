@@ -15,11 +15,11 @@
 
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.Bindings;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
-import io.nosqlbench.virtdata.api.ResolverDiagnostics;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.junit.Ignore;
 import org.junit.Test;
 

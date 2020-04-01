@@ -18,8 +18,8 @@
 package io.nosqlbench.engine.api.activityconfig;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.virtdata.api.templates.BindPoint;
-import io.nosqlbench.virtdata.api.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.BindPoint;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

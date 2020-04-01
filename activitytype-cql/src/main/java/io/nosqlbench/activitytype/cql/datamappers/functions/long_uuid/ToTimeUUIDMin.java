@@ -1,9 +1,9 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_uuid;
 
 import com.datastax.driver.core.utils.UUIDs;
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.UUID;
 import java.util.function.LongFunction;

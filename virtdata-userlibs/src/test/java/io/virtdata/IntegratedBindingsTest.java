@@ -15,9 +15,9 @@
 
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.Bindings;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;

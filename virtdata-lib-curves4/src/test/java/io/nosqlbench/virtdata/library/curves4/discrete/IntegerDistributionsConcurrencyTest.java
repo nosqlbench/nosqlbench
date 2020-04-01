@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.curves4.discrete;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
 import org.assertj.core.data.Offset;
 import org.junit.Test;

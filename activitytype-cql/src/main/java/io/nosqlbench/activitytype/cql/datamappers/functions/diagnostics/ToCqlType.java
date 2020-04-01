@@ -4,7 +4,7 @@ import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

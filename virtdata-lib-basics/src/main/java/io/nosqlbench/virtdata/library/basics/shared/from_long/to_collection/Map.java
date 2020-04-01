@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
-import io.nosqlbench.virtdata.annotations.*;
+import io.nosqlbench.virtdata.api.annotations.*;
 
 import java.util.HashMap;
 import java.util.function.LongFunction;

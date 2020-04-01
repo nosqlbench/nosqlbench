@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

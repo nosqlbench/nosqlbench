@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.core;
 
-import io.nosqlbench.virtdata.api.ResolvedFunction;
+import io.nosqlbench.virtdata.core.bindings.ResolvedFunction;
 import org.junit.Test;
 
 import java.util.function.LongUnaryOperator;

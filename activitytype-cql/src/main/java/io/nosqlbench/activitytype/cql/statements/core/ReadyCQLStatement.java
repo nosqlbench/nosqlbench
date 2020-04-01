@@ -7,7 +7,7 @@ import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
-import io.nosqlbench.virtdata.api.ContextualArrayBindings;
+import io.nosqlbench.virtdata.core.bindings.ContextualArrayBindings;
 
 import java.io.IOException;
 import java.io.Writer;

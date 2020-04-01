@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core;
 
-import io.nosqlbench.virtdata.api.ResolverDiagnostics;
-import io.nosqlbench.virtdata.api.VirtDataComposer;
+import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
+import io.nosqlbench.virtdata.core.bindings.VirtDataComposer;
 import org.junit.Test;
 
 public class VirtDataComposerTest {

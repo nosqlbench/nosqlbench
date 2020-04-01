@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.rainbow;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 @ThreadSafeMapper
 public class TokenMapFileCycle extends TokenMapFileBaseFunction {

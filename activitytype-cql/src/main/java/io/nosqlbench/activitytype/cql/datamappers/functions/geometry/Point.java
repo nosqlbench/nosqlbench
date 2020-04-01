@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;

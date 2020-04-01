@@ -1,9 +1,9 @@
 package io.nosqlbench.virtdata.userlibs.apps;
 
 import io.nosqlbench.nb.api.annotations.Service;
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.ResolverDiagnostics;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.docsys.api.WebServiceObject;
 
 import javax.inject.Singleton;

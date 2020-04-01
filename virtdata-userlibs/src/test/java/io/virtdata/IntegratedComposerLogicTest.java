@@ -1,7 +1,7 @@
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Identity;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;

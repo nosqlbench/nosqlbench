@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_localdate;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,7 +18,7 @@ import java.util.function.LongFunction;
  * Short form ZoneId values like 'CST' can be used, although US Domestic names
  * which specify the daylight savings hours are not supported. The full list of
  * short Ids at @see <a href="https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/time/ZoneId.html#SHORT_IDS">JavaSE ZoneId Ids</a>
- * 
+ *
  * Any timezone specifier may be used which can be read by {@link ZoneId#of(String)}
  */
 @ThreadSafeMapper

@@ -1,8 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.functionadapters;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.*;
 

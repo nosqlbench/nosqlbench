@@ -1,9 +1,9 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 
 import java.util.function.Function;

@@ -18,8 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.nb.api.VirtDataResources;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;

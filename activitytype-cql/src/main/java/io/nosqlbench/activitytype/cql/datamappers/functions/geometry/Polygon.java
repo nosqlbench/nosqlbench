@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
 import com.datastax.driver.dse.geometry.Point;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;

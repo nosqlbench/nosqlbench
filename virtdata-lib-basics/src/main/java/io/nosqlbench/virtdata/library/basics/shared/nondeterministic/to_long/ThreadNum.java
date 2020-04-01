@@ -18,7 +18,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_long;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
 import java.util.regex.Matcher;

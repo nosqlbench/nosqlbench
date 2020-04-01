@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.core;
 
-import io.nosqlbench.virtdata.api.CompatibilityFixups;
+import io.nosqlbench.virtdata.core.bindings.CompatibilityFixups;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

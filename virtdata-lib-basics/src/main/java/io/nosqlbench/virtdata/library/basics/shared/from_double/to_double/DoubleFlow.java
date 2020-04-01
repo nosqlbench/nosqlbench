@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_double.to_double;
 
-import io.nosqlbench.virtdata.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.Example;
 
 import java.util.function.DoubleUnaryOperator;
 

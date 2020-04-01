@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.util;
 
-import io.nosqlbench.virtdata.api.StringObjectPromoter;
+import io.nosqlbench.virtdata.core.bindings.StringObjectPromoter;
 import org.junit.Test;
 
 import java.math.BigDecimal;

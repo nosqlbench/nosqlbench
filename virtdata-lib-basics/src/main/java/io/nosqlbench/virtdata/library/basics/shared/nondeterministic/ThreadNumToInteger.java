@@ -18,8 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic;
 
-import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 import java.util.regex.Matcher;

@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.string_string;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;

@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core;
 
-import io.nosqlbench.virtdata.api.VirtDataDocs;
-import io.nosqlbench.virtdata.processors.DocFuncData;
+import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
+import io.nosqlbench.virtdata.api.processors.DocFuncData;
 import org.junit.Test;
 
 import java.util.List;

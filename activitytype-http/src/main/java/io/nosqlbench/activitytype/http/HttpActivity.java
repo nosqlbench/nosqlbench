@@ -15,9 +15,9 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
-import io.nosqlbench.virtdata.api.templates.StringBindings;
-import io.nosqlbench.virtdata.api.templates.StringBindingsTemplate;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
+import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

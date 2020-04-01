@@ -18,7 +18,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
-import io.nosqlbench.virtdata.annotations.Description;
+import io.nosqlbench.virtdata.api.annotations.Description;
 
 import java.util.function.LongUnaryOperator;
 

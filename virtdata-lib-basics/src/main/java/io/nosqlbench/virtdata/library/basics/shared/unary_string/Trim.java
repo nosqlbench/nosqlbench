@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.Function;
 
