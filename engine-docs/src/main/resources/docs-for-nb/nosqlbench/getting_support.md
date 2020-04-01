@@ -3,7 +3,14 @@ title: Getting Support
 weight: 10
 ---
 
-# Built-In Docs
+# Getting Support
+
+In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of
+armor, so that they feel capable of doing most things without having to ask for help. Please keep this in mind when
+looking for personal support form our community, and help us find those places where the docs are lacking. Maybe you can
+help us by adding some missing docs!
+
+## Built-In Docs
 
 The documentation for NoSQLBench is quite thorough. On the command line, you can see a list of built-in docs with the
 command:
@@ -16,13 +23,6 @@ To read any topic, simply use the command:
 
 The documentation system you are looking at right now includes the same docs you can find above already and more. They
 are automatically included when NoSQLBench is built.
-
-# Getting Support
-
-In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of
-armor, so that they feel capable of doing most things without having to ask for help. Please keep this in mind when
-looking for personal support form our community, and help us find those places where the docs are lacking. Maybe you can
-help us by adding some missing docs!
 
 ## General Feedback
 
