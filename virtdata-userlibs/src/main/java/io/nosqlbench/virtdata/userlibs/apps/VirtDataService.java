@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.userlibs.apps;
 
-import io.nosqlbench.virtdata.annotations.Service;
+import io.nosqlbench.nb.api.annotations.Service;
 import io.nosqlbench.virtdata.api.DataMapper;
 import io.nosqlbench.virtdata.api.ResolverDiagnostics;
 import io.nosqlbench.virtdata.api.VirtData;

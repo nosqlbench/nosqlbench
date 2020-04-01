@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.userlibs.apps.docsapp;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
-import io.nosqlbench.virtdata.annotations.Service;
+import io.nosqlbench.nb.api.annotations.Service;
 import io.nosqlbench.virtdata.api.VirtDataDocs;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.virtdata.processors.DocFuncData;

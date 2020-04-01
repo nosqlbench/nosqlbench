@@ -29,11 +29,18 @@
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-api</artifactId>
-            <version>3.12.73-SNAPSHOT</version>
-        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>io.nosqlbench</groupId>-->
+        <!--            <artifactId>virtdata-api</artifactId>-->
+        <!--            <version>3.12.73-SNAPSHOT</version>-->
+        <!--        </dependency>-->
+
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>virtdata-core</artifactId>
+                    <version>3.12.73-SNAPSHOT</version>
+                </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>

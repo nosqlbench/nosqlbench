@@ -1,6 +1,6 @@
 package io.nosqlbench.docsys.core;
 
-import io.nosqlbench.virtdata.annotations.Service;
+import io.nosqlbench.nb.api.annotations.Service;
 import io.nosqlbench.docsys.api.DocsNameSpace;
 import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.DocsBinder;

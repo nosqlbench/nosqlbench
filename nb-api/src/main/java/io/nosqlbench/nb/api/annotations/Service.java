@@ -13,7 +13,7 @@
 *   limitations under the License.
 */
 
-package io.nosqlbench.virtdata.annotations;
+package io.nosqlbench.nb.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

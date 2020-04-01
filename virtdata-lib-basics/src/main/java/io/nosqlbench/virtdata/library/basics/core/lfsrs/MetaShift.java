@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
+import java.util.logging.LogManager;
 
 public class MetaShift {
     private final static Logger logger  = LogManager.getLogger(MetaShift.class);public static Func forSizeAndBank(long size, int selector) {

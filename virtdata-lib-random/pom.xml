@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-api</artifactId>
+            <artifactId>virtdata-core</artifactId>
             <version>3.12.73-SNAPSHOT</version>
         </dependency>
 

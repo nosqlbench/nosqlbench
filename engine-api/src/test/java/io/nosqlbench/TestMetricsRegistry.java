@@ -19,7 +19,7 @@ package io.nosqlbench;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
-import io.nosqlbench.virtdata.annotations.Service;
+import io.nosqlbench.nb.api.annotations.Service;
 
 /**
  * Provide a local MetricRegistryService for tests

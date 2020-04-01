@@ -23,6 +23,7 @@
     <module>mvn-defaults</module>
     <!-- web apps and service hooks -->
     <module>docsys</module>
+    <module>nb-api</module>
 
     <!-- ENGINE MODULES -->
     <module>engine-api</module>
@@ -46,7 +47,7 @@
     <module>virtdata-annotations</module>
     <module>virtdata-processors</module>
     <module>virtdata-lang</module>
-    <module>virtdata-api</module>
+    <module>virtdata-core</module>
     <module>virtdata-realdata</module>
     <module>virtdata-lib-basics</module>
     <module>virtdata-lib-random</module>

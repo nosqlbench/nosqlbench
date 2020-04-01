@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.processors;
+package io.nosqlbench.nb.api.processors;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -22,11 +22,12 @@ import java.util.stream.Collectors;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_12)
 public class ServiceProcessor extends AbstractProcessor {
+    public final static String SERVICE_NAME = io.nosqlbench.nb.api.annotations.Service.class.getCanonicalName();
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> supportedAnnotations = new HashSet<>();
-        supportedAnnotations.add(ProcessorClassNames.Service);
+        supportedAnnotations.add(SERVICE_NAME);
         return supportedAnnotations;
     }
 

@@ -9,6 +9,4 @@ public class ProcessorClassNames {
             "io.nosqlbench.virtdata.annotations.ThreadSafeMapper";
     public final static String PerThreadMapper =
             "io.nosqlbench.virtdata.annotations.PerThreadMapper";
-    public final static String Service =
-            "io.nosqlbench.virtdata.annotations.Service";
 }
