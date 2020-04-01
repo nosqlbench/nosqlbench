@@ -52,6 +52,11 @@ do
  printf -- "drivers/${driver}.md\n" >> ${GUIDEBOOK}/services/docs/markdown.csv
  $JAVA -jar target/nb.jar help $driver >> $targetmd
 done
+(
+ cd ${GUIDEBOOK}/services/docs;
+ ( cd markdown && find * -name '*.md' ) | sort > markdown.csv
+ find .
+)
 
 #JAVA_HOME=${JAVA_HOME:-JAVA_HOME must be specified if java isn not in the path}
 #

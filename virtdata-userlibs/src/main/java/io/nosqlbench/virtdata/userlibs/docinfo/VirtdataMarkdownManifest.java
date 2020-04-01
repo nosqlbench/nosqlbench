@@ -12,7 +12,7 @@ public class VirtdataMarkdownManifest implements DocsysDynamicManifest {
         return new Docs().namespace("virtdata-docs").addFirstFoundPath(
                 "virtdata-userlibs/src/main/resources/docs-for-virtdata/",
                 "docs-for-virtdata/")
-                .setEnabledByDefault(false)
+                .setEnabledByDefault(true)
                 .asDocsBinder();
     }
 
