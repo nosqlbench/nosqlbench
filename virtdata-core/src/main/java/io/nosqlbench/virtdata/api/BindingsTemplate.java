@@ -38,7 +38,8 @@ import java.util.Optional;
  * bindings will be used in.
  */
 public class BindingsTemplate {
-    private final static Logger logger  = LogManager.getLogger(BindingsTemplate.class);private List<String> bindPointNames = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(BindingsTemplate.class);
+    private List<String> bindPointNames = new ArrayList<>();
     private List<String> specifiers = new ArrayList<>();
 
 //    public BindingsTemplate(Map<String,String> specs) {

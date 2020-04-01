@@ -33,7 +33,8 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 @Categories({Category.conversion})
 public class ModuloToBigDecimal implements LongFunction<BigDecimal> {
-    private final static Logger logger  = LogManager.getLogger(ModuloToBigDecimal.class);private final long modulo;
+    private final static Logger logger  = LogManager.getLogger(ModuloToBigDecimal.class);
+    private final long modulo;
 
     public ModuloToBigDecimal() {
         this.modulo = Long.MAX_VALUE;

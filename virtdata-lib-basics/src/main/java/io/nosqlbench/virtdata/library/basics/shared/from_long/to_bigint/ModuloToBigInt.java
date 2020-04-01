@@ -33,7 +33,8 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 @Categories({Category.conversion})
 public class ModuloToBigInt implements LongFunction<BigInteger> {
-    private final static Logger logger  = LogManager.getLogger(ModuloToBigInt.class);private final long modulo;
+    private final static Logger logger  = LogManager.getLogger(ModuloToBigInt.class);
+    private final long modulo;
 
     public ModuloToBigInt() {
         this.modulo = Long.MAX_VALUE;

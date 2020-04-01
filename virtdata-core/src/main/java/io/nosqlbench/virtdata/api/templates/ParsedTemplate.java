@@ -87,7 +87,8 @@ public class ParsedTemplate {
             Pattern.compile("\\{(?<anchor>\\w+[-_\\d\\w.]*)}"),
             Pattern.compile("\\?(?<anchor>\\w+[-_\\d\\w.]*)")
     };
-    private final static Logger logger  = LogManager.getLogger(ParsedTemplate.class);private final Pattern[] patterns;
+    private final static Logger logger  = LogManager.getLogger(ParsedTemplate.class);
+    private final Pattern[] patterns;
     // Spans is an even-odd form of (literal, variable, ..., ..., literal)
     private final String rawtemplate;
     private final String[] spans;

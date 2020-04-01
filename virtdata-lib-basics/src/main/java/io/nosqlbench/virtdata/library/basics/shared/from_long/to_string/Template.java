@@ -35,7 +35,8 @@ import java.util.regex.Pattern;
  */
 @ThreadSafeMapper
 public class Template implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(Template.class);private static final String EXPR_BEGIN = "[[";
+    private final static Logger logger  = LogManager.getLogger(Template.class);
+    private static final String EXPR_BEGIN = "[[";
     private static final String EXPR_END = "]]";
     private final static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     private final String rawTemplate;

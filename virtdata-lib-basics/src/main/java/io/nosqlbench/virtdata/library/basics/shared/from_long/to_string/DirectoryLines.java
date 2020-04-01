@@ -25,7 +25,9 @@ import java.util.regex.Pattern;
 @ThreadSafeMapper
 public class DirectoryLines implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(DirectoryLines.class);private final Pattern namePattern;
+    private final static Logger logger  = LogManager.getLogger(DirectoryLines.class);
+
+    private final Pattern namePattern;
     private final String basepath;
     private final List<Path> allFiles;
     private Iterator<String> stringIterator;

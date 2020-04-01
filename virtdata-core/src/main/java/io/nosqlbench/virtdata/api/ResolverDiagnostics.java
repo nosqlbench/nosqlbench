@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public class ResolverDiagnostics {
 
-    private final static Logger logger  = LogManager.getLogger(ResolverDiagnostics.class);private ResolvedFunction resolvedFunction;
+    private final static Logger logger  = LogManager.getLogger(ResolverDiagnostics.class);
+
+    private ResolvedFunction resolvedFunction;
     private final StringBuilder log = new StringBuilder();
     private Throwable error;
 

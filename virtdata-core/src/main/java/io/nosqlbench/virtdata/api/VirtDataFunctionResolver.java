@@ -16,7 +16,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class VirtDataFunctionResolver {
-    private final static Logger logger  = LogManager.getLogger(VirtDataFunctionResolver.class);private final static MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+    private final static Logger logger  = LogManager.getLogger(VirtDataFunctionResolver.class);
+    private final static MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     private final VirtDataFunctionFinder virtDataFunctionFinder = new VirtDataFunctionFinder();
 
     public List<ResolvedFunction> resolveFunctions(Class<?> returnType, Class<?> inputType, String functionName, Map<String,?> customParameters, Object... parameters) {

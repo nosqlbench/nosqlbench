@@ -37,7 +37,9 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class HashedFileExtractToString implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(HashedFileExtractToString.class);private static CharBuffer fileDataImage =null;
+    private final static Logger logger  = LogManager.getLogger(HashedFileExtractToString.class);
+
+    private static CharBuffer fileDataImage =null;
     private final HashRange sizeRange;
     private final HashRange positionRange;
 

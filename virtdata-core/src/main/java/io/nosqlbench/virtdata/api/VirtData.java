@@ -10,7 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import java.util.*;
 
 public class VirtData {
-    private final static Logger logger  = LogManager.getLogger(VirtData.class);/**
+    private final static Logger logger  = LogManager.getLogger(VirtData.class);
+    /**
      * Create a bindings template from the pair-wise names and specifiers.
      * Each even-numbered (starting with zero) argument is a binding name,
      * and each odd-numbered (starting with one) argument is a binding spec.

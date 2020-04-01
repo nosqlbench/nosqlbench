@@ -13,7 +13,9 @@ import java.util.concurrent.locks.Lock;
 
 public class ValuesCheckerRunnable implements Runnable {
 
-    private final static Logger logger  = LogManager.getLogger(ValuesCheckerRunnable.class);private final Condition goTime;
+    private final static Logger logger  = LogManager.getLogger(ValuesCheckerRunnable.class);
+
+    private final Condition goTime;
     private final Lock lock;
     private final long start;
     private final long end;

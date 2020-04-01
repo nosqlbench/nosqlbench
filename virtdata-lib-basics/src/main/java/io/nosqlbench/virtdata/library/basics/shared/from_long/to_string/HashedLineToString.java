@@ -34,7 +34,8 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 public class HashedLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(HashedLineToString.class);private final HashRange indexRange;
+    private final static Logger logger  = LogManager.getLogger(HashedLineToString.class);
+    private final HashRange indexRange;
 
     private List<String> lines = new ArrayList<>();
 

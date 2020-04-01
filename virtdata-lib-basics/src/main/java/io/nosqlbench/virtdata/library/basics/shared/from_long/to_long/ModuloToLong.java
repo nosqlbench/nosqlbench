@@ -29,7 +29,8 @@ import java.util.function.LongUnaryOperator;
  */
 @ThreadSafeMapper
 public class ModuloToLong implements LongUnaryOperator {
-    private final static Logger logger  = LogManager.getLogger(ModuloToLong.class);private final long modulo;
+    private final static Logger logger  = LogManager.getLogger(ModuloToLong.class);
+    private final long modulo;
 
     public ModuloToLong(long modulo) {
         this.modulo=modulo;

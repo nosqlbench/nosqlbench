@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PathWalker {
-    private final static Logger logger  = LogManager.getLogger(PathWalker.class);public static void walk(Path p, PathVisitor v) {
+    private final static Logger logger  = LogManager.getLogger(PathWalker.class);
+    public static void walk(Path p, PathVisitor v) {
         walk(p,v,PathWalker.WALK_ALL);
     }
 

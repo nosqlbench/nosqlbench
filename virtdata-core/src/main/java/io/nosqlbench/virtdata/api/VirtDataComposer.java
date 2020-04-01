@@ -50,7 +50,8 @@ import java.util.stream.Collectors;
 public class VirtDataComposer {
 
     private final static String PREAMBLE = "compose ";
-    private final static Logger logger  = LogManager.getLogger(DataMapperLibrary.class);private final static MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+    private final static Logger logger  = LogManager.getLogger(DataMapperLibrary.class);
+    private final static MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 
     private final VirtDataFunctionLibrary functionLibrary;
     private final Map<String,Object> customElements = new HashMap<>();

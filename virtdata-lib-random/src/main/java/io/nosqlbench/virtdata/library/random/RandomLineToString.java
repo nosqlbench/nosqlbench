@@ -35,7 +35,8 @@ import java.util.function.LongFunction;
  */
 @DeprecatedFunction("random mappers are not deterministic. They will be replaced with hash-based functions.")
 public class RandomLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(RandomLineToString.class);private List<String> lines = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(RandomLineToString.class);
+    private List<String> lines = new ArrayList<>();
 
     private final MersenneTwister rng;
     private final IntegerDistribution itemDistribution;

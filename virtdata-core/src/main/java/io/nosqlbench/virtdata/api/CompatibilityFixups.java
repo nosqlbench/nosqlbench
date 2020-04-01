@@ -11,7 +11,9 @@ import java.util.regex.Pattern;
 
 public class CompatibilityFixups {
 
-    private final static Logger logger  = LogManager.getLogger(CompatibilityFixups.class);// Not all of these are simple upper-case changes
+    private final static Logger logger  = LogManager.getLogger(CompatibilityFixups.class);
+
+    // Not all of these are simple upper-case changes
     private final static Map<String,String> funcs = new HashMap<String,String>() {{
         put("log_normal","LogNormal");
         put("normal", "Normal");

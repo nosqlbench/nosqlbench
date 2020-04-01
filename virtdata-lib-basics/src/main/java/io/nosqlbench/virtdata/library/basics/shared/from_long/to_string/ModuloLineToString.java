@@ -33,7 +33,8 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 public class ModuloLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);private List<String> lines = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);
+    private List<String> lines = new ArrayList<>();
 
     private String filename;
 

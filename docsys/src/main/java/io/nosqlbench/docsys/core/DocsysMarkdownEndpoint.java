@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Singleton
 @Path("/services/docs/")
 public class DocsysMarkdownEndpoint implements WebServiceObject {
-    private final static Logger logger  = LogManager.getLogger(DocsysMarkdownEndpoint.class);private DocsBinder docsinfo;
+    private final static Logger logger  = LogManager.getLogger(DocsysMarkdownEndpoint.class);
+    private DocsBinder docsinfo;
     private DocsBinder enabled;
     private DocsBinder disabled;
 

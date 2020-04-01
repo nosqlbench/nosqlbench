@@ -15,7 +15,9 @@ import java.util.function.Function;
 @ThreadSafeMapper
 public class FieldExtractor implements Function<String,String> {
 
-    private final static Logger logger  = LogManager.getLogger(FieldExtractor.class);private final String fields;
+    private final static Logger logger  = LogManager.getLogger(FieldExtractor.class);
+
+    private final String fields;
     private final String splitDelim;
     private final String printDelim;
     private final int maxIdx;

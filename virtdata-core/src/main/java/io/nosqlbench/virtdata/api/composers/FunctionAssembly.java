@@ -7,7 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import java.util.function.*;
 
 public class FunctionAssembly implements FunctionComposer {
-    private final static Logger logger  = LogManager.getLogger(FunctionAssembly.class);private FunctionComposer<?> composer = null;
+    private final static Logger logger  = LogManager.getLogger(FunctionAssembly.class);
+    private FunctionComposer<?> composer = null;
 
     @Override
     public Object getFunctionObject() {

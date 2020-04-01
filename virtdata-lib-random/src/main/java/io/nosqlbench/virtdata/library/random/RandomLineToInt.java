@@ -13,7 +13,8 @@ import java.util.function.LongToIntFunction;
 
 @DeprecatedFunction("random mappers are not deterministic. They will be replaced with hash-based functions.")
 public class RandomLineToInt implements LongToIntFunction {
-    private final static Logger logger  = LogManager.getLogger(RandomLineToInt.class);private final List<String> lines;
+    private final static Logger logger  = LogManager.getLogger(RandomLineToInt.class);
+    private final List<String> lines;
 
     private final MersenneTwister rng;
     private final IntegerDistribution itemDistribution;

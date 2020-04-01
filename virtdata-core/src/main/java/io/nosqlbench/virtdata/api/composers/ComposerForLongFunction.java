@@ -8,7 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import java.util.function.*;
 
 public class ComposerForLongFunction implements FunctionComposer<LongFunction<?>> {
-    private final static Logger logger  = LogManager.getLogger(ComposerForLongFunction.class);private final LongFunction<?> inner;
+    private final static Logger logger  = LogManager.getLogger(ComposerForLongFunction.class);
+    private final LongFunction<?> inner;
 
     public ComposerForLongFunction(LongFunction<?> inner) {
         this.inner = inner;

@@ -36,7 +36,8 @@ import java.util.*;
  * directly on your provided objects. See the detailed method docs for more information.</p>
  */
 public class Bindings {
-    private final static Logger logger  = LogManager.getLogger(Bindings.class);private BindingsTemplate template;
+    private final static Logger logger  = LogManager.getLogger(Bindings.class);
+    private BindingsTemplate template;
     private List<DataMapper<?>> dataMappers = new ArrayList<DataMapper<?>>();
     private ThreadLocal<Map<String, DataMapper<?>>> nameCache;
 

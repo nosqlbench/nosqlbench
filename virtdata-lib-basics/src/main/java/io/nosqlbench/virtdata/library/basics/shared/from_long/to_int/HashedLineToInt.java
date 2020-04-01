@@ -14,7 +14,8 @@ import java.util.function.LongToIntFunction;
  */
 @ThreadSafeMapper
 public class HashedLineToInt implements LongToIntFunction {
-    private final static Logger logger  = LogManager.getLogger(HashedLineToInt.class);private int[] values;
+    private final static Logger logger  = LogManager.getLogger(HashedLineToInt.class);
+    private int[] values;
     private final String filename;
     private final Hash intHash;
 

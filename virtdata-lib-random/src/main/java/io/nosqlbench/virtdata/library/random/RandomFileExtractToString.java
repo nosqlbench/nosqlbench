@@ -32,7 +32,9 @@ import java.util.function.LongFunction;
 @DeprecatedFunction("random mappers are not deterministic. They will be replaced with hash-based functions.")
 public class RandomFileExtractToString implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(RandomFileExtractToString.class);private static CharBuffer fileDataImage =null;
+    private final static Logger logger  = LogManager.getLogger(RandomFileExtractToString.class);
+
+    private static CharBuffer fileDataImage =null;
 
     private int minsize, maxsize;
     private final MersenneTwister rng;
