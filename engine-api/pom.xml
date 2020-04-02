@@ -22,7 +22,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
-            <version>3.12.75-SNAPSHOT</version>
+            <version>3.12.76-SNAPSHOT</version>
         </dependency>
 
         <dependency>
