@@ -6,7 +6,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
-import io.nosqlbench.nb.api.pathutil.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
@@ -71,7 +71,7 @@ public class WeightedStringsFromCSV implements LongFunction<String> {
             this.hash=new Hash();
         }
         for (String filename: filenames) {
-            CSVParser csvdata = VirtDataResources.readFileCSV(filename);
+            CSVParser csvdata = NBPaths.readFileCSV(filename);
             for (CSVRecord csvdatum : csvdata) {
                 String value = csvdatum.get(valueColumn);
                 values.add(value);
