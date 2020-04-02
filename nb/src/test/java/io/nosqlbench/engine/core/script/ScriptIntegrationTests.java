@@ -66,7 +66,7 @@ public class ScriptIntegrationTests {
     @Test
     public void testCycleRate() {
 
-        ScenarioResult scenarioResult = runScenario("cycle_rate");
+        ScenarioResult scenarioResult = runScenario("sync_cycle_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
         Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);

@@ -245,13 +245,13 @@ public class AsyncScriptIntegrationTests {
     }
 
 
-    @Test
-    @Ignore
-    public void testCycleRateChangeOldMetrics() {
-        ScenarioResult scenarioResult = runScenario("cycle_rate_change_deprecated");
-        String ioLog = scenarioResult.getIOLog();
-        assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
-    }
+//    @Test
+//    @Ignore
+//    public void testCycleRateChangeOldMetrics() {
+//        ScenarioResult scenarioResult = runScenario("cycle_rate_change_deprecated");
+//        String ioLog = scenarioResult.getIOLog();
+//        assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
+//    }
 
     @Test
     public void testCycleRateChangeNewMetrics() {

@@ -15,8 +15,8 @@
  * /
  */
 
-cycle_rate = {
-    "alias" : "cycle_rate",
+cycle_rate_change = {
+    "alias" : "cycle_rate_change",
     "type" : "diag",
     "cycles" : "0..1000000",
     "threads" : "10",
@@ -25,29 +25,29 @@ cycle_rate = {
     "async" : "1000"
 };
 
-print('starting cycle_rate');
-scenario.start(cycle_rate);
+print('starting cycle_rate_change');
+scenario.start(cycle_rate_change);
 print('started');
-print('cyclerate at 0ms:' + activities.cycle_rate.cyclerate);
+print('cyclerate at 0ms:' + activities.cycle_rate_change.cyclerate);
 scenario.waitMillis(1000);
-activities.cycle_rate.cyclerate='50000';
+activities.cycle_rate_change.cyclerate='50000';
 print("measured cycle increment per second is expected to adjust to 50000");
 
-print('cyclerate now:' + activities.cycle_rate.cyclerate);
+print('cyclerate now:' + activities.cycle_rate_change.cyclerate);
 
-var lastcount=metrics.cycle_rate.cycles.servicetime.count;
+var lastcount=metrics.cycle_rate_change.cycles.servicetime.count;
 for(i=0;i<20;i++) {
     scenario.waitMillis(1000);
-    var nextcount=metrics.cycle_rate.cycles.servicetime.count;
+    var nextcount=metrics.cycle_rate_change.cycles.servicetime.count;
     var cycles = (nextcount - lastcount);
     print("new this second: " + (nextcount - lastcount));
-    print(" waittime: " + metrics.cycle_rate.cycles.waittime.value);
+    print(" waittime: " + metrics.cycle_rate_change.cycles.waittime.value);
     lastcount=nextcount;
     if (cycles>49000 && cycles<51000) {
         print("cycles adjusted, exiting on iteration " + i);
         break;
     }
 }
-print('cycle_rate activity finished');
+print('cycle_rate_change activity finished');
 
 
