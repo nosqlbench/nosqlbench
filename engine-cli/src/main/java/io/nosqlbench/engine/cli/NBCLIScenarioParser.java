@@ -6,7 +6,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
-import io.nosqlbench.nb.api.pathutil.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +28,14 @@ public class NBCLIScenarioParser {
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
 
     public static boolean isFoundWorkload(String word) {
-        Optional<Path> workloadPath = NBFiles.findOptionalPath(word, "yaml", false, "activities");
+        Optional<Path> workloadPath = NBPaths.findOptionalPath(word, "yaml", false, "activities");
         return workloadPath.isPresent();
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist) {
 
         String workloadName = arglist.removeFirst();
-        Optional<Path> workloadPathSearch = NBFiles.findOptionalPath(workloadName, "yaml", false, "activities");
+        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
         Path workloadPath = workloadPathSearch.orElseThrow();
 
         List<String> scenarioNames = new ArrayList<>();

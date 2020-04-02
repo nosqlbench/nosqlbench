@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.nb.api.pathutil.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -25,11 +25,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NBFilesTest {
+public class NBPathsTest {
 
     @Test
     public void testNestedClasspathLoading() {
-        Optional<InputStream> optionalStreamOrFile = NBFiles.findOptionalStreamOrFile("nested/testfile", "txt", "activities");
+        Optional<InputStream> optionalStreamOrFile = NBPaths.findOptionalStreamOrFile("nested/testfile", "txt", "activities");
         assertThat(optionalStreamOrFile).isPresent();
     }
 

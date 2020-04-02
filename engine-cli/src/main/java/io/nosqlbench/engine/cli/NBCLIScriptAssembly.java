@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.pathutil.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +81,7 @@ public class NBCLIScriptAssembly {
         } catch (IOException ignored) {
         }
 
-        InputStream resourceAsStream = NBFiles.findRequiredStreamOrFile(cmd.getCmdSpec(), "js", "scripts");
+        InputStream resourceAsStream = NBPaths.findRequiredStreamOrFile(cmd.getCmdSpec(), "js", "scripts");
 
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             scriptData = buffer.lines().collect(Collectors.joining("\n"));
