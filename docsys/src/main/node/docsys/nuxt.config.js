@@ -96,6 +96,12 @@ export default {
     ** Build configuration
     */
     build: {
+//        analyze: {
+//            analyzerMode: 'static'
+//        },
+//        cssSourceMap: true,
+        extractCSS: false,
+//        parallel: true,
         /*
         ** You can extend webpack config here
         */
