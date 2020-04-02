@@ -2,7 +2,7 @@ package io.nosqlbench.activitytype.cql.statements.binders;
 
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
-import io.nosqlbench.virtdata.api.ValuesArrayBinder;
+import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 
 /**
  * This binder is not meant to be used with anything but DDL or statements

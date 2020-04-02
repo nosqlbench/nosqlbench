@@ -14,7 +14,7 @@
 */
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.IntUnaryOperator;
 

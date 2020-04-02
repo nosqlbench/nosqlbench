@@ -17,13 +17,14 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class TokenPoolTest {
 
+    @Test
     public void testBackfillFullRate() {
         TokenPool p = new TokenPool(100, 1.1);
         assertThat(p.refill(100L)).isEqualTo(100L);
@@ -37,7 +38,7 @@ public class TokenPoolTest {
         assertThat(p.takeUpTo(100)).isEqualTo(100L);
 
     }
-
+    @Test
     public void testTakeRanges() {
         TokenPool p = new TokenPool(100, 10);
         p.refill(100);

@@ -1,6 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
-import io.nosqlbench.virtdata.annotations.*;
+
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongToDoubleFunction;
 

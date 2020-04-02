@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -27,17 +27,16 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test(singleThreaded = true)
 public class HashedErrorHandlerTest {
 
     HashedErrorHandler<Throwable, Boolean> handler;
 
-    @BeforeMethod
+    @Before
     public void beforeTest() {
         handler = new HashedErrorHandler<Throwable,Boolean>();
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*actually.*")
+    @Test(expected= RuntimeException.class)
     public void testDefaultHandlerThrowsException() {
         handler.handleError(1L, new InvalidParameterException("this is an invalid exception, actually"));
     }
@@ -92,7 +91,7 @@ public class HashedErrorHandlerTest {
         assertThat(result).isFalse();
     }
 
-    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*this is an error.*")
+    @Test(expected = RuntimeException.class)
     public void testNamedGroup() {
         handler.setGroup("test1",IndexOutOfBoundsException.class,ArrayIndexOutOfBoundsException.class);
         handler.setGroup("types",InvalidParameterException.class);
@@ -103,20 +102,20 @@ public class HashedErrorHandlerTest {
         handler.handleError(5L,new InvalidParameterException("this is an error"));
     }
 
-    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*Found 2.*")
+    @Test(expected = RuntimeException.class)
     public void testFindVagueSingleSubmatchException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         handler.setHandlerForPattern("Index", CycleErrorHandlers.rethrow("12345 678910 11 12"));
     }
 
-    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*rethrown\\(Journey.*")
+    @Test(expected = RuntimeException.class)
     public void testFindMultipleRegex() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         handler.setHandlerForPattern(".*Index.*", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
         Boolean result = handler.handleError(9L, new IndexOutOfBoundsException("9L was out of bounds"));
     }
 
-    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Found no matching.*")
+    @Test(expected = RuntimeException.class)
     public void testNonMatchingSubstringException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         Set<Class<? extends Throwable>> groups = handler.getGroup("index");
@@ -126,7 +125,7 @@ public class HashedErrorHandlerTest {
         handler.setHandlerForPattern("Dyahwemo", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
     }
 
-    @Test(expectedExceptions=RuntimeException.class,expectedExceptionsMessageRegExp = ".*Group name 'outdex' was not found.*")
+    @Test(expected=RuntimeException.class)
     public void testSetHandlerForMissingGroupException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         handler.setHandlerForGroup("outdex", CycleErrorHandlers.rethrow("Journey through the klein bottle."));

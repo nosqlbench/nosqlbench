@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.random;
 
 
-import io.nosqlbench.virtdata.api.murmur.Murmur3F;
+import io.nosqlbench.virtdata.murmur.Murmur3F;
 
 import java.util.function.LongUnaryOperator;
 

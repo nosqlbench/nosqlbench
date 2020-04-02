@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.tests.libraryimpl;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.junit.Test;
 
 import java.util.Date;

@@ -18,8 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -27,19 +27,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongFunction;
 
+import static io.nosqlbench.nb.api.pathutil.NBPaths.readDataFileLines;
+
 /**
  * Select a value from a text file line by modulo division against the number
  * of lines in the file.
  */
 @ThreadSafeMapper
 public class ModuloLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);private List<String> lines = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);
+    private List<String> lines = new ArrayList<>();
 
     private String filename;
 
     public ModuloLineToString(String filename) {
         this.filename = filename;
-        this.lines = VirtDataResources.readDataFileLines(filename);
+        this.lines = readDataFileLines(filename);
     }
 
     @Override

@@ -17,13 +17,12 @@
 
 package io.nosqlbench.cli.testing;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class ExitStatusIntegrationTests {
 
     private final static String JARNAME = "target/nb.jar";

@@ -2,11 +2,11 @@ package io.nosqlbench.engine.api.activityimpl.tracking;
 
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTracker;
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTrackerAtomic;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class LongTreeTrackerTest2 {
 
 //    @Test
@@ -58,6 +58,7 @@ public class LongTreeTrackerTest2 {
         assertThat(t.getHighestCompleted()).isEqualTo(9L);
     }
 
+    @Test
     public void testTotalCompleted() {
         LongTreeTracker t;
 
@@ -137,7 +138,8 @@ public class LongTreeTrackerTest2 {
      * </pre>
      */
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void speedcheckThreadLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTracker();
@@ -156,7 +158,8 @@ public class LongTreeTrackerTest2 {
         System.out.format("rate/s: %f\n", rate * 1000.0d);
     }
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void speedcheckConcurrentLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTrackerAtomic();

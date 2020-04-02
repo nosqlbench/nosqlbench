@@ -18,8 +18,8 @@
 
 package io.nosqlbench.virtdata.library.random;
 
-import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.random.MersenneTwister;
@@ -35,7 +35,8 @@ import java.util.function.LongFunction;
  */
 @DeprecatedFunction("random mappers are not deterministic. They will be replaced with hash-based functions.")
 public class RandomLineToString implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(RandomLineToString.class);private List<String> lines = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(RandomLineToString.class);
+    private List<String> lines = new ArrayList<>();
 
     private final MersenneTwister rng;
     private final IntegerDistribution itemDistribution;
@@ -44,22 +45,22 @@ public class RandomLineToString implements LongFunction<String> {
     public RandomLineToString(String filename) {
         this.rng = new MersenneTwister(System.nanoTime());
         this.filename = filename;
-        this.lines = VirtDataResources.readDataFileLines(filename);
+        this.lines = NBPaths.readDataFileLines(filename);
         itemDistribution= new UniformIntegerDistribution(rng, 0, lines.size()-2);
     }
 
     public RandomLineToString(String filename, MersenneTwister rng) {
         this.rng = rng;
         this.filename = filename;
-        this.lines = VirtDataResources.readDataFileLines(filename);
-        this.lines = VirtDataResources.readDataFileLines(filename);
+        this.lines = NBPaths.readDataFileLines(filename);
+        this.lines = NBPaths.readDataFileLines(filename);
         itemDistribution= new UniformIntegerDistribution(rng, 0, lines.size()-2);
     }
 
     public RandomLineToString(String filename, long seed) {
         this.rng = new MersenneTwister(seed);
         this.filename = filename;
-        this.lines = VirtDataResources.readDataFileLines(filename);
+        this.lines = NBPaths.readDataFileLines(filename);
         itemDistribution= new UniformIntegerDistribution(rng, 0, lines.size()-2);
     }
 

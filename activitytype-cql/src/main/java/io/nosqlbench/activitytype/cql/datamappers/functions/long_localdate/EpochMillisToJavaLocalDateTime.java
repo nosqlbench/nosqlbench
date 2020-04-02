@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_localdate;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

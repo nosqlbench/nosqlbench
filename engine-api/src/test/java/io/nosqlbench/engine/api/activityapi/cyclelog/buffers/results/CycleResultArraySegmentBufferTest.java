@@ -17,13 +17,12 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CycleResultArraySegmentBufferTest {
 
     @Test

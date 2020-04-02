@@ -21,6 +21,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>3.12.75-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-userlibs</artifactId>
             <version>3.12.75-SNAPSHOT</version>
         </dependency>
@@ -93,14 +99,13 @@
         <!-- test scope only -->
 
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.assertj</groupId>
-            <artifactId>assertj-core-java8</artifactId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,8 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string.to_unset;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.Function;
 
@@ -12,7 +12,7 @@ import java.util.function.Function;
 @Categories(Category.nulls)
 @ThreadSafeMapper
 public class NullIfNullOrEmpty implements Function<String,String> {
-    
+
     @Override
     public String apply(String s) {
         if (s==null || s.isEmpty()) {

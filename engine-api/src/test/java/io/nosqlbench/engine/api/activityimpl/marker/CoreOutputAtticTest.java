@@ -17,9 +17,8 @@
 
 package io.nosqlbench.engine.api.activityimpl.marker;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-@Test
 public class CoreOutputAtticTest {
 
     @Test

@@ -22,13 +22,12 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.CoreResultValueFilt
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CoreResultFilterTest {
 
     @Test

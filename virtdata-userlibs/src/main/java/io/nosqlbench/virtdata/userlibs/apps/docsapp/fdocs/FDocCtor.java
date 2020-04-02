@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs;
 
-import io.nosqlbench.virtdata.processors.DocCtorData;
+import io.nosqlbench.virtdata.api.processors.DocCtorData;
 
 import java.util.List;
 import java.util.Map;

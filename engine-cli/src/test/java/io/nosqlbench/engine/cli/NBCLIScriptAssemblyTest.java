@@ -20,7 +20,7 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.cli.NBCLIOptions;
 import io.nosqlbench.engine.cli.NBCLIScriptAssembly;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

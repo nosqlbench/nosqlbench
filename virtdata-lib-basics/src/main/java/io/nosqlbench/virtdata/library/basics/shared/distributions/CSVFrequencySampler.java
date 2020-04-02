@@ -7,14 +7,14 @@ package io.nosqlbench.virtdata.library.basics.shared.distributions;
  */
 
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.math3.stat.Frequency;
@@ -72,7 +72,7 @@ public class CSVFrequencySampler implements LongFunction<String> {
         Set<String> values = new HashSet<>();
         List<EvProbD> frequencies = new ArrayList<>();
 
-        CSVParser csvdata = VirtDataResources.readFileCSV(filename);
+        CSVParser csvdata = NBPaths.readFileCSV(filename);
         Frequency freq = new Frequency();
         for (CSVRecord csvdatum : csvdata) {
             String value = csvdatum.get(columnName);

@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -55,7 +55,7 @@ public class RawYamlStatementLoader {
     }
 
     protected String loadRawFile(Logger logger, String fromPath, String... searchPaths) {
-        InputStream stream = NBFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
+        InputStream stream = NBPaths.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
             return buffer.lines().collect(Collectors.joining("\n"));
         } catch (Exception e) {

@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.activityapi.planning;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;

@@ -19,11 +19,10 @@ package io.nosqlbench.engine.api.activityimpl.input;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleArray;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CycleArrayTest {
 
     @Test

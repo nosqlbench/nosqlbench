@@ -17,11 +17,10 @@
 
 package io.nosqlbench.engine.cli;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class SessionNamerTest {
 
     @Test
@@ -33,6 +32,7 @@ public class SessionNamerTest {
         assertThat(name2).matches("scenario_\\d{8}_\\d{6}_\\d{3}");
     }
 
+    @Test
     public void testCustomFormat() {
         SessionNamer namer = new SessionNamer();
         String name1 = namer.format("Custom_session_name");

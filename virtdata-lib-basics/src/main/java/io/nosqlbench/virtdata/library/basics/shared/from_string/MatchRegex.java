@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.Function;
 import java.util.regex.Matcher;

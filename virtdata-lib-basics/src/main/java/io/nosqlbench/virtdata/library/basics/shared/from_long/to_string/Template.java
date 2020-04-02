@@ -1,8 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataFunctions;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -35,7 +35,8 @@ import java.util.regex.Pattern;
  */
 @ThreadSafeMapper
 public class Template implements LongFunction<String> {
-    private final static Logger logger  = LogManager.getLogger(Template.class);private static final String EXPR_BEGIN = "[[";
+    private final static Logger logger  = LogManager.getLogger(Template.class);
+    private static final String EXPR_BEGIN = "[[";
     private static final String EXPR_END = "]]";
     private final static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     private final String rawTemplate;

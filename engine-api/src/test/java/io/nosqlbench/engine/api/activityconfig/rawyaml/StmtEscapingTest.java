@@ -22,23 +22,22 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StmtEscapingTest {
 
     private final static Logger logger = LoggerFactory.getLogger(StmtEscapingTest.class);
     private static List<StmtDef> defs;
 
     @BeforeClass
-    public void testLayering() {
+    public static void testLayering() {
 
         StmtsDocList all = StatementsLoader.load(logger, "testdocs/escaped_stmts.yaml");
         assertThat(all).isNotNull();
@@ -56,16 +55,19 @@ public class StmtEscapingTest {
         defs = block1.getStmts();
     }
 
+    @Test
     public void testBackslashEscape() {
         String s1 = defs.get(0).getStmt();
         assertThat(s1).isEqualTo("This is a \"statement\"");
     }
 
+    @Test
     public void testBackslashInBlock() {
         String s2 = defs.get(1).getStmt();
         assertThat(s2).isEqualTo("This is a \\\"statement\\\".\n");
     }
 
+    @Test
     public void testTripleQuotesInBlock() {
         String s3 = defs.get(2).getStmt();
         assertThat(s3).isEqualTo("This is a \"\"\"statement\"\"\".\n");

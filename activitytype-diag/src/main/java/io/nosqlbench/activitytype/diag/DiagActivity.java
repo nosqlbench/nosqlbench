@@ -24,7 +24,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;

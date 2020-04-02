@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.marker;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,6 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class ByteTrackerExtentTest {
 
     @Test

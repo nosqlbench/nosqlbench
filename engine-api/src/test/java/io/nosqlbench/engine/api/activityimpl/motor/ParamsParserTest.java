@@ -17,13 +17,12 @@
 
 package io.nosqlbench.engine.api.activityimpl.motor;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class ParamsParserTest {
 
     @Test

@@ -2,11 +2,10 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Levy;
 import org.assertj.core.data.Offset;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class LevyTest {
 
     @Test

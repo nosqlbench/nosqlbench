@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

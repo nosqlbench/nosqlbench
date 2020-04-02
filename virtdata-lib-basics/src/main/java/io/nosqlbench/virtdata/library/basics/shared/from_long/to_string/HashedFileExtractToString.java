@@ -18,10 +18,10 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -37,7 +37,9 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class HashedFileExtractToString implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(HashedFileExtractToString.class);private static CharBuffer fileDataImage =null;
+    private final static Logger logger  = LogManager.getLogger(HashedFileExtractToString.class);
+
+    private static CharBuffer fileDataImage =null;
     private final HashRange sizeRange;
     private final HashRange positionRange;
 
@@ -58,7 +60,7 @@ public class HashedFileExtractToString implements LongFunction<String> {
         if (fileDataImage == null) {
             synchronized (HashedFileExtractToString.class) {
                 if (fileDataImage == null) {
-                    CharBuffer image= VirtDataResources.readDataFileToCharBuffer(fileName);
+                    CharBuffer image= NBPaths.readDataFileToCharBuffer(fileName);
                     fileDataImage = image;
                 }
             }

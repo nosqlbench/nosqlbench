@@ -1,10 +1,10 @@
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Date;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * values. This demonstrates that the functions act as idempotent operations.
  * They are pure functions, even though not always one-to-one functions.
  */
-@Test(singleThreaded = true)
+
 public class IntegratedTemporalExamplesTest {
 
     /**

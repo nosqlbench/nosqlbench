@@ -18,9 +18,9 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_inetaddress;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

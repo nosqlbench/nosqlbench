@@ -2,7 +2,7 @@ package io.nosqlbench.activitytype.cql.statements.binders;
 
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Statement;
-import io.nosqlbench.virtdata.api.ValuesArrayBinder;
+import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -18,9 +18,9 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bigint;
 
-import io.nosqlbench.virtdata.annotations.Categories;
-import io.nosqlbench.virtdata.annotations.Category;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -33,7 +33,8 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 @Categories({Category.conversion})
 public class ModuloToBigInt implements LongFunction<BigInteger> {
-    private final static Logger logger  = LogManager.getLogger(ModuloToBigInt.class);private final long modulo;
+    private final static Logger logger  = LogManager.getLogger(ModuloToBigInt.class);
+    private final long modulo;
 
     public ModuloToBigInt() {
         this.modulo = Long.MAX_VALUE;

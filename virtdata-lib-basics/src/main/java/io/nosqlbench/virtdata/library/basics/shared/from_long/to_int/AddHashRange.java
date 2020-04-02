@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange;
 
 import java.util.function.LongToIntFunction;

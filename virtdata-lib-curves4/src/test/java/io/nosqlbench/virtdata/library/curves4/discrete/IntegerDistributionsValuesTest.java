@@ -4,7 +4,8 @@ import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import io.nosqlbench.virtdata.library.curves4.discrete.long_long.Zipf;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -13,10 +14,10 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegerDistributionsValuesTest {
 
-    @Test(enabled=false)
+    @Ignore
+    @Test
     public void testComputedZipf() {
         RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
         System.out.println(runData.toString());

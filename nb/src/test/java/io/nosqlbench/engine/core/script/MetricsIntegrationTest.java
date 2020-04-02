@@ -20,13 +20,12 @@ package io.nosqlbench.engine.core.script;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class MetricsIntegrationTest {
 
     @Test

@@ -1,10 +1,10 @@
 package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.config.ConfigAware;
-import io.nosqlbench.virtdata.api.config.ConfigModel;
-import io.nosqlbench.virtdata.api.config.MutableConfigModel;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.core.config.ConfigAware;
+import io.nosqlbench.virtdata.core.config.ConfigModel;
+import io.nosqlbench.virtdata.core.config.MutableConfigModel;
 
 import java.util.Map;
 import java.util.function.Function;

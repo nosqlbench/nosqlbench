@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.curves4.continuous.long_double;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.math4.distribution.EnumeratedRealDistribution;
 
 @ThreadSafeMapper

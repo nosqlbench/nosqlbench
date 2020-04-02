@@ -55,7 +55,6 @@
         <slf4j.version>1.7.29</slf4j.version>
         <snakeyaml.version>1.23</snakeyaml.version>
         <snappy.version>1.1.2.6</snappy.version>
-        <testng.version>6.13.1</testng.version>
 
         <!-- plugin versions -->
         <antlr4.plugin.version>4.8</antlr4.plugin.version>
@@ -75,6 +74,7 @@
         <shade.plugin.version>3.2.1</shade.plugin.version>
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
+        <assertj.version>3.15.0</assertj.version>
     </properties>
 
     <name>${project.artifactId}</name>
@@ -415,28 +415,23 @@
             </dependency>
 
             <!-- test dependencies -->
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core-java8</artifactId>
-                <version>${assertj.java8.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit.jupiter.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.assertj</groupId>-->
+<!--                <artifactId>assertj-core</artifactId>-->
+<!--                <version>${assertj.java8.version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
 
         </dependencies>

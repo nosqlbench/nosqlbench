@@ -19,24 +19,23 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class ParsedStmtTest {
     private static final Logger logger = LoggerFactory.getLogger(ParsedStmtTest.class);
-
-    private StmtsDocList doclist;
+    private static StmtsDocList doclist;
 
     @BeforeClass
-    public void testLoadYaml() {
+    public static void testLoadYaml() {
         doclist = StatementsLoader.load(logger, "testdocs/bindings.yaml");
     }
 
+    @Test
     public void testBasicParser() {
         StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         StmtDef stmtDef0 = block0.getStmts().get(0);
@@ -53,6 +52,7 @@ public class ParsedStmtTest {
         assertThat(parsed1.hasError()).isFalse();
     }
 
+    @Test
     public void testMultipleBindingUsage() {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
@@ -67,7 +67,7 @@ public class ParsedStmtTest {
         assertThat(parsed1.hasError()).isFalse();
     }
 
-
+    @Test
     public void testQuestionMarkAnchors() {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(3);
 
@@ -81,8 +81,6 @@ public class ParsedStmtTest {
         assertThat(parsed1.getMissingBindings().isEmpty());
         assertThat(parsed1.hasError()).isFalse();
         assertThat(parsed1.getSpecificBindings()).containsOnlyKeys("alpha");
-
     }
-
 
 }

@@ -1,31 +1,30 @@
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.Bindings;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
-import io.nosqlbench.virtdata.api.templates.StringCompositor;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.templates.StringCompositor;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedStringCompositorTest {
 
-    private BindingsTemplate template;
-    private Bindings bindings;
+    private static BindingsTemplate template;
+    private static Bindings bindings;
 
     @BeforeClass
-    public void setupTemplate() {
+    public static void setupTemplate() {
         BindingsTemplate bindingsTemplate = new BindingsTemplate();
         bindingsTemplate.addFieldBinding("ident","Identity()");
         bindingsTemplate.addFieldBinding("mod5", "Mod(5)");
         bindingsTemplate.addFieldBinding("mod-5", "Mod(5)");
         bindingsTemplate.addFieldBinding("5_mod_5", "Mod(5)");
         bindingsTemplate.addFieldBinding(".mod5", "Mod(5)");
-        this.template = bindingsTemplate;
-        this.bindings = bindingsTemplate.resolveBindings();
+        template = bindingsTemplate;
+        bindings = bindingsTemplate.resolveBindings();
     }
 
     @Test

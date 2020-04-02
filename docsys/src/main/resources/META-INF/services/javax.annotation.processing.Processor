@@ -1,2 +1,1 @@
-io.nosqlbench.virtdata.processors.FunctionDocInfoProcessor
-io.nosqlbench.virtdata.processors.ServiceProcessor
+io.nosqlbench.nb.api.processors.ServiceProcessor

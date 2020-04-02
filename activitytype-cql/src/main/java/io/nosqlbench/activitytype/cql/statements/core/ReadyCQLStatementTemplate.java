@@ -12,9 +12,9 @@ import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.activitytype.cql.statements.binders.CqlBinderTypes;
 import io.nosqlbench.activitytype.cql.statements.binders.SimpleStatementValuesBinder;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
-import io.nosqlbench.virtdata.api.ContextualBindingsArrayTemplate;
-import io.nosqlbench.virtdata.api.ValuesArrayBinder;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.bindings.ContextualBindingsArrayTemplate;
+import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

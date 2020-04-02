@@ -19,7 +19,7 @@
 package io.nosqlbench.engine.api.activityapi;
 
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Optional;
 
@@ -85,7 +85,7 @@ public class ParameterMapTest {
         assertThat(multiNames.get().getOptionalString("delta","gamma").orElse("missing")).isEqualTo("blue");
     }
 
-    @Test(expectedExceptions = {RuntimeException.class}, expectedExceptionsMessageRegExp = ".*Multiple parameters are specified.*")
+    @Test(expected = RuntimeException.class)
     public void testAmbiguousMultiValueThrowsException() {
         Optional<ParameterMap> multiNames = ParameterMap.parseParams("alpha=blue;beta=red;delta=blue");
         assertThat(multiNames).isPresent();

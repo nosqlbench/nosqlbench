@@ -18,12 +18,13 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.core.ScenariosResults;
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
-@Test
 public class ScenariosExecutorTest {
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
         Scenario s = new Scenario("testing");

@@ -4,7 +4,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.virtdata.api.templates.StringBindings;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

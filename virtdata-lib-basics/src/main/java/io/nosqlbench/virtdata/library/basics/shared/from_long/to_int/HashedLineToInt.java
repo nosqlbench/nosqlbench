@@ -1,12 +1,14 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.function.LongToIntFunction;
+
+import static io.nosqlbench.nb.api.pathutil.NBPaths.readDataFileLines;
 
 /**
  * Return a pseudo-randomly selected integer value from a file of numeric values.
@@ -14,13 +16,14 @@ import java.util.function.LongToIntFunction;
  */
 @ThreadSafeMapper
 public class HashedLineToInt implements LongToIntFunction {
-    private final static Logger logger  = LogManager.getLogger(HashedLineToInt.class);private int[] values;
+    private final static Logger logger  = LogManager.getLogger(HashedLineToInt.class);
+    private int[] values;
     private final String filename;
     private final Hash intHash;
 
     public HashedLineToInt(String filename) {
         this.filename = filename;
-        List<String> lines = VirtDataResources.readDataFileLines(filename);
+        List<String> lines = readDataFileLines(filename);
         this.values = lines.stream().mapToInt(Integer::parseInt).toArray();
         this.intHash = new Hash();
     }

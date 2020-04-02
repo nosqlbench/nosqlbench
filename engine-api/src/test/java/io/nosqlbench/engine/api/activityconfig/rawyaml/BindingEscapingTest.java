@@ -17,19 +17,19 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class BindingEscapingTest {
 
     private final static Logger logger = LoggerFactory.getLogger(BindingEscapingTest.class);
 
+    @Test
     public void testEscapedBindings() {
         DataMapper<String> mapper = VirtData.getMapper("Template('\"-{}-\"Func(234)\\\"\\)',NumberNameToString());'",String.class);
         String s = mapper.get(234);

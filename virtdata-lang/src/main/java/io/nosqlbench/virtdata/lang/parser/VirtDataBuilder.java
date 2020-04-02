@@ -16,7 +16,8 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 public class VirtDataBuilder extends VirtDataBaseListener {
-    private final static Logger logger  = LogManager.getLogger(VirtDataBuilder.class);private VirtDataAST model = new VirtDataAST();
+    private final static Logger logger  = LogManager.getLogger(VirtDataBuilder.class);
+    private VirtDataAST model = new VirtDataAST();
     private List<ErrorNode> errorNodes = new ArrayList<>();
 
     private Stack<VirtDataParser.VirtdataFlowContext> flowContexts = new Stack<>();

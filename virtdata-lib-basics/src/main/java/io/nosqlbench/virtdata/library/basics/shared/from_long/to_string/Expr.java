@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.mvel2.MVEL;

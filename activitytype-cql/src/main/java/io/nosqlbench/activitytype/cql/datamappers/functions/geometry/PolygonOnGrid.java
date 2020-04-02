@@ -2,8 +2,8 @@ package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
 import com.datastax.driver.dse.geometry.Point;
 import com.datastax.driver.dse.geometry.Polygon;
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.curves4.discrete.long_int.Uniform;
 
 import java.util.function.LongFunction;

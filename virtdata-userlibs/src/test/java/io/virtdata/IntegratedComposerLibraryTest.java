@@ -15,24 +15,24 @@
 
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.Bindings;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
-import io.nosqlbench.virtdata.api.ResolverDiagnostics;
-import io.nosqlbench.virtdata.api.VirtData;
-import org.testng.annotations.Test;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedComposerLibraryTest {
 
     // The deprecated functions are not being included in the next release, so this test's purpose has been
     // reversed.
-    @Test(expectedExceptions = {RuntimeException.class}, expectedExceptionsMessageRegExp = ".*Unable to find.*")
+    @Test(expected=RuntimeException.class)
     public void testArgumentMatchingViaMainLib() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("param","RandomLineToString('data/variable_words.txt')");
@@ -44,14 +44,14 @@ public class IntegratedComposerLibraryTest {
         assertThat(o.getClass()).isEqualTo(String.class);
     }
 
-    @Test(enabled=true)
+    @Test
     public void testChainedTypeResolutionForLong() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("longchain", "compose CycleRange(123456789) ; Div(3); Mod(7) -> long");
         Bindings bindings = bt.resolveBindings();
     }
 
-    @Test(enabled=true)
+    @Test
     public void testChainedTypeResolutionForWithInternalLong() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("longchain", "compose HashRange(1234,6789) -> long; Mod(3) -> int;");
@@ -60,7 +60,7 @@ public class IntegratedComposerLibraryTest {
         assertThat(n1).isOfAnyClassIn(Integer.class);
     }
 
-    @Test(enabled=true)
+    @Test
     public void testChainedTypeResolutionForInt() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("intchain", "compose ToInt() ; CycleRange(123456789) ; Div(3) ; Mod(7) -> int");
@@ -82,7 +82,8 @@ public class IntegratedComposerLibraryTest {
     }
 
     // TODO: Fix this test
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void testTypeCoercionWhenNeeded() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("mod_to_string", "compose Mod(3) ; Suffix('0000000000') -> String");
@@ -96,13 +97,15 @@ public class IntegratedComposerLibraryTest {
     }
 
     // TODO: Fix this test
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void testBasicRange() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("phone","HashRange(1000000000, 9999999999)");
         Bindings bindings = bt.resolveBindings();
     }
 
+    @Test
     public void testUUIDChain() {
         Optional<DataMapper<Object>> dm =
                 VirtData.getOptionalMapper("compose Mod(1000); ToHashedUUID() -> java.util.UUID");
@@ -111,12 +114,14 @@ public class IntegratedComposerLibraryTest {
         assertThat(o).isEqualTo(UUID.fromString("3df498b1-9568-4584-96fd-76f6081da01a"));
     }
 
+    @Test
     public void testNormalDoubleAdd() {
         Optional<DataMapper<String>> dm =
                 VirtData.getOptionalMapper("compose Normal(0.0,5.0); Add(5.0) -> double");
         assertThat(dm).isPresent();
     }
 
+    @Test
     public void testDistInCompose() {
         Optional<DataMapper<String>> dm =
                 VirtData.getOptionalMapper("compose Hash(); Uniform(0,100); ToString() -> String");
@@ -126,6 +131,7 @@ public class IntegratedComposerLibraryTest {
         assertThat(s).isEqualTo("78");
     }
 
+    @Test
     public void testComposeSingleFuncTypeCoercion() {
         Optional<DataMapper<Object>> longMapper =
                 VirtData.getOptionalMapper("compose Uniform(1,10) -> long");
@@ -157,6 +163,7 @@ public class IntegratedComposerLibraryTest {
         assertThat(o).isEqualTo(expected);
     }
 
+    @Test
     public void testChainedHashRanges() {
         final int initialCycle = 0;
         final int intermediateCycle = 39;
@@ -172,6 +179,7 @@ public class IntegratedComposerLibraryTest {
         assertInteger(finalChainedValue, finalCycle);
     }
 
+    @Test
     public void testLeadingIdentityDoesNotImpactTypes()
     {
         final int initialCycle = 0;
@@ -184,6 +192,7 @@ public class IntegratedComposerLibraryTest {
         assertInteger(o2, finalCycle);
     }
 
+    @Test
     public void testTemplateBindingConversion() {
         ResolverDiagnostics diag;
         diag = VirtData.getMapperDiagnostics("Uniform(0.0,1.0)");

@@ -21,8 +21,8 @@ import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
 import org.assertj.core.data.Offset;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test(singleThreaded = true)
 public class ScriptIntegrationTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
@@ -59,7 +58,7 @@ public class ScriptIntegrationTests {
 
 
     @BeforeClass
-    public void logit() {
+    public static void logit() {
         System.out.println("Running SYNC version of Script Integration Tests.");
     }
 

@@ -1,19 +1,17 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
-import io.nosqlbench.virtdata.api.VirtDataResources;
-import org.testng.annotations.Test;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
+import org.junit.Test;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class TestNBCLIOptions {
 
     @Test
@@ -68,7 +66,7 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsActivityTypes()).isFalse();
         opts = new NBCLIOptions(new String[]{"--list-drivers"});
         assertThat(opts.wantsActivityTypes()).isTrue();
-        
+
     }
 
     @Test
@@ -88,7 +86,7 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
-    @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized option.*")
+    @Test(expected = InvalidParameterException.class)
     public void shouldErrorSanelyWhenNoMatch() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"unrecognizable command"});
     }
@@ -103,14 +101,12 @@ public class TestNBCLIOptions {
         assertThat(cmd.getCmdArgs().get("param1")).isEqualTo("value1");
     }
 
-    @Test(expectedExceptions = {InvalidParameterException.class},
-            expectedExceptionsMessageRegExp = ".*script name must precede.*")
+    @Test(expected = InvalidParameterException.class)
     public void testShouldErrorSanelyWhenScriptNameSkipped() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "param1=value1"});
     }
 
-    @Test(expectedExceptions = {InvalidParameterException.class},
-    expectedExceptionsMessageRegExp = ".*script name not found.*")
+    @Test(expected = InvalidParameterException.class)
     public void testShouldErrorForMissingScriptName() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"script"});
     }
@@ -158,7 +154,7 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test(expectedExceptions = InvalidParameterException.class)
+    @Test(expected = InvalidParameterException.class)
     public void shouldThrowErrorForInvalidStopActivity() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "stop", "woah=woah" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
@@ -173,7 +169,7 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test(expectedExceptions = InvalidParameterException.class)
+    @Test(expected = InvalidParameterException.class)
     public void shouldThrowErrorForInvalidAwaitActivity() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
@@ -189,13 +185,12 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test(expectedExceptions = NumberFormatException.class)
+    @Test(expected = NumberFormatException.class)
     public void shouldThrowErrorForInvalidWaitMillisOperand() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "noway" });
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
 
     }
-
 
     @Test
     public void listWorkloads() {
@@ -210,7 +205,7 @@ public class TestNBCLIOptions {
         String dir= "./";
         URL resource = getClass().getClassLoader().getResource(dir);
         assertThat(resource);
-        Path basePath = VirtDataResources.findPathIn(dir);
+        Path basePath = NBPaths.findPathIn(dir);
         List<Path> yamlPathList = PathWalker.findAll(basePath).stream().filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
         assertThat(yamlPathList);
     }

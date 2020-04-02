@@ -19,10 +19,10 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import org.assertj.core.data.MapEntry;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,11 +30,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StmtsDocListTest {
-    private static final Logger logger = LoggerFactory.getLogger(StmtsDocListTest.class);
 
-    private StmtsDocList doclist;
+    private static final Logger logger = LoggerFactory.getLogger(StmtsDocListTest.class);
+    private static StmtsDocList doclist;
 
     private LinkedHashMap<String, String> doc0bindings = new LinkedHashMap<String, String>() {{
         put("b2", "b2d");
@@ -51,7 +50,7 @@ public class StmtsDocListTest {
 
 
     @BeforeClass
-    public void testLoadYaml() {
+    public static void testLoadYaml() {
         doclist = StatementsLoader.load(logger, "testdocs/docs_blocks_stmts.yaml");
     }
 

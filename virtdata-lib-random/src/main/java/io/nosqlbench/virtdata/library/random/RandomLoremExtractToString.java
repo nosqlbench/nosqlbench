@@ -18,7 +18,7 @@
 
 package io.nosqlbench.virtdata.library.random;
 
-import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
+import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 
 import java.util.function.LongFunction;
 

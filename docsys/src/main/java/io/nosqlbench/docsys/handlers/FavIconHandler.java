@@ -18,7 +18,8 @@ import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
 public class FavIconHandler extends AbstractHandler {
-    private final static Logger logger  = LogManager.getLogger(FavIconHandler.class);private final Path faviconPath;
+    private final static Logger logger  = LogManager.getLogger(FavIconHandler.class);
+    private final Path faviconPath;
 
     byte[] iconData;
     private long lastModified = 0L;

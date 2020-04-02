@@ -3,8 +3,8 @@ package io.nosqlbench.activitytype.cqlverify;
 import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.activitytype.cql.statements.rsoperators.AssertSingleRowResultSet;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.virtdata.api.Bindings;
-import io.nosqlbench.virtdata.api.BindingsTemplate;
+import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,32 +1,32 @@
 package io.virtdata;
 
-import io.nosqlbench.virtdata.api.DataMapper;
-import io.nosqlbench.virtdata.api.VirtData;
-import org.testng.annotations.Test;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class IntegratedRealerTests {
 
+    @Test
     public void testLastNames() {
-        DataMapper mapper = VirtData.getOptionalMapper("LastNames()").orElse(null);
+        DataMapper<?> mapper = VirtData.getOptionalMapper("LastNames()").orElse(null);
         assertThat(mapper).isNotNull();
         assertThat(mapper.get(0L)).isEqualTo("Miracle");
     }
 
+    @Test
     public void testFirstNames() {
-        DataMapper mapper = VirtData.getOptionalMapper("FirstNames()").orElse(null);
+        DataMapper<?> mapper = VirtData.getOptionalMapper("FirstNames()").orElse(null);
         assertThat(mapper).isNotNull();
         assertThat(mapper.get(0L)).isEqualTo("Norman");
     }
 
+    @Test
     public void testFullNames() {
-        DataMapper mapper = VirtData.getOptionalMapper("FullNames()").orElse(null);
+        DataMapper<?> mapper = VirtData.getOptionalMapper("FullNames()").orElse(null);
         assertThat(mapper).isNotNull();
         assertThat(mapper.get(0L)).isEqualTo("Norman Wolf");
     }
-
-
 
 }

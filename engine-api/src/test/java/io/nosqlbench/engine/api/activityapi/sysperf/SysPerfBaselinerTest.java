@@ -17,12 +17,13 @@
 
 package io.nosqlbench.engine.api.activityapi.sysperf;
 
-import org.testng.annotations.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
-@Test(enabled=false)
 public class SysPerfBaselinerTest {
 
-    @Test(enabled=false)
+    @Test
+    @Ignore
     public void testSysOpsNanoTime() {
         SysPerfBaseliner sbo = new SysPerfBaseliner();
         SysPerfData perfdata = sbo.getSysPerfData();

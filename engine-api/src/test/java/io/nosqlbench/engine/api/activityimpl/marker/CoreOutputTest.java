@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,6 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CoreOutputTest {
 
     @Test

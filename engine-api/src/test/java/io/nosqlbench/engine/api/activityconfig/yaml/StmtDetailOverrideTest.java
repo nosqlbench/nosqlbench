@@ -18,23 +18,17 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class StmtDetailOverrideTest {
     private static final Logger logger = LoggerFactory.getLogger(StmtDetailOverrideTest.class);
-
-
-    @BeforeClass
-    public void testLoadYaml() {
-    }
 
     @Test
     public void testStmtOverrides() {
@@ -88,7 +82,6 @@ public class StmtDetailOverrideTest {
         assertThat(s.getTags()).hasSize(1);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
-
 
     }
 }

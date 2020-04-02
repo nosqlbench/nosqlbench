@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReada
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class ResultFilteringSieveTest {
 
     @Test
@@ -58,6 +57,7 @@ public class ResultFilteringSieveTest {
         assertThat(sieve.apply(new MutableCycleResult(3L,10))).isEqualTo(TristateFilter.Policy.Keep);
     }
 
+    @Test
     public void testPredicateConversions() {
         MutableCycleResult c1 = new MutableCycleResult(1,1);
         MutableCycleResult c2 = new MutableCycleResult(2,2);

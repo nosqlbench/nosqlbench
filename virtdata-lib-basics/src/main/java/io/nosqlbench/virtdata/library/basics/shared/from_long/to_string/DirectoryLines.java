@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import io.nosqlbench.virtdata.annotations.Example;
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -25,7 +25,9 @@ import java.util.regex.Pattern;
 @ThreadSafeMapper
 public class DirectoryLines implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(DirectoryLines.class);private final Pattern namePattern;
+    private final static Logger logger  = LogManager.getLogger(DirectoryLines.class);
+
+    private final Pattern namePattern;
     private final String basepath;
     private final List<Path> allFiles;
     private Iterator<String> stringIterator;

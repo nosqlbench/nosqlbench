@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.random;
 
-import io.nosqlbench.virtdata.annotations.DeprecatedFunction;
-import io.nosqlbench.virtdata.api.DataMapper;
+import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import org.apache.commons.math3.random.MersenneTwister;
 
 @DeprecatedFunction("random mappers are not deterministic. They will be replaced with hash-based functions.")

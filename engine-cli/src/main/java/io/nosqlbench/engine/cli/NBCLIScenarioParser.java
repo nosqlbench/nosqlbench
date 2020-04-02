@@ -1,18 +1,23 @@
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.exceptions.BasicError;
-import io.nosqlbench.engine.api.util.NBFiles;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class NBCLIScenarioParser {
 
@@ -23,14 +28,14 @@ public class NBCLIScenarioParser {
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
 
     public static boolean isFoundWorkload(String word) {
-        Optional<Path> workloadPath = NBFiles.findOptionalPath(word, "yaml", false, "activities");
+        Optional<Path> workloadPath = NBPaths.findOptionalPath(word, "yaml", false, "activities");
         return workloadPath.isPresent();
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist) {
 
         String workloadName = arglist.removeFirst();
-        Optional<Path> workloadPathSearch = NBFiles.findOptionalPath(workloadName, "yaml", false, "activities");
+        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
         Path workloadPath = workloadPathSearch.orElseThrow();
 
         List<String> scenarioNames = new ArrayList<>();
@@ -222,5 +227,58 @@ public class NBCLIScenarioParser {
 //
 //        }
 //    }
+
+    private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
+
+
+    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
+
+        String dir = "activities/";
+
+        Path basePath = NBPaths.findPathIn(dir);
+        List<Path> yamlPathList = PathWalker.findAll(basePath)
+            .stream()
+            .filter(f -> f.toString().endsWith(".yaml"))
+            .filter(f -> f.toString().contains("activities"))
+            .collect(Collectors.toList());
+
+        List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
+        for (Path yamlPath : yamlPathList) {
+            String substring = yamlPath.toString().substring(1);
+            StmtsDocList stmts = StatementsLoader.load(logger, substring);
+
+            Set<String> templates = new HashSet<>();
+            try {
+                List<String> lines = Files.readAllLines(yamlPath);
+                for (String line : lines) {
+                    Matcher matcher = templatePattern.matcher(line);
+
+                    while (matcher.find()) {
+                        templates.add(matcher.group(1));
+                    }
+                    matcher = templatePattern2.matcher(line);
+
+                    while (matcher.find()) {
+                        templates.add(matcher.group(1));
+                    }
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            Scenarios scenarios = stmts.getDocScenarios();
+
+            List<String> scenarioNames = scenarios.getScenarioNames();
+
+            if (scenarioNames != null && scenarioNames.size() >0){
+                workloadDescriptions.add(new WorkloadDesc(yamlPath.getFileName().toString(), scenarioNames, templates));
+            }
+        }
+
+        return workloadDescriptions;
+    }
 
 }

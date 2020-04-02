@@ -43,7 +43,9 @@ import java.util.stream.Collectors;
  */
 public class DocServer implements Runnable {
 
-    private final static Logger logger  = LogManager.getLogger(DocServer.class);private final List<Path> basePaths = new ArrayList<>();
+    private final static Logger logger  = LogManager.getLogger(DocServer.class);
+
+    private final List<Path> basePaths = new ArrayList<>();
     private final List<Class> servletClasses = new ArrayList<>();
     private ServletContextHandler contextHandler;
     private ServletHolder servletHolder;

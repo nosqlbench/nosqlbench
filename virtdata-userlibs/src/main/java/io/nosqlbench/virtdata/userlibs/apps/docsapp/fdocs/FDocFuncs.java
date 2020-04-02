@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs;
 
 import com.vladsch.flexmark.convert.html.FlexmarkHtmlParser;
-import io.nosqlbench.virtdata.processors.DocCtorData;
+import io.nosqlbench.virtdata.api.processors.DocCtorData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

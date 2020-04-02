@@ -13,18 +13,20 @@
 
     <name>virtdata-api</name>
     <url>http://nosqlbench.io/</url>
+    <description>
+        The internal API module for Virtual Data Set modules. Each module that provides
+        mapping functions should only have to depend on this module to get all the dependencies
+        it needs.
+    </description>
 
     <dependencies>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-processors</artifactId>
             <version>3.12.75-SNAPSHOT</version>
+            <artifactId>nb-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-annotations</artifactId>
-            <version>3.12.75-SNAPSHOT</version>
-        </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lang</artifactId>
@@ -33,28 +35,13 @@
 
 
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
-            <artifactId>assertj-core-java8</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -65,9 +52,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

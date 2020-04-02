@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
-import io.nosqlbench.virtdata.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.murmur.Murmur3F;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.murmur.Murmur3F;
 
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;

@@ -6,7 +6,7 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.virtdata.api.templates.StringBindings;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

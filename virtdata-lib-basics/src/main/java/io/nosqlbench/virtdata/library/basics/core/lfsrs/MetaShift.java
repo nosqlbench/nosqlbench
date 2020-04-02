@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.core.lfsrs;
 
-import io.nosqlbench.virtdata.api.VirtDataResources;
+import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.function.LongUnaryOperator;
 
 public class MetaShift {
-    private final static Logger logger  = LogManager.getLogger(MetaShift.class);public static Func forSizeAndBank(long size, int selector) {
+    private final static Logger logger  = LogManager.getLogger(MetaShift.class);
+    public static Func forSizeAndBank(long size, int selector) {
         GaloisData data = Masks.forPeriodAndBank(size, selector);
         return new Func(data);
     }
@@ -140,7 +141,7 @@ public class MetaShift {
             }
             int availableSize= Math.max(registerSize,4);
             String maskFileName= String.valueOf(availableSize)+"."+"txt";
-            List<String> lines = VirtDataResources.readDataFileLines("lfsrmasks/" + maskFileName);
+            List<String> lines = NBPaths.readDataFileLines("lfsrmasks/" + maskFileName);
             long[] longs = lines.stream().mapToLong(s -> Long.parseLong(s, 16)).toArray();
             return longs;
         }

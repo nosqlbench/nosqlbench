@@ -20,14 +20,13 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.buffers;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferTarget;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class CycleResultsRLEBufferTargetTest {
 
     @Test
@@ -53,6 +52,7 @@ public class CycleResultsRLEBufferTargetTest {
         assertThat(resultValues).containsExactly(0,1);
     }
 
+    @Test
     public void testGappedIntervalRLEEncoding() {
         CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(100000);
 

@@ -24,16 +24,16 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
 public class RawStmtDefDefsTest {
 
     private final static Logger logger = LoggerFactory.getLogger(RawStmtDefDefsTest.class);
+
     @Test
     public void testLayering() {
 
