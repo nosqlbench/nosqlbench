@@ -37,7 +37,7 @@ then
 fi
 
 $JAVA -jar target/nb.jar docserver generate ${GUIDEBOOK}/
-$JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/markdown/binding_functions
+$JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/markdown/bindings
 
 driversdir="${GUIDEBOOK}/services/docs/markdown/drivers"
 mkdir -p $driversdir
