@@ -119,4 +119,12 @@ public class StrInterpolatorTest {
         assertThat(a).isEqualTo("'Key': 'Value'.'Stuff'");
     }
 
+    @Test
+    public void shouldExpandNestedTemplates() {
+        String a = interp.apply("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
+        assertThat(a).isEqualTo("-aval1-");
+        String b = interp.apply("-TEMPLATE(unknown,TEMPLATE(bkey,whee))-");
+        assertThat(b).isEqualTo("-bval1-");
+    }
+
 }

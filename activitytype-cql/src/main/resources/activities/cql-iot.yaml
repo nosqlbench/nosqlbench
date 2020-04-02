@@ -4,6 +4,8 @@ scenarios:
     - run driver=cql tags==phase:schema threads==1
     - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+params:
+  instrument: TEMPLATE(instrument,false)
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
@@ -59,6 +61,8 @@ blocks:
        idempotent: true
        tags:
          name: insert-rampup
+       params:
+         instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
   - tags:
       phase: verify
       type: read
@@ -72,6 +76,8 @@ blocks:
        verify-fields: "*, -cell_timestamp"
        tags:
          name: select-verify
+       params:
+         instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
   - tags:
       phase: main
       type: read
@@ -85,6 +91,8 @@ blocks:
          limit <<limit:10>>
        tags:
          name: select-read
+       params:
+         instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
   - tags:
       phase: main
       type: write
@@ -100,3 +108,6 @@ blocks:
        idempotent: true
        tags:
          name: insert-main
+       params:
+         instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
+

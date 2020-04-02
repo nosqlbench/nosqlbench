@@ -48,8 +48,13 @@ public class StrInterpolator implements Function<String, String> {
     }
 
     @Override
-    public String apply(String s) {
-        return substitutor.replace(substitutor2.replace(s));
+    public String apply(String raw) {
+        String after = substitutor.replace(substitutor2.replace(raw));
+        while (!after.equals(raw)) {
+            raw=after;
+            after = substitutor.replace(substitutor2.replace(raw));
+        }
+        return after;
     }
 
     public static class MultiMap extends StrLookup<String> {
