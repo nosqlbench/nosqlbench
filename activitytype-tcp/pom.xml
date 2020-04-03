@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.77</version>
+        <version>3.12.78-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -23,13 +23,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>3.12.77</version>
+            <version>3.12.78-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>activitytype-stdout</artifactId>
-            <version>3.12.77</version>
+            <version>3.12.78-SNAPSHOT</version>
         </dependency>
 
         <!-- test scope only -->
