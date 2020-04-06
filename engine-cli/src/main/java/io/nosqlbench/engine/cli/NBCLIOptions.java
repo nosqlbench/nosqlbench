@@ -300,7 +300,12 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
                     break;
-                case WORKLOADS:
+                case LIST_SCENARIOS:
+                case LIST_WORKLOADS:
+                    arglist.removeFirst();
+                    wantsScenariosList = true;
+                    break;
+                case COPY_WORKLOAD:
                     arglist.removeFirst();
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
                     break;
