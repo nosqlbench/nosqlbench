@@ -161,6 +161,15 @@ public class CQLSessionCache implements Shutdownable {
                 .map(CQLOptions::socketOptionsFor)
                 .ifPresent(builder::withSocketOptions);
 
+        activityDef.getParams().getOptionalString("reconnectpolicy")
+            .map(reconnectpolicy-> {
+                logger.info("reconnectpolicy=>" + reconnectpolicy);
+                return reconnectpolicy;
+            })
+            .map(CQLOptions::reconnectPolicyFor)
+            .ifPresent(builder::withReconnectionPolicy);
+
+
         activityDef.getParams().getOptionalString("pooling")
                 .map(pooling -> {
                     logger.info("pooling=>" + pooling);

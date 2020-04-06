@@ -4,6 +4,8 @@ import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.ReconnectionPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
 import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import org.junit.Test;
@@ -30,6 +32,13 @@ public class CQLOptionsTest {
     public void testWhitelist() {
         LoadBalancingPolicy lbp = CQLOptions.whitelistFor("127.0.0.1,127.0.0.2:123", null);
         assertThat(lbp).isNotNull();
+    }
+
+    @Test
+    public void testReconnectPolicyPatterns() {
+        ReconnectionPolicy rp = CQLOptions.reconnectPolicyFor("exponential(123,321)");
+        rp = CQLOptions.reconnectPolicyFor("constant(123)");
+
     }
 
     @Test
