@@ -262,7 +262,7 @@ public class NBCLI {
             System.out.println("\n# from: "+ workload.getYamlPath());
             List<String> scenarioList = workload.getScenarioNames();
             String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
-            Set<String> templates = workload.getTemlpates();
+            Set<String> templates = workload.getTemplates();
 
             for (String scenario : scenarioList) {
                 if (scenario.equals("default")) {

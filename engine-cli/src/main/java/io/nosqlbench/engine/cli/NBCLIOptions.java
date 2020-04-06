@@ -119,7 +119,7 @@ public class NBCLIOptions {
 
     private void parse(String[] args) {
 
-        LinkedList<String> arglist = new LinkedList<String>() {{
+        LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
         }};
 

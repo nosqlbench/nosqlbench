@@ -6,12 +6,12 @@ import java.util.Set;
 public class WorkloadDesc {
     private final String yamlPath;
     private final List<String> scenarioNames;
-    private final Set<String> temlpates;
+    private final Set<String> templates;
 
     public WorkloadDesc(String yamlPath, List<String> scenarioNames, Set<String> templates) {
         this.yamlPath = yamlPath;
         this.scenarioNames = scenarioNames;
-        this.temlpates = templates;
+        this.templates = templates;
     }
 
     public String getYamlPath() {
@@ -22,7 +22,7 @@ public class WorkloadDesc {
         return scenarioNames;
     }
 
-    public Set<String> getTemlpates() {
-        return temlpates;
+    public Set<String> getTemplates() {
+        return templates;
     }
 }
