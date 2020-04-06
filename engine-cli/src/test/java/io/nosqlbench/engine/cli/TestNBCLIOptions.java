@@ -86,7 +86,7 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void shouldErrorSanelyWhenNoMatch() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"unrecognizable command"});
     }
@@ -196,7 +196,7 @@ public class TestNBCLIOptions {
     public void listWorkloads() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"});
         List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(opts.wantsWorkloads());
+        assertThat(opts.wantsScenariosList());
     }
 
 
