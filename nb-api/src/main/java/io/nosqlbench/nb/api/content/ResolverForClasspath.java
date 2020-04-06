@@ -10,6 +10,14 @@ import java.util.Optional;
 
 /**
  * Resolves resources which can be found via the class loader.
+ * <p>
+ * If a stream for a named resource is found, this resolver will
+ * provide a Path to it. If the classpath resolves a stream which
+ * contains a {@code file:} URI, then it is returned as a simple
+ * Path uri using the provided path component.
+ * If it is any other scheme, then filesystems are instantiated
+ * as needed to fully-qualify the resulting path, and then it
+ * is provided in external form.
  */
 public class ResolverForClasspath implements ContentResolver {
 
@@ -19,34 +27,35 @@ public class ResolverForClasspath implements ContentResolver {
         if (uri.getScheme() != null && !uri.getScheme().isEmpty()) {
             return null;
         }
-        Path fspath = Path.of(uri.getPath());
         URL systemResource = ClassLoader.getSystemResource(uri.getPath());
         if (systemResource == null) {
             return null;
         }
-        if (fspath.getFileSystem() == null || fspath.getFileSystem() == FileSystems.getDefault()) {
-            return fspath;
+        URI resolved = URI.create(systemResource.toExternalForm());
+        if (resolved.getScheme().equals("file")) {
+            return Path.of(uri.getPath());
+//            return Path.of(resolved.getPath());
         }
 
-        URI externalUri = URI.create(systemResource.toExternalForm());
         FileSystem fs;
         try {
-            fs = FileSystems.getFileSystem(externalUri);
+            fs = FileSystems.getFileSystem(resolved);
         } catch (FileSystemNotFoundException notfound) {
             try {
-                fs = FileSystems.newFileSystem(externalUri, Collections.EMPTY_MAP);
+                fs = FileSystems.newFileSystem(resolved, Collections.EMPTY_MAP);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        Path fspath = Path.of(resolved);
         return fspath;
     }
 
     @Override
     public Content<?> resolve(URI uri) {
         Path path = resolvePath(uri);
-        if (path==null) {
+        if (path == null) {
             return null;
         }
         return new PathContent(path);
