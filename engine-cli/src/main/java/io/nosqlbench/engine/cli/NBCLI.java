@@ -115,6 +115,8 @@ public class NBCLI {
             } catch (IOException e) {
                 throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
             }
+            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() +"'");
+            System.exit(0);
 
         }
 
