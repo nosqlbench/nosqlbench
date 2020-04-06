@@ -39,9 +39,21 @@ Provide specific help for the named activity type:
 
     ./nb help <activity type>
 
-List the available activity types
+List the available drivers:
 
     --list-drivers
+
+List the available scenarios:
+
+    --list-scenarios
+
+List only the available workloads which contain the above scenarios:
+
+    --list-workloads
+
+Copy a workload to your local directory as a starting point:
+
+    --copy-workload <name>
 
 Provide the metrics that are available for scripting
 
