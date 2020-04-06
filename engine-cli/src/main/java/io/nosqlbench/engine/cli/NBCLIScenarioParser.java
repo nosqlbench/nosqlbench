@@ -111,6 +111,14 @@ public class NBCLIScenarioParser {
                     builtcmd.put("workload", "workload=" + workloadPath.toString());
                 }
 
+                // Undefine any keys with a value of 'undef'
+                List<String> undefKeys = builtcmd.entrySet()
+                    .stream()
+                    .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+                undefKeys.forEach(builtcmd::remove);
+
                 logger.debug("Named scenario built command: " + String.join(" ", builtcmd.values()));
                 buildCmdBuffer.addAll(builtcmd.values());
             }

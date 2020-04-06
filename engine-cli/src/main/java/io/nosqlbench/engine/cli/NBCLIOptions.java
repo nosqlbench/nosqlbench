@@ -112,6 +112,7 @@ public class NBCLIOptions {
     private boolean dockerMetrics = false;
     private boolean wantsScenariosList = false;
     private String wantsToCopyWorkload = null;
+    private boolean wantsWorkloadsList = false;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -308,9 +309,12 @@ public class NBCLIOptions {
                     consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
                     break;
                 case LIST_SCENARIOS:
-                case LIST_WORKLOADS:
                     arglist.removeFirst();
                     wantsScenariosList = true;
+                    break;
+                case LIST_WORKLOADS:
+                    arglist.removeFirst();
+                    wantsWorkloadsList =true;
                     break;
                 case COPY_WORKLOAD:
                     arglist.removeFirst();
@@ -576,6 +580,10 @@ public class NBCLIOptions {
 
     public String wantsToCopyWorkloadNamed() {
         return wantsToCopyWorkload;
+    }
+
+    public boolean wantsWorkloadsList() {
+        return wantsWorkloadsList;
     }
 
     public static enum CmdType {

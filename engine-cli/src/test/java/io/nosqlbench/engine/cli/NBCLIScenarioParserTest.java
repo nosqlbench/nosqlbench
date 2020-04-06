@@ -84,5 +84,18 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;cycles=20;cycles-test=20;workload=activities/scenario-test.yaml;");
     }
 
+    @Test
+    public void testThatUndefValuesAreUndefined() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
+        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;workload=scenario-test;tags=phase:schema;cycles-test=20;");
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "doundef=20"});
+        List<NBCLIOptions.Cmd> cmds1 = opts1.getCommands();
+        assertThat(cmds1.size()).isEqualTo(1);
+        assertThat(cmds1.get(0).getCmdSpec()).isEqualTo("driver=stdout;workload=scenario-test;tags=phase:schema;");
+
+    }
+
 
 }

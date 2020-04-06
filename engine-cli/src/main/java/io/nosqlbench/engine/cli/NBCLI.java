@@ -61,12 +61,12 @@ public class NBCLI {
     }
 
     public void run(String[] args) {
-        if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
-            VirtDataMainApp.main(Arrays.copyOfRange(args,1,args.length));
+        if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
+            VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
-        if (args.length>0 && args[0].toLowerCase().equals("docserver")) {
-            DocServerApp.main(Arrays.copyOfRange(args,1,args.length));
+        if (args.length > 0 && args[0].toLowerCase().equals("docserver")) {
+            DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
 
@@ -93,8 +93,13 @@ public class NBCLI {
             System.exit(0);
         }
 
+        if (options.wantsWorkloadsList()) {
+            printWorkloads(false);
+            System.exit(0);
+        }
+
         if (options.wantsScenariosList()) {
-            printWorkloads();
+            printWorkloads(true);
             System.exit(0);
         }
 
@@ -111,11 +116,11 @@ public class NBCLI {
                 throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
             }
             try {
-                Files.writeString(writeTo,data.getCharBuffer(), StandardCharsets.UTF_8);
+                Files.writeString(writeTo, data.getCharBuffer(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
             }
-            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() +"'");
+            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() + "'");
             System.exit(0);
 
         }
@@ -143,7 +148,7 @@ public class NBCLI {
         if (options.wantsTopicalHelp()) {
             Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             System.exit(0);
         }
@@ -156,19 +161,19 @@ public class NBCLI {
         }
 
         String reportGraphiteTo = options.wantsReportGraphiteTo();
-        if (options.wantsDockerMetrics()){
+        if (options.wantsDockerMetrics()) {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
-            DockerMetricsManager dmh= new DockerMetricsManager();
+            DockerMetricsManager dmh = new DockerMetricsManager();
             dmh.startMetrics();
             logger.info("Docker Containers are started, for grafana and prometheus, hit" +
-                    "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
-                    "the default grafana creds are admin/admin");
-            if (reportGraphiteTo != null){
+                "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
+                "the default grafana creds are admin/admin");
+            if (reportGraphiteTo != null) {
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                    " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                    "usually only one of the two is configured.",
+                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                        "usually only one of the two is configured.",
                     reportGraphiteTo));
-            }else{
+            } else {
                 //TODO: is this right?
                 logger.info("Setting graphite reporting to localhost");
                 reportGraphiteTo = "localhost:9109";
@@ -180,7 +185,7 @@ public class NBCLI {
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
             if (reportGraphiteTo != null) {
-                reporters.addGraphite(reportGraphiteTo,  options.wantsMetricsPrefix());
+                reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
             }
             if (options.wantsReportCsvTo() != null) {
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
@@ -190,7 +195,7 @@ public class NBCLI {
 
         String sessionName = new SessionNamer().format(options.getSessionName());
 
-        if (options.wantsEnableChart()){
+        if (options.wantsEnableChart()) {
             logger.info("Charting enabled");
             if (options.getHistoLoggerConfigs().size() == 0) {
                 logger.info("Adding default histologger configs");
@@ -229,21 +234,21 @@ public class NBCLI {
             System.exit(0);
         }
 
-        if (options.wantsEnableChart()){
+        if (options.wantsEnableChart()) {
             logger.info("Charting enabled");
             scenario.enableCharting();
-        } else{
+        } else {
             logger.info("Charting disabled");
         }
 
         scenario.addScenarioScriptParams(scriptData.getScriptParams());
         scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
         ScenarioLogger sl = new ScenarioLogger(scenario)
-                .setLogDir(options.getLogsDirectory())
-                .setMaxLogs(options.getLogsMax())
-                .setLevel(options.getLogsLevel())
-                .setLogLevelOverrides(options.getLogLevelOverrides())
-                .start();
+            .setLogDir(options.getLogsDirectory())
+            .setMaxLogs(options.getLogsMax())
+            .setLevel(options.getLogsLevel())
+            .setLogLevelOverrides(options.getLogLevelOverrides())
+            .start();
 
         executor.execute(scenario, sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
@@ -258,28 +263,33 @@ public class NBCLI {
         }
     }
 
-    public void printWorkloads() {
+    public void printWorkloads(boolean includeScenarios) {
         List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts();
         for (WorkloadDesc workload : workloads) {
-            System.out.println("\n# from: "+ workload.getYamlPath());
-            List<String> scenarioList = workload.getScenarioNames();
-            String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "") ;
-            Set<String> templates = workload.getTemplates();
+            System.out.println(workload.getYamlPath());
 
-            for (String scenario : scenarioList) {
-                if (scenario.equals("default")) {
-                    scenario = scenario +  "\n # same as running ./nb " + workloadName ;
+            if (includeScenarios) {
+                System.out.println("    # scenarios:");
+
+                List<String> scenarioList = workload.getScenarioNames();
+                String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "");
+
+                for (String scenario : scenarioList) {
+                    System.out.println("    nb " + workloadName + " " + scenario);
                 }
-                System.out.println("  ./nb " + workloadName + " " + scenario);
+
+                Set<String> templates = workload.getTemplates();
+                if (templates.size() > 0) {
+                    System.out.println("        # defaults");
+                    templates.stream()
+                        .map(x -> x.replaceAll(",", "="))
+                        .map(x -> x.replaceAll(":", "="))
+                        .map(x -> "        " + x)
+                        .forEach(System.out::println);
+                }
+                System.out.println();
             }
-            if (templates.size()>0){
-                System.out.println("# with the following optional parameters and defaults: ");
-                templates.stream()
-                    .map(x -> x.replaceAll(",","="))
-                    .map(x -> x.replaceAll(":","="))
-                    .map(x -> " # "+x)
-                    .forEach(System.out::println);
-            }
+
         }
     }
 

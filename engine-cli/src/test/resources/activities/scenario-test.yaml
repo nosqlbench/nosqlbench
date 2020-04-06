@@ -5,7 +5,7 @@ scenarios:
     - run driver=stdout yaml===scenario-test tags=phase:rampup cycles=TEMPLATE(cycles1,10)
     - run driver=stdout yaml===scenario-test tags=phase:main cycles=TEMPLATE(cycles2,10)
   schema-only:
-    - "run driver=stdout yaml=scenario-test tags=phase:schema"
+    - "run driver=stdout yaml=scenario-test tags=phase:schema doundef==undef"
   template-test:
     with-template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
 blocks:
