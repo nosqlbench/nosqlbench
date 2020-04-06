@@ -31,18 +31,17 @@ the jar, just replace `./nb` with `java -jar nb.jar` when running commands.
 
 To run a simple built-in workload run:
 
-    ./nb  cql-iot
-
+    ./nb cql-iot
 
 To get a list of built-in workloads run:
 
     ./nb --list-workloads
 
 :::info
-Note:  this will include workloads that were shipped with nb and workloads in your local directory.
-To learn more about how to design custom workloads see [designing workloads](/index.html#/docs/04_designing_workloads.html)
+Note: this will include workloads that were shipped with nb and workloads in your local directory. To learn more about
+how to design custom workloads see
+[designing workloads](/index.html#/docs/designing_workloads.html)
 :::
-
 
 To provide your own contact points (comma separated), add the `hosts=` parameter
 

@@ -13,17 +13,6 @@ During preload, all keys are set with a value. During the main phase of the work
 population are replaced with new values which never repeat. During the main phase, random partitions are selected for
 upsert, with row values never repeating.
 
-## Schema
-
-    CREATE KEYSPACE baselines IF NOT EXISTS WITH replication =
-        { 'class': 'NetworkTopologyStrategy', 'dc1': 3 };
-
-    CREATE TABLE baselines.keyvalue (
-            user_id UUID,
-            user_code text
-            PRIMARY KEY (user_id)
-        );
-
 ## Workload Sequence
 
 1. schema - Initialize the schema.

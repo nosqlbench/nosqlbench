@@ -8,6 +8,10 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Saves all the values in this row to the thread-local object map,
+ * with the field names as keys.
+ */
 public class SaveThreadVars implements RowCycleOperator {
 
     ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;

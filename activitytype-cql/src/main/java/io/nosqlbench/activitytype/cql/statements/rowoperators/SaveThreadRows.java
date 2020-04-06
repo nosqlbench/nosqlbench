@@ -6,6 +6,9 @@ import io.nosqlbench.activitytype.cql.statements.rsoperators.PerThreadCQLData;
 
 import java.util.LinkedList;
 
+/**
+ * Adds the current row to the per-thread row cache.
+ */
 public class SaveThreadRows implements RowCycleOperator {
 
     @Override

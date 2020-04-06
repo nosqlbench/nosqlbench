@@ -18,10 +18,12 @@ called _core parameters_. Only core activity parameters are documented
 here.
 
 :::info
-To see what activity parameters are valid for a given activity type, see
-the documentation for that activity type with `nosqlbench help <activity
-type>`.
+To see what activity parameters are valid for a given activity type, see the documentation for that activity type with
+`nb help <activity type>`.
 :::
+
+When starting out, you want to familiarize yourself with these parameters. The most important ones to learn about first
+are driver, cycles and threads.
 
 ## driver
 
@@ -233,8 +235,8 @@ above. If you do not specify it when you initialize a cyclerate, then it
 defaults 1.1. The burst ratio is only valid as part of a rate limit and
 can not be specified by itself.
 
-_default_: `1.1`
-_dynamic_: yes
+* _default_: `1.1`
+* _dynamic_: yes
 
 The nosqlbench rate limiter provides a sliding scale between strict rate
 limiting and average rate limiting. The difference between them is
@@ -259,13 +261,12 @@ near-strict behavior while allowing clients to still track truer to rate
 limit expectations, so long as the overall workload is not saturating
 resources.
 
-:::info The default burst ratio of 1.1 makes testing results slightly
-more stable on average, but can also hide some short-term slow-downs in
-system throughput. It is set at the default to fit most tester's
-expectations for averaging results, but it may not be strict enough for
-your testing purposes. However, a strict setting of 1.0 nearly always
-adds cold/startup time to the result, so if you are testing for steady
-state, be sure to account for this across test runs. :::
+:::info
+The default burst ratio of 1.1 makes testing results slightly more stable on average, but can also hide some
+short-term slow-downs in system throughput. It is set at the default to fit most tester's expectations for averaging
+results, but it may not be strict enough for your testing purposes. However, a strict setting of 1.0 nearly always adds
+cold/startup time to the result, so if you are testing for steady state, be sure to account for this across test runs.
+:::
 
 ## striderate
 
@@ -289,11 +290,11 @@ to optimize a client runtime for more efficiency and throughput. The stride
 rate limiter applies to the whole activity irrespective of how many threads
 it has.
 
-:::warning When using the cyclerate an striderate options together,
-operations are delayed based on both rate limiters. If the relative
-rates are not synchronised with the side of a stride, then one rate
-limiter will artificially throttle the other. Thus, it usually doesn't
-make sense to use both of these settings in the same activity. :::
+:::warning
+When using the cyclerate an striderate options together, operations are delayed based on both rate limiters. If the
+relative rates are not synchronised with the side of a stride, then one rate limiter will artificially throttle the
+other. Thus, it usually doesn't make sense to use both of these settings in the same activity.
+:::
 
 ## seq
 

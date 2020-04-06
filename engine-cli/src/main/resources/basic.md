@@ -10,7 +10,7 @@
 # To run a simple built-in workload run:
     ./nb  cql-iot
 
-# To get a list of available workloads run:
+# To get a list of workloads run:
     ./nb --list-workloads
 
 # Note: this will include built-in workloads, shipped with nb and workloads in your local directory.

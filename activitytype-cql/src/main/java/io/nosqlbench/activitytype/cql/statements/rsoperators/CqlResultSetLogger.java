@@ -5,6 +5,10 @@ import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Logs a trace-level event for the result set, including
+ * cycles, rows, fetched row count, and the statement.
+ */
 public class CqlResultSetLogger implements ResultSetCycleOperator {
     private final static Logger logger = LoggerFactory.getLogger(CqlResultSetLogger.class);
 

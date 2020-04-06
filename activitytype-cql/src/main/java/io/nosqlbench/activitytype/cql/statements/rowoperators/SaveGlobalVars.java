@@ -8,6 +8,10 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Stores the current row into the global object map. Key names are set from the field names. Null values are stored
+ * as empty strings.
+ */
 public class SaveGlobalVars implements RowCycleOperator {
 
     ConcurrentHashMap<String, Object> gl_vars = SharedState.gl_ObjectMap;

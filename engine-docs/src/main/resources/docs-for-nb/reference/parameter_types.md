@@ -29,7 +29,7 @@ activity type. Core activity params include type*, *alias*, and *threads*, for e
 individually under the next section.
 
 *Driver* Parameters are those provided by an activity type. These parameters are documented for each activity type. You
-can see them by running `nosqlbench help <activity type>`.
+can see them by running `nb help <activity type>`.
 
 Driver parameters may be dynamic. *Dynamic* Activity Parameters are parameters which may be changed while an activity is
 running. This means that scenario scripting logic may change some variables while an activity is running, and that the

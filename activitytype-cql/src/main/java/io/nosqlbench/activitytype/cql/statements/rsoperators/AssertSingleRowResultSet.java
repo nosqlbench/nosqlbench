@@ -5,6 +5,9 @@ import com.datastax.driver.core.Statement;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ResultSetVerificationException;
 
+/**
+ * Throws a {@link ResultSetVerificationException} unless there is exactly one row in the result set.
+ */
 public class AssertSingleRowResultSet implements ResultSetCycleOperator {
 
     @Override

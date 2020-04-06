@@ -3,27 +3,15 @@ title: CQL IoT
 weight: 2
 ---
 
+# CQL IoT
+
 ## Description
 
 The CQL IoT workload demonstrates a time-series telemetry system as typically found in IoT applications. The bulk of the
 traffic is telemetry ingest. This is useful for establishing steady-state capacity with an actively managed data
 lifecycle. This is a steady-state workload, where inserts are 90% of the operations and queries are the remaining 10%.
 
-## Schema
-
-    CREATE KEYSPACE baselines WITH replication =
-        { 'class': 'NetworkTopologyStrategy', 'dc1': 3 };
-
-    CREATE TABLE baselines.iot (
-            station_id UUID,
-            machine_id UUID,
-            machine_type text,
-            sensor_value double,
-            time timestamp,
-            PRIMARY KEY (machine_id, time)
-        ) WITH CLUSTERING ORDER BY (time DESC)
-        AND compaction =  { 'class': 'TimeWindowCompactionStrategy' }
-        AND default_ttl = 3600;
+## Named Scenarios
 
 ## Workload Sequence
 
