@@ -1,12 +1,11 @@
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.exceptions.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 public class NBCLIScenarioParserTest {
 

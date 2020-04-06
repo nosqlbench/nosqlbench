@@ -235,7 +235,6 @@ public class NBPaths {
         }};
 
         for (String path : paths) {
-
             Optional<InputStream> stream = getInputStream(path);
             if (stream.isPresent()) {
                 return Optional.of(Path.of(path));

@@ -4,8 +4,9 @@ import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.engine.api.exceptions.BasicError;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
@@ -28,8 +29,10 @@ public class NBCLIScenarioParser {
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
 
     public static boolean isFoundWorkload(String word) {
-        Optional<Path> workloadPath = NBPaths.findOptionalPath(word, "yaml", false, "activities");
-        return workloadPath.isPresent();
+        Optional<Content<?>> found = NBIO.all().prefix("activities").exact().name(word).extension("yaml").first();
+        return found.isPresent();
+//        Optional<Path> workloadPath = NBPathOldUtil.findOptionalPathIn(word, "yaml", false, "activities");
+//        return workloadPath.isPresent();
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist) {
