@@ -20,18 +20,20 @@ package io.nosqlbench.engine.api.util;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class StrInterpolator implements Function<String, String> {
 
     private MultiMap multimap = new MultiMap();
-    private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\');
-    private StrSubstitutor substitutor2 = new StrSubstitutor(multimap, "TEMPLATE(", ")", '\\');
+    private StringSubstitutor substitutor=
+        new StringSubstitutor(multimap,"<<",">>",'\\')
+            .setEnableSubstitutionInVariables(true);
+    private StringSubstitutor substitutor2 =
+        new StringSubstitutor(multimap, "TEMPLATE(", ")", '\\')
+            .setEnableSubstitutionInVariables(true);
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -55,6 +57,12 @@ public class StrInterpolator implements Function<String, String> {
             after = substitutor.replace(substitutor2.replace(raw));
         }
         return after;
+    }
+
+    public LinkedHashMap<String,String> getTemplateDetails(String input) {
+        LinkedHashMap<String,String> details = new LinkedHashMap<>();
+
+        return details;
     }
 
     public static class MultiMap extends StrLookup<String> {
@@ -86,5 +94,6 @@ public class StrInterpolator implements Function<String, String> {
             return (defval != null) ? defval : warnPrefix + ":" + key;
         }
     }
+
 
 }

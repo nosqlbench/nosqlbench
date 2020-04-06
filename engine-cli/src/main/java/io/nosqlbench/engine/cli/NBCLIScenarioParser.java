@@ -141,13 +141,13 @@ public class NBCLIScenarioParser {
         }
 
         public boolean isReassignable() {
-            return "=".equals(operator);
+            return UNLOCKED.equals(operator);
         }
         public boolean isFinalSilent() {
-            return "==".equals(operator);
+            return SILENT_LOCKED.equals(operator);
         }
         public boolean isFinalVerbose() {
-            return "===".equals(operator);
+            return VERBOSE_LOCKED.equals(operator);
         }
 
 

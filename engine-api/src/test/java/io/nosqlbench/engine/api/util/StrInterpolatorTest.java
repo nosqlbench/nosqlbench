@@ -19,10 +19,7 @@ package io.nosqlbench.engine.api.util;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -119,12 +116,20 @@ public class StrInterpolatorTest {
         assertThat(a).isEqualTo("'Key': 'Value'.'Stuff'");
     }
 
-    @Test
-    public void shouldExpandNestedTemplates() {
-        String a = interp.apply("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
-        assertThat(a).isEqualTo("-aval1-");
-        String b = interp.apply("-TEMPLATE(unknown,TEMPLATE(bkey,whee))-");
-        assertThat(b).isEqualTo("-bval1-");
-    }
-
+//    @Test
+//    public void shouldExpandNestedTemplates() {
+//        String a = interp.apply("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
+//        assertThat(a).isEqualTo("-aval1-");
+//        String b = interp.apply("-TEMPLATE(unknown,TEMPLATE(bkey,whee))-");
+//        assertThat(b).isEqualTo("-bval1-");
+//    }
+//
+//    @Test
+//    public void shouldGetBasicDetails() {
+//        LinkedHashMap<String, String> details = interp.getTemplateDetails("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
+//        assertThat(details).containsOnlyKeys("akey","dkey");
+//        assertThat(details).containsValues("test1");
+//
+//    }
+//
 }
