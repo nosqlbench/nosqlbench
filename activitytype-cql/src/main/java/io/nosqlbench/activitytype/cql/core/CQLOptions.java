@@ -3,6 +3,7 @@ package io.nosqlbench.activitytype.cql.core;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.*;
 import io.netty.util.HashedWheelTimer;
+import io.nosqlbench.engine.api.exceptions.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +82,24 @@ public class CQLOptions {
         }
 
         return retryPolicy;
+    }
+
+    public static ReconnectionPolicy reconnectPolicyFor(String spec) {
+       if(spec.startsWith("exponential(")){
+           String argsString = spec.substring(12);
+           String[] args = argsString.substring(0, argsString.length() - 1).split("[,;]");
+           if (args.length != 2){
+               throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>)");
+           }
+           long baseDelay = Long.parseLong(args[0]);
+           long maxDelay = Long.parseLong(args[1]);
+           return new ExponentialReconnectionPolicy(baseDelay,maxDelay);
+       }else if(spec.startsWith("constant(")){
+           String argsString = spec.substring(9);
+           long constantDelayMs= Long.parseLong(argsString.substring(0, argsString.length() - 1));
+           return new ConstantReconnectionPolicy(constantDelayMs);
+       }
+       throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>) or constant(<constantDelayMs>)");
     }
 
     public static SocketOptions socketOptionsFor(String spec) {
