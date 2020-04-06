@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.api.exceptions;
+package io.nosqlbench.nb.api.errors;
 
 /**
  * User exceptions are errors for which we know how to explain the cause to the user.

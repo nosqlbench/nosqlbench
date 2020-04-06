@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.docker;
 
-import io.nosqlbench.engine.api.exceptions.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

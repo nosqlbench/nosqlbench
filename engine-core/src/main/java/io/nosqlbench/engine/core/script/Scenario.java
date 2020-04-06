@@ -20,7 +20,7 @@ import io.nosqlbench.engine.core.ProgressIndicator;
 import io.nosqlbench.engine.core.ScenarioController;
 import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.api.exceptions.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.MetricRegistryBindings;

@@ -7,7 +7,6 @@ import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.exceptions.BasicError;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.NashornEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;

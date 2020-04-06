@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.api.exceptions.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
