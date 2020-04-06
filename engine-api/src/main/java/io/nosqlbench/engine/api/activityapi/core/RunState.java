@@ -48,6 +48,7 @@ public enum RunState {
             default:
                 return false;
             case Uninitialized: // A motor was just created. This is its initial state.
+            case Stopped:
                 switch (to) {
                     case Starting: // a motor has been reserved for an execution command
                         return true;
@@ -76,14 +77,7 @@ public enum RunState {
                         return true;
                     default:
                         return false;
-                }
-            case Stopped:
-                switch (to) {
-                    case Running: // A motor was restarted after being stopped
-                        return true;
-                    default:
-                        return false;
-                }
+                }// A motor was restarted after being stopped
             case Finished:
                 switch (to) {
                     case Running: // A motor was restarted?
