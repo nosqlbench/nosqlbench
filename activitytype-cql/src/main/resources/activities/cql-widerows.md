@@ -9,24 +9,6 @@ The CQL Wide Rows workload provides a way to tax a system with wide rows of a gi
 understand underlying performance differences between version and configuration options when using data models that have
 wide rows.
 
-## Schema
-
-    CREATE KEYSPACE if not exists baselines WITH replication =
-        { 'class': 'NetworkTopologyStrategy', 'dc1': 3 };
-
-    CREATE TABLE if not exists baselines.widerows (
-         part text,
-         clust text,
-         data text,
-         PRIMARY KEY (part,clust)
-    );
-
-## Workload Sequence
-
-1. schema - Install the schema
-2. rampup - Fully populate the widerows with data, 100000 elements per row
-3. main - Run at steady state with 50% reads and 50% writes, 100M rows
-
 For in-depth testing, this workload needs significant density of partitions in combination with fully populated wide
 rows. For exploratory or parameter contrasting tests, ensure that the rampup phase is configured correctly to establish
 this initial state.

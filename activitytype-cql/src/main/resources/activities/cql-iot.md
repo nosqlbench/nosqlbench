@@ -13,11 +13,11 @@ lifecycle. This is a steady-state workload, where inserts are 90% of the operati
 
 ## Named Scenarios
 
-## Workload Sequence
+### default
 
-1. schema - Install the schema
-2. rampup - Ramp-Up to steady state for normative density, writes only 100M rows
-3. main - Run at steady state with 10% reads and 90% writes, 100M rows
+The default scenario for cql-iot.yaml runs the conventional test phases: schema, rampup, main
+
+## Testing Considerations
 
 For in-depth testing, this workload will take some time to build up data density where TTLs begin purging expired data.
 At this point, the test should be considered steady-state.

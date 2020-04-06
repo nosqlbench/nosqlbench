@@ -13,12 +13,6 @@ During preload, all keys are set with a value. During the main phase of the work
 population are replaced with new values which never repeat. During the main phase, random partitions are selected for
 upsert, with row values never repeating.
 
-## Workload Sequence
-
-1. schema - Initialize the schema.
-2. rampup - Load data according to the data set size.
-3. main - Run the workload
-
 ## Operations
 
 ### insert (rampup, main)
