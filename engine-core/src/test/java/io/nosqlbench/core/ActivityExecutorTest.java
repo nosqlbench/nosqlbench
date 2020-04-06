@@ -39,6 +39,30 @@ public class ActivityExecutorTest {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutorTest.class);
 
     @Test
+    public void testRestart() {
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
+        Activity a = new DelayedInitActivity(ad);
+        InputDispenser idisp = new CoreInputDispenser(a);
+        ActionDispenser adisp = new CoreActionDispenser(a);
+        OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
+        MotorDispenser<?> mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
+        a.setActionDispenserDelegate(adisp);
+        a.setOutputDispenserDelegate(tdisp);
+        a.setInputDispenserDelegate(idisp);
+        a.setMotorDispenserDelegate(mdisp);
+
+        ActivityExecutor ae = new ActivityExecutor(a);
+        ad.setThreads(1);
+        ae.startActivity();
+        ae.stopActivity();
+        ae.startActivity();
+        ae.awaitCompletion(15000);
+        assertThat(idisp.getInput(10).getInputSegment(3)).isNull();
+
+    }
+
+    @Test
     public void testDelayedStartSanity() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
