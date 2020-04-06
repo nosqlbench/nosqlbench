@@ -99,7 +99,7 @@ export default {
 //        analyze: {
 //            analyzerMode: 'static'
 //        },
-//        cssSourceMap: true,
+        cssSourceMap: true,
         extractCSS: false,
 //        parallel: true,
         /*
