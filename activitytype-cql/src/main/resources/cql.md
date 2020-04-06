@@ -66,6 +66,11 @@ activity types.
     The only option supported for this version is `retrypolicy=logging`,
     which uses the default retry policy, but with logging added.
 
+- **reconnectpolicy** default: none - Applies a reconnection policy in the driver
+    Supports either `reconnectpolicy=exponential(minDelayInMs,maxDelayInMs)` or `reconnectpolicy=constant(delayInMs)`.
+    The driver reconnects using this policy when the entire cluster becomes unavailable.
+
+
 - **pooling** default: none - Applies the connection pooling options
     to the policy.
     Examples:
