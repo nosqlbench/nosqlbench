@@ -26,12 +26,14 @@ public class NBCLIOptions {
     private static final String METRICS = "--list-metrics";
     private static final String DRIVER_TYPES = "--list-drivers";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
-    private static final String WORKLOADS = "--list-workloads";
+    private static final String LIST_WORKLOADS = "--list-workloads";
+    private static final String LIST_SCENARIOS = "--list-scenarios";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
     private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
     private static final String WANTS_VERSION_COORDS = "--version-coords";
     private static final String WANTS_VERSION_SHORT = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
+    private static final String COPY_WORKLOAD = "--copy-workload";
 
     // Execution
     private static final String SCRIPT = "script";
@@ -108,7 +110,8 @@ public class NBCLIOptions {
     private Map<String, Level> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
-    private boolean wantsWorkloads = false;
+    private boolean wantsScenariosList = false;
+    private String wantsToCopyWorkload = null;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -299,7 +302,7 @@ public class NBCLIOptions {
                     break;
                 case WORKLOADS:
                     arglist.removeFirst();
-                    wantsWorkloads = true;
+                    wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
                     break;
                 default:
                     Optional<InputStream> optionalScript =
@@ -551,8 +554,16 @@ public class NBCLIOptions {
         histoLoggerConfigs.add(String.format("%s:%s:%s", file, pattern, interval));
     }
 
-    public boolean wantsWorkloads() {
-        return wantsWorkloads;
+    public boolean wantsScenariosList() {
+        return wantsScenariosList;
+    }
+
+    public boolean wantsToCopyWorkload() {
+        return wantsToCopyWorkload!=null;
+    }
+
+    public String wantsToCopyWorkloadNamed() {
+        return wantsToCopyWorkload;
     }
 
     public static enum CmdType {

@@ -24,8 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,7 +73,6 @@ public class NBCLI {
         NBCLIOptions options = new NBCLIOptions(args);
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
 
-
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("basic.md"));
             System.exit(0);
@@ -90,9 +93,29 @@ public class NBCLI {
             System.exit(0);
         }
 
-        if (options.wantsWorkloads()) {
+        if (options.wantsScenariosList()) {
             printWorkloads();
             System.exit(0);
+        }
+
+        if (options.wantsToCopyWorkload()) {
+            String workloadToCopy = options.wantsToCopyWorkloadNamed();
+            logger.debug("user requests to copy out " + workloadToCopy);
+
+            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities").exact()
+                .name(workloadToCopy).extension("yaml").first();
+            Content<?> data = tocopy.orElseThrow(() -> new BasicError("Unable to find " + workloadToCopy + " in " +
+                "classpath to copy out"));
+            Path writeTo = Path.of(data.asPath().getFileName().toString());
+            if (Files.exists(writeTo)) {
+                throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
+            }
+            try {
+                Files.writeString(writeTo,data.getCharBuffer(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
+            }
+
         }
 
         if (options.wantsInputTypes()) {
@@ -243,7 +266,7 @@ public class NBCLI {
 
             for (String scenario : scenarioList) {
                 if (scenario.equals("default")) {
-                    scenario = scenario +  " # same as running ./nb " + workloadName ;
+                    scenario = scenario +  "\n # same as running ./nb " + workloadName ;
                 }
                 System.out.println("  ./nb " + workloadName + " " + scenario);
             }
@@ -256,7 +279,6 @@ public class NBCLI {
                     .forEach(System.out::println);
             }
         }
-
     }
 
     private String loadHelpFile(String filename) {
