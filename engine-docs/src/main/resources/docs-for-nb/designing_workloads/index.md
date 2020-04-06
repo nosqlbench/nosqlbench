@@ -31,11 +31,15 @@ types. Try to keep that in mind as you think about designing workloads.
 
 ### Review existing examples
 
-The built-in workloads that are include with nosqlbench are also shared
-on the github site where we manage the nosqlbench project:
+The built-in workloads that are include with nosqlbench are also easy to copy out as a starting point. You just need to
+use two commands:
 
-- [baselines](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/baselines)
-- [bindings](https://github.com/datastax/nosqlbench-labs/tree/master/sample-activities/bindings)
+    # find a workload you want to copy
+    nb --list-workloads
+
+
+    # copy a workload to your local directory
+    nb --copy-workload cql-iot
 
 ### Follow the conventions
 

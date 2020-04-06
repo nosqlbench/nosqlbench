@@ -33,13 +33,19 @@ To run a simple built-in workload run:
 
     ./nb cql-iot
 
-To get a list of built-in workloads run:
+To get a list of built-in scenarios run:
 
+    # Get a list of all named scenarios and parameters
+    ./nb --list-scenarios
+
+If you want a simple list of yamls which contain named scenarios, run:
+
+    # Get a simple list of yamls containing named scenarios
     ./nb --list-workloads
 
 :::info
-Note: this will include workloads that were shipped with nb and workloads in your local directory. To learn more about
-how to design custom workloads see
+Note: These commands will include workloads that were shipped with nb and workloads in your local directory. To learn
+more about how to design custom workloads see
 [designing workloads](/index.html#/docs/designing_workloads.html)
 :::
 

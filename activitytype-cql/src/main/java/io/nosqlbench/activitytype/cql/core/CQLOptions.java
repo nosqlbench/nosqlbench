@@ -3,7 +3,7 @@ package io.nosqlbench.activitytype.cql.core;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.*;
 import io.netty.util.HashedWheelTimer;
-import io.nosqlbench.engine.api.exceptions.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
