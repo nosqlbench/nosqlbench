@@ -203,3 +203,11 @@ $
 Ultimately, it is up to the scenario designer when to lock parameters for users. The built-in workloads offer some
 examples on how to set these parameters so that the right value are locked in place without bother the user, but some
 values are made very clear in how they should be set. Please look at these examples for inspiration when you need.
+
+## Enforcing UNDEF
+
+If you want to ensure that any parameter in a named scenario template remains unset in the generated scenario script,
+you can assign it a value of UNDEF. The locking behaviors described above apply to this one as well. Thus, for schema
+commands which rely on the default sequence length (which is based on the number of active statements), you can set
+cycles==UNDEF to ensure that when a user passes a cycles parameter the schema phase doesn't break with too many cycles.
+
