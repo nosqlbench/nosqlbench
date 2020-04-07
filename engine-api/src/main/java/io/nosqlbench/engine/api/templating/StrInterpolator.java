@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.engine.api.util;
+package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.apache.commons.text.StrLookup;
@@ -28,19 +28,25 @@ import java.util.function.Function;
 public class StrInterpolator implements Function<String, String> {
 
     private MultiMap multimap = new MultiMap();
-    private StringSubstitutor substitutor=
-        new StringSubstitutor(multimap,"<<",">>",'\\')
-            .setEnableSubstitutionInVariables(true);
+    private StringSubstitutor substitutor =
+        new StringSubstitutor(multimap, "<<", ">>", '\\')
+            .setEnableSubstitutionInVariables(true)
+            .setEnableUndefinedVariableException(true)
+            .setDisableSubstitutionInValues(true);
+
     private StringSubstitutor substitutor2 =
         new StringSubstitutor(multimap, "TEMPLATE(", ")", '\\')
-            .setEnableSubstitutionInVariables(true);
+            .setEnableSubstitutionInVariables(true)
+            .setEnableUndefinedVariableException(true)
+            .setDisableSubstitutionInValues(true);
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
-                .map(ad -> ad.getParams().getStringStringMap())
-                .forEach(multimap::add);
+            .map(ad -> ad.getParams().getStringStringMap())
+            .forEach(multimap::add);
     }
-    public StrInterpolator(Map<String,String> basicMap) {
+
+    public StrInterpolator(Map<String, String> basicMap) {
         multimap.add(basicMap);
     }
 
@@ -53,14 +59,14 @@ public class StrInterpolator implements Function<String, String> {
     public String apply(String raw) {
         String after = substitutor.replace(substitutor2.replace(raw));
         while (!after.equals(raw)) {
-            raw=after;
+            raw = after;
             after = substitutor.replace(substitutor2.replace(raw));
         }
         return after;
     }
 
-    public LinkedHashMap<String,String> getTemplateDetails(String input) {
-        LinkedHashMap<String,String> details = new LinkedHashMap<>();
+    public LinkedHashMap<String, String> getTemplateDetails(String input) {
+        LinkedHashMap<String, String> details = new LinkedHashMap<>();
 
         return details;
     }
@@ -70,13 +76,13 @@ public class StrInterpolator implements Function<String, String> {
         private List<Map<String, String>> maps = new ArrayList<>();
         private String warnPrefix = "UNSET";
 
-        public void add(Map<String,String> addedMap) {
+        public void add(Map<String, String> addedMap) {
             maps.add(addedMap);
         }
 
         @Override
         public String lookup(String key) {
-            String defval=null;
+            String defval = null;
 
             String[] parts = key.split("[:,]", 2);
             if (parts.length == 2) {
