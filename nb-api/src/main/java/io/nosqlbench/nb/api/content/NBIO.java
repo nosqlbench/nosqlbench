@@ -245,10 +245,11 @@ public class NBIO implements NBPathsAPI.Facets {
                     if (!extension.startsWith(".")) {
                         extension = "." + extension;
                     }
+
                     String pattern = name.endsWith(extension) ? name : name + Pattern.quote(extension);
                     RegexPathFilter filter = new RegexPathFilter(pattern);
 
-                    NBIOWalker.walk(path, capture, filter);
+                    NBIOWalker.walkFullPath(path, capture, filter);
                 }
 
             }
@@ -267,6 +268,10 @@ public class NBIO implements NBPathsAPI.Facets {
         private final Pattern regex;
 
         public RegexPathFilter(String pattern) {
+            if (!pattern.startsWith("^")) {
+                pattern = ".*" + pattern;
+            }
+
             this.regex = Pattern.compile(pattern);
         }
 

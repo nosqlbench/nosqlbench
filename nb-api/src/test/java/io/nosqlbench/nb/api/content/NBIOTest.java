@@ -98,4 +98,15 @@ public class NBIOTest {
         assertThat(list).hasSize(3);
     }
 
+    @Test
+    public void testPathSearchForSuffix() {
+        List<Content<?>> list = NBIO.classpath()
+            .prefix("nesteddir1")
+            .regex()
+            .name("nesteddir2/testdata12")
+            .extension("txt")
+            .list();
+        assertThat(list).hasSize(1);
+    }
+
 }
