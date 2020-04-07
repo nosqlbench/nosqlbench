@@ -2,8 +2,12 @@ package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * NBIO is a helper utility packaged as a search builder and fluent API.
@@ -167,7 +171,7 @@ public class NBIO implements NBPathsAPI.Facets {
         LinkedHashSet<String> specificPathsToSearch = expandSearches();
         for (String candidatePath : specificPathsToSearch) {
             Content<?> content = resolver.resolve(candidatePath);
-            if (content!=null) {
+            if (content != null) {
                 return Optional.of(content);
             }
         }
@@ -182,7 +186,7 @@ public class NBIO implements NBPathsAPI.Facets {
             Content<?> content = null;
             for (String slotSearchPath : slotSearchPaths) {
                 content = resolver.resolve(slotSearchPath);
-                if (content!=null) {
+                if (content != null) {
                     break;
                 }
             }
@@ -192,9 +196,10 @@ public class NBIO implements NBPathsAPI.Facets {
         return resolved;
     }
 
+
     // for testing
     public LinkedHashSet<String> expandSearches() {
-        LinkedHashSet<String> searchSet = new LinkedHashSet<>(extensions.size()*names.size()*searchPaths.size());
+        LinkedHashSet<String> searchSet = new LinkedHashSet<>(extensions.size() * names.size() * searchPaths.size());
         for (String name : names) {
             searchSet.addAll(expandSearches(name));
         }
@@ -217,12 +222,79 @@ public class NBIO implements NBPathsAPI.Facets {
         for (String searchPath : searchPathsToTry) {
             for (String extension : extensionsToTry) {
                 if (!name.endsWith(extension)) {
-                    name = name+extension;
+                    name = name + extension;
                 }
-                searchSet.add(Path.of(searchPath,name).toString());
+                searchSet.add(Path.of(searchPath, name).toString());
             }
         }
         return searchSet;
+    }
+
+    @Override
+    public List<Content<?>> list() {
+        List<Content<?>> foundFiles = new ArrayList<>();
+
+        for (String searchPath : searchPaths) {
+            Optional<Path> opath = resolver.resolveDirectory(searchPath);
+            Path path = opath.orElseThrow();
+
+            FileCapture capture = new FileCapture();
+            for (String name : names) {
+
+                for (String extension : extensions) {
+                    if (!extension.startsWith(".")) {
+                        extension = "." + extension;
+                    }
+                    String pattern = name.endsWith(extension) ? name : name + Pattern.quote(extension);
+                    RegexPathFilter filter = new RegexPathFilter(pattern);
+
+                    NBIOWalker.walk(path, capture, filter);
+                }
+
+            }
+
+            for (Path foundPath : capture) {
+                Path fullPath = path.resolve(foundPath);
+                foundFiles.add(new PathContent(fullPath));
+            }
+
+        }
+        return foundFiles;
+    }
+
+    private static class RegexPathFilter implements DirectoryStream.Filter<Path> {
+
+        private final Pattern regex;
+
+        public RegexPathFilter(String pattern) {
+            this.regex = Pattern.compile(pattern);
+        }
+
+        @Override
+        public boolean accept(Path entry) throws IOException {
+            String input = entry.toString();
+            Matcher matcher = regex.matcher(input);
+            boolean matches = matcher.matches();
+            return matches;
+        }
+
+        public String toString() {
+            return regex.toString();
+        }
+    }
+
+    private static class FileCapture implements NBIOWalker.PathVisitor, Iterable<Path> {
+        List<Path> found = new ArrayList<>();
+
+        @Override
+        public void visit(Path foundPath) {
+            found.add(foundPath);
+        }
+
+        @Override
+        public Iterator<Path> iterator() {
+            return found.iterator();
+        }
     }
 
 

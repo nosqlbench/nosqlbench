@@ -33,8 +33,10 @@ public class ResolverForClasspath implements ContentResolver {
         }
         URI resolved = URI.create(systemResource.toExternalForm());
         if (resolved.getScheme().equals("file")) {
-            return Path.of(uri.getPath());
-//            return Path.of(resolved.getPath());
+            Path current = Paths.get("").toAbsolutePath();
+            Path logical = Path.of(resolved.getPath());
+            Path relativePath = current.relativize(logical);
+            return relativePath;
         }
 
         FileSystem fs;

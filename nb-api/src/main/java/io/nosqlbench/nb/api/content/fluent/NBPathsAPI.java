@@ -113,6 +113,8 @@ public interface NBPathsAPI {
          * @return A list of optional {@code Content<?>} elements.
          */
         List<Optional<Content<?>>> resolveEach();
+
+        List<Content<?>> list();
     }
 
 }

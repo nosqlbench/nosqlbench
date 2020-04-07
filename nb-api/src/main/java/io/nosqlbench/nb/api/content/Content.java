@@ -14,8 +14,10 @@ public interface Content<T> {
     T getLocation();
     URI getURI();
     CharBuffer getCharBuffer();
+
     public default String asString() {
         return getCharBuffer().toString();
     }
+
     Path asPath();
 }

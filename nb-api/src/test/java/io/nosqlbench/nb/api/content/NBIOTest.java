@@ -65,4 +65,37 @@ public class NBIOTest {
         assertThat(content).isNotNull();
     }
 
+    @Test
+    public void testPathSearchForExtension() {
+        List<Content<?>> list = NBIO.classpath()
+            .prefix("nesteddir1")
+            .regex()
+            .name(".*\\.csv")
+            .extension("csv")
+            .list();
+        assertThat(list).hasSize(2);
+    }
+
+    @Test
+    public void testPathSearchForExtensionMissing() {
+        List<Content<?>> list = NBIO.classpath()
+            .prefix("nesteddir1")
+            .regex()
+            .name(".*")
+            .extension("csv")
+            .list();
+        assertThat(list).hasSize(2);
+    }
+
+    @Test
+    public void testPathSearchForMultipleExtensions() {
+        List<Content<?>> list = NBIO.classpath()
+            .prefix("nesteddir1")
+            .regex()
+            .name(".*")
+            .extension("csv","txt")
+            .list();
+        assertThat(list).hasSize(3);
+    }
+
 }

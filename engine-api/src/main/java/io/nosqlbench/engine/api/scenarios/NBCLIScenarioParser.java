@@ -247,6 +247,10 @@ public class NBCLIScenarioParser {
 
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
 
+        List<Content<?>> activities = NBIO.all().prefix("activities").regex().name(".*\\.yaml").list();
+
+        broken here
+
         String dir = "activities/";
 
         NBPathsAPI.ForContentSource content = NBIO.all(dir).prefix("activities").exact().(".yaml");
