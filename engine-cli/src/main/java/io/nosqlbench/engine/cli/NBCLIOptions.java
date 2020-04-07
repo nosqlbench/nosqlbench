@@ -2,6 +2,7 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.Unit;
 import org.slf4j.Logger;
@@ -332,7 +333,7 @@ public class NBCLIOptions {
                         cmdList.add(script);
                         //Scripted yaml
                     } else if (NBCLIScenarioParser.isFoundWorkload(word)) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist);
+                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS);
                     } else {
                         throw new InvalidParameterException("unrecognized option:" + word);
                     }

@@ -1,11 +1,13 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.api.scenarios;
 
 import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.util.Synonyms;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.engine.api.util.StrInterpolator;
@@ -35,7 +37,7 @@ public class NBCLIScenarioParser {
 //        return workloadPath.isPresent();
     }
 
-    public static void parseScenarioCommand(LinkedList<String> arglist) {
+    public static void parseScenarioCommand(LinkedList<String> arglist, Set<String> RESERVED_WORDS) {
 
         String workloadName = arglist.removeFirst();
         Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
@@ -45,7 +47,7 @@ public class NBCLIScenarioParser {
         while (arglist.size() > 0
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())) {
+            && RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.size() == 0) {
@@ -247,12 +249,15 @@ public class NBCLIScenarioParser {
 
         String dir = "activities/";
 
+        NBPathsAPI.ForContentSource content = NBIO.all(dir).prefix("activities").exact().(".yaml");
+        /*
         Path basePath = NBPaths.findPathIn(dir);
         List<Path> yamlPathList = PathWalker.findAll(basePath)
             .stream()
             .filter(f -> f.toString().endsWith(".yaml"))
             .filter(f -> f.toString().contains("activities"))
             .collect(Collectors.toList());
+         */
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
         for (Path yamlPath : yamlPathList) {

@@ -5,6 +5,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
+import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -272,7 +274,7 @@ public class NBCLI {
                 System.out.println("    # scenarios:");
 
                 List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "");
+                String workloadName = workload.getWorkloadName();
 
                 for (String scenario : scenarioList) {
                     System.out.println("    nb " + workloadName + " " + scenario);

@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.api.scenarios;
 
 import java.util.List;
 import java.util.Set;
@@ -16,6 +16,11 @@ public class WorkloadDesc {
 
     public String getYamlPath() {
         return yamlPath;
+    }
+
+    public String getWorkloadName(){
+        return getYamlPath().replaceAll("\\.yaml", "");
+
     }
 
     public List<String> getScenarioNames() {

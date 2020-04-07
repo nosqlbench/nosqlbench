@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.api.util;
 
 import org.slf4j.Logger;
 
