@@ -14,15 +14,15 @@ import java.util.function.Function;
  * to return a null object or the input value.
  */
 @ThreadSafeMapper
-@Categories({Category.state,Category.nulls})
-public class NullOrPass implements Function<Object,Object> {
+@Categories({Category.state, Category.nulls})
+public class NullOrPass implements Function<Object, Object> {
 
     private final String varname;
     private double ratio;
-    private HashedDoubleRange rangefunc = new HashedDoubleRange(0.0D,1.0D);
+    private HashedDoubleRange rangefunc = new HashedDoubleRange(0.0D, 1.0D);
 
     public NullOrPass(double ratio, String varname) {
-        if (ratio<0.0D || ratio >1.0D) {
+        if (ratio < 0.0D || ratio > 1.0D) {
             throw new RuntimeException("The " + NullOrPass.class.getSimpleName() + " function requires a ratio between 0.0D and 1.0D");
         }
         this.ratio = ratio;
@@ -36,7 +36,8 @@ public class NullOrPass implements Function<Object,Object> {
         if (o1 instanceof Long) {
             basis = (Long) o1;
         } else {
-            throw new RuntimeException("The NullsRatio function requires a variable to have been saved with Save('somename')");
+            throw new RuntimeException("The " + NullOrPass.class.getSimpleName() +
+                " function requires a variable to have been saved with Save(" + varname + ")");
         }
         double v = rangefunc.applyAsDouble(basis);
         if (v <= ratio) {
