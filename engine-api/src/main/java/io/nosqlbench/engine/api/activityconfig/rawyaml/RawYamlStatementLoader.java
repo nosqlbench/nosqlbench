@@ -19,14 +19,18 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
+import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +56,15 @@ public class RawYamlStatementLoader {
 
     public void addTransformer(Function<String, String> transformer) {
         stringTransformers.add(transformer);
+    }
+
+    public RawStmtsDocList load(Logger logger, Path path) {
+        try {
+            String yamlImg = Files.readString(path);
+            return parseYaml(logger, yamlImg);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading YAML from search paths: " + e.getMessage(),e);
+        }
     }
 
     protected String loadRawFile(Logger logger, String fromPath, String... searchPaths) {
@@ -118,6 +131,12 @@ public class RawYamlStatementLoader {
         String data = applyTransforms(logger, rawYaml);
         return parseYaml(logger, data);
     }
+
+    public RawStmtsDocList loadString(Logger logger, CharSequence rawYaml) {
+        String data = applyTransforms(logger, rawYaml.toString());
+        return parseYaml(logger, data);
+    }
+
 
     private class StatementsReader implements SnakeYamlCharmer.FieldHandler {
         @Override

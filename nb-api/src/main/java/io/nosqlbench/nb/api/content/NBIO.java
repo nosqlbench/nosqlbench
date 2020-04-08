@@ -1,13 +1,16 @@
 package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
+import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * NBIO is a helper utility packaged as a search builder and fluent API.
@@ -23,100 +26,75 @@ import java.util.regex.Pattern;
 public class NBIO implements NBPathsAPI.Facets {
 
     private URIResolver resolver;
-    private MatchType matchas = MatchType.exact;
 
     private List<String> names = new ArrayList<>();
     private List<String> extensions = new ArrayList<>();
-    private List<String> searchPaths = new ArrayList<>();
-
-
-    private enum MatchType {
-        exact,
-        suffix,
-        pattern
-    }
+    private List<String> prefixes = new ArrayList<>();
 
     private NBIO() {
     }
 
     private NBIO(URIResolver resolver,
-                 MatchType matchas,
-                 List<String> searchPaths,
+                 List<String> prefixes,
                  List<String> names,
                  List<String> extensions) {
         this.resolver = resolver;
-        this.matchas = matchas;
-        this.searchPaths = searchPaths;
+        this.prefixes = prefixes;
         this.names = names;
         this.extensions = extensions;
     }
 
     @Override
-    public NBPathsAPI.ForContentSource localContent() {
+    public NBPathsAPI.ForPrefix localContent() {
         this.resolver = URIResolvers.inFS().inCP();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForContentSource remoteContent() {
+    public NBPathsAPI.ForPrefix remoteContent() {
         this.resolver = URIResolvers.inURLs();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForContentSource internalContent() {
+    public NBPathsAPI.ForPrefix internalContent() {
         this.resolver = URIResolvers.inClasspath();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForContentSource fileContent() {
+    public NBPathsAPI.ForPrefix fileContent() {
         this.resolver = URIResolvers.inFS();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForContentSource allContent() {
+    public NBPathsAPI.ForPrefix allContent() {
         this.resolver = URIResolvers.inFS().inCP().inURLs();
         return this;
     }
 
     @Override
-    public NBPathsAPI.WantsContentName exact() {
-        return new NBIO(resolver, MatchType.exact, searchPaths, names, extensions);
-    }
-
-    @Override
-    public NBPathsAPI.WantsContentName matchtail() {
-        return new NBIO(resolver, MatchType.suffix, searchPaths, names, extensions);
-    }
-
-    @Override
-    public NBPathsAPI.WantsContentName regex() {
-        return new NBIO(resolver, MatchType.pattern, searchPaths, names, extensions);
-    }
-
-    @Override
     public NBPathsAPI.ForPrefix prefix(String... searchPaths) {
-        ArrayList<String> addingPaths = new ArrayList<>(this.searchPaths);
+        ArrayList<String> addingPaths = new ArrayList<>(this.prefixes);
         addingPaths.addAll(Arrays.asList(searchPaths));
-        return new NBIO(resolver, matchas, addingPaths, names, extensions);
+        return new NBIO(resolver, addingPaths, names, extensions);
     }
 
     @Override
     public NBPathsAPI.ForName name(String... searchNames) {
         ArrayList<String> addingNames = new ArrayList<>(this.names);
         addingNames.addAll(Arrays.asList(searchNames));
-        return new NBIO(resolver, matchas, searchPaths, addingNames, extensions);
+        return new NBIO(resolver, prefixes, addingNames, extensions);
     }
 
     @Override
     public NBPathsAPI.ForExtension extension(String... extensions) {
         ArrayList<String> addingExtensions = new ArrayList<>(this.extensions);
         for (String addingExtension : extensions) {
-            addingExtensions.add(addingExtension.startsWith(".") ? addingExtension : "." + addingExtension);
+            addingExtensions.add(dotExtension(addingExtension));
         }
-        return new NBIO(resolver, matchas, searchPaths, names, addingExtensions);
+        return new NBIO(resolver, prefixes, names, addingExtensions);
     }
 
     /**
@@ -124,7 +102,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForContentSource all() {
+    public static NBPathsAPI.ForPrefix all() {
         return new NBIO().allContent();
     }
 
@@ -133,7 +111,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForContentSource classpath() {
+    public static NBPathsAPI.ForPrefix classpath() {
         return new NBIO().internalContent();
     }
 
@@ -142,7 +120,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForContentSource fs() {
+    public static NBPathsAPI.ForPrefix fs() {
         return new NBIO().fileContent();
     }
 
@@ -151,7 +129,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForContentSource local() {
+    public static NBPathsAPI.ForPrefix local() {
         return new NBIO().localContent();
     }
 
@@ -160,29 +138,55 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForContentSource remote() {
+    public static NBPathsAPI.ForPrefix remote() {
         return new NBIO().remoteContent();
     }
 
 
     @Override
     public Optional<Content<?>> first() {
-        Content<?> found = null;
-        LinkedHashSet<String> specificPathsToSearch = expandSearches();
-        for (String candidatePath : specificPathsToSearch) {
-            Content<?> content = resolver.resolve(candidatePath);
-            if (content != null) {
-                return Optional.of(content);
-            }
+
+        List<Content<?>> list = list();
+        if (list.size()>0) {
+            return Optional.of(list.get(0));
+        } else {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+    }
+
+    public Optional<Content<?>> maybeOne() {
+        List<Content<?>> list = list();
+
+        if (list.size() > 1) {
+            throw new BasicError("Found more than one source for " + this.toString() + ", but expected to find one at" +
+                " most.");
+        }
+        throw new RuntimeException("Invalid code, go fix it, this should never happen.");
+    }
+
+    @Override
+    public Optional<Content<?>> one() {
+
+
+        List<Content<?>> list = list();
+        if (list.size() == 0) {
+            throw new BasicError("Unable to find even a single source for '" + this.toString() + "'");
+        }
+
+        if (list.size() > 1) {
+            String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining(","));
+            throw new BasicError(("Found too many sources for '" + this.toString() + "', ambiguous name. Pick from " + found));
+        }
+        return Optional.of(list.get(0));
+
     }
 
     @Override
     public List<Optional<Content<?>>> resolveEach() {
         List<Optional<Content<?>>> resolved = new ArrayList<>();
         for (String name : names) {
-            LinkedHashSet<String> slotSearchPaths = expandSearches(name);
+            LinkedHashSet<String> slotSearchPaths = expandSearches(prefixes, List.of(name), extensions, false);
             Content<?> content = null;
             for (String slotSearchPath : slotSearchPaths) {
                 content = resolver.resolve(slotSearchPath);
@@ -199,80 +203,148 @@ public class NBIO implements NBPathsAPI.Facets {
 
     // for testing
     public LinkedHashSet<String> expandSearches() {
-        LinkedHashSet<String> searchSet = new LinkedHashSet<>(extensions.size() * names.size() * searchPaths.size());
-        for (String name : names) {
-            searchSet.addAll(expandSearches(name));
-        }
-        return searchSet;
+        return expandSearches(prefixes, names, extensions, false);
     }
+
 
     // for testing
-    public LinkedHashSet<String> expandSearches(String name) {
+    public LinkedHashSet<String> expandSearches(List<String> thePrefixes, List<String> names,
+                                                List<String> suffixes, boolean eachPrefix) {
 
-        LinkedHashSet<String> searchSet = new LinkedHashSet<>();
+        List<String> prefixesToSearch = new ArrayList<>(thePrefixes);
+        List<String> namesToSearch = new ArrayList<>(names);
+        List<String> suffixesToSearch = new ArrayList<>(suffixes);
 
-        List<String> searchPathsToTry = new ArrayList<>();
-        searchPathsToTry.add("");
-        searchPathsToTry.addAll(searchPaths);
+        if (prefixesToSearch.size() == 0) {
+            prefixesToSearch.add("");
+        }
+        if (namesToSearch.size() == 0) {
+            namesToSearch.add(".*");
+        }
+        if (suffixesToSearch.size() == 0) {
+            suffixesToSearch.add("");
+        }
 
-        List<String> extensionsToTry = new ArrayList<>();
-        extensionsToTry.add("");
-        extensionsToTry.addAll(extensions);
+        LinkedHashSet<String> searches = new LinkedHashSet<>();
 
-        for (String searchPath : searchPathsToTry) {
-            for (String extension : extensionsToTry) {
-                if (!name.endsWith(extension)) {
-                    name = name + extension;
+        for (String name : namesToSearch) {
+            for (String suffix : suffixesToSearch) {
+                String search = name;
+                search = (search.endsWith(suffix) ? search : search + suffix);
+
+                if (eachPrefix) {
+                    for (String prefix : prefixesToSearch) {
+                        String withPrefix = (prefix.isEmpty() ? prefix :
+                            prefix + FileSystems.getDefault().getSeparator())
+                            + search;
+                        searches.add(withPrefix);
+                    }
+                } else {
+                    searches.add(search);
                 }
-                searchSet.add(Path.of(searchPath, name).toString());
             }
         }
-        return searchSet;
+
+        return searches;
     }
+
+//    // for testing
+//    public LinkedHashSet<String> expandSearches(String name) {
+//
+//        LinkedHashSet<String> searchSet = new LinkedHashSet<>();
+//
+//        List<String> searchPathsToTry = new ArrayList<>();
+//        searchPathsToTry.add("");
+//        searchPathsToTry.addAll(prefixes);
+//
+//        List<String> extensionsToTry = new ArrayList<>();
+////        extensionsToTry.add("");
+//        extensionsToTry.addAll(extensions);
+//
+//        for (String searchPath : searchPathsToTry) {
+//            for (String extension : extensionsToTry) {
+//                if (!name.endsWith(extension)) {
+//                    name = name + extension;
+//                }
+//                searchSet.add(Path.of(searchPath, name).toString());
+//            }
+//        }
+//        return searchSet;
+//    }
+
 
     @Override
     public List<Content<?>> list() {
-        List<Content<?>> foundFiles = new ArrayList<>();
+        LinkedHashSet<String> searches = expandSearches();
 
-        for (String searchPath : searchPaths) {
+        LinkedHashSet<Content<?>> foundFiles = new LinkedHashSet<>();
+
+        // wrap in local search iterator
+        for (String search : searches) {
+            Content<?> foundInLocal = resolver.resolve(search);
+            if (foundInLocal != null) {
+                foundFiles.add(foundInLocal);
+            }
+        }
+
+        for (String searchPath : prefixes) {
             Optional<Path> opath = resolver.resolveDirectory(searchPath);
             Path path = opath.orElseThrow();
 
             FileCapture capture = new FileCapture();
-            for (String name : names) {
-
-                for (String extension : extensions) {
-                    if (!extension.startsWith(".")) {
-                        extension = "." + extension;
-                    }
-
-                    String pattern = name.endsWith(extension) ? name : name + Pattern.quote(extension);
-                    RegexPathFilter filter = new RegexPathFilter(pattern);
-
-                    NBIOWalker.walkFullPath(path, capture, filter);
-                }
-
+            for (String searchPattern : searches) {
+                RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
+                NBIOWalker.walkFullPath(path, capture, filter);
             }
 
             for (Path foundPath : capture) {
-                Path fullPath = path.resolve(foundPath);
-                foundFiles.add(new PathContent(fullPath));
+//                Path fullPath = path.resolve(foundPath);
+//                foundFiles.add(new PathContent(fullPath));
+                foundFiles.add(new PathContent(foundPath));
             }
-
         }
-        return foundFiles;
+
+        return new ArrayList<>(foundFiles);
     }
+
+    private static String tailmatch(String name) {
+        if (!name.startsWith("^") && !name.startsWith(".")) {
+            name = ".*" + name;
+        }
+        return name;
+    }
+
+    private static String dotExtension(String extension) {
+        return extension.startsWith(".") ? extension : "." + extension;
+    }
+
+//    private LinkedHashSet<Pattern> expandSearchPatterns(String name) {
+//        LinkedHashSet<Pattern> expanded = new LinkedHashSet<>();
+//
+//        if (extensions.size()==0) {
+//            expanded.add(Pattern.compile(tailmatch(name)));
+//        }
+//
+//        for (String extension : extensions) {
+//            extension = dotExtension(extension);
+//            String withExtension = name.endsWith(extension) ? name : name + Pattern.quote(extension);
+//            withExtension=tailmatch(withExtension);
+//            Pattern pattern = Pattern.compile(withExtension);
+//            expanded.add(pattern);
+//        }
+//        return expanded;
+//    }
 
     private static class RegexPathFilter implements DirectoryStream.Filter<Path> {
 
         private final Pattern regex;
 
-        public RegexPathFilter(String pattern) {
-            if (!pattern.startsWith("^")) {
-                pattern = ".*" + pattern;
+        public RegexPathFilter(String pattern, boolean rightglob) {
+            if (rightglob && !pattern.startsWith("^") && !pattern.startsWith(".")) {
+                this.regex = Pattern.compile(".*" + pattern);
+            } else {
+                this.regex = Pattern.compile(pattern);
             }
-
-            this.regex = Pattern.compile(pattern);
         }
 
         @Override
@@ -302,5 +374,13 @@ public class NBIO implements NBPathsAPI.Facets {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "NBIO{" +
+            "resolver=" + resolver +
+            ", prefixes=" + prefixes +
+            ", names=" + names +
+            ", extensions=" + extensions +
+            '}';
+    }
 }

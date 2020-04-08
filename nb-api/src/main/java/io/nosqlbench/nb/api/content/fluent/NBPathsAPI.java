@@ -2,82 +2,58 @@ package io.nosqlbench.nb.api.content.fluent;
 
 import io.nosqlbench.nb.api.content.Content;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
 public interface NBPathsAPI {
 
     public static interface Facets extends
-        WantsSpaces, ForContentSource, ForPrefix, WantsContentName, ForName, ForExtension {}
+        WantsSpaces, ForPrefix, WantsContentName, ForName, ForExtension {}
 
     public static interface WantsSpaces {
         /**
          * Only provide content from the class path and the local filesystem.
          * @return this builder
          */
-        ForContentSource localContent();
+        ForPrefix localContent();
 
         /**
          * Only return content from remote URLs. If the user is providing non-URL content
          * in this context, it is an error. Throw an error in that case.
          * @return this builder
          */
-        ForContentSource remoteContent();
+        ForPrefix remoteContent();
 
         /**
          * Only return content from the runtime classpath, internal resources that are bundled,
          * and do not return content on the file system.
          * @return this builder
          */
-        ForContentSource internalContent();
+        ForPrefix internalContent();
 
         /**
          * Only return content from the filesystem, but not remote URLs nor internal bundled resources.
          * @return this builder
          */
-        ForContentSource fileContent();
+        ForPrefix fileContent();
 
         /**
          * Return content from everywhere, from remote URls, or from the file system and then the internal
          * bundled content if not found in the file system first.
          * @return this builder
          */
-        ForContentSource allContent();
+        ForPrefix allContent();
     }
 
-    public static interface ForContentSource extends ForPrefix {
+    public static interface ForPrefix extends WantsContentName {
         /**
          * Each of the prefix paths will be searched if the resource is not found with the exact
          * path given.
          * @param prefixPaths A list of paths to include in the search
          * @return this builder
          */
-        ForPrefix prefix(String... prefixPaths);
-    }
-
-    public static interface ForPrefix extends WantsContentName {
-        /**
-         * Only look at exact matches of the names as given, and if not found, look for exact matches
-         * of the path directly within each given search directory.
-         * @return this builders
-         */
-        WantsContentName exact();
-
-        /**
-         * Attempt {@link #exact()} matching, and if not found, also attempt to look within any
-         * provided search directories recursively for a path which matches the provided path at
-         * the end. For example "baz.csv" will be found under search directory "foo" if it is at
-         * "foo/bar/baz.csv", as will "bar/baz.csv", so long as "foo" is specified as a search directory.
-         * @return this builder
-         */
-        WantsContentName matchtail();
-
-        /**
-         * Attempt {@link #exact()} matching, and if not found, search in each provided search directory
-         * for a path name that matches the provided name as a regex pattern.
-         * @return this builder
-         */
-        WantsContentName regex();
+        WantsContentName prefix(String... prefixPaths);
     }
 
     public static interface WantsContentName {
@@ -115,6 +91,16 @@ public interface NBPathsAPI {
         List<Optional<Content<?>>> resolveEach();
 
         List<Content<?>> list();
+
+        Optional<Content<?>> maybeOne();
+
+        /**
+         * Find exactly one source of content under the search parameters given.
+         * It is an error if you find none, or more than one.
+         * @return An optional content element.
+         */
+        Optional<Content<?>> one();
+
     }
 
 }

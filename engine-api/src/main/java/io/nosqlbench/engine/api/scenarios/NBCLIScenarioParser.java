@@ -1,16 +1,13 @@
 package io.nosqlbench.engine.api.scenarios;
 
-import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.util.StrInterpolator;
 import io.nosqlbench.engine.api.util.Synonyms;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
-import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,32 +26,44 @@ public class NBCLIScenarioParser {
     public final static String UNLOCKED = "=";
 
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
+    private static final String SEARCH_IN = "activities";
 
-    public static boolean isFoundWorkload(String word) {
-        Optional<Content<?>> found = NBIO.all().prefix("activities").exact().name(word).extension("yaml").first();
+    public static boolean isFoundWorkload(String workload) {
+        Optional<Content<?>> found = NBIO.all()
+            .prefix("activities")
+            .name(workload)
+            .extension("yaml")
+            .first();
         return found.isPresent();
-//        Optional<Path> workloadPath = NBPathOldUtil.findOptionalPathIn(word, "yaml", false, "activities");
-//        return workloadPath.isPresent();
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist, Set<String> RESERVED_WORDS) {
 
         String workloadName = arglist.removeFirst();
-        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
-        Path workloadPath = workloadPathSearch.orElseThrow();
+        Optional<Content<?>> found = NBIO.all()
+            .prefix("activities")
+            .name(workloadName)
+            .extension("yaml")
+            .first();
+//
+        Content<?> workloadContent = found.orElseThrow();
 
+//        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
+//        Path workloadPath = workloadPathSearch.orElseThrow();
+
+        // Buffer in CLI word from user, but only until the next command
         List<String> scenarioNames = new ArrayList<>();
         while (arglist.size() > 0
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && RESERVED_WORDS.contains(arglist.peekFirst())) {
+            && !RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.size() == 0) {
             scenarioNames.add("default");
         }
 
-        // Load in user's CLI options
+        // Parse CLI command into keyed parameters, in order
         LinkedHashMap<String, String> userParams = new LinkedHashMap<>();
         while (arglist.size() > 0
             && arglist.peekFirst().contains("=")
@@ -66,6 +75,7 @@ public class NBCLIScenarioParser {
             }
             userParams.put(arg[0], arg[1]);
         }
+
         StrInterpolator userParamsInterp = new StrInterpolator(userParams);
 
         // This will hold the command to be prepended to the main arglist
@@ -74,7 +84,19 @@ public class NBCLIScenarioParser {
         for (String scenarioName : scenarioNames) {
 
             // Load in named scenario
-            StmtsDocList stmts = StatementsLoader.load(logger, workloadPath.toString());
+            Optional<Content<?>> yamlWithNamedScenarios = NBIO.all().prefix(SEARCH_IN)
+                .name(workloadName)
+                .extension("yaml")
+                .one();
+
+//            // TODO: ugly hack remove this
+//            workloadName = (workloadName.endsWith(".yaml")) ? workloadName : workloadName + ".yaml";
+//            StmtsDocList stmts = StatementsLoader.load(logger, workloadName, SEARCH_IN);
+
+
+            StmtsDocList stmts = StatementsLoader.load(logger,yamlWithNamedScenarios.get());
+
+
             Scenarios scenarios = stmts.getDocScenarios();
             List<String> cmds = scenarios.getNamedScenario(scenarioName);
             if (cmds == null) {
@@ -109,8 +131,9 @@ public class NBCLIScenarioParser {
                     builtcmd.put(cmdarg.getName(), cmdarg.toString());
                 }
                 usersCopy.forEach((k, v) -> builtcmd.put(k, k + "=" + v));
+
                 if (!builtcmd.containsKey("workload")) {
-                    builtcmd.put("workload", "workload=" + workloadPath.toString());
+                    builtcmd.put("workload", "workload=" + workloadName);
                 }
 
                 // Undefine any keys with a value of 'undef'
@@ -247,26 +270,24 @@ public class NBCLIScenarioParser {
 
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
 
-        List<Content<?>> activities = NBIO.all().prefix("activities").regex().name(".*\\.yaml").list();
+        List<Content<?>> activities = NBIO.all()
+            .prefix(SEARCH_IN)
+            .name(".*\\.yaml")
+            .list();
 
-        broken here
-
-        String dir = "activities/";
-
-        NBPathsAPI.ForContentSource content = NBIO.all(dir).prefix("activities").exact().(".yaml");
-        /*
-        Path basePath = NBPaths.findPathIn(dir);
-        List<Path> yamlPathList = PathWalker.findAll(basePath)
-            .stream()
-            .filter(f -> f.toString().endsWith(".yaml"))
-            .filter(f -> f.toString().contains("activities"))
-            .collect(Collectors.toList());
-         */
+        List<Path> yamlPathList = activities.stream().map(Content::asPath).collect(Collectors.toList());
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
+
         for (Path yamlPath : yamlPathList) {
-            String substring = yamlPath.toString().substring(1);
-            StmtsDocList stmts = StatementsLoader.load(logger, substring);
+            String referencedWorkloadName = yamlPath.toString().substring(1);
+
+            Optional<Content<?>> referencedWorkload = NBIO.all().prefix(SEARCH_IN)
+                .name(referencedWorkloadName).extension("yaml")
+                .one();
+
+            Content<?> content = referencedWorkload.orElseThrow();
+            StmtsDocList stmts = StatementsLoader.load(logger,content);
 
             Set<String> templates = new HashSet<>();
             try {

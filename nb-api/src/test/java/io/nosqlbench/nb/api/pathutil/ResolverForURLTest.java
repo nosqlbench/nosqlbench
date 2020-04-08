@@ -41,12 +41,13 @@ public class ResolverForURLTest {
 
     @Test
     public void testCPResource() {
-        String p = "nesteddir1/nesteddir2/testcsv12.csv";
+        String cprootForTestContext = "target/test-classes/";
+        String resourcePathWithinClasspathRoots = "nesteddir1/nesteddir2/testcsv12.csv";
         ResolverForClasspath r = new ResolverForClasspath();
-        Content<?> c = r.resolve(p);
+        Content<?> c = r.resolve(resourcePathWithinClasspathRoots);
         assertThat(c).isNotNull();
         Object location = c.getLocation();
-        assertThat(location.toString()).isEqualTo(p);
+        assertThat(location.toString()).isEqualTo(cprootForTestContext + resourcePathWithinClasspathRoots);
 
         String q = "src/test/resources/nesteddir1/nesteddir2/testcsv12.csv";
         Content<?> notfound = r.resolve(q);

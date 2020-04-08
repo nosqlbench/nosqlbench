@@ -109,7 +109,7 @@ public class NBCLI {
             String workloadToCopy = options.wantsToCopyWorkloadNamed();
             logger.debug("user requests to copy out " + workloadToCopy);
 
-            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities").exact()
+            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities")
                 .name(workloadToCopy).extension("yaml").first();
             Content<?> data = tocopy.orElseThrow(() -> new BasicError("Unable to find " + workloadToCopy + " in " +
                 "classpath to copy out"));

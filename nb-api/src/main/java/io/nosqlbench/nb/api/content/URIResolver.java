@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.content;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.math3.FieldElement;
 
 import java.net.URI;
@@ -123,4 +124,21 @@ public class URIResolver implements ContentResolver {
         this.extraPaths.add(Path.of(extraPath));
         return this;
     }
+
+    public Content<?> resolveOne(String candidatePath) {
+        List<Content<?>> contents = resolveAll(candidatePath);
+        if (contents.size()==1) {
+            return contents.get(0);
+        }
+        if (contents.size()==0) {
+            return null;
+        }
+        throw new BasicError("Error while loading content '" + candidatePath +"', only one is allowed, but " + contents.size() + " were found");
+    }
+
+    public String toString() {
+        return "[resolver]";
+    }
+
+
 }

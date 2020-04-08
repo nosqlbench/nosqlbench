@@ -76,4 +76,8 @@ public class ResolverForClasspath implements ContentResolver {
         }
     }
 
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
 }

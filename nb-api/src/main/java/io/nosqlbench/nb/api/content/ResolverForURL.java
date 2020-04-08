@@ -38,4 +38,9 @@ public class ResolverForURL implements ContentResolver {
     public Optional<Path> resolveDirectory(URI uri) {
         return Optional.empty();
     }
+
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
 }
