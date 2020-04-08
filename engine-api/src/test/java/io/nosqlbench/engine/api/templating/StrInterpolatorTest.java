@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.engine.api.util;
+package io.nosqlbench.engine.api.templating;
 
 import org.junit.Test;
 
