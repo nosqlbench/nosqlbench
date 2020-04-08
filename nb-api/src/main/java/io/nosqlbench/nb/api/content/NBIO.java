@@ -45,51 +45,51 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     @Override
-    public NBPathsAPI.ForPrefix localContent() {
+    public NBPathsAPI.GetPrefix localContent() {
         this.resolver = URIResolvers.inFS().inCP();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForPrefix remoteContent() {
+    public NBPathsAPI.GetPrefix remoteContent() {
         this.resolver = URIResolvers.inURLs();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForPrefix internalContent() {
+    public NBPathsAPI.GetPrefix internalContent() {
         this.resolver = URIResolvers.inClasspath();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForPrefix fileContent() {
+    public NBPathsAPI.GetPrefix fileContent() {
         this.resolver = URIResolvers.inFS();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForPrefix allContent() {
+    public NBPathsAPI.GetPrefix allContent() {
         this.resolver = URIResolvers.inFS().inCP().inURLs();
         return this;
     }
 
     @Override
-    public NBPathsAPI.ForPrefix prefix(String... searchPaths) {
+    public NBPathsAPI.GetPrefix prefix(String... searchPaths) {
         ArrayList<String> addingPaths = new ArrayList<>(this.prefixes);
         addingPaths.addAll(Arrays.asList(searchPaths));
         return new NBIO(resolver, addingPaths, names, extensions);
     }
 
     @Override
-    public NBPathsAPI.ForName name(String... searchNames) {
+    public NBPathsAPI.GetExtension name(String... searchNames) {
         ArrayList<String> addingNames = new ArrayList<>(this.names);
         addingNames.addAll(Arrays.asList(searchNames));
         return new NBIO(resolver, prefixes, addingNames, extensions);
     }
 
     @Override
-    public NBPathsAPI.ForExtension extension(String... extensions) {
+    public NBPathsAPI.DoSearch extension(String... extensions) {
         ArrayList<String> addingExtensions = new ArrayList<>(this.extensions);
         for (String addingExtension : extensions) {
             addingExtensions.add(dotExtension(addingExtension));
@@ -102,7 +102,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForPrefix all() {
+    public static NBPathsAPI.GetPrefix all() {
         return new NBIO().allContent();
     }
 
@@ -111,7 +111,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForPrefix classpath() {
+    public static NBPathsAPI.GetPrefix classpath() {
         return new NBIO().internalContent();
     }
 
@@ -120,7 +120,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForPrefix fs() {
+    public static NBPathsAPI.GetPrefix fs() {
         return new NBIO().fileContent();
     }
 
@@ -129,7 +129,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForPrefix local() {
+    public static NBPathsAPI.GetPrefix local() {
         return new NBIO().localContent();
     }
 
@@ -138,7 +138,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.ForPrefix remote() {
+    public static NBPathsAPI.GetPrefix remote() {
         return new NBIO().remoteContent();
     }
 

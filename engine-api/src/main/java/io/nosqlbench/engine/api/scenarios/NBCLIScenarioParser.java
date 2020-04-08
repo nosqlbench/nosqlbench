@@ -272,7 +272,7 @@ public class NBCLIScenarioParser {
 
         List<Content<?>> activities = NBIO.all()
             .prefix(SEARCH_IN)
-            .name(".*\\.yaml")
+            .extension("yaml")
             .list();
 
         List<Path> yamlPathList = activities.stream().map(Content::asPath).collect(Collectors.toList());

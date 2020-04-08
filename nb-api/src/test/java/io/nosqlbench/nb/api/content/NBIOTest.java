@@ -69,10 +69,10 @@ public class NBIOTest {
 
     @Test
     public void testLoadCsv1Classpath() {
-        NBPathsAPI.ForPrefix forSourceType = NBIO.classpath();
-        NBPathsAPI.WantsContentName nesteddir1 = forSourceType.prefix("nesteddir1");
-        NBPathsAPI.ForName forName = nesteddir1.name("nesteddir2/testcsv1");
-        NBPathsAPI.ForExtension forCsvExtension = forName.extension(".csv");
+        NBPathsAPI.GetPrefix forSourceType = NBIO.classpath();
+        NBPathsAPI.GetName nesteddir1 = forSourceType.prefix("nesteddir1");
+        NBPathsAPI.GetExtension getExtension = nesteddir1.name("nesteddir2/testcsv1");
+        NBPathsAPI.DoSearch forCsvExtension = getExtension.extension(".csv");
         Optional<Content<?>> testcsv1 = forCsvExtension.first();
 
         assertThat(testcsv1).isNotPresent();
@@ -80,10 +80,10 @@ public class NBIOTest {
 
     @Test
     public void testLoadCsv1Filesystem() {
-        NBPathsAPI.ForPrefix forSourceType = NBIO.fs();
-        NBPathsAPI.WantsContentName nesteddir1 = forSourceType.prefix("target/test-classes/nesteddir1");
-        NBPathsAPI.ForName forName = nesteddir1.name("nesteddir2/testcsv1");
-        NBPathsAPI.ForExtension forCsvExtension = forName.extension(".csv");
+        NBPathsAPI.GetPrefix forSourceType = NBIO.fs();
+        NBPathsAPI.GetName nesteddir1 = forSourceType.prefix("target/test-classes/nesteddir1");
+        NBPathsAPI.GetExtension getExtension = nesteddir1.name("nesteddir2/testcsv1");
+        NBPathsAPI.DoSearch forCsvExtension = getExtension.extension(".csv");
         Optional<Content<?>> testcsv1 = forCsvExtension.first();
 
         assertThat(testcsv1).isNotPresent();
