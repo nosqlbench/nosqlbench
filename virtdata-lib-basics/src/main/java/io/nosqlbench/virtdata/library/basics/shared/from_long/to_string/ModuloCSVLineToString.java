@@ -18,9 +18,9 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +47,7 @@ public class ModuloCSVLineToString implements LongFunction<String> {
     @Example({"ModuloCSVLineToString('data/myfile.csv','lat')","load values for 'lat' from the CSV file myfile.csv."})
     public ModuloCSVLineToString(String filename, String fieldname) {
         this.filename = filename;
-        CSVParser csvp = NBPaths.readFileCSV(filename);
+        CSVParser csvp = NBIO.readFileCSV(filename);
         Map<String, Integer> headerMap = csvp.getHeaderMap();
 
         if (headerMap==null || headerMap.isEmpty()) {

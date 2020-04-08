@@ -18,8 +18,8 @@
 
 package io.nosqlbench.virtdata.library.random;
 
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.random.MersenneTwister;
@@ -60,7 +60,7 @@ public class RandomFileExtractToString implements LongFunction<String> {
         if (fileDataImage == null) {
             synchronized (RandomFileExtractToString.class) {
                 if (fileDataImage == null) {
-                    CharBuffer image= NBPaths.readDataFileToCharBuffer(fileName);
+                    CharBuffer image= NBIO.readCharBuffer(fileName);
                     fileDataImage = image;
                 }
             }

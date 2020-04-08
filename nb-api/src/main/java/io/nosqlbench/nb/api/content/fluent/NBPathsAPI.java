@@ -96,7 +96,7 @@ public interface NBPathsAPI {
          * It is an error if you find none, or more than one.
          * @return An optional content element.
          */
-        Optional<Content<?>> one();
+        Content<?> one();
 
     }
 

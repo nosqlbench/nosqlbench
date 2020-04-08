@@ -68,32 +68,23 @@ public class URIResolver implements ContentResolver {
         return this;
     }
 
-    public Optional<Content<?>> resolveOptional(String uri) {
-        return Optional.ofNullable(resolve(uri));
-    }
-
-    public Content<?> resolve(String uri) {
+    public List<Content<?>> resolve(String uri) {
         return resolve(URI.create(uri));
     }
 
     @Override
-    public Optional<Path> resolveDirectory(URI uri) {
+    public List<Path> resolveDirectory(URI uri) {
+        List<Path> dirs = new ArrayList<>();
         for (ContentResolver loader : loaders) {
-            Optional<Path> path = loader.resolveDirectory(uri);
-            if (path.isPresent()) {
-                return path;
-            }
+            dirs.addAll(loader.resolveDirectory(uri));
         }
-        return Optional.empty();
+        return dirs;
     }
 
-    public Content<?> resolve(URI uri) {
-        Content<?> resolved = null;
+    public List<Content<?>> resolve(URI uri) {
+        List<Content<?>> resolved = new ArrayList<>();
         for (ContentResolver loader : loaders) {
-            resolved = loader.resolve(uri);
-            if (resolved!=null) {
-                break;
-            }
+            resolved.addAll(loader.resolve(uri));
         }
         return resolved;
     }
@@ -105,10 +96,7 @@ public class URIResolver implements ContentResolver {
     public List<Content<?>> resolveAll(URI uri) {
         List<Content<?>> allFound = new ArrayList<>();
         for (ContentResolver loader : loaders) {
-            Content<?> found = loader.resolve(uri);
-            if (found!=null) {
-                allFound.add(found);
-            }
+            allFound.addAll(loader.resolve(uri));
         }
         return allFound;
     }

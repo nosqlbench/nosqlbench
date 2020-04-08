@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.NBIO;
 import org.junit.Test;
 
 import java.net.URL;
@@ -205,7 +205,7 @@ public class TestNBCLIOptions {
         String dir= "./";
         URL resource = getClass().getClassLoader().getResource(dir);
         assertThat(resource);
-        Path basePath = NBPaths.findPathIn(dir);
+        Path basePath = NBIO.getFirstLocalPath(dir);
         List<Path> yamlPathList = PathWalker.findAll(basePath).stream().filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
         assertThat(yamlPathList);
     }

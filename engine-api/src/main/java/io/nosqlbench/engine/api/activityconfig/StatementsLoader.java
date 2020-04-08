@@ -46,14 +46,10 @@ public class StatementsLoader {
 //    }
 
     public static StmtsDocList load(Logger logger, String path, String... searchPaths) {
-        Optional<Content<?>> foundStmtsDoc = NBIO.all()
+        Content<?> content = NBIO.all()
             .prefix(searchPaths)
             .name(path)
             .one();
-
-        Content<?> content = foundStmtsDoc.orElseThrow(() ->
-            new BasicError("Unable to find content for '" + path + "' in search paths: " + String.join(",",
-                searchPaths)));
 
         RawYamlStatementLoader loader = new RawYamlStatementLoader();
         RawStmtsDocList rawDocList = loader.loadString(logger, content.get());

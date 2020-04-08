@@ -2,8 +2,13 @@ package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.CharBuffer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -43,6 +48,56 @@ public class NBIO implements NBPathsAPI.Facets {
         this.names = names;
         this.extensions = extensions;
     }
+
+    public static List<String> readLines(String filename) {
+        Content<?> data = NBIO.all().prefix("data").name(filename).one();
+        String[] split = data.getCharBuffer().toString().split("\n");
+        return Arrays.asList(split);
+    }
+
+    public static CSVParser readFileCSV(String filename, String... searchPaths) {
+        return NBIO.readFileDelimCSV(filename, ',', searchPaths);
+    }
+
+    public static CSVParser readFileDelimCSV(String filename,char delim, String... searchPaths) {
+        Reader reader = NBIO.readReader(filename, searchPaths);
+        CSVFormat format = CSVFormat.newFormat(delim).withFirstRecordAsHeader();
+        try {
+            CSVParser parser = new CSVParser(reader, format);
+            return parser;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private static InputStream readInputStream(String filename, String... searchPaths) {
+        return NBIO.all().prefix(searchPaths).name(filename).one().getInputStream();
+    }
+
+    private static Reader readReader(String filename, String... searchPaths) {
+        return NBIO.all().prefix(searchPaths).name(filename).one().getReader();
+    }
+
+    public static CharBuffer readCharBuffer(String fileName, String... searchPaths) {
+        return NBIO.all().prefix(searchPaths).name(fileName).one().getCharBuffer();
+    }
+
+    public static Path getFirstLocalPath(String... potentials) {
+        Optional<Content<?>> first = NBIO.local().name(potentials).first();
+        return first.orElseThrow().asPath();
+    }
+
+    public static Optional<Path> findFirstLocalPath(String... potentials) {
+        Optional<Content<?>> first = NBIO.local().name(potentials).first();
+        Optional<Path> path = first.map(Content::asPath);
+        return path;
+    }
+
+    public static InputStream readInputStream(String fromPath, String yaml, String[] searchPaths) {
+        return null;
+    }
+
 
     @Override
     public NBPathsAPI.GetPrefix localContent() {
@@ -147,7 +202,7 @@ public class NBIO implements NBPathsAPI.Facets {
     public Optional<Content<?>> first() {
 
         List<Content<?>> list = list();
-        if (list.size()>0) {
+        if (list.size() > 0) {
             return Optional.of(list.get(0));
         } else {
             return Optional.empty();
@@ -166,7 +221,7 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     @Override
-    public Optional<Content<?>> one() {
+    public Content<?> one() {
 
 
         List<Content<?>> list = list();
@@ -178,7 +233,7 @@ public class NBIO implements NBPathsAPI.Facets {
             String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining(","));
             throw new BasicError(("Found too many sources for '" + this.toString() + "', ambiguous name. Pick from " + found));
         }
-        return Optional.of(list.get(0));
+        return list.get(0);
 
     }
 
@@ -372,6 +427,11 @@ public class NBIO implements NBPathsAPI.Facets {
         public Iterator<Path> iterator() {
             return found.iterator();
         }
+
+        public String toString() {
+            return "FileCapture{n=" + found.size() +  (found.size()>0?"," +found.get(0).toString():"") +"}";
+        }
+
     }
 
     @Override

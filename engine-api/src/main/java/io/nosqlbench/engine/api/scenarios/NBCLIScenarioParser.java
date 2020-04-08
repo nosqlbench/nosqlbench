@@ -84,7 +84,7 @@ public class NBCLIScenarioParser {
         for (String scenarioName : scenarioNames) {
 
             // Load in named scenario
-            Optional<Content<?>> yamlWithNamedScenarios = NBIO.all().prefix(SEARCH_IN)
+            Content<?> yamlWithNamedScenarios = NBIO.all().prefix(SEARCH_IN)
                 .name(workloadName)
                 .extension("yaml")
                 .one();
@@ -94,7 +94,7 @@ public class NBCLIScenarioParser {
 //            StmtsDocList stmts = StatementsLoader.load(logger, workloadName, SEARCH_IN);
 
 
-            StmtsDocList stmts = StatementsLoader.load(logger,yamlWithNamedScenarios.get());
+            StmtsDocList stmts = StatementsLoader.load(logger,yamlWithNamedScenarios);
 
 
             Scenarios scenarios = stmts.getDocScenarios();
@@ -282,11 +282,10 @@ public class NBCLIScenarioParser {
         for (Path yamlPath : yamlPathList) {
             String referencedWorkloadName = yamlPath.toString().substring(1);
 
-            Optional<Content<?>> referencedWorkload = NBIO.all().prefix(SEARCH_IN)
+            Content<?> content = NBIO.all().prefix(SEARCH_IN)
                 .name(referencedWorkloadName).extension("yaml")
                 .one();
 
-            Content<?> content = referencedWorkload.orElseThrow();
             StmtsDocList stmts = StatementsLoader.load(logger,content);
 
             Set<String> templates = new HashSet<>();

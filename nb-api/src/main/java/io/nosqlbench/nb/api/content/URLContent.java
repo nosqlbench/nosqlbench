@@ -75,4 +75,8 @@ public class URLContent implements Content<URL> {
     public Path asPath() {
         return null;
     }
+
+    public String toString() {
+        return "URLContent{" + getURI().toString() + "}";
+    }
 }

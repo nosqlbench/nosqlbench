@@ -18,10 +18,10 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -60,7 +60,7 @@ public class HashedFileExtractToString implements LongFunction<String> {
         if (fileDataImage == null) {
             synchronized (HashedFileExtractToString.class) {
                 if (fileDataImage == null) {
-                    CharBuffer image= NBPaths.readDataFileToCharBuffer(fileName);
+                    CharBuffer image= NBIO.readCharBuffer(fileName);
                     fileDataImage = image;
                 }
             }

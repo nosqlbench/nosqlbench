@@ -1,6 +1,6 @@
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.NBIO;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +25,8 @@ public class Docs implements DocsBinder {
     }
 
     public Docs addFirstFoundPath(String... potentials) {
-        Path pathIn = NBPaths.findPathIn(potentials);
+        Path pathIn = NBIO.getFirstLocalPath(potentials);
+
         if (pathIn == null || !Files.exists(pathIn)) {
             throw new RuntimeException("Unable to find a path in one of " + Arrays.stream(potentials).collect(Collectors.joining(",")));
         }

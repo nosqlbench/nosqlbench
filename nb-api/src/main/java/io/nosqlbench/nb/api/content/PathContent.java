@@ -59,4 +59,9 @@ public class PathContent implements Content<Path> {
     public int hashCode() {
         return Objects.hash(path);
     }
+
+    public String toString() {
+        return "PathContent{" + getURI().toString() + "}";
+    }
+
 }

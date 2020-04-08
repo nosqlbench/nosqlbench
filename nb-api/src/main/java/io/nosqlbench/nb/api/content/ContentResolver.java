@@ -2,6 +2,7 @@ package io.nosqlbench.nb.api.content;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 public interface ContentResolver {
@@ -25,15 +26,13 @@ public interface ContentResolver {
      * @param uri The URI of a content location, like a file name or URL.
      * @return A content element which may then be used to access the content
      */
-    Content<?> resolve(URI uri);
-
-    default Content<?> resolve(String uri) {
+    List<Content<?>> resolve(URI uri);
+    default List<Content<?>> resolve(String uri) {
         return resolve(URI.create(uri));
     }
 
-    Optional<Path> resolveDirectory(URI uri);
-
-    default Optional<Path> resolveDirectory(String uri) {
+    List<Path> resolveDirectory(URI uri);
+    default List<Path> resolveDirectory(String uri) {
         return resolveDirectory(URI.create(uri));
     }
 
