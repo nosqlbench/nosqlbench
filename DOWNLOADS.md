@@ -4,9 +4,10 @@
 
 The latest release of NoSQLBench is always available from github releases.
 
-- download latest [nb](https://github.com/nosqlbench/nosqlbench/releases/latest/download/nb), a linux binary
+- download [the latest release of nb](https://github.com/nosqlbench/nosqlbench/releases/latest/download/nb), a linux
+  binary
   - (be sure to `chmod +x nb` once you download it)
-- download latest [nb.jar](https://github.com/nosqlbench/nosqlbench/releases/latest/download/nb.jar), a
+- download [the latest release of nb.jar](https://github.com/nosqlbench/nosqlbench/releases/latest/download/nb.jar), a
   single-jar application.
   - This requires java 12 or later, make sure your `java -version` command says that you are on Java 12 or later.
 
