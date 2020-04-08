@@ -4,11 +4,11 @@ import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
-import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -38,7 +38,7 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import io.nosqlbench.engine.api.util.StrInterpolator;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.engine.api.util.Unit;
 import org.slf4j.Logger;

@@ -1,8 +1,8 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.pathutil.NBPaths;
-import io.nosqlbench.engine.api.util.StrInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

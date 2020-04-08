@@ -32,7 +32,7 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
-import io.nosqlbench.engine.api.util.StrInterpolator;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
