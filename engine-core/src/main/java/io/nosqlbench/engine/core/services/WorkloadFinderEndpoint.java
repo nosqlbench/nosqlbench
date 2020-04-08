@@ -15,8 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BinaryOperator;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service(WebServiceObject.class)
@@ -43,12 +42,12 @@ public class WorkloadFinderEndpoint implements WebServiceObject {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("parameters")
-    public Set<String> getParametersByWorkload(@QueryParam("workloadName") String workloadName) {
+    public Map<String, String> getParametersByWorkload(@QueryParam("workloadName") String workloadName) {
         List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts();
 
-        Set<String> templates = null;
+        Map<String, String> templates = null;
 
-        Set<String> temlpates = workloads.stream()
+        templates = workloads.stream()
             .filter(workload -> workload.getWorkloadName().equals(workloadName))
             .map(workload -> workload.getTemplates())
             .collect(Collectors.toSet()).iterator().next();

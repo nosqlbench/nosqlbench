@@ -46,6 +46,7 @@ export default {
         '@nuxtjs/axios'
     ],
     axios: {
+        port: 12345
 
     },
     /*
