@@ -21,7 +21,7 @@ public class ResolverForURL implements ContentResolver {
     @Override
     public List<Content<?>> resolve(URI uri) {
         if (uri.getScheme()==null) {
-            return null;
+            return List.of();
         }
         if (uri.getScheme().equals("http")
             || uri.getScheme().equals("https")) {
@@ -34,8 +34,7 @@ public class ResolverForURL implements ContentResolver {
                 throw new RuntimeException(e);
             }
         }
-        return null;
-    }
+        return List.of();    }
 
     @Override
     public List<Path> resolveDirectory(URI uri) {

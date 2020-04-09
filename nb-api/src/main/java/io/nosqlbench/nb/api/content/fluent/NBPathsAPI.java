@@ -87,7 +87,7 @@ public interface NBPathsAPI {
          * of {@link #first()}, except that it returns a result pair-wise for each name given.
          * @return A list of optional {@code Content<?>} elements.
          */
-        List<Optional<Content<?>>> resolveEach();
+        List<List<Content<?>>> resolveEach();
 
         List<Content<?>> list();
 

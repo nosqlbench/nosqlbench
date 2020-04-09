@@ -91,10 +91,10 @@ public class NBIOTest {
 
     @Test
     public void testClasspathTestResource() {
-        List<Optional<Content<?>>> optionals =
+        List<List<Content<?>>> optionals =
             NBIO.classpath().name("nesteddir1/nesteddir2/testcsv12.csv").resolveEach();
         assertThat(optionals).hasSize(1);
-        Content<?> content = optionals.get(0).get();
+        Content<?> content = optionals.get(0).get(0);
         assertThat(content).isNotNull();
     }
 

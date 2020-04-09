@@ -72,6 +72,9 @@ public class CSVFrequencySampler implements LongFunction<String> {
         Set<String> values = new HashSet<>();
         List<EvProbD> frequencies = new ArrayList<>();
 
+        if (!filename.endsWith(".csv")) {
+            filename = filename + ".csv";
+        }
         CSVParser csvdata = NBIO.readFileCSV(filename);
         Frequency freq = new Frequency();
         for (CSVRecord csvdatum : csvdata) {

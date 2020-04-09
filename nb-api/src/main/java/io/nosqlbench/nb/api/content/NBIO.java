@@ -238,20 +238,16 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     @Override
-    public List<Optional<Content<?>>> resolveEach() {
-        List<Optional<Content<?>>> resolved = new ArrayList<>();
+    public List<List<Content<?>>> resolveEach() {
+        List<List<Content<?>>> resolved = new ArrayList<>();
         for (String name : names) {
             LinkedHashSet<String> slotSearchPaths = expandSearches(prefixes, List.of(name), extensions, false);
             Content<?> content = null;
             for (String slotSearchPath : slotSearchPaths) {
-                content = resolver.resolve(slotSearchPath);
-                if (content != null) {
-                    break;
-                }
+                List<Content<?>> contents = resolver.resolve(slotSearchPath);
+                resolved.add(contents);
             }
-            resolved.add(Optional.ofNullable(content));
         }
-
         return resolved;
     }
 
@@ -336,27 +332,20 @@ public class NBIO implements NBPathsAPI.Facets {
 
         // wrap in local search iterator
         for (String search : searches) {
-            Content<?> foundInLocal = resolver.resolve(search);
-            if (foundInLocal != null) {
-                foundFiles.add(foundInLocal);
-            }
+            List<Content<?>> founds = resolver.resolve(search);
+            foundFiles.addAll(founds);
         }
 
         for (String searchPath : prefixes) {
-            Optional<Path> opath = resolver.resolveDirectory(searchPath);
-            Path path = opath.orElseThrow();
-
+            List<Path> founds = resolver.resolveDirectory(searchPath);
             FileCapture capture = new FileCapture();
-            for (String searchPattern : searches) {
-                RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
-                NBIOWalker.walkFullPath(path, capture, filter);
+            for (Path path : founds) {
+                for (String searchPattern : searches) {
+                    RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
+                    NBIOWalker.walkFullPath(path, capture, filter);
+                }
             }
-
-            for (Path foundPath : capture) {
-//                Path fullPath = path.resolve(foundPath);
-//                foundFiles.add(new PathContent(fullPath));
-                foundFiles.add(new PathContent(foundPath));
-            }
+            capture.found.stream().map(PathContent::new).forEach(foundFiles::add);
         }
 
         return new ArrayList<>(foundFiles);

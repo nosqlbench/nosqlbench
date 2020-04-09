@@ -71,6 +71,9 @@ public class WeightedStringsFromCSV implements LongFunction<String> {
             this.hash=new Hash();
         }
         for (String filename: filenames) {
+            if (!filename.endsWith(".csv")) {
+                filename = filename+".csv";
+            }
             CSVParser csvdata = NBIO.readFileCSV(filename);
             for (CSVRecord csvdatum : csvdata) {
                 String value = csvdatum.get(valueColumn);

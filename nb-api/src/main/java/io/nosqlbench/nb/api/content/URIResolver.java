@@ -84,7 +84,8 @@ public class URIResolver implements ContentResolver {
     public List<Content<?>> resolve(URI uri) {
         List<Content<?>> resolved = new ArrayList<>();
         for (ContentResolver loader : loaders) {
-            resolved.addAll(loader.resolve(uri));
+            List<Content<?>> contents = loader.resolve(uri);
+            resolved.addAll(contents);
         }
         return resolved;
     }
