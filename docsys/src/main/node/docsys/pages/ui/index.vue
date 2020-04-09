@@ -9,23 +9,66 @@
       </v-toolbar-items>
     </v-app-bar>
 
+    <v-layout
+      justify-center
+      align-center>
+
     <v-content>
-      <v-container v-if="enabled">
-        <v-row align="stretch">
+      <v-container fluid v-if="enabled">
 
-
-          <v-col class="d-flex" cols="12" sm="6">
             <v-select
-              :items="workloads"
+              :items="workloadNames"
+              v-model="workloadName"
               chips
+              v-on:change="getTemplates();"
               label="Workload"
             ></v-select>
-          </v-col>
 
+      </v-container>
+
+        <v-container fluid>
+        <v-row
+          v-if="templates"
+        >
+         <v-col
+                cols="12"
+                sm="6"
+                md="10"
+                lg="10"
+         >
+ 
+         <v-card>
+             <v-card-title>
+                {{ workloadName }}
+              </v-card-title>
+             <v-col
+                v-for="(item, j) in Object.keys(templates)"
+                :key="item.command"
+                cols="12"
+                sm="6"
+                md="10"
+                lg="10"
+             >
+                    <v-text-field
+                      v-model="templates[item]"
+                      :label="item"
+                    >{{ item.name }}</v-text-field>
+
+              </v-col>
+
+            <v-col cols="12">
+            <v-btn v-if="workloadName" v-on:click="runWorkload()">Run Workload</v-btn>
+            </v-col>
+         </v-card>
+       </v-col>
 
         </v-row>
-      </v-container>
+
+
+        </v-container>
+        
     </v-content>
+    </v-layout>
 
     <v-footer app dark color="secondary">
       <span>&copy; 2020</span>
@@ -43,11 +86,19 @@
         computed: {
         },
         methods: {
+            async getTemplates() {
+                const data = await this.$axios.$get('/services/nb/parameters?workloadName=' + this.workloadName)
+                if (!data.err) {
+                    this.$data.templates = data;
+                }
+            },
         },
         data(context) {
             let data = {
-                workloads: [1, 2, 3],
-                enabled: false
+                workloadNames: [],
+                enabled: false,
+                workloadName: null,
+                templates: null,
             };
             return data;
         },
@@ -59,7 +110,7 @@
                     .catch((e) => {
                         console.log("back-end not found");
                     })
-          let workloads = await $axios.$get("/services/nb/workloads")
+          let workloadNames = await $axios.$get("/services/nb/workloads")
                     .then(res => {
                         return res
                     })
@@ -70,7 +121,7 @@
 
           return {
               enabled: enabled,
-              workloads: workloads,
+              workloadNames: workloadNames,
           }
         },
     }
@@ -78,7 +129,6 @@
 <style>
   .container {
     margin: 0 auto;
-    min-height: 60vh;
     display: flex;
     justify-content: center;
     align-items: center;

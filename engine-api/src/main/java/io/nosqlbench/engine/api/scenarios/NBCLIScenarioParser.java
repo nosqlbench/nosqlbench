@@ -265,6 +265,7 @@ public class NBCLIScenarioParser {
 //    }
 
     private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    private static Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
     private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
 
@@ -288,21 +289,11 @@ public class NBCLIScenarioParser {
 
             StmtsDocList stmts = StatementsLoader.load(logger,content);
 
-            Set<String> templates = new HashSet<>();
+            Map<String, String> templates = new HashMap<>();
             try {
                 List<String> lines = Files.readAllLines(yamlPath);
                 for (String line : lines) {
-                    Matcher matcher = templatePattern.matcher(line);
-
-                    while (matcher.find()) {
-                        templates.add(matcher.group(1));
-                    }
-                    matcher = templatePattern2.matcher(line);
-
-                    while (matcher.find()) {
-                        templates.add(matcher.group(1));
-                    }
-
+                    templates = matchTemplates(line, templates);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -320,5 +311,35 @@ public class NBCLIScenarioParser {
 
         return workloadDescriptions;
     }
+
+    public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
+        Matcher matcher = templatePattern.matcher(line);
+
+        while (matcher.find()) {
+            String match = matcher.group(1);
+
+            Matcher innerMatcher = innerTemplatePattern.matcher(match);
+            String[] matchArray = match.split(",");
+            //TODO: support recursive matches
+            if (innerMatcher.find()) {
+                String[] innerMatch = innerMatcher.group(1).split(",");
+
+                //We want the outer name with the inner default value
+                templates.put(matchArray[0], innerMatch[1]);
+
+            }else{
+                templates.put(matchArray[0], matchArray[1]);
+            }
+        }
+        matcher = templatePattern2.matcher(line);
+
+        while (matcher.find()) {
+            String match = matcher.group(1);
+            String[] matchArray = match.split(":");
+            templates.put(matchArray[0],matchArray[1]);
+        }
+        return templates;
+    }
+
 
 }

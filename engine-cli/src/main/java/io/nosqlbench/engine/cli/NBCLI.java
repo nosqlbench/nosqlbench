@@ -280,14 +280,12 @@ public class NBCLI {
                     System.out.println("    nb " + workloadName + " " + scenario);
                 }
 
-                Set<String> templates = workload.getTemplates();
+                Map<String, String> templates = workload.getTemplates();
                 if (templates.size() > 0) {
                     System.out.println("        # defaults");
-                    templates.stream()
-                        .map(x -> x.replaceAll(",", "="))
-                        .map(x -> x.replaceAll(":", "="))
-                        .map(x -> "        " + x)
-                        .forEach(System.out::println);
+                    for (Map.Entry<String, String> templateEntry: templates.entrySet()) {
+                        System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
+                    }
                 }
                 System.out.println();
             }
