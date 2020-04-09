@@ -17,13 +17,11 @@
 
 package io.nosqlbench.engine.extensions.files;
 
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.NBIO;
 
 public class FileAccess extends FileAccessPluginData {
 
     public String read(String filepath) {
-        String filedata = NBPaths.readFile(filepath);
-        return filedata;
-
+        return NBIO.readCharBuffer(filepath).toString();
     }
 }

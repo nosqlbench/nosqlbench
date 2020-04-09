@@ -10,7 +10,7 @@ export default {
     */
     head: {
         // titleTemplate: '%s' + " - NoSQLBench Docs",
-        titleTemplate: "NoSQLBench Docs",
+        titleTemplate: "NoSQLBench",
         title: process.env.npm_package_name || '',
         meta: [
             {charset: 'utf-8'},
@@ -46,6 +46,7 @@ export default {
         '@nuxtjs/axios'
     ],
     axios: {
+        port: 12345
 
     },
     /*

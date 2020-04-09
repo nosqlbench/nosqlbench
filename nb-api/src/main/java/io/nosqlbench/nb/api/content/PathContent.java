@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * PathContent provides the Path-centric way of accessing
@@ -44,6 +45,23 @@ public class PathContent implements Content<Path> {
     @Override
     public Path asPath() {
         return this.path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PathContent that = (PathContent) o;
+        return Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
+
+    public String toString() {
+        return "PathContent{" + getURI().toString() + "}";
     }
 
 }

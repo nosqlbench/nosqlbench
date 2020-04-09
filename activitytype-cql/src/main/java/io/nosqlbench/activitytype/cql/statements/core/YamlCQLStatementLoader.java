@@ -1,7 +1,8 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.TypeDescription;
@@ -32,14 +33,8 @@ public class YamlCQLStatementLoader {
 
     public AvailableCQLStatements load(String fromPath, String... searchPaths) {
 
-        InputStream stream = NBPaths.findRequiredStreamOrFile(fromPath,
-                "yaml", searchPaths);
-        String data = "";
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
-            data = buffer.lines().collect(Collectors.joining("\n"));
-        } catch (Exception e) {
-            throw new RuntimeException("Error while reading yaml stream data:" + e);
-        }
+        Content<?> yamlContent = NBIO.all().prefix(searchPaths).name(fromPath).extension("yaml").one();
+        String data = yamlContent.asString();
 
         for (Function<String, String> xform : transformers) {
             try {

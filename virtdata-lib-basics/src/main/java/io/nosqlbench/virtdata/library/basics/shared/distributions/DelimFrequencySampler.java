@@ -7,6 +7,7 @@ package io.nosqlbench.virtdata.library.basics.shared.distributions;
  */
 
 
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
@@ -14,7 +15,6 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.math3.stat.Frequency;
@@ -75,7 +75,10 @@ public class DelimFrequencySampler implements LongFunction<String> {
         Set<String> values = new HashSet<>();
         List<EvProbD> frequencies = new ArrayList<>();
 
-        CSVParser csvdata = NBPaths.readDelimFile(filename, delimiter);
+        if (!filename.endsWith(".csv")) {
+            filename = filename + ".csv";
+        }
+        CSVParser csvdata = NBIO.readFileDelimCSV(filename,delimiter);
         Frequency freq = new Frequency();
         for (CSVRecord csvdatum : csvdata) {
             String value = csvdatum.get(columnName);

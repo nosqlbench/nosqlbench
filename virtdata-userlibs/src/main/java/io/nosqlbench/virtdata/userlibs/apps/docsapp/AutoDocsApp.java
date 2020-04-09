@@ -2,9 +2,9 @@ package io.nosqlbench.virtdata.userlibs.apps.docsapp;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
 import io.nosqlbench.virtdata.api.processors.DocFuncData;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDoc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocCat;
@@ -143,7 +143,7 @@ public class AutoDocsApp implements Runnable {
 
                 String[] blurbsdirs = blurbsDirs.split(":");
                 for (String blurbsdir : blurbsdirs) {
-                    Optional<Path> bdir = NBPaths.FindOptionalPathIn(blurbsdir+"/");
+                    Optional<Path> bdir = NBIO.findFirstLocalPath(blurbsdir+"/");
                     if (bdir.isPresent()) {
                         Path blurbsFile = bdir.get().resolve(Path.of(outputname).getFileName().toString());
                         if (Files.exists(blurbsFile)) {

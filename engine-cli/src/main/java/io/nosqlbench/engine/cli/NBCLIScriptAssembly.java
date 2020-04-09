@@ -2,7 +2,8 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,13 +82,9 @@ public class NBCLIScriptAssembly {
         } catch (IOException ignored) {
         }
 
-        InputStream resourceAsStream = NBPaths.findRequiredStreamOrFile(cmd.getCmdSpec(), "js", "scripts");
+        Content<?> one = NBIO.all().prefix("scripts").name(cmd.getCmdSpec()).extension("js").one();
+        scriptData = one.asString();
 
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-            scriptData = buffer.lines().collect(Collectors.joining("\n"));
-        } catch (Throwable t) {
-            throw new RuntimeException("Unable to buffer " + cmd.getCmdSpec() + ": " + t);
-        }
         StrInterpolator interpolator = new StrInterpolator(cmd.getCmdArgs());
         scriptData = interpolator.apply(scriptData);
         return new ScriptData(scriptData,cmd.getCmdArgs());

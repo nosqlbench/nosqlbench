@@ -18,6 +18,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -25,8 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongFunction;
-
-import static io.nosqlbench.nb.api.pathutil.NBPaths.readDataFileLines;
 
 /**
  * Select a value from a text file line by modulo division against the number
@@ -41,7 +40,8 @@ public class ModuloLineToString implements LongFunction<String> {
 
     public ModuloLineToString(String filename) {
         this.filename = filename;
-        this.lines = readDataFileLines(filename);
+        this.lines = NBIO.readLines(filename);
+
     }
 
     @Override

@@ -19,17 +19,23 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,7 +51,8 @@ public class RawYamlStatementLoader {
     }
 
     public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
-        String data = loadRawFile(logger, fromPath, searchPaths);
+        Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(fromPath).extension("yaml").first();
+        String data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + fromPath));
         data = applyTransforms(logger, data);
         return parseYaml(logger, data);
     }
@@ -54,14 +61,12 @@ public class RawYamlStatementLoader {
         stringTransformers.add(transformer);
     }
 
-    protected String loadRawFile(Logger logger, String fromPath, String... searchPaths) {
-        InputStream stream = NBPaths.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
-            return buffer.lines().collect(Collectors.joining("\n"));
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error while reading YAML from search paths:" + Arrays.toString(searchPaths) + ":" + e.getMessage(), e
-            );
+    public RawStmtsDocList load(Logger logger, Path path) {
+        try {
+            String yamlImg = Files.readString(path);
+            return parseYaml(logger, yamlImg);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading YAML from search paths: " + e.getMessage(),e);
         }
     }
 
@@ -118,6 +123,12 @@ public class RawYamlStatementLoader {
         String data = applyTransforms(logger, rawYaml);
         return parseYaml(logger, data);
     }
+
+    public RawStmtsDocList loadString(Logger logger, CharSequence rawYaml) {
+        String data = applyTransforms(logger, rawYaml.toString());
+        return parseYaml(logger, data);
+    }
+
 
     private class StatementsReader implements SnakeYamlCharmer.FieldHandler {
         @Override

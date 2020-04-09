@@ -5,6 +5,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
+import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -107,7 +109,7 @@ public class NBCLI {
             String workloadToCopy = options.wantsToCopyWorkloadNamed();
             logger.debug("user requests to copy out " + workloadToCopy);
 
-            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities").exact()
+            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities")
                 .name(workloadToCopy).extension("yaml").first();
             Content<?> data = tocopy.orElseThrow(() -> new BasicError("Unable to find " + workloadToCopy + " in " +
                 "classpath to copy out"));
@@ -274,20 +276,18 @@ public class NBCLI {
                 System.out.println("    # scenarios:");
 
                 List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getYamlPath().replaceAll("\\.yaml", "");
+                String workloadName = workload.getWorkloadName();
 
                 for (String scenario : scenarioList) {
                     System.out.println("    nb " + workloadName + " " + scenario);
                 }
 
-                Set<String> templates = workload.getTemplates();
+                Map<String, String> templates = workload.getTemplates();
                 if (templates.size() > 0) {
                     System.out.println("        # defaults");
-                    templates.stream()
-                        .map(x -> x.replaceAll(",", "="))
-                        .map(x -> x.replaceAll(":", "="))
-                        .map(x -> "        " + x)
-                        .forEach(System.out::println);
+                    for (Map.Entry<String, String> templateEntry: templates.entrySet()) {
+                        System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
+                    }
                 }
                 System.out.println();
             }

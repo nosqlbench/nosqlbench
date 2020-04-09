@@ -2,8 +2,10 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.nb.api.pathutil.NBPaths;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -321,10 +323,14 @@ public class NBCLIOptions {
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
                     break;
                 default:
-                    Optional<InputStream> optionalScript =
-                        NBPaths.findOptionalStreamOrFile(word, "js", "scripts/auto");
+                    Optional<Content<?>> scriptfile = NBIO.local()
+                        .prefix("scripts/auto")
+                        .name(word)
+                        .extension("js")
+                        .first();
+
                     //Script
-                    if (optionalScript.isPresent()) {
+                    if (scriptfile.isPresent()) {
                         arglist.removeFirst();
                         arglist.addFirst("scripts/auto/" + word);
                         arglist.addFirst("script");
@@ -332,7 +338,7 @@ public class NBCLIOptions {
                         cmdList.add(script);
                         //Scripted yaml
                     } else if (NBCLIScenarioParser.isFoundWorkload(word)) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist);
+                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS);
                     } else {
                         throw new InvalidParameterException("unrecognized option:" + word);
                     }
