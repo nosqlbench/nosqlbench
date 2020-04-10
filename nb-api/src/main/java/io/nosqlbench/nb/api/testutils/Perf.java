@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.testutils;
+package io.nosqlbench.nb.api.testutils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -178,5 +178,29 @@ public class Perf implements Iterable<Result> {
     @Override
     public Iterator<Result> iterator() {
         return results.iterator();
+    }
+
+    public Time start(String name, long ops) {
+        return new Time(this, name, ops);
+    }
+
+    public static class Time implements AutoCloseable {
+        private final Perf perf;
+        private final long start;
+        private String name;
+        private long ops;
+
+        public Time(Perf perf, String name, long ops) {
+            this.name = name;
+            this.ops = ops;
+            this.start = System.nanoTime();
+            this.perf = perf;
+        }
+
+        @Override
+        public void close() {
+            long end = System.nanoTime();
+            perf.add(name,start,end,ops);
+        }
     }
 }

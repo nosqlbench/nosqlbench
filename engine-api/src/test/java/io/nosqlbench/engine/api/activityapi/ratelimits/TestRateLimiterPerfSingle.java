@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.testutils.Result;
+import io.nosqlbench.nb.api.testutils.Result;
 import org.junit.Ignore;
 import org.junit.Test;
 

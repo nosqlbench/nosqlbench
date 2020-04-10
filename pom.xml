@@ -1,112 +1,114 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>nosqlbench</artifactId>
-  <packaging>pom</packaging>
+    <artifactId>nosqlbench</artifactId>
+    <packaging>pom</packaging>
 
-  <parent>
-    <artifactId>mvn-defaults</artifactId>
-    <groupId>io.nosqlbench</groupId>
-    <version>3.12.83-SNAPSHOT</version>
-    <relativePath>mvn-defaults</relativePath>
-  </parent>
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>3.12.83-SNAPSHOT</version>
+        <relativePath>mvn-defaults</relativePath>
+    </parent>
 
-  <name>${project.artifactId}</name>
-  <url>http://nosqlbench.io/</url>
-  <description>A reusable machine pattern for building dynamic load
-    testing systems
-  </description>
+    <name>${project.artifactId}</name>
+    <url>http://nosqlbench.io/</url>
+    <description>A reusable machine pattern for building dynamic load
+        testing systems
+    </description>
 
-  <modules>
+    <modules>
 
-    <!-- project level defaults -->
-    <module>mvn-defaults</module>
-    <!-- web apps and service hooks -->
-    <module>docsys</module>
-    <module>nb-api</module>
+        <!-- project level defaults -->
+        <module>mvn-defaults</module>
+        <!-- web apps and service hooks -->
+        <module>docsys</module>
+        <module>nb-api</module>
 
-    <!-- ENGINE MODULES -->
-    <module>engine-api</module>
-    <module>engine-core</module>
-    <module>engine-cli</module>
-    <module>engine-extensions</module>
-    <module>engine-docker</module>
-    <module>engine-docs</module>
+        <!-- ENGINE MODULES -->
+        <module>engine-api</module>
+        <module>engine-core</module>
+        <module>engine-cli</module>
+        <module>engine-extensions</module>
+        <module>engine-docker</module>
+        <module>engine-docs</module>
 
-    <!-- a binary (appimage) build option for nb -->
-    <module>nb</module>
-    <module>activitytype-diag</module>
-    <module>activitytype-stdout</module>
-    <module>activitytype-tcp</module>
-    <module>activitytype-http</module>
-    <module>activitytype-cql</module>
-    <module>activitytype-cqlverify</module>
+        <!-- a binary (appimage) build option for nb -->
+        <module>nb</module>
+        <module>activitytype-diag</module>
+        <module>activitytype-stdout</module>
+        <module>activitytype-tcp</module>
+        <module>activitytype-http</module>
+        <module>activitytype-cql</module>
+        <module>activitytype-cqlverify</module>
+        <module>driver-web</module>
 
-    <!-- VIRTDATA MODULES -->
+        <!-- VIRTDATA MODULES -->
 
-    <module>virtdata-api</module>
-    <module>virtdata-lang</module>
-    <module>virtdata-realdata</module>
-    <module>virtdata-lib-basics</module>
-    <module>virtdata-lib-random</module>
-    <module>virtdata-lib-curves4</module>
-    <module>virtdata-lib-realer</module>
+        <module>virtdata-api</module>
+        <module>virtdata-lang</module>
+        <module>virtdata-realdata</module>
+        <module>virtdata-lib-basics</module>
+        <module>virtdata-lib-random</module>
+        <module>virtdata-lib-curves4</module>
+        <module>virtdata-lib-realer</module>
 
-    <module>virtdata-userlibs</module>
+        <module>virtdata-userlibs</module>
 
-  </modules>
+    </modules>
 
-  <licenses>
-    <license>
-      <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <groupId>org.apache.maven.plugins</groupId>
-        <configuration>
-          <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>release</releaseProfiles>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <useReleaseProfile>true</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-  <developers>
-    <developer>
-      <name>Jonathan Shook</name>
-      <email>jshook@gmail.com</email>
-      <organization>nosqlbench.io</organization>
-      <organizationUrl>http://nosqlbench.io/</organizationUrl>
-    </developer>
-    <developer>
-      <name>Sebastián Estévez</name>
-      <email>estevezsebastian@gmail.com</email>
-      <organization>nosqlbench.io</organization>
-      <organizationUrl>http://nosqlbench.io/</organizationUrl>
-    </developer>
-  </developers>
+    <developers>
+        <developer>
+            <name>Jonathan Shook</name>
+            <email>jshook@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Sebastián Estévez</name>
+            <email>estevezsebastian@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+    </developers>
 
-  <scm>
-    <connection>scm:git:https://github.com/nosqlbench/nosqlbench.git
-    </connection>
-    <developerConnection>
-      scm:git:https://github.com/nosqlbench/nosqlbench.git
-    </developerConnection>
-    <url>scm:git:git@github.com:nosqlbench/nosqlbench.git</url>
-    <tag>HEAD</tag>
-  </scm>
+    <scm>
+        <connection>scm:git:https://github.com/nosqlbench/nosqlbench.git
+        </connection>
+        <developerConnection>
+            scm:git:https://github.com/nosqlbench/nosqlbench.git
+        </developerConnection>
+        <url>scm:git:git@github.com:nosqlbench/nosqlbench.git</url>
+        <tag>HEAD</tag>
+    </scm>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>

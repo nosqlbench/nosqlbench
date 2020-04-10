@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.testutils;
+package io.nosqlbench.nb.api.testutils;
 
 import org.junit.Test;
 
