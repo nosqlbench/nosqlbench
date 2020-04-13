@@ -64,4 +64,13 @@ public class TemplateTest {
         assertThat(unescaped2).isEqualTo("' one ' two '");
     }
 
+    @Test
+    public void testBackslashUnescaping() {
+        String escaped="front \\\\\" back";
+        LongFunction<String> func = String::valueOf;
+        Template template = new Template("{} extra", func);
+        String unescaped = template.unescape(escaped);
+        assertThat(unescaped).isEqualTo("front \\\" back");
+
+    }
 }

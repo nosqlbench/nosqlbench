@@ -109,7 +109,7 @@ public class Template implements LongFunction<String> {
     public String unescape(String partial) {
         StringBuilder unescaped = new StringBuilder();
         try {
-            Pattern escapes = Pattern.compile("\\\\[^\\\\]");
+            Pattern escapes = Pattern.compile("\\\\.");
             Matcher m = escapes.matcher(partial);
             int pos = 0;
 

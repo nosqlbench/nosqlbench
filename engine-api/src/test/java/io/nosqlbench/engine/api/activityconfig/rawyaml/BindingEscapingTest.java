@@ -31,7 +31,8 @@ public class BindingEscapingTest {
 
     @Test
     public void testEscapedBindings() {
-        DataMapper<String> mapper = VirtData.getMapper("Template('\"-{}-\"Func(234)\\\"\\)',NumberNameToString());'",String.class);
+        DataMapper<String> mapper = VirtData.getMapper("Template('\"-{}-\"Func(234)\\\\\"\\\\)',NumberNameToString())" +
+            ";'",String.class);
         String s = mapper.get(234);
         assertThat(s).isEqualTo("\"-two hundred and thirty four-\"Func(234)\\\"\\)");
     }
