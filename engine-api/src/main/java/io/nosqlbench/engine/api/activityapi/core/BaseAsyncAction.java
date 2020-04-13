@@ -57,7 +57,8 @@ public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAct
 
     /**
      * Implementations that extend this base class can call this method in order to put
-     * an operation in flight.
+     * an operation in flight. Implementations should call either {@link TrackedOp#skip(int)}
+     * or {@link TrackedOp#start()}}.
      *
      * @param opc A tracked operation with state of parameterized type D
      */

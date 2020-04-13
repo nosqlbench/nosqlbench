@@ -35,7 +35,7 @@ public class WebDriverActivityType implements ActivityType<WebDriverActivity> {
 
         @Override
         public Action getAction(int slot) {
-            return new WebDriverAsyncAction((WebDriverActivity) activity, slot);
+            return new WebDriverAction((WebDriverActivity) activity, slot);
         }
     }
 }
