@@ -38,7 +38,7 @@ import java.util.Optional;
  * bindings will be used in.
  */
 public class BindingsTemplate {
-    private final static Logger logger  = LogManager.getLogger(BindingsTemplate.class);
+    private final static Logger logger = LogManager.getLogger(BindingsTemplate.class);
     private List<String> bindPointNames = new ArrayList<>();
     private List<String> specifiers = new ArrayList<>();
 
@@ -47,11 +47,11 @@ public class BindingsTemplate {
 //    }
 
     public BindingsTemplate(List<String> anchors, List<String> specs) {
-        if (anchors.size()!=specs.size()) {
+        if (anchors.size() != specs.size()) {
             throw new InvalidParameterException("Anchors and Specifiers must be matched pair-wise.");
         }
         for (int i = 0; i < anchors.size(); i++) {
-            addFieldBinding(anchors.get(i),specs.get(i));
+            addFieldBinding(anchors.get(i), specs.get(i));
         }
     }
 
@@ -64,14 +64,15 @@ public class BindingsTemplate {
 
     public void addFieldBindings(List<BindPoint> bindPoints) {
         for (BindPoint bindPoint : bindPoints) {
-            addFieldBinding(bindPoint.getAnchor(),bindPoint.getBindspec());
+            addFieldBinding(bindPoint.getAnchor(), bindPoint.getBindspec());
         }
     }
 
     /**
      * Add a named binding specifier to the template
+     *
      * @param bindPointName the name associated with the binding specifier
-     * @param genSpec the binding specifier
+     * @param genSpec       the binding specifier
      */
     public void addFieldBinding(String bindPointName, String genSpec) {
         this.bindPointNames.add(bindPointName);
@@ -80,19 +81,39 @@ public class BindingsTemplate {
 
     /**
      * Add multiple named bindings to the template
+     *
      * @param bindPairs A map of named binding specifiers
      */
-    public void addFieldBindings(Map<String,String> bindPairs) {
+    public void addFieldBindings(Map<String, String> bindPairs) {
         for (Map.Entry<String, String> e : bindPairs.entrySet()) {
             this.bindPointNames.add(e.getKey());
             this.specifiers.add(e.getValue());
         }
     }
 
+    public String getDiagnostics() {
+        StringBuilder diaglog = new StringBuilder();
+        for (String specifier : specifiers) {
+            diaglog.append("for ").append(specifier).append(":");
+
+            ResolverDiagnostics mapperDiagnostics = VirtData.getMapperDiagnostics(specifier);
+            String diagnostics = mapperDiagnostics.toString();
+            diaglog.append(diagnostics);
+            if (mapperDiagnostics.getResolvedFunction().isPresent()) {
+                diaglog.append("☑ RESOLVED:")
+                    .append(mapperDiagnostics.getResolvedFunction().get().toString()).append("\n");
+            } else {
+                diaglog.append("☐ UNRESOLVED\n");
+            }
+        }
+        return diaglog.toString();
+    }
+
     /**
      * Use the data mapping library and the specifier to create instances of data mapping functions.
      * If you need thread-aware mapping, be sure to call this in the proper thread. Each time this method
      * is called, it creates a new instance.
+     *
      * @return A set of bindings that can be used to yield mapped data values later.
      */
     public Bindings resolveBindings() {
@@ -104,9 +125,9 @@ public class BindingsTemplate {
             } else {
                 logAvailableDataMappers();
                 throw new RuntimeException(
-                        "data mapper binding was unsuccessful for "
-                                + ", spec:" + specifier
-                                + ", see log for known data mapper names.");
+                    "data mapper binding was unsuccessful for "
+                        + ", spec:" + specifier
+                        + ", see log for known data mapper names.");
             }
         }
         return new Bindings(this, dataMappers);
@@ -149,7 +170,7 @@ public class BindingsTemplate {
             sb.append("=>[");
             sb.append(values[i]);
             sb.append("](");
-            sb.append((null!=values[i]) ? values[i].getClass().getSimpleName() : "NULL");
+            sb.append((null != values[i]) ? values[i].getClass().getSimpleName() : "NULL");
             sb.append(")");
             delim = ", ";
         }

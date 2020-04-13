@@ -33,9 +33,11 @@ activity types.
 - **newline** - whether to automatically add a missing newline to the end
    of any statements.
    default: true
-- **format** - which format to use. If provided, the format will override
-   any statement formats provided by the YAML.
-   valid values are (csv, readout, json, inlinejson, and assignments)
+- **format** - which format to use. If provided, the format will override any statement formats provided by the YAML.
+  valid values are (csv, readout, json, inlinejson, assignments, and diag)
+  - When 'format=diag', then the internal construction logic for the binding is logged in detail and nosqlbench exits.
+    This is useful for detailed diagnostics when you run into trouble, but not generally otherwise. This provides
+    details that you may include in a bug report if you think there is a bindings bug.
 
 ## Configuration
 

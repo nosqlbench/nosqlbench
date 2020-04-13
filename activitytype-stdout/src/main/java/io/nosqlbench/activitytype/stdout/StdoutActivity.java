@@ -138,13 +138,23 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         String format = getParams().getOptionalString("format").orElse(null);
 
         if ((stmts.size()==0 && stmtsDocList.getDocBindings().size() > 0) || format!=null) {
-            logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
-            String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
-            BindingsTemplate bt = new BindingsTemplate();
-            stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
-            StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
-            StringBindings sb = sbt.resolve();
-            sequencer.addOp(sb,1L);
+            if (format!=null && format.startsWith("diag")) {
+                logger.info("Creating diagnostic log for resolver construction...");
+                BindingsTemplate bt = new BindingsTemplate();
+                stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
+                String diagnostics = bt.getDiagnostics();
+                System.out.println(diagnostics);
+                System.out.flush();
+                System.exit(2);
+            } else {
+                logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
+                String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
+                BindingsTemplate bt = new BindingsTemplate();
+                stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
+                StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
+                StringBindings sb = sbt.resolve();
+                sequencer.addOp(sb,1L);
+            }
         } else if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
