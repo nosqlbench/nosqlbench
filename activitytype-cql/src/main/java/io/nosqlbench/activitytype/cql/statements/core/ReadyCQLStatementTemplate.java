@@ -2,15 +2,14 @@ package io.nosqlbench.activitytype.cql.statements.core;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.*;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.activitytype.cql.statements.binders.CqlBinderTypes;
+import io.nosqlbench.activitytype.cql.statements.binders.RawValueBinder;
 import io.nosqlbench.activitytype.cql.statements.binders.SimpleStatementValuesBinder;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.bindings.ContextualBindingsArrayTemplate;
@@ -19,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Writer;
+import java.util.Optional;
 
 public class ReadyCQLStatementTemplate {
 
@@ -57,6 +57,17 @@ public class ReadyCQLStatementTemplate {
                 simpleStatement,
                 new BindingsTemplate(),
                 new SimpleStatementValuesBinder()
+        );
+        this.ratio = ratio;
+    }
+
+    public ReadyCQLStatementTemplate(Session session, String stmtForDriver, long ratio, String name, Optional<ConsistencyLevel> cl, Optional<ConsistencyLevel> serial_cl, Optional<Boolean> idempotent) {
+        this.session = session;
+        this.name = name;
+        template = new ContextualBindingsArrayTemplate<>(
+                stmtForDriver.split("\\?"),
+                new BindingsTemplate(),
+                new RawValueBinder(cl, serial_cl, idempotent)
         );
         this.ratio = ratio;
     }
