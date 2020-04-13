@@ -52,4 +52,16 @@ public class TemplateTest {
         }
     }
 
+    @Test
+    public void testUnescaping() {
+        String escaped="front \\' back";
+        LongFunction<String> func = String::valueOf;
+        Template template = new Template("{} extra", func);
+        String unescaped = template.unescape(escaped);
+        assertThat(unescaped).isEqualTo("front ' back");
+
+        String unescaped2= template.unescape("\\' one \\' two \\'");
+        assertThat(unescaped2).isEqualTo("' one ' two '");
+    }
+
 }
