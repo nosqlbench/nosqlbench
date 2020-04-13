@@ -94,7 +94,7 @@ public class Template implements LongFunction<String> {
                 pos = m.end();
             }
             String partial = template.substring(pos);
-            partial = unescape(partial);
+//            partial = unescape(partial);
             literals.add(partial);
             if (literals.size() != funcCount + 1) {
                 throw new RuntimeException("The number of {} place holders in '" + template + "' should equal the number of functions.");
@@ -105,28 +105,28 @@ public class Template implements LongFunction<String> {
         }
     }
 
-    // for testing
-    public String unescape(String partial) {
-        StringBuilder unescaped = new StringBuilder();
-        try {
-            Pattern escapes = Pattern.compile("\\\\.");
-            Matcher m = escapes.matcher(partial);
-            int pos = 0;
-
-            while (m.find()) {
-                String prefix = partial.substring(pos,m.start());
-                unescaped.append(prefix);
-                String segment = partial.substring(m.start(),m.end());
-                unescaped.append(segment.substring(1));
-                pos = m.end();
-            }
-            unescaped.append(partial.substring(pos));
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return unescaped.toString();
-    }
+//    // for testing
+//    public String unescape(String partial) {
+//        StringBuilder unescaped = new StringBuilder();
+//        try {
+//            Pattern escapes = Pattern.compile("\\\\.");
+//            Matcher m = escapes.matcher(partial);
+//            int pos = 0;
+//
+//            while (m.find()) {
+//                String prefix = partial.substring(pos,m.start());
+//                unescaped.append(prefix);
+//                String segment = partial.substring(m.start(),m.end());
+//                unescaped.append(segment.substring(1));
+//                pos = m.end();
+//            }
+//            unescaped.append(partial.substring(pos));
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        return unescaped.toString();
+//    }
 
     @Override
     public String apply(long value) {
