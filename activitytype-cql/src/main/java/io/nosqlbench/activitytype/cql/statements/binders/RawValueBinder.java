@@ -3,12 +3,15 @@ package io.nosqlbench.activitytype.cql.statements.binders;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 
 import java.util.Optional;
-import java.util.Set;
 
+/**
+ * This binder is only meant to be used to directly generate final SimpleStatement query
+ * without use of preparedStatement. This should be avoided any time possible since it's far more
+ * less optimized than use of PreparedStatement. Only Use it when PreparedStatement is not possible
+ */
 public class RawValueBinder
         implements ValuesArrayBinder<String[], Statement> {
 
