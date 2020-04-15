@@ -50,7 +50,9 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static List<String> readLines(String filename) {
-        Content<?> data = NBIO.all().prefix("data").name(filename).one();
+        System.err.println("loading broken file");
+        Content<?> data = NBIO.all().prefix("data").name(filename).first().orElseThrow();
+        System.err.println("data:" + data.asPath());
         String[] split = data.getCharBuffer().toString().split("\n");
         return Arrays.asList(split);
     }
