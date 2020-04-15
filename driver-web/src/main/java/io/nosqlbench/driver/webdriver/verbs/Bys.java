@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 public enum Bys {
     id(By::id),
-    link(By::linkText),
+    linkText(By::linkText),
     name(By::name),
     css(By::cssSelector),
     xpath(By::xpath),

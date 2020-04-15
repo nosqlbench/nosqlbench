@@ -22,12 +22,13 @@ import java.util.Map;
 public class CommandTemplate {
 
     private final static Logger logger = LoggerFactory.getLogger(CommandTemplate.class);
-
+    private final String name;
     private LinkedHashMap<String, StringBindings> cmdspec = new LinkedHashMap<>();
 
     public CommandTemplate(StmtDef stmt) {
-
-        Map<String,String> cmdMap = ParamsParser.parse("command="+stmt.getStmt());
+        this.name = stmt.getName();
+        String prefixed = "command=" + stmt.getStmt();
+        Map<String,String> cmdMap = ParamsParser.parse(prefixed);
         Map<String, String> paramsMap = stmt.getParams();
         paramsMap.forEach((k,v) -> {
             if (cmdMap.containsKey(k)) {
@@ -45,6 +46,18 @@ public class CommandTemplate {
 
     }
 
+    public CommandTemplate(String command, Map<String,String> bindings, String name) {
+        this.name = name;
+        Map<String, String> cmdMap = ParamsParser.parse(command);
+        cmdMap.forEach((param,value) -> {
+            ParsedTemplate paramTemplate = new ParsedTemplate(command,bindings);
+            BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
+            StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
+            cmdspec.put(param,paramStringBindings);
+        });
+
+    }
+
     public Map<String,String> getCommand(long cycle) {
         LinkedHashMap<String, String> cmd = new LinkedHashMap<>(cmdspec.size());
         cmdspec.forEach((k,v) -> {
@@ -53,4 +66,7 @@ public class CommandTemplate {
         return cmd;
     }
 
+    public String getName() {
+        return name;
+    }
 }

@@ -4,12 +4,16 @@ import io.nosqlbench.driver.webdriver.verbs.WebDriverVerbs;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds the definition and tracking state for a web driver command.
  */
 public class WebDriverAction implements SyncAction, ActivityDefObserver {
+    private final static Logger logger = LoggerFactory.getLogger(WebDriverAction.class);
 
     private final WebDriverActivity activity;
     private final int slot;
@@ -41,11 +45,16 @@ public class WebDriverAction implements SyncAction, ActivityDefObserver {
     // factor.
     @Override
     public int runCycle(long value) {
+        CommandTemplate commandTemplate = activity.getOpSequence().get(value);
         try {
-            CommandTemplate commandTemplate = activity.getOpSequence().get(value);
             WebDriverVerbs.execute(value, commandTemplate, context, dryrun);
             return 0;
+
         } catch (Exception e) {
+            logger.error("Error with cycle(" + value + "), statement(" + commandTemplate.getName() + "): " + e.getMessage());
+            if (errors.equals("stop")) {
+                throw e;
+            }
             return 1;
         }
 

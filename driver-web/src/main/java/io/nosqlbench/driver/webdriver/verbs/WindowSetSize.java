@@ -12,9 +12,10 @@ public class WindowSetSize implements WebDriverVerb {
         this.height = height;
     }
 
-    public WindowSetSize(String width, String height) {
-        this.width = Integer.parseInt(width);
-        this.height = Integer.parseInt(height);
+    public WindowSetSize(String windowSize) {
+        String[] xes = windowSize.split("x");
+        this.width = Integer.parseInt(xes[0]);
+        this.height = Integer.parseInt(xes[1]);
     }
 
     @Override
