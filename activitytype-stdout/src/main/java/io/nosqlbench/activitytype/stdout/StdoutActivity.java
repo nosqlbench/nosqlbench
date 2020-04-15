@@ -157,7 +157,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
                 StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
                 StringBindings sb = sbt.resolve();
-                sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
+                sequencer.addOp(sb,Long.parseLong(stmt.getParams().getOrDefault("ratio","1")));
             }
         } else {
             logger.error("Unable to create a stdout statement if you have no active statements or bindings configured.");

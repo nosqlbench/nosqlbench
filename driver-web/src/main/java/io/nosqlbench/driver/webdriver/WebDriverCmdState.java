@@ -1,4 +1,4 @@
-package io.nosqlbench.driver.web;
+package io.nosqlbench.driver.webdriver;
 
 public class WebDriverCmdState {
 

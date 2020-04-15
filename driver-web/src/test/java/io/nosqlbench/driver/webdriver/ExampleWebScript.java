@@ -1,13 +1,11 @@
-package io.nosqlbench.driver.web;
+package io.nosqlbench.driver.webdriver;
 
 import io.nosqlbench.nb.api.testutils.Perf;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.remote.RemoteWebElement;
 
 
 /**

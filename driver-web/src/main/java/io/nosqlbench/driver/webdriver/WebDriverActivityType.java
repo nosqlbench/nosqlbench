@@ -1,4 +1,4 @@
-package io.nosqlbench.driver.web;
+package io.nosqlbench.driver.webdriver;
 
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;

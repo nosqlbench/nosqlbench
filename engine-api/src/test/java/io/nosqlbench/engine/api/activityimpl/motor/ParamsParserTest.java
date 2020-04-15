@@ -118,5 +118,59 @@ public class ParamsParserTest {
         assertThat(p.get("b")).isEqualTo("2");
     }
 
+    @Test
+    public void testSpaceDelimiter() {
+        Map<String, String> p = ParamsParser.parse("a=1 b=2");
+        assertThat(p).hasSize(2);
+        assertThat(p).containsKey("a");
+        assertThat(p).containsKey("b");
+        assertThat(p.get("a")).isEqualTo("1");
+        assertThat(p.get("b")).isEqualTo("2");
+
+    }
+
+    @Test
+    public void testSpaceDelimiterGappedFirst() {
+        Map<String, String> p = ParamsParser.parse("a=1 2 3 b=2");
+        assertThat(p).hasSize(2);
+        assertThat(p).containsKey("a");
+        assertThat(p).containsKey("b");
+        assertThat(p.get("a")).isEqualTo("1 2 3");
+        assertThat(p.get("b")).isEqualTo("2");
+
+    }
+
+    @Test
+    public void testSpaceDelimiterGappedLast() {
+        Map<String, String> p = ParamsParser.parse("a=1 b=2 3 4");
+        assertThat(p).hasSize(2);
+        assertThat(p).containsKey("a");
+        assertThat(p).containsKey("b");
+        assertThat(p.get("a")).isEqualTo("1");
+        assertThat(p.get("b")).isEqualTo("2 3 4");
+
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testValidNameException() {
+        Map<String, String> p = ParamsParser.parse("a=1\\\\;'\";b=2 3 4");
+        assertThat(p).hasSize(2);
+        assertThat(p).containsKey("a");
+        assertThat(p).containsKey("b");
+        assertThat(p.get("a")).isEqualTo("1\\;'\"");
+        assertThat(p.get("b")).isEqualTo("2 3 4");
+    }
+
+    @Test
+    public void testSkippingLiteralLeadingSpaces() {
+        Map<String, String> p = ParamsParser.parse("a= fiver b=\\ sixer");
+        assertThat(p).hasSize(2);
+        assertThat(p).containsKey("a");
+        assertThat(p).containsKey("b");
+        assertThat(p.get("a")).isEqualTo("fiver");
+        assertThat(p.get("b")).isEqualTo(" sixer");
+
+    }
+
 
 }
