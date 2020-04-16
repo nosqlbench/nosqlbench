@@ -23,19 +23,25 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBCliIntegrationTests {
 
     private final static String JARNAME = "target/nb.jar";
     private Logger logger = LoggerFactory.getLogger(NBCliIntegrationTests.class);
+    private final String java = Optional.ofNullable(System.getenv(
+        "JAVA_HOME")).map(v -> v+"/bin/java").orElse("java");
+
 
     @Test
     public void listWorkloadsTest() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("workload-test", 15,
-            "java", "-jar", JARNAME, "--logs-dir", "logs/test", "--list-workloads"
+            java, "-jar", JARNAME, "--logs-dir", "logs/test", "--list" +
+                "-workloads"
         );
         System.out.println(result.getStdoutData());
         System.out.println(result.getStderrData());
