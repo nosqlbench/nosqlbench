@@ -67,4 +67,8 @@ public class StmtDef implements Tagged {
     public ParsedStmt getParsed() {
         return new ParsedStmt(this);
     }
+
+    public String getDesc() {
+        return rawStmtDef.getDesc();
+    }
 }

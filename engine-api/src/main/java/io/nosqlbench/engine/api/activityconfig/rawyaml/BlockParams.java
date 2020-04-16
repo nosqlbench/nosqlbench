@@ -24,10 +24,22 @@ import java.util.Map;
 public class BlockParams extends Tags {
 
     private String name = "";
+    private String desc = "";
     private Map<String, String> bindings = new LinkedHashMap<>();
     private Map<String, String> params = new LinkedHashMap<>();
 
     public BlockParams() {}
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+    public void setDescription(String desc) {
+        this.desc = desc;
+    }
 
     public String getName() {
         return name;

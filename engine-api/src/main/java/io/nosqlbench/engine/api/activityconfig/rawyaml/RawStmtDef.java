@@ -39,9 +39,13 @@ public class RawStmtDef extends BlockParams {
         Optional.ofNullable((String) map.remove("stmt")).ifPresent(this::setStmt);
         Optional.ofNullable((String) map.remove("statement")).ifPresent(this::setStmt);
         Optional.ofNullable((String) map.remove("name")).ifPresent(this::setName);
+        Optional.ofNullable((String) map.remove("desc")).ifPresent(this::setDesc);
+        Optional.ofNullable((String) map.remove("description")).ifPresent(this::setDesc);
+
         Optional.ofNullable((Map<String, String>) map.remove("tags")).ifPresent(this::setTags);
         Optional.ofNullable((Map<String, String>) map.remove("bindings")).ifPresent(this::setBindings);
         Optional.ofNullable((Map<String, String>) map.remove("params")).ifPresent(this::setParams);
+
 
         // Depends on order stability, relying on LinkedHashMap -- Needs stability unit tests
         if (this.statement == null) {
@@ -79,7 +83,7 @@ public class RawStmtDef extends BlockParams {
     private void setStmt(String statement) {
         this.statement = statement;
     }
-
+    
     public String getName() {
         return getParams().getOrDefault("name", super.getName());
     }
