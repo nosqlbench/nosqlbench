@@ -21,8 +21,8 @@ bindings:
  flightDateLong: Save('cycle'); HashRange(0,2); Mul(3600000); Load('cycle'); Save('hour'); Shuffle(0,2); Mul(60000); Save('minute'); Load('cycle'); HashRange(0,60); Mul(1000); Save('second'); Expr('hour + minute + second'); ToString()
 
 # status that depends on score
-  riskScore: Normal(0.0,5.0); Clamp(1, 100); Save('riskScore') -> int
-  status: |
+ riskScore: Normal(0.0,5.0); Clamp(1, 100); Save('riskScore') -> int
+ status: |
     Expr('riskScore > 90 ? 0 : 1')  -> long; ToBoolean(); ToString()
-  status_2: |
+ status_2: |
     ToInt(); Expr('riskScore >90 ? 0 : 1') -> int; WeightedStrings('accepted:1;rejected:1')
