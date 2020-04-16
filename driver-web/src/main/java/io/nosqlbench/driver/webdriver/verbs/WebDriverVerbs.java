@@ -20,7 +20,8 @@ public class WebDriverVerbs {
         open(Open.class, (m) -> new Open(m.get("url"),m.get("target"))),
         get(Get.class, (m) -> new Get(m.get("target"))),
         mouseOver(MouseOver.class, (m) -> new MouseOver(Bys.get(m.get("target")))),
-        mouseOut(MouseOut.class,(m) -> new MouseOut())
+        mouseOut(MouseOut.class,(m) -> new MouseOut()),
+        setWindowSize(SetWindowSize.class,(m) -> new SetWindowSize(m.get("target"))),
 
 //        find_element(FindElement.class, (m) -> new FindElement(m.get("by"))),
 //        find_elements(FindElements.class, (m) -> new FindElements(m.get("by"))),

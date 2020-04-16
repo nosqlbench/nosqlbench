@@ -9,6 +9,7 @@ import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import java.security.InvalidParameterException;
 import java.util.LinkedHashMap;
@@ -25,10 +26,10 @@ public class CommandTemplate {
     private final String name;
     private LinkedHashMap<String, StringBindings> cmdspec = new LinkedHashMap<>();
 
-    public CommandTemplate(StmtDef stmt) {
+    public CommandTemplate(StmtDef stmt, boolean canonicalize) {
         this.name = stmt.getName();
         String prefixed = "command=" + stmt.getStmt();
-        Map<String,String> cmdMap = ParamsParser.parse(prefixed);
+        Map<String,String> cmdMap = ParamsParser.parse(prefixed, canonicalize);
         Map<String, String> paramsMap = stmt.getParams();
         paramsMap.forEach((k,v) -> {
             if (cmdMap.containsKey(k)) {
@@ -46,9 +47,9 @@ public class CommandTemplate {
 
     }
 
-    public CommandTemplate(String command, Map<String,String> bindings, String name) {
+    public CommandTemplate(String command, Map<String,String> bindings, String name, boolean canonicalize) {
         this.name = name;
-        Map<String, String> cmdMap = ParamsParser.parse(command);
+        Map<String, String> cmdMap = ParamsParser.parse(command, canonicalize);
         cmdMap.forEach((param,value) -> {
             ParsedTemplate paramTemplate = new ParsedTemplate(command,bindings);
             BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());

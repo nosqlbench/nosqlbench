@@ -28,7 +28,7 @@ public class ParamsParserTest {
     @Test
     public void testSimpleParams() {
         Map<String, String> p;
-        p = ParamsParser.parse("a=1;");
+        p = ParamsParser.parse("a=1;",true);
         assertThat(p).hasSize(1);
         assertThat(p).containsKey("a");
         assertThat(p.get("a")).isEqualTo("1");
@@ -37,7 +37,7 @@ public class ParamsParserTest {
     @Test
     public void testNullValueParam() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b=;");
+        p = ParamsParser.parse("a=1;b=;",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isNull();
@@ -46,7 +46,7 @@ public class ParamsParserTest {
     @Test
     public void testSingleQuote() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b='fourfive';");
+        p = ParamsParser.parse("a=1;b='fourfive';",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("fourfive");
@@ -55,7 +55,7 @@ public class ParamsParserTest {
     @Test
     public void testSingleQuotedEscape() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b='fo\\'urfive';");
+        p = ParamsParser.parse("a=1;b='fo\\'urfive';",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("fo'urfive");
@@ -65,7 +65,7 @@ public class ParamsParserTest {
     @Test
     public void testDoubleQuote() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b=\"six\";");
+        p = ParamsParser.parse("a=1;b=\"six\";",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("six");
@@ -74,7 +74,7 @@ public class ParamsParserTest {
     @Test
     public void testDoubleQuotedEscape() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b=\"si\\'x\";");
+        p = ParamsParser.parse("a=1;b=\"si\\'x\";",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("si'x");
@@ -83,7 +83,7 @@ public class ParamsParserTest {
     @Test
     public void testSQuotesInDQuotes() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b=\"si'x\";");
+        p = ParamsParser.parse("a=1;b=\"si'x\";",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("si'x");
@@ -92,7 +92,7 @@ public class ParamsParserTest {
     @Test
     public void testDQuotesInSquotes() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1;b='Sev\"en';");
+        p = ParamsParser.parse("a=1;b='Sev\"en';",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("Sev\"en");
@@ -101,7 +101,7 @@ public class ParamsParserTest {
     @Test
     public void testSpaces() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1; b=2;");
+        p = ParamsParser.parse("a=1; b=2;",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p.get("a")).isEqualTo("1");
@@ -112,7 +112,7 @@ public class ParamsParserTest {
     @Test
     public void testMissingSemi() {
         Map<String,String> p;
-        p = ParamsParser.parse("a=1; b=2");
+        p = ParamsParser.parse("a=1; b=2",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("2");
@@ -120,7 +120,7 @@ public class ParamsParserTest {
 
     @Test
     public void testSpaceDelimiter() {
-        Map<String, String> p = ParamsParser.parse("a=1 b=2");
+        Map<String, String> p = ParamsParser.parse("a=1 b=2",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p).containsKey("b");
@@ -131,7 +131,7 @@ public class ParamsParserTest {
 
     @Test
     public void testSpaceDelimiterGappedFirst() {
-        Map<String, String> p = ParamsParser.parse("a=1 2 3 b=2");
+        Map<String, String> p = ParamsParser.parse("a=1 2 3 b=2",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p).containsKey("b");
@@ -142,7 +142,7 @@ public class ParamsParserTest {
 
     @Test
     public void testSpaceDelimiterGappedLast() {
-        Map<String, String> p = ParamsParser.parse("a=1 b=2 3 4");
+        Map<String, String> p = ParamsParser.parse("a=1 b=2 3 4",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p).containsKey("b");
@@ -153,7 +153,7 @@ public class ParamsParserTest {
 
     @Test(expected = RuntimeException.class)
     public void testValidNameException() {
-        Map<String, String> p = ParamsParser.parse("a=1\\\\;'\";b=2 3 4");
+        Map<String, String> p = ParamsParser.parse("a=1\\\\;'\";b=2 3 4",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p).containsKey("b");
@@ -163,7 +163,7 @@ public class ParamsParserTest {
 
     @Test
     public void testSkippingLiteralLeadingSpaces() {
-        Map<String, String> p = ParamsParser.parse("a= fiver b=\\ sixer");
+        Map<String, String> p = ParamsParser.parse("a= fiver b=\\ sixer",true);
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("a");
         assertThat(p).containsKey("b");

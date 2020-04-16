@@ -307,22 +307,22 @@ public class NBCLI {
                         System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
                     }
                 }
-                System.out.println();
-                System.out.println(
-                    "# To see examples to learn from, use\n" +
-                        "# --list-workloads --include examples"
-                );
-                System.out.println(
-                    "# To see included scenarios, use\n" +
-                        "# --list-scenarios shows details."
-                );
-                System.out.println(
-                    "# To copy an example to your local directory, use\n" +
-                        " --copy <path>"
-                );
+                System.out.println("\n");
             }
 
         }
+
+        if (!includeScenarios) {
+            System.out.println("\n# To see scenarios scenarios, use --list-scenarios");
+        }
+
+        System.out.println(
+            "\n" +
+                "# To include examples, add --include=examples\n" +
+                "# To copy any of these to your local directory, use\n" +
+                "# --include=examples --copy=examplename\n"
+        );
+
     }
 
     private String loadHelpFile(String filename) {

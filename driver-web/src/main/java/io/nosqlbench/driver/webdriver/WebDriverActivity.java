@@ -14,6 +14,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.engine.api.util.Synonyms;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
 import joptsimple.internal.Strings;
@@ -62,7 +63,7 @@ public class WebDriverActivity extends SimpleActivity {
     private OpSequence<CommandTemplate> initOpSequence() {
         OpSequence<CommandTemplate> sequence;
 
-        String yaml_loc = getParams().getOptionalString("yaml").orElse(null);
+        String yaml_loc = getParams().getOptionalString("yaml","workload").orElse(null);
         String side_loc = getParams().getOptionalString("side").orElse(null);
 
         if (yaml_loc == null && side_loc == null) {
@@ -161,7 +162,7 @@ public class WebDriverActivity extends SimpleActivity {
             .orElse(SequencerType.bucket);
         SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
         commands.forEach((name,cmd) -> {
-            CommandTemplate commandTemplate = new CommandTemplate(cmd, Map.of(), name);
+            CommandTemplate commandTemplate = new CommandTemplate(cmd, Map.of(), name, false);
             planner.addOp(commandTemplate,(c) -> 1L);
         });
         OpSequence<CommandTemplate> sequence = planner.resolve();
@@ -188,7 +189,7 @@ public class WebDriverActivity extends SimpleActivity {
 
         for (StmtDef optemplate : stmts) {
             long ratio = Long.parseLong(optemplate.getParams().getOrDefault("ratio", "1"));
-            CommandTemplate cmd = new CommandTemplate(optemplate);
+            CommandTemplate cmd = new CommandTemplate(optemplate, false);
             planner.addOp(cmd, ratio);
         }
         return planner.resolve();

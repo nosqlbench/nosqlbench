@@ -17,8 +17,12 @@
 
 package io.nosqlbench.engine.api.activityimpl.motor;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.nosqlbench.engine.api.activityimpl.ParameterMap;
+import io.nosqlbench.engine.api.util.Synonyms;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 /**
@@ -71,8 +75,10 @@ import java.util.Map;
  *
  */
 public class ParamsParser {
+    private final static Logger logger = LoggerFactory.getLogger(ParamsParser.class);
 
-    public static Map<String, String> parse(String input) {
+
+    public static Map<String, String> parse(String input, boolean canonicalize) {
 
         ParseState s = ParseState.expectingName;
 
@@ -131,7 +137,6 @@ public class ParamsParser {
                     break;
                 case expectingVal:
                     if (c == ' ') {
-
                     } else if (c == '\\') {
                         isEscaped = true;
                     } else if (c == '\'') {
@@ -215,6 +220,16 @@ public class ParamsParser {
             throw new RuntimeException("Unable to parse input:" + input);
         }
 
+        if (canonicalize) {
+            List<String> keys= new ArrayList<>(parms.keySet());
+            for (String key : keys) {
+                String properkey= Synonyms.canonicalize(key,logger);
+                if (!key.equals(properkey)) {
+                    parms.put(properkey,parms.get(key));
+                    parms.remove(key);
+                }
+            }
+        }
         return parms;
     }
 

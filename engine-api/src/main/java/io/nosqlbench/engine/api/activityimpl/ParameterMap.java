@@ -253,7 +253,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         if (encodedParams == null) {
             throw new RuntimeException("Must provide a non-null String to parse parameters.");
         }
-        Map<String, String> parsedMap = ParamsParser.parse(encodedParams);
+        Map<String, String> parsedMap = ParamsParser.parse(encodedParams,true);
         return new ParameterMap(parsedMap);
     }
 
