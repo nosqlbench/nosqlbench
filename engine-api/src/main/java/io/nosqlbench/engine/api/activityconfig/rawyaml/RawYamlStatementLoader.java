@@ -26,18 +26,13 @@ import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class RawYamlStatementLoader {
 
@@ -51,10 +46,15 @@ public class RawYamlStatementLoader {
     }
 
     public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
+        try {
+
         Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(fromPath).extension("yaml").first();
         String data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + fromPath));
         data = applyTransforms(logger, data);
         return parseYaml(logger, data);
+        } catch (Exception e) {
+            throw new RuntimeException("error while reading file " + fromPath,e);
+        }
     }
 
     public void addTransformer(Function<String, String> transformer) {

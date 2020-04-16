@@ -22,11 +22,8 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawYamlStatementLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 
-import java.nio.file.Path;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class StatementsLoader {
@@ -50,11 +47,14 @@ public class StatementsLoader {
             .prefix(searchPaths)
             .name(path)
             .one();
-
-        RawYamlStatementLoader loader = new RawYamlStatementLoader();
-        RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
-        StmtsDocList layered = new StmtsDocList(rawDocList);
-        return layered;
+        try {
+            RawYamlStatementLoader loader = new RawYamlStatementLoader();
+            RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
+            StmtsDocList layered = new StmtsDocList(rawDocList);
+            return layered;
+        } catch (Exception e) {
+            throw new RuntimeException("error while reading file " + path,e);
+        }
     }
 
     public static StmtsDocList load(Logger logger, String path, Function<String, String> transformer, String... searchPaths) {
