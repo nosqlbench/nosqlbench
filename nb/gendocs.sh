@@ -21,14 +21,15 @@ then
 #   exit 2;
 # fi
 # popd
- 
  cp -R ../docsys/src/main/resources/docsys-guidebook/ ${GUIDEBOOK}/
 else
  printf "${GUIDEBOOK} exists, not building again until mvn clean\n"
 fi
 
-JAVA=$(command -v java)
-JAVA=${JAVA:-$JAVA_HOME/bin/java}
+JAVA=java
+if [ -n "$JAVA_HOME" ]
+then JAVA=${JAVA_HOME}/bin/java
+fi
 
 if [ ! -x "$JAVA" ]
 then
