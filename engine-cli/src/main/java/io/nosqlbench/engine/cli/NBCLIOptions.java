@@ -35,7 +35,8 @@ public class NBCLIOptions {
     private static final String WANTS_VERSION_COORDS = "--version-coords";
     private static final String WANTS_VERSION_SHORT = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
-    private static final String COPY_WORKLOAD = "--copy-workload";
+    private static final String COPY_WORKLOAD = "--copy";
+    private static final String INCLUDE = "--include";
 
     // Execution
     private static final String SCRIPT = "script";
@@ -580,11 +581,11 @@ public class NBCLIOptions {
         return wantsScenariosList;
     }
 
-    public boolean wantsToCopyWorkload() {
+    public boolean wantsToCopyResource() {
         return wantsToCopyWorkload!=null;
     }
 
-    public String wantsToCopyWorkloadNamed() {
+    public String wantsToCopyResourceNamed() {
         return wantsToCopyWorkload;
     }
 
