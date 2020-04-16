@@ -11,6 +11,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Inspiration for how to make this work consistently with the exporter logic
+ * is found at
+ *
+ * <a href="https://github.com/SeleniumHQ/selenium-ide/blob/code-export-java/packages/code-export-java-junit/src/command.js">
+ *     The JUnit exporter command generator</a>
+ */
 public class WebDriverVerbs {
     private final static Logger logger = LoggerFactory.getLogger(WebDriverVerbs.class);
     public final static String COMMAND = "command";
