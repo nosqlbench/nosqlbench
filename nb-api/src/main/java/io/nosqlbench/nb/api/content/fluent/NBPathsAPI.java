@@ -52,7 +52,7 @@ public interface NBPathsAPI {
          * @param prefixPaths A list of paths to include in the search
          * @return this builder
          */
-        GetName prefix(String... prefixPaths);
+        GetPrefix prefix(String... prefixPaths);
     }
 
     public static interface GetName extends GetExtension {

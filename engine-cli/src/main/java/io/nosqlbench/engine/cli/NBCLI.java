@@ -96,23 +96,38 @@ public class NBCLI {
         }
 
         if (options.wantsWorkloadsList()) {
-            printWorkloads(false);
+            printWorkloads(false, options.wantsIncludes());
             System.exit(0);
         }
 
         if (options.wantsScenariosList()) {
-            printWorkloads(true);
+            printWorkloads(true, options.wantsIncludes());
             System.exit(0);
         }
 
-        if (options.wantsToCopyWorkload()) {
-            String workloadToCopy = options.wantsToCopyWorkloadNamed();
-            logger.debug("user requests to copy out " + workloadToCopy);
+        if (options.wantsToCopyResource()) {
+            String resourceToCopy = options.wantsToCopyResourceNamed();
+            logger.debug("user requests to copy out " + resourceToCopy);
 
-            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities")
-                .name(workloadToCopy).extension("yaml").first();
-            Content<?> data = tocopy.orElseThrow(() -> new BasicError("Unable to find " + workloadToCopy + " in " +
-                "classpath to copy out"));
+            Optional<Content<?>> tocopy = NBIO.classpath()
+                .prefix("activities")
+                .prefix(options.wantsIncludes())
+                .name(resourceToCopy).extension("yaml").first();
+
+            if (tocopy.isEmpty()) {
+
+                tocopy = NBIO.classpath()
+                    .prefix().prefix(options.wantsIncludes())
+                    .prefix(options.wantsIncludes())
+                    .name(resourceToCopy).first();
+            }
+
+            Content<?> data = tocopy.orElseThrow(
+                () -> new BasicError(
+                    "Unable to find " + resourceToCopy +
+                        " in classpath to copy out")
+            );
+
             Path writeTo = Path.of(data.asPath().getFileName().toString());
             if (Files.exists(writeTo)) {
                 throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
@@ -267,8 +282,11 @@ public class NBCLI {
         }
     }
 
-    public void printWorkloads(boolean includeScenarios) {
-        List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts();
+    public void printWorkloads(boolean includeScenarios,
+                               String... includes) {
+        List<WorkloadDesc> workloads =
+            NBCLIScenarioParser.getWorkloadsWithScenarioScripts(includes);
+
         for (WorkloadDesc workload : workloads) {
             System.out.println(workload.getYamlPath());
 
@@ -285,11 +303,23 @@ public class NBCLI {
                 Map<String, String> templates = workload.getTemplates();
                 if (templates.size() > 0) {
                     System.out.println("        # defaults");
-                    for (Map.Entry<String, String> templateEntry: templates.entrySet()) {
+                    for (Map.Entry<String, String> templateEntry : templates.entrySet()) {
                         System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
                     }
                 }
                 System.out.println();
+                System.out.println(
+                    "# To see examples to learn from, use\n" +
+                        "# --list-workloads --include examples"
+                );
+                System.out.println(
+                    "# To see included scenarios, use\n" +
+                        "# --list-scenarios shows details."
+                );
+                System.out.println(
+                    "# To copy an example to your local directory, use\n" +
+                        " --copy <path>"
+                );
             }
 
         }

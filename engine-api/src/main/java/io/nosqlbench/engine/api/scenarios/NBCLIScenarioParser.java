@@ -28,20 +28,25 @@ public class NBCLIScenarioParser {
     private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
     private static final String SEARCH_IN = "activities";
 
-    public static boolean isFoundWorkload(String workload) {
+    public static boolean isFoundWorkload(String workload,
+                                          String... includes) {
         Optional<Content<?>> found = NBIO.all()
             .prefix("activities")
+            .prefix(includes)
             .name(workload)
             .extension("yaml")
             .first();
         return found.isPresent();
     }
 
-    public static void parseScenarioCommand(LinkedList<String> arglist, Set<String> RESERVED_WORDS) {
+    public static void parseScenarioCommand(LinkedList<String> arglist,
+                                            Set<String> RESERVED_WORDS,
+                                            String... includes) {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
             .prefix("activities")
+            .prefix(includes)
             .name(workloadName)
             .extension("yaml")
             .first();
@@ -84,7 +89,9 @@ public class NBCLIScenarioParser {
         for (String scenarioName : scenarioNames) {
 
             // Load in named scenario
-            Content<?> yamlWithNamedScenarios = NBIO.all().prefix(SEARCH_IN)
+            Content<?> yamlWithNamedScenarios = NBIO.all()
+                .prefix(SEARCH_IN)
+                .prefix(includes)
                 .name(workloadName)
                 .extension("yaml")
                 .one();
@@ -269,10 +276,11 @@ public class NBCLIScenarioParser {
     private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
 
-    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
+    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(String... includes) {
 
         List<Content<?>> activities = NBIO.all()
             .prefix(SEARCH_IN)
+            .prefix(includes)
             .extension("yaml")
             .list();
 

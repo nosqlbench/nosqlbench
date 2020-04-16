@@ -9,7 +9,6 @@ import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -116,6 +115,7 @@ public class NBCLIOptions {
     private boolean wantsScenariosList = false;
     private String wantsToCopyWorkload = null;
     private boolean wantsWorkloadsList = false;
+    private List<String> wantsToIncludePaths = new ArrayList<String>();
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -132,6 +132,8 @@ public class NBCLIOptions {
             return;
         }
 
+        // Preprocess --include regardless of position
+        LinkedList<String> nonincludes = new LinkedList<>();
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
@@ -141,55 +143,22 @@ public class NBCLIOptions {
                 arglist.offerFirst(split[0]);
                 continue;
             }
+
             switch (word) {
+                case INCLUDE:
+                    arglist.removeFirst();
+                    String include = readWordOrThrow(arglist, "path to include");
+                    wantsToIncludePaths.add(include);
+                    break;
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
-                    break;
-                case SCRIPT_FRAGMENT:
-                    Cmd fragment = parseFragmentCmd(arglist);
-                    cmdList.add(fragment);
-                    break;
-                case ACTIVITY:
-                    arglist.removeFirst();
-                    arglist.addFirst("run");
-                case START_ACTIVITY:
-                case RUN_ACTIVITY:
-                    Cmd activity = parseActivityCmd(arglist);
-                    cmdList.add(activity);
                     break;
                 case METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
                     Cmd introspectActivity = parseActivityCmd(arglist);
                     wantsMetricsForActivity = introspectActivity.cmdSpec;
-                    break;
-                case AWAIT_ACTIVITY:
-                    String awaitCmdType = arglist.removeFirst();
-                    String activityToAwait = readWordOrThrow(arglist, "activity alias to await");
-                    assertNotParameter(activityToAwait);
-                    assertNotReserved(activityToAwait);
-                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType), activityToAwait);
-                    cmdList.add(awaitActivityCmd);
-                    break;
-                case STOP_ACTIVITY:
-                    String stopCmdType = readWordOrThrow(arglist, "stop command");
-                    String activityToStop = readWordOrThrow(arglist, "activity alias to await");
-                    assertNotParameter(activityToStop);
-                    assertNotReserved(activityToStop);
-                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType), activityToStop);
-                    cmdList.add(stopActivityCmd);
-                    break;
-                case WAIT_MILLIS:
-                    String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
-                    String millisCount = readWordOrThrow(arglist, "millis count");
-                    Long.parseLong(millisCount); // sanity check
-                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
-                    cmdList.add(awaitMillisCmd);
-                    break;
-                case SCRIPT:
-                    Cmd cmd = parseScriptCmd(arglist);
-                    cmdList.add(cmd);
                     break;
                 case SESSION_NAME:
                     arglist.removeFirst();
@@ -317,11 +286,66 @@ public class NBCLIOptions {
                     break;
                 case LIST_WORKLOADS:
                     arglist.removeFirst();
-                    wantsWorkloadsList =true;
+                    wantsWorkloadsList = true;
                     break;
                 case COPY_WORKLOAD:
                     arglist.removeFirst();
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
+                    break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+
+        arglist = nonincludes;
+        while (arglist.peekFirst() != null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+            switch (word) {
+                case SCRIPT_FRAGMENT:
+                    Cmd fragment = parseFragmentCmd(arglist);
+                    cmdList.add(fragment);
+                    break;
+                case ACTIVITY:
+                    arglist.removeFirst();
+                    arglist.addFirst("run");
+                case START_ACTIVITY:
+                case RUN_ACTIVITY:
+                    Cmd activity = parseActivityCmd(arglist);
+                    cmdList.add(activity);
+                    break;
+                case AWAIT_ACTIVITY:
+                    String awaitCmdType = arglist.removeFirst();
+                    String activityToAwait = readWordOrThrow(arglist, "activity alias to await");
+                    assertNotParameter(activityToAwait);
+                    assertNotReserved(activityToAwait);
+                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType), activityToAwait);
+                    cmdList.add(awaitActivityCmd);
+                    break;
+                case STOP_ACTIVITY:
+                    String stopCmdType = readWordOrThrow(arglist, "stop command");
+                    String activityToStop = readWordOrThrow(arglist, "activity alias to await");
+                    assertNotParameter(activityToStop);
+                    assertNotReserved(activityToStop);
+                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType), activityToStop);
+                    cmdList.add(stopActivityCmd);
+                    break;
+                case WAIT_MILLIS:
+                    String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
+                    String millisCount = readWordOrThrow(arglist, "millis count");
+                    Long.parseLong(millisCount); // sanity check
+                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
+                    cmdList.add(awaitMillisCmd);
+                    break;
+                case SCRIPT:
+                    Cmd cmd = parseScriptCmd(arglist);
+                    cmdList.add(cmd);
                     break;
                 default:
                     Optional<Content<?>> scriptfile = NBIO.local()
@@ -338,8 +362,10 @@ public class NBCLIOptions {
                         Cmd script = parseScriptCmd(arglist);
                         cmdList.add(script);
                         //Scripted yaml
-                    } else if (NBCLIScenarioParser.isFoundWorkload(word)) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS);
+                    } else if (
+                        NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())
+                    ) {
+                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, wantsIncludes());
                     } else {
                         throw new InvalidParameterException("unrecognized option:" + word);
                     }
@@ -348,6 +374,10 @@ public class NBCLIOptions {
         }
     }
 
+
+    public String[] wantsIncludes() {
+        return wantsToIncludePaths.toArray(new String[0]);
+    }
 
     private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
         Map<String, Level> levels = new HashMap<>();
@@ -498,8 +528,36 @@ public class NBCLIOptions {
         while (arglist.size() > 0 &&
             !RESERVED_WORDS.contains(arglist.peekFirst())
             && arglist.peekFirst().contains("=")) {
-            activitydef.add(arglist.removeFirst());
+            String arg = arglist.removeFirst();
+            String yaml = "";
+            if (arg.startsWith("yaml=")) {
+                yaml = arg.substring("yaml=".length());
+            } else if (arg.startsWith("workload=")) {
+                yaml = arg.substring("workload=".length());
+            }
+
+            if (!yaml.isEmpty()) {
+                Optional<Content<?>> found = NBIO.local().prefix("activities")
+                    .prefix(wantsMetricsPrefix())
+                    .name(yaml)
+                    .first();
+                if (found.isPresent()) {
+                    if (!found.get().asPath().toString().equals(yaml)) {
+                        logger.info("rewrote path for " + yaml + " as " + found.get().asPath().toString());
+                        activitydef.add("workload=" + found.get().asPath().toString());
+                    } else {
+                        logger.debug("kept path for " + yaml + " as " + found.get().asPath().toString());
+                        activitydef.add("workload=" + yaml);
+                    }
+                } else {
+                    logger.debug("unable to find " + yaml + " for pathqualification");
+                    activitydef.add("workload=" + yaml);
+                }
+            } else {
+                activitydef.add(arg);
+            }
         }
+
         return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
     }
 
@@ -582,7 +640,7 @@ public class NBCLIOptions {
     }
 
     public boolean wantsToCopyResource() {
-        return wantsToCopyWorkload!=null;
+        return wantsToCopyWorkload != null;
     }
 
     public String wantsToCopyResourceNamed() {
