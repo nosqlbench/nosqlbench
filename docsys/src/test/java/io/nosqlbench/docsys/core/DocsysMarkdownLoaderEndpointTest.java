@@ -2,7 +2,7 @@ package io.nosqlbench.docsys.core;
 
 import org.junit.Test;
 
-public class DocsysMarkdownEndpointTest {
+public class DocsysMarkdownLoaderEndpointTest {
 
     @Test
     public void testDocLoader() {
