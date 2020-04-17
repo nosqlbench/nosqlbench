@@ -155,7 +155,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
             boolean prepared = Boolean.valueOf(stmtDef.getParams().getOrDefault("prepared", "true"));
-            boolean raw = Boolean.valueOf(stmtDef.getParams().getOrDefault("raw", "false"));
+            boolean parametrized = Boolean.valueOf(stmtDef.getParams().getOrDefault("parametrized", "false"));
             long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1"));
 
             Optional<ConsistencyLevel> cl = Optional.ofNullable(
@@ -205,17 +205,6 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         .getOrDefault("binder", CqlBinderTypes.DEFAULT.toString()));
 
                 template = new ReadyCQLStatementTemplate(binderType, getSession(), prepare, ratio, parsed.getName());
-            } else if (raw) {
-                cl.ifPresent((conlvl) -> {
-                    psummary.append(" consistency_level=>").append(conlvl);
-                });
-                serial_cl.ifPresent((scl) -> {
-                    psummary.append(" serial_consistency_level=>").append(scl);
-                });
-                idempotent.ifPresent((i) -> {
-                    psummary.append(" idempotent=>").append(i);
-                });
-                template = new ReadyCQLStatementTemplate(getSession(), stmtForDriver, ratio, parsed.getName(), cl, serial_cl, idempotent);
             } else {
                 SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
@@ -230,7 +219,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     psummary.append(" idempotent=>").append(i);
                     simpleStatement.setIdempotent(i);
                 });
-                template = new ReadyCQLStatementTemplate(getSession(), simpleStatement, ratio, parsed.getName());
+                template = new ReadyCQLStatementTemplate(getSession(), simpleStatement, ratio, parsed.getName(), parametrized);
             }
 
             Optional.ofNullable(stmtDef.getParams().getOrDefault("save", null))
