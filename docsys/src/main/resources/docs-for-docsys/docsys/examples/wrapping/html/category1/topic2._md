@@ -1,6 +1,0 @@
-#### Topic 2
-
-This is some content of topic 2.
-It is nested within directory `category`.
-
-It *will* be rendered as a layered rendering, since it *is* marked as a markdown template file with the extension `._md`.

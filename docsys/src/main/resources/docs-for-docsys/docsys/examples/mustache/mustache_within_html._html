@@ -1,8 +1,0 @@
-<html>
- <head>Example Mustache Rendering directly to HTML</head>
- <body>
- <p>
- <span>The target is '{{ target }}'</span>
- </p>
- </body>
-</html>
