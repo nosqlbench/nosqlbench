@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -289,10 +290,12 @@ public class NBCLIScenarioParser {
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
 
         for (Path yamlPath : yamlPathList) {
-            String referencedWorkloadName = yamlPath.toString().substring(1);
+            String referenced = yamlPath.toString();
+            referenced = referenced.startsWith("/") ? referenced.substring(1) :
+                referenced;
 
             Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                .name(referencedWorkloadName).extension("yaml")
+                .name(referenced).extension("yaml")
                 .one();
 
             StmtsDocList stmts = StatementsLoader.load(logger,content);
@@ -313,7 +316,9 @@ public class NBCLIScenarioParser {
             List<String> scenarioNames = scenarios.getScenarioNames();
 
             if (scenarioNames != null && scenarioNames.size() >0){
-                workloadDescriptions.add(new WorkloadDesc(yamlPath.getFileName().toString(), scenarioNames, templates));
+                String path = yamlPath.toString();
+                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
+                workloadDescriptions.add(new WorkloadDesc(path, scenarioNames, templates));
             }
         }
 
