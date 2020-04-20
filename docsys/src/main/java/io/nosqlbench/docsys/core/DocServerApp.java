@@ -1,12 +1,10 @@
 package io.nosqlbench.docsys.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -14,7 +12,7 @@ import java.util.Arrays;
 
 public class DocServerApp {
     public final static String APPNAME_DOCSERVER = "docserver";
-    private static Logger logger = LoggerFactory.getLogger(DocServerApp.class);
+    private static Logger logger = LogManager.getLogger(DocServerApp.class);
 
 //    static {
 //        // defer to an extant logger context if it is there, otherwise
