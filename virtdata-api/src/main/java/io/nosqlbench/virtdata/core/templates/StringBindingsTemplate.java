@@ -62,4 +62,9 @@ public class StringBindingsTemplate {
         Bindings bindings = bindingsTemplate.resolveBindings();
         return new StringBindings(compositor,bindings);
     }
+
+    @Override
+    public String toString() {
+        return "TEMPLATE:"+this.stringTemplate+" BINDING:"+bindingsTemplate.toString();
+    }
 }
