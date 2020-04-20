@@ -14,13 +14,9 @@ import java.util.function.LongUnaryOperator;
 
 /**
  * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
- *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * based on list of functions without any size boundaries,
+ * each function in the list functions populate the list with
+ * object value.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -30,18 +26,14 @@ public class ListFunctions implements LongFunction<java.util.List<Object>> {
     private final int size;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListFunctions(NumberNameToString(),NumberNameToString(),NumberNameToString())",
+        "Create a list of object values of each function output. ListFunctions output ['one','one','one']"
     })
     public ListFunctions(LongFunction<? extends Object>... funcs) {
         this.valueFuncs = Arrays.asList(funcs);
         this.size = valueFuncs.size();
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListFunctions(LongUnaryOperator... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (LongUnaryOperator func : funcs) {
@@ -51,10 +43,6 @@ public class ListFunctions implements LongFunction<java.util.List<Object>> {
         this.size = building.size();
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListFunctions(Function<Long,Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (Function<Long,Object> func : funcs) {

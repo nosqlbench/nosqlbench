@@ -16,13 +16,9 @@ import java.util.function.LongUnaryOperator;
 
 /**
  * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
- *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * based on pseudo-randomly hash list of functions without any size boundaries,
+ * each function in the list functions populate the hash list with
+ * object value.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -33,18 +29,14 @@ public class ListHashed implements LongFunction<List<Object>> {
     private final Hash hasher = new Hash();
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListHashed(long->ToString(), long->WeightedStrings('text:1'))",
+        "Create a hash list of object values of each function output. ListHashed output ['2945182322382062539','text']"
     })
     public ListHashed(LongFunction<? extends Object>... funcs) {
         this.valueFuncs = Arrays.asList(funcs);
         this.size = valueFuncs.size();
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListHashed(LongUnaryOperator... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (LongUnaryOperator func : funcs) {
@@ -54,10 +46,6 @@ public class ListHashed implements LongFunction<List<Object>> {
         this.size = building.size();
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListHashed(Function<Long,Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (Function<Long,Object> func : funcs) {

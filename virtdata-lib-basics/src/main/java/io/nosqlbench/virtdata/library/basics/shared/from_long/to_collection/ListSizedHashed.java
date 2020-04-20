@@ -16,13 +16,9 @@ import java.util.function.LongUnaryOperator;
 
 /**
  * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
- *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * based on at least two functions, the first function to
+ * determine the list functions size, and the remaining functions onwards to populate
+ * the list with object values till the end of the list size.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -33,18 +29,16 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
     private final LongToIntFunction sizeFunc;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListSizedHashed(FixedValue(5),long->ToString(),long->WeightedStrings('text:1'),long->ToString())",
+        "Create a sized hash list of object values of each function output. List size function will recursively call the last function till" +
+            "end of the list size functions",
+        "ListSizedHashed output ['2945182322382062539', 'text', '37945690212757860', '287864597160630738', '3299224200079606887']"
     })
     public ListSizedHashed(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
         this.sizeFunc = sizeFunc;
         this.valueFuncs = Arrays.asList(funcs);
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListSizedHashed(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (LongUnaryOperator func : funcs) {
@@ -54,10 +48,6 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
         this.valueFuncs = building;
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListSizedHashed(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (Function<Long,Object> func : funcs) {

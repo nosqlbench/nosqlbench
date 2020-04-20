@@ -15,13 +15,9 @@ import java.util.function.LongUnaryOperator;
 
 /**
  * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
- *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * based on at least two functions, the first function to
+ * determine the list functions size, and the remaining functions onwards to populate
+ * the list with object values till the end of the list size.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -31,18 +27,16 @@ public class ListSized implements LongFunction<List<Object>> {
     private final LongToIntFunction sizeFunc;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListSized(FixedValue(5), NumberNameToString(),NumberNameToString(), WeightedStrings('text:1'))",
+        "Create a sized list of object values of each function output. List size function will recursively call the last function till" +
+            "end of the list size functions",
+        "ListSized output ['one','one','text','text','text']"
     })
     public ListSized(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
         this.sizeFunc = sizeFunc;
         this.valueFuncs = Arrays.asList(funcs);
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListSized(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (LongUnaryOperator func : funcs) {
@@ -52,10 +46,6 @@ public class ListSized implements LongFunction<List<Object>> {
         this.valueFuncs = building;
     }
 
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
     public ListSized(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (Function<Long,Object> func : funcs) {
