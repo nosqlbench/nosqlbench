@@ -1,5 +1,10 @@
 # Topics in Files
 
+# DEPRECATED
+
+# DEPRECATED
+
+
 Since DocSys is meant to make it easy to add docs to a system
 without doing much extra management, the ability to label and find
 topics of interest must be built in.
