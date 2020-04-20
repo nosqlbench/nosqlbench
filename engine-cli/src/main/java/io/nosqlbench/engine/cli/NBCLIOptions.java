@@ -150,6 +150,24 @@ public class NBCLIOptions {
                     String include = readWordOrThrow(arglist, "path to include");
                     wantsToIncludePaths.add(include);
                     break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+        arglist=nonincludes;
+        nonincludes= new LinkedList<>();
+
+        while (arglist.peekFirst()!= null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+
+            switch (word) {
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
@@ -296,8 +314,9 @@ public class NBCLIOptions {
                     nonincludes.addLast(arglist.removeFirst());
             }
         }
-
         arglist = nonincludes;
+        nonincludes=new LinkedList<>();
+
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
