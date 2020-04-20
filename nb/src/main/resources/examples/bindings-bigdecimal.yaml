@@ -1,0 +1,44 @@
+scenarios:
+  default: run driver===stdout format=readout
+
+# In the binding examples below, ther are some initial conversions to create
+# approriate example data. The most important part ot pay attention to is
+# the actual use of the ToBigDecimal, according to the input type in each
+# example, and the arguments supported.
+
+# ToBigDecimal(...) functions which take whole-numbered inputs may have
+# a scale parameter or a custom MathContext, but not both. The scale parameter
+# is not supported for String or Double input forms.
+
+bindings:
+
+  # convert an example double with some fractional values, then convert it to BigDecimal
+  from_double: ToDouble(); Div(100.0d); ToBigDecimal();
+
+  # convert doubles to BigDecimal, with custom precision and rounding
+  from_double_custom5: ToDouble(); Div(100.0d); ToBigDecimal('precision=5 roundingMode=HALF');
+
+  # convert directly to BigDecimal from long as whole numbers
+  from_long: ToBigDecimal();
+
+  # convert long to BigDecimal with three digits to the right of the decimal point
+  from_long_scale3: ToBigDecimal(3);
+
+  # convert long to BigDecimal with custom precision and rounding
+  from_long_custom2: ToBigDecimal('precision=2 roundingMode=UP');
+
+  # convert int to BigDecimal as whole numbers
+  from_int: ToInt(); ToBigDecimal();
+
+  # convert int to BigDecimal with 2 digits to the right of the decimal point
+  from_int_scale2: ToInt(); ToBigDecimal(2);
+
+  # convert int to BigDecimal with custom precision and rounding
+  from_int_custom3: ToInt(); ToBigDecimal('precision=3 roundingMode=CEILING');
+
+  # convert a string input using default settings
+  from_string: FixedValue("12345.54321"); ToBigDecimal();
+
+  # convert a string input using a custom MathContext
+  from_string_custom: FixedValue("12345.54321"); ToBigDecimal('precision=7 roundingMode=UP');
+

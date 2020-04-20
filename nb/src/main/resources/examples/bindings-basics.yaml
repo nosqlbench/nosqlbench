@@ -1,0 +1,74 @@
+description: examples of basic bindings
+
+scenarios:
+  default:
+    stdout: run driver===stdout format=readout
+
+
+# Each binding is named, so the bindings is a map of names to
+# bindings recipes. Bindings that are defined at the document
+# root level are made available to all statements.
+
+# In these example files, statements are not defined, since
+# we use the stdout driver, which can create a convenient output
+# format for us based on the binding names.
+
+bindings:
+
+  # Identity()
+  #
+  # All binding recipes will get the current cycle number as the
+  # input for the first function in the list.
+  # In this way, each cycle serves as a unique and stable seed
+  # for all the data associated with that cycle.
+  #
+  # You can get the cycle number with the Identity() function,
+  # which is a helpful way to display cycles and their related
+  # values from other named bindings.
+
+  n: Identity();
+
+  # function chaining
+  #
+  # Functions can be stitched together. This is done with Java lambdas
+  # internally. This means you can build up richer binding functions
+  # from basics simply by putting them on a line together, delimited by
+  # semicolons.
+
+  # convert the input long to a String and then prefix it with 'pre-'
+  # and then suffix it with '-post'
+
+  lambda: ToString(); Prefix('pre-'); Suffix('-post');
+
+  # escapes
+  #
+  # When you pass String arguments to a binding function, you can either
+  # use single or double quotes. With single quotes, every character between
+  # the first single quote and the next one is taken literally.
+  #
+  # With double quotes, the backslash character acts escapes the next character,
+  # including double quotes.
+
+  escaped: FixedValue("\"quotes included!\"");
+
+  # NumberNameToString()
+  #
+  # This function produces a name for a number all the way up to
+  # Long.MAX_VALUE, and all negative values except for LONG.MIN_VALUE.
+  # It is quite useful for sketching data and relationships where you
+  # need a text field in your data. For fluffy text, use a higher
+  # cycle range.
+
+  name: NumberNameToString();
+
+  # TypeOf()
+  # If you want to see or confirm the type of object that is produced
+  # by a binding recipe, simply add TypeOf() to the end of it.
+
+  typeof: NumberNameToString(); TypeOf();
+
+# The Show() function provides a snapshot of what is in the thread-local
+# variable map as a String
+
+  show: Show();
+

@@ -1,8 +1,7 @@
-# You can run this file with this command line to see the values printed to stdout:
-# ./ebdse run driver=stdout yaml=bindings/timestamp.yaml cycles=10
+description: examples of bindings that produce long values as epoch millis
 
-# This file demonstrates different types of timestamp recipes
-# that you can use with virtdata. (The bindings used in ebdse)
+scenarios:
+  default: run type===stdout format=readout
 
 # If you want to control the output, uncomment and edit the statement template below
 # and modify the named anchors to suit your output requirements.
@@ -18,6 +17,7 @@ bindings:
   # Normally, the value that you get with a cycle starts at 0.
 
  cycleNum: Identity();
+
 # All uncommented lines under this are indented, so they become named bindings below
 # the entry above
 

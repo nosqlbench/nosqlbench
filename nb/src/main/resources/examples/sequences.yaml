@@ -9,6 +9,7 @@ scenarios:
   concat: run driver===stdout seq===concat cycles=20
   bucket: run driver===stdout seq===bucket cycles=20
   interval: run driver===stdout seq===interval cycles=20
+
 statements:
  - A1: "A "
    ratio: 1
