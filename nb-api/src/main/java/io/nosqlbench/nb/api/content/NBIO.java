@@ -8,12 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -339,14 +336,15 @@ public class NBIO implements NBPathsAPI.Facets {
 
         for (String searchPath : prefixes) {
             List<Path> founds = resolver.resolveDirectory(searchPath);
-            FileCapture capture = new FileCapture();
+            NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true,false);
             for (Path path : founds) {
                 for (String searchPattern : searches) {
-                    RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
+                    NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter(searchPattern,true);
+//                    RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
                     NBIOWalker.walkFullPath(path, capture, filter);
                 }
             }
-            capture.found.stream().map(PathContent::new).forEach(foundFiles::add);
+            capture.get().stream().map(PathContent::new).forEach(foundFiles::add);
         }
 
         return new ArrayList<>(foundFiles);
@@ -380,49 +378,6 @@ public class NBIO implements NBPathsAPI.Facets {
 //        return expanded;
 //    }
 
-    private static class RegexPathFilter implements DirectoryStream.Filter<Path> {
-
-        private final Pattern regex;
-
-        public RegexPathFilter(String pattern, boolean rightglob) {
-            if (rightglob && !pattern.startsWith("^") && !pattern.startsWith(".")) {
-                this.regex = Pattern.compile(".*" + pattern);
-            } else {
-                this.regex = Pattern.compile(pattern);
-            }
-        }
-
-        @Override
-        public boolean accept(Path entry) throws IOException {
-            String input = entry.toString();
-            Matcher matcher = regex.matcher(input);
-            boolean matches = matcher.matches();
-            return matches;
-        }
-
-        public String toString() {
-            return regex.toString();
-        }
-    }
-
-    private static class FileCapture implements NBIOWalker.PathVisitor, Iterable<Path> {
-        List<Path> found = new ArrayList<>();
-
-        @Override
-        public void visit(Path foundPath) {
-            found.add(foundPath);
-        }
-
-        @Override
-        public Iterator<Path> iterator() {
-            return found.iterator();
-        }
-
-        public String toString() {
-            return "FileCapture{n=" + found.size() +  (found.size()>0?"," +found.get(0).toString():"") +"}";
-        }
-
-    }
 
     @Override
     public String toString() {

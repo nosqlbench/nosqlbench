@@ -5,12 +5,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NBIOWalker {
     private final static Logger logger = LogManager.getLogger(NBIOWalker.class);
@@ -20,7 +21,7 @@ public class NBIOWalker {
     }
 
     public static List<Path> findAll(Path p) {
-        Collect fileCollector = new Collect(true, false);
+        CollectVisitor fileCollector = new CollectVisitor(true, false);
         walk(p, fileCollector);
         return fileCollector.get();
 
@@ -104,12 +105,31 @@ public class NBIOWalker {
 
     public static DirectoryStream.Filter<Path> WALK_ALL = entry -> true;
 
-    public static class Collect implements PathVisitor {
+//    private static class FileCapture implements NBIOWalker.PathVisitor, Iterable<Path> {
+//        List<Path> found = new ArrayList<>();
+//
+//        @Override
+//        public void visit(Path foundPath) {
+//            found.add(foundPath);
+//        }
+//
+//        @Override
+//        public Iterator<Path> iterator() {
+//            return found.iterator();
+//        }
+//
+//        public String toString() {
+//            return "FileCapture{n=" + found.size() +  (found.size()>0?"," +found.get(0).toString():"") +"}";
+//        }
+//
+//    }
+
+    public static class CollectVisitor implements PathVisitor {
         private final List<Path> listing = new ArrayList<>();
         private final boolean collectFiles;
         private final boolean collectDirectories;
 
-        public Collect(boolean collectFiles, boolean collectDirectories) {
+        public CollectVisitor(boolean collectFiles, boolean collectDirectories) {
 
             this.collectFiles = collectFiles;
             this.collectDirectories = collectDirectories;
@@ -137,5 +157,31 @@ public class NBIOWalker {
             }
         }
     }
+
+    public static class RegexFilter implements DirectoryStream.Filter<Path> {
+
+        private final Pattern regex;
+
+        public RegexFilter(String pattern, boolean rightglob) {
+            if (rightglob && !pattern.startsWith("^") && !pattern.startsWith(".")) {
+                this.regex = Pattern.compile(".*" + pattern);
+            } else {
+                this.regex = Pattern.compile(pattern);
+            }
+        }
+
+        @Override
+        public boolean accept(Path entry) throws IOException {
+            String input = entry.toString();
+            Matcher matcher = regex.matcher(input);
+            boolean matches = matcher.matches();
+            return matches;
+        }
+
+        public String toString() {
+            return regex.toString();
+        }
+    }
+
 
 }
