@@ -138,5 +138,23 @@ public interface ActivityType<A extends Activity> extends Named {
         return new CoreMotorDispenser<T> (activity, inputDispenser, actionDispenser, outputDispenser);
     }
 
+    /**
+     * An ActivityType can describe the canonical named types as known within that driver implementation,
+     * and the Java compatible types which can be assigned to them. This map is consulted when users need to select
+     * the name from within that driver in order to see the compatible functions which may produce a valid type for
+     * it. For example, a CQL users may want to know what java type (and thus what binding functions) can support
+     * the CQL timeuuid type.
+     *
+     * Conversely, a user may want to know what types are supported by the java.util.{@link java.util.UUID} class
+     * in CQL. In that case, this map will also be consulted, and multiple keys will match.
+     * When there are multiple answers in this way, but the driver has its own default about which one to use
+     * when the user's intent is ambiguous, the map should be be ordered as in {@link java.util.LinkedHashMap},
+     * and the preferred form should be listed first.
+     *
+     * @return a type map indicating co-compatible associations of driver-specific type names and Java types
+     */
+    default Map<String,Class<?>> getTypeMap() {
+        return Map.of();
+    }
 
 }
