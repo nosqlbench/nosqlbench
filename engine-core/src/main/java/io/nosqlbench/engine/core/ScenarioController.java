@@ -349,16 +349,25 @@ public class ScenarioController {
         }
     }
 
+    public boolean await(Map<String,String> activityDefMap) {
+        return this.awaitActivity(activityDefMap);
+    }
     public boolean awaitActivity(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         return awaitActivity(ad);
     }
 
+    public boolean await(String alias) {
+        return this.awaitActivity(alias);
+    }
     public boolean awaitActivity(String alias) {
         ActivityDef toAwait = aliasToDef(alias);
         return awaitActivity(toAwait);
     }
 
+    public boolean await(ActivityDef activityDef) {
+        return this.awaitActivity(activityDef);
+    }
     public boolean awaitActivity(ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
         if (activityExecutor == null) {

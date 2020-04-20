@@ -138,7 +138,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         String format = getParams().getOptionalString("format").orElse(null);
 
         if ((stmts.size()==0 && stmtsDocList.getDocBindings().size() > 0) || format!=null) {
-            logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
+            logger.info("Creating stdout statement template from bindings...");
             String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
             BindingsTemplate bt = new BindingsTemplate();
             stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);

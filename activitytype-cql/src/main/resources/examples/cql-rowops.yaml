@@ -1,7 +1,7 @@
 scenarios:
   default:
     schema: run driver=cql tags==phase:schema cycles==UNDEF threads==1
-    rampup: run driver=cql tags==phase:rampup cycles=TEMPLATE(rampup-cycles100K) threads=auto
+    rampup: run driver=cql tags==phase:rampup cycles=TEMPLATE(rampup-cycles,100K) threads=auto
 
 bindings:
   userid: Template('user-{}',ToString()); SaveString('userid');

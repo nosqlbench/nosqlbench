@@ -161,6 +161,8 @@ public class NBCLIOptions {
         arglist = nonincludes;
         nonincludes = new LinkedList<>();
 
+        PathCanonicalizer canonicalizer = new PathCanonicalizer(wantsIncludes());
+
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
@@ -179,7 +181,7 @@ public class NBCLIOptions {
                 case LIST_METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
-                    Cmd cmd = Cmd.parseArg(arglist,this);
+                    Cmd cmd = Cmd.parseArg(arglist,canonicalizer);
                     wantsMetricsForActivity = cmd.getArg("driver");
                     break;
                 case SESSION_NAME:
@@ -334,7 +336,7 @@ public class NBCLIOptions {
                 case AWAIT:
                 case STOP:
                 case WAIT_MILLIS:
-                    cmd = Cmd.parseArg(arglist,this);
+                    cmd = Cmd.parseArg(arglist,canonicalizer);
                     cmdList.add(cmd);
                     break;
 //                    cmd = Cmd.parseArg(arglist, this, "alias_to_await");
@@ -369,7 +371,7 @@ public class NBCLIOptions {
                         arglist.removeFirst();
                         arglist.addFirst("scripts/auto/" + word);
                         arglist.addFirst("script");
-                        cmd = Cmd.parseArg(arglist,this);
+                        cmd = Cmd.parseArg(arglist,canonicalizer);
                         cmdList.add(cmd);
                     } else if (
                         NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())

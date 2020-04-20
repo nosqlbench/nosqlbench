@@ -2,13 +2,12 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /**
  * Encapsulate Command parsing and structure for the NoSQLBench command line.
@@ -17,26 +16,51 @@ import java.util.stream.Collectors;
  * An example of a command tha thas both would look like {@code script test.js p1=v1}
  */
 public class Cmd {
-
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
 
     public enum CmdType {
-        script("script_path"),
-        fragment("script_fragment"),
+        script(Arg.of("script_path", s -> s)),
+        fragment(Arg.of("script_fragment")),
         start(),
         run(),
-        await("alias_name"),
-        stop("alias_name"),
-        waitmillis("millis_to_wait");
+        await(Arg.of("alias_name")),
+        stop(Arg.of("alias_name")),
+        waitmillis(Arg.of("millis_to_wait", Long::parseLong));
 
-        private final String[] positional;
+        private final Arg<?>[] positional;
 
-        CmdType(String... positional) {
+        CmdType(Arg<?>... positional) {
             this.positional = positional;
         }
 
-        public String[] getPositionalArgs() {
+        public String[] getPositionalArgNames() {
+            String[] names = new String[positional.length];
+            for (int i = 0; i < names.length; i++) {
+                names[i] = positional[i].name;
+            }
+            return names;
+        }
+
+        public Arg<?>[] getPositionalArgs() {
             return positional;
+        }
+    }
+
+    private static final class Arg<T> {
+        public final String name;
+        public final Function<String, T> converter;
+
+        public Arg(String name, Function<String, T> converter) {
+            this.name = name;
+            this.converter = converter;
+        }
+
+        public static <T> Arg<T> of(String name, Function<String, T> converter) {
+            return new Arg<>(name, converter);
+        }
+
+        public static Arg<String> of(String name) {
+            return new Arg<>(name, s -> s);
         }
     }
 
@@ -49,7 +73,7 @@ public class Cmd {
 
     private final CmdType cmdType;
 
-    public Cmd(CmdType cmdType, Map<String,String> cmdArgs) {
+    public Cmd(CmdType cmdType, Map<String, String> cmdArgs) {
         this.cmdArgs = cmdArgs;
         this.cmdType = cmdType;
     }
@@ -63,19 +87,31 @@ public class Cmd {
     }
 
     public String toString() {
-        return "type:" + cmdType + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
+        StringBuilder sb = new StringBuilder();
+        sb.append(cmdType.toString());
+        sb.append("(");
+        if (getParams().size() > cmdType.positional.length) {
+            sb.append(toJSONBlock(getParams(), false));
+        } else {
+            for (String value : getParams().values()) {
+                sb.append("'").append(value).append("'").append(",");
+            }
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append(");");
+        return sb.toString();
     }
 
-    public static Cmd parseArg(LinkedList<String> arglist, NBCLIOptions options) {
+    public static Cmd parseArg(LinkedList<String> arglist, PathCanonicalizer fixer) {
 
         String cmdName = arglist.removeFirst();
         CmdType cmdType = CmdType.valueOf(cmdName);
 
-        Map<String,String> params = new LinkedHashMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
 
-        for (String paramName : cmdType.getPositionalArgs()) {
+        for (Arg<?> paramName : cmdType.getPositionalArgs()) {
             String arg = arglist.peekFirst();
-            if (arg==null) {
+            if (arg == null) {
                 throw new InvalidParameterException("command '" + cmdName + " requires a value for " + paramName
                     + ", but there were no remaining arguments after it.");
             }
@@ -88,8 +124,8 @@ public class Cmd {
                     + ", but a reserved word was found instead: " + arg);
             }
 
-            logger.debug("cmd name:" + cmdName +", positional " + paramName + ": " + arg);
-            params.put(paramName,arglist.removeFirst());
+            logger.debug("cmd name:" + cmdName + ", positional " + paramName + ": " + arg);
+            params.put(paramName.name, paramName.converter.apply(arglist.removeFirst()).toString());
         }
 
         while (arglist.size() > 0 &&
@@ -100,30 +136,34 @@ public class Cmd {
             String pname = assigned[0];
             String pval = assigned[1];
 
-            if (pname.equals("yaml")||pname.equals("workload")) {
-                String yaml = pval;
-                Optional<Content<?>> found = NBIO.local().prefix("activities")
-                    .prefix(options.wantsIncludes())
-                    .name(yaml)
-                    .first();
-                if (found.isPresent()) {
-                    if (!found.get().asPath().toString().equals(yaml)) {
-                        logger.info("rewrote path for " + yaml + " as " + found.get().asPath().toString());
-                        pval=found.get().asPath().toString();
-                    } else {
-                        logger.debug("kept path for " + yaml + " as " + found.get().asPath().toString());
-                    }
-                } else {
-                    logger.debug("unable to find " + yaml + " for path qualification");
-                }
+
+            if (pname.equals("yaml") || pname.equals("workload")) {
+                pval = fixer.canonicalizePath(pval);
             }
             if (params.containsKey(pname)) {
                 throw new InvalidParameterException("parameter '" + pname + "' is already set for " + cmdType);
             }
-            params.put(pname,pval);
+            params.put(pname, pval);
         }
 
         return new Cmd(cmdType, params);
+    }
+
+    public static String toJSONBlock(Map<String, String> map, boolean oneline) {
+
+        int klen = map.keySet().stream().mapToInt(String::length).max().orElse(1);
+        StringBuilder sb = new StringBuilder();
+        List<String> l = new ArrayList<>();
+        map.forEach((k, v) -> l.add(
+            (oneline ? "" : "    ") + "'" + k + "'"
+                +": " + (oneline ? "" : " ".repeat(klen - k.length())) +
+                "'" + v + "'"
+        ));
+        return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
+    }
+
+    public static String toJSONParams(String varname, Map<String, String> map, boolean oneline) {
+        return "// params.size==" + map.size() + "\n" + varname + "=" + toJSONBlock(map, oneline);
     }
 
 }
