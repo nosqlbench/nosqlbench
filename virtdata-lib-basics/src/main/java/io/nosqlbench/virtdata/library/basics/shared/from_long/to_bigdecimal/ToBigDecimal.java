@@ -11,6 +11,12 @@ import java.util.function.LongFunction;
 
 /**
  * Convert values to BigDecimals at configurable scale or precision.
+ *
+ * <p>
+ * ToBigDecimal(...) functions which take whole-numbered inputs may have
+ * a scale parameter or a custom MathContext, but not both. The scale parameter
+ * is not supported for String or Double input forms.
+ * </p>
  */
 @ThreadSafeMapper
 public class ToBigDecimal implements LongFunction<BigDecimal> {
