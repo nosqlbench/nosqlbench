@@ -93,6 +93,7 @@ blocks:
          name: select-read
        params:
          instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
+
   - tags:
       phase: main
       type: write

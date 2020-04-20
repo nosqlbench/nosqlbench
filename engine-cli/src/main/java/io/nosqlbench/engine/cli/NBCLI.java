@@ -244,10 +244,10 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        NBCLIScriptAssembly.ScriptData scriptData = NBCLIScriptAssembly.assembleScript(options);
+        String scriptData = NBCLIScriptAssembly.assemble(options);
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
-            System.out.println(scriptData.getScriptParamsAndText());
+            System.out.println(scriptData);
             System.exit(0);
         }
 
@@ -258,8 +258,10 @@ public class NBCLI {
             logger.info("Charting disabled");
         }
 
-        scenario.addScenarioScriptParams(scriptData.getScriptParams());
-        scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
+
+        // Execute Scenario!
+
+        scenario.addScriptText(scriptData);
         ScenarioLogger sl = new ScenarioLogger(scenario)
             .setLogDir(options.getLogsDirectory())
             .setMaxLogs(options.getLogsMax())

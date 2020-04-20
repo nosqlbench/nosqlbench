@@ -18,8 +18,6 @@
 package io.nosqlbench.engine.cli;
 
 
-import io.nosqlbench.engine.cli.NBCLIOptions;
-import io.nosqlbench.engine.cli.NBCLIScriptAssembly;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,9 +31,8 @@ public class NBCLIScriptAssemblyTest {
                 "testscripts/printscript.js",
                 "param1=value1"
         });
-        NBCLIScriptAssembly.ScriptData sd = NBCLIScriptAssembly.assembleScript(opts);
-        String assembledScript = sd.getScriptTextIgnoringParams();
-        assertThat(assembledScript).matches("(?s).*a single line.*");
+        String script = NBCLIScriptAssembly.assemble(opts);
+        assertThat(script).matches("(?s).*a single line.*");
     }
 
     @Test
@@ -49,9 +46,8 @@ public class NBCLIScriptAssemblyTest {
                 "paramname=another",
                 "param2=andanother"
         });
-        NBCLIScriptAssembly.ScriptData sd = NBCLIScriptAssembly.assembleScript(opts);
-        String assembledScript = sd.getScriptTextIgnoringParams();
-        assertThat(assembledScript).matches("(?s).*a single line.*");
+        String script = NBCLIScriptAssembly.assemble(opts);
+        assertThat(script).matches("(?s).*a single line.*");
     }
 
 }

@@ -12,49 +12,46 @@ public class NBCLIScenarioParserTest {
     @Test
     public void providePathForScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example-scenarios" });
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void defaultScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test" });
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void defaultScenarioWithParams() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "cycles=100"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=");
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.get(0).getArg("cycles")).isEqualTo("100");
     }
 
     @Test
     public void namedScenario() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void namedScenarioWithParams() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles=100"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=100");
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("cycles=");
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.get(0).getArg("cycles")).containsOnlyOnce("100");
     }
 
     @Test
     public void testThatSilentFinalParametersPersist() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "type=foo"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdSpec()).containsOnlyOnce("driver=stdout");
-        assertThat(cmds.get(1).getCmdSpec()).containsOnlyOnce("driver=foo");
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
     }
 
     @Test(expected = BasicError.class)
     public void testThatVerboseFinalParameterThrowsError() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
     }
 
     @Test(expected = BasicError.class)
@@ -65,7 +62,7 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatMultipleScenariosConcatenate() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "default", "default"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(6);
     }
 
@@ -90,13 +87,13 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatUndefValuesAreUndefined() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
-        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
+        List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;workload=scenario-test;tags=phase:schema;cycles-test=20;");
+        assertThat(cmds.get(0).getArg("cycles-test")).isEqualTo("20");
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "doundef=20"});
-        List<NBCLIOptions.Cmd> cmds1 = opts1.getCommands();
+        List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
-        assertThat(cmds1.get(0).getCmdSpec()).isEqualTo("driver=stdout;workload=scenario-test;tags=phase:schema;");
+        assertThat(cmds1.get(0).getArg("cycles-test")).isNull();
 
     }
 
