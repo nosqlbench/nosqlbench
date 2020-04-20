@@ -1,6 +1,5 @@
 package io.nosqlbench.nb.api.content;
 
-import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

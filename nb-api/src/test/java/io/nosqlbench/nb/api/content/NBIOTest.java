@@ -1,6 +1,5 @@
 package io.nosqlbench.nb.api.content;
 
-import io.nosqlbench.nb.api.content.fluent.NBPathsAPI;
 import org.junit.Test;
 
 import java.util.LinkedHashSet;

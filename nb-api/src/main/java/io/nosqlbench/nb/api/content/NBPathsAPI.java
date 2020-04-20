@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.content.fluent;
+package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.content.Content;
 
