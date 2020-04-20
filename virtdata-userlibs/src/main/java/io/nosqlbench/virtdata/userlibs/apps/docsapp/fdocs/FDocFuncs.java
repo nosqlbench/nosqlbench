@@ -1,7 +1,6 @@
 package io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs;
 
-import com.vladsch.flexmark.convert.html.FlexmarkHtmlParser;
-import io.nosqlbench.virtdata.api.processors.DocCtorData;
+import io.nosqlbench.nb.api.markdown.FlexParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +57,7 @@ public class FDocFuncs implements Iterable<FDocFunc> {
 
         sb.append("## ").append(getFunctionName()).append("\n\n");
 
-        String classDocMarkdown = FlexmarkHtmlParser.parse(getCombinedClassDocs());
+        String classDocMarkdown = FlexParser.converter.convert(getCombinedClassDocs());
         sb.append(classDocMarkdown).append("\n");
 
         for (FDocFunc fdf : functionsByPackage.values()) {
