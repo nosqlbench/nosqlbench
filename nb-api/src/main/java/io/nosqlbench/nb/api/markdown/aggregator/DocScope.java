@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.markdown.descriptor;
+package io.nosqlbench.nb.api.markdown.aggregator;
 
 /**
  * DocScope determines which display mode a topic is meant to be displayed in.

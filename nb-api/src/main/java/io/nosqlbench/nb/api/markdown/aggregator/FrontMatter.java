@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.markdown.descriptor;
+package io.nosqlbench.nb.api.markdown.aggregator;
 
 import java.util.List;
 import java.util.Set;

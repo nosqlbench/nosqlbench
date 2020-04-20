@@ -1,10 +1,10 @@
-package io.nosqlbench.nb.api.markdown.descriptor;
+package io.nosqlbench.nb.api.markdown.aggregator;
 
 import java.nio.file.Path;
 
 public interface MarkdownInfo {
     Path getPath();
-    CharSequence getBody();
+    String getBody();
     FrontMatter getFrontmatter();
 
 }
