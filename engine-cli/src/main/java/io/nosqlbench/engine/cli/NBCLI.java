@@ -5,8 +5,6 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -96,12 +94,12 @@ public class NBCLI {
         }
 
         if (options.wantsWorkloadsList()) {
-            printWorkloads(false, options.wantsIncludes());
+            NBCLIScenarios.printWorkloads(false, options.wantsIncludes());
             System.exit(0);
         }
 
         if (options.wantsScenariosList()) {
-            printWorkloads(true, options.wantsIncludes());
+            NBCLIScenarios.printWorkloads(true, options.wantsIncludes());
             System.exit(0);
         }
 
@@ -280,49 +278,6 @@ public class NBCLI {
         } else {
             System.exit(0);
         }
-    }
-
-    public void printWorkloads(boolean includeScenarios,
-                               String... includes) {
-        List<WorkloadDesc> workloads =
-            NBCLIScenarioParser.getWorkloadsWithScenarioScripts(includes);
-
-        for (WorkloadDesc workload : workloads) {
-            System.out.println(workload.getYamlPath());
-
-            if (includeScenarios) {
-                System.out.println("    # scenarios:");
-
-                List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getWorkloadName();
-
-                for (String scenario : scenarioList) {
-                    System.out.println("    nb " + workloadName + " " + scenario);
-                }
-
-                Map<String, String> templates = workload.getTemplates();
-                if (templates.size() > 0) {
-                    System.out.println("        # defaults");
-                    for (Map.Entry<String, String> templateEntry : templates.entrySet()) {
-                        System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
-                    }
-                }
-                System.out.println("\n");
-            }
-
-        }
-
-        if (!includeScenarios) {
-            System.out.println("\n# To see scenarios scenarios, use --list-scenarios");
-        }
-
-        System.out.println(
-            "\n" +
-                "# To include examples, add --include=examples\n" +
-                "# To copy any of these to your local directory, use\n" +
-                "# --include=examples --copy=examplename\n"
-        );
-
     }
 
     private String loadHelpFile(String filename) {
