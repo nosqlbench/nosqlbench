@@ -1,17 +1,15 @@
 package io.nosqlbench.engine.cli;
 
+import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.core.*;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.core.MarkdownDocInfo;
-import io.nosqlbench.engine.core.ScenarioLogger;
-import io.nosqlbench.engine.core.ScenariosResults;
-import io.nosqlbench.engine.core.ShutdownManager;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
@@ -31,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 public class NBCLI {
@@ -261,16 +260,34 @@ public class NBCLI {
 
         // Execute Scenario!
 
+        Level clevel = options.wantsConsoleLogLevel();
+        Level llevel = Level.toLevel(options.getLogsLevel());
+        if (llevel.toInt()>clevel.toInt()) {
+            logger.info("raising scenario logging level to accommodate console logging level");
+        }
+        Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
+
         scenario.addScriptText(scriptData);
         ScenarioLogger sl = new ScenarioLogger(scenario)
             .setLogDir(options.getLogsDirectory())
             .setMaxLogs(options.getLogsMax())
-            .setLevel(options.getLogsLevel())
+            .setLevel(maxLevel)
             .setLogLevelOverrides(options.getLogLevelOverrides())
             .start();
 
         executor.execute(scenario, sl);
+
+        while (true) {
+            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getName());
+            if (pendingResult.isEmpty()) {
+                LockSupport.parkNanos(100000000L);
+            } else {
+                break;
+            }
+        }
+
         ScenariosResults scenariosResults = executor.awaitAllResults();
+
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
