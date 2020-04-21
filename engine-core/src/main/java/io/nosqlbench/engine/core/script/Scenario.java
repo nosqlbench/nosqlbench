@@ -142,13 +142,16 @@ public class Scenario implements Callable<ScenarioResult> {
                 } else {
                     result = scriptEngine.eval(script);
                 }
+                if (result!=null) {
+                    logger.debug("result: type(" + result.getClass().getCanonicalName() + "): value:" + result.toString());
+                }
                 System.err.flush();
                 System.out.flush();
             } catch (ScriptException e) {
                 String diagname = "diag_" + System.currentTimeMillis() + ".js";
                 try {
                     Path diagFilePath = Paths.get(scenarioLogger.getLogDir(), diagname);
-                    Files.write(diagFilePath,script.getBytes(StandardCharsets.UTF_8));
+                    Files.writeString(diagFilePath, script);
                 } catch (Exception ignored) {
                 }
                 String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;
@@ -170,7 +173,7 @@ public class Scenario implements Callable<ScenarioResult> {
         int awaitCompletionTime = 86400*365*1000;
         logger.info("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
-
+        logger.trace("scenario complete");
     }
 
     public ScenarioResult call() {
