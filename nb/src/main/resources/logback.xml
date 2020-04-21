@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- logback.xml for engine-core -->
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+    <!--<encoder>-->
+    <!--<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>-->
+    <!--</encoder>-->
+    <!--</appender>-->
+
+    <logger name="io.nosqlbench" specificity="TRACE"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DOCSLOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/docserver.log</file>
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>50MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+            <totalSizeCap>250GB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>1</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="io.nosqlbench.docsys" level="info" additivity="true">
+        <appender-ref ref="DOCSLOGS"/>
+    </logger>
+
+</configuration>

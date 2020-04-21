@@ -9,6 +9,6 @@
     <!--</encoder>-->
   <!--</appender>-->
 
-  <logger name="io.nosqlbench" specificity="INFO"/>
+  <logger name="io.nosqlbench" specificity="TRACE"/>
 
 </configuration>
