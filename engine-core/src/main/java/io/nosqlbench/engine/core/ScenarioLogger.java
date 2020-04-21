@@ -56,6 +56,11 @@ public class ScenarioLogger {
         return this;
     }
 
+    public ScenarioLogger setLevel(Level level) {
+        this.logLevel = level;
+        return this;
+    }
+
     public ScenarioLogger setLevel(String levelname) {
         this.logLevel = Level.toLevel(levelname);
         return this;
