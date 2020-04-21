@@ -153,15 +153,20 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         executorService.shutdown();
         boolean wasStopped = false;
         try {
+            logger.trace("awaiting termination with timeout of " + secondsToWait +" seconds");
             wasStopped = executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
+            logger.trace("interrupted while awaiting termination");
             wasStopped = false;
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
         } finally {
+            logger.trace("finally shutting down activity " + this.getActivity().getAlias());
             activity.shutdownActivity();
+            logger.trace("closing auto-closeables");
             activity.closeAutoCloseables();
         }
         if (stoppingException!=null) {
+            logger.trace("an exception caused the activity to stop:" + stoppingException.getMessage());
             throw stoppingException;
         }
 
@@ -303,6 +308,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
         }
+        logger.debug("activity and threads are aligned to state " + activity.getRunState() + " for " + this.getActivity().getAlias());
 
     }
 
