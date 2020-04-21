@@ -285,7 +285,12 @@ public class SimpleActivity implements Activity {
             int processors = Runtime.getRuntime().availableProcessors();
             if (spec.toLowerCase().equals("auto")) {
                 int threads = processors*10;
-                logger.info("setting threads to " + threads + " (auto)");
+                if (threads>activityDef.getCycleCount()) {
+                    threads=(int) activityDef.getCycleCount();
+                    logger.info("setting threads to " + threads + " (auto) [10xCORES, cycle count limited]");
+                } else {
+                    logger.info("setting threads to " + threads + " (auto) [10xCORES]");
+                }
                 activityDef.setThreads(threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
@@ -296,6 +301,12 @@ public class SimpleActivity implements Activity {
                 logger.info("setting threads to " + spec + "(direct)");
                 activityDef.setThreads(Integer.parseInt(spec));
             }
+
+            if (activityDef.getThreads()>activityDef.getCycleCount()) {
+                logger.warn("threads="+activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+                + ", you should have more cycles than threads.");
+            }
+
         } else {
             if (cycleCount>1000) {
                 logger.warn("For testing at scale, it is highly recommended that you " +
