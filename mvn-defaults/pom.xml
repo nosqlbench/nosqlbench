@@ -47,7 +47,7 @@
         <logback.version>1.2.3</logback.version>
         <lz4.version>1.4.1</lz4.version>
         <metrics.reservoir.version>1.1.0</metrics.reservoir.version>
-        <metrics.version>3.2.6</metrics.version>
+        <metrics.version>4.0.7</metrics.version>
         <mvel2.version>2.4.3.Final</mvel2.version>
         <netty.version>4.1.45.Final</netty.version>
         <number.to.words.version>1.0.0</number.to.words.version>
