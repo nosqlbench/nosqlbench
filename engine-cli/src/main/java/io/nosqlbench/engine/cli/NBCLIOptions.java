@@ -284,12 +284,12 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsMarkerTypes = true;
                     break;
-                case DASH_VV_DEBUG:
-                    consoleLevel = Level.DEBUG;
-                    arglist.removeFirst();
-                    break;
                 case DASH_V_INFO:
                     consoleLevel = Level.INFO;
+                    arglist.removeFirst();
+                    break;
+                case DASH_VV_DEBUG:
+                    consoleLevel = Level.DEBUG;
                     arglist.removeFirst();
                     break;
                 case DASH_VVV_TRACE:
