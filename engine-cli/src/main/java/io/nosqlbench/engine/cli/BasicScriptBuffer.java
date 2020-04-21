@@ -17,11 +17,13 @@ public class BasicScriptBuffer implements ScriptBuffer {
         switch (cmd.getCmdType()) {
             case script:
                 sb.append(Cmd.toJSONParams("params", cmd.getParams(), false));
+                sb.append(";\n");
                 String scriptData = NBCLIScriptAssembly.loadScript(cmd);
                 sb.append(scriptData);
                 break;
             case fragment:
                 sb.append(Cmd.toJSONParams("params", cmd.getParams(), false));
+                sb.append(";\n");
                 sb.append(cmd.getArg("script_fragment"));
                 if (!cmd.getArg("script_fragment").endsWith("\n")) {
                     sb.append("\n");
