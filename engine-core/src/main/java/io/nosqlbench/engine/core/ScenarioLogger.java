@@ -93,6 +93,7 @@ public class ScenarioLogger {
         fileAppender.setFile(scenarioLog);
         fileAppender.setEncoder(ple);
         fileAppender.setContext(loggerContext);
+        fileAppender.setImmediateFlush(true);
         System.err.println("Logging to " + scenarioLog);
         fileAppender.start();
 
