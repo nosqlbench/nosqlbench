@@ -75,6 +75,7 @@
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <assertj.version>3.15.0</assertj.version>
+        <graalvm.version>20.0.0</graalvm.version>
     </properties>
 
     <name>${project.artifactId}</name>
@@ -437,6 +438,36 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
+            </dependency>
+
+            <!-- graalvm -->
+            <dependency>
+                <groupId>org.graalvm.sdk</groupId>
+                <artifactId>graal-sdk</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>profiler</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>chromeinspector</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
             </dependency>
 
         </dependencies>

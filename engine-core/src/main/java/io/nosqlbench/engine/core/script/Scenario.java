@@ -56,6 +56,12 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private boolean areChartsEnabled;
+    private Engine engine = Engine.Graalvm;
+
+    public enum Engine {
+        Nashorn,
+        Graalvm
+    }
 
     public Scenario(String name, String progressInterval) {
         this.name = name;
@@ -68,6 +74,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public Scenario addScriptText(String scriptText) {
         scripts.add(scriptText);
+        this.engine = engine;
         return this;
     }
 
@@ -91,15 +98,34 @@ public class Scenario implements Callable<ScenarioResult> {
 
     private void init() {
 
+        logger.info("Using engine " + engine.toString());
+
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
-        scriptEngine = engineManager.getEngineByName("nashorn");
-        scriptEnv = new ScenarioContext(scenarioController);
-        scriptEngine.setContext(scriptEnv);
+        switch (engine) {
+            case Nashorn:
+                scriptEngine = engineManager.getEngineByName("nashorn");
+                break;
+            case Graalvm:
+                scriptEngine = engineManager.getEngineByName("graal.js");
+                Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+                bindings.put("polyglot.js.allowHostAccess", true);
+                bindings.put("polyglot.js.allowNativeAccess", true);
+                bindings.put("polyglot.js.allowCreateThread", true);
+                bindings.put("polyglot.js.allowIO", true);
+                bindings.put("polyglot.js.allowHostClassLookup", true);
+                bindings.put("polyglot.js.allowHostClassLoading", true);
+                bindings.put("polyglot.js.allowAllAccess", true);
+                break;
+        }
+
         scenarioController = new ScenarioController();
         if (!progressInterval.equals("disabled")) {
             progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
         }
+
+        scriptEnv = new ScenarioContext(scenarioController);
+        scriptEngine.setContext(scriptEnv);
 
         scriptEngine.put("params", scenarioScriptParams);
         scriptEngine.put("scenario", scenarioController);

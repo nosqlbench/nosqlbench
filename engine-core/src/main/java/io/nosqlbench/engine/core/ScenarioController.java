@@ -105,6 +105,11 @@ public class ScenarioController {
     public synchronized void run(String activityDefString) {
         run(Integer.MAX_VALUE, activityDefString);
     }
+//
+//    public synchronized void run(Value v) {
+//        logger.debug("run(Value) called with:" + v);
+//        throw new RuntimeException("fix it");
+//    }
 
     public synchronized void run(ActivityDef activityDef) {
         run(Integer.MAX_VALUE, activityDef);

@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
@@ -74,6 +75,10 @@ public class NBCLIOptions {
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
 
+    private static final String GRAALVM_ENGINE = "--graalvm";
+    private static final String NASHORN_ENGINE = "--nashorn";
+
+
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
             Arrays.asList(
@@ -119,6 +124,8 @@ public class NBCLIOptions {
     private String wantsToCopyWorkload = null;
     private boolean wantsWorkloadsList = false;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
+    private Scenario.Engine engine = Scenario.Engine.Graalvm;
+
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -174,6 +181,14 @@ public class NBCLIOptions {
             }
 
             switch (word) {
+                case GRAALVM_ENGINE:
+                    engine = Scenario.Engine.Graalvm;
+                    arglist.removeFirst();
+                    break;
+                case NASHORN_ENGINE:
+                    engine = Scenario.Engine.Nashorn;
+                    arglist.removeFirst();
+                    break;
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
@@ -400,6 +415,10 @@ public class NBCLIOptions {
             levels.put(ll[0], Level.toLevel(ll[1]));
         });
         return levels;
+    }
+
+    public Scenario.Engine getScriptingEngine() {
+        return engine;
     }
 
     public List<LoggerConfig> getHistoLoggerConfigs() {
