@@ -130,12 +130,12 @@ public class Scenario implements Callable<ScenarioResult> {
     public void run() {
         init();
 
-        logger.info("Running control script for " + getName() + ".");
+        logger.debug("Running control script for " + getName() + ".");
         for (String script : scripts) {
             try {
                 Object result = null;
                 if (scriptEngine instanceof Compilable) {
-                    logger.info("Using direct script compilation");
+                    logger.debug("Using direct script compilation");
                     Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
                     result = compiled.eval();
@@ -143,7 +143,7 @@ public class Scenario implements Callable<ScenarioResult> {
                     result = scriptEngine.eval(script);
                 }
                 if (result!=null) {
-                    logger.debug("result: type(" + result.getClass().getCanonicalName() + "): value:" + result.toString());
+                    logger.debug("scenario result: type(" + result.getClass().getCanonicalName() + "): value:" + result.toString());
                 }
                 System.err.flush();
                 System.out.flush();
@@ -171,9 +171,9 @@ public class Scenario implements Callable<ScenarioResult> {
             }
         }
         int awaitCompletionTime = 86400*365*1000;
-        logger.info("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
+        logger.debug("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
-        logger.trace("scenario complete");
+        logger.debug("scenario completed without errors");
     }
 
     public ScenarioResult call() {

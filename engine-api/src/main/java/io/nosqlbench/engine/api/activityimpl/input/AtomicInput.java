@@ -65,7 +65,8 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
             long next = current + stride;
             if (next > max.get()) {
                 if (recycleValue.get()>=recycleMax.get()) {
-                    logger.debug("Exhausted input for " + activityDef.getAlias() + " at " + current + ", recycle count " + recycleValue.get());
+                    logger.trace("Exhausted input for " + activityDef.getAlias() + " at " + current + ", recycle " +
+                        "count " + recycleValue.get());
                     return null;
                 } else {
                     if (cycleValue.compareAndSet(current,min.get()+stride)) {
