@@ -21,12 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ScriptParams extends HashMap<String,String> {
+
     public Map<String,String> withOverrides(Map<String,String> overrides) {
         HashMap<String,String> result = new HashMap<>();
         result.putAll(this);
         result.putAll(overrides);
         return result;
     }
+
     public Map<String,String> withDefaults(Map<String,String> defaults) {
         HashMap<String,String> result = new HashMap<>();
         result.putAll(defaults);

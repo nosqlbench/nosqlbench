@@ -113,21 +113,6 @@ public class TestNBCLIOptions {
     }
 
     @Test
-    public void testScriptInterpolation() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "script_to_interpolate", "parameter1=replaced"});
-        String s = NBCLIScriptAssembly.assemble(opts);
-        assertThat(s).contains("let foo=replaced;");
-        assertThat(s).contains("let bar=UNSET:parameter2");
-    }
-
-    @Test
-    public void testAutoScriptCommand() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "acommand" });
-        String s = NBCLIScriptAssembly.assemble(opts);
-        assertThat(s).contains("acommand script text");
-    }
-
-    @Test
     public void shouldRecognizeStartActivityCmd() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "driver=woot" });
         List<Cmd> cmds = opts.getCommands();
@@ -183,14 +168,6 @@ public class TestNBCLIOptions {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.waitmillis);
         assertThat(cmds.get(0).getArg("millis_to_wait")).isEqualTo("23234");
-
-    }
-
-    @Test(expected = NumberFormatException.class)
-    public void shouldThrowErrorForInvalidWaitMillisOperand() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "noway" });
-        List<Cmd> cmds = opts.getCommands();
-        NBCLIScriptAssembly.assemble(opts);
 
     }
 

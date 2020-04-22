@@ -7,6 +7,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogIm
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.core.*;
+import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -243,7 +244,10 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        String scriptData = NBCLIScriptAssembly.assemble(options);
+        ScriptBuffer buffer = new BasicScriptBuffer().add(options.getCommands().toArray(new Cmd[0]));
+        String scriptData = buffer.getParsedScript();
+        Map<String,String> globalParams=buffer.getCombinedParams();
+
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
             System.out.println(scriptData);
@@ -268,6 +272,9 @@ public class NBCLI {
         Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
 
         scenario.addScriptText(scriptData);
+        ScriptParams scriptParams = new ScriptParams();
+        scriptParams.putAll(buffer.getCombinedParams());
+        scenario.addScenarioScriptParams(scriptParams);
         ScenarioLogger sl = new ScenarioLogger(scenario)
             .setLogDir(options.getLogsDirectory())
             .setMaxLogs(options.getLogsMax())

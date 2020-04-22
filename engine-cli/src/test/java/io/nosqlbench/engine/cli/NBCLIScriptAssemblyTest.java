@@ -24,30 +24,5 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBCLIScriptAssemblyTest {
 
-    @Test
-    public void testScriptParamsSingle() {
-        NBCLIOptions opts = new NBCLIOptions(new String[] {
-                "script",
-                "testscripts/printscript.js",
-                "param1=value1"
-        });
-        String script = NBCLIScriptAssembly.assemble(opts);
-        assertThat(script).matches("(?s).*a single line.*");
-    }
-
-    @Test
-    public void testScriptParamsMulti() {
-        NBCLIOptions opts = new NBCLIOptions(new String[] {
-                "script",
-                "testscripts/printscript.js",
-                "param1=value1",
-                "script",
-                "testscripts/printparam.js",
-                "paramname=another",
-                "param2=andanother"
-        });
-        String script = NBCLIScriptAssembly.assemble(opts);
-        assertThat(script).matches("(?s).*a single line.*");
-    }
 
 }

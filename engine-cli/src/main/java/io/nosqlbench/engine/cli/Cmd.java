@@ -1,7 +1,5 @@
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +14,12 @@ import java.util.function.Function;
  * An example of a command tha thas both would look like {@code script test.js p1=v1}
  */
 public class Cmd {
+
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
 
     public enum CmdType {
         script(Arg.of("script_path", s -> s)),
-        fragment(Arg.of("script_fragment")),
+        fragment(Arg.ofFreeform("script_fragment")),
         start(),
         run(),
         await(Arg.of("alias_name")),
@@ -49,18 +48,23 @@ public class Cmd {
     private static final class Arg<T> {
         public final String name;
         public final Function<String, T> converter;
+        public final boolean freeform;
 
-        public Arg(String name, Function<String, T> converter) {
+        public Arg(String name, Function<String, T> converter, boolean freeform) {
             this.name = name;
             this.converter = converter;
+            this.freeform = freeform;
         }
 
         public static <T> Arg<T> of(String name, Function<String, T> converter) {
-            return new Arg<>(name, converter);
+            return new Arg<>(name, converter, false);
         }
 
         public static Arg<String> of(String name) {
-            return new Arg<>(name, s -> s);
+            return new Arg<>(name, s -> s, false);
+        }
+        public static Arg<String> ofFreeform(String name) {
+            return new Arg<>(name, s->s, true);
         }
     }
 
@@ -109,23 +113,28 @@ public class Cmd {
 
         Map<String, String> params = new LinkedHashMap<>();
 
-        for (Arg<?> paramName : cmdType.getPositionalArgs()) {
-            String arg = arglist.peekFirst();
-            if (arg == null) {
-                throw new InvalidParameterException("command '" + cmdName + " requires a value for " + paramName
-                    + ", but there were no remaining arguments after it.");
-            }
-            if (arg.contains("=")) {
-                throw new InvalidParameterException("command '" + cmdName + "' requires a value for " + paramName + "" +
-                    ", but a named parameter was found instead: " + arg);
-            }
-            if (NBCLIOptions.RESERVED_WORDS.contains(arg)) {
-                throw new InvalidParameterException("command '" + cmdName + "' requires a value for " + paramName
-                    + ", but a reserved word was found instead: " + arg);
+        for (Arg<?> arg : cmdType.getPositionalArgs()) {
+
+            String nextarg = arglist.peekFirst();
+
+            if (nextarg == null) {
+                throw new InvalidParameterException(
+                    "command '" + cmdName + " requires a value for " + arg.name
+                        + ", but there were no remaining arguments after it.");
+            } else if (arg.freeform) {
+                logger.debug("freeform parameter:" + nextarg);
+            } else if (nextarg.contains("=")) {
+                throw new InvalidParameterException(
+                    "command '" + cmdName + "' requires a value for " + arg.name + "" +
+                        ", but a named parameter was found instead: " + nextarg);
+            } else if (NBCLIOptions.RESERVED_WORDS.contains(nextarg)) {
+                throw new InvalidParameterException(
+                    "command '" + cmdName + "' requires a value for " + arg.name
+                        + ", but a reserved word was found instead: " + nextarg);
             }
 
-            logger.debug("cmd name:" + cmdName + ", positional " + paramName + ": " + arg);
-            params.put(paramName.name, paramName.converter.apply(arglist.removeFirst()).toString());
+            logger.debug("cmd name:" + cmdName + ", positional " + arg.name + ": " + nextarg);
+            params.put(arg.name, arg.converter.apply(arglist.removeFirst()).toString());
         }
 
         while (arglist.size() > 0 &&
@@ -156,7 +165,7 @@ public class Cmd {
         List<String> l = new ArrayList<>();
         map.forEach((k, v) -> l.add(
             (oneline ? "" : "    ") + "'" + k + "'"
-                +": " + (oneline ? "" : " ".repeat(klen - k.length())) +
+                + ": " + (oneline ? "" : " ".repeat(klen - k.length())) +
                 "'" + v + "'"
         ));
         return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
