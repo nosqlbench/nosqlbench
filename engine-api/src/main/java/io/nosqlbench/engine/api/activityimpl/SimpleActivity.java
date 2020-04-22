@@ -143,6 +143,7 @@ public class SimpleActivity implements Activity {
     @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
+            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable.toString());
             try {
                 closeable.close();
             } catch (Exception e) {

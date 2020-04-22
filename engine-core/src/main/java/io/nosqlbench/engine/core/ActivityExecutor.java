@@ -51,7 +51,10 @@ import java.util.stream.Collectors;
  */
 
 public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressMeter {
+
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
+    private static final Logger activitylogger = LoggerFactory.getLogger("ACTIVITY");
+
     private final List<Motor<?>> motors = new ArrayList<>();
     private final Activity activity;
     private final ActivityDef activityDef;
@@ -89,6 +92,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      */
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
+        activitylogger.debug("START/before alias=(" + activity.getAlias() + ")");
         try {
             activity.setRunState(RunState.Starting);
             activity.initActivity();
@@ -96,17 +100,21 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         } catch (Exception e) {
             this.stoppingException = new RuntimeException("Error initializing activity '" +
                     activity.getAlias() +"': " + e.getMessage(),e);
-            logger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
+            activitylogger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
             throw stoppingException;
         }
         adjustToActivityDef(activity.getActivityDef());
         activity.setRunState(RunState.Running);
+        activitylogger.debug("START/after alias=(" + activity.getAlias() + ")");
+
     }
 
     /**
      * Simply stop the motors
      */
     public synchronized void stopActivity() {
+        activitylogger.debug("STOP/before alias=(" + activity.getAlias() + ")");
+
         activity.setRunState(RunState.Stopped);
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
@@ -114,6 +122,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         activity.shutdownActivity();
         activity.closeAutoCloseables();
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
+        activitylogger.debug("STOP/after alias=(" + activity.getAlias() + ")");
+
     }
 
     /**
@@ -122,6 +132,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing everything to stop
      */
     public synchronized void forceStopExecutor(int initialMillisToWait) {
+        activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
+
         activity.setRunState(RunState.Stopped);
 
         executorService.shutdown();
@@ -141,11 +153,17 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.debug(runnables.size() + " threads never started.");
 
         if (stoppingException!=null) {
+            activitylogger.debug("FORCE STOP/exception alias=(" + activity.getAlias() + ")");
+
             throw stoppingException;
         }
+        activitylogger.debug("FORCE STOP/after alias=(" + activity.getAlias() + ")");
+
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
+        activitylogger.debug("REQUEST STOP/before alias=(" + activity.getAlias() + ")");
+
         activity.setRunState(RunState.Stopped);
 
         logger.info("Stopping executor for " + activity.getAlias() + " when work completes.");
@@ -159,6 +177,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.trace("interrupted while awaiting termination");
             wasStopped = false;
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
+            activitylogger.debug("REQUEST STOP/exception alias=(" + activity.getAlias() + ") wasstopped=" +wasStopped);
         } finally {
             logger.trace("finally shutting down activity " + this.getActivity().getAlias());
             activity.shutdownActivity();
@@ -169,6 +188,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.trace("an exception caused the activity to stop:" + stoppingException.getMessage());
             throw stoppingException;
         }
+        activitylogger.debug("REQUEST STOP/after alias=(" + activity.getAlias() + ") wasstopped=" +wasStopped);
 
         return wasStopped;
     }
@@ -209,13 +229,17 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public boolean awaitFinish(int timeout) {
+        activitylogger.debug("AWAIT-FINISH/before alias=(" + activity.getAlias() + ")");
+
         boolean awaited = awaitAllRequiredMotorState(timeout, 50, RunState.Finished, RunState.Stopped);
         if (awaited) {
             awaited = awaitCompletion(timeout);
         }
         if (stoppingException!=null) {
+            activitylogger.debug("AWAIT-FINISH/exception alias=(" + activity.getAlias() + ")");
             throw stoppingException;
         }
+        activitylogger.debug("AWAIT-FINISH/afte alias=(" + activity.getAlias() + ")");
         return awaited;
     }
 

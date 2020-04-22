@@ -138,10 +138,15 @@ public class Scenario implements Callable<ScenarioResult> {
                     logger.debug("Using direct script compilation");
                     Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
+                    logger.debug("-> invoking main scenario script (compiled)");
                     result = compiled.eval();
+                    logger.debug("<- scenario completed (compiled)");
                 } else {
+                    logger.debug("-> invoking main scenario script (interpreted)");
                     result = scriptEngine.eval(script);
+                    logger.debug("<- scenario completed (interpreted)");
                 }
+
                 if (result!=null) {
                     logger.debug("scenario result: type(" + result.getClass().getCanonicalName() + "): value:" + result.toString());
                 }
@@ -168,6 +173,9 @@ public class Scenario implements Callable<ScenarioResult> {
                 logger.error(errorDesc, o);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
+            } finally {
+               System.out.flush();
+               System.err.flush();
             }
         }
         int awaitCompletionTime = 86400*365*1000;
