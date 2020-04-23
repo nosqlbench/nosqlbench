@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -244,7 +245,9 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        ScriptBuffer buffer = new BasicScriptBuffer().add(options.getCommands().toArray(new Cmd[0]));
+        ScriptBuffer buffer = new BasicScriptBuffer(
+            options.getLogsDirectory()+ FileSystems.getDefault().getSeparator()+ "_scenario."+ scenario.getName() +".js"
+        ).add(options.getCommands().toArray(new Cmd[0]));
         String scriptData = buffer.getParsedScript();
         Map<String,String> globalParams=buffer.getCombinedParams();
 

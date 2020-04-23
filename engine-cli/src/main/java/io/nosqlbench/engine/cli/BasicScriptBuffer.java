@@ -3,9 +3,19 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +26,19 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
     private final StringBuilder sb = new StringBuilder();
     private final Map<String, String> scriptParams = new HashMap<>();
+    private final String createPath;
 
+//    public BasicScriptBuffer() {
+//        this.createPath = null;
+//    }
+
+    public BasicScriptBuffer() {
+        this.createPath =  "_scenario.js";
+    }
+
+    public BasicScriptBuffer(String createPath) {
+        this.createPath = createPath;
+    }
 
     public ScriptBuffer add(Cmd cmd) {
         Map<String, String> params = cmd.getParams();
@@ -44,7 +66,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
             case stop: // stop activity
             case waitmillis:
 
-            sb.append("scenario.").append(cmd).append("\n");
+                sb.append("scenario.").append(cmd).append("\n");
 ////                // Sanity check that this can parse before using it
 ////                sb.append("scenario.").append(cmd.toString()).append("(")
 ////                    .append(Cmd.toJSONBlock(cmd.getParams(), false))
@@ -67,7 +89,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
      * if they are overwriting values, which could cause difficult to find bugs in their scripts.
      *
      * @param scriptParams The existing global params map
-     * @param cmd The command containing the new params to merge in
+     * @param cmd          The command containing the new params to merge in
      */
     private void combineGlobalParams(Map<String, String> scriptParams, Cmd cmd) {
         for (String newkey : cmd.getParams().keySet()) {
@@ -76,7 +98,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
             if (scriptParams.containsKey(newkey)) {
                 logger.warn("command '" + cmd.getCmdType() + "' overwrote param '" + newkey + " as " + newvalue);
             }
-            scriptParams.put(newkey,newvalue);
+            scriptParams.put(newkey, newvalue);
         }
     }
 
@@ -90,7 +112,24 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
     @Override
     public String getParsedScript() {
-        return sb.toString();
+        String scripttext = sb.toString();
+
+        if (this.createPath != null) {
+            Path tocreate = Path.of(createPath);
+
+            if (Files.exists(tocreate) && !tocreate.getFileName().toString().startsWith("_")) {
+                throw new BasicError("Unable to overwrite file at " + tocreate.toString() + ". If you start the name " +
+                    "with _, it will always be overwritten.");
+            }
+            try {
+                String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
+                Files.writeString(tocreate, appended, StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
+                logger.debug("Wrote script to " + tocreate.toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return scripttext;
     }
 
     @Override
