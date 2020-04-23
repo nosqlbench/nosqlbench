@@ -29,7 +29,6 @@ import java.util.function.LongUnaryOperator;
 public class ListSizedHashed implements LongFunction<List<Object>> {
 
     private final List<LongFunction<? extends Object>> valueFuncs;
-    private final int size;
     private final Hash hasher = new Hash();
     private final LongToIntFunction sizeFunc;
 
@@ -40,7 +39,6 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
     public ListSizedHashed(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
         this.sizeFunc = sizeFunc;
         this.valueFuncs = Arrays.asList(funcs);
-        this.size = valueFuncs.size();
     }
 
     @Example({
@@ -54,7 +52,6 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
         }
         this.sizeFunc = sizeFunc;
         this.valueFuncs = building;
-        this.size = building.size();
     }
 
     @Example({
@@ -68,7 +65,6 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
         }
         this.sizeFunc = sizeFunc;
         this.valueFuncs = building;
-        this.size = building.size();
     }
 
     @Override

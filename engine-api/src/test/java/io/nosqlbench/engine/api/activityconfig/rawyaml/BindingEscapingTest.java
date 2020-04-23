@@ -30,10 +30,22 @@ public class BindingEscapingTest {
     private final static Logger logger = LoggerFactory.getLogger(BindingEscapingTest.class);
 
     @Test
-    public void testEscapedBindings() {
-        DataMapper<String> mapper = VirtData.getMapper("Template('\"-{}-\"Func(234)\\\"\\)',NumberNameToString());'",String.class);
+    public void testThatEscapesAreNotUnescapedInSingleQuotes() {
+        DataMapper<String> mapper = VirtData.getMapper(
+            "Template('\"-{}-\"Func(234)\\\"\\)',NumberNameToString());"
+        );
         String s = mapper.get(234);
         assertThat(s).isEqualTo("\"-two hundred and thirty four-\"Func(234)\\\"\\)");
+    }
+
+    @Test
+    public void testThatEscapesAreUnescapedInSingleQuotes() {
+        DataMapper<String> mapper =
+            VirtData.getMapper(
+                "Template(\"\\\"-{}-\\\"Func(234)\\\")\",NumberNameToString());"
+            );
+        String s = mapper.get(234);
+        assertThat(s).isEqualTo("\"-two hundred and thirty four-\"Func(234)\")");
     }
 
 }

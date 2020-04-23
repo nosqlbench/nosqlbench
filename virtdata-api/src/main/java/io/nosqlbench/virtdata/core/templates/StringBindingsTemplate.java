@@ -63,6 +63,16 @@ public class StringBindingsTemplate {
         return new StringBindings(compositor,bindings);
     }
 
+    public String getDiagnostics() {
+        StringCompositor compositor = new StringCompositor(stringTemplate);
+        HashSet<String> unqualifiedNames = new HashSet<>(compositor.getBindPointNames());
+        unqualifiedNames.removeAll(new HashSet<>(bindingsTemplate.getBindPointNames()));
+        if (unqualifiedNames.size()>0) {
+            throw new RuntimeException("Named anchors were specified in the template which were not provided in the bindings: " + unqualifiedNames.toString());
+        }
+        return bindingsTemplate.getDiagnostics();
+    }
+
     @Override
     public String toString() {
         return "TEMPLATE:"+this.stringTemplate+" BINDING:"+bindingsTemplate.toString();

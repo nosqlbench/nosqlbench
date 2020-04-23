@@ -50,12 +50,12 @@ import java.util.stream.Collectors;
 public class VirtDataComposer {
 
     private final static String PREAMBLE = "compose ";
-    private final static Logger logger  = LogManager.getLogger(DataMapperLibrary.class);
+    private final static Logger logger = LogManager.getLogger(DataMapperLibrary.class);
     private final static MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 
     private final VirtDataFunctionLibrary functionLibrary;
 
-    private final Map<String,Object> customElements = new HashMap<>();
+    private final Map<String, Object> customElements = new HashMap<>();
 
     public VirtDataComposer(VirtDataFunctionLibrary functionLibrary) {
         this.functionLibrary = functionLibrary;
@@ -91,23 +91,22 @@ public class VirtDataComposer {
 
     public ResolverDiagnostics resolveDiagnosticFunctionFlow(VirtDataFlow flow) {
         ResolverDiagnostics diagnostics = new ResolverDiagnostics();
-        diagnostics.trace("processing flow " + flow.toString() + " from output to input");
-
         LinkedList<List<ResolvedFunction>> funcs = new LinkedList<>();
 
         LinkedList<Set<Class<?>>> nextFunctionInputTypes = new LinkedList<>();
         Optional<Class<?>> finalValueTypeOption =
-                Optional.ofNullable(flow.getLastExpression().getCall().getOutputType())
-                        .map(ValueType::valueOfClassName).map(ValueType::getValueClass);
+            Optional.ofNullable(flow.getLastExpression().getCall().getOutputType())
+                .map(ValueType::valueOfClassName).map(ValueType::getValueClass);
 
         nextFunctionInputTypes.add(new HashSet<>());
         finalValueTypeOption.ifPresent(t -> nextFunctionInputTypes.get(0).add(t));
 
-        diagnostics.trace("working backwards from " + (flow.getExpressions().size()-1));
+        diagnostics.trace("working backwards from index " + (flow.getExpressions().size() - 1) + " to index 0");
 
         for (int i = flow.getExpressions().size() - 1; i >= 0; i--) {
             FunctionCall call = flow.getExpressions().get(i).getCall();
-            diagnostics.trace("resolving args for " + call.toString());
+            diagnostics.trace("FUNCTION[" + i + "]: " + call.toString() + ", resolving args");
+//            diagnostics.trace("resolving args for " + call.toString());
 
             List<ResolvedFunction> nodeFunctions = new LinkedList<>();
 
@@ -115,23 +114,24 @@ public class VirtDataComposer {
             Class<?> inputType = ValueType.classOfType(call.getInputType());
             Class<?> outputType = ValueType.classOfType(call.getOutputType());
             Object[] args = call.getArguments();
+
             try {
                 args = populateFunctions(diagnostics, args, this.customElements);
             } catch (Exception e) {
                 return diagnostics.error(e);
             }
 
-            diagnostics.trace("resolved args: ");
+            diagnostics.trace(" resolved args:");
             for (Object arg : args) {
-                diagnostics.trace(" " + arg.getClass().getSimpleName() + ": " + arg.toString());
+                diagnostics.trace(" " + arg.getClass().getSimpleName() + ": " + arg.getClass().getCanonicalName());
             }
 
-            List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, this.customElements,args);
+            List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, this.customElements, args);
             if (resolved.size() == 0) {
                 return diagnostics.error(new RuntimeException("Unable to find even one function for " + call));
             }
-            diagnostics.trace(" resolved functions:");
-            diagnostics.trace(summarize(resolved));
+            diagnostics.trace(" resolved functions");
+            diagnostics.trace(summarize(resolved, "  - "));
 
             nodeFunctions.addAll(resolved);
             funcs.addFirst(nodeFunctions);
@@ -153,10 +153,10 @@ public class VirtDataComposer {
         }
 
         FunctionAssembly assembly = new FunctionAssembly();
-        diagnostics.trace("composed summary: " + summarize(flattenedFuncs));
+//        diagnostics.trace("composed summary: " + summarize(flattenedFuncs));
 
         boolean isThreadSafe = true;
-        diagnostics.trace("FUNCTION chain selected: (multi) '" + this.summarize(flattenedFuncs) + "'");
+        diagnostics.trace("FUNCTION chain selected: (multi) '" + this.summarize(flattenedFuncs, "  - ") + "'");
         for (ResolvedFunction resolvedFunction : flattenedFuncs) {
             try {
                 Object functionObject = resolvedFunction.getFunctionObject();
@@ -165,7 +165,7 @@ public class VirtDataComposer {
                     isThreadSafe = false;
                 }
             } catch (Exception e) {
-                String flowdata = flow!=null? flow.toString() : "undefined";
+                String flowdata = flow != null ? flow.toString() : "undefined";
                 return diagnostics.error(new RuntimeException("FUNCTION resolution failed: '" + flowdata + "': " + e.toString()));
             }
         }
@@ -179,7 +179,7 @@ public class VirtDataComposer {
         return resolverDiagnostics.getResolvedFunction();
     }
 
-    private Object[] populateFunctions(ResolverDiagnostics diagnostics, Object[] args, Map<String,?> cconfig) {
+    private Object[] populateFunctions(ResolverDiagnostics diagnostics, Object[] args, Map<String, ?> cconfig) {
         for (int i = 0; i < args.length; i++) {
             Object o = args[i];
             if (o instanceof FunctionCall) {
@@ -189,7 +189,8 @@ public class VirtDataComposer {
                 Class<?> inputType = ValueType.classOfType(call.getInputType());
                 Class<?> outputType = ValueType.classOfType(call.getOutputType());
                 Object[] fargs = call.getArguments();
-                diagnostics.trace("resolving argument as function '" + call.toString() + "'");
+                diagnostics.trace(" arg (function): " + call.toString());
+//                diagnostics.trace("resolving argument as function '" + call.toString() + "'");
                 fargs = populateFunctions(diagnostics, fargs, cconfig);
 
                 List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, cconfig, fargs);
@@ -216,9 +217,11 @@ public class VirtDataComposer {
         funcs.removeAll(toRemove);
     }
 
-    private String summarize(List<ResolvedFunction> funcs) {
+    private String summarize(List<ResolvedFunction> funcs, String prefix) {
         return funcs.stream()
-                .map(String::valueOf).collect(Collectors.joining("|"));
+            .map(String::valueOf)
+            .map(s -> prefix + s)
+            .collect(Collectors.joining("\n"));
     }
 
     private String summarizeBulk(List<List<ResolvedFunction>> funcs) {
@@ -226,9 +229,9 @@ public class VirtDataComposer {
         List<List<String>> spans = new LinkedList<>();
         funcs.forEach(l -> spans.add(l.stream().map(String::valueOf).collect(Collectors.toList())));
         List<Optional<Integer>> widths = spans.stream().map(
-                l -> l.stream().map(String::length).max(Integer::compare)).collect(Collectors.toList());
+            l -> l.stream().map(String::length).max(Integer::compare)).collect(Collectors.toList());
         String funcsdata = spans.stream().map(
-                l -> l.stream().map(String::valueOf).collect(Collectors.joining("|\n"))
+            l -> l.stream().map(String::valueOf).collect(Collectors.joining("|\n"))
         ).collect(Collectors.joining("\n\n"));
 
         StringBuilder sb = new StringBuilder();
@@ -322,7 +325,7 @@ public class VirtDataComposer {
             funcs.sort(ResolvedFunction.PREFERRED_TYPE_COMPARATOR);
             while (funcs.size() > 1) {
                 logger.trace("BY-SINGLE-PREFERRED-TYPE removing func " + funcs.get(funcs.size() - 1)
-                        + " because " + funcs.get(0) + " has more preferred types.");
+                    + " because " + funcs.get(0) + " has more preferred types.");
                 funcs.remove(funcs.size() - 1);
             }
 
@@ -337,7 +340,7 @@ public class VirtDataComposer {
             prevFuncs.sort(ResolvedFunction.PREFERRED_TYPE_COMPARATOR);
             while (prevFuncs.size() > 1) {
                 String logmsg = "BY-PREV-PREFERRED-TYPE removing func " + prevFuncs.get(prevFuncs.size() - 1)
-                        + " because " + prevFuncs.get(0) + " has more preferred types.";
+                    + " because " + prevFuncs.get(0) + " has more preferred types.";
                 logger.trace(logmsg);
                 prevFuncs.remove(prevFuncs.size() - 1);
             }
@@ -346,7 +349,7 @@ public class VirtDataComposer {
             nextFuncs.sort(ResolvedFunction.PREFERRED_TYPE_COMPARATOR);
             while (nextFuncs.size() > 1) {
                 String logmsg = "BY-NEXT-PREFERRED-TYPE removing func " + nextFuncs.get(nextFuncs.size() - 1)
-                        + " because " + nextFuncs.get(0) + " has more preferred types.";
+                    + " because " + nextFuncs.get(0) + " has more preferred types.";
                 logger.trace(logmsg);
                 nextFuncs.remove(nextFuncs.size() - 1);
             }
@@ -370,7 +373,7 @@ public class VirtDataComposer {
         Set<Class<?>> outputs = getOutputs(prevFuncs);
         Set<Class<?>> inputs = getInputs(nextFuncs);
         Set<Class<?>> directMatches =
-                inputs.stream().filter(outputs::contains).collect(Collectors.toCollection(HashSet::new));
+            inputs.stream().filter(outputs::contains).collect(Collectors.toCollection(HashSet::new));
 
         if (directMatches.size() > 0) {
             List<ResolvedFunction> toremove = new ArrayList<>();
@@ -424,9 +427,9 @@ public class VirtDataComposer {
             return 0;
         } else {
             toremove.forEach(nextfunc -> {
-                        String logmsg = "BY-ASSIGNABLE-TYPE removing next func: " + nextfunc + " because its input types are not assignable from any of the previous funcs";
-                        logger.trace(logmsg);
-                    }
+                    String logmsg = "BY-ASSIGNABLE-TYPE removing next func: " + nextfunc + " because its input types are not assignable from any of the previous funcs";
+                    logger.trace(logmsg);
+                }
             );
 
             nextFuncs.removeAll(toremove);
@@ -451,9 +454,10 @@ public class VirtDataComposer {
         return inputs;
     }
 
-    public Map<String,?> getCustomElements() {
+    public Map<String, ?> getCustomElements() {
         return this.customElements;
     }
+
     public VirtDataComposer addCustomElement(String name, Object element) {
         this.customElements.put(name, element);
         return this;

@@ -30,15 +30,13 @@ public class ListHashed implements LongFunction<List<Object>> {
 
     private final List<LongFunction<? extends Object>> valueFuncs;
     private final int size;
-    private final LongToIntFunction sizeFunc;
     private final Hash hasher = new Hash();
 
     @Example({
         "ListFunctions(NumberNameToString(),NumberNameToString())",
         "Create a list of ['one','one']"
     })
-    public ListHashed(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
-        this.sizeFunc = sizeFunc;
+    public ListHashed(LongFunction<? extends Object>... funcs) {
         this.valueFuncs = Arrays.asList(funcs);
         this.size = valueFuncs.size();
     }
@@ -47,12 +45,11 @@ public class ListHashed implements LongFunction<List<Object>> {
         "ListFunctions(NumberNameToString(),NumberNameToString())",
         "Create a list of ['one','one']"
     })
-    public ListHashed(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
+    public ListHashed(LongUnaryOperator... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (LongUnaryOperator func : funcs) {
             building.add(func::applyAsLong);
         }
-        this.sizeFunc = sizeFunc;
         this.valueFuncs = building;
         this.size = building.size();
     }
@@ -61,12 +58,11 @@ public class ListHashed implements LongFunction<List<Object>> {
         "ListFunctions(NumberNameToString(),NumberNameToString())",
         "Create a list of ['one','one']"
     })
-    public ListHashed(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
+    public ListHashed(Function<Long,Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
         for (Function<Long,Object> func : funcs) {
             building.add(func::apply);
         }
-        this.sizeFunc = sizeFunc;
         this.valueFuncs = building;
         this.size = building.size();
     }
@@ -74,7 +70,6 @@ public class ListHashed implements LongFunction<List<Object>> {
     @Override
     public List<Object> apply(long value) {
         long hash = value;
-        int size = sizeFunc.applyAsInt(value);
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             int selector = Math.min(i, valueFuncs.size() - 1);

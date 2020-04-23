@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
  * result of the provided functions. The number of <code>{}</code> entries in the template
  * must strictly match the number of functions or an error will be thrown.
  *
+ * If you need to include single quotes or other special characters, you may use a
+ * backslash "\" in your template.
+ *
  * The objects passed must be functions of any of the following types:
  * <UL>
  *     <LI>LongUnaryOperator</LI>
@@ -66,7 +69,82 @@ public class Template implements LongFunction<String> {
         return adapted.toArray(new LongFunction<?>[0]);
     }
 
-//    public Template(String template, LongFunction<?>... funcs) {
+
+    /**
+     * If an operator is provided, it is used to change the function input value in an additional way before each function.
+     *
+     * @param iterOp   A pre-generation value mapping function
+     * @param template A string template containing <pre>{}</pre> anchors
+     * @param funcs    A varargs length of LongFunctions of any output type
+     */
+    public Template(LongUnaryOperator iterOp, String template, LongFunction<?>... funcs) {
+        this(template, funcs);
+        this.iterOp = iterOp;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String[] parseTemplate(String template, int funcCount) {
+        try {
+            List<String> literals = new ArrayList<>();
+            Pattern p = Pattern.compile("\\{}");
+            Matcher m = p.matcher(template);
+            int pos = 0;
+            while (m.find()) {
+                literals.add(template.substring(pos, m.start()));
+                pos = m.end();
+            }
+            String partial = template.substring(pos);
+//            partial = unescape(partial);
+            literals.add(partial);
+            if (literals.size() != funcCount + 1) {
+                throw new RuntimeException("The number of {} place holders in '" + template + "' should equal the number of functions.");
+            }
+            return literals.toArray(new String[0]);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    // for testing
+//    public String unescape(String partial) {
+//        StringBuilder unescaped = new StringBuilder();
+//        try {
+//            Pattern escapes = Pattern.compile("\\\\.");
+//            Matcher m = escapes.matcher(partial);
+//            int pos = 0;
+//
+//            while (m.find()) {
+//                String prefix = partial.substring(pos,m.start());
+//                unescaped.append(prefix);
+//                String segment = partial.substring(m.start(),m.end());
+//                unescaped.append(segment.substring(1));
+//                pos = m.end();
+//            }
+//            unescaped.append(partial.substring(pos));
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        return unescaped.toString();
+//    }
+
+    @Override
+    public String apply(long value) {
+        StringBuilder buffer = sb.get();
+        buffer.setLength(0);
+        buffer.append(literals[0]);
+        if (literals.length > 1) {
+            for (int i = 0; i < adaptedFuncs.length; i++) {
+                long input = iterOp != null ? iterOp.applyAsLong(value + i) : value + i;
+                String genString = String.valueOf(adaptedFuncs[i].apply(input));
+                buffer.append(genString);
+                buffer.append(literals[i + 1]);
+            }
+        }
+        return buffer.toString();
+    }
+
+    //    public Template(String template, LongFunction<?>... funcs) {
 //        this.adaptedFuncs = funcs;
 //        this.rawTemplate = template;
 //        this.literals = parseTemplate(template, funcs.length);
@@ -134,52 +212,4 @@ public class Template implements LongFunction<String> {
 //
 //    }
 
-    /**
-     * If an operator is provided, it is used to change the function input value in an additional way before each function.
-     *
-     * @param iterOp   A pre-generation value mapping function
-     * @param template A string template containing <pre>{}</pre> anchors
-     * @param funcs    A varargs length of LongFunctions of any output type
-     */
-    public Template(LongUnaryOperator iterOp, String template, LongFunction<?>... funcs) {
-        this(template, funcs);
-        this.iterOp = iterOp;
-    }
-
-    @SuppressWarnings("unchecked")
-    private String[] parseTemplate(String template, int funcCount) {
-        try {
-            List<String> literals = new ArrayList<>();
-            Pattern p = Pattern.compile("\\{}");
-            Matcher m = p.matcher(template);
-            int pos = 0;
-            while (m.find()) {
-                literals.add(template.substring(pos, m.start()));
-                pos = m.end();
-            }
-            literals.add(template.substring(pos));
-            if (literals.size() != funcCount + 1) {
-                throw new RuntimeException("The number of {} place holders in '" + template + "' should equal the number of functions.");
-            }
-            return literals.toArray(new String[0]);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public String apply(long value) {
-        StringBuilder buffer = sb.get();
-        buffer.setLength(0);
-        buffer.append(literals[0]);
-        if (literals.length > 1) {
-            for (int i = 0; i < adaptedFuncs.length; i++) {
-                long input = iterOp != null ? iterOp.applyAsLong(value + i) : value + i;
-                String genString = String.valueOf(adaptedFuncs[i].apply(input));
-                buffer.append(genString);
-                buffer.append(literals[i + 1]);
-            }
-        }
-        return buffer.toString();
-    }
 }
