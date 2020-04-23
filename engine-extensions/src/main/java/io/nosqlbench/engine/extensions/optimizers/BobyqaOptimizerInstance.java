@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import javax.script.ScriptContext;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class BobyqaOptimizerInstance {
 
@@ -41,7 +43,7 @@ public class BobyqaOptimizerInstance {
 
     private MVParams params = new MVParams();
 
-    private MultivariateObjectScript objectiveScriptObject;
+    private MultivariateFunction objectiveFunctionFromScript;
     private SimpleBounds bounds;
     private InitialGuess initialGuess;
     private PointValuePair result;
@@ -99,9 +101,16 @@ public class BobyqaOptimizerInstance {
             if (!scriptObject.isFunction()) {
                 throw new RuntimeException("Unable to setFunction with a non-function object");
             }
-            this.objectiveScriptObject =
-                    new MultivariateObjectScript(logger, params, scriptObject);
+            this.objectiveFunctionFromScript =
+                    new NashornMultivariateObjectScript(logger, params, scriptObject);
         }
+
+        if (f instanceof Function) {
+//            Function<Object[],Object> function = (Function<Object[],Object>)f;
+            this.objectiveFunctionFromScript =
+                new PolyglotMultivariateObjectScript(logger, params, f);
+        }
+
         return this;
     }
 
@@ -121,7 +130,7 @@ public class BobyqaOptimizerInstance {
                 this.stoppingTrustRegionRadius
         );
 
-        this.mvLogger = new MVLogger(this.objectiveScriptObject);
+        this.mvLogger = new MVLogger(this.objectiveFunctionFromScript);
         ObjectiveFunction objective = new ObjectiveFunction(this.mvLogger);
 
         List<OptimizationData> od = List.of(
