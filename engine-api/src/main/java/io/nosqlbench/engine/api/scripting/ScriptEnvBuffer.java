@@ -96,7 +96,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
         Optional.ofNullable(this.stdinBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stderrBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stdoutBuffer).map(t->t.timedLog).ifPresent(log::addAll);
-        log = log.stream().map(l -> l+"\n").collect(Collectors.toList());
+        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
         return log;
     }
     public String getTimedLog() {
