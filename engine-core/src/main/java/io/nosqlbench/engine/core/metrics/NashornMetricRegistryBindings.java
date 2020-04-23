@@ -26,14 +26,15 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRegistryListener {
+public class NashornMetricRegistryBindings extends ReadOnlyBindings implements MetricRegistryListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(MetricRegistryBindings.class);
+    private final static Logger logger = LoggerFactory.getLogger(NashornMetricRegistryBindings.class);
+
     private final MetricRegistry registry;
     private MetricMap metricMap = new MetricMap("ROOT");
     private boolean failfast = true;
 
-    public MetricRegistryBindings(MetricRegistry registry) {
+    public NashornMetricRegistryBindings(MetricRegistry registry) {
         this.registry = registry;
         registry.addListener(this);
     }

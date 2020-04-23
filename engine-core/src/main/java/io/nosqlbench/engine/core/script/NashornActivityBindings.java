@@ -16,6 +16,8 @@ package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.core.ScenarioController;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 
 import javax.script.Bindings;
 import java.util.*;
@@ -24,12 +26,12 @@ import java.util.stream.Collectors;
 /**
  * Provide a bindings wrapper around a ScenarioController,
  */
-public class ActivityBindings implements Bindings {
+public class NashornActivityBindings implements Bindings, ProxyObject {
 
     private final ScenarioController scenario;
     private Map<String,Bindings> elementMap = new HashMap<String,Bindings>();
 
-    public ActivityBindings(ScenarioController scenarioController) {
+    public NashornActivityBindings(ScenarioController scenarioController) {
         this.scenario = scenarioController;
     }
 
@@ -104,5 +106,32 @@ public class ActivityBindings implements Bindings {
     public Object remove(Object key) {
         throw new RuntimeException("this is not the advised way to forceStopMotors an activity");
 //        scenario.forceStopMotors(String.valueOf(key));
+    }
+
+    @Override
+    public Object getMember(String key) {
+        Bindings bindings = get(key);
+        return bindings;
+    }
+
+    @Override
+    public Object getMemberKeys() {
+        ArrayList<String> keys = new ArrayList<>(keySet());
+        return keys;
+    }
+
+    @Override
+    public boolean hasMember(String key) {
+        boolean b = containsKey(key);
+        return b;
+    }
+
+    @Override
+    public void putMember(String key, Value value) {
+        if (value.isHostObject()) {
+            put(key,value.asHostObject());
+        } else {
+            throw new RuntimeException("Unable to put a non-host object into the activities bindings layer:" + value);
+        }
     }
 }

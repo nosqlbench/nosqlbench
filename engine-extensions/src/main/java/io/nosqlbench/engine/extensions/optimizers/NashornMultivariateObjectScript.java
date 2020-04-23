@@ -8,12 +8,12 @@ import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultivariateObjectScript implements MultivariateFunction {
+public class NashornMultivariateObjectScript implements MultivariateFunction {
     private final ScriptObjectMirror script;
     private final MVParams params;
     private Logger logger;
 
-    public MultivariateObjectScript(Logger logger, MVParams params, ScriptObjectMirror script) {
+    public NashornMultivariateObjectScript(Logger logger, MVParams params, ScriptObjectMirror script) {
         this.logger = logger;
         this.script = script;
         this.params = params;
