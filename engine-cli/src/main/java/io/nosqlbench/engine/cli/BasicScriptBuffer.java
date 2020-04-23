@@ -114,7 +114,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
     public String getParsedScript() {
         String scripttext = sb.toString();
 
-        if (this.createPath != null) {
+        if (this.createPath != null && !this.createPath.isEmpty()) {
             Path tocreate = Path.of(createPath);
 
             if (Files.exists(tocreate) && !tocreate.getFileName().toString().startsWith("_")) {
