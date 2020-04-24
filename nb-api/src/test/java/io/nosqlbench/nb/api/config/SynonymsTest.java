@@ -1,6 +1,6 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.engine.api.util.Synonyms;
+import io.nosqlbench.nb.api.config.Synonyms;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
