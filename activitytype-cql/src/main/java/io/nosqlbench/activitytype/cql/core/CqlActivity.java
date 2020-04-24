@@ -155,6 +155,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
             boolean prepared = Boolean.valueOf(stmtDef.getParams().getOrDefault("prepared", "true"));
+            boolean parametrized = Boolean.valueOf(stmtDef.getParams().getOrDefault("parametrized", "false"));
             long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1"));
 
             Optional<ConsistencyLevel> cl = Optional.ofNullable(
@@ -218,7 +219,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     psummary.append(" idempotent=>").append(i);
                     simpleStatement.setIdempotent(i);
                 });
-                template = new ReadyCQLStatementTemplate(getSession(), simpleStatement, ratio, parsed.getName());
+                template = new ReadyCQLStatementTemplate(getSession(), simpleStatement, ratio, parsed.getName(), parametrized);
             }
 
             Optional.ofNullable(stmtDef.getParams().getOrDefault("save", null))
