@@ -52,15 +52,13 @@ public class ReadyCQLStatementTemplate {
         this.ratio = ratio;
     }
 
-    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, Session session, SimpleStatement simpleStatement,
-                                     long ratio,
-                                     String name) {
+    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, Session session, SimpleStatement simpleStatement, long ratio, String name, boolean parametrized)     {
         this.session = session;
         this.name = name;
         template = new ContextualBindingsArrayTemplate<>(
                 simpleStatement,
                 new BindingsTemplate(fconfig),
-                new SimpleStatementValuesBinder()
+                new SimpleStatementValuesBinder(parametrized)
         );
         this.ratio = ratio;
     }
