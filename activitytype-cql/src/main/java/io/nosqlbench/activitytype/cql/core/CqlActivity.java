@@ -133,6 +133,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
     private void initSequencer() {
 
+        Session session = getSession();
+        Map<String,Object> fconfig = Map.of("cluster",session.getCluster());
+
         SequencerType sequencerType = SequencerType.valueOf(
                 getParams().getOptionalString("seq").orElse("bucket")
         );
@@ -203,7 +206,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 CqlBinderTypes binderType = CqlBinderTypes.valueOf(stmtDef.getParams()
                         .getOrDefault("binder", CqlBinderTypes.DEFAULT.toString()));
 
-                template = new ReadyCQLStatementTemplate(binderType, getSession(), prepare, ratio, parsed.getName());
+                template = new ReadyCQLStatementTemplate(fconfig, binderType, getSession(), prepare, ratio,
+                    parsed.getName());
             } else {
                 SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
@@ -218,7 +222,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     psummary.append(" idempotent=>").append(i);
                     simpleStatement.setIdempotent(i);
                 });
-                template = new ReadyCQLStatementTemplate(getSession(), simpleStatement, ratio, parsed.getName());
+                template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
+                    parsed.getName());
             }
 
             Optional.ofNullable(stmtDef.getParams().getOrDefault("save", null))

@@ -39,6 +39,7 @@ import java.util.Optional;
  */
 public class BindingsTemplate {
     private final static Logger logger = LogManager.getLogger(BindingsTemplate.class);
+    private final Map<String, Object> fconfig;
     private List<String> bindPointNames = new ArrayList<>();
     private List<String> specifiers = new ArrayList<>();
 
@@ -46,7 +47,8 @@ public class BindingsTemplate {
 //        specs.forEach(this::addFieldBinding);
 //    }
 
-    public BindingsTemplate(List<String> anchors, List<String> specs) {
+    public BindingsTemplate(Map<String,Object> config, List<String> anchors, List<String> specs) {
+        this.fconfig = config;
         if (anchors.size() != specs.size()) {
             throw new InvalidParameterException("Anchors and Specifiers must be matched pair-wise.");
         }
@@ -55,11 +57,22 @@ public class BindingsTemplate {
         }
     }
 
-    public BindingsTemplate(List<BindPoint> bindpoints) {
+    public BindingsTemplate(Map<String,Object> config, List<BindPoint> bindpoints) {
+        this.fconfig = config;
         addFieldBindings(bindpoints);
+    }
+    public BindingsTemplate(List<BindPoint> bindPoints) {
+        this.fconfig = Map.of();
+        addFieldBindings(bindPoints);
+
+    }
+
+    public BindingsTemplate(Map<String,Object> config) {
+        this.fconfig = config;
     }
 
     public BindingsTemplate() {
+        this.fconfig = Map.of();
     }
 
     public void addFieldBindings(List<BindPoint> bindPoints) {
@@ -119,7 +132,7 @@ public class BindingsTemplate {
     public Bindings resolveBindings() {
         List<DataMapper<?>> dataMappers = new ArrayList<>();
         for (String specifier : specifiers) {
-            Optional<DataMapper<Object>> optionalDataMapper = VirtData.getOptionalMapper(specifier);
+            Optional<DataMapper<Object>> optionalDataMapper = VirtData.getOptionalMapper(specifier,fconfig);
             if (optionalDataMapper.isPresent()) {
                 dataMappers.add(optionalDataMapper.get());
             } else {

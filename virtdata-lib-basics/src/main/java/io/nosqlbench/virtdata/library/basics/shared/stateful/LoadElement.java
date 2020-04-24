@@ -42,8 +42,8 @@ public class LoadElement implements Function<Object,Object>, ConfigAware {
     }
 
     @Override
-    public void applyConfig(Map<String, ?> element) {
-        Map<String,?> vars = (Map<String, ?>) element.get(mapname);
+    public void applyConfig(Map<String, ?> elements) {
+        Map<String,?> vars = (Map<String, ?>) elements.get(mapname);
         if (vars!=null) {
             this.vars = vars;
         }

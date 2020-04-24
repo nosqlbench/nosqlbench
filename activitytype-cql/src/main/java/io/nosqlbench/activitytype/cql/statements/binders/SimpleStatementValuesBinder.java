@@ -10,7 +10,7 @@ import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
  * support will be added for parameterized values here.
  */
 public class SimpleStatementValuesBinder
-        implements ValuesArrayBinder<SimpleStatement, Statement> {
+    implements ValuesArrayBinder<SimpleStatement, Statement> {
 
     @Override
     public Statement bindValues(SimpleStatement context, Object[] values) {

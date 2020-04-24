@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Writer;
+import java.util.Map;
 
 public class ReadyCQLStatementTemplate {
 
@@ -36,7 +37,8 @@ public class ReadyCQLStatementTemplate {
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
 
-    public ReadyCQLStatementTemplate(CqlBinderTypes binderType, Session session, PreparedStatement preparedStmt, long ratio, String name) {
+    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, CqlBinderTypes binderType, Session session,
+                                     PreparedStatement preparedStmt, long ratio, String name) {
         this.session = session;
         this.name = name;
         ValuesArrayBinder<PreparedStatement, Statement> binder = binderType.get(session);
@@ -44,18 +46,20 @@ public class ReadyCQLStatementTemplate {
 
         template = new ContextualBindingsArrayTemplate<>(
                 preparedStmt,
-                new BindingsTemplate(),
+                new BindingsTemplate(fconfig),
                 binder
         );
         this.ratio = ratio;
     }
 
-    public ReadyCQLStatementTemplate(Session session, SimpleStatement simpleStatement, long ratio, String name) {
+    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, Session session, SimpleStatement simpleStatement,
+                                     long ratio,
+                                     String name) {
         this.session = session;
         this.name = name;
         template = new ContextualBindingsArrayTemplate<>(
                 simpleStatement,
-                new BindingsTemplate(),
+                new BindingsTemplate(fconfig),
                 new SimpleStatementValuesBinder()
         );
         this.ratio = ratio;
