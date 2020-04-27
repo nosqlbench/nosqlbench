@@ -1,6 +1,9 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string.to_bigdecimal;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.util.MathContextReader;
 
 import java.math.BigDecimal;
@@ -8,6 +11,8 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.function.Function;
 
+@ThreadSafeMapper
+@Categories(Category.conversion)
 public class ToBigDecimal implements Function<String, BigDecimal> {
 
     private final MathContext context;

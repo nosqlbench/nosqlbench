@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bigdecimal;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.util.MathContextReader;
@@ -19,6 +21,7 @@ import java.util.function.LongFunction;
  * </p>
  */
 @ThreadSafeMapper
+@Categories(Category.conversion)
 public class ToBigDecimal implements LongFunction<BigDecimal> {
 
     private final MathContext mathContext;
