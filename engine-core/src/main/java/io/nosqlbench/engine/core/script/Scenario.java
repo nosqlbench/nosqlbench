@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 public class Scenario implements Callable<ScenarioResult> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
+
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
