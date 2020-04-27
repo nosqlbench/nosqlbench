@@ -4,7 +4,7 @@ weight: 03
 
 ---
 
-## Statement Parameters
+# Statement Parameters
 
 Statements within a YAML can be accessorized with parameters. These are known as _statement params_ and are different
 than the parameters that you use at the activity level. They apply specifically to a statement template, and are

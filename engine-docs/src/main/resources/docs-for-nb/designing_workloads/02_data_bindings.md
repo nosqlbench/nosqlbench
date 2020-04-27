@@ -3,7 +3,7 @@ title: 02 Data Bindings
 weight: 02
 ---
 
-## Data Bindings
+# Data Bindings
 
 Procedural data generation is built-in to the nosqlbench runtime by way of the
 [Virtual DataSet](http://virtdata.io/) library. This allows us to create named data generation recipes. These named

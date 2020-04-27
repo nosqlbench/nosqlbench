@@ -3,7 +3,7 @@ title: High Fidelity Metrics
 weight: 12
 ---
 
-# High Fidelity Metrics
+# High-Fidelity Metrics
 
 Since NoSQLBench has been built as a serious testing tool for all users,
 some attention was necessary on the way metric are used.

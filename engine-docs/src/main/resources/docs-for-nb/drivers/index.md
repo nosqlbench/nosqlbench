@@ -3,6 +3,8 @@ title: Driver Types
 weight: 50
 ---
 
+# Driver Types
+
 Each nosqlbench scenario is comprised of one or more activities of a specific type. The types of activities available
 are provided by the version of nosqlbench.
 

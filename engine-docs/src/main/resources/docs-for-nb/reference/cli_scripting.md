@@ -2,7 +2,7 @@
 title: CLI Scripting
 ---
 
-# CLI Scripting
+# Command-Line Scripting
 
 Sometimes you want to to run a set of workloads in a particular order, or call other specific test setup logic in
 between phases or workloads. While the full scripting environment allows you to do this and more, it is not necessary to

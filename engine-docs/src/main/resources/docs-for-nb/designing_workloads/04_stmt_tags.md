@@ -3,7 +3,7 @@ title: 04 Statement Tags
 weight: 04
 ---
 
-## Statement Tags
+# Statement Tags
 
 Tags are used to mark and filter groups of statements for controlling which ones get used in a given scenario. Tags are
 generally free-form, but there is a set of conventions that can make your testing easier.
