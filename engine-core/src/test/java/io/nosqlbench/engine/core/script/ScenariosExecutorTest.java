@@ -27,7 +27,7 @@ public class ScenariosExecutorTest {
     @Ignore
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
-        Scenario s = new Scenario("testing");
+        Scenario s = new Scenario("testing", Scenario.Engine.Graalvm);
         s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();

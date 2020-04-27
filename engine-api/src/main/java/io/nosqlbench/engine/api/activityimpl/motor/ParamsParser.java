@@ -17,8 +17,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.motor;
 
-import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.util.Synonyms;
+import io.nosqlbench.nb.api.config.Synonyms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -244,7 +244,7 @@ public class NBCLI {
 
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
-        Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
+        Scenario scenario = new Scenario(sessionName, options.getScriptingEngine(), options.getProgressSpec());
         ScriptBuffer buffer = new BasicScriptBuffer(
             options.getLogsDirectory()+ FileSystems.getDefault().getSeparator()+ "_scenario."+ scenario.getName() +".js"
         ).add(options.getCommands().toArray(new Cmd[0]));

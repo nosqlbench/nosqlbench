@@ -14,24 +14,20 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.engine.api.util.Synonyms;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import joptsimple.internal.Strings;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.StreamSupport;
 
 public class WebDriverActivity extends SimpleActivity {
 

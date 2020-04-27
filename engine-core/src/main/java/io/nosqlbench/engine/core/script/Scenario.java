@@ -64,18 +64,19 @@ public class Scenario implements Callable<ScenarioResult> {
         Graalvm
     }
 
-    public Scenario(String name, String progressInterval) {
+    public Scenario(String name, Engine engine, String progressInterval) {
         this.name = name;
+        this.engine = engine;
         this.progressInterval = progressInterval;
     }
 
-    public Scenario(String name) {
+    public Scenario(String name, Engine engine) {
         this.name = name;
+        this.engine = engine;
     }
 
     public Scenario addScriptText(String scriptText) {
         scripts.add(scriptText);
-        this.engine = engine;
         return this;
     }
 
