@@ -1,6 +1,27 @@
 #!/bin/bash
 #set -x
 DIR="$(dirname "$(readlink -f "$0")")"
+if [ "$1" = "--wrapper-help" ]
+then
+ echo "OPTIONS:"
+ echo " # run the bundled JRE with -version"
+ echo " --java-version"
+ echo " # run the app with JDWP debugging support, with suspend=n"
+ echo " --DN"
+ echo " # run the app with JDWP debugging support, with suspend=y"
+ echo " --DY"
+ echo " # set additional JRE options ..."
+ echo " JAVA_OPTS=... $0 ..."
+ exit 0
+fi
+
+if [ "$1" = "--java-version" ]
+then
+ shift
+ java -version
+ exit
+fi
+
 if [ "$1" = "-DN" ]
 then
  shift
