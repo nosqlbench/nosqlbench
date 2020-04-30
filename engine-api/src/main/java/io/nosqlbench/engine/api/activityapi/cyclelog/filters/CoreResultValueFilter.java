@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReada
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
 import io.nosqlbench.engine.api.util.ConfigTuples;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Predicate;
 

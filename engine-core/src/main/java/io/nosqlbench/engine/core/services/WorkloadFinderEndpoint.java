@@ -3,7 +3,7 @@ package io.nosqlbench.engine.core.services;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.AutoDocsWebService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

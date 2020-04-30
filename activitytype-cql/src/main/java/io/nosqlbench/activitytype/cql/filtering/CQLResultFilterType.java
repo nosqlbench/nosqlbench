@@ -7,7 +7,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterTy
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.EnumReadableMappingFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
 import io.nosqlbench.engine.api.util.ConfigTuples;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Predicate;
 

@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.userlibs.docinfo;
 
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;

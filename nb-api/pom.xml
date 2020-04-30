@@ -27,6 +27,13 @@
         <!-- logging -->
         <!-- TODO: consolidate to Log4j 2 -->
 
+        <!-- The ONLY upstream module in project from nb-api -->
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>3.12.92-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

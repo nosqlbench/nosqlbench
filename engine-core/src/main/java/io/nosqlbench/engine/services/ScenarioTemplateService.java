@@ -1,8 +1,7 @@
 package io.nosqlbench.engine.services;
 
-import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import io.nosqlbench.docsys.api.WebServiceObject;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;

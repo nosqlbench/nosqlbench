@@ -24,6 +24,7 @@
         <!-- web apps and service hooks -->
         <module>docsys</module>
         <module>nb-api</module>
+        <module>nb-annotations</module>
 
         <!-- ENGINE MODULES -->
         <module>engine-api</module>

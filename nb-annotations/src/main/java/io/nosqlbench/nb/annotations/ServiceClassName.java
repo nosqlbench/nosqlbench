@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.processors;
+package io.nosqlbench.nb.annotations;
 
 /**
  * Statically defined names which need to be visible for refactoring
@@ -6,5 +6,5 @@ package io.nosqlbench.nb.api.processors;
  */
 public class ServiceClassName {
     public final static String Service =
-            "io.nosqlbench.nb.api.annotations.Service";
+            "io.nosqlbench.nb.annotations.Service";
 }
