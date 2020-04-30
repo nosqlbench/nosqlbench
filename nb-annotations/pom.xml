@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.94-SNAPSHOT</version>
+        <version>3.12.94</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
