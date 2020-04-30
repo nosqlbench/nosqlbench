@@ -92,10 +92,13 @@ public class PolyglotScenarioController {
     }
 
     public synchronized void waitMillis(Value spec) {
-        if (spec.fitsInLong()) {
+        if (spec.isString()) {
+            controller.waitMillis(Long.parseLong(spec.asString()));
+        } else if (spec.isNumber()){
             controller.waitMillis(spec.asLong());
         } else {
-            throw new InvalidParameterException("long type can't contain " + spec.toString());
+            throw new InvalidParameterException(
+                "unable to convert polyglot type " + spec.toString() + " to a long for waitMillis");
         }
     }
 

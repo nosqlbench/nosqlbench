@@ -77,3 +77,12 @@ running real workloads without having to learn much about the machinery that mak
 
 The rest of this section has a more elaborate example that exposes some of the basic options you may want to adjust for
 your first serious test.
+
+:::info
+
+If you want to see system-level metrics from your cluster, it is possible to get these as well as Apache Cassandra level
+metrics by using the DSE Metrics Collector (if using DSE), or by setting up a metrics feed to the Prometheus instance in
+your local docker stack. You can find the DSE Metrics Collector docs
+[here](https://docs.datastax.com/en/monitoring/doc/monitoring/metricsCollector/mcExportMetricsDocker.html).
+
+:::
