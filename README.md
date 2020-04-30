@@ -76,14 +76,14 @@ this license.
 This is a Linux targeted tool, as most cloud/nosql testing is done on Linux instances. Some support for other systems is available, but more work is needed to support them fully. Here is what is supported for each:
 
 1. on Linux, all features are supported, for both `nb.jar` as well as the appimage binary `nb`
-2. on Mac, with `nb.jar` all features are supported, except --docker-metrics
-3. On Windows, with `nb.jar` all features are supported, except --docker-metrics
+2. on Mac, with `nb.jar` all features are supported, except `--docker-metrics`
+3. On Windows, with `nb.jar` all features are supported, except `--docker-metrics`
 
 ## Thanks
 
 [![DataStax Logo](https://www.datastax.com/sites/default/files/content/graphics/logo/DS-logo-2019_1-25percent.png)](http://datastax.com/)
 
-This project is sponsored by [DataStax](http://datstax.com/) -- The always-on,
+This project is sponsored by [DataStax](http://datastax.com/) -- The always-on,
 active everywhere, distributed hybrid cloud database built on Apache Cassandra™,
 and designed from the ground up to run anywhere, on any cloud, in any datacenter,
 and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
