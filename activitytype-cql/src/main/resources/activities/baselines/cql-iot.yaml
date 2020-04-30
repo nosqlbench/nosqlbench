@@ -1,4 +1,7 @@
 # nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
+description: |
+  This workload emulates a time-series data model and access patterns.
+
 scenarios:
   default:
     - run driver=cql tags==phase:schema threads==1 cycles==UNDEF

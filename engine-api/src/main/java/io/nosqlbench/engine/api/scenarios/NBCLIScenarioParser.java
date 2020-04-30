@@ -8,6 +8,7 @@ import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.virtdata.library.basics.core.stathelpers.DiscreteProbabilityBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,76 +241,9 @@ public class NBCLIScenarioParser {
         }
     }
 
-//    private static void parseWorkloadYamlCmds(String yamlPath, LinkedList<String> arglist, String scenarioName) {
-//        StmtsDocList stmts = StatementsLoader.load(logger, yamlPath);
-//
-//        Scenarios scenarios = stmts.getDocScenarios();
-//
-//        String scenarioName = "default";
-//        if (scenarioName != null) {
-//            scenarioName = scenarioName;
-//        }
-//
-//        List<String> cmds = scenarios.getNamedScenario(scenarioName);
-//
-//
-//        Map<String, String> paramMap = new HashMap<>();
-//        while (arglist.size() > 0 && arglist.peekFirst().contains("=")) {
-//            String arg = arglist.removeFirst();
-//            String oldArg = arg;
-//            arg = Synonyms.canonicalize(arg, logger);
-//
-//            for (int i = 0; i < cmds.size(); i++) {
-//                String yamlCmd = cmds.get(i);
-//                String[] argArray = arg.split("=");
-//                String argKey = argArray[0];
-//                String argValue = argArray[1];
-//                if (!yamlCmd.contains(argKey)) {
-//                    cmds.set(i, yamlCmd + " " + arg);
-//                } else {
-//                    paramMap.put(argKey, argValue);
-//                }
-//            }
-//        }
-//
-//
-//        if (cmds == null) {
-//            List<String> names = scenarios.getScenarioNames();
-//            throw new RuntimeException("Unknown scenario name, make sure the scenario name you provide exists in the workload definition (yaml):\n" + String.join(",", names));
-//        }
-//
-//        for (String cmd : cmds) {
-//            String[] cmdArray = cmd.split(" ");
-//
-//            for (String parameter : cmdArray) {
-//                if (parameter.contains("=")) {
-//                    if (!parameter.contains("TEMPLATE(") && !parameter.contains("<<")) {
-//                        String[] paramArray = parameter.split("=");
-//                        paramMap.put(paramArray[0], paramArray[1]);
-//                    }
-//                }
-//            }
-//
-//            StrSubstitutor sub1 = new StrSubstitutor(paramMap, "<<", ">>", '\\', ",");
-//            StrSubstitutor sub2 = new StrSubstitutor(paramMap, "TEMPLATE(", ")", '\\', ",");
-//
-//            cmd = sub2.replace(sub1.replace(cmd));
-//
-//            if (cmd.contains("yaml=") || cmd.contains("workload=")) {
-//                parse(cmd.split(" "));
-//            } else {
-//                parse((cmd + " workload=" + yamlPath).split(" "));
-//            }
-//
-//            // Is there a better way to do this than regex?
-//
-//        }
-//    }
-
     private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
     private static Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
     private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
-
 
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(String... includes) {
 
@@ -334,7 +268,7 @@ public class NBCLIScenarioParser {
 
             StmtsDocList stmts = StatementsLoader.load(logger, content);
 
-            Map<String, String> templates = new HashMap<>();
+            Map<String, String> templates = new LinkedHashMap<>();
             try {
                 List<String> lines = Files.readAllLines(yamlPath);
                 for (String line : lines) {
@@ -352,7 +286,15 @@ public class NBCLIScenarioParser {
             if (scenarioNames != null && scenarioNames.size() > 0) {
                 String path = yamlPath.toString();
                 path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
-                workloadDescriptions.add(new WorkloadDesc(path, scenarioNames, templates));
+                LinkedHashMap<String,String> sortedTemplates = new LinkedHashMap<>();
+                ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
+                Collections.sort(keyNames);
+                for (String keyName : keyNames) {
+                    sortedTemplates.put(keyName,templates.get(keyName));
+                }
+
+                String description = stmts.getDescription();
+                workloadDescriptions.add(new WorkloadDesc(path, scenarioNames, sortedTemplates, description));
             }
         }
 

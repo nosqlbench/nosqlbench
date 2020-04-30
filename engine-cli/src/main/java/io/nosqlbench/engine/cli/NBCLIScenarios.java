@@ -13,31 +13,8 @@ public class NBCLIScenarios {
             NBCLIScenarioParser.getWorkloadsWithScenarioScripts(includes);
 
         for (WorkloadDesc workload : workloads) {
-            if (includeScenarios) {
-                System.out.print("# workload in ");
-            }
+            System.out.println(workload.toString(includeScenarios));
 
-            System.out.println(workload.getYamlPath());
-
-            if (includeScenarios) {
-                System.out.println("    # scenarios:");
-
-                List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getWorkloadName();
-
-                for (String scenario : scenarioList) {
-                    System.out.println("    nb " + workloadName + " " + scenario);
-                }
-
-                Map<String, String> templates = workload.getTemplates();
-                if (templates.size() > 0) {
-                    System.out.println("        # defaults");
-                    for (Map.Entry<String, String> templateEntry : templates.entrySet()) {
-                        System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
-                    }
-                }
-                System.out.println("\n");
-            }
 
         }
 

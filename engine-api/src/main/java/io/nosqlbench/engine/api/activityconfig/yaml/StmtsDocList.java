@@ -89,8 +89,18 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * on the first doc, any `scenarios` defined in different docs will be ignored.
      */
 
+    /**
+     * @return the list of named scenarios for the first document in the list.
+     */
     public Scenarios getDocScenarios() {
         return this.getStmtDocs().get(0).getScenarios();
+    }
+
+    /**
+     * @return the description of the first document in the list.
+     */
+    public String getDescription() {
+        return this.getStmtDocs().get(0).getDescription();
     }
 
 }

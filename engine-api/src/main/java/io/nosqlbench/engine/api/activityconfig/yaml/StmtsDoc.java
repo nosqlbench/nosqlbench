@@ -108,4 +108,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
         return new Scenarios(rawStmtsDoc.getRawScenarios());
     }
 
+    public String getDescription() {
+        return rawStmtsDoc.getDesc();
+    }
 }
