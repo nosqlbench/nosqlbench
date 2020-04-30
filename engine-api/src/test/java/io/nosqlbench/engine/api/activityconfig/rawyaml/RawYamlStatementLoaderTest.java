@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,10 +69,16 @@ public class RawYamlStatementLoaderTest {
 
         RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
-        List<String> defaultScenario = rawScenarios.getNamedScenario("default");
-        assertThat(defaultScenario).containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
-        List<String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
-        assertThat(schemaOnlyScenario).containsExactly("run driver=blah tags=phase:schema");
+        Map<String, String> defaultScenario = rawScenarios.getNamedScenario("default");
+        assertThat(defaultScenario.keySet())
+            .containsExactly("000","001");
+        assertThat(defaultScenario.values())
+            .containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
+        Map<String, String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
+        assertThat(schemaOnlyScenario.keySet())
+            .containsExactly("000");
+        assertThat(schemaOnlyScenario.values())
+            .containsExactly("run driver=blah tags=phase:schema");
 
         assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
