@@ -166,7 +166,7 @@ public class TestNBCLIOptions {
     public void shouldRecognizewaitMillisCmd() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "23234" });
         List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.waitmillis);
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.waitMillis);
         assertThat(cmds.get(0).getArg("millis_to_wait")).isEqualTo("23234");
 
     }

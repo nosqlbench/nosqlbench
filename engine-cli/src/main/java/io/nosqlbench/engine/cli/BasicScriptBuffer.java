@@ -64,7 +64,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
             case run: // run activity
             case await: // await activity
             case stop: // stop activity
-            case waitmillis:
+            case waitMillis:
 
                 sb.append("scenario.").append(cmd).append("\n");
 ////                // Sanity check that this can parse before using it

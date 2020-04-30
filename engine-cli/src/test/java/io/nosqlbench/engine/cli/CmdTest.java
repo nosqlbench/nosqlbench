@@ -16,7 +16,7 @@ public class CmdTest {
 
         Cmd cmd = Cmd.parseArg(new LinkedList<String>(List.of("waitmillis", "234")), p);
         assertThat(cmd.getArg("millis_to_wait")).isEqualTo("234");
-        assertThat(cmd.toString()).isEqualTo("waitmillis('234');");
+        assertThat(cmd.toString()).isEqualTo("waitMillis('234');");
     }
 
     @Test
