@@ -109,7 +109,7 @@ public class Cmd {
     public static Cmd parseArg(LinkedList<String> arglist, PathCanonicalizer fixer) {
 
         String cmdName = arglist.removeFirst();
-        CmdType cmdType = CmdType.valueOf(cmdName);
+        CmdType cmdType = CmdType.valueOfAnyCase(cmdName);
 
         Map<String, String> params = new LinkedHashMap<>();
 
