@@ -354,26 +354,6 @@ public class NBCLIOptions {
                     cmd = Cmd.parseArg(arglist,canonicalizer);
                     cmdList.add(cmd);
                     break;
-//                    cmd = Cmd.parseArg(arglist, this, "alias_to_await");
-//                    String cmdName = arglist.removeFirst();
-//                    String cmdParam = readWordOrThrow(arglist, "activity alias to await");
-//                    assertNotParameter(cmdParam);
-//                    assertNotReserved(cmdParam);
-//                    cmdList.add(cmd);
-//                    break;
-//                    String stopCmdType = readWordOrThrow(arglist, "stop command");
-//                    String activityToStop = readWordOrThrow(arglist, "activity alias to await");
-//                    assertNotParameter(activityToStop);
-//                    assertNotReserved(activityToStop);
-//                    Cmd stopActivityCmd = Cmd.parseArg(arglist,this,"activity alias to stop");
-//                    cmdList.add(stopActivityCmd);
-//                    break;
-//                    String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
-//                    String millisCount = readWordOrThrow(arglist, "millis count");
-//                    Long.parseLong(millisCount); // sanity check
-//                    Cmd awaitMillisCmd = Cmd.parseArg(arglist,this,"milliseconds to wait");
-//                    cmdList.add(awaitMillisCmd);
-//                    break;
                 default:
                     Optional<Content<?>> scriptfile = NBIO.local()
                         .prefix("scripts/auto")
@@ -388,9 +368,7 @@ public class NBCLIOptions {
                         arglist.addFirst("script");
                         cmd = Cmd.parseArg(arglist,canonicalizer);
                         cmdList.add(cmd);
-                    } else if (
-                        NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())
-                    ) {
+                    } else if (NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())) {
                         NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, wantsIncludes());
                     } else {
                         throw new InvalidParameterException("unrecognized option:" + word);
