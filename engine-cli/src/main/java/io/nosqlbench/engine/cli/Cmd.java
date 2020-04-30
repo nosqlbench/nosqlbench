@@ -24,7 +24,7 @@ public class Cmd {
         run(),
         await(Arg.of("alias_name")),
         stop(Arg.of("alias_name")),
-        waitmillis(Arg.of("millis_to_wait", Long::parseLong));
+        waitMillis(Arg.of("millis_to_wait", Long::parseLong));
 
         private final Arg<?>[] positional;
 
@@ -38,6 +38,15 @@ public class Cmd {
                 names[i] = positional[i].name;
             }
             return names;
+        }
+
+        public static CmdType valueOfAnyCase(String cmdname) {
+            for (CmdType value : values()) {
+                if (cmdname.equals(value.toString()) || cmdname.toLowerCase().equals(value.toString().toLowerCase())) {
+                    return value;
+                }
+            }
+            return valueOf(cmdname); // let the normal exception take over in this case
         }
 
         public Arg<?>[] getPositionalArgs() {
