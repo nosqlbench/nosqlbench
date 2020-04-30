@@ -17,6 +17,7 @@ import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
@@ -68,6 +69,10 @@ public class NBCLI {
         }
         if (args.length > 0 && args[0].toLowerCase().equals("docserver")) {
             DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
+            System.exit(0);
+        }
+        if (args.length>0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
+            MarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
         }
 

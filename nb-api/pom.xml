@@ -63,6 +63,11 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>5.0.3</version>
+        </dependency>
 
         <!-- perf testing -->
 
@@ -96,5 +101,19 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>docs-for-testing-only/**</exclude>
+                </excludes>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
 
 </project>

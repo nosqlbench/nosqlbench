@@ -10,6 +10,15 @@ import java.util.regex.Pattern;
  * defaults must be provided.
  */
 public interface FrontMatter {
+
+    String SCOPE = "scope";
+    String AGGREGATIONS = "aggregations";
+    String TOPICS = "topics";
+    String TOPIC = "topic";
+    String WEIGHT = "weight";
+    String TITLE = "title";
+
+
     /**
      * @return A title for the given markdown source file.
      */
@@ -39,7 +48,7 @@ public interface FrontMatter {
      *
      * @return A list of categories
      */
-    List<String> getTopics();
+    Set<String> getTopics();
 
     /**
      * <p>
