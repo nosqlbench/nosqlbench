@@ -1,8 +1,8 @@
 package io.nosqlbench.nb.api.markdown.exporter;
 
-import io.nosqlbench.nb.api.markdown.aggregator.DocScope;
+import io.nosqlbench.nb.api.markdown.types.DocScope;
 import io.nosqlbench.nb.api.markdown.aggregator.MarkdownDocs;
-import io.nosqlbench.nb.api.markdown.aggregator.MarkdownInfo;
+import io.nosqlbench.nb.api.markdown.types.MarkdownInfo;
 import joptsimple.*;
 
 import java.nio.file.Path;

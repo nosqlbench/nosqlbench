@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NBIOWalker {
+
     private final static Logger logger = LogManager.getLogger(NBIOWalker.class);
 
     public static void walk(Path p, PathVisitor v) {

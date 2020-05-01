@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.markdown.aggregator;
+package io.nosqlbench.nb.api.markdown.types;
 
 /**
  * DocScope determines which display mode a topic is meant to be displayed in.
@@ -13,19 +13,19 @@ public enum DocScope {
      * The command line doc scope includes any markdown which should be shown to the user
      * when they are searching for or viewing documentation on a command line.
      */
-    CommandLine(false),
+    cli(false),
 
     /**
      * The static web doc scope includes any markdown which should be shown to the user
      * when they are viewing documentation on an externally hosted site in static form.
      */
-    StaticWeb(false),
+    web(false),
 
     /**
      * The dynamic web doc scope includes any markdown which should be made available to
      * users when they are interacting with a web application.
      */
-    DynamicWeb(false),
+    app(false),
 
     /**
      * ANY is a descriptive doc scope which is meant to be used as a filter within API calls

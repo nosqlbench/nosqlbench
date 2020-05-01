@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.markdown.aggregator;
+package io.nosqlbench.nb.api.markdown;
 
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.markdown.providers.DocsRootDirectory;

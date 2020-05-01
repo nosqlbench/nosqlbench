@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api.markdown.aggregator;
 
-import org.junit.Ignore;
+import io.nosqlbench.nb.api.markdown.types.MarkdownInfo;
 import org.junit.Test;
 
 import java.util.List;

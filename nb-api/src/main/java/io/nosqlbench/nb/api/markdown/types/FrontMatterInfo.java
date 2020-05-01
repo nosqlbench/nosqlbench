@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.markdown.aggregator;
+package io.nosqlbench.nb.api.markdown.types;
 
 import java.util.List;
 import java.util.Set;
@@ -9,14 +9,14 @@ import java.util.regex.Pattern;
  * If the markdown source file does not contain the metadata requested, then reasonable non-null
  * defaults must be provided.
  */
-public interface FrontMatter {
+public interface FrontMatterInfo {
 
-    String SCOPE = "scope";
-    String AGGREGATIONS = "aggregations";
+    String SCOPES = "scopes";
+    String AGGREGATE = "aggregate";
     String TOPICS = "topics";
-    String TOPIC = "topic";
     String WEIGHT = "weight";
     String TITLE = "title";
+    Set<String> FrontMatterKeyWords = Set.of(SCOPES, AGGREGATE,TOPICS,WEIGHT,TITLE);
 
 
     /**
