@@ -132,7 +132,8 @@ public class SSLKsFactory {
 
                 try {
                     KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-                    ks.load(null, keyPassword.toCharArray());
+                    char[] pass = keyPassword==null? null : keyPassword.toCharArray();
+                    ks.load(null, pass);
 
                     X509Certificate cert = (X509Certificate) CertificateFactory.
                             getInstance("X509").
