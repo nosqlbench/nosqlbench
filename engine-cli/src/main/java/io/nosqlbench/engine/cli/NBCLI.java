@@ -186,11 +186,9 @@ public class NBCLI {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
             dmh.startMetrics();
-            String info = "Docker Containers are started, for grafana and prometheus, hit" +
-                "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
-                "the default grafana creds are admin/admin";
-            logger.info(info);
-            System.out.println(info);
+            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
+                "these urls in your browser: http://<host>:3000 and http://<host>:9090";
+            logger.warn(warn);
             if (reportGraphiteTo != null) {
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
                         " but graphite reporting (--report-graphite-to) is set to %s \n" +
