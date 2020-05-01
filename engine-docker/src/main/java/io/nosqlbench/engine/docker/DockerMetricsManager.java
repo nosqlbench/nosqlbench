@@ -54,7 +54,10 @@ public class DockerMetricsManager {
         String name = "grafana";
         List<Integer> port = Arrays.asList(3000);
 
-        setupGrafanaFiles(ip);
+        boolean grafanaFilesExist = grafanaFilesExist();
+        if (!grafanaFilesExist) {
+            setupGrafanaFiles(ip);
+        }
 
         List<String> volumeDescList = Arrays.asList(
             userHome + "/.nosqlbench/grafana:/var/lib/grafana:rw"
@@ -80,7 +83,9 @@ public class DockerMetricsManager {
 
         logger.info("grafana container started, http listening");
 
-        configureGrafana();
+        if (!grafanaFilesExist) {
+            configureGrafana();
+        }
     }
 
     private void startPrometheus(String ip) {
@@ -91,7 +96,9 @@ public class DockerMetricsManager {
         String name = "prom";
         List<Integer> port = Arrays.asList(9090);
 
-        setupPromFiles(ip);
+        if (!promFilesExist()) {
+            setupPromFiles(ip);
+        }
 
         List<String> volumeDescList = Arrays.asList(
             //cwd+"/docker-metrics/prometheus:/prometheus",
@@ -170,6 +177,9 @@ public class DockerMetricsManager {
                 "/prometheus");
 
         Set<PosixFilePermission> perms = new HashSet<>();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        perms.add(PosixFilePermission.OWNER_EXECUTE);
         perms.add(PosixFilePermission.OTHERS_READ);
         perms.add(PosixFilePermission.OTHERS_WRITE);
         perms.add(PosixFilePermission.OTHERS_EXECUTE);
@@ -215,6 +225,24 @@ public class DockerMetricsManager {
         }
     }
 
+    private boolean grafanaFilesExist() {
+        File nosqlbenchDir = new File(userHome, "/.nosqlbench/");
+        boolean exists = nosqlbenchDir.exists();
+        if (exists) {
+            File grafana = new File(userHome, "/.nosqlbench/grafana");
+            exists = grafana.exists();
+        }
+        return exists;
+    }
+    private boolean promFilesExist() {
+        File nosqlbenchDir = new File(userHome, "/.nosqlbench/");
+        boolean exists = nosqlbenchDir.exists();
+        if (exists) {
+            File prom = new File(userHome, "/.nosqlbench/grafana");
+            exists = prom.exists();
+        }
+        return exists;
+    }
 
     private void setupGrafanaFiles(String ip) {
 
@@ -243,6 +271,7 @@ public class DockerMetricsManager {
     private void configureGrafana() {
         post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true, "load analysis dashboard");
         post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true, "configure data source");
+        logger.warn("default grafana creds are admin/admin");
     }
 
 

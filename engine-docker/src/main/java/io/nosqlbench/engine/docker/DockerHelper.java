@@ -213,7 +213,11 @@ public class DockerHelper {
             logger.info(String.format("Hupping config"));
 
             if (reload != null) {
-                post(reload, null, false, "reloading config");
+                try {
+                    post(reload, null, false, "reloading config");
+                } catch (Exception e) {
+                    logger.error(String.format("Unexpected config/state for docker container %s, consider removing the container", name));
+                }
             }
 
             return runningContainers.get(0);
