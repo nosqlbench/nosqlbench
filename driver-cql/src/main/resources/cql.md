@@ -1,6 +1,6 @@
 # cql driver
 
-This is an driver which allows for the execution of CQL statements. This driver supports both sync and async modes, with
+This is a driver which allows for the execution of CQL statements. This driver supports both sync and async modes, with
 detailed metrics provided for both.
 
 ### Example activity definitions
@@ -38,7 +38,7 @@ activity types.
     with no spaces.
     Examples:
     - `host=192.168.1.25`
-    - `host=`192.168.1.25,testhost42`
+    - `host=192.168.1.25,testhost42`
 - **workload** - The workload definition which holds the schema and statement defs.
      see workload yaml location for additional details
     (no default, required)
@@ -59,8 +59,8 @@ activity types.
     policy in the driver. If used, a WhitelistPolicy(RoundRobinPolicy())
     will be created and added to the cluster builder on startup.
     Examples:
-    - whitelist=127.0.0.1
-    - whitelist=127.0.0.1:9042,127.0.0.2:1234
+    - `whitelist=127.0.0.1`
+    - `whitelist=127.0.0.1:9042,127.0.0.2:1234`
 - **retrypolicy** default: none - Applies a retry policy in the driver
     The only option supported for this version is `retrypolicy=logging`,
     which uses the default retry policy, but with logging added.
@@ -107,7 +107,7 @@ activity types.
 
   Examples:
     - `socketoptions=read_timeout_ms=23423,connect_timeout_ms=4444`
-    - `socketoptions=tcp_no_delay=true
+    - `socketoptions=tcp_no_delay=true`
 
 - **tokens** default: unset - Only executes statements that fall within
     any of the specified token ranges. Others are counted in metrics
@@ -133,36 +133,12 @@ activity types.
     ignored if passfile is also present.
 - **passfile** - the file to read the password from. The first
     line of this file is used as the password.
+
 - **ssl** - specifies the type of the SSL implementation.
-    Disabled by default, possible values are `jdk`, and `openssl`.
-    Depending on type, additional parameters need to be provided.
-- **tlsversion** - specify the TLS version to use for SSL.
-    Examples:
-    - `tlsversion=TLSv1.2` (the default)
-- **truststore** (`jdk`, `openssl`) - specify the path to the SSL truststore.
-    Examples:
-    - `truststore=file.truststore`
-- **tspass** (`jdk`, `openssl`) - specify the password for the SSL truststore.
-    Examples:
-    - `tspass=mypass`
-- **keystore** (`jdk`) - specify the path to the SSL keystore.
-    Examples:
-    - `keystore=file.keystore`
-- **kspass** (`jdk`) - specify the password for the SSL keystore.
-    Examples:
-    - `kspass=mypass`
-- **keyFilePath** (`openssl`) - path to the OpenSSL key file.
-    Examples:
-    - `keyFilePath=file.key`
-- **keyPassword** (`openssl`) - key password;
-    Examples:
-    - `keyPassword=password`
-- **caCertFilePath** (`openssl`) - path to the X509 CA certificate file.
-    Examples:
-    - `caCertFilePath=cacert.pem`
-- **certFilePath** (`openssl`) - path to the X509 certificate file.
-    Examples:
-    - `certFilePath=ca.pem`
+    Disabled by default, possible values are `jdk` and `openssl`.
+
+    [Additional parameters may need to be provided](ssl.md).
+
 - **jmxreporting** - enable JMX reporting if needed.
     Examples:
     - `jmxreporting=true`
