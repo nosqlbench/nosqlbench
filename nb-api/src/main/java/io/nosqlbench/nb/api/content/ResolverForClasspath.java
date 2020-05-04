@@ -60,7 +60,7 @@ public class ResolverForClasspath implements ContentResolver {
             fs = FileSystems.getFileSystem(resolved);
         } catch (FileSystemNotFoundException notfound) {
             try {
-                fs = FileSystems.newFileSystem(resolved, Collections.EMPTY_MAP);
+                fs = FileSystems.newFileSystem(resolved, Map.of());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
