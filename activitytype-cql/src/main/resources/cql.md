@@ -30,10 +30,9 @@ activity types.
 
 ### CQL ActivityType Parameters
 
-- **driver** - default: dse - The type of driver to use, either dse, or
-  oss. If you need DSE-specific features, use the dse driver. If you are
-  connecting to an OSS Apache Cassandra cluster, you must use the oss
-  driver. The oss driver option is only available in nosqlbench.
+- **cqldriver** - default: dse - The type of driver to use, either dse, or oss. If you need DSE-specific features, use
+  the dse driver. If you are connecting to an OSS Apache Cassandra cluster, you must use the oss driver. The oss driver
+  option is only available in nosqlbench.
 - **host** - The host or hosts to use for connection points to
     the cluster. If you specify multiple values here, use commas
     with no spaces.
