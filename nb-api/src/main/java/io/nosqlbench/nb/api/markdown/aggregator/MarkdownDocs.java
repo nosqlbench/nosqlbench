@@ -55,65 +55,80 @@ public class MarkdownDocs {
 
         List<? extends MarkdownInfo> markdownWithTopicGlobs =
             ListSplitterWhyDoesJavaNotDoThisAlready.partition(markdownInfos, MarkdownInfo::hasTopicGlobs);
-        Collections.
 
-        for (MarkdownInfo markdownWithTopicGlob : markdownWithTopicGlobs) {
-
+        int loopsremaining=100;
+        // TODO: add logic to deal with leaf nodes and kick intermediate nodes to the end of the processing list.
+        // TODO: Double check exit conditions and warn user
+        while (markdownWithTopicGlobs.size()>0 && loopsremaining>0) {
+            for (MarkdownInfo markdownWithTopicGlob : markdownWithTopicGlobs) {
+                markdownWithTopicGlob.getTopicGlobs();
+                for (MarkdownInfo allInfo : markdownInfos) {
+//                    allInfo.getTopics()
+                }
+            }
+            loopsremaining--;
         }
+        if (markdownWithTopicGlobs.size()>0) {
+            throw new RuntimeException("Non-terminal condition in markdown graph processing, unable to resolve all " +
+                "topic globs, " + markdownWithTopicGlobs.size() + " remaining: " + markdownWithTopicGlobs);
+        }
+
+
         // Assign glob topics to non-glob topics that match
-        for (MarkdownInfo parsedMarkdown : markdownInfos) {
-            FrontMatterInfo fm = parsedMarkdown.getFrontmatter();
-            Set<String> topics = fm.getTopics();
-            Set<String> newTopics = new HashSet<>();
-            for (String topic : topics) {
-                if (isPattern(topic)) {
-                    Pattern p = Pattern.compile(topic);
-                    for (String nonGlobTopic : nonGlobTopics) {
-                        if (p.matcher(nonGlobTopic).matches()) {
-                            newTopics.add(topic);
-                        }
-                    }
-                } else {
-                    newTopics.add(topic);
-                }
-            }
-            fm.setTopics(newTopics);
-        }
 
-        // create topic to content map
-        HashMap<String,List<ParsedMarkdown>> contentByTopic = new HashMap<>();
-        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
-            for (String topic : parsedMarkdown.getFrontmatter().getTopics()) {
-                contentByTopic.computeIfAbsent(topic, t -> new ArrayList<>()).add(parsedMarkdown);
-            }
-        }
-
-        ListIterator<? extends MarkdownInfo> lit = markdownInfos.listIterator();
-        while (lit.hasNext()) {
-            MarkdownInfo mif = lit.next();
-            if (mif.hasAggregations()) {
-                lit.remove();
-                mif = new CompositeMarkdownInfo().add(mif);
-                lit.add(mif);
-            }
-        }
-
-        // combine aggregate targets
-        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
-            List<Pattern> aggregations = parsedMarkdown.getFrontmatter().getAggregations();
-            if (aggregations.size()>0) {
-                for (Pattern aggregation : aggregations) {
-
-                }
-            }
-        }
-
-        // Assign glob topics
-
-        // Assign content aggregates
-        System.out.println("topics: " + topicSets);
-
-        aggregated.addAll(markdownInfos);
+//        for (MarkdownInfo parsedMarkdown : markdownInfos) {
+//            FrontMatterInfo fm = parsedMarkdown.getFrontmatter();
+//            Set<String> topics = fm.getTopics();
+//            Set<String> newTopics = new HashSet<>();
+//            for (String topic : topics) {
+//                if (isPattern(topic)) {
+//                    Pattern p = Pattern.compile(topic);
+//                    for (String nonGlobTopic : nonGlobTopics) {
+//                        if (p.matcher(nonGlobTopic).matches()) {
+//                            newTopics.add(topic);
+//                        }
+//                    }
+//                } else {
+//                    newTopics.add(topic);
+//                }
+//            }
+//            fm.setTopics(newTopics);
+//        }
+//
+//        // create topic to content map
+//        HashMap<String,List<ParsedMarkdown>> contentByTopic = new HashMap<>();
+//        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
+//            for (String topic : parsedMarkdown.getFrontmatter().getTopics()) {
+//                contentByTopic.computeIfAbsent(topic, t -> new ArrayList<>()).add(parsedMarkdown);
+//            }
+//        }
+//
+//        ListIterator<? extends MarkdownInfo> lit = markdownInfos.listIterator();
+//        while (lit.hasNext()) {
+//            MarkdownInfo mif = lit.next();
+//            if (mif.hasAggregations()) {
+//                lit.remove();
+//                mif = new CompositeMarkdownInfo().add(mif);
+//                lit.add(mif);
+//            }
+//        }
+//
+//        // combine aggregate targets
+//        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
+//            List<Pattern> aggregations = parsedMarkdown.getFrontmatter().getAggregations();
+//            if (aggregations.size()>0) {
+//                for (Pattern aggregation : aggregations) {
+//
+//                }
+//            }
+//        }
+//
+//        // Assign glob topics
+//
+//        // Assign content aggregates
+//        System.out.println("topics: " + topicSets);
+//
+//        aggregated.addAll(markdownInfos);
         return aggregated;
 
 

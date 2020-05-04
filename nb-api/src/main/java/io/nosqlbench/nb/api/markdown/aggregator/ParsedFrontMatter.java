@@ -93,6 +93,7 @@ public class ParsedFrontMatter implements FrontMatterInfo {
 
 
     public void setTopics(Set<String> newTopics) {
-        this.data.put(FrontMatterInfo.TOPICS,newTopics);
+        // TODO: allow functional version of this
+//        this.data.put(FrontMatterInfo.TOPICS,newTopics);
     }
 }
