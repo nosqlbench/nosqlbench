@@ -306,6 +306,9 @@ public class NBCLI {
         ShutdownManager.shutdown();
 
         if (scenariosResults.hasError()) {
+            Exception exception = scenariosResults.getOne().getException().get();
+            System.err.println("ERROR while running scenario: " + exception.getMessage());
+            exception.printStackTrace(System.err);
             System.exit(2);
         } else {
             System.exit(0);
