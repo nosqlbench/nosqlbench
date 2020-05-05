@@ -6,12 +6,13 @@ GIT_RELEASE_BOT_NAME=${GIT_RELEASE_BOT_NAME:?GIT_RELEASE_BOT_NAME must be provid
 GITHUB_SHA=${GITHUB_SHA:?GITHUB_SHA must be provided}
 GITHUB_REF=${GITHUB_REF:?GITHUB_REF must be provided}
 RELEASE_BRANCH_NAME=${RELEASE_BRANCH_NAME:?RELEASE_BRANCH_NAME must be provided}
+#git rev-parse --abbrev-ref HEAD
 
 # Filter the branch to execute the release on
-readonly local branch=${GITHUB_REF##*/}
-echo "Current branch: ${branch}"
-if [[ -n "$RELEASE_BRANCH_NAME" && ! "${branch}" = "$RELEASE_BRANCH_NAME" ]]; then
-     echo "Skipping for ${branch} branch"
+readonly local current_branch=$(git rev-parse --abbrev-ref HEAD)
+echo "Current branch: ${current_branch}"
+if [[ -n "$RELEASE_BRANCH_NAME" && ! "${current_branch}" = "$RELEASE_BRANCH_NAME" ]]; then
+     echo "Skipping for ${current_branch} branch"
      exit 0
 fi
 
