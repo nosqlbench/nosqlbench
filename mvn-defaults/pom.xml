@@ -491,7 +491,7 @@
                     <source>${java.target.version}</source>
                     <target>${java.target.version}</target>
                     <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
-                    <compilerArgument>-Xlint:all</compilerArgument>
+<!--                    <compilerArgument>-Xlint:all</compilerArgument>-->
                 </configuration>
             </plugin>
 
