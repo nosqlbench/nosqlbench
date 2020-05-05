@@ -4,7 +4,7 @@ in order to make the contribution process easy and effective for everyone involv
 
 ## Code of Conduct
 
-This project follows a [code of conduct](https://github.com/nosqlbench/nosqlbench/CONDUCT.md).
+This project follows a [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 Please read through it at least once if you are going to contribute to our endeavor.
 
 ## Licensing

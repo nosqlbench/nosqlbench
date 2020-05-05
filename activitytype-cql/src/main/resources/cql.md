@@ -249,6 +249,8 @@ activity types.
 - **compression** - sets the transport compression to use for this
     activity. Valid values are 'LZ4' and 'SNAPPY'. Both types are bundled
     with EBDSE.
+- **showcql** - logs cql statements as INFO (to see INFO messages in stdout use -v or greater) Note: this is expensive
+    and should only be done to troubleshoot workloads. Do not use `showcql` for your tests.
 
 ### CQL YAML Parameters
 

@@ -2,8 +2,6 @@ name: release
 
 on:
   push:
-    branches: 
-     - master
     tags:
      - invoke-release
 
@@ -43,6 +41,14 @@ jobs:
       run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
     - name: set git email
       run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+
+    - name: free disk space
+      run: |
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        docker rmi $(docker image ls -aq)
+        df -h
 
     - name: Cache Maven packages
       uses: actions/cache@v1
