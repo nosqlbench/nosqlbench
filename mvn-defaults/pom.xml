@@ -11,7 +11,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench</javadoc.name>
 
-        <java.target.version>12</java.target.version>
+        <java.target.version>14</java.target.version>
 
         <!-- properties for package versions -->
         <antlr4.version>4.8</antlr4.version>
@@ -474,7 +474,6 @@
 
     <build>
         <plugins>
-            <!-- Compile & Source 11 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
