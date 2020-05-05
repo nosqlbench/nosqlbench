@@ -36,12 +36,12 @@
 
         <!-- a binary (appimage) build option for nb -->
         <module>nb</module>
-        <module>activitytype-diag</module>
-        <module>activitytype-stdout</module>
-        <module>activitytype-tcp</module>
-        <module>activitytype-http</module>
-        <module>activitytype-cql</module>
-        <module>activitytype-cqlverify</module>
+        <module>driver-diag</module>
+        <module>driver-stdout</module>
+        <module>driver-tcp</module>
+        <module>driver-http</module>
+        <module>driver-cql</module>
+        <module>driver-cqlverify</module>
         <module>driver-web</module>
 
         <!-- VIRTDATA MODULES -->

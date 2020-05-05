@@ -1,8 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>activitytype-stdout</artifactId>
-    <packaging>jar</packaging>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
@@ -11,10 +9,12 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
+    <artifactId>driver-http</artifactId>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>
-        An nosqlbench ActivityType (AT) driver module;
-        Provides basic formatting and output to stdout or files.
+        A HTTP nosqlbench ActivityType (AT) driver module;
+        This provides the ability to generate HTTP requests with nosqlbench
     </description>
 
     <dependencies>
@@ -39,6 +39,5 @@
         </dependency>
 
     </dependencies>
-
 
 </project>

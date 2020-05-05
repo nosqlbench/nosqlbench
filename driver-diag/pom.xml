@@ -9,12 +9,11 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>activitytype-http</artifactId>
+    <artifactId>driver-diag</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>
-        A HTTP nosqlbench ActivityType (AT) driver module;
-        This provides the ability to generate HTTP requests with nosqlbench
+    <description>A nosqlbench ActivityType (AT) driver module;
+        Provides a diagnostic activity that logs input at some interval
     </description>
 
     <dependencies>
@@ -24,7 +23,19 @@
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
         <!-- test scope only -->
+
+        <!--<dependency>-->
+            <!--<groupId>org.mockito</groupId>-->
+            <!--<artifactId>mockito-all</artifactId>-->
+            <!--<version>2.0.2-beta</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.assertj</groupId>
@@ -39,5 +50,6 @@
         </dependency>
 
     </dependencies>
+
 
 </project>

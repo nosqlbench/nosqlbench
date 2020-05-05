@@ -59,37 +59,37 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-stdout</artifactId>
+            <artifactId>driver-stdout</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-diag</artifactId>
+            <artifactId>driver-diag</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-tcp</artifactId>
+            <artifactId>driver-tcp</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-http</artifactId>
+            <artifactId>driver-http</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-cql</artifactId>
+            <artifactId>driver-cql</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-cqlverify</artifactId>
+            <artifactId>driver-cqlverify</artifactId>
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
