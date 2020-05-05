@@ -490,6 +490,9 @@
                     <release>${java.target.version}</release>
                     <source>${java.target.version}</source>
                     <target>${java.target.version}</target>
+<!--                    <compilerArgs>-->
+<!--                        &#45;&#45;enable-preview-->
+<!--                    </compilerArgs>-->
                     <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
 <!--                    <compilerArgument>-Xlint:all</compilerArgument>-->
                 </configuration>
@@ -499,6 +502,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+<!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -525,6 +529,7 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <forkMode>always</forkMode>
                     <includes>
                         <include>**/*Integrated*Test*.java</include>
