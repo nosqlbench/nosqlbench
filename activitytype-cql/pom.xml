@@ -93,23 +93,4 @@
 
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>shade</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <configuration>
-                            <finalName>${project.artifactId}</finalName>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>

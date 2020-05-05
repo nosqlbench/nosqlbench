@@ -71,7 +71,6 @@
         <nexus.staging.plugin.version>1.6.8</nexus.staging.plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
         <resources.plugin.version>3.1.0</resources.plugin.version>
-        <shade.plugin.version>3.2.1</shade.plugin.version>
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <assertj.version>3.15.0</assertj.version>
@@ -594,7 +593,6 @@
 
         <pluginManagement>
             <plugins>
-                <!-- Shading -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
