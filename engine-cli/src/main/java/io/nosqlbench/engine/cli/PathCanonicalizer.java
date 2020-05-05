@@ -5,6 +5,7 @@ import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.FileSystems;
 import java.util.Optional;
 
 public class PathCanonicalizer {
@@ -24,9 +25,13 @@ public class PathCanonicalizer {
             .first();
 
         if (found.isPresent()) {
-            if (!found.get().asPath().toString().equals(path)) {
-                logger.info("rewrote path for " + path + " as " + found.get().asPath().toString());
-                return found.get().asPath().toString();
+            String rewriteTo = found.get().asPath().toString();
+            String separator = FileSystems.getDefault().getSeparator();
+            rewriteTo=(rewriteTo.startsWith(separator) ? rewriteTo.substring(1) : rewriteTo);
+
+            if (!rewriteTo.equals(path)) {
+                logger.info("rewrote path for " + path + " as " + rewriteTo);
+                return rewriteTo;
             } else {
                 logger.trace("kept path for " + path + " as " + found.get().asPath().toString());
             }

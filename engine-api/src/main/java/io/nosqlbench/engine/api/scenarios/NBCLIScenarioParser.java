@@ -143,11 +143,14 @@ public class NBCLIScenarioParser {
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
-                    buildingCmd.put("workload", "workload=" + workloadName);
+                    String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
+                    relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
+                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
+                    buildingCmd.put("workload", "workload=" + relativeWorkloadPathFromRoot);
                 }
 
                 if (!buildingCmd.containsKey("alias")) {
-                    buildingCmd.put("alias", WORKLOAD_SCENARIO_STEP);
+                    buildingCmd.put("alias", "alias="+WORKLOAD_SCENARIO_STEP);
                 }
 
                 String alias = buildingCmd.get("alias");
@@ -163,7 +166,8 @@ public class NBCLIScenarioParser {
                     ".yaml",""));
                 alias = alias.replaceAll("SCENARIO", scenarioName);
                 alias = alias.replaceAll("STEP", stepName);
-                buildingCmd.put("alias", "alias="+alias);
+                alias=(alias.startsWith("alias=") ? alias : "alias="+alias);
+                buildingCmd.put("alias", alias);
 
                 logger.debug("Named scenario built command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
