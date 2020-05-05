@@ -23,7 +23,8 @@ public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
         // sanity check that we have a yaml parameter, which contains our statements and bindings
         if (!yaml.isPresent()) {
-            throw new RuntimeException("Currently, the stdout activity type requires yaml activity parameter.");
+            throw new RuntimeException("Currently, the stdout activity type requires yaml/workload activity parameter" +
+                ".");
         }
 
         // allow shortcut: yaml parameter provide the default alias name

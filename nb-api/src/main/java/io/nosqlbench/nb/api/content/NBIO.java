@@ -26,11 +26,17 @@ import java.util.stream.Collectors;
  */
 public class NBIO implements NBPathsAPI.Facets {
 
+    private static String[] globalIncludes = new String[0];
+
+    public synchronized static void addGlobalIncludes(String[] globalIncludes) {
+        NBIO.globalIncludes = globalIncludes;
+    }
+
     private URIResolver resolver;
 
     private List<String> names = new ArrayList<>();
     private List<String> extensions = new ArrayList<>();
-    private List<String> prefixes = new ArrayList<>();
+    private List<String> prefixes = Arrays.asList(globalIncludes);
 
     private NBIO() {
     }

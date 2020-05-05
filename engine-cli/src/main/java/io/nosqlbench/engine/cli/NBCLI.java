@@ -77,6 +77,8 @@ public class NBCLI {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
+        NBIO.addGlobalIncludes(options.wantsIncludes());
+
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
 
         if (options.wantsBasicHelp()) {
