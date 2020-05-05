@@ -67,12 +67,6 @@
                     <groupId>com.github.docker-java</groupId>
                 </exclusion>
             </exclusions>
-            <!--      <exclusions>-->
-            <!--        <exclusion>-->
-            <!--          <artifactId>docker-java-transport-jersey</artifactId>-->
-            <!--          <groupId>com.github.docker-java</groupId>-->
-            <!--        </exclusion>-->
-            <!--      </exclusions>-->
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
