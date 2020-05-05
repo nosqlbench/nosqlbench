@@ -31,7 +31,9 @@ appropriate, to ensure that VirtData selects the right functions within the flow
 
 ## Format
 
-Apply the Java String.format method to an incoming object. @see [Java 8 String.format(...) javadoc](https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html#syntax) Note: This function can often be quite slow, so more direct methods are generally preferrable.
+Apply the Java String.format method to an incoming object. @see
+[Java 14 String.format(...) javadoc](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/util/Formatter.html#syntax) Note:
+This function can often be quite slow, so more direct methods are generally preferrable.
 
 - java.lang.Object -> Format(java.lang.String: format) -> java.lang.String
   - *ex:* `Format('Y')` - *Yield the formatted year from a Java date object.*
