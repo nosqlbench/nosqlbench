@@ -122,6 +122,11 @@ public class BasicScriptBuffer implements ScriptBuffer {
                     "with _, it will always be overwritten.");
             }
             try {
+                if (!Files.exists(tocreate.getParent())) {
+                    Path directories = Files.createDirectories(tocreate.getParent());
+                    logger.debug("added directory for parsed script: " + directories);
+                }
+
                 String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
                 Files.writeString(tocreate, appended, StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
                 logger.debug("Wrote script to " + tocreate.toString());
