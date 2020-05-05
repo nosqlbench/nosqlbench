@@ -59,7 +59,6 @@
         <snappy.version>1.1.2.6</snappy.version>
 
         <!-- plugin versions -->
-        <antlr4.plugin.version>4.8</antlr4.plugin.version>
         <clean.plugin.version>3.1.0</clean.plugin.version>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
@@ -620,7 +619,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${compiler.plugin.version}</version>
+                    <version>3.8.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -650,7 +649,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>${antlr4.plugin.version}</version>
+                    <version>4.8</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
