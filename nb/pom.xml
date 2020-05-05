@@ -156,17 +156,41 @@
 
         <plugins>
             <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assembly.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>shade-nb-jar</id>
+                        <id>assemble-nb</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <filters>-->
+<!--                <filter>-->
+<!--                    <artifact>*:*</artifact>-->
+<!--                    <excludes>-->
+<!--                        <exclude>META-INF/*.SF</exclude>-->
+<!--                        <exclude>META-INF/*.DSA</exclude>-->
+<!--                        <exclude>META-INF/*.RSA</exclude>-->
+<!--                    </excludes>-->
+<!--                </filter>-->
+<!--            </filters>-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
