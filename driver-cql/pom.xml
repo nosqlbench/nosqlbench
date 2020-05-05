@@ -8,7 +8,7 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>activitytype-cql</artifactId>
+    <artifactId>driver-cql</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 

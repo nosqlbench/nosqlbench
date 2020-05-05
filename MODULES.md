@@ -29,9 +29,9 @@ To make it easier to find the module you are looking for, the following strict
 naming conventions have been adopted:
 
 - All packages within a module start with `io.nosqlbench`, followed by the module name,
-  with hyphens converted to dots. For example, the 'engine-api' module contains 
+  with hyphens converted to dots. For example, the 'engine-api' module contains
   packages in `io.nosqlbench.engine.api`.
-- Modules which implement activity types (high-level protocol drivers) are named `activitytype-...`.
+- Modules which implement activity types (high-level protocol drivers) are named `driver-...`.
 - Modules which provide procedural data generation support are named `virtdata-...`.
 - Modules which provide core runtime logic are named `engine-...`.
 - Project-wide maven defaults are contained in the mvn-defaults module.
