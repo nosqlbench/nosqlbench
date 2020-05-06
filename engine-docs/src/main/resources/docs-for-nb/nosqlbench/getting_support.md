@@ -24,6 +24,13 @@ To read any topic, simply use the command:
 The documentation system you are looking at right now includes the same docs you can find above already and more. They
 are automatically included when NoSQLBench is built.
 
+## NoSQLBench Slack
+
+There is a new
+[slack channel](https://join.slack.com/t/nosqlbench/shared_invite/zt-cu9f2jpe-XiHN3SsUDcjkVgxaURFuaw) for NoSQLBench.
+Please join it if you are a new or existing NoSQLBench user and help us get it going!
+
+
 ## General Feedback
 
 These guidelines are mirrored at the
