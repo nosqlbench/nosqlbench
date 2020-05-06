@@ -69,6 +69,15 @@ jobs:
         echo "::set-env name=RELEASE_VERSION::${RELEASE_VERSION}"
         echo "::set-env name=RELEASE_TAGNAME::${RELEASE_TAGNAME}"
 
+    - name: Prepare Summary
+      id: prepare_summary
+      run: |
+       summary=$(scripts/release-notes.sh)
+       summary="${summary//'%'/'%25'}"
+       summary="${summary//$'\n'/'%0A'}"
+       summary="${summary//$'\r'/'%0D'}"
+       echo "::set-output name=release_summary::$summary"
+
     - name: prepare release
       run: scripts/release-prepare.sh
       env:
@@ -130,6 +139,7 @@ jobs:
         release_name: Release ${{ env.RELEASE_TAGNAME }}
         draft: false
         prerelease: false
+        body: ${{ steps.prepare_summary.outputs.release_summary }}
     - name: Upload nb.jar
       id: upload-nb-jar
       uses: actions/upload-release-asset@v1
