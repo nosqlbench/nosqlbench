@@ -87,11 +87,11 @@
             <version>3.12.100-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-cqld4</artifactId>
-            <version>3.12.100-SNAPSHOT</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>driver-cqld4</artifactId>-->
+<!--            <version>3.12.100-SNAPSHOT</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
