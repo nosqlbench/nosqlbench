@@ -30,13 +30,18 @@ public class PathCanonicalizer {
             rewriteTo=(rewriteTo.startsWith(separator) ? rewriteTo.substring(1) : rewriteTo);
 
             if (!rewriteTo.equals(path)) {
-                logger.info("rewrote path for " + path + " as " + rewriteTo);
-                return rewriteTo;
+                if (NBIO.local().prefix("activities").prefix(includes).name(rewriteTo).first().isPresent()) {
+                    logger.info("rewrote path for " + path + " as " + rewriteTo);
+                    return rewriteTo;
+                } else {
+                    logger.trace("kept path for " + path + " as " + found.get().asPath().toString());
+                    return path;
+                }
             } else {
                 logger.trace("kept path for " + path + " as " + found.get().asPath().toString());
             }
         } else {
-            logger.trace("unable to find " + path + " for path qualification");
+            logger.trace("unable to find " + path + " for path qualification, either it is remote or missing.");
         }
         return path;
     }
