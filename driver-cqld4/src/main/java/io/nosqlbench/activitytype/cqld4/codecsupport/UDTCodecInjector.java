@@ -1,8 +1,7 @@
 package io.nosqlbench.activitytype.cqld4.codecsupport;
 
-import com.datastax.driver.core.CodecRegistry;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.UserType;
+import com.datastax.oss.driver.api.core.session.Session;
+import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,12 @@
 package io.nosqlbench.activitytype.cqld4.errorhandling;
 
-import com.datastax.driver.core.exceptions.*;
+import com.datastax.oss.driver.api.core.DriverException;
+import com.datastax.oss.driver.api.core.UnsupportedProtocolVersionException;
+import com.datastax.oss.driver.api.core.auth.AuthenticationException;
+import com.datastax.oss.driver.api.core.connection.BusyConnectionException;
+import com.datastax.oss.driver.api.core.connection.FrameTooLongException;
+import com.datastax.oss.driver.api.core.servererrors.*;
+import com.datastax.oss.driver.api.core.type.codec.CodecNotFoundException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import org.slf4j.Logger;
@@ -15,22 +21,25 @@ import java.util.Map;
  * This enumerates all known exception classes, including supertypes,
  * for the purposes of stable naming in error handling.
  * This is current as of com.datastax.cassandra:cassandra-driver-core:3.2.0
+ *
+ * TODO: for cqld4, add all exceptions again, keeping the previous ones in their existing places, but eliding the
+ * removed ones and leaving a place holder there, adding the new ones after
  */
 public enum CQLExceptionEnum implements ResultReadable {
 
-    FrameTooLongException(FrameTooLongException.class, 1),
-    CodecNotFoundException(CodecNotFoundException.class, 2),
-    DriverException(DriverException.class, 3),
+    FrameTooLongException(com.datastax.oss.driver.api.core.connection.FrameTooLongException.class, 1),
+    CodecNotFoundException(com.datastax.oss.driver.api.core.type.codec.CodecNotFoundException.class, 2),
+    DriverException(com.datastax.oss.driver.api.core.DriverException.class, 3),
 
-    AuthenticationException(AuthenticationException.class, 4),
+    AuthenticationException(com.datastax.oss.driver.api.core.auth.AuthenticationException.class, 4),
     TraceRetrievalException(TraceRetrievalException.class, 5),
-    UnsupportedProtocolVersionException(UnsupportedProtocolVersionException.class, 6),
+    UnsupportedProtocolVersionException(com.datastax.oss.driver.api.core.UnsupportedProtocolVersionException.class, 6),
     NoHostAvailableException(NoHostAvailableException.class, 7),
-    QueryValidationException(QueryValidationException.class, 8),
-    InvalidQueryException(InvalidQueryException.class, 9),
-    InvalidConfigurationInQueryException(InvalidConfigurationInQueryException.class, 10),
-    UnauthorizedException(UnauthorizedException.class, 11),
-    SyntaxError(SyntaxError.class, 12),
+    QueryValidationException(com.datastax.oss.driver.api.core.servererrors.QueryValidationException.class, 8),
+    InvalidQueryException(com.datastax.oss.driver.api.core.servererrors.InvalidQueryException.class, 9),
+    InvalidConfigurationInQueryException(com.datastax.oss.driver.api.core.servererrors.InvalidConfigurationInQueryException.class, 10),
+    UnauthorizedException(com.datastax.oss.driver.api.core.servererrors.UnauthorizedException.class, 11),
+    SyntaxError(com.datastax.oss.driver.api.core.servererrors.SyntaxError.class, 12),
     AlreadyExistsException(AlreadyExistsException.class, 13),
     UnpreparedException(UnpreparedException.class, 14),
     InvalidTypeException(InvalidTypeException.class, 15),
@@ -55,7 +64,7 @@ public enum CQLExceptionEnum implements ResultReadable {
     PagingStateException(PagingStateException.class, 34),
     UnresolvedUserTypeException(UnresolvedUserTypeException.class, 35),
     UnsupportedFeatureException(UnsupportedFeatureException.class, 36),
-    BusyConnectionException(BusyConnectionException.class, 37),
+    BusyConnectionException(com.datastax.oss.driver.api.core.connection.BusyConnectionException.class, 37),
 
     ChangeUnappliedCycleException(io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.ChangeUnappliedCycleException.class, 38),
     ResultSetVerificationException(io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.ResultSetVerificationException.class, 39),

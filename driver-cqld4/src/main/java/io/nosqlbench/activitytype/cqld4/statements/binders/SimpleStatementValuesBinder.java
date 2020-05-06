@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cqld4.statements.binders;
 
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.SimpleStatement;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 
@@ -22,7 +22,7 @@ public class SimpleStatementValuesBinder
 
     @Override
     public Statement bindValues(SimpleStatement context, Object[] values) {
-        String query = context.getQueryString();
+        String query = context.getQuery();
         if(parametrized) {
             String[] splits = query.split("\\?");
             assert splits.length == values.length+1;
@@ -36,7 +36,7 @@ public class SimpleStatementValuesBinder
             System.out.println(query);
 
         }
-        SimpleStatement simpleStatement = new SimpleStatement(query);
+        SimpleStatement simpleStatement = SimpleStatement.newInstance(query);
         ConsistencyLevel cl = context.getConsistencyLevel();
         if(cl != null){
             simpleStatement.setConsistencyLevel(context.getConsistencyLevel());

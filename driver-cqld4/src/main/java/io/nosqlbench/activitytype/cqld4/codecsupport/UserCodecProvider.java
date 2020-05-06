@@ -1,6 +1,11 @@
 package io.nosqlbench.activitytype.cqld4.codecsupport;
 
-import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.metadata.schema.KeyspaceMetadata;
+import com.datastax.oss.driver.api.core.session.Session;
+import com.datastax.oss.driver.api.core.type.UserDefinedType;
+import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
+import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;
+import com.datastax.oss.driver.api.core.type.codec.registry.MutableCodecRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,17 +17,18 @@ public abstract class UserCodecProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(UserCodecProvider.class);
 
-    public List<UDTTransformCodec> registerCodecsForCluster(
+    public List<UDTTransformCodec<?>> registerCodecsForCluster(
             Session session,
             boolean allowAcrossKeyspaces
     ) {
-        List<UDTTransformCodec> typeCodecs = new ArrayList<>();
+        List<UDTTransformCodec<?>> typeCodecs = new ArrayList<>();
 
-        List<KeyspaceMetadata> ksMetas = new ArrayList<>(session.getCluster().getMetadata().getKeyspaces());
+
+        List<KeyspaceMetadata> ksMetas = new ArrayList<>(session.getMetadata().getKeyspaces().values());
 
         for (KeyspaceMetadata keyspace : ksMetas) {
 
-            List<UDTTransformCodec> keyspaceCodecs = registerCodecsForKeyspace(session, keyspace.getName());
+            List<UDTTransformCodec> keyspaceCodecs = registerCodecsForKeyspace(session, keyspace.getName().toString());
 
             for (UDTTransformCodec typeCodec : keyspaceCodecs) {
                 if (typeCodecs.contains(typeCodec) && !allowAcrossKeyspaces) {
@@ -38,27 +44,27 @@ public abstract class UserCodecProvider {
 
     public List<UDTTransformCodec> registerCodecsForKeyspace(Session session, String keyspace) {
 
-        CodecRegistry registry = session.getCluster().getConfiguration().getCodecRegistry();
+        CodecRegistry registry = session.getContext().getCodecRegistry();
 
         List<UDTTransformCodec> codecsForKeyspace = new ArrayList<>();
 
-        KeyspaceMetadata ksMeta = session.getCluster().getMetadata().getKeyspace(keyspace);
+        KeyspaceMetadata ksMeta = session.getMetadata().getKeyspace(keyspace).orElseThrow();
         if (ksMeta==null) {
             logger.warn("No metadata for " + keyspace);
             return Collections.emptyList();
         }
-        Collection<UserType> typesInKeyspace = ksMeta.getUserTypes();
+        Collection<UserDefinedType> typesInKeyspace = ksMeta.getUserDefinedTypes().values();
 
         List<Class<? extends UDTTransformCodec>> providedCodecClasses = getUDTCodecClasses();
 
-        Map<UserType, Class<? extends UDTTransformCodec>> codecMap = new HashMap<>();
+        Map<UserDefinedType, Class<? extends UDTTransformCodec>> codecMap = new HashMap<>();
 
         for (Class<? extends TypeCodec> providedCodecClass : providedCodecClasses) {
             Class<? extends UDTTransformCodec> udtCodecClass = (Class<? extends UDTTransformCodec>) providedCodecClass;
 
             List<String> targetUDTTypes = getUDTTypeNames(udtCodecClass);
-            for (UserType keyspaceUserType : typesInKeyspace) {
-                String ksTypeName = keyspaceUserType.getTypeName();
+            for (UserDefinedType keyspaceUserType : typesInKeyspace) {
+                String ksTypeName = keyspaceUserType.getName().toString();
                 String globalTypeName = (ksTypeName.contains(".") ? ksTypeName.split("\\.",2)[1] : ksTypeName);
                 if (targetUDTTypes.contains(ksTypeName) || targetUDTTypes.contains(globalTypeName)) {
                     codecMap.put(keyspaceUserType, udtCodecClass);
@@ -66,12 +72,13 @@ public abstract class UserCodecProvider {
             }
         }
 
-        for (UserType userType : codecMap.keySet()) {
+        for (UserDefinedType userType : codecMap.keySet()) {
             Class<? extends UDTTransformCodec> codecClass = codecMap.get(userType);
             Class<?> udtJavaType = getUDTJavaType(codecClass);
             UDTTransformCodec udtCodec = instantiate(userType, codecClass, udtJavaType);
             codecsForKeyspace.add(udtCodec);
-            registry.register(udtCodec);
+            ((MutableCodecRegistry)registry).register(udtCodec);
+
             logger.info("registered codec:" + udtCodec);
         }
 
@@ -79,9 +86,10 @@ public abstract class UserCodecProvider {
 
     }
 
-    private UDTTransformCodec instantiate(UserType key, Class<? extends UDTTransformCodec> codecClass, Class<?> javaType) {
+    private UDTTransformCodec instantiate(UserDefinedType key, Class<? extends UDTTransformCodec> codecClass,
+                                          Class<?> javaType) {
         try {
-            Constructor<? extends UDTTransformCodec> ctor = codecClass.getConstructor(UserType.class, Class.class);
+            Constructor<? extends UDTTransformCodec> ctor = codecClass.getConstructor(UserDefinedType.class, Class.class);
             UDTTransformCodec typeCodec = ctor.newInstance(key, javaType);
             return typeCodec;
         } catch (Exception e) {
