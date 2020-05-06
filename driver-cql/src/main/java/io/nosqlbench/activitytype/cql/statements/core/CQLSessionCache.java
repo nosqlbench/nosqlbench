@@ -1,8 +1,36 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.net.ssl.SSLContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
+import com.datastax.driver.core.RemoteEndpointAwareNettySSLOptions;
+import com.datastax.driver.core.SSLOptions;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
+import com.datastax.driver.core.policies.WhiteListPolicy;
 import com.datastax.driver.dse.DseCluster;
+import io.netty.handler.ssl.SslContext;
 import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
@@ -10,16 +38,6 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.NashornEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -202,98 +220,11 @@ public class CQLSessionCache implements Shutdownable {
                 .map(CQLOptions::withCompression)
                 .ifPresent(builder::withCompression);
 
-        if (activityDef.getParams().getOptionalString("ssl").isPresent()) {
-            logger.info("Cluster builder proceeding with SSL but no Client Auth");
-            Object context = SSLKsFactory.get().getContext(activityDef);
-            SSLOptions sslOptions;
-            if (context instanceof javax.net.ssl.SSLContext) {
-                sslOptions = RemoteEndpointAwareJdkSSLOptions.builder()
-                        .withSSLContext((javax.net.ssl.SSLContext) context).build();
-                builder.withSSL(sslOptions);
-            } else if (context instanceof io.netty.handler.ssl.SslContext) {
-                sslOptions =
-                        new RemoteEndpointAwareNettySSLOptions((io.netty.handler.ssl.SslContext) context);
-            } else {
-                throw new RuntimeException("Unrecognized ssl context object type: " + context.getClass().getCanonicalName());
-            }
+        SslContext context = SSLKsFactory.get().getContext(activityDef);
+        if (context != null) {
+            SSLOptions sslOptions = new RemoteEndpointAwareNettySSLOptions(context);
             builder.withSSL(sslOptions);
         }
-
-//            JdkSSLOptions sslOptions = RemoteEndpointAwareJdkSSLOptions
-//                    .builder()
-//                    .withSSLContext(context)
-//                    .build();
-//            builder.withSSL(sslOptions);
-//
-//        }
-//
-//        boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
-//        boolean jdkSslEnabled = activityDef.getParams().getOptionalBoolean("jdkssl").orElse(false);
-//        if (jdkSslEnabled){
-//            sslEnabled = true;
-//        }
-//
-//        // used for OpenSSL
-//        boolean openSslEnabled = activityDef.getParams().getOptionalBoolean("openssl").orElse(false);
-//
-//        if (sslEnabled && openSslEnabled) {
-//            logger.error("You cannot enable both OpenSSL and JDKSSL, please pick one and try again!");
-//            System.exit(2);
-//        }
-//
-//        if (sslEnabled) {
-//            logger.info("Cluster builder proceeding with SSL but no Client Auth");
-//            SSLContext context = SSLKsFactory.get().getContext(activityDef);
-//            JdkSSLOptions sslOptions = RemoteEndpointAwareJdkSSLOptions
-//                    .builder()
-//                    .withSSLContext(context)
-//                    .build();
-//            builder.withSSL(sslOptions);
-//        }
-//        else if (openSslEnabled) {
-//            logger.info("Cluster builder proceeding with SSL and Client Auth");
-//            String keyPassword = activityDef.getParams().getOptionalString("keyPassword").orElse(null);
-//            String caCertFileLocation = activityDef.getParams().getOptionalString("caCertFilePath").orElse(null);
-//            String certFileLocation = activityDef.getParams().getOptionalString("certFilePath").orElse(null);
-//            String keyFileLocation = activityDef.getParams().getOptionalString("keyFilePath").orElse(null);
-//
-//
-//            try {
-//
-//                KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-//                ks.load(null, keyPassword.toCharArray());
-//
-//                X509Certificate cert = (X509Certificate) CertificateFactory.
-//                        getInstance("X509").
-//                        generateCertificate(new FileInputStream(caCertFileLocation));
-//
-//                //set alias to cert
-//                ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
-//
-//                TrustManagerFactory tMF = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-//                tMF.init(ks);
-//
-//
-//                SslContext sslContext = SslContextBuilder
-//                        .forClient()
-//                        /* configured with the TrustManagerFactory that has the cert from the ca.cert
-//                         * This tells the driver to trust the server during the SSL handshake */
-//                        .trustManager(tMF)
-//                        /* These are needed because the server is configured with require_client_auth
-//                         * In this case the client's public key must be in the truststore on each DSE
-//                         * server node and the CA configured */
-//                        .keyManager(new File(certFileLocation), new File(keyFileLocation))
-//                        .build();
-//
-//                RemoteEndpointAwareNettySSLOptions sslOptions = new RemoteEndpointAwareNettySSLOptions(sslContext);
-//
-//                // Cluster builder with sslOptions
-//                builder.withSSL(sslOptions);
-//
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
 
         RetryPolicy retryPolicy = activityDef.getParams()
                 .getOptionalString("retrypolicy")
