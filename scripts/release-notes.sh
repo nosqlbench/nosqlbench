@@ -3,22 +3,22 @@ set -e
 #RELEASE_NOTES_FILE=${RELEASE_NOTES_FILE:?RELEASE_NOTES_FILE must be provided}
 
 git log --oneline --decorate --max-count=1000 master > /tmp/gitlog_master
-(( release_count=0 ))
 
 readarray lines < /tmp/gitlog_master
 for line in "${lines[@]}"
 do
  if [[ $line =~ \(tag:\ nosqlbench-[0-9]+\.[0-9]+\.[0-9]+\).+ ]]
-  then release_count++
-  if (( release_count>=2 ))
-  then break
-  fi
- fi
- then break
+ then
+#  printf "no more lines after $line" 1>&2
+  break
  elif [[ $line =~ \[maven-release-plugin\] ]]
- then continue
- elif [[ $line =~ \(.+Merge\ branch ]]
- then continue
+ then
+#  printf "maven release plugin, skipping: $line\n" 1>&2
+  continue
+ elif [[ $line =~ "Merge" ]]
+  then
+#  printf "merge info, skipping: $line" 1>&2
+  continue
  else
   printf "$line"
 #  printf "$line" | tee -a ${RELEASE_NOTES_FILE}
