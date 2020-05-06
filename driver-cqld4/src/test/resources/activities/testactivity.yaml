@@ -1,0 +1,14 @@
+tags:
+  group: read
+statements:
+- name: read-telemetry
+  statement: |
+    select * from <<KEYSPACE:testks>>.<<TABLE:testtable>>_telemetry
+    where source={source}
+    and epoch_hour={epoch_hour}
+    and param={param}
+    limit 10
+  bindings:
+    source: ThreadNumGenerator
+    epoch_hour: DateSequenceFieldGenerator(1000,'YYYY-MM-dd-HH')
+    param: LineExtractGenerator('data/variable_words.txt')

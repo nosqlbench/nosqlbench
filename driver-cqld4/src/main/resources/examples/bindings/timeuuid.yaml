@@ -1,0 +1,62 @@
+# You can run this file with this command line to see the values printed to stdout:
+# ./ebdse run driver=stdout yaml=bindings/timeuuid.yaml cycles=10
+
+# This file demonstrates different types of timestamp recipes
+# that you can use with virtdata. (The bindings used in ebdse)
+
+# If you want to control the output, uncomment and edit the statement template below
+# and modify the named anchors to suit your output requirements.
+
+#statements:
+#  example1: "{fullname}\n"
+
+bindings:
+
+# All uncommented lines under this are indented, so they become named bindings below
+# the entry above
+
+# Normally, the value that you get with a cycle starts at 0.
+
+ cycleNum: Identity();
+# here we convert the cycle number to a TIMEUUID by casting.
+
+ id: Identity(); ToEpochTimeUUID()
+
+##  Client ID
+ client_id: AddHashRange(0L, 2000000000000L); ToEpochTimeUUID()
+
+#  Example output:
+
+#  client_id : 4eb369b0-91de-11bd-8000-000000000000
+#  client_id : 0b9edab0-5401-11e7-8000-000000000000
+#  client_id : 58f21c30-0eec-11f3-8000-000000000000
+#  client_id : 4f547e60-a48a-11ca-8000-000000000000
+#  client_id : 42db8510-cad8-11bb-8000-000000000000
+#  client_id : 78cc7790-529c-11d6-8000-000000000000
+#  client_id : 55382200-9cfd-11d7-8000-000000000000
+#  client_id : 1ebdbef0-b6dc-11b7-8000-000000000000
+#  client_id : 8bc58ba0-57fe-11da-8000-000000000000
+#  client_id : 03d1b690-ba64-11f5-8000-000000000000
+
+# If you wanted a java.util.UUID instead of a java.util.Date type, you can use something like below.
+# This form avoids setting the non-time fields in the timeuuid value. This makes testing determinstically
+# possible, when the basic data type as used in practice, is designed specifically to avoid repeatability.
+
+ timeuuid1: AddHashRange(0,2419200000L); StartingEpochMillis('2018-02-01 05:00:00'); ToEpochTimeUUID();
+
+# There is a shortcut for this version supported directly by ToEpochTimeUUID(..) as seen here:
+
+ timeuuid2: AddHashRange(0,2419200000L); ToEpochTimeUUID('2018-02-01 05:00:00');
+
+# You can also access the finest level of resolution of the timeuuid type, where each cycle value represents
+# the smallest possible change for a timeuuid. Bear in mind that this represents many many sub-millisecond
+# level timestamp values which may not be easy to see in normal timestamp formats. In this case, millisecond
+# semantics are not appropriate, so make sure you adjust the input values accordingly.
+
+ timeuuid_finest1: ToFinestTimeUUID();
+
+# However, since starting at some reference time is a popular option, ToFinestTimeUUID(...) also supports
+# the shortcut version just like ToEpochTimeUUID(). This is provided because converting between epoch
+# millis and timeuuid ticks is not fun.
+
+ timeuuid_finest_relative: ToFinestTimeUUID('2018-02-01 05:00:00');

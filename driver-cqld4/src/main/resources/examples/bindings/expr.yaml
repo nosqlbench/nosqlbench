@@ -1,0 +1,28 @@
+
+# You can run this file with this command line to see the values printed to stdout:
+# ./ebdse run driver=stdout yaml=bindings/expr.yaml cycles=10
+
+# This file demonstrates different types of timestamp recipes
+# that you can use with virtdata. (The bindings used in ebdse)
+
+# If you want to control the output, uncomment and edit the statement template below
+# and modify the named anchors to suit your output requirements.
+
+#statements:
+#  example1: "{fullname}\n"
+
+bindings:
+# flight times based on hour / minute / second computation
+ hour: HashRange(0,2); ToInt()
+ minute: Shuffle(0,2); ToInt()
+ second: HashRange(0,60); ToInt()
+ flightDate: HashRange(0,2); Mul(3600000); Save('hour'); Shuffle(0,2); Mul(60000); Save('minute'); HashRange(0,60); Mul(1000); Save('second'); Expr('hour + minute + second'); StartingEpochMillis('2018-10-02 04:00:00'); ToDate(); ToString()
+ flightDateFixed: Save('cycle'); HashRange(0,2); Mul(3600000); Load('cycle'); Save('hour'); Shuffle(0,2); Mul(60000); Save('minute'); Load('cycle'); HashRange(0,60); Mul(1000); Save('second'); Expr('hour + minute + second'); StartingEpochMillis('2018-10-02 04:00:00'); ToDate(); ToString()
+ flightDateLong: Save('cycle'); HashRange(0,2); Mul(3600000); Load('cycle'); Save('hour'); Shuffle(0,2); Mul(60000); Save('minute'); Load('cycle'); HashRange(0,60); Mul(1000); Save('second'); Expr('hour + minute + second'); ToString()
+
+# status that depends on score
+ riskScore: Normal(0.0,5.0); Clamp(1, 100); Save('riskScore') -> int
+ status: |
+    Expr('riskScore > 90 ? 0 : 1')  -> long; ToBoolean(); ToString()
+ status_2: |
+    ToInt(); Expr('riskScore >90 ? 0 : 1') -> int; WeightedStrings('accepted:1;rejected:1')
