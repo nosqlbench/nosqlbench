@@ -26,14 +26,20 @@ public class CompositeMarkdownInfo implements MarkdownInfo {
 
     @Override
     public FrontMatterInfo getFrontmatter() {
-        // calculate included topics
-        return null;
+        return elements.get(0).getFrontmatter();
     }
 
     @Override
     public boolean hasAggregations() {
-        // was true, but now it is false after compositing
         return false;
+    }
+
+    @Override
+    public MarkdownInfo withTopics(List<String> assigning) {
+        MarkdownInfo leader = elements.get(0);
+        leader = leader.withTopics(assigning);
+        elements.set(0,leader);
+        return this;
     }
 
     public <T extends MarkdownInfo> CompositeMarkdownInfo add(T element) {

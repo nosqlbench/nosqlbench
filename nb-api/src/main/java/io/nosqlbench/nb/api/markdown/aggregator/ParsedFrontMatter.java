@@ -96,4 +96,18 @@ public class ParsedFrontMatter implements FrontMatterInfo {
         // TODO: allow functional version of this
 //        this.data.put(FrontMatterInfo.TOPICS,newTopics);
     }
+
+    public ParsedFrontMatter withTopics(List<String> assigning) {
+        HashMap<String, List<String>> newmap = new HashMap<>();
+        newmap.putAll(this.data);
+        newmap.put(FrontMatterInfo.TOPICS,assigning);
+        return new ParsedFrontMatter(newmap);
+    }
+
+    @Override
+    public String toString() {
+        return "ParsedFrontMatter{" +
+            "data=" + data +
+            '}';
+    }
 }
