@@ -20,6 +20,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SlotStateTracker;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,12 +98,15 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             activity.setRunState(RunState.Starting);
             activity.initActivity();
             //activity.onActivityDefUpdate(activityDef);
+        } catch (BasicError ue) {
+            logger.error(ue.getMessage());
         } catch (Exception e) {
             this.stoppingException = new RuntimeException("Error initializing activity '" +
                     activity.getAlias() +"': " + e.getMessage(),e);
             activitylogger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
             throw stoppingException;
         }
+
         adjustToActivityDef(activity.getActivityDef());
         activity.setRunState(RunState.Running);
         activitylogger.debug("START/after alias=(" + activity.getAlias() + ")");
