@@ -1,7 +1,12 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.*;
+import com.datastax.oss.driver.api.core.connection.ReconnectionPolicy;
+import com.datastax.oss.driver.api.core.retry.RetryPolicy;
+import com.datastax.oss.driver.api.core.session.Session;
+import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
+import com.datastax.oss.driver.internal.core.connection.ExponentialReconnectionPolicy;
+import com.datastax.oss.driver.internal.core.retry.DefaultRetryPolicy;
+import com.datastax.oss.driver.internal.core.specex.ConstantSpeculativeExecutionPolicy;
 import io.netty.util.HashedWheelTimer;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
@@ -69,9 +74,9 @@ public class CQLOptions {
 
     }
 
-    public static RetryPolicy retryPolicyFor(String spec) {
+    public static RetryPolicy retryPolicyFor(String spec, Session session) {
         Set<String> retryBehaviors = Arrays.stream(spec.split(",")).map(String::toLowerCase).collect(Collectors.toSet());
-        RetryPolicy retryPolicy = DefaultRetryPolicy.INSTANCE;
+        RetryPolicy retryPolicy = new DefaultRetryPolicy(session.getContext(),"default");
 
         if (retryBehaviors.contains("default")) {
             return retryPolicy;
@@ -84,7 +89,7 @@ public class CQLOptions {
         return retryPolicy;
     }
 
-    public static ReconnectionPolicy reconnectPolicyFor(String spec) {
+    public static ReconnectionPolicy reconnectPolicyFor(String spec, Session session) {
        if(spec.startsWith("exponential(")){
            String argsString = spec.substring(12);
            String[] args = argsString.substring(0, argsString.length() - 1).split("[,;]");
@@ -93,7 +98,7 @@ public class CQLOptions {
            }
            long baseDelay = Long.parseLong(args[0]);
            long maxDelay = Long.parseLong(args[1]);
-           return new ExponentialReconnectionPolicy(baseDelay,maxDelay);
+           ExponentialReconnectionPolicy exponentialReconnectionPolicy = new ExponentialReconnectionPolicy(session.getContext());
        }else if(spec.startsWith("constant(")){
            String argsString = spec.substring(9);
            long constantDelayMs= Long.parseLong(argsString.substring(0, argsString.length() - 1));
