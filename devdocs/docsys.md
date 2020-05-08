@@ -7,10 +7,10 @@
 - Only markdown files which contain front matter will be considered user-facing docs.
 - Front matter will specify the namespace and/or names under which the included file should appear
 - Front matter will include search meta and related topics
-- Front matter will contain all the meta data that any client app needs to create a basic topic index or menu.
+- Front matter will contain all the metadata that any client app needs to create a basic topic index or menu.
 - Front matter will specify whether or not to include the markdown in command line help.
 - Front matter will specify whether or not to include the markdown in web help.
-- Front matter will specify the topic path for the included.
+- Front matter will specify the topic path for the included content.
 
 ### Internal APIs
 
