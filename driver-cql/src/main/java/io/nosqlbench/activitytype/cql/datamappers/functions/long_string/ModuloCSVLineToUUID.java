@@ -52,7 +52,9 @@ public class ModuloCSVLineToUUID implements LongFunction<UUID> {
         CSVParser csvp = NBIO.readFileCSV(filename);
         int column = csvp.getHeaderMap().get(fieldname);
         for (CSVRecord strings : csvp) {
-            lines.add(strings.get(column));
+            if (strings.get(column) != null) {
+                lines.add(strings.get(column));
+            }
         }
     }
 

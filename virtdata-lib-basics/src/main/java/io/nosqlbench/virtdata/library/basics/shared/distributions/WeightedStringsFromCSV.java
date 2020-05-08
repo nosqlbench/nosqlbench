@@ -76,10 +76,12 @@ public class WeightedStringsFromCSV implements LongFunction<String> {
             }
             CSVParser csvdata = NBIO.readFileCSV(filename);
             for (CSVRecord csvdatum : csvdata) {
-                String value = csvdatum.get(valueColumn);
-                values.add(value);
-                String weight = csvdatum.get(weightColumn);
-                events.add(new EvProbD(values.size()-1,Double.valueOf(weight)));
+                if (csvdatum.get(valueColumn) != null && csvdatum.get(weightColumn) != null) {
+                    String value = csvdatum.get(valueColumn);
+                    values.add(value);
+                    String weight = csvdatum.get(weightColumn);
+                    events.add(new EvProbD(values.size() - 1, Double.valueOf(weight)));
+                }
             }
         }
         sampler = new AliasSamplerDoubleInt(events);
