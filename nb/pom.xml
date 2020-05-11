@@ -83,7 +83,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-cql</artifactId>
+            <artifactId>driver-cql-shaded</artifactId>
             <version>3.12.103-SNAPSHOT</version>
         </dependency>
 
