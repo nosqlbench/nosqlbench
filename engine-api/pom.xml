@@ -27,6 +27,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>3.12.103-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-userlibs</artifactId>
             <version>3.12.103-SNAPSHOT</version>
         </dependency>

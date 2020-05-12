@@ -319,7 +319,6 @@ public class NBCLIScenarioParser {
 
                 //We want the outer name with the inner default value
                 templates.put(matchArray[0], innerMatch[1]);
-
             } else {
                 templates.put(matchArray[0], matchArray[1]);
             }
@@ -329,7 +328,12 @@ public class NBCLIScenarioParser {
         while (matcher.find()) {
             String match = matcher.group(1);
             String[] matchArray = match.split(":");
-            templates.put(matchArray[0], matchArray[1]);
+            if (matchArray.length==1) {
+                templates.put(matchArray[0], "-none-");
+            }
+            else {
+                templates.put(matchArray[0], matchArray[1]);
+            }
         }
         return templates;
     }
