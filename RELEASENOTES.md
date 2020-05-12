@@ -18,3 +18,5 @@ f3f38f62 shade google deps in driver-cql-shaded, replace driver-cql with driver-
 4278c790 incremental work on markdown processing
 66a7190e (origin/better-error-handling) BasicError handling, print don't throw
 e2e75f4d ErrorResponse enum check
+495315a6 update release notes
+60fab5bb set lang level to 11
