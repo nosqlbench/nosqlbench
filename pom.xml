@@ -58,6 +58,18 @@
 
     </modules>
 
+    <profiles>
+        <profile>
+            <id>with-cql-d4</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>driver-cqld4</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>

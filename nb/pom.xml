@@ -87,12 +87,6 @@
             <version>3.12.104-SNAPSHOT</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.nosqlbench</groupId>-->
-<!--            <artifactId>driver-cqld4</artifactId>-->
-<!--            <version>3.12.100-SNAPSHOT</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cqlverify</artifactId>
@@ -233,6 +227,19 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>with-cql-d4</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-cqld4</artifactId>
+                    <version>3.12.104-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>build-nb-appimage</id>
             <activation>
