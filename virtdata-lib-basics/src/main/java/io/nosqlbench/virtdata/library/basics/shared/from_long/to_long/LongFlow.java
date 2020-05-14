@@ -16,7 +16,7 @@ public class LongFlow implements LongUnaryOperator {
 
     private final LongUnaryOperator[] ops;
 
-    @Example({"StringFlow(Add(3),Mul(6))","Create an integer operator which adds 3 and multiplies the result by 6"})
+    @Example({"LongFlow(Add(3),Mul(6))","Create an integer operator which adds 3 and multiplies the result by 6"})
     public LongFlow(LongUnaryOperator... ops) {
         this.ops = ops;
     }
