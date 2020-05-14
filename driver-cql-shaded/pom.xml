@@ -106,7 +106,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                     <createSourcesJar>true</createSourcesJar>
                     <!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
