@@ -13,6 +13,6 @@ public class LongArg implements ArgType {
 
     @Override
     public String toString() {
-        return String.valueOf(longValue);
+        return longValue +"L";
     }
 }
