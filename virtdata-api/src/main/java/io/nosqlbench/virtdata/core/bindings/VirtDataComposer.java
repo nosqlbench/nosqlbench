@@ -115,18 +115,30 @@ public class VirtDataComposer {
             Class<?> outputType = ValueType.classOfType(call.getOutputType());
             Object[] args = call.getArguments();
 
+            Object[][] resolvedArgs = new Object[args.length][];
+
             try {
-                args = populateFunctions(diagnostics, args, this.customElements);
+                resolvedArgs = populateFunctions(diagnostics, args, this.customElements);
             } catch (Exception e) {
                 return diagnostics.error(e);
             }
+            resolvedArgs=combinations(resolvedArgs);
 
             diagnostics.trace(" resolved args:");
-            for (Object arg : args) {
-                diagnostics.trace(" " + arg.getClass().getSimpleName() + ": " + arg.getClass().getCanonicalName());
+            for (Object[] row : resolvedArgs) {
+                for (Object arg : row) {
+                    diagnostics.trace("row[" + row + "] " + arg.getClass().getSimpleName() + ": " + arg.getClass().getCanonicalName());
+                }
             }
 
-            List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, this.customElements, args);
+            List<ResolvedFunction> resolved = new ArrayList<>();
+
+            for (Object[] argsRow : resolvedArgs) {
+                List<ResolvedFunction> rowresolved = functionLibrary.resolveFunctions(outputType, inputType, funcName,
+                    this.customElements, argsRow);
+                resolved.addAll(rowresolved);
+            }
+
             if (resolved.size() == 0) {
                 return diagnostics.error(new RuntimeException("Unable to find even one function for " + call));
             }
@@ -179,7 +191,9 @@ public class VirtDataComposer {
         return resolverDiagnostics.getResolvedFunction();
     }
 
-    private Object[] populateFunctions(ResolverDiagnostics diagnostics, Object[] args, Map<String, ?> cconfig) {
+    private Object[][] populateFunctions(ResolverDiagnostics diagnostics, Object[] args, Map<String, ?> cconfig) {
+        Object[][] newargs = new Object[args.length][];
+
         for (int i = 0; i < args.length; i++) {
             Object o = args[i];
             if (o instanceof FunctionCall) {
@@ -191,16 +205,50 @@ public class VirtDataComposer {
                 Object[] fargs = call.getArguments();
                 diagnostics.trace(" arg (function): " + call.toString());
 //                diagnostics.trace("resolving argument as function '" + call.toString() + "'");
-                fargs = populateFunctions(diagnostics, fargs, cconfig);
-
+                Object[][] allargs = populateFunctions(diagnostics, fargs, cconfig);
                 List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, cconfig, fargs);
                 if (resolved.size() == 0) {
                     throw new RuntimeException("Unable to resolve even one function for argument: " + call);
                 }
-                args[i] = resolved.get(0).getFunctionObject();
+                Object[] resolvedFuncs = new Object[resolved.size()];
+                for (int r = 0; r < resolvedFuncs.length; r++) {
+                    resolvedFuncs[r] = resolved.get(r).getFunctionObject();
+                }
+                newargs[i] = resolvedFuncs;
+            } else {
+                newargs[i] = new Object[]{o};
             }
         }
-        return args;
+        if (newargs.length==0) {
+            return new Object[][]{ {} };
+        }
+        return newargs;
+    }
+
+    private Object[][] combinations(Object[][] allargs) {
+        // At this point allargs[][] is a positional list of possible param values
+        int modulo = 1;
+        int[] modulos = new int[allargs.length];
+        for (int i = allargs.length - 1; i >= 0; i--) {
+            modulos[i] = modulo;
+            modulo = Math.multiplyExact(modulo, allargs[i].length);
+        }
+
+        Object[][] combinations = new Object[modulo][];
+        for (int row = 0; row < combinations.length; row++) {
+            Object[] combination = new Object[allargs.length];
+            int number = row;
+            for (int pos = 0; pos < combination.length; pos++) {
+                int selector = (int) (row / modulos[pos]);
+                combination[pos] = allargs[pos][selector];
+                number %= modulos[pos];
+            }
+            combinations[row] = combination;
+        }
+        if (combinations.length==0) {
+            return new Object[][] { { } };
+        }
+        return combinations;
     }
 
     private void removeNonLongFunctions(List<ResolvedFunction> funcs) {
