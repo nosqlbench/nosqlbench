@@ -1,10 +1,14 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 import com.datastax.oss.driver.api.core.connection.ReconnectionPolicy;
+import com.datastax.oss.driver.api.core.context.DriverContext;
+import com.datastax.oss.driver.api.core.loadbalancing.LoadBalancingPolicy;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
+import com.datastax.oss.driver.internal.core.connection.ConstantReconnectionPolicy;
 import com.datastax.oss.driver.internal.core.connection.ExponentialReconnectionPolicy;
+import com.datastax.oss.driver.internal.core.context.NettyOptions;
 import com.datastax.oss.driver.internal.core.retry.DefaultRetryPolicy;
 import com.datastax.oss.driver.internal.core.specex.ConstantSpeculativeExecutionPolicy;
 import io.netty.util.HashedWheelTimer;
@@ -27,7 +31,7 @@ public class CQLOptions {
     private final static Pattern PERCENTILE_EAGER_PATTERN = Pattern.compile("^p(?<pctile>[^:]+)(:(?<executions>\\d+))?(:(?<tracked>\\d+)ms)?$");
     private final static Pattern CONSTANT_EAGER_PATTERN = Pattern.compile("^((?<msThreshold>\\d++)ms)(:(?<executions>\\d+))?$");
 
-    private static ConstantSpeculativeExecutionPolicy constantPolicy(int threshold, int executions) {
+    private static ConstantSpeculativeExecutionPolicy constantPolicy(DriverContext context, int threshold, int executions) {
         return new ConstantSpeculativeExecutionPolicy(threshold, executions);
     }
 
