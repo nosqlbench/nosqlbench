@@ -75,8 +75,9 @@ public class NBCLIOptions {
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
 
-    private static final String GRAALVM_ENGINE = "--graalvm";
+    private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
+    private static final String GRAALJS_COMPAT = "--graaljs-compat";
 
 
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
@@ -125,6 +126,7 @@ public class NBCLIOptions {
     private boolean wantsWorkloadsList = false;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
+    private boolean graaljs_compat = false;
 
 
     public NBCLIOptions(String[] args) {
@@ -181,7 +183,11 @@ public class NBCLIOptions {
             }
 
             switch (word) {
-                case GRAALVM_ENGINE:
+                case GRAALJS_COMPAT:
+                    graaljs_compat = true;
+                    arglist.removeFirst();
+                    break;
+                case GRAALJS_ENGINE:
                     engine = Scenario.Engine.Graalvm;
                     arglist.removeFirst();
                     break;
@@ -397,6 +403,10 @@ public class NBCLIOptions {
 
     public Scenario.Engine getScriptingEngine() {
         return engine;
+    }
+
+    public boolean wantsGraaljsCompatMode() {
+        return graaljs_compat;
     }
 
     public List<LoggerConfig> getHistoLoggerConfigs() {

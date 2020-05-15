@@ -24,6 +24,7 @@ import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.EnvironmentAccess;
 import org.graalvm.polyglot.HostAccess;
@@ -54,6 +55,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScenarioController scenarioController;
     private ProgressIndicator progressIndicator;
     private String progressInterval = "console:1m";
+    private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
     private String name;
     private ScenarioLogger scenarioLogger;
@@ -65,10 +67,11 @@ public class Scenario implements Callable<ScenarioResult> {
         Graalvm
     }
 
-    public Scenario(String name, Engine engine, String progressInterval) {
+    public Scenario(String name, Engine engine, String progressInterval, boolean wantsGraaljsCompatMode) {
         this.name = name;
         this.engine = engine;
         this.progressInterval = progressInterval;
+        this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
     }
 
     public Scenario(String name, Engine engine) {
@@ -107,7 +110,11 @@ public class Scenario implements Callable<ScenarioResult> {
 
         switch (engine) {
             case Nashorn:
-                scriptEngine = engineManager.getEngineByName("nashorn");
+                NashornScriptEngineFactory f = new NashornScriptEngineFactory();
+                this.scriptEngine = f.getScriptEngine("--language=es6");
+
+                // engineManager.getEngineByName("nashorn");
+                // TODO: Figure out how to do this in engine bindings: --language=es-6
                 break;
             case Graalvm:
                 Context.Builder contextSettings = Context.newBuilder("js")
@@ -124,14 +131,14 @@ public class Scenario implements Callable<ScenarioResult> {
                     .option("js.ecmascript-version", "2020")
                     .option("js.nashorn-compat", "true");
 
-                scriptEngine = GraalJSScriptEngine.create(null, contextSettings);
+                this.scriptEngine = GraalJSScriptEngine.create(null, contextSettings);
 
-                try {
-                    scriptEngine.put("javaObj", new Object());
-                    scriptEngine.eval("(javaObj instanceof Java.type('java.lang.Object'));");
-                } catch (ScriptException e) {
-                    throw new RuntimeException(e);
-                }
+//                try {
+//                    this.scriptEngine.put("javaObj", new Object());
+//                    this.scriptEngine.eval("(javaObj instanceof Java.type('java.lang.Object'));");
+//                } catch (ScriptException e) {
+//                    throw new RuntimeException(e);
+//                }
 
                 break;
         }
@@ -147,9 +154,15 @@ public class Scenario implements Callable<ScenarioResult> {
         scriptEngine.put("params", scenarioScriptParams);
 
         if (engine == Engine.Graalvm) {
-            scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
-            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+            if (wantsGraaljsCompatMode) {
+                scriptEngine.put("scenario", scenarioController);
+                scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
+                scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+            } else {
+                scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
+                scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+                scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+            }
         } else if (engine == Engine.Nashorn) {
             scriptEngine.put("scenario", scenarioController);
             scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
