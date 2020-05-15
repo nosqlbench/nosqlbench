@@ -89,6 +89,52 @@ public class VirtDataComposer {
         return resolveDiagnosticFunctionFlow(flow);
     }
 
+    private List<ResolvedFunction> resolve(
+        ResolverDiagnostics diagnostics,
+        FunctionCall fcall,
+        Map<String,Object> cconfig) {
+
+        List<ResolvedFunction> resolved = new ArrayList<>();
+
+        Object[] fargs = fcall.getArguments();
+        Object[][] params = new Object[fargs.length][];
+
+        for (int pos = 0; pos <fargs.length; pos++) {
+            Object param = fargs[pos];
+            if (param instanceof FunctionCall) {
+
+                List<ResolvedFunction> resolvedAt = resolve(diagnostics, (FunctionCall) param, cconfig);
+                Object[] pfuncs = new Object[resolvedAt.size()];
+                for (int pfunc = 0; pfunc < pfuncs.length; pfunc++) {
+                    pfuncs[pfunc]=resolvedAt.get(pfunc).getFunctionObject();
+                }
+                params[pos]=pfuncs;
+            } else {
+                params[pos]=new Object[] {param};
+            }
+        }
+        if (params.length==0) {
+            params = new Object[][] { { } };
+        }
+
+//        Object[][] paramsBySlot = resolveParameters(diagnostics, fargs, cconfig);
+        Object[][] paramsSignatures = combinations(params);
+
+        Class<?> returnType = fcall.getOutputType()!=null ? ValueType.classOfType(fcall.getOutputType()) : null;
+        Class<?> inputType = fcall.getInputType()!=null ? ValueType.classOfType(fcall.getInputType()) : null;
+
+        for (Object[] paramsSignature : paramsSignatures) {
+            List<ResolvedFunction> resolvedFunctions = functionLibrary.resolveFunctions(
+                returnType,
+                inputType,
+                fcall.getFunctionName(),
+                cconfig,
+                paramsSignature);
+            resolved.addAll(resolvedFunctions);
+        }
+        return resolved;
+    }
+
     public ResolverDiagnostics resolveDiagnosticFunctionFlow(VirtDataFlow flow) {
         ResolverDiagnostics diagnostics = new ResolverDiagnostics();
         LinkedList<List<ResolvedFunction>> funcs = new LinkedList<>();
@@ -105,50 +151,16 @@ public class VirtDataComposer {
 
         for (int i = flow.getExpressions().size() - 1; i >= 0; i--) {
             FunctionCall call = flow.getExpressions().get(i).getCall();
+
             diagnostics.trace("FUNCTION[" + i + "]: " + call.toString() + ", resolving args");
-//            diagnostics.trace("resolving args for " + call.toString());
 
-            List<ResolvedFunction> nodeFunctions = new LinkedList<>();
+            List<ResolvedFunction> resolved = resolve(diagnostics, call, customElements);
 
-            String funcName = call.getFunctionName();
-            Class<?> inputType = ValueType.classOfType(call.getInputType());
-            Class<?> outputType = ValueType.classOfType(call.getOutputType());
-            Object[] args = call.getArguments();
-
-            Object[][] resolvedArgs = new Object[args.length][];
-
-            try {
-                resolvedArgs = populateFunctions(diagnostics, args, this.customElements);
-            } catch (Exception e) {
-                return diagnostics.error(e);
-            }
-            resolvedArgs=combinations(resolvedArgs);
-
-            diagnostics.trace(" resolved args:");
-            for (Object[] row : resolvedArgs) {
-                for (Object arg : row) {
-                    diagnostics.trace("row[" + row + "] " + arg.getClass().getSimpleName() + ": " + arg.getClass().getCanonicalName());
-                }
-            }
-
-            List<ResolvedFunction> resolved = new ArrayList<>();
-
-            for (Object[] argsRow : resolvedArgs) {
-                List<ResolvedFunction> rowresolved = functionLibrary.resolveFunctions(outputType, inputType, funcName,
-                    this.customElements, argsRow);
-                resolved.addAll(rowresolved);
-            }
-
-            if (resolved.size() == 0) {
-                return diagnostics.error(new RuntimeException("Unable to find even one function for " + call));
-            }
             diagnostics.trace(" resolved functions");
             diagnostics.trace(summarize(resolved, "  - "));
+            funcs.addFirst(resolved);
 
-            nodeFunctions.addAll(resolved);
-            funcs.addFirst(nodeFunctions);
-
-            Set<Class<?>> inputTypes = nodeFunctions.stream().map(ResolvedFunction::getInputClass).collect(Collectors.toSet());
+            Set<Class<?>> inputTypes = resolved.stream().map(ResolvedFunction::getInputClass).collect(Collectors.toSet());
             nextFunctionInputTypes.addFirst(inputTypes);
         }
 
@@ -165,7 +177,6 @@ public class VirtDataComposer {
         }
 
         FunctionAssembly assembly = new FunctionAssembly();
-//        diagnostics.trace("composed summary: " + summarize(flattenedFuncs));
 
         boolean isThreadSafe = true;
         diagnostics.trace("FUNCTION chain selected: (multi) '" + this.summarize(flattenedFuncs, "  - ") + "'");
@@ -191,39 +202,8 @@ public class VirtDataComposer {
         return resolverDiagnostics.getResolvedFunction();
     }
 
-    private Object[][] populateFunctions(ResolverDiagnostics diagnostics, Object[] args, Map<String, ?> cconfig) {
-        Object[][] newargs = new Object[args.length][];
-
-        for (int i = 0; i < args.length; i++) {
-            Object o = args[i];
-            if (o instanceof FunctionCall) {
-                FunctionCall call = (FunctionCall) o;
-
-                String funcName = call.getFunctionName();
-                Class<?> inputType = ValueType.classOfType(call.getInputType());
-                Class<?> outputType = ValueType.classOfType(call.getOutputType());
-                Object[] fargs = call.getArguments();
-                diagnostics.trace(" arg (function): " + call.toString());
-//                diagnostics.trace("resolving argument as function '" + call.toString() + "'");
-                Object[][] allargs = populateFunctions(diagnostics, fargs, cconfig);
-                List<ResolvedFunction> resolved = functionLibrary.resolveFunctions(outputType, inputType, funcName, cconfig, fargs);
-                if (resolved.size() == 0) {
-                    throw new RuntimeException("Unable to resolve even one function for argument: " + call);
-                }
-                Object[] resolvedFuncs = new Object[resolved.size()];
-                for (int r = 0; r < resolvedFuncs.length; r++) {
-                    resolvedFuncs[r] = resolved.get(r).getFunctionObject();
-                }
-                newargs[i] = resolvedFuncs;
-            } else {
-                newargs[i] = new Object[]{o};
-            }
-        }
-        if (newargs.length==0) {
-            return new Object[][]{ {} };
-        }
-        return newargs;
-    }
+    // From a list of possible arguments in each position, compute the set of
+    // argument signatures which is possible.
 
     private Object[][] combinations(Object[][] allargs) {
         // At this point allargs[][] is a positional list of possible param values
@@ -289,14 +269,13 @@ public class VirtDataComposer {
 
     /**
      * <p>
-     * Attempt path optimizations on each phase junction, considering the set of
+     * Attempt path optimizations on each junction, considering the set of
      * candidate inner functions with the candidate outer functions.
      * This is an iterative process, that will keep trying until no apparent
      * progress is made. Each higher-precedence optimization strategy is used
      * iteratively as long as it makes progress and then the lower precedence
      * strategies are allowed to have their turn.
      * </p>
-     * <p>
      * <p>It is considered an error if the strategies are unable to reduce each
      * phase down to a single preferred function. Therefore, the lowest precedence
      * strategy is the most aggressive, simply sorting the functions by basic
