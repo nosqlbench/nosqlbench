@@ -1,6 +1,7 @@
 package io.nosqlbench.virtdata.lang.ast;
 
 public class BooleanArg implements ArgType {
+
     private final boolean boolValue;
 
     public BooleanArg(boolean boolValue) {

@@ -1,6 +1,7 @@
 package io.nosqlbench.virtdata.lang.ast;
 
 public class LongArg implements ArgType {
+
     private final long longValue;
 
     public LongArg(Long longValue) {

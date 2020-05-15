@@ -1,6 +1,7 @@
 package io.nosqlbench.virtdata.lang.ast;
 
 public class StringArg implements ArgType {
+
     private final String rawEscapedText;
     private final String unEscapedText;
 

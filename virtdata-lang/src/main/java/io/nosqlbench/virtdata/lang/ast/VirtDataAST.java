@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VirtDataAST {
-    private List<VirtDataFlow> flows = new ArrayList<>();
+
+    private final List<VirtDataFlow> flows = new ArrayList<>();
 
     public void addFlow(VirtDataFlow flow) {
         this.flows.add(flow);

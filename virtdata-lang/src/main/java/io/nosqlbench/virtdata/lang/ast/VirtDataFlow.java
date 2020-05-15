@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VirtDataFlow {
-    private List<Expression> expressions = new ArrayList<>();
+
+    private final List<Expression> expressions = new ArrayList<>();
 
     public List<Expression> getExpressions() {
         return expressions;
