@@ -1,14 +1,15 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
-import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.ProtocolVersion;
+import com.datastax.oss.driver.api.core.cql.*;
+import com.datastax.oss.driver.api.core.session.Session;
+import com.datastax.oss.driver.api.core.type.DataType;
+import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
+import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.virtdata.api.bindings.VALUE;
 
-import java.math.BigDecimal;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -16,120 +17,51 @@ import java.util.regex.Pattern;
 
 public class CQLBindHelper {
 
-    private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
-    public static Statement rebindUnappliedStatement(Statement statement, ColumnDefinitions defs, Row row) {
+    private final ProtocolVersion protocolVersion;
+    private final Session session;
+    private final CodecRegistry codecRegistry;
 
+    // refrence ProtocolConstants.DataType
 
-        for (ColumnDefinitions.Definition def : defs) {
-            String name = def.getName();
-            def.getType();
-            if (!name.equals("[applied]")) {
-                DataType.Name typeName = def.getType().getName();
-                switch (typeName) {
-                    case ASCII: // ASCII(1, String.class)
-                        ((BoundStatement) statement).bind().setString(name, row.getString(name));
-                    case VARCHAR: // VARCHAR(13, String.class)
-                        ((BoundStatement) statement).bind().setString(name, row.getString(name));
-                    case TEXT: //  TEXT(10, String.class)
-                        ((BoundStatement) statement).bind().setString(name, row.getString(name));
-                    case BIGINT: // BIGINT(2, Long.class)
-                        ((BoundStatement) statement).bind().setLong(name, row.getLong(name));
-                    case COUNTER: // COUNTER(5, Long.class)
-                        ((BoundStatement) statement).bind().setLong(name, row.getLong(name));
-                    case BLOB: // BLOB(3, ByteBuffer.class)
-                        ((BoundStatement) statement).bind().setBytes(name, row.getBytes(name));
-                    case CUSTOM: // CUSTOM(0, ByteBuffer.class)
-                        throw new RuntimeException("The diagnostic binder does not understand custom types yet.");
-                    case BOOLEAN: // BOOLEAN(4, Boolean.class)
-                        ((BoundStatement) statement).bind().setBool(name, row.getBool(name));
-                    case DECIMAL: // DECIMAL(6, BigDecimal.class)
-                        ((BoundStatement) statement).bind().setDecimal(name, row.getDecimal(name));
-                    case DOUBLE: // DOUBLE(7, Double.class)
-                        ((BoundStatement) statement).bind().setDouble(name, row.getDouble(name));
-                    case FLOAT: // FLOAT(8, Float.class)
-                        ((BoundStatement) statement).bind().setFloat(name, row.getFloat(name));
-                    case INET: // INET(16, InetAddress.class)
-                        ((BoundStatement) statement).bind().setInet(name, row.getInet(name));
-                    case INT: // INT(9, Integer.class)
-                        ((BoundStatement) statement).bind().setInt(name, row.getInt(name));
-                    case TIMESTAMP: // TIMESTAMP(11, Date.class)
-                        ((BoundStatement) statement).bind().setTimestamp(name, row.getTimestamp(name));
-                    case UUID: // UUID(12, UUID.class)
-                        ((BoundStatement) statement).bind().setUUID(name, row.getUUID(name));
-                    case TIMEUUID: // TIMEUUID(15, UUID.class)
-                        ((BoundStatement) statement).bind().setUUID(name, row.getUUID(name));
-                    case VARINT: // VARINT(14, BigInteger.class)
-                        ((BoundStatement) statement).bind().setInt(name, row.getInt(name));
-                    case UDT: // UDT(48, UDTValue.class)
-                        ((BoundStatement) statement).bind().setUDTValue(name, row.getUDTValue(name));
-                    case TUPLE: // TUPLE(49, TupleValue.class)
-                        ((BoundStatement) statement).bind().setTupleValue(name, row.getTupleValue(name));
-                    case SMALLINT:
-                        ((BoundStatement) statement).bind().setInt(name, row.getInt(name));
-                    case TINYINT:
-                        ((BoundStatement) statement).bind().setInt(name, row.getInt(name));
-                    case DATE:
-                        ((BoundStatement) statement).bind().setDate(name, row.getDate(name));
-                    case TIME:
-                        ((BoundStatement) statement).bind().setTime(name, row.getTime(name));
-                    default:
-                        throw new RuntimeException("Unrecognized type:" + typeName);
-                }
-            }
-        }
-        return statement;
+    public CQLBindHelper(Session session) {
+        this.session = session;
+        this.protocolVersion = this.session.getContext().getProtocolVersion();
+        this.codecRegistry = session.getContext().getCodecRegistry();
+
     }
 
-    public static BoundStatement bindStatement(Statement statement, String name, Object value, DataType.Name typeName) {
-        switch (typeName) {
-            case ASCII: // ASCII(1, String.class)
-                return ((BoundStatement) statement).bind().setString(name, (String) value);
-            case VARCHAR: // VARCHAR(13, String.class)
-                return ((BoundStatement) statement).bind().setString(name, (String) value);
-            case TEXT: //  TEXT(10, String.class)
-                return ((BoundStatement) statement).bind().setString(name, (String) value);
-            case BIGINT: // BIGINT(2, Long.class)
-                return ((BoundStatement) statement).bind().setLong(name, (long) value);
-            case COUNTER: // COUNTER(5, Long.class)
-                return ((BoundStatement) statement).bind().setLong(name, (long) value);
-            case BLOB: // BLOB(3, ByteBuffer.class)
-                return ((BoundStatement) statement).bind().setBytes(name, (ByteBuffer) value);
-            case CUSTOM: // CUSTOM(0, ByteBuffer.class)
-                throw new RuntimeException("The diagnostic binder does not understand custom types yet.");
-            case BOOLEAN: // BOOLEAN(4, Boolean.class)
-                return ((BoundStatement) statement).bind().setBool(name, (boolean) value);
-            case DECIMAL: // DECIMAL(6, BigDecimal.class)
-                return ((BoundStatement) statement).bind().setDecimal(name, (BigDecimal) value);
-            case DOUBLE: // DOUBLE(7, Double.class)
-                return ((BoundStatement) statement).bind().setDouble(name, (double) value);
-            case FLOAT: // FLOAT(8, Float.class)
-                return ((BoundStatement) statement).bind().setFloat(name, (float) value);
-            case INET: // INET(16, InetAddress.class)
-                return ((BoundStatement) statement).bind().setInet(name, (InetAddress) value);
-            case INT: // INT(9, Integer.class)
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
-            case TIMESTAMP: // TIMESTAMP(11, Date.class)
-                return ((BoundStatement) statement).bind().setTimestamp(name, (Date) value);
-            case UUID: // UUID(12, UUID.class)
-                return ((BoundStatement) statement).bind().setUUID(name, (UUID) value);
-            case TIMEUUID: // TIMEUUID(15, UUID.class)
-                return ((BoundStatement) statement).bind().setUUID(name, (UUID) value);
-            case VARINT: // VARINT(14, BigInteger.class)
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
-            case UDT: // UDT(48, UDTValue.class)
-                 return ((BoundStatement) statement).bind().setUDTValue(name, (UDTValue) value);
-            case TUPLE: // TUPLE(49, TupleValue.class
-                return ((BoundStatement) statement).bind().setTupleValue(name, (TupleValue) value);
-            case SMALLINT:
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
-            case TINYINT:
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
-            case DATE:
-                return ((BoundStatement) statement).bind().setDate(name, (LocalDate) value);
-            case TIME:
-                return ((BoundStatement) statement).bind().setTime(name, (long) value);
-            default:
-                throw new RuntimeException("Unrecognized type:" + typeName);
+    private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
+
+    public Statement<?> rebindUnappliedStatement(
+        Statement<?> statement,
+        ColumnDefinitions defs,
+        Row row) {
+
+        if (!(statement instanceof BoundStatement)) {
+            throw new RuntimeException("Unable to rebind a non-bound statement: " + statement.toString());
+        }
+
+        BoundStatement bound = (BoundStatement) statement;
+
+        for (ColumnDefinition def : defs) {
+            ByteBuffer byteBuffer = row.getByteBuffer(def.getName());
+            bound.setBytesUnsafe(def.getName(), byteBuffer);
+        }
+        return bound;
+    }
+
+    public BoundStatement bindStatement(Statement<?> statement, String name, Object value, DataType dataType) {
+
+        if (!(statement instanceof BoundStatement)) {
+            throw new RuntimeException("only BoundStatement is supported here");
+        }
+        BoundStatement bound = (BoundStatement) statement;
+
+        if (value == VALUE.unset) {
+            return bound.unset(name);
+        } else {
+            TypeCodec<Object> codec = codecRegistry.codecFor(dataType);
+            return bound.set(name, value, codec);
         }
     }
 
@@ -155,10 +87,10 @@ public class CQLBindHelper {
             spans.add(pre);
 
             if (extraBindings.contains(tokenName)) {
-                if (specificBindings.get(tokenName) != null){
+                if (specificBindings.get(tokenName) != null) {
                     String postfix = UUID.randomUUID().toString();
-                    specificBindings.put(tokenName+postfix, stmtDef.getBindings().get(tokenName));
-                }else {
+                    specificBindings.put(tokenName + postfix, stmtDef.getBindings().get(tokenName));
+                } else {
                     specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
                 }
             }
