@@ -1,0 +1,34 @@
+package io.nosqlbench.driver.mongodb;
+
+import com.mongodb.ReadPreference;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
+import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+public class ReadyMongoStatement {
+
+    private StringBindings bindings;
+    private ReadPreference readPreference;
+
+    public ReadyMongoStatement(StmtDef stmtDef) {
+        ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
+        BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
+        StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
+
+        this.bindings = template.resolve();
+        this.readPreference = ReadPreference.valueOf(stmtDef.getParams()
+                                                            .getOrDefault("readPreference","primary"));
+    }
+
+    public ReadPreference getReadPreference() {
+        return readPreference;
+    }
+
+    public Bson bind(long value) {
+        return Document.parse(bindings.bind(value));
+    }
+}

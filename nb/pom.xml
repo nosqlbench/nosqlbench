@@ -98,6 +98,11 @@
             <version>3.12.117-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-mongodb</artifactId>
+            <version>3.12.117-SNAPSHOT</version>
+        </dependency>
 
         <!--        <dependency>-->
         <!--            <groupId>io.nosqlbench</groupId>-->
@@ -242,6 +247,19 @@
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-cqld4</artifactId>
                     <version>3.12.104-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>with-mongodb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-mongodb</artifactId>
+                    <version>3.12.117-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
