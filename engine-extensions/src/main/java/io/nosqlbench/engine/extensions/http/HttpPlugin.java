@@ -24,6 +24,10 @@ public class HttpPlugin {
         return response.body();
     }
 
+    public String post(String url) throws IOException, InterruptedException {
+        return post(url, null, null);
+    }
+
     public String post(String url, String data, String contentType) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         URI uri = URI.create(url);
