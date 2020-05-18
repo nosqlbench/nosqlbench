@@ -81,5 +81,19 @@ The `topic` property determines
      of the included topics.
 
 
+## Composite Markdown
 
+When aggregations occur, the resulting markdown that is produces is simply a composite of all of the included markdown
+sources. The front matter of the including markdown source becomes the first element, and all other included are added
+after this. The front matter of the including markdown becomes the representative front matter for the composite
+markdown.
+
+## Indexing Data
+
+Indexing data should be provided in two forms:
+
+1. The basic metadata index which includes topics, titles, and other basic info and logical path info. This view is used
+   to build menus for traversal and other simple views of topics as needed for direct presence check, or lookup.
+2. A FTS index which includes a basic word index with stemming and other concerns pre-baked. This view is used as a
+   cache-friendly searchable index into the above metadata.
 

@@ -39,4 +39,6 @@ public interface MarkdownInfo {
     default List<Pattern> getAggregators() {
         return getFrontmatter().getAggregations();
     }
+
+    MarkdownInfo withTopics(List<String> assigning);
 }

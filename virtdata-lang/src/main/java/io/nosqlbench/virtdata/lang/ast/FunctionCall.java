@@ -5,7 +5,7 @@ import java.util.List;
 
 public class FunctionCall implements ArgType {
     private String funcName;
-    private List<ArgType> args = new ArrayList<>();
+    private final List<ArgType> args = new ArrayList<>();
     private String inputType;
     private String outputType;
     private String inputClass;

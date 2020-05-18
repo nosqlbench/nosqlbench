@@ -1,11 +1,23 @@
-127e8912 (HEAD -> master) actions: when building release, build only release
-e2761006 (origin/master, origin/HEAD) updated release notes script
-77fdc93a updated nosqlbench invite link
-
-76d3e0b0 (HEAD -> master) add release notes to release
-5a9c6a6e add basic release notes script
-298b6469 Merge branch 'master' of https://github.com/nosqlbench/nosqlbench
-9cda6590 slack channel info
-e3b0c3da partial work on inactive driver
-db46f047 bug fix for absolute paths
-
+7b61ee3a (HEAD -> master) Don't swallow exception in VirtdataComposer
+2d4bf8d0 DateRangeFunc allows flexible signatures
+8cad4414 improve debugger view of virtdata AST
+2de8df4e incremental cql-d4 work
+7fb0eb83 make cql-d4 optional via profile
+be160856 organize virtdata entry points
+4f2b2929 remove extraneous build file
+6e74b5ab virtdata composer considers all arg type combinations
+526dc5de longflow example
+52501f40 (HEAD -> master) support graal-js in nashorn compat mode
+9d0403a5 polyglot mode now does full type introspection
+ae8506ca incremental work on cql-d4
+302c3ca4 higher order functions now consider all possible matches without explicity input and output types
+5f63092e misc AST cleanups
+087c0b80 (origin/master, origin/HEAD) release commit
+2d4bf8d0 DateRangeFunc allows flexible signatures
+8cad4414 improve debugger view of virtdata AST
+2de8df4e incremental cql-d4 work
+7fb0eb83 make cql-d4 optional via profile
+be160856 organize virtdata entry points
+4f2b2929 remove extraneous build file
+6e74b5ab virtdata composer considers all arg type combinations
+526dc5de longflow example

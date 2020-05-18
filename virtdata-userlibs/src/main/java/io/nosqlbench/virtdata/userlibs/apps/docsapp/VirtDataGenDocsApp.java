@@ -19,9 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class AutoDocsApp implements Runnable {
+public class VirtDataGenDocsApp implements Runnable {
 
-    private final static Logger logger = LogManager.getLogger(AutoDocsApp.class);
+    private final static Logger logger = LogManager.getLogger(VirtDataGenDocsApp.class);
 
     private final static String CATEGORIES = "categories";
     private final static String CATEGORIES_SPLIT = "split";
@@ -46,10 +46,10 @@ public class AutoDocsApp implements Runnable {
     private String basedir = "";
 
     public static void main(String[] args) {
-        new AutoDocsApp(args).run();
+        new VirtDataGenDocsApp(args).run();
     }
 
-    public AutoDocsApp(String[] args) {
+    public VirtDataGenDocsApp(String[] args) {
         this.args = args;
     }
 
@@ -66,7 +66,7 @@ public class AutoDocsApp implements Runnable {
         while (largs.peekFirst() != null) {
             String argtype = largs.removeFirst();
             if (largs.peekFirst() == null) {
-                throw new RuntimeException(AutoDocsApp.class.toString() + " expects args in param value couplets.");
+                throw new RuntimeException(VirtDataGenDocsApp.class.toString() + " expects args in param value couplets.");
             }
 
             String argval = largs.removeFirst().toLowerCase();

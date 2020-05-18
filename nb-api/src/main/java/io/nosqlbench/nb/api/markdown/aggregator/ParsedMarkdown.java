@@ -36,6 +36,11 @@ public class ParsedMarkdown implements MarkdownInfo, HasDiagnostics {
         logger.debug("created " + this.toString());
     }
 
+    private ParsedMarkdown(ParsedFrontMatter frontMatter, Content<?> content) {
+        this.frontMatter = frontMatter;
+        this.content = content;
+    }
+
     @Override
     public Path getPath() {
         return content.asPath();
@@ -81,5 +86,16 @@ public class ParsedMarkdown implements MarkdownInfo, HasDiagnostics {
     @Override
     public boolean hasAggregations() {
         return getFrontmatter().getAggregations().size()>0;
+    }
+
+    @Override
+    public MarkdownInfo withTopics(List<String> assigning) {
+        return new ParsedMarkdown(frontMatter.withTopics(assigning), this.content);
+    }
+
+    @Override
+    public String toString() {
+        return "ParsedMarkdown/" +
+            frontMatter.toString();
     }
 }

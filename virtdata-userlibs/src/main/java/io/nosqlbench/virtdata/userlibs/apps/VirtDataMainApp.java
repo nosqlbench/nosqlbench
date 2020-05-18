@@ -1,11 +1,10 @@
 package io.nosqlbench.virtdata.userlibs.apps;
 
-import io.nosqlbench.virtdata.userlibs.apps.docsapp.AutoDocsApp;
-import io.nosqlbench.virtdata.userlibs.apps.valuesapp.ValuesCheckerApp;
-import io.nosqlbench.docsys.core.DocServerApp;
+import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
+import io.nosqlbench.virtdata.userlibs.apps.docsapp.VirtDataGenDocsApp;
+import io.nosqlbench.virtdata.userlibs.apps.valuesapp.VirtDataCheckPerfApp;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * This just routes the user to the correct sub-app depending on the leading verb, stripping it off in the process.
@@ -14,18 +13,16 @@ public class VirtDataMainApp {
 
     private final static String APP_TESTMAPPER = "testmapper";
     private final static String APP_GENDOCS = "gendocs";
-    private final static String APP_DOCSERVER = "docserver";
-    private final static String[] names = new String[]{APP_DOCSERVER, APP_GENDOCS, APP_TESTMAPPER};
+    private final static String APP_DIAGNOSE = "diagnose";
+    private final static String[] names = new String[]{APP_GENDOCS, APP_TESTMAPPER, APP_DIAGNOSE};
 
     public static boolean hasNamedApp(String appname) {
-        return (appname.equals(APP_TESTMAPPER)
-        || appname.equals(APP_GENDOCS)
-        || appname.equals(APP_DOCSERVER));
+        return (appname.equals(APP_TESTMAPPER) || appname.equals(APP_GENDOCS) || appname.equals(APP_DIAGNOSE));
     }
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DOCSERVER + ")");
+            System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DIAGNOSE +")");
             System.exit(0);
         }
 
@@ -36,13 +33,13 @@ public class VirtDataMainApp {
         }
 
         if (appSelection.toLowerCase().equals(APP_TESTMAPPER)) {
-            ValuesCheckerApp.main(appArgs);
+            VirtDataCheckPerfApp.main(appArgs);
         } else if (appSelection.toLowerCase().equals(APP_GENDOCS)) {
-            AutoDocsApp.main(appArgs);
-        } else if (appSelection.toLowerCase().equals(APP_DOCSERVER)) {
-            DocServerApp.main(appArgs);
+            VirtDataGenDocsApp.main(appArgs);
+        } else if (appSelection.toLowerCase().equals(APP_DIAGNOSE)) {
+            VirtDataDiagnoseApp.main(appArgs);
         } else {
-            System.err.println("Error in command line. The first argument must one of " + Arrays.stream(names).collect(Collectors.joining(",")));
+            System.err.println("Error in command line. The first argument must one of " + String.join(",", names));
         }
     }
 }

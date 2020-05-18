@@ -24,6 +24,9 @@ public class DateRangeFunc implements LongFunction<DateRange> {
     private final LongUnaryOperator lower;
     private final LongUnaryOperator upper;
 
+    @Example({
+        "StartingEpochMillis('2017-01-01 23:59:59'); DateRangeFunc('second',Identity(),Add(3600000L)",
+        "Create 1-minute date ranges starting at 2017-01-01 23:59:59"})
     public DateRangeFunc(String precision, LongUnaryOperator lower, LongUnaryOperator upper) {
         this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
         this.lower = lower;
@@ -40,6 +43,37 @@ public class DateRangeFunc implements LongFunction<DateRange> {
         this.upper = upper::apply;
     }
 
+    public DateRangeFunc(String precision, LongUnaryOperator lower, Function<Long,Long> upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower;
+        this.upper = upper::apply;
+    }
+    public DateRangeFunc(String precision, LongFunction<Long> lower, LongUnaryOperator upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower::apply;
+        this.upper = upper;
+    }
+    public DateRangeFunc(String precision, Function<Long,Long> lower, LongFunction<Long> upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower::apply;
+        this.upper = upper::apply;
+    }
+
+    public DateRangeFunc(String precision, LongUnaryOperator lower, LongFunction<Long> upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower;
+        this.upper = upper::apply;
+    }
+    public DateRangeFunc(String precision, LongFunction<Long> lower, Function<Long,Long> upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower::apply;
+        this.upper = upper::apply;
+    }
+    public DateRangeFunc(String precision, Function<Long,Long> lower, LongUnaryOperator upper) {
+        this.precision = DateRange.DateRangeBound.Precision.valueOf(precision.toUpperCase());
+        this.lower = lower::apply;
+        this.upper = upper;
+    }
 
 
     @Override

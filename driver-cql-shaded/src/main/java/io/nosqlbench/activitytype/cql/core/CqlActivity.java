@@ -41,6 +41,8 @@ import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -512,9 +514,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             String[] keyval = spec.split("=|->|:", 2);
             if (keyval.length == 1) {
                 String verb = keyval[0];
-                newerrorHandler.setDefaultHandler(
+                ErrorResponse errorResponse = getErrorResponseOrBasicError(verb);
+                    newerrorHandler.setDefaultHandler(
                         new NBCycleErrorHandler(
-                                ErrorResponse.valueOf(verb),
+                                errorResponse,
                                 exceptionCountMetrics,
                                 exceptionHistoMetrics,
                                 !getParams().getOptionalLong("async").isPresent()
@@ -524,9 +527,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 String pattern = keyval[0];
                 String verb = keyval[1];
                 if (newerrorHandler.getGroupNames().contains(pattern)) {
+                    ErrorResponse errorResponse = getErrorResponseOrBasicError(verb);
                     NBCycleErrorHandler handler =
                             new NBCycleErrorHandler(
-                                    ErrorResponse.valueOf(verb),
+                                    errorResponse,
                                     exceptionCountMetrics,
                                     exceptionHistoMetrics,
                                     !getParams().getOptionalLong("async").isPresent()
@@ -534,8 +538,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     logger.info("Handling error group '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForGroup(pattern, handler);
                 } else {
+                    ErrorResponse errorResponse = ErrorResponse.valueOf(keyval[1]);
                     NBCycleErrorHandler handler = new NBCycleErrorHandler(
-                            ErrorResponse.valueOf(keyval[1]),
+                            errorResponse,
                             exceptionCountMetrics,
                             exceptionHistoMetrics,
                             !getParams().getOptionalLong("async").isPresent()
@@ -547,6 +552,14 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         }
 
         return newerrorHandler;
+    }
+
+    private ErrorResponse getErrorResponseOrBasicError(String verb) {
+        try {
+            return ErrorResponse.valueOf(verb);
+        }catch(IllegalArgumentException e){
+            throw new BasicError("Invalid parameter for errors: '"+ verb + "' should be one of: " + StringUtils.join(ErrorResponse.values(), ", "));
+        }
     }
 
     public int getMaxTries() {

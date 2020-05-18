@@ -17,6 +17,8 @@
 
 package io.nosqlbench.engine.api.util;
 
+import java.io.FileNotFoundException;
+
 import org.junit.Test;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -24,8 +26,17 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class SSLKsFactoryTest
-{
+public class SSLKsFactoryTest {
+    @Test
+    public void testJdkGetContext() {
+        String[] params = {
+                "ssl=jdk",
+                "tlsversion=TLSv1.2",
+        };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+    }
+
     @Test
     public void testJdkGetContextWithTruststoreAndKeystore() {
         String[] params = {
@@ -64,7 +75,17 @@ public class SSLKsFactoryTest
     }
 
     @Test
-    public void testOpenSSLGetContextWithCaCertAndClientCert() {
+    public void testOpenSSLGetContext() {
+        String[] params = {
+                "ssl=openssl",
+                "tlsversion=TLSv1.2",
+        };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+    }
+
+    @Test
+    public void testOpenSSLGetContextWithCaCertAndCertAndKey() {
         String[] params = {
                 "ssl=openssl",
                 "caCertFilePath=src/test/resources/ssl/cacert.crt",
@@ -86,20 +107,11 @@ public class SSLKsFactoryTest
     }
 
     @Test
-    public void testJdkGetContext() {
-        String[] params = {
-                "ssl=jdk",
-                "tlsversion=TLSv1.2",
-        };
-        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
-    }
-
-    @Test
-    public void testOpenSSLGetContext() {
+    public void testOpenSSLGetContextWithCertAndKey() {
         String[] params = {
                 "ssl=openssl",
-                "tlsversion=TLSv1.2",
+                "certFilePath=src/test/resources/ssl/client_cert.pem",
+                "keyFilePath=src/test/resources/ssl/client.key"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
@@ -155,8 +167,8 @@ public class SSLKsFactoryTest
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageContaining("File does not contain valid certificates")
-                .withCauseInstanceOf(IllegalArgumentException.class);
+                .withMessageContaining("Unable to load caCert from")
+                .withCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -168,8 +180,8 @@ public class SSLKsFactoryTest
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageContaining("File does not contain valid certificates")
-                .withCauseInstanceOf(IllegalArgumentException.class);
+                .withMessageContaining("Unable to load cert from")
+                .withCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -181,7 +193,21 @@ public class SSLKsFactoryTest
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageContaining("File does not contain valid private key")
+                .withMessageContaining("Unable to load key from")
+                .withCauseInstanceOf(FileNotFoundException.class);
+    }
+
+    @Test
+    public void testOpenSSLGetContextWithMissingCertError() {
+        String[] params = {
+                "ssl=openssl",
+                "caCertFilePath=src/test/resources/ssl/cacert.crt",
+                "keyFilePath=src/test/resources/ssl/client.key"
+        };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .withMessageContaining("Unable to load key from")
                 .withCauseInstanceOf(IllegalArgumentException.class);
     }
 }

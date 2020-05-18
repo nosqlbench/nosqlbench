@@ -1,0 +1,75 @@
+<svg version="1.1" baseProfile="full" width="1038" height="114" viewbox="0 0 1038 114" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" style="font-weight:bold; font-size:12pt; font-family:'Calibri', Helvetica, sans-serif;;stroke-width:3;stroke-linejoin:round;stroke-linecap:round">
+  <title >nomnoml</title>
+  <desc ># direction: right
+#.op: fill=white visual=note direction=right
+#.combined: fill=#EEEEFF visual=note direction=right
+#.capture: fill=white visual=sender
+#.value: fill=white visual=none
+#.input: fill=white visual=receiver
+
+//[&lt;op&gt; a]
+//[&lt;capture&gt; a:username]
+//[&lt;op&gt; b]
+//[&lt;capture&gt; b:result]
+[&lt;value&gt; cycle]
+[&lt;value&gt; username]
+[&lt;value&gt; result]
+
+
+[cycle] -&gt; [op a]
+
+[&lt;combined&gt;op a|
+[&lt;input&gt; cycle]-&gt;[&lt;op&gt; a]
+[&lt;op&gt;a]-&gt;[&lt;capture&gt;a:username]]
+
+[op a] -&gt; [username]
+
+[username] -&gt; [op b]
+
+[&lt;combined&gt;op b|
+[&lt;input&gt; username] -&gt; [&lt;op&gt; b]
+[&lt;op&gt;b]-&gt;[&lt;capture&gt;b:result]]
+
+[op b] -&gt; [result]</desc>
+  <path d="M77.5 57.5 L97.5 57.5 L117.5 57.5 L117.5 57.5 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M104.2 62.8 L110.8 57.5 L104.2 52.2 L117.5 57.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M424.5 57.5 L444.5 57.5 L464.5 57.5 L464.5 57.5 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M451.2 62.8 L457.8 57.5 L451.2 52.2 L464.5 57.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M556.5 57.5 L576.5 57.5 L596.5 57.5 L596.5 57.5 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M583.2 62.8 L589.8 57.5 L583.2 52.2 L596.5 57.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M912.5 57.5 L932.5 57.5 L952.5 57.5 L952.5 57.5 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M939.2 62.8 L945.8 57.5 L939.2 52.2 L952.5 57.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M117.5 13.5 L416.5 13.5 L424.5 21.5 L424.5 101.5 L117.5 101.5 L117.5 13.5 Z" style="stroke:#33322E;fill:#EEEEFF;stroke-dasharray:none;"></path>
+  <path d="M416.5 13.5 L416.5 21.5 L424.5 21.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <text x="271" y="35" style="fill: #33322E;font-weight:normal;text-anchor: middle;">op a</text>
+  <path d="M117.5 44.5 L424.5 44.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M194.5 73 L214.5 73 L234.5 73 L234.5 73 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M221.2 78.3 L227.8 73 L221.2 67.7 L234.5 73 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M260.5 73 L280.5 73 L300.5 73 L300.5 73 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M287.2 78.3 L293.8 73 L287.2 67.7 L300.5 73 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M122.5 57.5 L194.5 57.5 L194.5 88.5 L122.5 88.5 L130.5 73 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <text x="162.5" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">cycle</text>
+  <path d="M234.5 57.5 L252.5 57.5 L260.5 65.5 L260.5 88.5 L234.5 88.5 L234.5 57.5 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <path d="M252.5 57.5 L252.5 65.5 L260.5 65.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <text x="247.5" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">a</text>
+  <path d="M300.5 57.5 L403.5 57.5 L411.5 73 L403.5 88.5 L300.5 88.5 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <text x="356" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">a:username</text>
+  <path d="M596.5 13.5 L904.5 13.5 L912.5 21.5 L912.5 101.5 L596.5 101.5 L596.5 13.5 Z" style="stroke:#33322E;fill:#EEEEFF;stroke-dasharray:none;"></path>
+  <path d="M904.5 13.5 L904.5 21.5 L912.5 21.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <text x="754.5" y="35" style="fill: #33322E;font-weight:normal;text-anchor: middle;">op b</text>
+  <path d="M596.5 44.5 L912.5 44.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M701.5 73 L721.5 73 L741.5 73 L741.5 73 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M728.2 78.3 L734.8 73 L728.2 67.7 L741.5 73 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M767.5 73 L787.5 73 L807.5 73 L807.5 73 " style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <path d="M794.2 78.3 L800.8 73 L794.2 67.7 L807.5 73 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+  <path d="M601.5 57.5 L701.5 57.5 L701.5 88.5 L601.5 88.5 L609.5 73 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <text x="655.5" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">username</text>
+  <path d="M741.5 57.5 L759.5 57.5 L767.5 65.5 L767.5 88.5 L741.5 88.5 L741.5 57.5 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <path d="M759.5 57.5 L759.5 65.5 L767.5 65.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+  <text x="754.5" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">b</text>
+  <path d="M807.5 57.5 L891.5 57.5 L899.5 73 L891.5 88.5 L807.5 88.5 Z" style="stroke:#33322E;fill:white;stroke-dasharray:none;"></path>
+  <text x="853.5" y="79" style="fill: #33322E;font-weight:normal;text-anchor: middle;">b:result</text>
+  <text x="45.5" y="64" style="fill: #33322E;font-weight:normal;text-anchor: middle;">cycle</text>
+  <text x="510.5" y="64" style="fill: #33322E;font-weight:normal;text-anchor: middle;">username</text>
+  <text x="989" y="64" style="fill: #33322E;font-weight:normal;text-anchor: middle;">result</text>
+</svg>

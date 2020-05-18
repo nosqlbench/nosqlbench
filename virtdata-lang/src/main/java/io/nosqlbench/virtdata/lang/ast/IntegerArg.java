@@ -1,6 +1,7 @@
 package io.nosqlbench.virtdata.lang.ast;
 
 public class IntegerArg implements ArgType {
+
     private final int intValue;
 
     public IntegerArg(Integer integer) {

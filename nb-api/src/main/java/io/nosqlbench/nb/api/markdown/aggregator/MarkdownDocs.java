@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -55,24 +56,54 @@ public class MarkdownDocs {
 
         List<? extends MarkdownInfo> markdownWithTopicGlobs =
             ListSplitterWhyDoesJavaNotDoThisAlready.partition(markdownInfos, MarkdownInfo::hasTopicGlobs);
+        List<? extends MarkdownInfo> markdownWithOnlyTopicGlobs =
+            ListSplitterWhyDoesJavaNotDoThisAlready.partition(markdownWithTopicGlobs, m -> m.getTopics().size()==0);
 
-        int loopsremaining=100;
-        // TODO: add logic to deal with leaf nodes and kick intermediate nodes to the end of the processing list.
-        // TODO: Double check exit conditions and warn user
-        while (markdownWithTopicGlobs.size()>0 && loopsremaining>0) {
-            for (MarkdownInfo markdownWithTopicGlob : markdownWithTopicGlobs) {
-                markdownWithTopicGlob.getTopicGlobs();
-                for (MarkdownInfo allInfo : markdownInfos) {
-//                    allInfo.getTopics()
+        List<MarkdownInfo> ordered = new ArrayList<>();
+
+
+        // At this point, we have three set of markdown infos
+        // a) with only globs
+        // b) with globs and literals
+        // c) with only literals
+        // We can do an O((n/2)^2) association check, which is better than O(n^2)
+
+        ordered.addAll(markdownWithOnlyTopicGlobs);
+        ordered.addAll(markdownWithTopicGlobs);
+        ordered.addAll(markdownInfos);
+
+        List<Edge<List<String>>> edges = new ArrayList<>();
+        List<String> assigning = null;
+
+        for (int i = 0; i < ordered.size()-1; i++) {
+            MarkdownInfo mdHavingGlobs = ordered.get(i);
+            List<Pattern> topicGlobs = mdHavingGlobs.getTopicGlobs();
+
+            // TODO track and warn if a glob doesn't match anything
+            for (int j = i+1; j < ordered.size(); j++) {
+
+                MarkdownInfo mdHavingTopics = ordered.get(j);
+                List<String> topics = mdHavingTopics.getTopics();
+
+                for (Pattern topicGlob : topicGlobs) {
+
+                    for (String topic : topics) {
+                        if (topicGlob.matcher(topic).matches()) {
+                            assigning=assigning==null ? new ArrayList<>() : assigning;
+                            assigning.add(topic);
+                            logger.debug("added topic=" + topic + " to " + i + "->" + j + " with " + topicGlob);
+                        }
+                    }
+                    if (assigning!=null) {
+                        assigning.addAll(mdHavingGlobs.getTopics());
+                        ordered.set(i,mdHavingGlobs.withTopics(assigning));
+                        logger.debug("assigned new mdinfo");
+                    }
                 }
             }
-            loopsremaining--;
-        }
-        if (markdownWithTopicGlobs.size()>0) {
-            throw new RuntimeException("Non-terminal condition in markdown graph processing, unable to resolve all " +
-                "topic globs, " + markdownWithTopicGlobs.size() + " remaining: " + markdownWithTopicGlobs);
         }
 
+        int loopsremaining=100;
 
         // Assign glob topics to non-glob topics that match
 
@@ -140,6 +171,30 @@ public class MarkdownDocs {
                 || srcTopic.contains(".*")
                 || srcTopic.contains(".+")
                 || srcTopic.endsWith("$");
+    }
+
+    private static class Edge<T> {
+
+        private final int from;
+        private final int to;
+        private T edgeProps;
+
+        public Edge(int from, int to, Supplier<T> forT) {
+            this.from = from;
+            this.to = to;
+            edgeProps = forT.get();
+        }
+
+        public int from() {
+            return from;
+        }
+        public int to() {
+            return to;
+        }
+        public T props() {
+            return edgeProps;
+        }
+
     }
 
 }

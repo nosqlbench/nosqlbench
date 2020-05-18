@@ -1,7 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
-import com.datastax.driver.core.policies.AddressTranslator;
-import com.datastax.driver.core.Cluster;
+import com.datastax.oss.driver.api.core.addresstranslation.AddressTranslator;
 
 import java.net.InetSocketAddress;
 
@@ -14,11 +13,6 @@ public class ProxyTranslator implements AddressTranslator {
 
     public ProxyTranslator(InetSocketAddress host){
         this.address= host;
-    }
-
-    @Override
-    public void init(Cluster cluster) {
-        // Nothing to do
     }
 
     @Override

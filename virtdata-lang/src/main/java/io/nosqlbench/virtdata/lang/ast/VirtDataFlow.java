@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VirtDataFlow {
-    private List<Expression> expressions = new ArrayList<>();
+
+    private final List<Expression> expressions = new ArrayList<>();
 
     public List<Expression> getExpressions() {
         return expressions;
@@ -26,5 +27,17 @@ public class VirtDataFlow {
             throw new RuntimeException("expressions not initialized, first expression undefined.");
         }
         return expressions.get(0);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Expression expression : expressions) {
+            sb.append(expression).append("; ");
+        }
+        if (sb.length()>0) {
+            sb.setLength(sb.length()-"; ".length());
+        }
+        return sb.toString();
     }
 }
