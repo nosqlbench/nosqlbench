@@ -60,7 +60,9 @@ public class ModuloCSVLineToString implements LongFunction<String> {
         }
 
         for (CSVRecord strings : csvp) {
-            lines.add(strings.get(column));
+            if (strings.get(column) != null) {
+                lines.add(strings.get(column));
+            }
         }
     }
 
