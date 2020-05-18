@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
-import com.datastax.driver.core.RemoteEndpointAwareNettySSLOptions;
-import com.datastax.driver.core.SSLOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
@@ -30,7 +28,6 @@ import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
 import com.datastax.driver.core.policies.WhiteListPolicy;
 import com.datastax.driver.dse.DseCluster;
-import io.netty.handler.ssl.SslContext;
 import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
@@ -43,7 +40,7 @@ public class CQLSessionCache implements Shutdownable {
 
     private final static Logger logger = LoggerFactory.getLogger(CQLSessionCache.class);
     private final static String DEFAULT_SESSION_ID = "default";
-    private static CQLSessionCache instance = new CQLSessionCache();
+    private static final CQLSessionCache instance = new CQLSessionCache();
     private Map<String, Session> sessionCache = new HashMap<>();
 
     private CQLSessionCache() {
@@ -220,10 +217,9 @@ public class CQLSessionCache implements Shutdownable {
                 .map(CQLOptions::withCompression)
                 .ifPresent(builder::withCompression);
 
-        SslContext context = SSLKsFactory.get().getContext(activityDef);
+        SSLContext context = SSLKsFactory.get().getContext(activityDef);
         if (context != null) {
-            SSLOptions sslOptions = new RemoteEndpointAwareNettySSLOptions(context);
-            builder.withSSL(sslOptions);
+            builder.withSSL(RemoteEndpointAwareJdkSSLOptions.builder().withSSLContext(context).build());
         }
 
         RetryPolicy retryPolicy = activityDef.getParams()
