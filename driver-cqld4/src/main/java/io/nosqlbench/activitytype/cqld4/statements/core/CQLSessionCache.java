@@ -1,6 +1,10 @@
 package io.nosqlbench.activitytype.cqld4.statements.core;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.config.DriverOption;
 import com.datastax.oss.driver.api.core.loadbalancing.LoadBalancingPolicy;
+import com.datastax.oss.driver.api.core.metadata.EndPoint;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
@@ -29,7 +33,8 @@ public class CQLSessionCache implements Shutdownable {
     private final static Logger logger = LoggerFactory.getLogger(CQLSessionCache.class);
     private final static String DEFAULT_SESSION_ID = "default";
     private static CQLSessionCache instance = new CQLSessionCache();
-    private Map<String, Session> sessionCache = new HashMap<>();
+    private Map<String, CqlSession> sessionCache = new HashMap<>();
+    private Map<String, Map<String, DriverOption>> rawConfigs = new HashMap<>();
 
     private CQLSessionCache() {
     }
@@ -44,61 +49,62 @@ public class CQLSessionCache implements Shutdownable {
         session.close();
     }
 
-    public Session getSession(ActivityDef activityDef) {
+    public CqlSession getSession(ActivityDef activityDef) {
         String key = activityDef.getParams().getOptionalString("clusterid").orElse(DEFAULT_SESSION_ID);
         return sessionCache.computeIfAbsent(key, (cid) -> createSession(activityDef, key));
     }
 
     // cbopts=\".withLoadBalancingPolicy(LatencyAwarePolicy.builder(new TokenAwarePolicy(new DCAwareRoundRobinPolicy(\"dc1-us-east\", 0, false))).build()).withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE))\"
 
-    private Session createSession(ActivityDef activityDef, String sessid) {
+    private CqlSession createSession(ActivityDef activityDef, String sessid) {
 
         String host = activityDef.getParams().getOptionalString("host").orElse("localhost");
         int port = activityDef.getParams().getOptionalInteger("port").orElse(9042);
 
         String driverType = activityDef.getParams().getOptionalString("cqldriver").orElse("dse");
 
-        Cluster.Builder builder =
-                driverType.toLowerCase().equals("dse") ? DseCluster.builder() :
-                        driverType.toLowerCase().equals("oss") ? Cluster.builder() : null;
+        activityDef.getParams().getOptionalString("cqldriver").ifPresent(v -> {
+            logger.warn("The cqldriver parameter is not needed in this version of the driver.");
+        });
 
-        if (builder==null) {
-            throw new RuntimeException("The driver type '" + driverType + "' is not recognized");
+        CqlSessionBuilder builder = CqlSession.builder();
+
+        Optional<Path> scb = activityDef.getParams().getOptionalString("secureconnectbundle")
+            .map(Path::of);
+
+        Optional<List<String>> hosts = activityDef.getParams().getOptionalString("host", "hosts")
+            .map(h -> h.split(",")).map(Arrays::asList);
+
+        Optional<Integer> port1 = activityDef.getParams().getOptionalInteger("port");
+
+        if (scb.isPresent()) {
+            scb.map(b -> {
+                logger.debug("adding secureconnectbundle: " + b.toString());
+                return b;
+            }).ifPresent(builder::withCloudSecureConnectBundle);
+
+            if (hosts.isPresent()) {
+                logger.warn("The host parameter is not valid when using secureconnectbundle=");
+            }
+            if (port1.isPresent()) {
+                logger.warn("the port parameter is not used with CQL when using secureconnectbundle=");
+            }
+        } else {
+            hosts.orElse(List.of("localhost"))
+                .stream()
+                .map(h -> InetSocketAddress.createUnresolved(h,port))
+                .peek(h-> logger.debug("adding contact endpoint: " + h.getHostName()+":"+h.getPort()))
+                .forEachOrdered(builder::addContactPoint);
         }
 
-        logger.info("Using driver type '" + driverType.toUpperCase() + "'");
-
-        Optional<String> scb = activityDef.getParams()
-                .getOptionalString("secureconnectbundle");
-                scb.map(File::new)
-                .ifPresent(builder::withCloudSecureConnectBundle);
-
-        activityDef.getParams()
-                .getOptionalString("insights").map(Boolean::parseBoolean)
-                .ifPresent(builder::withMonitorReporting);
-
-        String[] contactPoints = activityDef.getParams().getOptionalString("host")
-                .map(h -> h.split(",")).orElse(null);
-
-        if (contactPoints == null) {
-            contactPoints = activityDef.getParams().getOptionalString("hosts")
-                    .map(h -> h.split(",")).orElse(null);
-        }
-        if (contactPoints == null && scb.isEmpty()) {
-            contactPoints = new String[]{"localhost"};
-        }
-
-        if (contactPoints != null) {
-            builder.addContactPoints(contactPoints);
-        }
-
-        activityDef.getParams().getOptionalInteger("port").ifPresent(builder::withPort);
-
-        builder.withCompression(ProtocolOptions.Compression.NONE);
+//        builder.withCompression(ProtocolOptions.Compression.NONE);
+        // TODO add map based configuration with compression defaults
 
         Optional<String> usernameOpt = activityDef.getParams().getOptionalString("username");
         Optional<String> passwordOpt = activityDef.getParams().getOptionalString("password");
         Optional<String> passfileOpt = activityDef.getParams().getOptionalString("passfile");
+        Optional<String> authIdOpt = activityDef.getParams().getOptionalString("authid");
+
 
         if (usernameOpt.isPresent()) {
             String username = usernameOpt.get();
@@ -119,7 +125,11 @@ public class CQLSessionCache implements Shutdownable {
                 logger.error(error);
                 throw new RuntimeException(error);
             }
-            builder.withCredentials(username, password);
+            if (authIdOpt.isPresent()) {
+                builder.withAuthCredentials(username, password, authIdOpt.get());
+            } else {
+                builder.withAuthCredentials(username, password);
+            }
         }
 
         Optional<String> clusteropts = activityDef.getParams().getOptionalString("cbopts");

@@ -4,55 +4,52 @@ This is the CQL version 4 driver for NoSQLBench. As it gets more use, we will ma
 name. For now, the 'cql' refers to the version 1.9 driver, while 'cqld4' refers to this one. The drivers will have
 identical features where possible, but new enhancements will be targeted at this one first.
 
+In the alpha release of this NoSQLBench CQL driver, some of the options previously available on the CQL 1.9 driver will
+not be supported. We are working to add these in an idiomatic way ASAP.
+
 This is an driver which allows for the execution of CQL statements. This driver supports both sync and async modes, with
 detailed metrics provided for both.
 
-### Example activity definitions
-
-Run a cql activity named 'cql1', with definitions from activities/cqldefs.yaml
-~~~
-... driver=cql alias=cql1 workload=cqldefs
-~~~
-
-Run a cql activity defined by cqldefs.yaml, but with shortcut naming
-~~~
-... driver=cql workload=cqldefs
-~~~
-
-Only run statement groups which match a tag regex
-~~~
-... driver=cql workload=cqldefs tags=group:'ddl.*'
-~~~
-
-Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
-~~~
-... driver=cql workload=cqldefs tags=group:'dml.*' cycles=1000..1100
-~~~
-This last example shows that the cycle range is [inclusive..exclusive),
-to allow for stacking test intervals. This is standard across all
-activity types.
+TEMPORARY EDITORS NOTE: This will use a more consistent layout as shown below. The topics are meant to be searchable in
+the newer doc system scheme.
 
 ### CQL ActivityType Parameters
 
-- **cqldriver** - default: dse - The type of driver to use, either dse, or oss. If you need DSE-specific features, use
-  the dse driver. If you are connecting to an OSS Apache Cassandra cluster, you must use the oss driver. The oss driver
-  option is only available in nosqlbench.
-- **host** - The host or hosts to use for connection points to
-    the cluster. If you specify multiple values here, use commas
-    with no spaces.
-    Examples:
-    - `host=192.168.1.25`
-    - `host=`192.168.1.25,testhost42`
-- **workload** - The workload definition which holds the schema and statement defs.
-     see workload yaml location for additional details
-    (no default, required)
-- **port** - The port to connect with
-- **cl** - An override to consistency levels for the activity. If
-    this option is used, then all consistency levels will be replaced
-    by this one for the current activity, and a log line explaining
-    the difference with respect to the yaml will be emitted.
-    This is not a dynamic parameter. It will only be applied at
-    activity start.
+#### secureconnectbundle
+
+This parameter is used to connect to Astra Database as a Service. This option accepts a path to the secure connect
+bundle that is downloaded from the Astra UI.
+
+- Examples:
+  - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
+  - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
+
+#### hosts
+
+The host or hosts to use for connection points to the cluster. If you specify multiple values here, use commas with no
+spaces. This option is not valid when the **secureconnectbundle** option is used.
+
+* Examples:
+  - `host=192.168.1.25`
+  - `host=`192.168.1.25,testhost42`
+
+#### port
+
+The port to connect with. This option is not valid when the **secureconnectbundle** option is used.
+
+Default
+: 9042
+
+---- below this line needs to be curated for the new driver ----
+
+
+Examples:
+    - `port=9042`
+
+- **cl** - An override to consistency levels for the activity. If this option is used, then all consistency levels will
+  be replaced by this one for the current activity, and a log line explaining the difference with respect to the yaml
+  will be emitted. This is not a dynamic parameter. It will only be applied at activity start.
+-
 - **cbopts** - default: none - this is how you customize the cluster
     settings for the client, including policies, compression, etc. This
     is a string of *Java*-like method calls just as you would use them
@@ -238,11 +235,6 @@ activity types.
     code base. This is for dynamic codec loading with user-provided codecs mapped
     via the internal UDT APIs.
     default: false
-- **secureconnectbundle** - used to connect to CaaS, accepts a path to the secure connect bundle
-    that is downloaded from the CaaS UI.
-    Examples:
-    - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
-    - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
 - **insights** - Set to false to disable the driver from sending insights monitoring information
     - `insights=false`
 - **tickduration** - sets the tickDuration (milliseconds) of HashedWheelTimer of the

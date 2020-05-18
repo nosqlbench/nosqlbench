@@ -1,10 +1,8 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
-import com.google.common.util.concurrent.FutureCallback;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
 
 public class CqlOpData implements FutureCallback<ResultSet> {

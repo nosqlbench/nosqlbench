@@ -1,8 +1,9 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 import com.codahale.metrics.Timer;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.cql.*;
+import com.datastax.oss.driver.api.core.session.Session;
 import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.StatementFilter;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("Duplicates")
@@ -81,7 +83,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
             totalRowsFetchedForQuery = 0L;
 
             Statement statement;
-            ResultSetFuture resultSetFuture;
+            CompletionStage<AsyncResultSet> resultSetFuture;
             ReadyCQLStatement readyCQLStatement;
 
             int tries = 0;
@@ -124,7 +126,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                 }
 
                 try (Timer.Context executeTime = cqlActivity.executeTimer.time()) {
-                    resultSetFuture = cqlActivity.getSession().executeAsync(statement);
+                    CompletionStage<AsyncResultSet> completion = cqlActivity.getSession().executeAsync(statement);
                 }
 
                 Timer.Context resultTime = cqlActivity.resultTimer.time();
@@ -149,7 +151,8 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                         Row row = resultSet.one();
                         ColumnDefinitions defs = row.getColumnDefinitions();
                         if (retryReplace) {
-                            statement = CQLBindHelper.rebindUnappliedStatement(statement, defs, row);
+                            statement =
+                                new CQLBindHelper(getCqlActivity().getSession()).rebindUnappliedStatement(statement, defs,row);
                         }
 
                         logger.trace(readyCQLStatement.getQueryString(cycleValue));
@@ -212,7 +215,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                                     readyCQLStatement.getQueryString(cycleValue),
                                     1,
                                     cqlActivity.maxpages,
-                                    cqlActivity.getSession().getCluster().getConfiguration().getQueryOptions().getFetchSize()
+                                    cqlActivity.getSession().getContext().getConfig().getDefaultProfile().getInt(DefaultDriverOption.REQUEST_PAGE_SIZE)
                             );
                         }
                     }
@@ -302,7 +305,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                                         pagingReadyStatement.getQueryString(cycleValue),
                                         pagesFetched,
                                         cqlActivity.maxpages,
-                                        cqlActivity.getSession().getCluster().getConfiguration().getQueryOptions().getFetchSize()
+                                        cqlActivity.getSession().getContext().getConfig().getDefaultProfile().getInt(DefaultDriverOption.REQUEST_PAGE_SIZE)
                                 );
                             }
                             pagingResultSet = resultSet;

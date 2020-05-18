@@ -4,6 +4,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.session.Session;
 import io.nosqlbench.activitytype.cqld4.codecsupport.UDTCodecInjector;
 import com.datastax.driver.core.TokenRangeStmtFilter;
@@ -73,7 +74,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     Meter rowsCounter;
     private HashedCQLErrorHandler errorHandler;
     private OpSequence<ReadyCQLStatement> opsequence;
-    private Session session;
+    private CqlSession session;
     private int maxTries;
     private StatementFilter statementFilter;
     private Boolean showcql;
@@ -125,7 +126,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         logger.debug("activity fully initialized: " + this.activityDef.getAlias());
     }
 
-    public synchronized Session getSession() {
+    public synchronized CqlSession getSession() {
         if (session == null) {
             session = CQLSessionCache.get().getSession(this.getActivityDef());
         }
