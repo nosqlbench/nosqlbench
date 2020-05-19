@@ -195,10 +195,8 @@ activity types.
     The above traces every 1000th cycle to stdout.
     If the trace log is not specified, then 'tracelog' is assumed.
     If the filename is specified as stdout, then traces are dumped to stdout.
-- **clusterid** - names the configuration to be used for this activity. Within
-    a given scenario, any activities that use the same name for clusterid will
-    share a session and cluster.
-    default: 'default'
+- **sessionid** - names the configuration to be used for this activity. Within a given scenario, any activities that use
+  the same name for clusterid will share a session and cluster. default: 'default'
 - **drivermetrics** - enable reporting of driver metrics.
     default: false
 - **driverprefix** - set the metrics name that will prefix all CQL driver metrics.
