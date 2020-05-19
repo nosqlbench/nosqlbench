@@ -1,7 +1,5 @@
 package io.nosqlbench.engine.extensions.http;
 
-import jdk.jfr.ContentType;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,7 +9,7 @@ import java.net.http.HttpResponse;
 public class HttpPlugin {
     private HttpClient client = HttpClient.newHttpClient();
 
-    public String get(String url) throws IOException, InterruptedException {
+    public HttpResponse<String> get(String url) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         URI uri = URI.create(url);
         HttpRequest request = builder
@@ -21,14 +19,14 @@ public class HttpPlugin {
         HttpResponse<String> response = client.send(request,
             HttpResponse.BodyHandlers.ofString());
 
-        return response.body();
+        return response;
     }
 
-    public String post(String url) throws IOException, InterruptedException {
+    public HttpResponse<String> post(String url) throws IOException, InterruptedException {
         return post(url, null, null);
     }
 
-    public String post(String url, String data, String contentType) throws IOException, InterruptedException {
+    public HttpResponse<String> post(String url, String data, String contentType) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         URI uri = URI.create(url);
 
@@ -55,7 +53,7 @@ public class HttpPlugin {
         HttpResponse<String> response = client.send(request,
             HttpResponse.BodyHandlers.ofString());
 
-        return response.body();
+        return response;
     }
 
 }
