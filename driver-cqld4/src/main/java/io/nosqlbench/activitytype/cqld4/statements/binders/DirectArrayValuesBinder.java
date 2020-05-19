@@ -18,7 +18,7 @@ import java.util.Arrays;
  * to be modeled, and at no clear benefit. Thus the {@link CqlBinderTypes#unset_aware} one
  * will become the default.
  */
-public class DirectArrayValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement> {
+public class DirectArrayValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
     public final static Logger logger = LoggerFactory.getLogger(DirectArrayValuesBinder.class);
 
     @Override

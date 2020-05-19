@@ -2,13 +2,18 @@ package io.nosqlbench.activitytype.cqld4.statements.core;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.config.DriverConfig;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.DriverOption;
+import com.datastax.oss.driver.api.core.config.OptionsMap;
 import com.datastax.oss.driver.api.core.loadbalancing.LoadBalancingPolicy;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
+import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.retry.DefaultRetryPolicy;
+import com.typesafe.config.ConfigFactory;
 import io.nosqlbench.activitytype.cqld4.core.CQLOptions;
 import io.nosqlbench.activitytype.cqld4.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
@@ -17,6 +22,7 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.NashornEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.graalvm.options.OptionMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,14 +33,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CQLSessionCache implements Shutdownable {
 
     private final static Logger logger = LoggerFactory.getLogger(CQLSessionCache.class);
     private final static String DEFAULT_SESSION_ID = "default";
     private static CQLSessionCache instance = new CQLSessionCache();
-    private Map<String, CqlSession> sessionCache = new HashMap<>();
-    private Map<String, Map<String, DriverOption>> rawConfigs = new HashMap<>();
+    private Map<String, SessionConfig> sessionCache = new HashMap<>();
+
+
+    private final static class SessionConfig extends ConcurrentHashMap<String,String> {
+        public CqlSession session;
+        public Map<String,String> config = new ConcurrentHashMap<>();
+
+        public SessionConfig(CqlSession session) {
+            this.session = session;
+        }
+    }
 
     private CQLSessionCache() {
     }
@@ -44,30 +60,52 @@ public class CQLSessionCache implements Shutdownable {
     }
 
     public void stopSession(ActivityDef activityDef) {
-        String key = activityDef.getParams().getOptionalString("clusterid").orElse(DEFAULT_SESSION_ID);
-        Session session = sessionCache.get(key);
-        session.close();
+        String key = activityDef.getParams().getOptionalString("sessionid").orElse(DEFAULT_SESSION_ID);
+        SessionConfig sessionConfig = sessionCache.get(key);
+        sessionConfig.session.close();
     }
 
     public CqlSession getSession(ActivityDef activityDef) {
-        String key = activityDef.getParams().getOptionalString("clusterid").orElse(DEFAULT_SESSION_ID);
-        return sessionCache.computeIfAbsent(key, (cid) -> createSession(activityDef, key));
+        String key = activityDef.getParams().getOptionalString("sessionid").orElse(DEFAULT_SESSION_ID);
+        String profileName = activityDef.getParams().getOptionalString("profile").orElse("default");
+        SessionConfig sessionConfig = sessionCache.computeIfAbsent(key, (cid) -> createSession(activityDef, key, profileName));
+        return sessionConfig.session;
     }
 
     // cbopts=\".withLoadBalancingPolicy(LatencyAwarePolicy.builder(new TokenAwarePolicy(new DCAwareRoundRobinPolicy(\"dc1-us-east\", 0, false))).build()).withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE))\"
 
-    private CqlSession createSession(ActivityDef activityDef, String sessid) {
+    private SessionConfig createSession(ActivityDef activityDef, String sessid, String profileName) {
 
         String host = activityDef.getParams().getOptionalString("host").orElse("localhost");
         int port = activityDef.getParams().getOptionalInteger("port").orElse(9042);
-
-        String driverType = activityDef.getParams().getOptionalString("cqldriver").orElse("dse");
 
         activityDef.getParams().getOptionalString("cqldriver").ifPresent(v -> {
             logger.warn("The cqldriver parameter is not needed in this version of the driver.");
         });
 
-        CqlSessionBuilder builder = CqlSession.builder();
+
+        // TODO: Figure out how to layer configs with the new TypeSafe Config layer in the Datastax Java Driver
+        // TODO: Or give up and bulk import options into the map, because the config API is a labyrinth
+//
+//        CqlSessionBuilder builder = CqlSession.builder();
+//
+//        OptionsMap optionsMap = new OptionsMap();
+//
+//        OptionsMap defaults = OptionsMap.driverDefaults();
+//        DriverConfigLoader cl = DriverConfigLoader.fromMap(defaults);
+//        DriverConfig cfg = cl.getInitialConfig();
+
+
+        DriverConfigLoader alldefaults = DriverConfigLoader.fromMap(OptionsMap.driverDefaults());
+
+        ConfigFactory.defaultApplication().withFallback(alldefaults.getInitialConfig().getDefaultProfile().).
+
+        DriverConfigLoader.fromMap()
+
+        builder.withConfigLoader(DriverConfigLoader.fromMap().)
+
+
+
 
         Optional<Path> scb = activityDef.getParams().getOptionalString("secureconnectbundle")
             .map(Path::of);

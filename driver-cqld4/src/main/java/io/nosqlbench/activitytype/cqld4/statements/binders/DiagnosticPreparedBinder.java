@@ -16,10 +16,10 @@ import java.util.List;
  * Other binders will call to this one in an exception handler when needed in
  * order to explain in more detail what is happening for users.
  */
-public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedStatement, Statement> {
+public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
     public static final Logger logger = LoggerFactory.getLogger(DiagnosticPreparedBinder.class);
     @Override
-    public Statement bindValues(PreparedStatement prepared, Object[] values) {
+    public Statement<?> bindValues(PreparedStatement prepared, Object[] values) {
         ColumnDefinitions columnDefinitions = prepared.getVariableDefinitions();
         BoundStatement bound = prepared.bind();
 

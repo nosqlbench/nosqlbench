@@ -13,11 +13,10 @@ public class UDTCodecInjector {
     private final static Logger logger = LoggerFactory.getLogger(UDTCodecInjector.class);
 
     private List<UserCodecProvider> codecProviders = new ArrayList<>();
-    private List<UserType> userTypes = new ArrayList<>();
 
     public void injectUserProvidedCodecs(Session session, boolean allowAcrossKeyspaces) {
 
-        CodecRegistry registry = session.getCluster().getConfiguration().getCodecRegistry();
+        CodecRegistry registry = session.getContext().getCodecRegistry();
 
         ServiceLoader<UserCodecProvider> codecLoader = ServiceLoader.load(UserCodecProvider.class);
 
