@@ -1,8 +1,8 @@
 {
   "name":"prometheus",
   "type":"prometheus",
-  "url":"http://localhost:9090",
-  "access":"direct",
+  "url":"http://prom:9090",
+  "access":"proxy",
   "editable":true,
   "basicAuth":false
 }
