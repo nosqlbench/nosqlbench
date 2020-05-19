@@ -74,7 +74,9 @@ public class DockerMetricsManager {
         );
 
         String reload = null;
-        String containerId = dh.startDocker(GRAFANA_IMG, tag, name, port, volumeDescList, envList, null, reload);
+        List<String> linkNames = new ArrayList();
+        linkNames.add("prom");
+        String containerId = dh.startDocker(GRAFANA_IMG, tag, name, port, volumeDescList, envList, null, reload, linkNames);
         if (containerId == null){
             return;
         }
@@ -118,7 +120,8 @@ public class DockerMetricsManager {
         );
 
         String reload = "http://localhost:9090/-/reload";
-        dh.startDocker(PROMETHEUS_IMG, tag, name, port, volumeDescList, envList, cmdList, reload);
+        List<String> linkNames = new ArrayList();
+        dh.startDocker(PROMETHEUS_IMG, tag, name, port, volumeDescList, envList, cmdList, reload, linkNames);
 
         logger.info("prometheus started and listenning");
     }
@@ -137,7 +140,8 @@ public class DockerMetricsManager {
         List<String> envList = Arrays.asList();
 
         String reload = null;
-        dh.startDocker(GRAPHITE_EXPORTER_IMG, tag, name, port, volumeDescList, envList, null, reload);
+        List<String> linkNames = new ArrayList();
+        dh.startDocker(GRAPHITE_EXPORTER_IMG, tag, name, port, volumeDescList, envList, null, reload, linkNames);
 
         logger.info("graphite exporter container started");
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static io.nosqlbench.engine.docker.RestHelper.post;
 
@@ -45,7 +46,7 @@ public class DockerHelper {
             .withDockerCmdExecFactory(dockerCmdExecFactory)
             .build();
     }
-    public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload) {
+    public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
         logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
             "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
@@ -108,6 +109,7 @@ public class DockerHelper {
 
 
         CreateContainerResponse containerResponse;
+        List<Link> links = linkNames.stream().map(x->new Link(x,x)).collect(Collectors.toList());
         if (envList == null) {
             containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
                 .withCmd(cmdList)
@@ -120,6 +122,7 @@ public class DockerHelper {
                 )
                 .withName(name)
                 //.withVolumes(volumeList)
+                .withLinks(links)
                 .exec();
         } else {
             long user = new UnixSystem().getUid();
@@ -133,6 +136,7 @@ public class DockerHelper {
                         .withBinds(volumeBindList)
                 )
                 .withName(name)
+                .withLinks(links)
                 .withUser(""+user)
                 //.withVolumes(volumeList)
                 .exec();
