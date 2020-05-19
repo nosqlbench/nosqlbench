@@ -1,4 +1,4 @@
-# cql driver
+# cql-d4 driver
 
 This is the CQL version 4 driver for NoSQLBench. As it gets more use, we will make it the primary driver under the 'cql'
 name. For now, the 'cql' refers to the version 1.9 driver, while 'cqld4' refers to this one. The drivers will have
@@ -13,55 +13,123 @@ detailed metrics provided for both.
 TEMPORARY EDITORS NOTE: This will use a more consistent layout as shown below. The topics are meant to be searchable in
 the newer doc system scheme.
 
-### CQL ActivityType Parameters
+## Activity Params
+
+There are the parameters that you can provide when starting an activity with this driver.
+
+Any parameter that is marked as *required* must be provided or an error will be thrown at activity startup. All other
+parameters are marked as *optional*.
+
+Any parameter that is marked as *static* may not be changed while an activity is running. All other parameters are
+marked as *dynamic*, meaning that they may be changed while an activity is running via scripting.
+
+#### sessionid
+
+*optional*, *static*
+
+The `sessionid` parameter allows you to logically assign a named instance of a session and session configuration to each
+activity that you run. This allows for different driver settings to be used within the same scenario.
+
+Default
+: default
+
+Example:
+: `sessionid=test43`
+
+#### profile
+
+*optional*, *static*
+
+Controls the configuration profile used by the driver. If you provide a value for this parameter, then a configuration
+file under the name must exist, or an error will be thrown. This a driver configuration file, as documented in [DataStax
+Java Driver - Configurat](https://docs.datastax.com/en/developer/java-driver/4.6/manual/core/configuration/).
+
+The profile is keyed to the sessionid, as each session id will be configured with the named profile just as you would
+see with normal file-based driver configuration. Thus, changing the configuration within the profile will affect future
+operations which share the same session.
+
+While the profile itself is not changeable after it has been set, the parameters that are in the profile may be
+dynamically changed, depending on how they are annotated below.
+
+*All other driver settings are part of the named profile for an activity, and will override the values provided from the
+named profile unless otherwise stated. These overrides do not affect the named file, only the runtime behavior of the
+driver.*
+
+Default
+:   'default'
+
+Examples
+:   `profile=experimental-settings`
 
 #### secureconnectbundle
+
+*optional*, *static*
 
 This parameter is used to connect to Astra Database as a Service. This option accepts a path to the secure connect
 bundle that is downloaded from the Astra UI.
 
-- Examples:
-  - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
-  - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
+Default
+:   undefined
+
+Examples
+: `secureconnectbundle=/tmp/secure-connect-my_db.zip`
+: `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
+
 
 #### hosts
 
-The host or hosts to use for connection points to the cluster. If you specify multiple values here, use commas with no
-spaces. This option is not valid when the **secureconnectbundle** option is used.
+*optional*, *static*
 
-* Examples:
-  - `host=192.168.1.25`
-  - `host=`192.168.1.25,testhost42`
+The host or hosts to use to connect to the cluster. If you specify multiple values here, use commas with no spaces.
+*This option is not valid when the `secureconnectbundle` option is used.*
+
+Default
+: localhost
+
+Examples
+: `host=192.168.1.25`
+: `host=192.168.1.25,testhost42`
 
 #### port
 
-The port to connect with. This option is not valid when the **secureconnectbundle** option is used.
+*optional*, *static*
+
+The port to connect with. *This option is not valid when the `secureconnectbundle` option is used.*
 
 Default
 : 9042
 
+Examples:
+- `port=9042`
+
+#### cl
+
+*optional*, *static*
+
+An override to consistency levels for the activity. If this option is used, then all consistency levels will be set to
+this by default for the current activity, and a log line explaining the difference with respect to the yaml will be
+emitted. This is not a dynamic parameter. It will only be applied at activity start.
+
+
+#### whitelist
+
+
 ---- below this line needs to be curated for the new driver ----
 
 
-Examples:
-    - `port=9042`
-
-- **cl** - An override to consistency levels for the activity. If this option is used, then all consistency levels will
-  be replaced by this one for the current activity, and a log line explaining the difference with respect to the yaml
-  will be emitted. This is not a dynamic parameter. It will only be applied at activity start.
--
-- **cbopts** - default: none - this is how you customize the cluster
-    settings for the client, including policies, compression, etc. This
-    is a string of *Java*-like method calls just as you would use them
-    in the Cluster.Builder fluent API. They are evaluated inline
-    with the default Cluster.Builder options not covered below.
-    Example: cbopts=".withCompression(ProtocolOptions.Compression.NONE)"
 - **whitelist** default: none - Applies a whitelist policy to the load balancing
     policy in the driver. If used, a WhitelistPolicy(RoundRobinPolicy())
     will be created and added to the cluster builder on startup.
     Examples:
     - whitelist=127.0.0.1
     - whitelist=127.0.0.1:9042,127.0.0.2:1234
+
+- **cbopts** - default: none - this is how you customize the cluster
+    settings for the client, including policies, compression, etc. This
+    is a string of *Java*-like method calls just as you would use them
+    in the Cluster.Builder fluent API. They are evaluated inline
+    with the default Cluster.Builder options not covered below.
+    Example: cbopts=".withCompression(ProtocolOptions.Compression.NONE)"
 - **retrypolicy** default: none - Applies a retry policy in the driver
     The only option supported for this version is `retrypolicy=logging`,
     which uses the default retry policy, but with logging added.
