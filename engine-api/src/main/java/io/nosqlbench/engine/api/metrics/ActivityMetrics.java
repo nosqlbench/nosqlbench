@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.Unit;
@@ -42,6 +43,16 @@ public class ActivityMetrics {
         return true;
     };
     private static List<MetricsCloseable> metricsCloseables = new ArrayList<>();
+
+    private static int significantDigits = 4;
+
+    public static int getSignificantDigits() {
+        return significantDigits;
+    }
+
+    public static void setHdrDigits(int hdrDigits) {
+        ActivityMetrics.significantDigits = hdrDigits;
+    }
 
     private ActivityMetrics() {
     }
@@ -98,7 +109,7 @@ public class ActivityMetrics {
     public static Timer timer(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         Timer registeredTimer = (Timer) register(activityDef, name, () ->
-                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, 4)));
+                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, significantDigits)));
         return registeredTimer;
     }
 
@@ -114,7 +125,7 @@ public class ActivityMetrics {
     public static Histogram histogram(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         return (Histogram) register(activityDef, name, () ->
-                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, 4)));
+                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, significantDigits)));
     }
 
     /**

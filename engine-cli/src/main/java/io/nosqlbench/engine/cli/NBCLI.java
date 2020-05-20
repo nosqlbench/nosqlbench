@@ -81,6 +81,8 @@ public class NBCLI {
 
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
 
+        ActivityMetrics.setHdrDigits(options.getHdrDigits());
+
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("basic.md"));
             System.exit(0);

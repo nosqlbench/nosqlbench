@@ -53,6 +53,7 @@ public class NBCLIOptions {
     private static final String WAIT_MILLIS = "waitmillis";
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
+    private static final String HDR_DIGITS = "--hdr-digits";
 
     // Execution Options
 
@@ -127,7 +128,7 @@ public class NBCLIOptions {
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
-
+    private int hdr_digits = 4;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -212,6 +213,10 @@ public class NBCLIOptions {
                 case LOGS_DIR:
                     arglist.removeFirst();
                     logsDirectory = readWordOrThrow(arglist, "a log directory");
+                    break;
+                case HDR_DIGITS:
+                    arglist.removeFirst();
+                    hdr_digits = Integer.parseInt(readWordOrThrow(arglist, "significant digits"));
                     break;
                 case LOGS_MAX:
                     arglist.removeFirst();
@@ -530,6 +535,10 @@ public class NBCLIOptions {
 //        return new Cmd(CmdType.script, scriptName, scriptParams);
 //    }
 
+
+    public int getHdrDigits() {
+        return hdr_digits;
+    }
 
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
