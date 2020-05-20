@@ -70,6 +70,16 @@
                 <module>driver-cqld4</module>
             </modules>
         </profile>
+        <profile>
+            <id>with-mongodb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>driver-mongodb</module>
+            </modules>
+        </profile>
+
     </profiles>
 
     <licenses>
