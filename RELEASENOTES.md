@@ -8,3 +8,5 @@ d0ae1dd2 (origin/master, origin/HEAD) updated release notes
 3c29a80d updated release notes
 08489c55 Update docker ci on trigger
 0877afc8 testing dockerhub
+14f6f9b4 update release notes
+55b21edc streamline docker publish
