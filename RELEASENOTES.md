@@ -6,3 +6,4 @@ de6c6b36 (origin/http-script-plugin, http-script-plugin) return types
 39d6c50a http plugin for scripts
 c99b609a (origin/refactor-sslksfactory) Refactor SSLKsFactory
 548b3a4e (HEAD -> master) make --hdr_digits configurable
+d43941d1 (HEAD -> master) allow activities to set hdr-digits
