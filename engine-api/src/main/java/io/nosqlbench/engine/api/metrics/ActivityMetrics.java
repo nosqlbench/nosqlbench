@@ -37,7 +37,7 @@ public class ActivityMetrics {
 
     private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
 
-    public static final String HDRDIGITS_PARAM = "hdr-digits";
+    public static final String HDRDIGITS_PARAM = "hdr_digits";
     public static final int DEFAULT_HDRDIGITS= 4;
     private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
 
@@ -103,7 +103,7 @@ public class ActivityMetrics {
     /**
      * <p>Create a timer associated with an activity.</p>
      *
-     * <p>If the provide ActivityDef contains a parameter "hdr-digits", then it will be used to set the number of
+     * <p>If the provide ActivityDef contains a parameter "hdr_digits", then it will be used to set the number of
      * significant digits on the histogram's precision.</p>
      *
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
@@ -128,7 +128,7 @@ public class ActivityMetrics {
     /**
      * <p>Create an HDR histogram associated with an activity.</p>
      *
-     * <p>If the provide ActivityDef contains a parameter "hdr-digits", then it will be used to set the number of
+     * <p>If the provide ActivityDef contains a parameter "hdr_digits", then it will be used to set the number of
      * significant digits on the histogram's precision.</p>
      *
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,

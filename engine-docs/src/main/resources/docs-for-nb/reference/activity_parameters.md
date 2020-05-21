@@ -364,9 +364,9 @@ This sequencer is most useful when you want a stable ordering of operation from 
 each operations is spaced as evenly as possible over time, and where it is not important to control the cycle-by-cycle
 sequencing of statements.
 
-## hdr-digits
+## hdr_digits
 
-- `hdr-digits=3`
+- `hdr_digits=3`
 - _default_: `4`
 - _required_: no
 - _dynamic_: no
@@ -376,5 +376,5 @@ activity. The default of 4 allows 4 significant digits, which means *up to* 1000
 metric, per histogram interval. This does not mean that there _will be_ 10000 distinct buckets, but it means there could
 be if there is significant volume and variety in the measurements.
 
-If you are running a scenario that creates many activities, then you can set `hdr-digits=1` on some of them to save
+If you are running a scenario that creates many activities, then you can set `hdr_digits=1` on some of them to save
 client resources.
