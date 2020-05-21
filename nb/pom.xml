@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.109</version>
+        <version>3.12.110-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,31 +24,31 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-web</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
 <!--        <dependency>-->
@@ -60,37 +60,37 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-stdout</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-diag</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-tcp</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-http</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cql-shaded</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cqlverify</artifactId>
-            <version>3.12.109</version>
+            <version>3.12.110-SNAPSHOT</version>
         </dependency>
 
 
