@@ -18,7 +18,6 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.*;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.Unit;
@@ -37,6 +36,11 @@ import java.util.regex.Pattern;
 public class ActivityMetrics {
 
     private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
+
+    public static final String HDRDIGITS_PARAM = "hdr-digits";
+    public static final int DEFAULT_HDRDIGITS= 4;
+    private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
+
     private static MetricRegistry registry;
 
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
@@ -44,14 +48,13 @@ public class ActivityMetrics {
     };
     private static List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 
-    private static int significantDigits = 4;
 
-    public static int getSignificantDigits() {
-        return significantDigits;
+    public static int getHdrDigits() {
+        return _HDRDIGITS;
     }
 
     public static void setHdrDigits(int hdrDigits) {
-        ActivityMetrics.significantDigits = hdrDigits;
+        ActivityMetrics._HDRDIGITS = hdrDigits;
     }
 
     private ActivityMetrics() {
@@ -99,6 +102,10 @@ public class ActivityMetrics {
     }
     /**
      * <p>Create a timer associated with an activity.</p>
+     *
+     * <p>If the provide ActivityDef contains a parameter "hdr-digits", then it will be used to set the number of
+     * significant digits on the histogram's precision.</p>
+     *
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
@@ -109,14 +116,24 @@ public class ActivityMetrics {
     public static Timer timer(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         Timer registeredTimer = (Timer) register(activityDef, name, () ->
-                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, significantDigits)));
+                new NicerTimer(fullMetricName,
+                        new DeltaHdrHistogramReservoir(
+                                fullMetricName,
+                                activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                        )
+                ));
         return registeredTimer;
     }
 
     /**
-     * <p>Create a histogram associated with an activity.</p>
+     * <p>Create an HDR histogram associated with an activity.</p>
+     *
+     * <p>If the provide ActivityDef contains a parameter "hdr-digits", then it will be used to set the number of
+     * significant digits on the histogram's precision.</p>
+     *
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
+     *
      *
      * @param activityDef an associated activity def
      * @param name     a simple, descriptive name for the histogram
@@ -125,7 +142,13 @@ public class ActivityMetrics {
     public static Histogram histogram(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         return (Histogram) register(activityDef, name, () ->
-                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, significantDigits)));
+                new NicerHistogram(
+                        fullMetricName,
+                        new DeltaHdrHistogramReservoir(
+                                fullMetricName,
+                                activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                        )
+                ));
     }
 
     /**

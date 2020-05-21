@@ -360,9 +360,21 @@ In detail, the rendering appears as `0.0(A), 0.0(B), 0.0(C), 0.25(A),
 0.5(A), 0.5(B), 0.75(A)`, which yields `A B C A A B A` as the op
 sequence.
 
-This sequencer is most useful when you want a stable ordering of
-operation from a rich mix of statement types, where each operations is
-spaced as evenly as possible over time, and where it is not important to
-control the cycle-by-cycle sequencing of statements.
+This sequencer is most useful when you want a stable ordering of operation from a rich mix of statement types, where
+each operations is spaced as evenly as possible over time, and where it is not important to control the cycle-by-cycle
+sequencing of statements.
 
+## hdr-digits
 
+- `hdr-digits=3`
+- _default_: `4`
+- _required_: no
+- _dynamic_: no
+
+This parameter determines the number of significant digits used in all HDR histograms for metrics collected from this
+activity. The default of 4 allows 4 significant digits, which means *up to* 10000 distinct histogram buckets per named
+metric, per histogram interval. This does not mean that there _will be_ 10000 distinct buckets, but it means there could
+be if there is significant volume and variety in the measurements.
+
+If you are running a scenario that creates many activities, then you can set `hdr-digits=1` on some of them to save
+client resources.
