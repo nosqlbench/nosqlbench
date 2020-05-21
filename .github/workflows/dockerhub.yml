@@ -1,43 +1,39 @@
 name: dockerhub
-
 on:
-  push:
-    tags:
-    - nosqlbench-**
+  release:
+    types: [published]
 
 jobs:
-  build:
+
+  docker_push:
+
+    name: docker_push
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Login to DockerHub Registry
-      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-    - name: Get the version
-      id: vars
-      run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
-    - name: Build the tagged Docker image
-      run: docker build ./nb/ --file Dockerfile --tag nosqlbench/nosqlbench:${{steps.vars.outputs.tag}}
-    - name: Push the tagged Docker image
-      run: docker push nosqlbench/nosqlbench:${{steps.vars.outputs.tag}}
-    - name: Build the latest Docker image
-      run: docker build ./nb/ --file Dockerfile --tag nosqlbench/nosqlbench:latest
-    - name: Push the latest Docker image
-      run: docker push nosqlbench/nosqlbench:latest
 
-#jobs: (copied from docker.yml, this snippet references non-extant Dockerfile-build
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@master
-#      - name: Build nosqlbench docker
-#        run: cd nb && docker build -t nosqlbench -f ./Dockerfile-build ./
-#      - name: Publish to Registry
-#        uses: elgohr/Publish-Docker-Github-Action@master
-#        with:
-#          name: nosqlbench/nosqlbench
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          tag_names: true
-#          dockerfile: Dockerfile
-#          workdir: nb
+      - uses: actions/checkout@v2
+        name: checkout nosqlbench
+      - uses: actions/setup-java@v1
+        name: setup java
+        with:
+          java-version: '14'
+          java-package: jdk
+          architecture: x64
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: mvn package
+        run: mvn package -DskipTests
+
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: nosqlbench/nosqlbench
+          tag_with_ref: true
