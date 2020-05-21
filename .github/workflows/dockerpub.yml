@@ -2,7 +2,9 @@ name: dockerpub
   
 on:
   push:
-    tags: nosqlbench-**
+    branches: master
+    paths:
+     - '!RELEASENOTES.**'
 
 jobs:
   build:
