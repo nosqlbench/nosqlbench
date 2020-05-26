@@ -2,10 +2,7 @@ package io.nosqlbench.activitytype.cqld4.statements.core;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
-import com.datastax.oss.driver.api.core.config.DriverConfig;
-import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.datastax.oss.driver.api.core.config.DriverOption;
-import com.datastax.oss.driver.api.core.config.OptionsMap;
+import com.datastax.oss.driver.api.core.config.*;
 import com.datastax.oss.driver.api.core.loadbalancing.LoadBalancingPolicy;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
@@ -95,11 +92,14 @@ public class CQLSessionCache implements Shutdownable {
 //        DriverConfigLoader cl = DriverConfigLoader.fromMap(defaults);
 //        DriverConfig cfg = cl.getInitialConfig();
 
+        OptionsMap optionsMap = new OptionsMap();
+        optionsMap.put(TypedDriverOption.CONTINUOUS_PAGING_TIMEOUT_OTHER_PAGES,)
+        OptionsMap source = OptionsMap.driverDefaults();
+        optionsMap.put()
 
-        DriverConfigLoader alldefaults = DriverConfigLoader.fromMap(OptionsMap.driverDefaults());
+        DriverConfigLoader alldefaults = DriverConfigLoader.fromMap(source);
 
-        ConfigFactory.defaultApplication().withFallback(alldefaults.getInitialConfig().getDefaultProfile().).
-
+        alldefaults.
         DriverConfigLoader.fromMap()
 
         builder.withConfigLoader(DriverConfigLoader.fromMap().)
