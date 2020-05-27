@@ -224,7 +224,7 @@ as any other parameter depending on the assignment operators as explained above.
 ### alias
 
 The `alias` parameter is, by default, set to the expanded name of WORKLOAD_SCENARIO_STEP, which means that each activity
-within the scenario has a distinct and symoblic name. This is important for distinguishing metrics from one another
+within the scenario has a distinct and symbolic name. This is important for distinguishing metrics from one another
 across workloads, named scenarios, and steps within a named scenario. The above words are interpolated into the alias as
 follows:
 

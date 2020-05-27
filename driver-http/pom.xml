@@ -18,6 +18,7 @@
     </description>
 
     <dependencies>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>

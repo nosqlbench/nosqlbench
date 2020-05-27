@@ -43,6 +43,7 @@
         <module>driver-cql-shaded</module>
         <module>driver-cqlverify</module>
         <module>driver-web</module>
+        <module>driver-kafka</module>
 
         <!-- VIRTDATA MODULES -->
 
