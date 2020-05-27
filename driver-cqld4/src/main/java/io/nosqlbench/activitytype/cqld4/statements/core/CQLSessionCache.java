@@ -8,6 +8,7 @@ import com.datastax.oss.driver.api.core.metadata.EndPoint;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
+import com.datastax.oss.driver.internal.core.config.map.MapBasedDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.retry.DefaultRetryPolicy;
 import com.typesafe.config.ConfigFactory;
@@ -83,8 +84,8 @@ public class CQLSessionCache implements Shutdownable {
 
         // TODO: Figure out how to layer configs with the new TypeSafe Config layer in the Datastax Java Driver
         // TODO: Or give up and bulk import options into the map, because the config API is a labyrinth
-//
-//        CqlSessionBuilder builder = CqlSession.builder();
+
+        CqlSessionBuilder builder = CqlSession.builder();
 //
 //        OptionsMap optionsMap = new OptionsMap();
 //
@@ -92,19 +93,10 @@ public class CQLSessionCache implements Shutdownable {
 //        DriverConfigLoader cl = DriverConfigLoader.fromMap(defaults);
 //        DriverConfig cfg = cl.getInitialConfig();
 
-        OptionsMap optionsMap = new OptionsMap();
-        optionsMap.put(TypedDriverOption.CONTINUOUS_PAGING_TIMEOUT_OTHER_PAGES,)
-        OptionsMap source = OptionsMap.driverDefaults();
-        optionsMap.put()
+        OptionsMap optionsMap = OptionsMap.driverDefaults();
 
-        DriverConfigLoader alldefaults = DriverConfigLoader.fromMap(source);
-
-        alldefaults.
-        DriverConfigLoader.fromMap()
-
-        builder.withConfigLoader(DriverConfigLoader.fromMap().)
-
-
+        builder.withConfigLoader(new MapBasedDriverConfigLoader())
+        builder.withConfigLoader(optionsMap);
 
 
         Optional<Path> scb = activityDef.getParams().getOptionalString("secureconnectbundle")
