@@ -4,7 +4,7 @@ description: |
 
 scenarios:
   default:
-    readout1: run driver===stdout format===readout cycles=1
+    readout1: run driver===stdout format=readout cycles=1
 
 bindings:
   cycle: Identity()
