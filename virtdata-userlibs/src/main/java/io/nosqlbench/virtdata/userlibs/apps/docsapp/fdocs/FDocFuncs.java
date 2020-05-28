@@ -71,4 +71,12 @@ public class FDocFuncs implements Iterable<FDocFunc> {
             .replaceAll("java.net.","")
             .replaceAll("java.io.","");
     }
+
+    @Override
+    public String toString() {
+        return "FDocFuncs{" +
+                "functionsByPackage=" + functionsByPackage +
+                ", functionName='" + functionName + '\'' +
+                '}';
+    }
 }
