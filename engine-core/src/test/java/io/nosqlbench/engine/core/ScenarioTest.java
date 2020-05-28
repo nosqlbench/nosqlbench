@@ -1,4 +1,4 @@
-package io.nosqlbench.core;
+package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.script.Scenario;

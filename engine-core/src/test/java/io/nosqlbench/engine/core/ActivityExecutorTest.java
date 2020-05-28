@@ -1,4 +1,4 @@
-package io.nosqlbench.core;
+package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
@@ -12,7 +12,6 @@ import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.engine.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
