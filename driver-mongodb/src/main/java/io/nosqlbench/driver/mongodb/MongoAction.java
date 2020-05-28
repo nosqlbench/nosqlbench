@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Timer;
-import com.mongodb.ReadPreference;
-import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import org.bson.Document;
@@ -51,12 +49,9 @@ public class MongoAction implements SyncAction {
             activity.triesHisto.update(i);
 
             try (Timer.Context resultTime = activity.resultTimer.time()) {
-                MongoDatabase database = activity.getDatabase();
-                ReadPreference readPreference = rms.getReadPreference();
-
                 // assuming the commands are one of these in the doc:
                 // https://docs.mongodb.com/manual/reference/command/nav-crud/
-                Document resultDoc = database.runCommand(queryBson, readPreference);
+                Document resultDoc = activity.getDatabase().runCommand(queryBson, rms.getReadPreference());
 
                 long resultNanos = System.nanoTime() - nanoStartTime;
 

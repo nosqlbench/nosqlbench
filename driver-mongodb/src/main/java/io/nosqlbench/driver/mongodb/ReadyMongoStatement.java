@@ -11,8 +11,8 @@ import org.bson.conversions.Bson;
 
 public class ReadyMongoStatement {
 
-    private StringBindings bindings;
-    private ReadPreference readPreference;
+    private final StringBindings bindings;
+    private final ReadPreference readPreference;
 
     public ReadyMongoStatement(OpTemplate stmtDef) {
         ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());

@@ -48,8 +48,8 @@ public class ReadyMongoStatementTest {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(2);
 
-            BindPoint seqKey = new BindPoint("seq_key", "Mod(1000000000); ToString() -> String");
-            BindPoint seqValue = new BindPoint("seq_value", "Hash(); Mod(1000000000); ToString() -> String");
+            BindPoint seqKey = new BindPoint("seq_key", "Mod(1000000L); ToInt()");
+            BindPoint seqValue = new BindPoint("seq_value", "Mod(1000000000L); Hash(); ToString() -> String");
             assertThat(parsed.getBindPoints()).containsExactly(seqKey, seqValue);
 
             String statement = parsed.getPositionalStatement(Function.identity());
@@ -71,7 +71,7 @@ public class ReadyMongoStatementTest {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(1);
 
-            BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000000)->int; ToString() -> String");
+            BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000)->long; ToInt()");
             assertThat(parsed.getBindPoints()).containsExactly(rwKey);
 
             String statement = parsed.getPositionalStatement(Function.identity());
@@ -93,8 +93,8 @@ public class ReadyMongoStatementTest {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(2);
 
-            BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000000)->int; ToString() -> String");
-            BindPoint rwValue = new BindPoint("rw_value", "Hash(); Uniform(0,1000000000)->int; ToString() -> String");
+            BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000)->long; ToInt()");
+            BindPoint rwValue = new BindPoint("rw_value", "Uniform(0,1000000000)->int; Hash(); ToString() -> String");
             assertThat(parsed.getBindPoints()).containsExactly(rwKey, rwValue);
 
             String statement = parsed.getPositionalStatement(Function.identity());
