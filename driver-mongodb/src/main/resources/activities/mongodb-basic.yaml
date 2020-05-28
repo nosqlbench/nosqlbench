@@ -1,0 +1,61 @@
+# nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup
+description: An exmaple of a basic mongo insert and find.
+
+scenarios:
+  default:
+    - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=mongodb tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+
+blocks:
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: |
+          {
+            insert: "<<collection:keyvalue>>",
+            documents: [ { key: {seq_key},
+                           value: {seq_value} } ]
+          }
+        params:
+          readPreference: primary
+        tags:
+           name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:5>>
+    statements:
+      - main-find: |
+          {
+            find: "<<collection:keyvalue>>",
+            filter: { key: {rw_key} }
+          }
+        params:
+          readPreference: primary
+        tags:
+          name: main-find
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:5>>
+    statements:
+      - main-insert: |
+          {
+            insert: "<<collection:keyvalue>>",
+            documents: [ { key: {rw_key},
+                           value: {rw_value} } ]
+          }
+        params:
+          readPreference: primary
+        tags:
+           name: main-insert
