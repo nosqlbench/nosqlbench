@@ -1,4 +1,6 @@
 # nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup
+description: An exmaple of a basic mongo insert and find.
+
 scenarios:
   default:
     - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
@@ -53,5 +55,7 @@ blocks:
             documents: [ { key: {rw_key},
                            value: {rw_value} } ]
           }
+        params:
+          readPreference: primary
         tags:
            name: main-insert

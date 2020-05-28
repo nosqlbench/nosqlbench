@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.mongodb;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,21 +40,36 @@ public class MongoAction implements SyncAction {
             rms = sequencer.get(cycleValue);
             queryBson = rms.bind(cycleValue);
 
+            // Maybe show the query in log/console - only for diagnostic use
             if (activity.isShowQuery()) {
                 logger.info("Query(cycle={}):\n{}", cycleValue, queryBson);
             }
         }
 
-        for (int i = 0; i < activity.getMaxTries(); i++) {
+        long nanoStartTime = System.nanoTime();
+        for (int i = 1; i <= activity.getMaxTries(); i++) {
             activity.triesHisto.update(i);
-            try (Timer.Context executeTime = activity.executeTimer.time()) {
+
+            try (Timer.Context resultTime = activity.resultTimer.time()) {
                 MongoDatabase database = activity.getDatabase();
                 ReadPreference readPreference = rms.getReadPreference();
+
+                // assuming the commands are one of these in the doc:
+                // https://docs.mongodb.com/manual/reference/command/nav-crud/
                 Document resultDoc = database.runCommand(queryBson, readPreference);
 
-                double ok = resultDoc.getDouble("ok");
+                long resultNanos = System.nanoTime() - nanoStartTime;
+
+                // TODO: perhaps collect the operationTime from the resultDoc if any
+                // https://docs.mongodb.com/manual/reference/method/db.runCommand/#command-response
+                int ok = Double.valueOf((double) resultDoc.getOrDefault("ok", 0.0d)).intValue();
+                if (ok == 1) {
+                    // success
+                    activity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+                }
                 activity.resultSetSizeHisto.update(resultDoc.getInteger("n", 0));
-                return ok == 1.0d ? 0 : 1;
+
+                return ok == 1 ? 0 : 1;
             } catch (Exception e) {
                 logger.error("Failed to runCommand {} on cycle {}, tries {}", queryBson, cycleValue, i, e);
             }

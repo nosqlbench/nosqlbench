@@ -41,10 +41,11 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
 
     private OpSequence<ReadyMongoStatement> opSequence;
 
-    protected Timer bindTimer;
-    protected Timer executeTimer;
-    protected Histogram resultSetSizeHisto;
-    protected Histogram triesHisto;
+    Timer bindTimer;
+    Timer resultTimer;
+    Timer resultSuccessTimer;
+    Histogram resultSetSizeHisto;
+    Histogram triesHisto;
 
     public MongoActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -80,7 +81,8 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
                               .orElse(10);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
+        resultTimer = ActivityMetrics.timer(activityDef, "result");
+        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
         resultSetSizeHisto = ActivityMetrics.histogram(activityDef, "resultset-size");
         triesHisto = ActivityMetrics.histogram(activityDef, "tries");
     }

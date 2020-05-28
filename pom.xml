@@ -73,7 +73,7 @@
         <profile>
             <id>with-mongodb</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>driver-mongodb</module>
