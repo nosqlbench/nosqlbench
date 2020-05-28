@@ -101,7 +101,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-mongodb</artifactId>
-            <version>3.12.117-SNAPSHOT</version>
+            <version>3.12.118-SNAPSHOT</version>
         </dependency>
 
         <!--        <dependency>-->
@@ -253,13 +253,13 @@
         <profile>
             <id>with-mongodb</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-mongodb</artifactId>
-                    <version>3.12.117-SNAPSHOT</version>
+                    <version>3.12.118-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
