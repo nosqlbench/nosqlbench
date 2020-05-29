@@ -5,7 +5,7 @@ import com.datastax.driver.core.QueryTrace;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
-import io.nosqlbench.activitytype.cql.core.StatementModifier;
+import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

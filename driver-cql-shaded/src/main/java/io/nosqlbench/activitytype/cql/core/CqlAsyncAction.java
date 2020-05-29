@@ -15,6 +15,7 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingE
 import io.nosqlbench.activitytype.cql.statements.core.ReadyCQLStatement;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.FailedOp;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;

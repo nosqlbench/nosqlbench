@@ -1,4 +1,4 @@
-package io.nosqlbench.activitytype.cql.core;
+package io.nosqlbench.activitytype.cql.statements.modifiers;
 
 import com.datastax.driver.core.Statement;
 
