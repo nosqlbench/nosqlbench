@@ -42,6 +42,8 @@ public interface ActivityInstrumentation {
      */
     Timer getOrCreateStridesServiceTimer();
 
+    Timer getOrCreateSubstridesServiceTimer();
+
     /**
      * The strides response timer measures the total response time from the scheduled
      * time a stride should start to when it completed. Stride scheduling is only defined

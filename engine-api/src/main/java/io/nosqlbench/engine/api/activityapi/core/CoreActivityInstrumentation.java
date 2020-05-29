@@ -59,6 +59,11 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
     }
 
     @Override
+    public synchronized Timer getOrCreateSubstridesServiceTimer() {
+        return ActivityMetrics.timer(def, "substrides" + SERVICE_TIME);
+    }
+
+    @Override
     public synchronized Timer getStridesResponseTimerOrNull() {
         if (activity.getStrideLimiter()==null) {
             return null;
