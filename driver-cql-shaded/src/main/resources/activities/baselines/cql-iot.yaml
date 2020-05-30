@@ -7,6 +7,10 @@ scenarios:
     - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
     - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  astra:
+    - run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
+    - run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto      
 params:
   instrument: TEMPLATE(instrument,false)
 bindings:
@@ -51,6 +55,23 @@ blocks:
          truncate table <<keyspace:baselines>>.<<table:iot>>;
        tags:
          name: truncate-table
+  - tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+     - create-table-astra : |
+        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
+        machine_id UUID,     // source machine
+        sensor_name text,    // sensor name
+        time timestamp,      // timestamp of collection
+        sensor_value double, //
+        station_id UUID,     // source location
+        data text,
+        PRIMARY KEY ((machine_id, sensor_name), time)
+        ) WITH CLUSTERING ORDER BY (time DESC);
+       tags:
+         name: create-table-astra
   - tags:
       phase: rampup
     params:
