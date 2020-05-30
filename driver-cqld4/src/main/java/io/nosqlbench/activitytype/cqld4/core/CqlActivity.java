@@ -4,6 +4,10 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
+import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.session.Session;
 import io.nosqlbench.activitytype.cqld4.codecsupport.UDTCodecInjector;
 import com.datastax.driver.core.TokenRangeStmtFilter;
@@ -73,7 +77,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     Meter rowsCounter;
     private HashedCQLErrorHandler errorHandler;
     private OpSequence<ReadyCQLStatement> opsequence;
-    private Session session;
+    private CqlSession session;
     private int maxTries;
     private StatementFilter statementFilter;
     private Boolean showcql;
@@ -85,6 +89,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private long maxRetryDelay;
     private boolean retryReplace;
     private String pooling;
+    private String profileName;
 
 
     public CqlActivity(ActivityDef activityDef) {
@@ -103,7 +108,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     @Override
     public synchronized void initActivity() {
         logger.debug("initializing activity: " + this.activityDef.getAlias());
-        session = getSession();
+        profileName = getParams().getOptionalString("profile").orElse("default");
+        session = getSession(profileName);
 
         if (getParams().getOptionalBoolean("usercodecs").orElse(false)) {
             registerCodecs(session);
@@ -125,9 +131,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         logger.debug("activity fully initialized: " + this.activityDef.getAlias());
     }
 
-    public synchronized Session getSession() {
+    public synchronized CqlSession getSession(String profileName) {
         if (session == null) {
-            session = CQLSessionCache.get().getSession(this.getActivityDef());
+            session = CQLSessionCache.get().getSession(this.getActivityDef(), profileName);
         }
         return session;
     }
@@ -135,10 +141,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private void initSequencer() {
 
         Session session = getSession();
-        Map<String,Object> fconfig = Map.of("cluster",session.getCluster());
+        Map<String, Object> fconfig = Map.of("session", session);
 
         SequencerType sequencerType = SequencerType.valueOf(
-                getParams().getOptionalString("seq").orElse("bucket")
+            getParams().getOptionalString("seq").orElse("bucket")
         );
         SequencePlanner<ReadyCQLStatement> planner = new SequencePlanner<>(sequencerType);
 
@@ -162,97 +168,100 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             boolean parametrized = Boolean.valueOf(stmtDef.getParams().getOrDefault("parametrized", "false"));
             long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1"));
 
-            Optional<ConsistencyLevel> cl = Optional.ofNullable(
-                    stmtDef.getParams().getOrDefault("cl", null)).map(ConsistencyLevel::valueOf);
-
-            Optional<ConsistencyLevel> serial_cl = Optional.ofNullable(
-                    stmtDef.getParams().getOrDefault("serial_cl", null)).map(ConsistencyLevel::valueOf);
-
-            Optional<Boolean> idempotent = Optional.ofNullable(stmtDef.getParams().getOrDefault("idempotent", null))
-                    .map(Boolean::valueOf);
-
             StringBuilder psummary = new StringBuilder();
 
             boolean instrument = Optional.ofNullable(stmtDef.getParams()
-                    .get("instrument")).map(Boolean::valueOf)
-                    .orElse(getParams().getOptionalBoolean("instrument").orElse(false));
+                .get("instrument")).map(Boolean::valueOf)
+                .orElse(getParams().getOptionalBoolean("instrument").orElse(false));
 
-            String logresultcsv = stmtDef.getParams().getOrDefault("logresultcsv","");
+            String logresultcsv = stmtDef.getParams().getOrDefault("logresultcsv", "");
             String logresultcsv_act = getParams().getOptionalString("logresultcsv").orElse("");
 
             if (!logresultcsv_act.isEmpty() && !logresultcsv_act.toLowerCase().equals("true")) {
                 throw new RuntimeException("At the activity level, only logresultcsv=true is allowed, no other values.");
             }
             logresultcsv = !logresultcsv.isEmpty() ? logresultcsv : logresultcsv_act;
-            logresultcsv = !logresultcsv.toLowerCase().equals("true") ? logresultcsv : stmtDef.getName()+"--results.csv";
+            logresultcsv = !logresultcsv.toLowerCase().equals("true") ? logresultcsv : stmtDef.getName() + "--results.csv";
 
             logger.debug("readying statement[" + (prepared ? "" : "un") + "prepared]:" + parsed.getStmt());
 
             ReadyCQLStatementTemplate template;
             String stmtForDriver = parsed.getPositionalStatement(s -> "?");
-            if (prepared) {
-                psummary.append(" prepared=>").append(prepared);
-                PreparedStatement prepare = getSession().prepare(stmtForDriver);
-                cl.ifPresent((conlvl) -> {
-                    psummary.append(" consistency_level=>").append(conlvl);
-                    prepare.setConsistencyLevel(conlvl);
-                });
-                serial_cl.ifPresent((scl) -> {
-                    psummary.append(" serial_consistency_level=>").append(serial_cl);
-                    prepare.setSerialConsistencyLevel(scl);
-                });
-                idempotent.ifPresent((i) -> {
-                    psummary.append(" idempotent=").append(idempotent);
-                    prepare.setIdempotent(i);
-                });
-                CqlBinderTypes binderType = CqlBinderTypes.valueOf(stmtDef.getParams()
-                        .getOrDefault("binder", CqlBinderTypes.DEFAULT.toString()));
 
-                template = new ReadyCQLStatementTemplate(fconfig, binderType, getSession(), prepare, ratio,
-                    parsed.getName());
-            } else {
-                SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
-                cl.ifPresent((conlvl) -> {
+            SimpleStatementBuilder stmtBuilder = SimpleStatement.builder(stmtForDriver);
+            psummary.append(" statement=>").append(stmtForDriver);
+
+            Optional.ofNullable(stmtDef.getParams().getOrDefault("cl", null))
+                .map(DefaultConsistencyLevel::valueOf)
+                .map(conlvl -> {
                     psummary.append(" consistency_level=>").append(conlvl);
-                    simpleStatement.setConsistencyLevel(conlvl);
-                });
-                serial_cl.ifPresent((scl) -> {
-                    psummary.append(" serial_consistency_level=>").append(scl);
-                    simpleStatement.setSerialConsistencyLevel(scl);
-                });
-                idempotent.ifPresent((i) -> {
-                    psummary.append(" idempotent=>").append(i);
-                    simpleStatement.setIdempotent(i);
-                });
+                    return conlvl;
+                })
+                .ifPresent(stmtBuilder::setConsistencyLevel);
+
+            Optional.ofNullable(stmtDef.getParams().getOrDefault("serial_cl", null))
+                .map(DefaultConsistencyLevel::valueOf)
+                .map(sconlvel -> {
+                    psummary.append(" serial_consistency_level=>").append(sconlvel);
+                    return sconlvel;
+                })
+                .ifPresent(stmtBuilder::setSerialConsistencyLevel);
+
+            Optional.ofNullable(stmtDef.getParams().getOrDefault("idempotent", null))
+                .map(Boolean::valueOf)
+                .map(idempotent -> {
+                    psummary.append(" idempotent=").append(idempotent);
+                    return idempotent;
+                })
+                .ifPresent(stmtBuilder::setIdempotence);
+
+
+            if (prepared) {
+                PreparedStatement preparedStatement = getSession().prepare(stmtBuilder.build());
+
+                CqlBinderTypes binderType = CqlBinderTypes.valueOf(stmtDef.getParams()
+                    .getOrDefault("binder", CqlBinderTypes.DEFAULT.toString()));
+
+                template = new ReadyCQLStatementTemplate(
+                    fconfig,
+                    binderType,
+                    getSession(),
+                    preparedStatement,
+                    ratio,
+                    parsed.getName()
+                );
+            } else {
+                SimpleStatement simpleStatement = SimpleStatement.newInstance(stmtForDriver);
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
                     parsed.getName(), parametrized);
             }
 
+
             Optional.ofNullable(stmtDef.getParams().getOrDefault("save", null))
-                    .map(s -> s.split("[,; ]"))
-                    .map(Save::new)
-                    .ifPresent(save_op -> {
-                        psummary.append(" save=>").append(save_op.toString());
-                        template.addRowCycleOperators(save_op);
-                    });
+                .map(s -> s.split("[,; ]"))
+                .map(Save::new)
+                .ifPresent(save_op -> {
+                    psummary.append(" save=>").append(save_op.toString());
+                    template.addRowCycleOperators(save_op);
+                });
 
             Optional.ofNullable(stmtDef.getParams().getOrDefault("rsoperators", null))
-                    .map(s -> s.split(","))
-                    .stream().flatMap(Arrays::stream)
-                    .map(ResultSetCycleOperators::newOperator)
-                    .forEach(rso -> {
-                        psummary.append(" rsop=>").append(rso.toString());
-                        template.addResultSetOperators(rso);
-                    });
+                .map(s -> s.split(","))
+                .stream().flatMap(Arrays::stream)
+                .map(ResultSetCycleOperators::newOperator)
+                .forEach(rso -> {
+                    psummary.append(" rsop=>").append(rso.toString());
+                    template.addResultSetOperators(rso);
+                });
 
             Optional.ofNullable(stmtDef.getParams().getOrDefault("rowoperators", null))
-                    .map(s -> s.split(","))
-                    .stream().flatMap(Arrays::stream)
-                    .map(RowCycleOperators::newOperator)
-                    .forEach(ro -> {
-                        psummary.append(" rowop=>").append(ro.toString());
-                        template.addRowCycleOperators(ro);
-                    });
+                .map(s -> s.split(","))
+                .stream().flatMap(Arrays::stream)
+                .map(RowCycleOperators::newOperator)
+                .forEach(ro -> {
+                    psummary.append(" rowop=>").append(ro.toString());
+                    template.addRowCycleOperators(ro);
+                });
 
             if (instrument) {
                 logger.info("Adding per-statement success and error and resultset-size timers to statement '" + parsed.getName() + "'");
@@ -262,7 +271,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             if (!logresultcsv.isEmpty()) {
                 logger.info("Adding per-statement result CSV logging to statement '" + parsed.getName() + "'");
-                template.logResultCsv(this,logresultcsv);
+                template.logResultCsv(this, logresultcsv);
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }
 
@@ -297,9 +306,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             case "1":
                 doclist = getVersion1StmtsDoc(interp, yaml_loc);
                 logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
-                        "This will be deprecated in a future release.");
+                    "This will be deprecated in a future release.");
                 logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                    "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
                 break;
             case "2":
                 doclist = StatementsLoader.load(logger, yaml_loc, interp, "activities");
@@ -307,22 +316,22 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             case "unset":
                 try {
                     logger.debug("You can suffix your yaml filename or url with the " +
-                            "format version, such as :1 or :2. Assuming version 2.");
+                        "format version, such as :1 or :2. Assuming version 2.");
                     doclist = StatementsLoader.load(null, yaml_loc, interp, "activities");
                 } catch (Exception ignored) {
                     try {
                         doclist = getVersion1StmtsDoc(interp, yaml_loc);
                         logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc +
-                                " with compatibility mode. This will be deprecated in a future release.");
+                            " with compatibility mode. This will be deprecated in a future release.");
                         logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                                "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                            "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
                     } catch (Exception compatError) {
                         logger.warn("Tried to load yaml in compatibility mode, " +
-                                "since it failed to load with the standard format, " +
-                                "but found an error:" + compatError);
+                            "since it failed to load with the standard format, " +
+                            "but found an error:" + compatError);
                         logger.warn("The following detailed errors are provided only " +
-                                "for the standard format. To force loading version 1 with detailed logging, add" +
-                                " a version qualifier to your yaml filename or url like ':1'");
+                            "for the standard format. To force loading version 1 with detailed logging, add" +
+                            " a version qualifier to your yaml filename or url like ':1'");
                         // retrigger the error again, this time with logging enabled.
                         doclist = StatementsLoader.load(logger, yaml_loc, interp, "activities");
                     }
@@ -330,7 +339,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 break;
             default:
                 throw new RuntimeException("Unrecognized yaml format version, expected :1 or :2 " +
-                        "at end of yaml file, but got " + yamlVersion + " instead.");
+                    "at end of yaml file, but got " + yamlVersion + " instead.");
         }
 
         return doclist;
@@ -393,10 +402,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     @Override
     public String toString() {
         return "CQLActivity {" +
-                "activityDef=" + activityDef +
-                ", session=" + session +
-                ", opSequence=" + this.opsequence +
-                '}';
+            "activityDef=" + activityDef +
+            ", session=" + session +
+            ", opSequence=" + this.opsequence +
+            '}';
     }
 
     @Override
@@ -409,10 +418,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         ParameterMap params = activityDef.getParams();
         Optional<String> fetchSizeOption = params.getOptionalString("fetchsize");
-        Cluster cluster = getSession().getCluster();
+
         if (fetchSizeOption.isPresent()) {
             int fetchSize = fetchSizeOption.flatMap(Unit::bytesFor).map(Double::intValue).orElseThrow(() -> new RuntimeException(
-                    "Unable to parse fetch size from " + fetchSizeOption.get()
+                "Unable to parse fetch size from " + fetchSizeOption.get()
             ));
             if (fetchSize > 10000000 && fetchSize < 1000000000) {
                 logger.warn("Setting the fetchsize to " + fetchSize + " is unlikely to give good performance.");
@@ -420,6 +429,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 throw new RuntimeException("Setting the fetch size to " + fetchSize + " is likely to cause instability.");
             }
             logger.trace("setting fetchSize to " + fetchSize);
+
             cluster.getConfiguration().getQueryOptions().setFetchSize(fetchSize);
         }
 
@@ -431,8 +441,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         this.maxpages = params.getOptionalInteger("maxpages").orElse(1);
 
         this.statementFilter = params.getOptionalString("tokens")
-                .map(s -> new TokenRangeStmtFilter(cluster, s))
-                .orElse(null);
+            .map(s -> new TokenRangeStmtFilter(cluster, s))
+            .orElse(null);
 
         if (statementFilter != null) {
             logger.info("filtering statements" + statementFilter);
@@ -441,13 +451,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         errorHandler = configureErrorHandler();
 
         params.getOptionalString("trace")
-                .map(SimpleConfig::new)
-                .map(TraceLogger::new)
-                .ifPresent(
-                        tl -> {
-                            addResultSetCycleOperator(tl);
-                            addStatementModifier(tl);
-                        });
+            .map(SimpleConfig::new)
+            .map(TraceLogger::new)
+            .ifPresent(
+                tl -> {
+                    addResultSetCycleOperator(tl);
+                    addStatementModifier(tl);
+                });
 
         this.maxTotalOpsInFlight = params.getOptionalLong("async").orElse(1L);
 
@@ -504,8 +514,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         HashedCQLErrorHandler newerrorHandler = new HashedCQLErrorHandler(exceptionCountMetrics);
 
         String errors = activityDef.getParams()
-                .getOptionalString("errors")
-                .orElse("stop,retryable->retry,unverified->stop");
+            .getOptionalString("errors")
+            .orElse("stop,retryable->retry,unverified->stop");
 
 
         String[] handlerSpecs = errors.split(",");
@@ -514,32 +524,32 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             if (keyval.length == 1) {
                 String verb = keyval[0];
                 newerrorHandler.setDefaultHandler(
-                        new NBCycleErrorHandler(
-                                ErrorResponse.valueOf(verb),
-                                exceptionCountMetrics,
-                                exceptionHistoMetrics,
-                                !getParams().getOptionalLong("async").isPresent()
-                        )
+                    new NBCycleErrorHandler(
+                        ErrorResponse.valueOf(verb),
+                        exceptionCountMetrics,
+                        exceptionHistoMetrics,
+                        !getParams().getOptionalLong("async").isPresent()
+                    )
                 );
             } else {
                 String pattern = keyval[0];
                 String verb = keyval[1];
                 if (newerrorHandler.getGroupNames().contains(pattern)) {
                     NBCycleErrorHandler handler =
-                            new NBCycleErrorHandler(
-                                    ErrorResponse.valueOf(verb),
-                                    exceptionCountMetrics,
-                                    exceptionHistoMetrics,
-                                    !getParams().getOptionalLong("async").isPresent()
-                            );
+                        new NBCycleErrorHandler(
+                            ErrorResponse.valueOf(verb),
+                            exceptionCountMetrics,
+                            exceptionHistoMetrics,
+                            !getParams().getOptionalLong("async").isPresent()
+                        );
                     logger.info("Handling error group '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForGroup(pattern, handler);
                 } else {
                     NBCycleErrorHandler handler = new NBCycleErrorHandler(
-                            ErrorResponse.valueOf(keyval[1]),
-                            exceptionCountMetrics,
-                            exceptionHistoMetrics,
-                            !getParams().getOptionalLong("async").isPresent()
+                        ErrorResponse.valueOf(keyval[1]),
+                        exceptionCountMetrics,
+                        exceptionHistoMetrics,
+                        !getParams().getOptionalLong("async").isPresent()
                     );
                     logger.info("Handling error pattern '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForPattern(keyval[0], handler);

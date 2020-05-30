@@ -215,12 +215,15 @@ public class VirtDataComposer {
         }
 
         Object[][] combinations = new Object[modulo][];
+
         for (int row = 0; row < combinations.length; row++) {
             Object[] combination = new Object[allargs.length];
             int number = row;
             for (int pos = 0; pos < combination.length; pos++) {
-                int selector = (int) (row / modulos[pos]);
-                combination[pos] = allargs[pos][selector];
+                int selector = (int) (number / modulos[pos]);
+                Object[] allargspos = allargs[pos];
+                Object objectatpos = allargspos[selector];
+                combination[pos] = objectatpos;
                 number %= modulos[pos];
             }
             combinations[row] = combination;

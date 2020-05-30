@@ -45,7 +45,7 @@ public class CQLBindHelper {
 
         for (ColumnDefinition def : defs) {
             ByteBuffer byteBuffer = row.getByteBuffer(def.getName());
-            bound.setBytesUnsafe(def.getName(), byteBuffer);
+            bound=bound.setBytesUnsafe(def.getName(), byteBuffer);
         }
         return bound;
     }

@@ -154,6 +154,7 @@ public class Scenario implements Callable<ScenarioResult> {
         scriptEngine.put("params", scenarioScriptParams);
 
         if (engine == Engine.Graalvm) {
+            // https://github.com/graalvm/graaljs/blob/master/docs/user/JavaInterop.md
             if (wantsGraaljsCompatMode) {
                 scriptEngine.put("scenario", scenarioController);
                 scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));

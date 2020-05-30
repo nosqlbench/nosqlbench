@@ -2,7 +2,6 @@ package io.nosqlbench.activitytype.cqld4.core;
 
 import com.codahale.metrics.Timer;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
 import io.nosqlbench.activitytype.cqld4.api.ErrorResponse;
 import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
@@ -13,8 +12,6 @@ import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLCycleWithSta
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.FailedOp;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
@@ -115,8 +112,8 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
         // The execute timer covers only the point at which EB hands the op to the driver to be executed
         try (Timer.Context executeTime = activity.executeTimer.time()) {
-            cqlop.future = activity.getSession().executeAsync(cqlop.statement);
-            Futures.addCallback(cqlop.future, cqlop);
+            cqlop.completionStage = activity.getSession().executeAsync(cqlop.statement);
+            Futures.addCallback(cqlop.completionStage, cqlop);
         }
     }
 
@@ -234,8 +231,8 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         if (errorStatus.isRetryable() && cqlop.triesAttempted < maxTries) {
             startedOp.retry();
             try (Timer.Context executeTime = activity.executeTimer.time()) {
-                cqlop.future = activity.getSession().executeAsync(cqlop.statement);
-                Futures.addCallback(cqlop.future, cqlop);
+                cqlop.completionStage = activity.getSession().executeAsync(cqlop.statement);
+                Futures.addCallback(cqlop.completionStage, cqlop);
                 return;
             }
         }

@@ -136,7 +136,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private void initSequencer() {
 
         Session session = getSession();
-        Map<String,Object> fconfig = Map.of("cluster",session.getCluster());
+        Map<String,Object> fconfig = Map.of("session",session);
 
         SequencerType sequencerType = SequencerType.valueOf(
                 getParams().getOptionalString("seq").orElse("bucket")

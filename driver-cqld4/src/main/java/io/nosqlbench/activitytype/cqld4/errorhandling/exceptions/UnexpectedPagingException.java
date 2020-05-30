@@ -49,7 +49,9 @@ public class UnexpectedPagingException extends CqlGenericCycleException {
         sb.append("Additional paging would be required to read the results from this query fully" +
                 ", but the user has not explicitly indicated that paging was expected.")
                 .append(" fetched/allowed: ").append(fetchedPages).append("/").append(maxpages)
-                .append(" fetchSize(").append(fetchSize).append("): ").append(queryString);
+                .append(" fetchSize(").append(fetchSize).append("): ").append(queryString).append(", note this value " +
+            "is shown for reference from the default driver profile. If you are using a custom profile, it may be " +
+            "different.");
         return sb.toString();
     }
 }

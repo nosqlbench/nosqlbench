@@ -1,8 +1,8 @@
 package io.nosqlbench.activitytype.cqld4.errorhandling.exceptions;
 
-import com.datastax.driver.core.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.driver.core.SimpleStatement;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 
 public abstract class CQLResultSetException extends CqlGenericCycleException {

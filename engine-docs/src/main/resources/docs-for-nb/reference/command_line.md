@@ -153,6 +153,17 @@ created for this name.
 
     --session-name <name>
 
+If you want to control the number of significant digits in all of the HDR metrics, including histograms and timers, then
+you can do so this way:
+
+    --hdr-digits 4
+
+The default is 4 digits, which creates 10000 equisized histogram buckets for every named metric in every reporting
+interval. For longer running test or for test which do not require this level of precision in metrics, you can set this
+down to 3 or 2. Note that this only sets the global default. Each activity can also override this value with the
+hdr_digits parameter.
+
+
 Enlist engineblock to stand up your metrics infrastructure using a local docker runtime:
 
     --docker-metrics

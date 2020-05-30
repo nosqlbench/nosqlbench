@@ -5,23 +5,23 @@ import com.datastax.oss.driver.api.core.cql.Statement;
 import com.datastax.oss.driver.api.core.session.Session;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 
+import java.util.function.Function;
+
 public enum CqlBinderTypes {
-    direct_array,
-    unset_aware,
-    diagnostic;
+    direct_array(s -> new DirectArrayValuesBinder()),
+    unset_aware(UnsettableValuesBinder::new),
+    diagnostic(s -> new DiagnosticPreparedBinder());
+
+    private final Function<Session, ValuesArrayBinder<PreparedStatement, Statement<?>>> mapper;
+
+    CqlBinderTypes(Function<Session,ValuesArrayBinder<PreparedStatement,Statement<?>>> mapper) {
+        this.mapper = mapper;
+    }
 
     public final static CqlBinderTypes DEFAULT = unset_aware;
 
-    public ValuesArrayBinder<PreparedStatement, Statement> get(Session session) {
-        if (this==direct_array) {
-            return new DirectArrayValuesBinder();
-        } else if (this== unset_aware) {
-            return new UnsettableValuesBinder(session);
-        } else if (this==diagnostic) {
-            return new DiagnosticPreparedBinder();
-        } else {
-            throw new RuntimeException("Impossible-ish statement branch");
-        }
+    public ValuesArrayBinder<PreparedStatement,Statement<?>> get(Session session) {
+        return mapper.apply(session);
     }
 
 }

@@ -33,6 +33,8 @@ public class ExceptionMap {
 
 
 
+            // DriverException subtypes
+
             put(AllNodesFailedException.class, DriverException.class);
               put(NoNodeAvailableException.class, AllNodesFailedException.class);
             put(BusyConnectionException.class, DriverException.class);
@@ -53,34 +55,22 @@ public class ExceptionMap {
                 put(UnavailableException.class, QueryExecutionException.class);
               put(QueryValidationException.class, CoordinatorException.class);
                 put(AlreadyExistsException.class, QueryValidationException.class);
-                put(InvalidConfigurationInQueryException.class, QueryValidationException.class);
                 put(InvalidQueryException.class, QueryValidationException.class);
+                put(InvalidConfigurationInQueryException.class, QueryValidationException.class);
                 put(SyntaxError.class, QueryValidationException.class);
                 put(UnauthorizedException.class, QueryValidationException.class);
               put(ServerError.class,CoordinatorException.class);
-              put(UnfitClientException.class, CoordinatorException.class);
-              put(DriverExecutionException.class, DriverException.class);
-              put(DriverTimeoutException.class, DriverException.class);
-              put(FrameTooLongException.class, DriverException.class);
-              put(HeartbeatException.class,DriverException.class);
-              put(InvalidKeyspaceException.class,DriverException.class);
-              put(RequestThrottlingException.class,DriverException.class);
-              put(UnsupportedProtocolVersionException.class, DriverException.class);
+            put(UnfitClientException.class, CoordinatorException.class);
+            put(DriverExecutionException.class, DriverException.class);
+            put(DriverTimeoutException.class, DriverException.class);
+            put(FrameTooLongException.class, DriverException.class);
+            put(HeartbeatException.class,DriverException.class);
+            put(InvalidKeyspaceException.class,DriverException.class);
+            put(RequestThrottlingException.class,DriverException.class);
+            put(UnsupportedProtocolVersionException.class, DriverException.class);
 
-
-
-
-
-            put(UnpreparedException.class, QueryValidationException.class);
-            put(InvalidTypeException.class, DriverException.class);
-            put(FunctionExecutionException.class, QueryValidationException.class);
-            put(DriverInternalError.class, DriverException.class);
+            // package org.apache.tinkerpop.gremlin.driver.exception;
             put(ConnectionException.class, DriverException.class);
-            put(TransportException.class, ConnectionException.class);
-            put(OperationTimedOutException.class, ConnectionException.class);
-            put(PagingStateException.class, DriverException.class);
-            put(UnresolvedUserTypeException.class, DriverException.class);
-            put(UnsupportedFeatureException.class, DriverException.class);
 
             put(ChangeUnappliedCycleException.class, CqlGenericCycleException.class);
             put(ResultSetVerificationException.class, CqlGenericCycleException.class);

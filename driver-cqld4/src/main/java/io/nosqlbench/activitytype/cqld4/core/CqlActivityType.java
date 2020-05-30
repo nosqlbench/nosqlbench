@@ -1,9 +1,9 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 
-import com.datastax.driver.core.LocalDate;
-import com.datastax.driver.core.TupleValue;
-import com.datastax.driver.core.UDTValue;
+import com.datastax.oss.driver.api.core.data.TupleValue;
+import com.datastax.oss.driver.api.core.type.UserDefinedType;
+import io.nosqlbench.activitytype.cqld4.codecsupport.UDTJavaType;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -76,7 +77,7 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
         typemap.put("timestamp", Instant.class);
         typemap.put("tinyint",byte.class);
         typemap.put("tuple", TupleValue.class);
-        typemap.put("<udt>", UDTValue.class);
+        typemap.put("<udt>", UserDefinedType.class);
         typemap.put("uuid",UUID.class);
         typemap.put("timeuuid",UUID.class);
         typemap.put("varchar",String.class);

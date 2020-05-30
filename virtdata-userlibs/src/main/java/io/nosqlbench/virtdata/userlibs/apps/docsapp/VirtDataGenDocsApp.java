@@ -116,7 +116,8 @@ public class VirtDataGenDocsApp implements Runnable {
                         Gson gson = new GsonBuilder().setPrettyPrinting().create();
                         writer.append(gson.toJson(docsForFuncName));
                     } else if (format.equals(FORMAT_MARKDOWN)) {
-                        writer.append(docsForFuncName.asMarkdown());
+                        String markdown = docsForFuncName.asMarkdown();
+                        writer.append(markdown);
                     }
                 }
             }
@@ -165,10 +166,12 @@ public class VirtDataGenDocsApp implements Runnable {
         FDoc docsinfo = new FDoc();
         List<DocFuncData> allDocs = VirtDataDocs.getAllDocs();
         for (DocFuncData docFuncData : allDocs) {
-            FDocFunc FDocFunc = new FDocFunc(docFuncData);
-            for (Category categoryName : FDocFunc.getCategories()) {
+            FDocFunc fDocFunc = new FDocFunc(docFuncData);
+            Set<Category> categories =
+                    fDocFunc.getCategories().size()==0 ? Set.of(Category.general) : fDocFunc.getCategories();
+            for (Category categoryName : categories) {
                 FDocCat fDocCat = docsinfo.addCategory(categoryName.toString());
-                fDocCat.addFunctionDoc(FDocFunc);
+                fDocCat.addFunctionDoc(fDocFunc);
             }
         }
         return docsinfo;

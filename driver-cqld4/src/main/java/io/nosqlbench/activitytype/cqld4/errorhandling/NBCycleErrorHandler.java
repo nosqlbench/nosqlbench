@@ -2,7 +2,6 @@ package io.nosqlbench.activitytype.cqld4.errorhandling;
 
 import io.nosqlbench.activitytype.cqld4.api.ErrorResponse;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLCycleWithStatementException;
-import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLExceptionDetailer;
 import io.nosqlbench.engine.api.activityapi.errorhandling.CycleErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;

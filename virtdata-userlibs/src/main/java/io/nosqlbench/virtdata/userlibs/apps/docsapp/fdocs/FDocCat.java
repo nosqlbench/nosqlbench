@@ -30,6 +30,6 @@ public class FDocCat implements Iterable<FDocFuncs> {
     public Iterator<FDocFuncs> iterator() {
         ArrayList<FDocFuncs> fdocs = new ArrayList<>(docsByFuncName.values());
         fdocs.sort(Comparator.comparing(FDocFuncs::getFunctionName));
-        return docsByFuncName.values().iterator();
+        return fdocs.iterator();
     }
 }

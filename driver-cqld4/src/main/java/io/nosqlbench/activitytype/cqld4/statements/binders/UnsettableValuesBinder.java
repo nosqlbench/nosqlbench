@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement> {
+public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
     private final static Logger logger = LoggerFactory.getLogger(UnsettableValuesBinder.class);
 
     private final Session session;

@@ -1,14 +1,17 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
-import com.google.common.util.concurrent.FutureCallback;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
-public class CqlOpData implements FutureCallback<ResultSet> {
+public class CqlOpData extends CompletableFuture<AsyncResultSet> {
+
     final long cycle;
+    public CompletionStage<AsyncResultSet> completionStage;
 
     // op state is managed via callbacks, we keep a ref here
     StartedOp<CqlOpData> startedOp;
@@ -19,8 +22,6 @@ public class CqlOpData implements FutureCallback<ResultSet> {
 
     ReadyCQLStatement readyCQLStatement;
     Statement statement;
-    ResultSetFuture future;
-    ResultSet resultSet;
 
     long totalRowsFetchedForQuery;
     long totalPagesFetchedForQuery;
@@ -28,6 +29,7 @@ public class CqlOpData implements FutureCallback<ResultSet> {
     public Throwable throwable;
     public long resultAt;
     private long errorAt;
+    private Iterable<Row> page;
 
     public CqlOpData(long cycle, CqlAsyncAction action) {
         this.cycle = cycle;
@@ -35,18 +37,20 @@ public class CqlOpData implements FutureCallback<ResultSet> {
     }
 
     @Override
-    public void onSuccess(ResultSet result) {
-        this.resultSet = result;
-        this.resultAt = System.nanoTime();
-        action.onSuccess(startedOp);
-
+    public boolean completeExceptionally(Throwable ex) {
+        this.throwable=ex;
+        this.errorAt = System.nanoTime();
+        action.onFailure(startedOp);
+        return true;
     }
 
     @Override
-    public void onFailure(Throwable throwable) {
-        this.throwable=throwable;
-        this.errorAt = System.nanoTime();
-        action.onFailure(startedOp);
+    public boolean complete(AsyncResultSet value) {
+        this.page = value.currentPage();
+        this.resultAt = System.nanoTime();
+        action.onSuccess(startedOp);
+        return true;
+        // ? return !value.hasMorePages();
     }
 
 }
