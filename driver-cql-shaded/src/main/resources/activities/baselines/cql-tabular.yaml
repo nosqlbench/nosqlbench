@@ -4,6 +4,11 @@ scenarios:
     schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  astra:
+    schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -40,6 +45,21 @@ blocks:
         );
       tags:
         name: create-table
+  - name: schema-astra
+    tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+    - create-table: |
+        create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
+         part text,
+         clust text,
+         data text,
+         PRIMARY KEY (part,clust)
+        );
+      tags:
+        name: create-table-astra
   - name: rampup
     tags:
       phase: rampup
