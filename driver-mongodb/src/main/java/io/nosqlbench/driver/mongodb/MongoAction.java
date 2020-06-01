@@ -71,6 +71,6 @@ public class MongoAction implements SyncAction {
         }
 
         throw new RuntimeException(String.format("Exhausted max tries (%s) on cycle %s",
-                                                 cycleValue, activity.getMaxTries()));
+                                                 activity.getMaxTries(), cycleValue));
     }
 }
