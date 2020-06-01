@@ -79,6 +79,7 @@ public class NBCLIOptions {
     private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
+    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
 
 
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
@@ -103,7 +104,7 @@ public class NBCLIOptions {
     private String reportGraphiteTo = null;
     private String reportCsvTo = null;
     private int reportInterval = 10;
-    private String metricsPrefix = "nosqlbench.";
+    private String metricsPrefix = "nosqlbench";
     private String wantsMetricsForActivity;
     private String sessionName = "";
     private boolean showScript = false;
@@ -129,6 +130,7 @@ public class NBCLIOptions {
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
     private int hdr_digits = 4;
+    private String docker_grafana_tag = "7.0.1";
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -184,6 +186,10 @@ public class NBCLIOptions {
             }
 
             switch (word) {
+                case DOCKER_GRAFANA_TAG:
+                    arglist.removeFirst();
+                    docker_grafana_tag = readWordOrThrow(arglist,"grafana docker tag");
+                    break;
                 case GRAALJS_COMPAT:
                     graaljs_compat = true;
                     arglist.removeFirst();
@@ -628,6 +634,10 @@ public class NBCLIOptions {
 
     public boolean wantsWorkloadsList() {
         return wantsWorkloadsList;
+    }
+
+    public String getDockerGrafanaTag() {
+        return docker_grafana_tag;
     }
 
     public static class LoggerConfig {
