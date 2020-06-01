@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.Test;
 
@@ -98,4 +99,10 @@ public class NBCLIScenarioParserTest {
     }
 
 
+    @Test
+    public void testSanitizer() {
+        String sanitized = NBCLIScenarioParser.sanitize("A-b,c_d");
+        assertThat(sanitized).isEqualTo("Abcd");
+
+    }
 }
