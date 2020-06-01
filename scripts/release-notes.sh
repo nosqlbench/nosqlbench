@@ -20,7 +20,7 @@ do
 #  printf "merge info, skipping: $line" 1>&2
   continue
  else
-  printf "$line"
+  printf -- "- $line"
 #  printf "$line" | tee -a ${RELEASE_NOTES_FILE}
  fi
 done
