@@ -14,6 +14,7 @@ import io.nosqlbench.activitytype.cql.errorhandling.NBCycleErrorHandler;
 import io.nosqlbench.activitytype.cql.errorhandling.HashedCQLErrorHandler;
 import io.nosqlbench.activitytype.cql.statements.binders.CqlBinderTypes;
 import io.nosqlbench.activitytype.cql.statements.core.*;
+import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.activitytype.cql.statements.rowoperators.RowCycleOperators;
 import io.nosqlbench.activitytype.cql.statements.rowoperators.Save;
 import io.nosqlbench.activitytype.cql.statements.rsoperators.ResultSetCycleOperators;

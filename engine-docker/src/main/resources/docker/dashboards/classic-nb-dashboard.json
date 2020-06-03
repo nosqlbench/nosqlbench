@@ -21,6 +21,7 @@
     "provisioned": true
   },
   "dashboard": {
+    "id": null,
     "__inputs": [
       {
         "description": "",
@@ -73,7 +74,6 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
-    "id": 1,
     "iteration": 1552332041877,
     "links": [],
     "panels": [
@@ -7069,7 +7069,7 @@
       ]
     },
     "timezone": "",
-    "title": "Analysis",
+    "title": "NoSQLBench (deprecated)",
     "id": null,
     "uid": null,
     "version": 1

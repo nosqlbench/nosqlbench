@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.function.Supplier;
 
 public class RestHelper {
     private static Logger logger = LoggerFactory.getLogger(RestHelper.class);
@@ -23,8 +24,15 @@ public class RestHelper {
     }
 
 
-    public static HttpResponse<String> post(String url, String path, boolean auth, String taskname) {
-        logger.debug("posting to " + url + " with path:" + path +", auth: " + auth + " task:" + taskname);
+    public static HttpResponse<String> post(String url,
+                                            Supplier<String> contentSupplier, boolean auth,
+                                            String taskname) {
+        String content =null;
+        if (contentSupplier!=null) {
+            content = contentSupplier.get();
+        }
+
+        logger.debug("posting to " + url + ", auth: " + auth + " task:" + taskname);
 
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         builder = builder.uri(URI.create(url));
@@ -34,11 +42,9 @@ public class RestHelper {
             builder = builder.header("Authorization", basicAuth("admin", "admin"));
         }
 
-        if (path !=null) {
-            logger.debug("POSTing " + path + " to " + url);
-            String dashboard = NBIO.readCharBuffer(path).toString();
-            logger.debug("length of content for " + path + " is " + dashboard.length());
-            builder = builder.POST(HttpRequest.BodyPublishers.ofString(dashboard));
+        if (content !=null) {
+            logger.debug("POSTing " + content.length() + "bytes to " + url + " for " + taskname);
+            builder = builder.POST(HttpRequest.BodyPublishers.ofString(content));
             builder.setHeader("Content-Type", "application/json");
         } else {
             logger.debug(("POSTing empty body to " + url));

@@ -13,6 +13,7 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.MaxTriesExhausted
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cql.statements.core.ReadyCQLStatement;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.MultiPhaseAction;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;

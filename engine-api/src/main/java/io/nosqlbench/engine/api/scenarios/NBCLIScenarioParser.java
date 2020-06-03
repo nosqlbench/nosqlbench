@@ -8,7 +8,6 @@ import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.library.basics.core.stathelpers.DiscreteProbabilityBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +33,11 @@ public class NBCLIScenarioParser {
     public static boolean isFoundWorkload(String workload,
                                           String... includes) {
         Optional<Content<?>> found = NBIO.all()
-            .prefix("activities")
-            .prefix(includes)
-            .name(workload)
-            .extension("yaml")
-            .first();
+                .prefix("activities")
+                .prefix(includes)
+                .name(workload)
+                .extension("yaml")
+                .first();
         return found.isPresent();
     }
 
@@ -48,11 +47,11 @@ public class NBCLIScenarioParser {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
-            .prefix("activities")
-            .prefix(includes)
-            .name(workloadName)
-            .extension("yaml")
-            .first();
+                .prefix("activities")
+                .prefix(includes)
+                .name(workloadName)
+                .extension("yaml")
+                .first();
 //
         Content<?> workloadContent = found.orElseThrow();
 
@@ -62,9 +61,9 @@ public class NBCLIScenarioParser {
         // Buffer in CLI word from user, but only until the next command
         List<String> scenarioNames = new ArrayList<>();
         while (arglist.size() > 0
-            && !arglist.peekFirst().contains("=")
-            && !arglist.peekFirst().startsWith("-")
-            && !RESERVED_WORDS.contains(arglist.peekFirst())) {
+                && !arglist.peekFirst().contains("=")
+                && !arglist.peekFirst().startsWith("-")
+                && !RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.size() == 0) {
@@ -74,8 +73,8 @@ public class NBCLIScenarioParser {
         // Parse CLI command into keyed parameters, in order
         LinkedHashMap<String, String> userParams = new LinkedHashMap<>();
         while (arglist.size() > 0
-            && arglist.peekFirst().contains("=")
-            && !arglist.peekFirst().startsWith("-")) {
+                && arglist.peekFirst().contains("=")
+                && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=");
             arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userParams.containsKey(arg[0])) {
@@ -93,11 +92,11 @@ public class NBCLIScenarioParser {
 
             // Load in named scenario
             Content<?> yamlWithNamedScenarios = NBIO.all()
-                .prefix(SEARCH_IN)
-                .prefix(includes)
-                .name(workloadName)
-                .extension("yaml")
-                .one();
+                    .prefix(SEARCH_IN)
+                    .prefix(includes)
+                    .name(workloadName)
+                    .extension("yaml")
+                    .one();
 
             StmtsDocList stmts = StatementsLoader.load(logger, yamlWithNamedScenarios);
 
@@ -107,7 +106,7 @@ public class NBCLIScenarioParser {
 
             if (namedSteps == null) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + "', but you can pick from " + String.join(",", scenarios.getScenarioNames()));
+                        + "', but you can pick from " + String.join(",", scenarios.getScenarioNames()));
             }
 
             // each named command line step of the named scenario
@@ -136,37 +135,38 @@ public class NBCLIScenarioParser {
 
                 // Undefine any keys with a value of 'undef'
                 List<String> undefKeys = buildingCmd.entrySet()
-                    .stream()
-                    .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                        .stream()
+                        .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
                     String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
                     relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
-                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
+                            relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
                     buildingCmd.put("workload", "workload=" + relativeWorkloadPathFromRoot);
                 }
 
                 if (!buildingCmd.containsKey("alias")) {
-                    buildingCmd.put("alias", "alias="+WORKLOAD_SCENARIO_STEP);
+                    buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
 
                 String alias = buildingCmd.get("alias");
                 for (String token : new String[]{"WORKLOAD", "SCENARIO", "STEP"}) {
                     if (!alias.contains(token)) {
                         logger.warn("Your alias template '" + alias + "' does not contain " + token + ", which will " +
-                            "cause your metrics to be combined under the same name. It is strongly advised that you " +
-                            "include them in a template like " + WORKLOAD_SCENARIO_STEP + ".");
+                                "cause your metrics to be combined under the same name. It is strongly advised that you " +
+                                "include them in a template like " + WORKLOAD_SCENARIO_STEP + ".");
                     }
                 }
 
-                alias = alias.replaceAll("WORKLOAD", workloadContent.asPath().getFileName().toString().replaceAll(
-                    ".yaml",""));
-                alias = alias.replaceAll("SCENARIO", scenarioName);
-                alias = alias.replaceAll("STEP", stepName);
-                alias=(alias.startsWith("alias=") ? alias : "alias="+alias);
+                String workloadToken = workloadContent.asPath().getFileName().toString();
+
+                alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
+                alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
+                alias = alias.replaceAll("STEP", sanitize(stepName));
+                alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
 
                 logger.debug("Named scenario built command: " + String.join(" ", buildingCmd.values()));
@@ -176,6 +176,13 @@ public class NBCLIScenarioParser {
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
 
+    }
+
+    public static String sanitize(String word) {
+        String sanitized = word;
+        sanitized = sanitized.replaceAll("\\..+$","");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9]+","");
+        return sanitized;
     }
 
     private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
@@ -252,10 +259,10 @@ public class NBCLIScenarioParser {
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(String... includes) {
 
         List<Content<?>> activities = NBIO.all()
-            .prefix(SEARCH_IN)
-            .prefix(includes)
-            .extension("yaml")
-            .list();
+                .prefix(SEARCH_IN)
+                .prefix(includes)
+                .extension("yaml")
+                .list();
 
         List<Path> yamlPathList = activities.stream().map(Content::asPath).collect(Collectors.toList());
 
@@ -264,11 +271,11 @@ public class NBCLIScenarioParser {
         for (Path yamlPath : yamlPathList) {
             String referenced = yamlPath.toString();
             referenced = referenced.startsWith("/") ? referenced.substring(1) :
-                referenced;
+                    referenced;
 
             Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                .name(referenced).extension("yaml")
-                .one();
+                    .name(referenced).extension("yaml")
+                    .one();
 
             StmtsDocList stmts = StatementsLoader.load(logger, content);
 
@@ -290,11 +297,11 @@ public class NBCLIScenarioParser {
             if (scenarioNames != null && scenarioNames.size() > 0) {
                 String path = yamlPath.toString();
                 path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
-                LinkedHashMap<String,String> sortedTemplates = new LinkedHashMap<>();
+                LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
                 ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
                 Collections.sort(keyNames);
                 for (String keyName : keyNames) {
-                    sortedTemplates.put(keyName,templates.get(keyName));
+                    sortedTemplates.put(keyName, templates.get(keyName));
                 }
 
                 String description = stmts.getDescription();
@@ -328,10 +335,9 @@ public class NBCLIScenarioParser {
         while (matcher.find()) {
             String match = matcher.group(1);
             String[] matchArray = match.split(":");
-            if (matchArray.length==1) {
+            if (matchArray.length == 1) {
                 templates.put(matchArray[0], "-none-");
-            }
-            else {
+            } else {
                 templates.put(matchArray[0], matchArray[1]);
             }
         }

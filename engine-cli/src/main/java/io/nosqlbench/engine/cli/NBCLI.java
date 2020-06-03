@@ -186,10 +186,15 @@ public class NBCLI {
         }
 
         String reportGraphiteTo = options.wantsReportGraphiteTo();
+
         if (options.wantsDockerMetrics()) {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
-            dmh.startMetrics();
+            Map<String,String> dashboardOptions = Map.of(
+                    DockerMetricsManager.GRAFANA_TAG, options.getDockerGrafanaTag()
+            );
+            dmh.startMetrics(dashboardOptions);
+
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
                 " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             logger.warn(warn);

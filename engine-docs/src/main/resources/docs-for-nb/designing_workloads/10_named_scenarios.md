@@ -231,7 +231,7 @@ follows:
 - WORKLOAD - The simple name part of the fully qualified workload name. For example, with a workload (yaml path) of
   foo/bar/baz.yaml, the WORKLOAD name used here would be `baz`.
 
-- SCENARIO - The name of the scenario as provided ot the command line.
+- SCENARIO - The name of the scenario as provided on the command line.
 
 - STEP - The name of the step in the named scenario. If you used the list or string forms to provide a command template,
   then the steps are automatically named as a zero-padded number representing the step in the named scenario, starting
@@ -243,8 +243,9 @@ explaining why this is a bad idea.
 
 :::info
 
-UNDEF is handled before alias expansion above, so it is possible to force activity naming with `alias===UNDEF`. This is
-generally recommended, and will inform users if they try to set the alias in an unsafe way.
+UNDEF is handled before alias expansion above, so it is possible to force the default activity naming behavior above
+with `alias===UNDEF`. This is generally recommended, and will inform users if they try to set the alias in an unsafe
+way.
 
 :::
 
