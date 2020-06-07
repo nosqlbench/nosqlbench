@@ -10,7 +10,7 @@ are provided by the version of nosqlbench.
 
 You can see this list at any time by running the command:
 
-    nb --list-driver-types
+    nb --list-drivers
 
 Each one comes with its own built-in documentation. It can be accessed with this command:
 
