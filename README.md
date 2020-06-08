@@ -47,21 +47,18 @@ ecosystem can benefit from common concepts and understanding and reliable patter
 
 ## Getting Support
 
-In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of armor, so that they feel capable of doing most things without having to ask for help. Please keep this in mind when looking for personal support form our community, and help us find those places where the docs are lacking. Maybe you can help us by adding some missing docs!
-
-### Built-In Docs
-The documentation for NoSQLBench is quite thorough. On the command line, you can see a list of built-in docs with the command:
-
-`nb help topics`
-
-To read any topic, simply use the command:
-
-`nb help <topic>`
-
-The documentation system you are looking at right now includes the same docs you can find above already and more. They are automatically included when NoSQLBench is built.
+In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of
+armor, so that they feel capable of doing most things autonomously. Please keep this in mind when looking for personal
+support form our community, and help us find those places where the docs are lacking. Maybe you can help us by adding
+some missing docs!
 
 ### NoSQLBench Slack
-There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You can get that through [this simple form](https://docs.google.com/forms/d/e/1FAIpQLSdUOJ8iAPqyxsLfh1nBBsKShI53RAeuzYW4bKExmRMWjj4ufQ/viewform), which will send you an invite in email: Slack Invite. This is just a simple google form that automates the invite process.
+
+There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You
+can get that through
+[this simple form](https://docs.google.com/forms/d/e/1FAIpQLSdUOJ8iAPqyxsLfh1nBBsKShI53RAeuzYW4bKExmRMWjj4ufQ/viewform),
+which will send you an invite in email: Slack Invite. This is just a simple google form that automates the invite
+process.
 
 Please join it if you are a new or existing NoSQLBench user and help us get it going!
 
