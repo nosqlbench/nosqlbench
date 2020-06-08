@@ -1,0 +1,27 @@
+digraph dockerstack {
+ rankdir=TB
+ node[shape=record]
+// edge[fontsize=10]
+
+ nosqlbench[label="nosqlbench",shape="box"]
+
+ subgraph clusterfoo {
+
+  grafana[label="<3000>TCP/3000 (http)|grafana\ndocker", shape="record", rank=3]
+  graphite[label="{<9108>TCP/9108 (http)|<9109>TCP/9109 (graphite)}|graphite\ndocker", shape="record",
+  rank=2]
+  prometheus[label="<9090>TCP/9090 (promql)|prometheus\ndocker", shape="record", rank=3]
+
+
+  prometheus->graphite:9108
+  grafana->prometheus:9090
+
+ }
+ browser -> grafana:3000;
+ browser -> prometheus:9090;
+ nosqlbench->graphite:9109
+
+ { rank=same; nosqlbench; browser; }
+// { rank=same; graphite; grafana; }
+
+}
