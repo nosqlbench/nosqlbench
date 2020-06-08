@@ -1,12 +1,9 @@
-2a1284c3 (HEAD -> master) sync up mongo version and enable
-d3b3490b formatting
-6d8443e6 simplify command builder
-42559152 support graphite exporter custom mappings
-9235a51b add prom label based dashboard
-8a37abe7 mark previous dashboard as deprecated
-d64c0840 sanitize named scenario aliasing
-b248c866 configurable docker tags for grafana
-98bb5feb support more grafana datasources and dashboards
-3aea85cb use named steps in bundled workloads
-0fd96c9c added astra-specific schema support for Astra or DSE with guardrail enabled
-eb41be7e organize cql op functions
+- b5cc07fc (HEAD -> master) unpromote topics list until it works better
+- 0ef8d633 simplify output for listing scenarios and workloads
+- 512759af fix type conversion bug on waitmillis command
+- d0f2152a add sketch of chained flow
+- d95e9de0 add dockerstack diagram
+- 3628cc0f cqld4 incremental process
+- cf03c82b fixed a typo in driver index.md
+- c368b7cc Added Getting Help part to the front page README
+- d6a167c6 release notes script now uses md list form
