@@ -1,9 +1,11 @@
 package io.nosqlbench.engine.api.scenarios;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.Map;
 
-public class WorkloadDesc {
+public class WorkloadDesc implements Comparable<WorkloadDesc> {
     private final String yamlPath;
     private final List<String> scenarioNames;
     private final Map<String, String> templates;
@@ -48,17 +50,28 @@ public class WorkloadDesc {
 
         StringBuilder sb = new StringBuilder();
 
+        if (description.isEmpty()) {
+            sb.append("# no description provided\n");
+        }
+
+        if (!description.isEmpty()) {
+//            sb.append("# description:\n");
+            String formttedDesc = "# " + String.join("\n# ",description.split("\n"));
+            sb.append(formttedDesc).append("\n");
+            while (sb.toString().endsWith("\n\n")) {
+                sb.setLength(sb.length()-1);
+            }
+//            if (!description.endsWith("\n")) {
+//                sb.append("\n");
+//            }
+        }
+
         if (includeScenarios) {
-            sb.append("# workload in ");
+            sb.append("# workload found in in ");
         }
         sb.append(getYamlPath()).append("\n");
 
-        if (!description.isEmpty()) {
-            sb.append("# description:\n").append(description);
-            if (!description.endsWith("\n")) {
-                sb.append("\n");
-            }
-        }
+
         if (includeScenarios) {
             sb.append("    # scenarios:\n");
 
@@ -82,5 +95,10 @@ public class WorkloadDesc {
         }
         return sb.toString();
 
+    }
+
+    @Override
+    public int compareTo(@NotNull WorkloadDesc o) {
+        return this.yamlPath.compareTo(o.yamlPath);
     }
 }

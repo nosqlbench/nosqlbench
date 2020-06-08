@@ -1,4 +1,5 @@
-# nb -v cql-tabular rampup-cycles=1E6 main-cycles=1E9
+description: A tabular workload with partitions, clusters, and data fields
+
 scenarios:
   default:
     schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF

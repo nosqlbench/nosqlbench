@@ -308,6 +308,7 @@ public class NBCLIScenarioParser {
                 workloadDescriptions.add(new WorkloadDesc(path, scenarioNames, sortedTemplates, description));
             }
         }
+        Collections.sort(workloadDescriptions);
 
         return workloadDescriptions;
     }
