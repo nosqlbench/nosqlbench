@@ -1,5 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.statements.binders;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.type.DataType;
 import io.nosqlbench.activitytype.cqld4.core.CQLBindHelper;
@@ -17,7 +18,14 @@ import java.util.List;
  * order to explain in more detail what is happening for users.
  */
 public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
+
     public static final Logger logger = LoggerFactory.getLogger(DiagnosticPreparedBinder.class);
+    private final CqlSession session;
+
+    public DiagnosticPreparedBinder(CqlSession session) {
+        this.session = session;
+    }
+
     @Override
     public Statement<?> bindValues(PreparedStatement prepared, Object[] values) {
         ColumnDefinitions columnDefinitions = prepared.getVariableDefinitions();
@@ -26,9 +34,7 @@ public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedState
         List<ColumnDefinition> columnDefList = new ArrayList<>();
         prepared.getVariableDefinitions().forEach(columnDefList::add);
 
-        if (columnDefList.size() == values.length) {
-            columnDefList = columnDefinitions.asList();
-        } else {
+        if (columnDefList.size() != values.length) {
             throw new RuntimeException("The number of named anchors in your statement does not match the number of bindings provided.");
         }
 
@@ -41,7 +47,7 @@ public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedState
             String colName = columnDef.getName().toString();
             DataType type =columnDef.getType();
             try {
-                bound = CQLBindHelper.bindStatement(bound, colName, value, type);
+                new CQLBindHelper(session).bindStatement(bound, colName, value, type);
             } catch (ClassCastException e) {
                 logger.error(String.format("Unable to bind column %s to cql type %s with value %s", colName, type, value));
                 throw e;

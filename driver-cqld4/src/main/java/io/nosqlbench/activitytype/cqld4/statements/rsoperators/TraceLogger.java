@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cqld4.statements.rsoperators;
 
 import com.datastax.oss.driver.api.core.cql.*;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.core.StatementModifier;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TraceLogger implements ResultSetCycleOperator, StatementModifier {
+public class TraceLogger implements D4ResultSetCycleOperator, StatementModifier {
 
     private final static Logger logger = LoggerFactory.getLogger(TraceLogger.class);
 
@@ -46,7 +46,8 @@ public class TraceLogger implements ResultSetCycleOperator, StatementModifier {
     }
 
     @Override
-    public int apply(ResultSet rs, Statement statement, long cycle) {
+    public int apply(AsyncResultSet rs, Statement<?> statement, long cycle) {
+        rs.getExecutionInfo().getQueryTrace();
         if ((cycle%modulo)!=0) {
             return 0;
         }

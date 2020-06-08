@@ -1,9 +1,11 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 import com.codahale.metrics.Timer;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.config.TypedDriverOption;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.activitytype.cqld4.api.ErrorResponse;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.StatementFilter;
 import io.nosqlbench.activitytype.cqld4.errorhandling.ErrorStatus;
@@ -11,6 +13,7 @@ import io.nosqlbench.activitytype.cqld4.errorhandling.HashedCQLErrorHandler;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLCycleWithStatementException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.UnexpectedPagingException;
+import io.nosqlbench.activitytype.cqld4.statements.core.CQLSessionCache;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.FailedOp;
@@ -23,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
 
@@ -33,7 +37,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
     private final ActivityDef activityDef;
 
     private List<RowCycleOperator> rowOps;
-    private List<ResultSetCycleOperator> cycleOps;
+    private List<D4ResultSetCycleOperator> cycleOps;
     private List<StatementModifier> modifiers;
     private StatementFilter statementFilter;
     private OpSequence<ReadyCQLStatement> sequencer;
@@ -112,13 +116,13 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
         // The execute timer covers only the point at which EB hands the op to the driver to be executed
         try (Timer.Context executeTime = activity.executeTimer.time()) {
-            cqlop.completionStage = activity.getSession().executeAsync(cqlop.statement);
-            Futures.addCallback(cqlop.completionStage, cqlop);
+            CompletionStage<AsyncResultSet> completionStage = activity.getSession().executeAsync(cqlop.statement);
+            completionStage.whenComplete(cqlop::handleAsyncResult);
         }
     }
 
 
-    public void onSuccess(StartedOp<CqlOpData> sop) {
+    public void onSuccess(StartedOp<CqlOpData> sop, AsyncResultSet resultSet) {
         CqlOpData cqlop = sop.getData();
 
         HashedCQLErrorHandler.resetThreadStatusCode();
@@ -128,39 +132,41 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
         try {
 
-            ResultSet resultSet = cqlop.resultSet;
             cqlop.totalPagesFetchedForQuery++;
 
             // Apply any defined ResultSetCycleOperators
-            if (cycleOps != null) {
-                for (ResultSetCycleOperator cycleOp : cycleOps) {
-                    cycleOp.apply(resultSet, cqlop.statement, cqlop.cycle);
+            // TODO: Implement result and row operators for cqld4 actions
+//            if (cycleOps != null) {
+//                for (ResultSetCycleOperator cycleOp : cycleOps) {
+//                    cycleOp.apply(resultSet, cqlop.statement, cqlop.cycle);
+//                    resultSet.
+//                }
+//            }
+//
+            int rowsInPage = 0;
+//            if (rowOps==null) {
+                for (Row row : resultSet.currentPage()) {
+                    rowsInPage++;
                 }
-            }
-
-            int pageRows = resultSet.getAvailableWithoutFetching();
-            int remaining = pageRows;
-            if (rowOps == null) {
-                while (remaining-- > 0) {
-                    resultSet.one();
-                }
-            } else {
-                while (remaining-- > 0) {
-                    for (RowCycleOperator rowOp : rowOps) {
-                        rowOp.apply(resultSet.one(), cqlop.cycle);
-                    }
-                }
-            }
-            cqlop.totalRowsFetchedForQuery += pageRows;
+//            } else {
+//                for (Row row : resultSet.currentPage()) {
+//                    rowsInPage++;
+//                    for (RowCycleOperator rowOp : rowOps) {
+//                        rowOp.apply(row, cqlop.cycle);
+//                    }
+//                }
+//            }
+            cqlop.totalRowsFetchedForQuery += rowsInPage;
 
             if (cqlop.totalPagesFetchedForQuery++ > activity.maxpages) {
+                Integer pagesize = CQLSessionCache.get().getSession(activityDef).optionsMap.get(TypedDriverOption.REQUEST_PAGE_SIZE);
                 throw new UnexpectedPagingException(
                         cqlop.cycle,
                         resultSet,
                         cqlop.readyCQLStatement.getQueryString(cqlop.cycle),
                         1,
                         activity.maxpages,
-                        activity.getSession().getCluster().getConfiguration().getQueryOptions().getFetchSize()
+                        pagesize
                 );
             }
 
@@ -171,10 +177,11 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
                 );
             }
 
-            if (!resultSet.isFullyFetched()) {
+
+            if (!resultSet.hasMorePages()) {
                 logger.trace("async paging request " + cqlop.totalPagesFetchedForQuery + " for cycle " + cqlop.cycle);
-                ListenableFuture<ResultSet> resultSetListenableFuture = resultSet.fetchMoreResults();
-                Futures.addCallback(resultSetListenableFuture, cqlop);
+
+                resultSet.fetchNextPage().whenComplete(cqlop::handleAsyncResult);
                 return;
             }
 
@@ -196,9 +203,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
             ErrorStatus errorStatus = cqlActivityErrorHandler.handleError(cqlop.cycle, cqlCycleException);
 
             if (errorStatus.isRetryable() && ++cqlop.triesAttempted < maxTries) {
-                ResultSetFuture resultSetFuture = activity.getSession().executeAsync(cqlop.statement);
-                sop.retry();
-                Futures.addCallback(resultSetFuture, cqlop);
+                activity.getSession().executeAsync(cqlop.statement).whenComplete(cqlop::handleAsyncResult);
                 return;
             } else {
                 sop.fail(errorStatus.getResultCode());
@@ -231,8 +236,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         if (errorStatus.isRetryable() && cqlop.triesAttempted < maxTries) {
             startedOp.retry();
             try (Timer.Context executeTime = activity.executeTimer.time()) {
-                cqlop.completionStage = activity.getSession().executeAsync(cqlop.statement);
-                Futures.addCallback(cqlop.completionStage, cqlop);
+                activity.getSession().executeAsync(cqlop.statement).whenComplete(cqlop::handleAsyncResult);
                 return;
             }
         }
@@ -252,7 +256,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         this.cqlActivityErrorHandler = activity.getCqlErrorHandler();
         this.statementFilter = activity.getStatementFilter();
         this.rowOps = activity.getRowCycleOperators();
-        this.cycleOps = activity.getResultSetCycleOperators();
+        this.cycleOps = activity.getPageInfoCycleOperators();
         this.modifiers = activity.getStatementModifiers();
     }
 

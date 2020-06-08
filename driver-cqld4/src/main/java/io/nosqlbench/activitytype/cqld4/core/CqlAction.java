@@ -3,14 +3,12 @@ package io.nosqlbench.activitytype.cqld4.core;
 import com.codahale.metrics.Timer;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.cql.*;
-import com.datastax.oss.driver.api.core.session.Session;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.StatementFilter;
 import io.nosqlbench.activitytype.cqld4.errorhandling.ErrorStatus;
 import io.nosqlbench.activitytype.cqld4.errorhandling.HashedCQLErrorHandler;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLCycleWithStatementException;
-import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.MaxTriesExhaustedException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
@@ -34,7 +32,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
     private final CqlActivity cqlActivity;
     private final ActivityDef activityDef;
     private List<RowCycleOperator> rowOps;
-    private List<ResultSetCycleOperator> cycleOps;
+    private List<D4ResultSetCycleOperator> cycleOps;
     private List<StatementModifier> modifiers;
     private StatementFilter statementFilter;
     private OpSequence<ReadyCQLStatement> sequencer;
@@ -44,7 +42,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
 
     private int pagesFetched = 0;
     private long totalRowsFetchedForQuery = 0L;
-    private ResultSet pagingResultSet;
+    private AsyncResultSet pagingResultSet;
     private Statement pagingStatement;
     private ReadyCQLStatement pagingReadyStatement;
     private boolean showcql;
@@ -125,84 +123,74 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     }
                 }
 
+                CompletionStage<AsyncResultSet> completion;
                 try (Timer.Context executeTime = cqlActivity.executeTimer.time()) {
-                    CompletionStage<AsyncResultSet> completion = cqlActivity.getSession().executeAsync(statement);
+                    completion = cqlActivity.getSession().executeAsync(statement);
                 }
 
                 Timer.Context resultTime = cqlActivity.resultTimer.time();
                 try {
-                    ResultSet resultSet = resultSetFuture.getUninterruptibly();
+                    AsyncResultSet resultSet = completion.toCompletableFuture().get();
 
                     if (cycleOps != null) {
-                        for (ResultSetCycleOperator cycleOp : cycleOps) {
+                        for (D4ResultSetCycleOperator cycleOp : cycleOps) {
                             cycleOp.apply(resultSet, statement, cycleValue);
                         }
                     }
 
-                    ResultSetCycleOperator[] perStmtRSOperators = readyCQLStatement.getResultSetOperators();
-                    if (perStmtRSOperators != null) {
-                        for (ResultSetCycleOperator perStmtRSOperator : perStmtRSOperators) {
+                    D4ResultSetCycleOperator[] rsOperators = readyCQLStatement.getResultSetOperators();
+                    if (rsOperators != null) {
+                        for (D4ResultSetCycleOperator perStmtRSOperator : rsOperators) {
                             perStmtRSOperator.apply(resultSet, statement, cycleValue);
                         }
                     }
 
-                    if (!resultSet.wasApplied()) {
-                        //resultSet.b
-                        Row row = resultSet.one();
-                        ColumnDefinitions defs = row.getColumnDefinitions();
-                        if (retryReplace) {
-                            statement =
-                                new CQLBindHelper(getCqlActivity().getSession()).rebindUnappliedStatement(statement, defs,row);
-                        }
-
-                        logger.trace(readyCQLStatement.getQueryString(cycleValue));
-                        // To make exception handling logic flow more uniformly
-                        throw new ChangeUnappliedCycleException(
-                                cycleValue, resultSet, readyCQLStatement.getQueryString(cycleValue)
-                        );
-                    }
-
-                    int pageRows = resultSet.getAvailableWithoutFetching();
-                    int remaining = pageRows;
-                    RowCycleOperator[] perStmtRowOperators = readyCQLStatement.getRowCycleOperators();
-                    if (rowOps == null && perStmtRowOperators==null) {
-                        while (remaining-- > 0) {
-                            Row row = resultSet.one();
-
-//                            NOTE: This has been replaced by:
-//                            params:
-//                              rowops: savevars
-//                              You must add this to the YAML for statements that are meant to capture vars
-//                            HashMap<String, Object> bindings = SharedState.tl_ObjectMap.get();
-//                            for (ColumnDefinitions.Definition cdef : row.getColumnDefinitions()) {
-//                                bindings.put(cdef.getName(), row.getObject(cdef.getName()));
-//                            }
+                    // TODO: Add parameter rebind support in cqld4 via op
+//                    if (!resultSet.wasApplied()) {
+//                        //resultSet.b
+//                        Row row = resultSet.one();
+//                        ColumnDefinitions defs = row.getColumnDefinitions();
+//                        if (retryReplace) {
+//                            statement =
+//                                new CQLBindHelper(getCqlActivity().getSession()).rebindUnappliedStatement(statement, defs,row);
+//                        }
 //
+//                        logger.trace(readyCQLStatement.getQueryString(cycleValue));
+//                        // To make exception handling logic flow more uniformly
+//                        throw new ChangeUnappliedCycleException(
+//                                cycleValue, resultSet, readyCQLStatement.getQueryString(cycleValue)
+//                        );
+//                    }
+
+//                    int pageRows = resultSet.getAvailableWithoutFetching();
+
+                    int rowsInPage=0;
+                    RowCycleOperator[] perStmtRowOperators = readyCQLStatement.getRowCycleOperators();
+
+                    if (rowOps==null && perStmtRowOperators==null) {
+                        for (Row row : resultSet.currentPage()) {
+                            rowsInPage++;
                         }
                     } else {
-                        while (remaining-- > 0) {
-                            Row onerow = resultSet.one();
+                        for (Row row : resultSet.currentPage()) {
                             if (rowOps!=null) {
                                 for (RowCycleOperator rowOp : rowOps) {
-                                    rowOp.apply(onerow, cycleValue);
+                                    rowOp.apply(row, cycleValue);
                                 }
                             }
                             if (perStmtRowOperators!=null) {
                                 for (RowCycleOperator rowOp : perStmtRowOperators) {
-                                    rowOp.apply(onerow, cycleValue);
+                                    rowOp.apply(row, cycleValue);
                                 }
                             }
+                            rowsInPage++;
                         }
                     }
-                    cqlActivity.rowsCounter.mark(pageRows);
-                    totalRowsFetchedForQuery += pageRows;
 
-                    if (resultSet.isFullyFetched()) {
-                        long resultNanos = System.nanoTime() - nanoStartTime;
-                        cqlActivity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
-                        cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
-                        readyCQLStatement.onSuccess(cycleValue, resultNanos, totalRowsFetchedForQuery);
-                    } else {
+                    cqlActivity.rowsCounter.mark(rowsInPage);
+                    totalRowsFetchedForQuery += rowsInPage;
+
+                    if (resultSet.hasMorePages()) {
                         if (cqlActivity.maxpages > 1) {
                             pagingResultSet = resultSet;
                             pagingStatement = statement;
@@ -218,6 +206,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                                     cqlActivity.getSession().getContext().getConfig().getDefaultProfile().getInt(DefaultDriverOption.REQUEST_PAGE_SIZE)
                             );
                         }
+                    } else {
+                        long resultNanos = System.nanoTime() - nanoStartTime;
+                        cqlActivity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+                        cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
+                        readyCQLStatement.onSuccess(cycleValue, resultNanos, totalRowsFetchedForQuery);
                     }
                     break; // This is normal termination of this loop, when retries aren't needed
                 } catch (Exception e) {
@@ -248,56 +241,58 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     throw new MaxTriesExhaustedException(cycleValue, maxTries);
                 }
 
-                ListenableFuture<ResultSet> pagingFuture;
-
                 try (Timer.Context pagingTime = cqlActivity.pagesTimer.time()) {
+
+                    CompletionStage<AsyncResultSet> completion;
                     try (Timer.Context executeTime = cqlActivity.executeTimer.time()) {
-                        pagingFuture = pagingResultSet.fetchMoreResults();
+                        completion = pagingResultSet.fetchNextPage();
                     }
 
                     Timer.Context resultTime = cqlActivity.resultTimer.time();
                     try {
-                        ResultSet resultSet = pagingFuture.get();
+                        AsyncResultSet resultSet = completion.toCompletableFuture().get();
 
                         if (cycleOps != null) {
-                            for (ResultSetCycleOperator cycleOp : cycleOps) {
+                            for (D4ResultSetCycleOperator cycleOp : cycleOps) {
                                 cycleOp.apply(resultSet, pagingStatement, cycleValue);
                             }
                         }
-                        ResultSetCycleOperator[] perStmtRSOperators = pagingReadyStatement.getResultSetOperators();
+                        D4ResultSetCycleOperator[] perStmtRSOperators = pagingReadyStatement.getResultSetOperators();
                         if (perStmtRSOperators != null) {
-                            for (ResultSetCycleOperator perStmtRSOperator : perStmtRSOperators) {
+                            for (D4ResultSetCycleOperator perStmtRSOperator : perStmtRSOperators) {
                                 perStmtRSOperator.apply(resultSet, pagingStatement, cycleValue);
                             }
                         }
 
                         pagesFetched++;
 
-                        int pageRows = resultSet.getAvailableWithoutFetching();
-                        int remaining = pageRows;
-                        if (rowOps == null) {
-                            while (remaining-- > 0) {
-                                resultSet.one();
+                        RowCycleOperator[] perStmtRowCycleOp = pagingReadyStatement.getRowCycleOperators();
+                        int rowsInPage=0;
+
+                        if (rowOps==null && perStmtRowCycleOp==null) {
+                            for (Row row : resultSet.currentPage()) {
+                                rowsInPage++;
                             }
                         } else {
-                            while (remaining-- > 0) {
-                                for (RowCycleOperator rowOp : rowOps) {
-                                    rowOp.apply(resultSet.one(), cycleValue);
-
+                            for (Row row : resultSet.currentPage()) {
+                                rowsInPage++;
+                                if (rowOps!=null) {
+                                    for (RowCycleOperator rowOp : rowOps) {
+                                        rowOp.apply(row,cycleValue);
+                                    }
+                                }
+                                if (perStmtRowCycleOp!=null) {
+                                    for (RowCycleOperator rowCycleOperator : perStmtRowCycleOp) {
+                                        rowCycleOperator.apply(row,cycleValue);
+                                    }
                                 }
                             }
                         }
-                        cqlActivity.rowsCounter.mark(pageRows);
-                        totalRowsFetchedForQuery += pageRows;
 
-                        if (resultSet.isFullyFetched()) {
-                            long nanoTime = System.nanoTime() - nanoStartTime;
-                            cqlActivity.resultSuccessTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-                            cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
-                            pagingReadyStatement.onSuccess(cycleValue, nanoTime, totalRowsFetchedForQuery);
-                            pagingResultSet = null;
+                        cqlActivity.rowsCounter.mark(rowsInPage);
+                        totalRowsFetchedForQuery += rowsInPage;
 
-                        } else {
+                        if (resultSet.hasMorePages()) {
                             if (pagesFetched > cqlActivity.maxpages) {
                                 throw new UnexpectedPagingException(
                                         cycleValue,
@@ -309,6 +304,12 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                                 );
                             }
                             pagingResultSet = resultSet;
+                        } else {
+                            long nanoTime = System.nanoTime() - nanoStartTime;
+                            cqlActivity.resultSuccessTimer.update(nanoTime, TimeUnit.NANOSECONDS);
+                            cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
+                            pagingReadyStatement.onSuccess(cycleValue, nanoTime, totalRowsFetchedForQuery);
+                            pagingResultSet = null;
                         }
                         break; // This is normal termination of this loop, when retries aren't needed
                     } catch (Exception e) {
@@ -350,7 +351,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
         this.ebdseErrorHandler = cqlActivity.getCqlErrorHandler();
         this.statementFilter = cqlActivity.getStatementFilter();
         this.rowOps = cqlActivity.getRowCycleOperators();
-        this.cycleOps = cqlActivity.getResultSetCycleOperators();
+        this.cycleOps = cqlActivity.getPageInfoCycleOperators();
         this.modifiers = cqlActivity.getStatementModifiers();
     }
 

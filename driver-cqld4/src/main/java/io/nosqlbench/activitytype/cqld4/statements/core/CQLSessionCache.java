@@ -5,6 +5,7 @@ import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.*;
 import com.datastax.oss.driver.api.core.loadbalancing.LoadBalancingPolicy;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
+import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.api.core.retry.RetryPolicy;
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.specex.SpeculativeExecutionPolicy;
@@ -12,6 +13,7 @@ import com.datastax.oss.driver.internal.core.config.map.MapBasedDriverConfigLoad
 import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.retry.DefaultRetryPolicy;
 import com.typesafe.config.ConfigFactory;
+import io.nosqlbench.activitytype.cqld4.config.CQLD4OptionsMapper;
 import io.nosqlbench.activitytype.cqld4.core.CQLOptions;
 import io.nosqlbench.activitytype.cqld4.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
@@ -41,12 +43,17 @@ public class CQLSessionCache implements Shutdownable {
     private Map<String, SessionConfig> sessionCache = new HashMap<>();
 
 
-    private final static class SessionConfig extends ConcurrentHashMap<String,String> {
+    public final static class SessionConfig extends ConcurrentHashMap<String,String> {
         public CqlSession session;
-        public Map<String,String> config = new ConcurrentHashMap<>();
+        public OptionsMap optionsMap;
 
-        public SessionConfig(CqlSession session) {
+        public SessionConfig(CqlSession session, OptionsMap optionsMap) {
             this.session = session;
+            this.optionsMap = optionsMap;
+        }
+
+        public void set(DefaultDriverOption intOption, Object value) {
+            CQLD4OptionsMapper.apply(optionsMap,intOption.getPath(), value.toString());
         }
     }
 
@@ -63,11 +70,11 @@ public class CQLSessionCache implements Shutdownable {
         sessionConfig.session.close();
     }
 
-    public CqlSession getSession(ActivityDef activityDef) {
+    public SessionConfig getSession(ActivityDef activityDef) {
         String key = activityDef.getParams().getOptionalString("sessionid").orElse(DEFAULT_SESSION_ID);
         String profileName = activityDef.getParams().getOptionalString("profile").orElse("default");
         SessionConfig sessionConfig = sessionCache.computeIfAbsent(key, (cid) -> createSession(activityDef, key, profileName));
-        return sessionConfig.session;
+        return sessionConfig;
     }
 
     // cbopts=\".withLoadBalancingPolicy(LatencyAwarePolicy.builder(new TokenAwarePolicy(new DCAwareRoundRobinPolicy(\"dc1-us-east\", 0, false))).build()).withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE))\"
@@ -93,11 +100,6 @@ public class CQLSessionCache implements Shutdownable {
 //        DriverConfigLoader cl = DriverConfigLoader.fromMap(defaults);
 //        DriverConfig cfg = cl.getInitialConfig();
 
-        OptionsMap optionsMap = OptionsMap.driverDefaults();
-
-        builder.withConfigLoader(new MapBasedDriverConfigLoader())
-        builder.withConfigLoader(optionsMap);
-
 
         Optional<Path> scb = activityDef.getParams().getOptionalString("secureconnectbundle")
             .map(Path::of);
@@ -106,6 +108,7 @@ public class CQLSessionCache implements Shutdownable {
             .map(h -> h.split(",")).map(Arrays::asList);
 
         Optional<Integer> port1 = activityDef.getParams().getOptionalInteger("port");
+
 
         if (scb.isPresent()) {
             scb.map(b -> {
@@ -162,11 +165,12 @@ public class CQLSessionCache implements Shutdownable {
             }
         }
 
+
         Optional<String> clusteropts = activityDef.getParams().getOptionalString("cbopts");
         if (clusteropts.isPresent()) {
             try {
                 logger.info("applying cbopts:" + clusteropts.get());
-                NashornEvaluator<DseCluster.Builder> clusterEval = new NashornEvaluator<>(DseCluster.Builder.class);
+                NashornEvaluator<CqlSessionBuilder> clusterEval = new NashornEvaluator<>(CqlSessionBuilder.class);
                 clusterEval.put("builder", builder);
                 String importEnv =
                         "load(\"nashorn:mozilla_compat.js\");\n" +
@@ -185,135 +189,157 @@ public class CQLSessionCache implements Shutdownable {
             }
         }
 
-        SpeculativeExecutionPolicy speculativePolicy = activityDef.getParams()
-                .getOptionalString("speculative")
-                .map(speculative -> {
-                    logger.info("speculative=>" + speculative);
-                    return speculative;
-                })
-                .map(CQLOptions::speculativeFor)
-                .orElse(CQLOptions.defaultSpeculativePolicy());
-        builder.withSpeculativeExecutionPolicy(speculativePolicy);
+        // TODO: Support speculative=>
+//        SpeculativeExecutionPolicy speculativePolicy = activityDef.getParams()
+//                .getOptionalString("speculative")
+//                .map(speculative -> {
+//                    logger.info("speculative=>" + speculative);
+//                    return speculative;
+//                })
+//                .map(CQLOptions::speculativeFor)
+//                .orElse(CQLOptions.defaultSpeculativePolicy());
+//        builder.withSpeculativeExecutionPolicy(speculativePolicy);
 
-        activityDef.getParams().getOptionalString("socketoptions")
-                .map(sockopts -> {
-                    logger.info("socketoptions=>" + sockopts);
-                    return sockopts;
-                })
-                .map(CQLOptions::socketOptionsFor)
-                .ifPresent(builder::withSocketOptions);
+        // TODO: Support socketoptions=>
+//        activityDef.getParams().getOptionalString("socketoptions")
+//                .map(sockopts -> {
+//                    logger.info("socketoptions=>" + sockopts);
+//                    return sockopts;
+//                })
+//                .map(CQLOptions::socketOptionsFor)
+//                .ifPresent(builder::withSocketOptions);
+//
 
-        activityDef.getParams().getOptionalString("reconnectpolicy")
-            .map(reconnectpolicy-> {
-                logger.info("reconnectpolicy=>" + reconnectpolicy);
-                return reconnectpolicy;
-            })
-            .map(CQLOptions::reconnectPolicyFor)
-            .ifPresent(builder::withReconnectionPolicy);
-
-
-        activityDef.getParams().getOptionalString("pooling")
-                .map(pooling -> {
-                    logger.info("pooling=>" + pooling);
-                    return pooling;
-                })
-                .map(CQLOptions::poolingOptionsFor)
-                .ifPresent(builder::withPoolingOptions);
-
-        activityDef.getParams().getOptionalString("whitelist")
-                .map(whitelist -> {
-                    logger.info("whitelist=>" + whitelist);
-                    return whitelist;
-                })
-                .map(p -> CQLOptions.whitelistFor(p, null))
-                .ifPresent(builder::withLoadBalancingPolicy);
-
-        activityDef.getParams().getOptionalString("tickduration")
-                .map(tickduration -> {
-                    logger.info("tickduration=>" + tickduration);
-                    return tickduration;
-                })
-                .map(CQLOptions::withTickDuration)
-                .ifPresent(builder::withNettyOptions);
-
-        activityDef.getParams().getOptionalString("compression")
-                .map(compression -> {
-                    logger.info("compression=>" + compression);
-                    return compression;
-                })
-                .map(CQLOptions::withCompression)
-                .ifPresent(builder::withCompression);
-
-        if (activityDef.getParams().getOptionalString("ssl").isPresent()) {
-            logger.info("Cluster builder proceeding with SSL but no Client Auth");
-            Object context = SSLKsFactory.get().getContext(activityDef);
-            SSLOptions sslOptions;
-            if (context instanceof javax.net.ssl.SSLContext) {
-                sslOptions = RemoteEndpointAwareJdkSSLOptions.builder()
-                        .withSSLContext((javax.net.ssl.SSLContext) context).build();
-                builder.withSSL(sslOptions);
-            } else if (context instanceof io.netty.handler.ssl.SslContext) {
-                sslOptions =
-                        new RemoteEndpointAwareNettySSLOptions((io.netty.handler.ssl.SslContext) context);
-            } else {
-                throw new RuntimeException("Unrecognized ssl context object type: " + context.getClass().getCanonicalName());
-            }
-            builder.withSSL(sslOptions);
-        }
+        // TODO: Support reconnectpolicy
+//        activityDef.getParams().getOptionalString("reconnectpolicy")
+//            .map(reconnectpolicy-> {
+//                logger.info("reconnectpolicy=>" + reconnectpolicy);
+//                return reconnectpolicy;
+//            })
+//            .map(CQLOptions::reconnectPolicyFor)
+//            .ifPresent(builder::withReconnectionPolicy);
 
 
-        RetryPolicy retryPolicy = activityDef.getParams()
-                .getOptionalString("retrypolicy")
-                .map(CQLOptions::retryPolicyFor).orElse(DefaultRetryPolicy.INSTANCE);
+        // TODO: support pooling options
+//        activityDef.getParams().getOptionalString("pooling")
+//                .map(pooling -> {
+//                    logger.info("pooling=>" + pooling);
+//                    return pooling;
+//                })
+//                .map(CQLOptions::poolingOptionsFor)
+//                .ifPresent(builder::withPoolingOptions);
 
-        if (retryPolicy instanceof LoggingRetryPolicy) {
-            logger.info("using LoggingRetryPolicy");
-        }
+        // TODO: support whitelist options
+//        activityDef.getParams().getOptionalString("whitelist")
+//                .map(whitelist -> {
+//                    logger.info("whitelist=>" + whitelist);
+//                    return whitelist;
+//                })
+//                .map(p -> CQLOptions.whitelistFor(p, null))
+//                .ifPresent(builder::withLoadBalancingPolicy);
+//
 
-        builder.withRetryPolicy(retryPolicy);
+        // TODO: support tickduration
+//        activityDef.getParams().getOptionalString("tickduration")
+//                .map(tickduration -> {
+//                    logger.info("tickduration=>" + tickduration);
+//                    return tickduration;
+//                })
+//                .map(CQLOptions::withTickDuration)
+//                .ifPresent(builder::withNettyOptions);
 
-        if (!activityDef.getParams().getOptionalBoolean("jmxreporting").orElse(false)) {
-            builder.withoutJMXReporting();
-        }
+        // TODO: support compression
+//        activityDef.getParams().getOptionalString("compression")
+//                .map(compression -> {
+//                    logger.info("compression=>" + compression);
+//                    return compression;
+//                })
+//                .map(CQLOptions::withCompression)
+//                .ifPresent(builder::withCompression);
 
-        // Proxy Translator and Whitelist for use with DS Cloud on-demand single-endpoint setup
-        if (activityDef.getParams().getOptionalBoolean("single-endpoint").orElse(false)) {
-            InetSocketAddress inetHost = new InetSocketAddress(host, port);
-            final List<InetSocketAddress> whiteList = new ArrayList<>();
-            whiteList.add(inetHost);
+        // TODO: Support SSL standard config interface
+//        if (activityDef.getParams().getOptionalString("ssl").isPresent()) {
+//            logger.info("Cluster builder proceeding with SSL but no Client Auth");
+//            Object context = SSLKsFactory.get().getContext(activityDef);
+//            SSLOptions sslOptions;
+//            if (context instanceof javax.net.ssl.SSLContext) {
+//                sslOptions = RemoteEndpointAwareJdkSSLOptions.builder()
+//                        .withSSLContext((javax.net.ssl.SSLContext) context).build();
+//                builder.withSSL(sslOptions);
+//            } else if (context instanceof io.netty.handler.ssl.SslContext) {
+//                sslOptions =
+//                        new RemoteEndpointAwareNettySSLOptions((io.netty.handler.ssl.SslContext) context);
+//            } else {
+//                throw new RuntimeException("Unrecognized ssl context object type: " + context.getClass().getCanonicalName());
+//            }
+//            builder.withSSL(sslOptions);
+//        }
 
-            LoadBalancingPolicy whitelistPolicy = new WhiteListPolicy(new RoundRobinPolicy(), whiteList);
-            builder.withAddressTranslator(new ProxyTranslator(inetHost)).withLoadBalancingPolicy(whitelistPolicy);
-        }
+        // TODO: Support retry policy
+//        RetryPolicy retryPolicy = activityDef.getParams()
+//                .getOptionalString("retrypolicy")
+//                .map(CQLOptions::retryPolicyFor).orElse(DefaultRetryPolicy.INSTANCE);
+//
+//        if (retryPolicy instanceof LoggingRetryPolicy) {
+//            logger.info("using LoggingRetryPolicy");
+//        }
+//
+//        builder.withRetryPolicy(retryPolicy);
 
-        Cluster cl = builder.build();
+        // TODO: Support JMX reporting toggle
+//        if (!activityDef.getParams().getOptionalBoolean("jmxreporting").orElse(false)) {
+//            builder.withoutJMXReporting();
+//        }
 
-        // Apply default idempotence, if set
-        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
-                b -> cl.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
-        );
+        // TODO: Support single-endpoint options?
+//        // Proxy Translator and Whitelist for use with DS Cloud on-demand single-endpoint setup
+//        if (activityDef.getParams().getOptionalBoolean("single-endpoint").orElse(false)) {
+//            InetSocketAddress inetHost = new InetSocketAddress(host, port);
+//            final List<InetSocketAddress> whiteList = new ArrayList<>();
+//            whiteList.add(inetHost);
+//
+//            LoadBalancingPolicy whitelistPolicy = new WhiteListPolicy(new RoundRobinPolicy(), whiteList);
+//            builder.withAddressTranslator(new ProxyTranslator(inetHost)).withLoadBalancingPolicy(whitelistPolicy);
+//        }
 
-        Session session = cl.newSession();
+        CqlSession session = builder.build();
+
+//        Cluster cl = builder.build();
+
+
+        // TODO: Support default idempotence
+//        // Apply default idempotence, if set
+//        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
+//                b -> cl.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
+//        );
 
         // This also forces init of metadata
 
-        logger.info("cluster-metadata-allhosts:\n" + session.getCluster().getMetadata().getAllHosts());
+
+        Map<UUID, Node> nodes = session.getMetadata().getNodes();
+        if (nodes.size()>25) {
+            logger.info("Found " + nodes.size() + " nodes in cluster.");
+        } else {
+            nodes.forEach((k,v)->{
+                logger.info("found node " + k);
+            });
+        }
+        logger.info("cluster-metadata-allhosts:\n" + session.getMetadata().getNodes());
 
         if (activityDef.getParams().getOptionalBoolean("drivermetrics").orElse(false)) {
-            String driverPrefix = "driver." + sessid;
-            driverPrefix = activityDef.getParams().getOptionalString("driverprefix").orElse(driverPrefix) + ".";
-            ActivityMetrics.mountSubRegistry(driverPrefix, cl.getMetrics().getRegistry());
+            String driverPrefix = activityDef.getParams().getOptionalString("driverprefix").orElse("driver."+sessid) + ".";
+            session.getMetrics().ifPresent(m -> ActivityMetrics.mountSubRegistry(driverPrefix,m.getRegistry()));
         }
 
-        return session;
+        OptionsMap optionsMap = OptionsMap.driverDefaults();
+
+        return new SessionConfig(session,optionsMap);
     }
 
     @Override
     public void shutdown() {
-        for (Session session : sessionCache.values()) {
-            Cluster cluster = session.getCluster();
-            session.close();
-            cluster.close();
+        for (SessionConfig session : sessionCache.values()) {
+            session.session.close();
         }
     }
 }

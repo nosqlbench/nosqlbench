@@ -1,5 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.statements.binders;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
@@ -20,9 +21,14 @@ import java.util.Arrays;
  */
 public class DirectArrayValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
     public final static Logger logger = LoggerFactory.getLogger(DirectArrayValuesBinder.class);
+    private final CqlSession session;
+
+    public DirectArrayValuesBinder(CqlSession session) {
+        this.session = session;
+    }
 
     @Override
-    public Statement bindValues(PreparedStatement preparedStatement, Object[] objects) {
+    public Statement<?> bindValues(PreparedStatement preparedStatement, Object[] objects) {
         try {
             return preparedStatement.bind(objects);
         } catch (Exception e) {
@@ -30,7 +36,7 @@ public class DirectArrayValuesBinder implements ValuesArrayBinder<PreparedStatem
             sb.append("Error binding objects to prepared statement directly, falling back to diagnostic binding layer:");
             sb.append(Arrays.toString(objects));
             logger.warn(sb.toString(),e);
-            DiagnosticPreparedBinder diag = new DiagnosticPreparedBinder();
+            DiagnosticPreparedBinder diag = new DiagnosticPreparedBinder(session);
             return diag.bindValues(preparedStatement, objects);
         }
     }

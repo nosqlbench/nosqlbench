@@ -5,7 +5,7 @@ import com.codahale.metrics.Timer;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.virtdata.core.bindings.ContextualArrayBindings;
 
@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 public class ReadyCQLStatement {
 
     private String name;
-    private ContextualArrayBindings<?, Statement> contextualBindings;
+    private ContextualArrayBindings<?, Statement<?>> contextualBindings;
     private long ratio;
-    private ResultSetCycleOperator[] resultSetOperators = null;
+    private D4ResultSetCycleOperator[] resultSetOperators = null;
     private RowCycleOperator[] rowCycleOperators = null;
 
     private Timer successTimer;
@@ -30,7 +30,7 @@ public class ReadyCQLStatement {
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
 
-    public ReadyCQLStatement(ContextualArrayBindings<?, Statement> contextualBindings, long ratio, String name) {
+    public ReadyCQLStatement(ContextualArrayBindings<?, Statement<?>> contextualBindings, long ratio, String name) {
         this.contextualBindings = contextualBindings;
         this.ratio = ratio;
         this.name = name;
@@ -47,7 +47,7 @@ public class ReadyCQLStatement {
         return contextualBindings.bind(value);
     }
 
-    public ResultSetCycleOperator[] getResultSetOperators() {
+    public D4ResultSetCycleOperator[] getResultSetOperators() {
         return resultSetOperators;
     }
 
@@ -161,8 +161,8 @@ public class ReadyCQLStatement {
 
     }
 
-    public ReadyCQLStatement withResultSetCycleOperators(ResultSetCycleOperator[] resultSetCycleOperators) {
-        this.resultSetOperators = resultSetCycleOperators;
+    public ReadyCQLStatement withResultSetCycleOperators(D4ResultSetCycleOperator[] pageInfoCycleOperators) {
+        this.resultSetOperators = pageInfoCycleOperators;
         return this;
     }
 

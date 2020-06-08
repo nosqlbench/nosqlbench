@@ -1,5 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.ProtocolVersion;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.session.Session;
@@ -18,14 +19,13 @@ import java.util.regex.Pattern;
 public class CQLBindHelper {
 
     private final ProtocolVersion protocolVersion;
-    private final Session session;
     private final CodecRegistry codecRegistry;
+//    private final ColumnDefinitions definitions;
 
     // refrence ProtocolConstants.DataType
 
-    public CQLBindHelper(Session session) {
-        this.session = session;
-        this.protocolVersion = this.session.getContext().getProtocolVersion();
+    public CQLBindHelper(CqlSession session) {
+        this.protocolVersion = session.getContext().getProtocolVersion();
         this.codecRegistry = session.getContext().getCodecRegistry();
 
     }

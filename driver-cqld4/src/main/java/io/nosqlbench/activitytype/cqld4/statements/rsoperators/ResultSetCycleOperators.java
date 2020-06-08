@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.statements.rsoperators;
 
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 
 public enum ResultSetCycleOperators {
 
@@ -9,23 +9,23 @@ public enum ResultSetCycleOperators {
     clearvars(ClearVars.class),
 
     trace(TraceLogger.class),
-    log(CqlResultSetLogger.class),
-    assert_singlerow(AssertSingleRowResultSet.class),
+    log(CqlD4ResultSetLogger.class),
+    assert_singlerow(AssertSingleRowD4ResultSet.class),
 
     print(Print.class);
 
-    private final Class<? extends ResultSetCycleOperator> implClass;
+    private final Class<? extends D4ResultSetCycleOperator> implClass;
 
-    ResultSetCycleOperators(Class<? extends ResultSetCycleOperator> traceLoggerClass) {
+    ResultSetCycleOperators(Class<? extends D4ResultSetCycleOperator> traceLoggerClass) {
         this.implClass = traceLoggerClass;
     }
 
 
-    public Class<? extends ResultSetCycleOperator> getImplementation() {
+    public Class<? extends D4ResultSetCycleOperator> getImplementation() {
         return implClass;
     }
 
-    public ResultSetCycleOperator getInstance() {
+    public D4ResultSetCycleOperator getInstance() {
         try {
             return getImplementation().getConstructor().newInstance();
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public enum ResultSetCycleOperators {
         }
     }
 
-    public static ResultSetCycleOperator newOperator(String name) {
+    public static D4ResultSetCycleOperator newOperator(String name) {
         return ResultSetCycleOperators.valueOf(name).getInstance();
     }
 

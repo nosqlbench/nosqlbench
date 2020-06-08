@@ -7,5 +7,5 @@ import com.datastax.oss.driver.api.core.cql.Statement;
  * Each active modifier returns a statement in turn.
  */
 public interface StatementModifier {
-    Statement modify(Statement unmodified, long cycleNum);
+    Statement<?> modify(Statement<?> unmodified, long cycleNum);
 }

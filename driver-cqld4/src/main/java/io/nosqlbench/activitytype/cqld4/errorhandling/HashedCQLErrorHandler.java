@@ -1,6 +1,10 @@
 package io.nosqlbench.activitytype.cqld4.errorhandling;
 
+import com.datastax.oss.driver.api.core.DriverTimeoutException;
 import com.datastax.oss.driver.api.core.NoNodeAvailableException;
+import com.datastax.oss.driver.api.core.RequestThrottlingException;
+import com.datastax.oss.driver.api.core.connection.BusyConnectionException;
+import com.datastax.oss.driver.api.core.connection.ClosedConnectionException;
 import com.datastax.oss.driver.api.core.servererrors.OverloadedException;
 import com.datastax.oss.driver.api.core.servererrors.ReadTimeoutException;
 import com.datastax.oss.driver.api.core.servererrors.UnavailableException;
@@ -30,10 +34,13 @@ public class HashedCQLErrorHandler extends HashedErrorHandler<Throwable, ErrorSt
         this.setGroup("retryable",
                 NoNodeAvailableException.class,
                 UnavailableException.class,
-                OperationTimedOutException.class,
+                BusyConnectionException.class,
+                ClosedConnectionException.class,
                 OverloadedException.class,
                 WriteTimeoutException.class,
-                ReadTimeoutException.class
+                ReadTimeoutException.class,
+                DriverTimeoutException.class,
+                RequestThrottlingException.class
         );
         this.setGroup(
                 "unapplied",

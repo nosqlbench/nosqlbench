@@ -3,16 +3,15 @@ package io.nosqlbench.activitytype.cqld4.core;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
-import com.datastax.driver.core.*;
-import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.session.Session;
 import io.nosqlbench.activitytype.cqld4.codecsupport.UDTCodecInjector;
 import com.datastax.driver.core.TokenRangeStmtFilter;
 import io.nosqlbench.activitytype.cqld4.api.ErrorResponse;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.StatementFilter;
 import io.nosqlbench.activitytype.cqld4.errorhandling.NBCycleErrorHandler;
@@ -82,7 +81,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private StatementFilter statementFilter;
     private Boolean showcql;
     private List<RowCycleOperator> rowCycleOperators;
-    private List<ResultSetCycleOperator> resultSetCycleOperators;
+    private List<D4ResultSetCycleOperator> pageInfoCycleOperators;
     private List<StatementModifier> statementModifiers;
     private Long maxTotalOpsInFlight;
     private long retryDelay;
@@ -109,7 +108,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     public synchronized void initActivity() {
         logger.debug("initializing activity: " + this.activityDef.getAlias());
         profileName = getParams().getOptionalString("profile").orElse("default");
-        session = getSession(profileName);
+        session = getSession();
 
         if (getParams().getOptionalBoolean("usercodecs").orElse(false)) {
             registerCodecs(session);
@@ -131,9 +130,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         logger.debug("activity fully initialized: " + this.activityDef.getAlias());
     }
 
-    public synchronized CqlSession getSession(String profileName) {
+    public synchronized CqlSession getSession() {
         if (session == null) {
-            session = CQLSessionCache.get().getSession(this.getActivityDef(), profileName);
+            session = CQLSessionCache.get().getSession(this.getActivityDef()).session;
         }
         return session;
     }
@@ -430,7 +429,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             }
             logger.trace("setting fetchSize to " + fetchSize);
 
-            cluster.getConfiguration().getQueryOptions().setFetchSize(fetchSize);
+            CQLSessionCache.get().getSession(activityDef).set(DefaultDriverOption.REQUEST_PAGE_SIZE,fetchSize);
         }
 
         this.retryDelay = params.getOptionalLong("retrydelay").orElse(0L);
@@ -441,7 +440,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         this.maxpages = params.getOptionalInteger("maxpages").orElse(1);
 
         this.statementFilter = params.getOptionalString("tokens")
-            .map(s -> new TokenRangeStmtFilter(cluster, s))
+            .map(s -> new TokenRangeStmtFilter(getSession(), s))
             .orElse(null);
 
         if (statementFilter != null) {
@@ -461,49 +460,50 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         this.maxTotalOpsInFlight = params.getOptionalLong("async").orElse(1L);
 
-        Optional<String> dynpooling = params.getOptionalString("pooling");
-        if (dynpooling.isPresent()) {
-            logger.info("dynamically updating pooling");
-            if (!dynpooling.get().equals(this.pooling)) {
-                PoolingOptions opts = CQLOptions.poolingOptionsFor(dynpooling.get());
-                logger.info("pooling=>" + dynpooling.get());
-
-                PoolingOptions cfg = getSession().getCluster().getConfiguration().getPoolingOptions();
-
-                // This looks funny, because we have to set max conns per host
-                // in an order that will appease the driver, as there is no "apply settings"
-                // to do that for us, so we raise max first if it goes higher, and we lower
-                // it last, if it goes lower
-                int prior_mcph_l = cfg.getMaxConnectionsPerHost(HostDistance.LOCAL);
-                int mcph_l = opts.getMaxConnectionsPerHost(HostDistance.LOCAL);
-                int ccph_l = opts.getCoreConnectionsPerHost(HostDistance.LOCAL);
-                if (prior_mcph_l < mcph_l) {
-                    logger.info("setting mcph_l to " + mcph_l);
-                    cfg.setMaxConnectionsPerHost(HostDistance.LOCAL, mcph_l);
-                }
-                logger.info("setting ccph_l to " + ccph_l);
-                cfg.setCoreConnectionsPerHost(HostDistance.LOCAL, ccph_l);
-                if (mcph_l < prior_mcph_l) {
-                    logger.info("setting mcph_l to " + mcph_l);
-                    cfg.setMaxRequestsPerConnection(HostDistance.LOCAL, mcph_l);
-                }
-                cfg.setMaxRequestsPerConnection(HostDistance.LOCAL, opts.getMaxRequestsPerConnection(HostDistance.LOCAL));
-
-                int prior_mcph_r = cfg.getMaxConnectionsPerHost(HostDistance.REMOTE);
-                int mcph_r = opts.getMaxConnectionsPerHost(HostDistance.REMOTE);
-                int ccph_r = opts.getCoreConnectionsPerHost(HostDistance.REMOTE);
-
-                if (mcph_r > 0) {
-                    if (mcph_r > prior_mcph_r) opts.setMaxConnectionsPerHost(HostDistance.REMOTE, mcph_r);
-                    opts.setCoreConnectionsPerHost(HostDistance.REMOTE, ccph_r);
-                    if (prior_mcph_r > mcph_r) opts.setMaxConnectionsPerHost(HostDistance.REMOTE, mcph_r);
-                    if (opts.getMaxConnectionsPerHost(HostDistance.REMOTE) > 0) {
-                        cfg.setMaxRequestsPerConnection(HostDistance.REMOTE, opts.getMaxRequestsPerConnection(HostDistance.REMOTE));
-                    }
-                }
-                this.pooling = dynpooling.get();
-            }
-        }
+        // TODO: Support dynamic pooling options
+//        Optional<String> dynpooling = params.getOptionalString("pooling");
+//        if (dynpooling.isPresent()) {
+//            logger.info("dynamically updating pooling");
+//            if (!dynpooling.get().equals(this.pooling)) {
+//                PoolingOptions opts = CQLOptions.poolingOptionsFor(dynpooling.get());
+//                logger.info("pooling=>" + dynpooling.get());
+//
+//                PoolingOptions cfg = getSession().getCluster().getConfiguration().getPoolingOptions();
+//
+//                // This looks funny, because we have to set max conns per host
+//                // in an order that will appease the driver, as there is no "apply settings"
+//                // to do that for us, so we raise max first if it goes higher, and we lower
+//                // it last, if it goes lower
+//                int prior_mcph_l = cfg.getMaxConnectionsPerHost(HostDistance.LOCAL);
+//                int mcph_l = opts.getMaxConnectionsPerHost(HostDistance.LOCAL);
+//                int ccph_l = opts.getCoreConnectionsPerHost(HostDistance.LOCAL);
+//                if (prior_mcph_l < mcph_l) {
+//                    logger.info("setting mcph_l to " + mcph_l);
+//                    cfg.setMaxConnectionsPerHost(HostDistance.LOCAL, mcph_l);
+//                }
+//                logger.info("setting ccph_l to " + ccph_l);
+//                cfg.setCoreConnectionsPerHost(HostDistance.LOCAL, ccph_l);
+//                if (mcph_l < prior_mcph_l) {
+//                    logger.info("setting mcph_l to " + mcph_l);
+//                    cfg.setMaxRequestsPerConnection(HostDistance.LOCAL, mcph_l);
+//                }
+//                cfg.setMaxRequestsPerConnection(HostDistance.LOCAL, opts.getMaxRequestsPerConnection(HostDistance.LOCAL));
+//
+//                int prior_mcph_r = cfg.getMaxConnectionsPerHost(HostDistance.REMOTE);
+//                int mcph_r = opts.getMaxConnectionsPerHost(HostDistance.REMOTE);
+//                int ccph_r = opts.getCoreConnectionsPerHost(HostDistance.REMOTE);
+//
+//                if (mcph_r > 0) {
+//                    if (mcph_r > prior_mcph_r) opts.setMaxConnectionsPerHost(HostDistance.REMOTE, mcph_r);
+//                    opts.setCoreConnectionsPerHost(HostDistance.REMOTE, ccph_r);
+//                    if (prior_mcph_r > mcph_r) opts.setMaxConnectionsPerHost(HostDistance.REMOTE, mcph_r);
+//                    if (opts.getMaxConnectionsPerHost(HostDistance.REMOTE) > 0) {
+//                        cfg.setMaxRequestsPerConnection(HostDistance.REMOTE, opts.getMaxRequestsPerConnection(HostDistance.REMOTE));
+//                    }
+//                }
+//                this.pooling = dynpooling.get();
+//            }
+//        }
 
     }
 
@@ -528,7 +528,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         ErrorResponse.valueOf(verb),
                         exceptionCountMetrics,
                         exceptionHistoMetrics,
-                        !getParams().getOptionalLong("async").isPresent()
+                            getParams().getOptionalLong("async").isEmpty()
                     )
                 );
             } else {
@@ -540,7 +540,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                             ErrorResponse.valueOf(verb),
                             exceptionCountMetrics,
                             exceptionHistoMetrics,
-                            !getParams().getOptionalLong("async").isPresent()
+                                getParams().getOptionalLong("async").isEmpty()
                         );
                     logger.info("Handling error group '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForGroup(pattern, handler);
@@ -549,7 +549,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         ErrorResponse.valueOf(keyval[1]),
                         exceptionCountMetrics,
                         exceptionHistoMetrics,
-                        !getParams().getOptionalLong("async").isPresent()
+                            getParams().getOptionalLong("async").isEmpty()
                     );
                     logger.info("Handling error pattern '" + pattern + "' with handler:" + handler);
                     newerrorHandler.setHandlerForPattern(keyval[0], handler);
@@ -599,19 +599,19 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         this.rowCycleOperators = null;
     }
 
-    public List<ResultSetCycleOperator> getResultSetCycleOperators() {
-        return resultSetCycleOperators;
+    public List<D4ResultSetCycleOperator> getPageInfoCycleOperators() {
+        return pageInfoCycleOperators;
     }
 
-    protected synchronized void addResultSetCycleOperator(ResultSetCycleOperator resultSetCycleOperator) {
-        if (this.resultSetCycleOperators == null) {
-            this.resultSetCycleOperators = new ArrayList<>();
+    protected synchronized void addResultSetCycleOperator(D4ResultSetCycleOperator pageInfoCycleOperator) {
+        if (this.pageInfoCycleOperators == null) {
+            this.pageInfoCycleOperators = new ArrayList<>();
         }
-        this.resultSetCycleOperators.add(resultSetCycleOperator);
+        this.pageInfoCycleOperators.add(pageInfoCycleOperator);
     }
 
     private void clearResultSetCycleOperators() {
-        this.resultSetCycleOperators = null;
+        this.pageInfoCycleOperators = null;
     }
 
     public List<StatementModifier> getStatementModifiers() {

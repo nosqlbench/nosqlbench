@@ -5,13 +5,17 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.activitytype.cqld4.statements.core.ReadyCQLStatement;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class CqlOpData extends CompletableFuture<AsyncResultSet> {
+public class CqlOpData {
 
     final long cycle;
-    public CompletionStage<AsyncResultSet> completionStage;
+//    public CompletionStage<AsyncResultSet> completionStage;
 
     // op state is managed via callbacks, we keep a ref here
     StartedOp<CqlOpData> startedOp;
@@ -36,21 +40,16 @@ public class CqlOpData extends CompletableFuture<AsyncResultSet> {
         this.action = action;
     }
 
-    @Override
-    public boolean completeExceptionally(Throwable ex) {
-        this.throwable=ex;
-        this.errorAt = System.nanoTime();
-        action.onFailure(startedOp);
-        return true;
-    }
-
-    @Override
-    public boolean complete(AsyncResultSet value) {
-        this.page = value.currentPage();
-        this.resultAt = System.nanoTime();
-        action.onSuccess(startedOp);
-        return true;
-        // ? return !value.hasMorePages();
+    public void handleAsyncResult(AsyncResultSet asyncResultSet, Throwable throwable) {
+        if (throwable!=null) {
+            this.throwable = throwable;
+            this.errorAt = System.nanoTime();
+            action.onFailure(startedOp);
+        } else {
+            this.page = asyncResultSet.currentPage();
+            this.resultAt = System.nanoTime();
+            action.onSuccess(startedOp, asyncResultSet);
+        }
     }
 
 }

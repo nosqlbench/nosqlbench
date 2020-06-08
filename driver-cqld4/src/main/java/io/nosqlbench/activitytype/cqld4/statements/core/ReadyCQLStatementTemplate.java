@@ -2,11 +2,12 @@ package io.nosqlbench.activitytype.cqld4.statements.core;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import com.datastax.oss.driver.api.core.session.Session;
-import io.nosqlbench.activitytype.cqld4.api.ResultSetCycleOperator;
+import io.nosqlbench.activitytype.cqld4.api.D4ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cqld4.core.CqlActivity;
 import io.nosqlbench.activitytype.cqld4.statements.binders.CqlBinderTypes;
@@ -25,11 +26,11 @@ public class ReadyCQLStatementTemplate {
 
     private final static Logger logger = LoggerFactory.getLogger(ReadyCQLStatementTemplate.class);
     private final Session session;
-    private ContextualBindingsArrayTemplate<?, Statement> template;
+    private ContextualBindingsArrayTemplate<?, Statement<?>> template;
     private long ratio;
     private String name;
 
-    private ResultSetCycleOperator[] resultSetCycleOperators;
+    private D4ResultSetCycleOperator[] pageInfoCycleOperators;
     private RowCycleOperator[] rowCycleOperators;
 
     private Timer successTimer;
@@ -37,11 +38,17 @@ public class ReadyCQLStatementTemplate {
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
 
-    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, CqlBinderTypes binderType, Session session,
-                                     PreparedStatement preparedStmt, long ratio, String name) {
+    public ReadyCQLStatementTemplate(
+            Map<String,Object> fconfig,
+            CqlBinderTypes binderType,
+            CqlSession session,
+            PreparedStatement preparedStmt,
+            long ratio,
+            String name
+    ) {
         this.session = session;
         this.name = name;
-        ValuesArrayBinder<PreparedStatement, Statement> binder = binderType.get(session);
+        ValuesArrayBinder<PreparedStatement, Statement<?>> binder = binderType.get(session);
         logger.trace("Using binder_type=>" + binder.toString());
 
         template = new ContextualBindingsArrayTemplate<>(
@@ -52,10 +59,17 @@ public class ReadyCQLStatementTemplate {
         this.ratio = ratio;
     }
 
-    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, Session session, SimpleStatement simpleStatement, long ratio, String name, boolean parametrized)     {
+    public ReadyCQLStatementTemplate(
+            Map<String,Object> fconfig,
+            Session session,
+            SimpleStatement simpleStatement,
+            long ratio,
+            String name,
+            boolean parametrized
+    ) {
         this.session = session;
         this.name = name;
-        template = new ContextualBindingsArrayTemplate<>(
+        template = new ContextualBindingsArrayTemplate(
                 simpleStatement,
                 new BindingsTemplate(fconfig),
                 new SimpleStatementValuesBinder(parametrized)
@@ -66,12 +80,12 @@ public class ReadyCQLStatementTemplate {
     public ReadyCQLStatement resolve() {
         return new ReadyCQLStatement(template.resolveBindings(), ratio, name)
                 .withMetrics(this.successTimer, this.errorTimer, this.rowsFetchedHisto)
-                .withResultSetCycleOperators(resultSetCycleOperators)
+                .withResultSetCycleOperators(pageInfoCycleOperators)
                 .withRowCycleOperators(rowCycleOperators)
                 .withResultCsvWriter(resultCsvWriter);
     }
 
-    public ContextualBindingsArrayTemplate<?, Statement> getContextualBindings() {
+    public ContextualBindingsArrayTemplate<?, Statement<?>> getContextualBindings() {
         return template;
     }
 
@@ -90,13 +104,13 @@ public class ReadyCQLStatementTemplate {
         this.resultCsvWriter = activity.getNamedWriter(name);
     }
 
-    public void addResultSetOperators(ResultSetCycleOperator... addingOperators) {
-        resultSetCycleOperators = (resultSetCycleOperators==null) ? new ResultSetCycleOperator[0]: resultSetCycleOperators;
+    public void addResultSetOperators(D4ResultSetCycleOperator... addingOperators) {
+        pageInfoCycleOperators = (pageInfoCycleOperators ==null) ? new D4ResultSetCycleOperator[0]: pageInfoCycleOperators;
 
-        ResultSetCycleOperator[] newOperators = new ResultSetCycleOperator[resultSetCycleOperators.length + addingOperators.length];
-        System.arraycopy(resultSetCycleOperators,0,newOperators,0,resultSetCycleOperators.length);
-        System.arraycopy(addingOperators,0,newOperators,resultSetCycleOperators.length,addingOperators.length);
-        this.resultSetCycleOperators=newOperators;
+        D4ResultSetCycleOperator[] newOperators = new D4ResultSetCycleOperator[pageInfoCycleOperators.length + addingOperators.length];
+        System.arraycopy(pageInfoCycleOperators,0,newOperators,0, pageInfoCycleOperators.length);
+        System.arraycopy(addingOperators,0,newOperators, pageInfoCycleOperators.length,addingOperators.length);
+        this.pageInfoCycleOperators =newOperators;
     }
 
     public void addRowCycleOperators(RowCycleOperator... addingOperators) {
