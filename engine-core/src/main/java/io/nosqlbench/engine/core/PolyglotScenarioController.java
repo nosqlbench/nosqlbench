@@ -180,6 +180,8 @@ public class PolyglotScenarioController {
             controller.waitMillis((Integer) o);
         } else if (o instanceof Long) {
             controller.waitMillis((Long) o);
+        } else if (o instanceof String) {
+            controller.waitMillis(Long.parseLong((String)o));
         } else {
             throw new RuntimeException("unknown type: " + o.getClass().getCanonicalName());
         }
