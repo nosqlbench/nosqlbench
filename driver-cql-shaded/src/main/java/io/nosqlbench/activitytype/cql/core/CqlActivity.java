@@ -137,7 +137,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private void initSequencer() {
 
         Session session = getSession();
-        Map<String,Object> fconfig = Map.of("session",session);
+        Map<String, Object> fconfig = Map.of("session", session);
 
         SequencerType sequencerType = SequencerType.valueOf(
                 getParams().getOptionalString("seq").orElse("bucket")
@@ -160,33 +160,28 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         for (StmtDef stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
-            boolean prepared = Boolean.valueOf(stmtDef.getParams().getOrDefault("prepared", "true"));
-            boolean parametrized = Boolean.valueOf(stmtDef.getParams().getOrDefault("parametrized", "false"));
-            long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1"));
+            boolean prepared = stmtDef.getParamOrDefault("prepared", true);
+            boolean parametrized = stmtDef.getParamOrDefault("parametrized", false);
+            long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
-            Optional<ConsistencyLevel> cl = Optional.ofNullable(
-                    stmtDef.getParams().getOrDefault("cl", null)).map(ConsistencyLevel::valueOf);
-
-            Optional<ConsistencyLevel> serial_cl = Optional.ofNullable(
-                    stmtDef.getParams().getOrDefault("serial_cl", null)).map(ConsistencyLevel::valueOf);
-
-            Optional<Boolean> idempotent = Optional.ofNullable(stmtDef.getParams().getOrDefault("idempotent", null))
-                    .map(Boolean::valueOf);
+            Optional<ConsistencyLevel> cl = stmtDef.getOptionalParam("cl", String.class).map(ConsistencyLevel::valueOf);
+            Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalParam("serial_cl").map(ConsistencyLevel::valueOf);
+            Optional<Boolean> idempotent = stmtDef.getOptionalParam("idempotent", boolean.class);
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = Optional.ofNullable(stmtDef.getParams()
-                    .get("instrument")).map(Boolean::valueOf)
+            boolean instrument = stmtDef.getOptionalParam("instrument", boolean.class)
                     .orElse(getParams().getOptionalBoolean("instrument").orElse(false));
 
-            String logresultcsv = stmtDef.getParams().getOrDefault("logresultcsv","");
+            String logresultcsv = stmtDef.getParamOrDefault("logresultcsv", "");
+
             String logresultcsv_act = getParams().getOptionalString("logresultcsv").orElse("");
 
             if (!logresultcsv_act.isEmpty() && !logresultcsv_act.toLowerCase().equals("true")) {
                 throw new RuntimeException("At the activity level, only logresultcsv=true is allowed, no other values.");
             }
             logresultcsv = !logresultcsv.isEmpty() ? logresultcsv : logresultcsv_act;
-            logresultcsv = !logresultcsv.toLowerCase().equals("true") ? logresultcsv : stmtDef.getName()+"--results.csv";
+            logresultcsv = !logresultcsv.toLowerCase().equals("true") ? logresultcsv : stmtDef.getName() + "--results.csv";
 
             logger.debug("readying statement[" + (prepared ? "" : "un") + "prepared]:" + parsed.getStmt());
 
@@ -207,11 +202,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     psummary.append(" idempotent=").append(idempotent);
                     prepare.setIdempotent(i);
                 });
-                CqlBinderTypes binderType = CqlBinderTypes.valueOf(stmtDef.getParams()
-                        .getOrDefault("binder", CqlBinderTypes.DEFAULT.toString()));
+
+                CqlBinderTypes binderType = stmtDef.getOptionalParam("binder")
+                        .map(CqlBinderTypes::valueOf)
+                        .orElse(CqlBinderTypes.DEFAULT);
 
                 template = new ReadyCQLStatementTemplate(fconfig, binderType, getSession(), prepare, ratio,
-                    parsed.getName());
+                        parsed.getName());
             } else {
                 SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
@@ -227,18 +224,18 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                    parsed.getName(), parametrized);
+                        parsed.getName(), parametrized);
             }
 
-            Optional.ofNullable(stmtDef.getParams().getOrDefault("save", null))
-                    .map(s -> s.split("[,; ]"))
+            stmtDef.getOptionalParam("save")
+                    .map(s -> s.split("[,: ]"))
                     .map(Save::new)
                     .ifPresent(save_op -> {
                         psummary.append(" save=>").append(save_op.toString());
                         template.addRowCycleOperators(save_op);
                     });
 
-            Optional.ofNullable(stmtDef.getParams().getOrDefault("rsoperators", null))
+            stmtDef.getOptionalParam("rsoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(ResultSetCycleOperators::newOperator)
@@ -247,7 +244,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         template.addResultSetOperators(rso);
                     });
 
-            Optional.ofNullable(stmtDef.getParams().getOrDefault("rowoperators", null))
+            stmtDef.getOptionalParam("rowoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(RowCycleOperators::newOperator)
@@ -264,7 +261,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             if (!logresultcsv.isEmpty()) {
                 logger.info("Adding per-statement result CSV logging to statement '" + parsed.getName() + "'");
-                template.logResultCsv(this,logresultcsv);
+                template.logResultCsv(this, logresultcsv);
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }
 
@@ -357,7 +354,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 rawblock.setTags(rawdef.getTags());
 
                 // params
-                Map<String, String> params = new HashMap<>(rawdef.getParams());
+                Map<String, Object> params = new HashMap<>(rawdef.getParams());
                 if (rawstmt.getConsistencyLevel() != null && !rawstmt.getConsistencyLevel().isEmpty())
                     params.put("cl", rawstmt.getConsistencyLevel());
                 if (!rawstmt.isPrepared()) params.put("prepared", "false");
@@ -516,7 +513,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             if (keyval.length == 1) {
                 String verb = keyval[0];
                 ErrorResponse errorResponse = getErrorResponseOrBasicError(verb);
-                    newerrorHandler.setDefaultHandler(
+                newerrorHandler.setDefaultHandler(
                         new NBCycleErrorHandler(
                                 errorResponse,
                                 exceptionCountMetrics,
@@ -558,8 +555,8 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private ErrorResponse getErrorResponseOrBasicError(String verb) {
         try {
             return ErrorResponse.valueOf(verb);
-        }catch(IllegalArgumentException e){
-            throw new BasicError("Invalid parameter for errors: '"+ verb + "' should be one of: " + StringUtils.join(ErrorResponse.values(), ", "));
+        } catch (IllegalArgumentException e) {
+            throw new BasicError("Invalid parameter for errors: '" + verb + "' should be one of: " + StringUtils.join(ErrorResponse.values(), ", "));
         }
     }
 

@@ -68,7 +68,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
     /**
      * @return a usable map of parameters, including those inherited from the parent doc
      */
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return rawStmtsDoc.getParams();
     }
 

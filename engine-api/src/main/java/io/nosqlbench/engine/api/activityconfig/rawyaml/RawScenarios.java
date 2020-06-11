@@ -2,12 +2,16 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.*;
 
-public class RawScenarios extends LinkedHashMap<String, LinkedList<String>> {
+public class RawScenarios extends LinkedHashMap<String, Object> {
 
     public static String STEPNAME = "%03d";
 
     public List<String> getScenarioNames() {
         return new LinkedList<>(this.keySet());
+    }
+
+    public void setPropertiesByReflection(Map<String,Object> scenarioInfo) {
+        scenarioInfo.forEach(this::put);
     }
 
     public Map<String,String> getNamedScenario(String scenarioName) {

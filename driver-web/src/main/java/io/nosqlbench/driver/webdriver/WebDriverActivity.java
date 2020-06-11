@@ -184,7 +184,7 @@ public class WebDriverActivity extends SimpleActivity {
         }
 
         for (StmtDef optemplate : stmts) {
-            long ratio = Long.parseLong(optemplate.getParams().getOrDefault("ratio", "1"));
+            long ratio = optemplate.getParamOrDefault("ratio", 1);
             CommandTemplate cmd = new CommandTemplate(optemplate, false);
             planner.addOp(cmd, ratio);
         }

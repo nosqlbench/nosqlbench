@@ -114,8 +114,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
             String statement = parsed.getPositionalStatement(Function.identity());
             Objects.requireNonNull(statement);
 
-            sequencer.addOp(new ReadyMongoStatement(stmt),
-                            Long.parseLong(stmt.getParams().getOrDefault("ratio","1")));
+            sequencer.addOp(new ReadyMongoStatement(stmt), stmt.getParamOrDefault("ratio",1));
         }
 
         return sequencer.resolve();

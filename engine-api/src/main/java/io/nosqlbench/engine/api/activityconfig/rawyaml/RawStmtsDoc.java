@@ -19,6 +19,8 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A statements doc can have both a list of statement blocks and/or a
@@ -35,7 +37,39 @@ public class RawStmtsDoc extends StatementsOwner {
     private List<RawStmtsBlock> blocks = new ArrayList<>();
 
     // no-args ctor is required
-    public RawStmtsDoc() {}
+    public RawStmtsDoc() {
+    }
+
+    public void setFieldsByReflection(Map<String, Object> properties) {
+        Object blocksObjects = properties.remove("blocks");
+        if (blocksObjects instanceof List) {
+            List<Object> blockList = ((List<Object>) blocksObjects);
+            for (Object blockData : blockList) {
+                if (blockData instanceof Map) {
+                    Map<String,Object>  blockDataMap = (Map<String,Object>)blockData;
+                    RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
+                    rawStmtsBlock.setFieldsByReflection(blockDataMap);
+                    blocks.add(rawStmtsBlock);
+                } else {
+                    throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
+                }
+            }
+        }
+
+        Object scenariosData = properties.remove("scenarios");
+        if (scenariosData!=null) {
+            if (scenariosData instanceof Map) {
+                RawScenarios rawScenarios = new RawScenarios();
+                Map<String,Object> scenariosObjMap = (Map<String,Object>)scenariosData;
+                rawScenarios.setPropertiesByReflection(scenariosObjMap);
+            } else {
+                throw new RuntimeException("Invalid type for scenarios data: " + scenariosData.getClass().getCanonicalName());
+            }
+        }
+
+        super.setFieldsByReflection(properties);
+
+    }
 
     /**
      * Return the list of statement blocks in this RawStmtsDoc.
@@ -69,4 +103,5 @@ public class RawStmtsDoc extends StatementsOwner {
     public void setScenarios(RawScenarios scenarios) {
         this.scenarios = scenarios;
     }
+
 }

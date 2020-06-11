@@ -89,6 +89,7 @@ public class RawYamlStatementLoader {
 
         try {
             Iterable<Object> objects = yaml.loadAll(data);
+
             List<RawStmtsDoc> stmtListList = new ArrayList<>();
             for (Object object : objects) {
                 RawStmtsDoc tgsd = (RawStmtsDoc) object;

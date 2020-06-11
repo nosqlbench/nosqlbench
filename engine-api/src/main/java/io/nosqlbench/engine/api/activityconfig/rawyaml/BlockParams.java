@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,10 +26,11 @@ public class BlockParams extends Tags {
 
     private String name = "";
     private String desc = "";
-    private Map<String, String> bindings = new LinkedHashMap<>();
-    private Map<String, String> params = new LinkedHashMap<>();
+    private final Map<String, String> bindings = new LinkedHashMap<>();
+    private final Map<String, Object> params = new LinkedHashMap<>();
 
-    public BlockParams() {}
+    public BlockParams() {
+    }
 
     public String getDesc() {
         return desc;
@@ -37,6 +39,7 @@ public class BlockParams extends Tags {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+
     public void setDescription(String desc) {
         this.desc = desc;
     }
@@ -58,11 +61,17 @@ public class BlockParams extends Tags {
         this.bindings.putAll(bindings);
     }
 
-    public Map<String, String> getParams() {
-        return params;
+    public Map<String,Object> getParams() {
+        return this.params;
     }
 
-    public void setParams(Map<String, String> config) {
+//    public Map<String, String> getParamsAsText() {
+//        Map<String,String> paramsMap = new HashMap<>();
+//        this.params.forEach((ko,vo) -> paramsMap.put(ko,vo.toString()));
+//        return paramsMap;
+//    }
+
+    public void setParams(Map<String, Object> config) {
         this.params.clear();
         this.params.putAll(config);
     }
@@ -72,5 +81,41 @@ public class BlockParams extends Tags {
         setBindings(other.getBindings());
         setTags(other.getTags());
         setParams(other.getParams());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setFieldsByReflection(Map<String, Object> propsmap) {
+
+        Object descriptionObj = propsmap.remove("description");
+        if (descriptionObj!=null) {
+            setDescription(descriptionObj.toString());
+        }
+
+        Object nameObj = propsmap.remove("name");
+        if (nameObj!=null) {
+            setName(nameObj.toString());
+        }
+
+        Object bindingsObject = propsmap.remove("bindings");
+        if (bindingsObject!=null) {
+            if (bindingsObject instanceof Map) {
+                Map<Object,Object> bindingsMap = (Map<Object,Object>) bindingsObject;
+                bindingsMap.forEach((ko,vo) -> bindings.put(ko.toString(), vo.toString()));
+            } else {
+              throw new RuntimeException("Invalid type for bindings object: " + bindingsObject.getClass().getCanonicalName());
+            }
+        }
+
+        Object paramsObject = propsmap.remove("params");
+        if (paramsObject!=null) {
+            if (paramsObject instanceof Map) {
+                Map<Object,Object> paramsMap = (Map<Object,Object>) paramsObject;
+                paramsMap.forEach((ko,vo) -> params.put(ko.toString(),vo));
+            } else {
+                throw new RuntimeException("Invalid type for params object:" + paramsObject.getClass().getCanonicalName());
+            }
+        }
+
+        super.setFieldsByReflection(propsmap);
     }
 }

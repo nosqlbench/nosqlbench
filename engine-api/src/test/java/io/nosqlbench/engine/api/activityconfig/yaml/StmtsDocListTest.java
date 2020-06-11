@@ -101,7 +101,7 @@ public class StmtsDocListTest {
         StmtsBlock block0 = doc1.getBlocks().get(0);
 
         Map<String, String> doc1block0tags = block0.getTags();
-        Map<String, String> doc1block0params = block0.getParams();
+        Map<String, String> doc1block0params = block0.getParamsAsText();
         Map<String, String> doc1block0bindings = block0.getBindings();
 
         assertThat(doc1block0tags).hasSize(3);

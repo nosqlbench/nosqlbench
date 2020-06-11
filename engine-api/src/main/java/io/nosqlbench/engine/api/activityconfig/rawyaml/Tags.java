@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class Tags implements Tagged {
 
-    private Map<String, String> tags = new LinkedHashMap<>();
+    private final Map<String, String> tags = new LinkedHashMap<>();
 
     @Override
     public Map<String, String> getTags() {
@@ -35,6 +35,19 @@ public class Tags implements Tagged {
     public void setTags(Map<String, String> tags) {
         this.tags.clear();
         this.tags.putAll(tags);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setFieldsByReflection(Map<String, Object> propsmap) {
+        Object tagsValues = propsmap.remove("tags");
+        if (tagsValues != null) {
+            if (tagsValues instanceof Map) {
+                Map<Object, Object> tagsMap = (Map<Object, Object>) tagsValues;
+                tagsMap.forEach((ko, vo) -> tags.put(ko.toString(), vo.toString()));
+            } else {
+                throw new RuntimeException("Invalid type for tags property: " + tags.getClass().getCanonicalName());
+            }
+        }
     }
 
 }

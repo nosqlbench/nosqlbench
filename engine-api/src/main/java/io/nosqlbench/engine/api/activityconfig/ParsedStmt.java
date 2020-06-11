@@ -153,7 +153,7 @@ public class ParsedStmt {
     /**
      * @return the params from the enclosed {@link StmtDef}
      */
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return stmtDef.getParams();
     }
 

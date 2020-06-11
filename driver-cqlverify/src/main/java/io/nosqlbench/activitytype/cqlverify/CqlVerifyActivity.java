@@ -55,8 +55,8 @@ public class CqlVerifyActivity extends CqlActivity {
             Map<String, String> bindings = stmts.get(0).getBindings();
             if (stmts.get(0).getParams().containsKey("verify-fields")) {
                 List<String> fields = new ArrayList<>();
-                String fieldsSpec = stmts.get(0).getParams().get("verify-fields");
-                String[] vfields = fieldsSpec.split("\\s*,\\s*");
+                String fieldSpec= stmts.get(0).getParamOrDefault("verify-fields","");
+                String[] vfields = fieldSpec.split("\\s*,\\s*");
                 for (String vfield : vfields) {
                     if (vfield.equals("*")) {
                         bindings.forEach((k,v)->fields.add(k));

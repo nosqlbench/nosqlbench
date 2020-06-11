@@ -21,11 +21,9 @@ import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
 import io.nosqlbench.engine.api.util.Tagged;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
@@ -43,13 +41,13 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
     }
 
     public List<StmtDef> getStmts() {
-        
+
         List<StmtDef> rawStmtDefs = new ArrayList<>();
         List<RawStmtDef> statements = rawStmtsBlock.getRawStmtDefs();
 
         for (int i = 0; i < statements.size(); i++) {
             rawStmtDefs.add(
-                    new StmtDef(this,statements.get(i))
+                    new StmtDef(this, statements.get(i))
             );
         }
         return rawStmtDefs;
@@ -69,18 +67,44 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
     }
 
     public Map<String, String> getTags() {
-        return new MultiMapLookup(rawStmtsBlock.getTags(), rawStmtsDoc.getTags());
+        return new MultiMapLookup<>(rawStmtsBlock.getTags(), rawStmtsDoc.getTags());
     }
 
-    public Map<String, String> getParams() {
-        return new MultiMapLookup(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+    public Map<String, Object> getParams() {
+        return new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+    }
+
+    public Map<String, String> getParamsAsText() {
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        LinkedHashMap<String, String> stringmap = new LinkedHashMap<>();
+        lookup.forEach((k, v) -> stringmap.put(k, v.toString()));
+        return stringmap;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> V getParamOrDefault(String name, V defaultValue) {
+        Objects.requireNonNull(defaultValue);
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        if (!lookup.containsKey(name)) {
+            return defaultValue;
+        }
+        Object value = lookup.get(name);
+        return (V) defaultValue.getClass().cast(value);
+    }
+
+    public <V> V getParam(String name, Class<? extends V> type) {
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        Object object = lookup.get(name);
+        V value = type.cast(object);
+        return value;
     }
 
     public Map<String, String> getBindings() {
-        return new MultiMapLookup(rawStmtsBlock.getBindings(), rawStmtsDoc.getBindings());
+        return new MultiMapLookup<>(rawStmtsBlock.getBindings(), rawStmtsDoc.getBindings());
     }
 
     @Override
+    @NotNull
     public Iterator<StmtDef> iterator() {
         return getStmts().iterator();
     }

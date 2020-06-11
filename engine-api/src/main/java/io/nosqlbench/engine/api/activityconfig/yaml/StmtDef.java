@@ -22,7 +22,10 @@ import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.util.Tagged;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class StmtDef implements Tagged {
 
@@ -43,15 +46,58 @@ public class StmtDef implements Tagged {
     }
 
     public Map<String,String> getBindings() {
-        return new MultiMapLookup(rawStmtDef.getBindings(), block.getBindings());
+        return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
     }
 
-    public Map<String, String> getParams() {
-        return new MultiMapLookup(rawStmtDef.getParams(), block.getParams());
+    public Map<String, Object> getParams() {
+        return new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
     }
+    public <T> Map<String,T> getParamsAsValueType(Class<? extends T> type) {
+        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        Map<String,T> map = new LinkedHashMap<>();
+        lookup.forEach((k,v)->map.put(k,type.cast(v)));
+        return map;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> V getParamOrDefault(String name, V defaultValue) {
+        Objects.requireNonNull(defaultValue);
+        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+
+        if (!lookup.containsKey(name)) {
+            return defaultValue;
+        }
+        Object value = lookup.get(name);
+        return (V) defaultValue.getClass().cast(value);
+    }
+
+    public <V> V getParam(String name, Class<? extends V> type) {
+        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        Object object = lookup.get(name);
+        V value = type.cast(object);
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> Optional<V> getOptionalParam(String name, Class<? extends V> type) {
+        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        if (lookup.containsKey(name)) {
+            Object object = lookup.get(name);
+            if (object==null) {
+                return Optional.empty();
+            }
+            return Optional.of((V) type.cast(object));
+        }
+        return Optional.empty();
+    }
+
+    public Optional<String> getOptionalParam(String name) {
+        return getOptionalParam(name,String.class);
+    }
+
 
     public Map<String,String> getTags() {
-        return new MultiMapLookup(rawStmtDef.getTags(), block.getTags());
+        return new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags());
     }
 
     @Override

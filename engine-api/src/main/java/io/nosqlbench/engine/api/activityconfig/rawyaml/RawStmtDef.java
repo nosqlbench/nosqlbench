@@ -33,6 +33,7 @@ public class RawStmtDef extends BlockParams {
         this.statement = statement;
     }
 
+
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
 
@@ -44,7 +45,7 @@ public class RawStmtDef extends BlockParams {
 
         Optional.ofNullable((Map<String, String>) map.remove("tags")).ifPresent(this::setTags);
         Optional.ofNullable((Map<String, String>) map.remove("bindings")).ifPresent(this::setBindings);
-        Optional.ofNullable((Map<String, String>) map.remove("params")).ifPresent(this::setParams);
+        Optional.ofNullable((Map<String, Object>) map.remove("params")).ifPresent(this::setParams);
 
 
         // Depends on order stability, relying on LinkedHashMap -- Needs stability unit tests
@@ -85,6 +86,10 @@ public class RawStmtDef extends BlockParams {
     }
     
     public String getName() {
-        return getParams().getOrDefault("name", super.getName());
+        Object name = getParams().get("name");
+        if (name!=null) {
+            return name.toString();
+        }
+        return super.getName();
     }
 }

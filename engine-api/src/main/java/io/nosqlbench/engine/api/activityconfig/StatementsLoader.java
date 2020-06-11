@@ -17,8 +17,10 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawYamlStatementLoader;
+import io.nosqlbench.engine.api.activityconfig.stmtloader.GenericStmtLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
@@ -27,6 +29,11 @@ import org.slf4j.Logger;
 import java.util.function.Function;
 
 public class StatementsLoader {
+
+    public enum Loader {
+        original,
+        generified
+    }
 
     public static StmtsDocList load(Logger logger, Content<?> content) {
         RawYamlStatementLoader loader = new RawYamlStatementLoader();
@@ -42,18 +49,32 @@ public class StatementsLoader {
 //        return layered;
 //    }
 
+    public static StmtsDocList load(Loader loader, Logger logger, String path, String... searchPaths) {
+        RawStmtsDocList list= null;
+
+        switch (loader) {
+            case generified:
+                GenericStmtLoader gloaderImpl = new GenericStmtLoader();
+                list = gloaderImpl.load(logger,path,searchPaths);
+            case original:
+                RawYamlStatementLoader yloaderImpl = new RawYamlStatementLoader();
+                list = yloaderImpl.load(logger, path, searchPaths);
+        }
+        return new StmtsDocList(list);
+    }
+
     public static StmtsDocList load(Logger logger, String path, String... searchPaths) {
         Content<?> content = NBIO.all()
-            .prefix(searchPaths)
-            .name(path)
-            .one();
+                .prefix(searchPaths)
+                .name(path)
+                .one();
         try {
             RawYamlStatementLoader loader = new RawYamlStatementLoader();
             RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
             StmtsDocList layered = new StmtsDocList(rawDocList);
             return layered;
         } catch (Exception e) {
-            throw new RuntimeException("error while reading file " + path,e);
+            throw new RuntimeException("error while reading file " + path, e);
         }
     }
 
@@ -63,5 +84,23 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
     }
+
+    public static StmtsDocList load(Loader loader, Logger logger, String path,
+                                    Function<String,String> transformer, String... searchPaths) {
+        RawStmtsDocList list= null;
+
+        switch (loader) {
+            case generified:
+                GenericStmtLoader gloaderImpl = new GenericStmtLoader();
+                gloaderImpl.addTransformers(transformer);
+                list = gloaderImpl.load(logger,path,searchPaths);
+            case original:
+                RawYamlStatementLoader yloaderImpl = new RawYamlStatementLoader();
+                yloaderImpl.addTransformer(transformer);
+                list = yloaderImpl.load(logger, path, searchPaths);
+        }
+        return new StmtsDocList(list);
+    }
+
 
 }

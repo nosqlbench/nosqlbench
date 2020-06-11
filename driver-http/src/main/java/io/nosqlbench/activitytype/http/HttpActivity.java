@@ -109,7 +109,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
                 StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
                 StringBindings sb = sbt.resolve();
-                sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
+                sequencer.addOp(sb,stmt.getParamOrDefault("ratio",1));
             }
         } else {
             logger.error("Unable to create an HTTP statement if no bindings or statements are defined.");

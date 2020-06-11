@@ -20,8 +20,9 @@ public class ReadyMongoStatement {
         StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
 
         this.bindings = template.resolve();
-        this.readPreference = ReadPreference.valueOf(stmtDef.getParams()
-                                                            .getOrDefault("readPreference","primary"));
+        this.readPreference = stmtDef.getOptionalParam("readPreference")
+                .map(ReadPreference::valueOf)
+                .orElse(ReadPreference.primary());
     }
 
     public ReadPreference getReadPreference() {

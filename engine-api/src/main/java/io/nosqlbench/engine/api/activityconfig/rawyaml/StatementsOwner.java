@@ -34,6 +34,21 @@ public class StatementsOwner extends BlockParams {
         this.rawStmtDefs = rawStmtDefs;
     }
 
+    public void setFieldsByReflection(Map<String, Object> propsmap) {
+        Object statementsObject = propsmap.remove("statements");
+        if (statementsObject!=null) {
+            setByObject(statementsObject);
+        }
+//        if (statementsObject!=null) {
+//            if (statementsObject instanceof List) {
+//                setByObject(statementsObject);
+//            } else {
+//                throw new RuntimeException("Invalid type for statements property: " + statementsObject.getClass().getCanonicalName());
+//            }
+//        }
+        super.setFieldsByReflection(propsmap);
+    }
+
     @SuppressWarnings("unchecked")
     public void setByObject(Object object) {
         if (object instanceof List) {
@@ -61,7 +76,7 @@ public class StatementsOwner extends BlockParams {
                     valueMap.put("name", entries.getKey());
                     itemizedMaps.add(valueMap);
                 } else if (value instanceof String) {
-                    Map<String,Object> stmtDetails = new HashMap<String,Object>() {{
+                    Map<String,Object> stmtDetails = new HashMap<>() {{
                         put("name", entries.getKey());
                         put("stmt", entries.getValue());
                     }};

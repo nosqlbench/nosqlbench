@@ -30,7 +30,7 @@ public class CommandTemplate {
         this.name = stmt.getName();
         String prefixed = "command=" + stmt.getStmt();
         Map<String,String> cmdMap = ParamsParser.parse(prefixed, canonicalize);
-        Map<String, String> paramsMap = stmt.getParams();
+        Map<String, String> paramsMap = stmt.getParamsAsValueType(String.class);
         paramsMap.forEach((k,v) -> {
             if (cmdMap.containsKey(k)) {
                 logger.warn("command property override: '" + k + "' superseded by param form with value '" + v + "'");
