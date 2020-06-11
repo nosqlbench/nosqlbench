@@ -98,7 +98,7 @@ public class NBCLIScenarioParser {
                     .extension("yaml")
                     .one();
 
-            StmtsDocList stmts = StatementsLoader.load(logger, yamlWithNamedScenarios);
+            StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios);
 
             Scenarios scenarios = stmts.getDocScenarios();
 
@@ -277,7 +277,7 @@ public class NBCLIScenarioParser {
                     .name(referenced).extension("yaml")
                     .one();
 
-            StmtsDocList stmts = StatementsLoader.load(logger, content);
+            StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
 
             Map<String, String> templates = new LinkedHashMap<>();
             try {

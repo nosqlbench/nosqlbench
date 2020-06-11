@@ -76,7 +76,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
         this.fileName = activityDef.getParams().getOptionalString("filename").orElse("stdout");
-        this.stmtsDocList = StatementsLoader.load(logger, yaml_loc, interp, "activities");
+        this.stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
     }
 
     @Override

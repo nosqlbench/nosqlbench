@@ -17,7 +17,6 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
@@ -32,7 +31,7 @@ public class StmtVariationTests {
 
     @Test
     public void testListStmtsOnly() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsLoader ysl = new RawStmtsLoader();
         RawStmtsDocList docs = ysl.loadString(logger,
                 "statements:\n" +
                         " - first statement\n" +
@@ -53,7 +52,7 @@ public class StmtVariationTests {
 
     @Test
     public void testSingleEntryMapStmtsOnly() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsLoader ysl = new RawStmtsLoader();
         RawStmtsDocList docs = ysl.loadString(logger,
                 "statements:\n" +
                         " - s1: statement one\n" +
@@ -73,7 +72,7 @@ public class StmtVariationTests {
 
     @Test
     public void testMapStmtsOnly() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsLoader ysl = new RawStmtsLoader();
         RawStmtsDocList docs = ysl.loadString(logger,
                 "statements:\n" +
                         " - name: s1\n" +
@@ -95,7 +94,7 @@ public class StmtVariationTests {
 
     @Test
     public void testMixedForms() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsLoader ysl = new RawStmtsLoader();
         RawStmtsDocList docs = ysl.loadString(logger,
                 "statement:\n" +
                         " - name: s1\n" +

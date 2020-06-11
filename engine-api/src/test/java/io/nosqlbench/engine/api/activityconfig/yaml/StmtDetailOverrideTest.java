@@ -33,7 +33,7 @@ public class StmtDetailOverrideTest {
     @Test
     public void testStmtOverrides() {
 
-        StmtsDocList doclist = StatementsLoader.load(logger, "testdocs/stmt_details.yaml");
+        StmtsDocList doclist = StatementsLoader.loadPath(logger, "testdocs/stmt_details.yaml");
 
         assertThat(doclist).isNotNull();
 

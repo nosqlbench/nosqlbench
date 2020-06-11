@@ -39,7 +39,7 @@ public class StmtEscapingTest {
     @BeforeClass
     public static void testLayering() {
 
-        StmtsDocList all = StatementsLoader.load(logger, "testdocs/escaped_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/escaped_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(1);
         StmtsDoc doc1 = all.getStmtDocs().get(0);

@@ -36,6 +36,11 @@ public class StatementsOwner extends BlockParams {
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
         Object statementsObject = propsmap.remove("statements");
+
+        if (statementsObject==null) {
+            statementsObject = propsmap.remove("statement");
+        }
+
         if (statementsObject!=null) {
             setByObject(statementsObject);
         }

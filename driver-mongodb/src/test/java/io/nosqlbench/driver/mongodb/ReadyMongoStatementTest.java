@@ -34,7 +34,7 @@ public class ReadyMongoStatementTest {
         };
         activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        stmtsDocList = StatementsLoader.load(logger, yaml_loc, new StrInterpolator(activityDef), "activities");
+        stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, new StrInterpolator(activityDef), "activities");
     }
 
     @Test

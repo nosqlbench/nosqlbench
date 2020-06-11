@@ -31,8 +31,8 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadPropertiesBlock() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList rawBlockDocs = ysl.load(logger, "testdocs/rawblock.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList rawBlockDocs = ysl.loadPath(logger, "testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
         RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getRawStmtDefs()).hasSize(1);
@@ -44,8 +44,8 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadFullFormat() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList erthing = ysl.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
@@ -58,8 +58,8 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadScenarios() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList erthing = ysl.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);

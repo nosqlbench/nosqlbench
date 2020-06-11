@@ -46,7 +46,7 @@ public class RawStmtsDoc extends StatementsOwner {
             List<Object> blockList = ((List<Object>) blocksObjects);
             for (Object blockData : blockList) {
                 if (blockData instanceof Map) {
-                    Map<String,Object>  blockDataMap = (Map<String,Object>)blockData;
+                    Map<String, Object> blockDataMap = (Map<String, Object>) blockData;
                     RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
                     rawStmtsBlock.setFieldsByReflection(blockDataMap);
                     blocks.add(rawStmtsBlock);
@@ -57,14 +57,9 @@ public class RawStmtsDoc extends StatementsOwner {
         }
 
         Object scenariosData = properties.remove("scenarios");
-        if (scenariosData!=null) {
-            if (scenariosData instanceof Map) {
-                RawScenarios rawScenarios = new RawScenarios();
-                Map<String,Object> scenariosObjMap = (Map<String,Object>)scenariosData;
-                rawScenarios.setPropertiesByReflection(scenariosObjMap);
-            } else {
-                throw new RuntimeException("Invalid type for scenarios data: " + scenariosData.getClass().getCanonicalName());
-            }
+
+        if (scenariosData != null) {
+            scenarios.setPropertiesByReflection(scenariosData);
         }
 
         super.setFieldsByReflection(properties);

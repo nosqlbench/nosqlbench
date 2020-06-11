@@ -301,13 +301,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
                 break;
             case "2":
-                doclist = StatementsLoader.load(logger, yaml_loc, interp, "activities");
+                doclist = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
                 break;
             case "unset":
                 try {
                     logger.debug("You can suffix your yaml filename or url with the " +
                             "format version, such as :1 or :2. Assuming version 2.");
-                    doclist = StatementsLoader.load(null, yaml_loc, interp, "activities");
+                    doclist = StatementsLoader.loadPath(null, yaml_loc, interp, "activities");
                 } catch (Exception ignored) {
                     try {
                         doclist = getVersion1StmtsDoc(interp, yaml_loc);
@@ -323,7 +323,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                                 "for the standard format. To force loading version 1 with detailed logging, add" +
                                 " a version qualifier to your yaml filename or url like ':1'");
                         // retrigger the error again, this time with logging enabled.
-                        doclist = StatementsLoader.load(logger, yaml_loc, interp, "activities");
+                        doclist = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
                     }
                 }
                 break;

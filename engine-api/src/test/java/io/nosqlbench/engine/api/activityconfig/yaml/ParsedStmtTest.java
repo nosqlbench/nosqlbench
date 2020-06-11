@@ -32,7 +32,7 @@ public class ParsedStmtTest {
 
     @BeforeClass
     public static void testLoadYaml() {
-        doclist = StatementsLoader.load(logger, "testdocs/bindings.yaml");
+        doclist = StatementsLoader.loadPath(logger, "testdocs/bindings.yaml");
     }
 
     @Test

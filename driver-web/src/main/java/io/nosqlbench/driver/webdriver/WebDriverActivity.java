@@ -168,7 +168,7 @@ public class WebDriverActivity extends SimpleActivity {
     private OpSequence<CommandTemplate> initOpSequenceFromYaml() {
         StrInterpolator interp = new StrInterpolator(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        StmtsDocList stmtsDocList = StatementsLoader.load(logger, yaml_loc, interp, "activities");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
 
         SequencerType sequencerType = getParams()
             .getOptionalString("seq")

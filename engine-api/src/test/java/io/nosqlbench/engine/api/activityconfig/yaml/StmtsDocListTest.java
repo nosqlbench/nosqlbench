@@ -51,7 +51,7 @@ public class StmtsDocListTest {
 
     @BeforeClass
     public static void testLoadYaml() {
-        doclist = StatementsLoader.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        doclist = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
     }
 
     @Test

@@ -101,7 +101,8 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         );
         SequencePlanner<ReadyMongoStatement> sequencer = new SequencePlanner<>(sequencerType);
 
-        StmtsDocList stmtsDocList = StatementsLoader.load(logger, yamlLoc, new StrInterpolator(activityDef), "activities");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, new StrInterpolator(activityDef),
+                "activities");
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 

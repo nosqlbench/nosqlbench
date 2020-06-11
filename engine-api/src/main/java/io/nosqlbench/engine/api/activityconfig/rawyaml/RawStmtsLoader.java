@@ -1,41 +1,25 @@
-package io.nosqlbench.engine.api.activityconfig.stmtloader;
+package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.library.basics.core.stathelpers.DiscreteProbabilityBuffer;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.StreamSupport;
 
-public class GenericStmtLoader {
+public class RawStmtsLoader {
 
     List<Function<String, String>> stringTransformers = new ArrayList<>();
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
-    public void addTransformers(Function<String, String>... newTransformers) {
-        Collections.addAll(this.transformers, newTransformers);
+    public void addTransformer(Function<String, String> newTransformer) {
+        Collections.addAll(this.transformers, newTransformer);
     }
 
-    public RawStmtsDocList load(
-            Logger logger,
-            String path,
-            String... searchPaths) {
-
-        String data = null;
-        try {
-            Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension("yaml").first();
-            data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
-        } catch (Exception e) {
-            throw new RuntimeException("error while reading file " + path, e);
-        }
+    public RawStmtsDocList loadString(Logger logger, String data) {
 
         try {
             if (logger != null) logger.debug("Applying string transformer to yaml data:" + data);
@@ -49,7 +33,22 @@ public class GenericStmtLoader {
         }
 
         return parseYaml(logger, data);
+    }
 
+    public RawStmtsDocList loadPath(
+            Logger logger,
+            String path,
+            String... searchPaths) {
+
+        String data = null;
+        try {
+            Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension("yaml").first();
+            data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
+        } catch (Exception e) {
+            throw new RuntimeException("error while reading file " + path, e);
+        }
+
+        return loadString(logger, data);
     }
 
     private RawStmtsDocList parseYaml(Logger logger, String data) {

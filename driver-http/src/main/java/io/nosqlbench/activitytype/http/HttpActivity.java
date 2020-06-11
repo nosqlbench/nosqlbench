@@ -59,7 +59,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
                 .getOptionalString("yaml", "workload")
                 .orElse("default");
 
-        stmtsDocList = StatementsLoader.load(logger,yaml_loc, "activities");
+        stmtsDocList = StatementsLoader.loadPath(logger,yaml_loc, "activities");
     }
 
 
