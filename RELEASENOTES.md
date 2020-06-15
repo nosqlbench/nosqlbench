@@ -7,3 +7,7 @@
 - cf03c82b fixed a typo in driver index.md
 - c368b7cc Added Getting Help part to the front page README
 - d6a167c6 release notes script now uses md list form
+- d57835e4 (HEAD -> main) updated scripts for main branch name
+- e27b39b0 #158 Simplify YamlStatement Loader part 2, remove previous loader
+- 46b2447d #158 Simplify YamlStatement Loader
+- 941f08c0 example map usage for proposed change
