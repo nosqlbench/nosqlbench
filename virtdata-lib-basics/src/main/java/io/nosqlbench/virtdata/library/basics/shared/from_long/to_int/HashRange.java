@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
@@ -22,7 +23,7 @@ public class HashRange implements LongToIntFunction {
     @Example({"HashRange(35L,39L)","map the input to a number in the range 35-38, inclusive, of type int"})
     public HashRange(int minValue, int maxValue) {
         if (maxValue<minValue) {
-            throw new RuntimeException("HashRange must have min and max value in that order.");
+            throw new BasicError("HashRange must have min and max value in that order.");
         }
         this.minValue = minValue;
         this.width = (maxValue - minValue) +1;

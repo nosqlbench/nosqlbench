@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.IntUnaryOperator;
@@ -18,7 +19,7 @@ public class HashRange implements IntUnaryOperator {
 
     public HashRange(int minValue, int maxValue) {
         if (maxValue<minValue) {
-            throw new RuntimeException("HashRange must have min and max value in that order.");
+            throw new BasicError("HashRange must have min and max value in that order.");
         }
         this.minValue = minValue;
         this.width = (maxValue - minValue) +1;

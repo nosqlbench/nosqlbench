@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -26,7 +27,7 @@ public class HashRange implements LongUnaryOperator {
 
     public HashRange(long minValue, long maxValue) {
         if (maxValue<minValue) {
-            throw new RuntimeException("HashRange must have min and max value in that order.");
+            throw new BasicError("HashRange must have min and max value in that order.");
         }
         this.minValue = minValue;
         this.width = (maxValue - minValue)+1;
