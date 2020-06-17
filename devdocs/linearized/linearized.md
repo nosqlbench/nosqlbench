@@ -180,4 +180,17 @@ advanced scenarios:
 -  some ops may be required to produce a value
 -  some ops may be required to produce multiple values
 
+* The carrier of op state should enable the following programmatic constructions:
+  * Metric measuring the service time of the op on failure
+  * Metric measuring the service time of the op on success
+  * Metric measuring the size of the op on success
+  * Hooks for transforming or acting upon the op or cycle before the op executes
+  * Hooks for transforming or acting upon the op or cycle after the op executes, regardless of result
+  * Additional modifiers on the op, as in transformers.
+
+* All op contextual actions should be presented as a function on the op type
+
+* Completion Stages that support the op API should come from built-in template implementations that already include
+  metrics options, logging support, etc.
+
 
