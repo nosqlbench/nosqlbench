@@ -35,7 +35,7 @@ public class IntegratedTemporalExamplesTest {
         );
         UUID uuid1 = uuidgen.get(1L);
         System.out.println(uuid1);
-        assertThat(uuid1).isEqualTo(UUID.fromString("998ccf20-ee50-1398-8000-000000000000"));
+        assertThat(uuid1).isEqualTo(UUID.fromString("826476e0-ee50-1398-8000-000000000000"));
     }
 
     /**
@@ -87,7 +87,7 @@ public class IntegratedTemporalExamplesTest {
         );
         Date date = dateMapper.get(3L);
 
-        assertThat(date).isEqualTo(new Date(2527683L));
+        assertThat(date).isEqualTo(new Date(1539133L));
     }
 
     /**
@@ -107,10 +107,10 @@ public class IntegratedTemporalExamplesTest {
                         1970,
                         1,
                         1,
+                        0,
                         2,
-                        43,
-                        10,
-                        106,
+                        27,
+                        245,
                         DateTimeZone.UTC)
         );
     }

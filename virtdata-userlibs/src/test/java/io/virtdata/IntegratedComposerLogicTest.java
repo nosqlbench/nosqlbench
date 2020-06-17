@@ -102,7 +102,7 @@ public class IntegratedComposerLogicTest {
         DataMapper<Long> longDataMapper = mo.get();
         Long result = longDataMapper.get(5L);
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(1398623797L);
+        assertThat(result).isEqualTo(359183748L);
     }
 
     @Test
