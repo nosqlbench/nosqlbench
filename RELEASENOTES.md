@@ -1,12 +1,9 @@
-- 6fb23b7b (HEAD -> main) simplify command template prefix
+- bb57a479 (HEAD -> main) fixed integrated tests for HashRange vs HashInterval, expanded constructions for Set
+- 63500882 minor release
+- 6fb23b7b simplify command template prefix
 - 480db201 improve StringSet argument compatibility
 - a1234879 improve error details for missing functions
 - d79ff1fa notes: HashRange and HashInterval do (incl,incl) and (incl,excl) respectively
 - 244217c6 #163 Make NBIO file read errors more helpful
 - cb7d9d16 #163 Make NBIO file read errors more helpful
 - 2a7406e0 #162 Allow hash range functions to span single value ranges
-- 21be4c19 (origin/main) updated release notes
-- d57835e4 updated scripts for main branch name
-- e27b39b0 #158 Simplify YamlStatement Loader part 2, remove previous loader
-- 46b2447d #158 Simplify YamlStatement Loader
-- 941f08c0 example map usage for proposed change
