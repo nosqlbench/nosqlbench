@@ -158,6 +158,11 @@ public class VirtDataComposer {
 
             diagnostics.trace(" resolved functions");
             diagnostics.trace(summarize(resolved, "  - "));
+
+            if (resolved.size()==0) {
+                return diagnostics.error(new RuntimeException("There were no functions found for " + call.toString()));
+            }
+
             funcs.addFirst(resolved);
 
             Set<Class<?>> inputTypes = resolved.stream().map(ResolvedFunction::getInputClass).collect(Collectors.toSet());
