@@ -8,6 +8,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.util.HashSet;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 
 /**
  * Create a {@code Set<String>} from a long
@@ -33,6 +34,16 @@ public class StringSet implements LongFunction<java.util.Set<String>> {
                      LongFunction<Object> valueFunc) {
         this.sizeFunc = sizeFunc;
         this.valueFunc = valueFunc;
+    }
+
+    public StringSet(LongToIntFunction sizeFunc, LongUnaryOperator valueFunc) {
+        this.sizeFunc = sizeFunc;
+        this.valueFunc = valueFunc::applyAsLong;
+    }
+
+    public StringSet(LongToIntFunction sizeFunc, LongToIntFunction valueFunc) {
+        this.sizeFunc = sizeFunc;
+        this.valueFunc = valueFunc::applyAsInt;
     }
 
     @Override

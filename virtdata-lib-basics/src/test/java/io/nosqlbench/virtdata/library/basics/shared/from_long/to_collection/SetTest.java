@@ -2,6 +2,8 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import org.junit.Test;
 
+import java.util.function.LongToIntFunction;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SetTest {
@@ -15,7 +17,7 @@ public class SetTest {
 
     @Test
     public void testStringSet() {
-        StringSet set = new StringSet(s -> 3, e -> e);
+        StringSet set = new StringSet(s -> 3, (LongToIntFunction) (e -> (int)e));
         java.util.Set<String> s1 = set.apply(15L);
         assertThat(s1).containsOnly("15","16","17");
     }
