@@ -52,7 +52,9 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static List<String> readLines(String filename) {
-        Content<?> data = NBIO.all().prefix("data").name(filename).first().orElseThrow();
+        Content<?> data = NBIO.all().prefix("data").name(filename).first().orElseThrow(
+                () -> new BasicError("Unable to read lines from " + filename)
+        );
         String[] split = data.getCharBuffer().toString().split("\n");
         return Arrays.asList(split);
     }
