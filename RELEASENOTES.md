@@ -1,4 +1,6 @@
-- bb57a479 (HEAD -> main) fixed integrated tests for HashRange vs HashInterval, expanded constructions for Set
+- 629583c6 (HEAD -> main) fix missing release file
+- d401e62a (origin/main) fix release
+- bb57a479 fixed integrated tests for HashRange vs HashInterval, expanded constructions for Set
 - 63500882 minor release
 - 6fb23b7b simplify command template prefix
 - 480db201 improve StringSet argument compatibility
