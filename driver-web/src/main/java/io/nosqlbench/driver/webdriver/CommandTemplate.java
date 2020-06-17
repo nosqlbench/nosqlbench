@@ -28,7 +28,9 @@ public class CommandTemplate {
 
     public CommandTemplate(StmtDef stmt, boolean canonicalize) {
         this.name = stmt.getName();
-        String prefixed = "command=" + stmt.getStmt();
+        String prefixed = stmt.getStmt();
+        prefixed = (prefixed.startsWith("command=") ? prefixed : "command=" + prefixed);
+
         Map<String,String> cmdMap = ParamsParser.parse(prefixed, canonicalize);
         Map<String, String> paramsMap = stmt.getParamsAsValueType(String.class);
         paramsMap.forEach((k,v) -> {
