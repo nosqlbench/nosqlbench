@@ -13,4 +13,11 @@ public class HashRangeTest {
         assertThat(hashRange.applyAsLong(32L)).isEqualTo(11L);
     }
 
+    @Test
+    public void testSingleElementRange() {
+        HashRange hashRange = new HashRange(33L,33L);
+        long l = hashRange.applyAsLong(93874L);
+        assertThat(l).isEqualTo(33L);
+    }
+
 }

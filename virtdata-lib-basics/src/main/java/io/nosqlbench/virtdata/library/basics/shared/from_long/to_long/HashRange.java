@@ -8,6 +8,9 @@ import java.util.function.LongUnaryOperator;
  * Return a value within a range, pseudo-randomly. This is equivalent to
  * returning a value with in range between 0 and some maximum value, but
  * with a minimum value added.
+ *
+ * You can specify hash ranges as small as a single-element range, like
+ * (5,5), or as wide as the relevant data type allows.
  */
 @ThreadSafeMapper
 public class HashRange implements LongUnaryOperator {
@@ -22,12 +25,11 @@ public class HashRange implements LongUnaryOperator {
     }
 
     public HashRange(long minValue, long maxValue) {
-        this.minValue = minValue;
-
-        if (maxValue<=minValue) {
+        if (maxValue<minValue) {
             throw new RuntimeException("HashRange must have min and max value in that order.");
         }
-        this.width = maxValue - minValue;
+        this.minValue = minValue;
+        this.width = (maxValue - minValue)+1;
     }
 
     @Override

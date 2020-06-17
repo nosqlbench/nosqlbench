@@ -21,12 +21,11 @@ public class HashRange implements LongToIntFunction {
 
     @Example({"HashRange(35L,39L)","map the input to a number in the range 35-38, inclusive, of type int"})
     public HashRange(int minValue, int maxValue) {
-        this.minValue = minValue;
-
-        if (maxValue<=minValue) {
+        if (maxValue<minValue) {
             throw new RuntimeException("HashRange must have min and max value in that order.");
         }
-        this.width = maxValue - minValue;
+        this.minValue = minValue;
+        this.width = (maxValue - minValue) +1;
     }
 
     @Override
