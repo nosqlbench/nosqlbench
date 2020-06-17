@@ -89,7 +89,9 @@ public class NBIO implements NBPathsAPI.Facets {
 
     public static Path getFirstLocalPath(String... potentials) {
         Optional<Content<?>> first = NBIO.local().name(potentials).first();
-        return first.orElseThrow().asPath();
+        return first.orElseThrow(
+                () -> new BasicError("Unable to find loadable content at " + String.join(",",potentials))
+        ).asPath();
     }
 
     public static Optional<Path> findFirstLocalPath(String... potentials) {
