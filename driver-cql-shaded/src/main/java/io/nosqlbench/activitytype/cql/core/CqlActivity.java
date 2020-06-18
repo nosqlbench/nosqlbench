@@ -166,12 +166,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             Optional<ConsistencyLevel> cl = stmtDef.getOptionalParam("cl", String.class).map(ConsistencyLevel::valueOf);
             Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalParam("serial_cl").map(ConsistencyLevel::valueOf);
-            Optional<Boolean> idempotent = stmtDef.getOptionalParam("idempotent", boolean.class);
+            Optional<Boolean> idempotent = stmtDef.getOptionalParam("idempotent").map(Boolean::parseBoolean);
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = stmtDef.getOptionalParam("instrument", boolean.class)
-                    .orElse(getParams().getOptionalBoolean("instrument").orElse(false));
+            boolean instrument = stmtDef.getOptionalParam("instrument",Boolean.class)
+                    .or(() -> getParams().getOptionalBoolean("instrument"))
+                    .orElse(false);
 
             String logresultcsv = stmtDef.getParamOrDefault("logresultcsv", "");
 
