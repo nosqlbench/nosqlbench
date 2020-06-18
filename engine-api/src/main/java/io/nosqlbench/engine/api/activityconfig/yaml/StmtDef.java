@@ -68,7 +68,11 @@ public class StmtDef implements Tagged {
             return defaultValue;
         }
         Object value = lookup.get(name);
-        return (V) defaultValue.getClass().cast(value);
+        try {
+            return (V) defaultValue.getClass().cast(value);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to cast type " + value.getClass().getCanonicalName() + " to " + defaultValue.getClass().getCanonicalName(), e);
+        }
     }
 
     public <V> V getParam(String name, Class<? extends V> type) {
@@ -80,13 +84,22 @@ public class StmtDef implements Tagged {
 
     @SuppressWarnings("unchecked")
     public <V> Optional<V> getOptionalParam(String name, Class<? extends V> type) {
+        if (type.isPrimitive()) {
+            throw new RuntimeException("Do not use primitive types for the target class here. For example, Boolean.class is accepted, but boolean.class is not.");
+        }
+        // TODO: add warning here if primitive types are not allowed
         MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         if (lookup.containsKey(name)) {
             Object object = lookup.get(name);
             if (object==null) {
                 return Optional.empty();
             }
-            return Optional.of((V) type.cast(object));
+            try {
+                V reified = type.cast(object);
+                return Optional.of(reified);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to cast type " + object.getClass().getCanonicalName() + " to " + type.getCanonicalName());
+            }
         }
         return Optional.empty();
     }
