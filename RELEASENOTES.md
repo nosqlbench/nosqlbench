@@ -1,11 +1,4 @@
-- 629583c6 (HEAD -> main) fix missing release file
-- d401e62a (origin/main) fix release
-- bb57a479 fixed integrated tests for HashRange vs HashInterval, expanded constructions for Set
-- 63500882 minor release
-- 6fb23b7b simplify command template prefix
-- 480db201 improve StringSet argument compatibility
-- a1234879 improve error details for missing functions
-- d79ff1fa notes: HashRange and HashInterval do (incl,incl) and (incl,excl) respectively
-- 244217c6 #163 Make NBIO file read errors more helpful
-- cb7d9d16 #163 Make NBIO file read errors more helpful
-- 2a7406e0 #162 Allow hash range functions to span single value ranges
+- 17a9c1ab (HEAD -> main) fix test signature
+- 7a21ef3d Fix: Use new config getters correctly in CqlActivity
+- efd7e77e Add safety warnings for improper use of config getters
+- 2d0b3744 StringSet and Set support same constructor forms
