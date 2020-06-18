@@ -77,7 +77,6 @@ public class Set implements LongFunction<java.util.Set<Object>> {
         } else {
             throw new BasicError("The size function produces " + sizeType.getClass().getCanonicalName() + ", which can't be used as an integer");
         }
-
     }
 
     @Override

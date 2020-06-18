@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
@@ -30,20 +31,54 @@ public class StringSet implements LongFunction<java.util.Set<String>> {
     private final LongFunction<Object> valueFunc;
 
     @Example({"StringSet(HashRange(3,7),Add(15L))", "create a set between 3 and 7 elements of String representations of Long values"})
-    public StringSet(LongToIntFunction sizeFunc,
-                     LongFunction<Object> valueFunc) {
+    public StringSet(LongToIntFunction sizeFunc, LongFunction<Object> valueFunc) {
         this.sizeFunc = sizeFunc;
         this.valueFunc = valueFunc;
     }
-
     public StringSet(LongToIntFunction sizeFunc, LongUnaryOperator valueFunc) {
         this.sizeFunc = sizeFunc;
         this.valueFunc = valueFunc::applyAsLong;
     }
-
     public StringSet(LongToIntFunction sizeFunc, LongToIntFunction valueFunc) {
         this.sizeFunc = sizeFunc;
         this.valueFunc = valueFunc::applyAsInt;
+    }
+
+    public StringSet(LongFunction<?> sizeFunc, LongFunction<Object> valueFunc) {
+        this.sizeFunc = checkSizeFunc(sizeFunc);
+        this.valueFunc = valueFunc;
+    }
+    public StringSet(LongFunction<?> sizeFunc, LongUnaryOperator valueFunc) {
+        this.sizeFunc = checkSizeFunc(sizeFunc);
+        this.valueFunc = valueFunc::applyAsLong;
+    }
+    public StringSet(LongFunction<?> sizeFunc, LongToIntFunction valueFunc) {
+        this.sizeFunc = checkSizeFunc(sizeFunc);
+        this.valueFunc = valueFunc::applyAsInt;
+    }
+
+    public StringSet(LongUnaryOperator sizeFunc, LongFunction<Object> valueFunc) {
+        this.sizeFunc = l -> (int) sizeFunc.applyAsLong(l);
+        this.valueFunc = valueFunc;
+    }
+    public StringSet(LongUnaryOperator sizeFunc, LongUnaryOperator valueFunc) {
+        this.sizeFunc = l -> (int) sizeFunc.applyAsLong(l);
+        this.valueFunc = valueFunc::applyAsLong;
+    }
+    public StringSet(LongUnaryOperator sizeFunc, LongToIntFunction valueFunc) {
+        this.sizeFunc = l -> (int) sizeFunc.applyAsLong(l);
+        this.valueFunc = valueFunc::applyAsInt;
+    }
+
+    private static LongToIntFunction checkSizeFunc(LongFunction<?> sizeFunc) {
+        Object sizeType = sizeFunc.apply(0);
+        if (int.class.isAssignableFrom(sizeType.getClass())) {
+            return value -> ((LongFunction<Integer>)sizeFunc).apply(value);
+        } else if (long.class.isAssignableFrom(sizeType.getClass())) {
+            return value -> ((LongFunction<Long>)sizeFunc).apply(value).intValue();
+        } else {
+            throw new BasicError("The size function produces " + sizeType.getClass().getCanonicalName() + ", which can't be used as an integer");
+        }
     }
 
     @Override
