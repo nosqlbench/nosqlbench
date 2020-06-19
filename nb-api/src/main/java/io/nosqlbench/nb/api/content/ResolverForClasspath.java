@@ -73,6 +73,9 @@ public class ResolverForClasspath implements ContentResolver {
     @Override
     public List<Content<?>> resolve(URI uri) {
         List<Path> paths = resolvePaths(uri);
+        if (paths==null) {
+            return List.of();
+        }
         List<Content<?>> contents = paths.stream().map(PathContent::new).collect(Collectors.toList());
         return contents;
 
