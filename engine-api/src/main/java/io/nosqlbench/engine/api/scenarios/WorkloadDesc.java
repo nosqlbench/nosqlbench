@@ -67,7 +67,7 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
         }
 
         if (includeScenarios) {
-            sb.append("# workload found in in ");
+            sb.append("# workload found in ");
         }
         sb.append(getYamlPath()).append("\n");
 
