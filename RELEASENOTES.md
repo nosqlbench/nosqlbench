@@ -1,4 +1,3 @@
-- 17a9c1ab (HEAD -> main) fix test signature
-- 7a21ef3d Fix: Use new config getters correctly in CqlActivity
-- efd7e77e Add safety warnings for improper use of config getters
-- 2d0b3744 StringSet and Set support same constructor forms
+- a689b4c9 initial NBUI docs
+- cd450c17 Fix typo
+- b723924e #159 Possible NPE bug in URL resolver

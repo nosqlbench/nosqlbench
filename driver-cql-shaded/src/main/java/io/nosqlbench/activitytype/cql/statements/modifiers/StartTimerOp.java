@@ -6,6 +6,7 @@ public class StartTimerOp implements StatementModifier {
 
     @Override
     public Statement modify(Statement unmodified, long cycleNum) {
-        return null;
+
+        return unmodified;
     }
 }
