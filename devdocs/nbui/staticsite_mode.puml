@@ -1,0 +1,50 @@
+@startuml
+title NoSQLBench docserver in static mode
+participant "UserBrowser" as u
+participant "Generic Static\nContent Server\n(HTTP)" as nb
+participant "Files" as content
+
+u -> nb : Load Page
+activate nb
+
+nb -> content : "Read Generated App\n(static on disk)"
+activate content
+nb <- content : static files
+deactivate content
+
+u <- nb : HTTP Content
+deactivate nb
+
+
+note over u
+The client app initializes
+and makes subsequent
+calls to the origin server
+for content and services
+[ which happen to be static
+files in this case ]
+end note
+
+u -> nb: Read Content Manifest
+activate nb
+
+nb -> content : "Read Static Manifest\n(static on disk)"
+activate content
+note over content
+    To support this mode,
+    content which is normally
+    accessed via named endpoint
+    is statically included
+    as files at the same URI
+    path.
+end note
+nb <- content : markdown\nmanifest
+deactivate content
+u <- nb: Markdown Manifest
+deactivate nb
+
+... Remaining requests are similar ...
+
+
+
+@enduml

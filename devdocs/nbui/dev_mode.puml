@@ -1,0 +1,50 @@
+@startuml
+title NoSQLBench docserver in dev mode
+participant "UserBrowser" as u
+participant "Nuxt dev mode\n:3000 (HTTP)" as dev
+participant "NoSQLBench\n:12345 (HTTP)" as nb
+participant "Static Content\nService" as content
+participant "Markdown Content\nService" as SPI
+
+u -> dev : Load Page
+activate dev
+dev -> dev : render Vue app
+u <- dev : <app resources>
+deactivate dev
+
+note over dev
+Vue.js develpment occurs
+in the Nuxt/Vue instance,
+and supports dynamic layout
+and reloading.
+end note
+
+u -> nb: Read Content Manifest
+
+note over nb
+Nuxt/Vue selects
+this port for services
+when Nuxt is in dev mode
+on port 3000
+end note
+
+activate nb
+nb -> SPI : List Content
+activate SPI
+SPI -> SPI: Discover and \nEnumerate
+nb <- SPI : markdown\nmanifest
+deactivate SPI
+u <- nb: markdown\nmanifest
+deactivate nb
+
+u -> nb: Read Named Content
+activate nb
+nb -> SPI : Lookup
+activate SPI
+SPI -> SPI: Lookup
+nb <- SPI : Named Content
+deactivate SPI
+u <- nb: Named Content
+deactivate nb
+
+@enduml
