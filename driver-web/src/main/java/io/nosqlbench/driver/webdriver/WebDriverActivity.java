@@ -9,6 +9,7 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -159,7 +160,7 @@ public class WebDriverActivity extends SimpleActivity {
             .orElse(SequencerType.bucket);
         SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
         commands.forEach((name,cmd) -> {
-            CommandTemplate commandTemplate = new CommandTemplate(cmd, Map.of(), name, false);
+            CommandTemplate commandTemplate = new CommandTemplate(name, cmd, Map.of(), Map.of());
             planner.addOp(commandTemplate,(c) -> 1L);
         });
         OpSequence<CommandTemplate> sequence = planner.resolve();
@@ -178,15 +179,15 @@ public class WebDriverActivity extends SimpleActivity {
         SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
 
         if (stmts.size() == 0) {
             throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
         }
 
-        for (StmtDef optemplate : stmts) {
+        for (OpTemplate optemplate : stmts) {
             long ratio = optemplate.getParamOrDefault("ratio", 1);
-            CommandTemplate cmd = new CommandTemplate(optemplate, false);
+            CommandTemplate cmd = new CommandTemplate(optemplate);
             planner.addOp(cmd, ratio);
         }
         return planner.resolve();

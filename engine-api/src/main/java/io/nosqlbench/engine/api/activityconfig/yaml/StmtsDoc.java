@@ -90,7 +90,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
      * @return The list of all included statements for all included block in this document,
      * including the inherited and overridden values from the this doc and the parent block.
      */
-    public List<StmtDef> getStmts() {
+    public List<OpTemplate> getStmts() {
         return getBlocks().stream().flatMap(b -> b.getStmts().stream()).collect(Collectors.toList());
     }
 

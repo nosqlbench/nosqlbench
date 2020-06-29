@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class StmtsBlock implements Tagged, Iterable<StmtDef> {
+public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
 
     private final static String NameToken = "name";
     private final static String StmtToken = "stmt";
@@ -40,17 +40,17 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
         this.blockIdx = blockIdx;
     }
 
-    public List<StmtDef> getStmts() {
+    public List<OpTemplate> getStmts() {
 
-        List<StmtDef> rawStmtDefs = new ArrayList<>();
+        List<OpTemplate> rawOpTemplates = new ArrayList<>();
         List<RawStmtDef> statements = rawStmtsBlock.getRawStmtDefs();
 
         for (int i = 0; i < statements.size(); i++) {
-            rawStmtDefs.add(
+            rawOpTemplates.add(
                     new StmtDef(this, statements.get(i))
             );
         }
-        return rawStmtDefs;
+        return rawOpTemplates;
     }
 
     public String getName() {
@@ -105,7 +105,7 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
     @Override
     @NotNull
-    public Iterator<StmtDef> iterator() {
+    public Iterator<OpTemplate> iterator() {
         return getStmts().iterator();
     }
 }

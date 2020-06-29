@@ -1,6 +1,3 @@
-tags:
-  type: google
-params:
-  requestType: GET
 statements:
-  - /
+  - s1: |
+      GET http://google.com/ HTTP/1.1

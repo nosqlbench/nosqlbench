@@ -38,14 +38,14 @@ public class ParsedStmtTest {
     @Test
     public void testBasicParser() {
         StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
-        StmtDef stmtDef0 = block0.getStmts().get(0);
+        OpTemplate stmtDef0 = block0.getStmts().get(0);
         ParsedStmt parsed0 = stmtDef0.getParsed();
         assertThat(parsed0.getExtraBindings()).containsExactly("alpha","gamma");
         assertThat(parsed0.getMissingBindings()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
         StmtsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
-        StmtDef stmtDef1 = block1.getStmts().get(0);
+        OpTemplate stmtDef1 = block1.getStmts().get(0);
         ParsedStmt parsed1 = stmtDef1.getParsed();
         assertThat(parsed1.getExtraBindings()).containsExactly();
         assertThat(parsed1.getMissingBindings()).containsExactly();
@@ -56,12 +56,12 @@ public class ParsedStmtTest {
     public void testMultipleBindingUsage() {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
-        StmtDef stmtDef0 = block2.getStmts().get(0);
+        OpTemplate stmtDef0 = block2.getStmts().get(0);
         ParsedStmt parsed0 = stmtDef0.getParsed();
         assertThat(parsed0.getMissingBindings()).isEmpty();
         assertThat(parsed0.hasError()).isFalse();
 
-        StmtDef stmtDef1 = block2.getStmts().get(1);
+        OpTemplate stmtDef1 = block2.getStmts().get(1);
         ParsedStmt parsed1 = stmtDef1.getParsed();
         assertThat(parsed1.getMissingBindings().isEmpty());
         assertThat(parsed1.hasError()).isFalse();
@@ -71,12 +71,12 @@ public class ParsedStmtTest {
     public void testQuestionMarkAnchors() {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(3);
 
-        StmtDef stmtDef0 = block2.getStmts().get(0);
+        OpTemplate stmtDef0 = block2.getStmts().get(0);
         ParsedStmt parsed0 = stmtDef0.getParsed();
         assertThat(parsed0.getMissingBindings()).isEmpty();
         assertThat(parsed0.hasError()).isFalse();
 
-        StmtDef stmtDef1 = block2.getStmts().get(1);
+        OpTemplate stmtDef1 = block2.getStmts().get(1);
         ParsedStmt parsed1 = stmtDef1.getParsed();
         assertThat(parsed1.getMissingBindings().isEmpty());
         assertThat(parsed1.hasError()).isFalse();

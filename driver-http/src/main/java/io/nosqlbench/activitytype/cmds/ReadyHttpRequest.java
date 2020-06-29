@@ -1,82 +1,29 @@
 package io.nosqlbench.activitytype.cmds;
 
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
-import io.nosqlbench.virtdata.core.templates.StringBindings;
-import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 
+import java.net.URI;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 public class ReadyHttpRequest implements LongFunction<HttpRequest> {
 
-    private final static HttpRequestSetter setter = new HttpRequestSetter();
-
-    public enum FieldType {
-        method,
-        port,
-        host,
-        path,
-        query,
-        header,
-        version
-    }
-
-    HttpRequest.Builder builder = HttpRequest.newBuilder();
-    Map<FieldType, StringBindings> unresolved = new HashMap<>();
+    private final CommandTemplate propertyTemplate;
 
     // only populated if there is no value which is an actual bindings template
     private final HttpRequest cachedRequest;
 
-    public ReadyHttpRequest(StmtDef stmtDef) {
-        CommandTemplate cmdt = new CommandTemplate(stmtDef, false);
-        ParsedStmt parsed = stmtDef.getParsed();
+    public ReadyHttpRequest(OpTemplate stmtDef) {
+        propertyTemplate = new CommandTemplate(stmtDef, HttpFormatParser::parse);
+        Set<String> namedProperties = propertyTemplate.getPropertyNames();
 
-        Map<String, String> reqParams = new HashMap<>();
-
-        String stmt = parsed.getStmt();
-        if (stmt != null) {
-            Map<String, String> parsedparams = ParamsParser.parse(stmt, false);
-            reqParams.putAll(parsedparams);
-        }
-        for (String paramsKey : stmtDef.getParams().keySet()) {
-            if (reqParams.containsKey(paramsKey)) {
-                throw new RuntimeException("request parameter '" + paramsKey + "' used again in params block. Choose one.");
-            }
-        }
-        reqParams.putAll(stmtDef.getParamsAsValueType(String.class));
-
-        for (String cfgname : reqParams.keySet()) {
-            FieldType cfgfield;
-            try {
-                cfgfield = FieldType.valueOf(cfgname);
-            } catch (IllegalArgumentException iae) {
-                throw new BasicError("You can't configure a request with '" + cfgname + "'." +
-                        " Valid properties are " + Arrays.stream(FieldType.values()).map(String::valueOf).collect(Collectors.joining(",")));
-            }
-            String value = reqParams.get(cfgname);
-            ParsedTemplate tpl = new ParsedTemplate(value, stmtDef.getBindings());
-            if (tpl.getBindPoints().size() == 0) {
-                builder = setter.setField(builder, cfgfield, value);
-            } else {
-                BindingsTemplate bindingsTemplate = new BindingsTemplate(tpl.getBindPoints());
-                StringBindingsTemplate stringBindingsTemplate = new StringBindingsTemplate(value, bindingsTemplate);
-                StringBindings stringBindings = stringBindingsTemplate.resolve();
-                unresolved.put(cfgfield, stringBindings);
-            }
-        }
-
-        if (unresolved.size() == 0) {
-            cachedRequest = builder.build();
+        if (propertyTemplate.isStatic()) {
+            cachedRequest = apply(0);
         } else {
             cachedRequest = null;
         }
@@ -84,16 +31,45 @@ public class ReadyHttpRequest implements LongFunction<HttpRequest> {
 
     @Override
     public HttpRequest apply(long value) {
+
+        // If the request is invariant, simply return it, since it is thread-safe
         if (this.cachedRequest != null) {
             return this.cachedRequest;
         }
-        HttpRequest.Builder newRq = builder.copy();
-        for (Map.Entry<FieldType, StringBindings> toset : unresolved.entrySet()) {
-            String setValue = toset.getValue().bind(value);
-            newRq = setter.setField(newRq, toset.getKey(), setValue);
+
+        Map<String, String> cmd = propertyTemplate.getCommand(value);
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder();
+
+        HttpRequest.BodyPublisher bodyPublisher = cmd.containsKey("body") ?
+                HttpRequest.BodyPublishers.ofString(cmd.remove("body"))
+                : HttpRequest.BodyPublishers.noBody();
+
+        String method = cmd.containsKey("method") ? cmd.remove("method") : "GET";
+
+        builder.method(method, bodyPublisher);
+
+        if (cmd.containsKey("version")) {
+            HttpClient.Version version = HttpClient.Version.valueOf(cmd.remove("version"));
+            builder.version(version);
         }
 
-        HttpRequest request = newRq.build();
+        if (cmd.containsKey("uri")) {
+            URI uri = URI.create(cmd.remove("uri"));
+            builder.uri(uri);
+        }
+
+        for (String header : cmd.keySet()) {
+            if (header.charAt(0) >= 'A' && header.charAt(0) <= 'Z') {
+                builder.header(header, cmd.get(header));
+            } else {
+                throw new BasicError("HTTP request parameter '" + header + "' was not recognized as a basic request parameter, and it is not capitalized to indicate that it is a header.");
+            }
+        }
+
+
+        HttpRequest request = builder.build();
         return request;
     }
+
 }

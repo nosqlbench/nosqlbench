@@ -1,6 +1,7 @@
 package io.nosqlbench.activitytype.http;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.activitytype.cmds.ReadyHttpRequest;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -32,7 +33,7 @@ public class HttpAction implements SyncAction {
     private int maxTries = 1;
     private boolean showstmts;
 
-    private OpSequence<CommandTemplate> sequencer;
+    private OpSequence<ReadyHttpRequest> sequencer;
     private HttpClient client;
     private HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
     private long timeoutMillis;
@@ -70,35 +71,8 @@ public class HttpAction implements SyncAction {
         String ok;
 
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            CommandTemplate commandTemplate = httpActivity.getOpSequence().get(cycleValue);
-            Map<String, String> cmdMap = commandTemplate.getCommand(cycleValue);
-
-            String host = httpActivity.getHosts()[(int) cycleValue % httpActivity.getHosts().length];
-            String[] command = cmdMap.get("command").split(" ", 3); // RFC 2616 Section 5.1.2
-            ok = cmdMap.remove("ok");
-
-            // Base request
-            String method = command[0].toUpperCase();
-
-            String baseuri = command[1].trim();
-            URI uri = URI.create(baseuri);
-
-            HttpRequest.Builder builder = HttpRequest.newBuilder(uri);
-
-            HttpRequest.BodyPublisher bodysource = bodySourceFrom(cmdMap);
-            builder = builder.method(method, bodysource);
-
-            if (command.length == 3) {
-                HttpClient.Version version = HttpClient.Version.valueOf(command[2]);
-                builder.version(version);
-            }
-
-            // All known command options must be processed by this point, so the rest are headers
-            for (String mustBeAHeader : cmdMap.keySet()) {
-                builder.header(mustBeAHeader, cmdMap.get(mustBeAHeader));
-            }
-
-            request = builder.build();
+            ReadyHttpRequest readyHttpRequest = httpActivity.getOpSequence().get(cycleValue);
+            request =readyHttpRequest.apply(cycleValue);
         } catch (Exception e) {
             throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(),e);
         }
@@ -121,26 +95,26 @@ public class HttpAction implements SyncAction {
                 throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }
 
-            if (ok == null) {
-                if (response.statusCode() != 200) {
-                    throw new ResponseError("Result had status code " +
-                            response.statusCode() + ", but 'ok' was not set for this statement," +
-                            "so it is considered an error.");
-                }
-            } else {
-                String[] oks = ok.split(",");
-                for (String ok_condition : oks) {
-                    if (ok_condition.charAt(0)>='0' && ok_condition.charAt(0)<='9') {
-                        int matching_status = Integer.parseInt(ok_condition);
-                    } else {
-                        Pattern successRegex = Pattern.compile(ok);
-                    }
-                }
-//                Matcher matcher = successRegex.matcher(String.valueOf(response.statusCode()));
-//                if (!matcher.matches()) {
-//                    throw new BasicError("status code " + response.statusCode() + " did not match " + success);
+//            if (ok == null) {
+//                if (response.statusCode() != 200) {
+//                    throw new ResponseError("Result had status code " +
+//                            response.statusCode() + ", but 'ok' was not set for this statement," +
+//                            "so it is considered an error.");
 //                }
-            }
+//            } else {
+//                String[] oks = ok.split(",");
+//                for (String ok_condition : oks) {
+//                    if (ok_condition.charAt(0)>='0' && ok_condition.charAt(0)<='9') {
+//                        int matching_status = Integer.parseInt(ok_condition);
+//                    } else {
+//                        Pattern successRegex = Pattern.compile(ok);
+//                    }
+//                }
+////                Matcher matcher = successRegex.matcher(String.valueOf(response.statusCode()));
+////                if (!matcher.matches()) {
+////                    throw new BasicError("status code " + response.statusCode() + " did not match " + success);
+////                }
+//            }
         }
         return 0;
     }

@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
@@ -9,70 +10,121 @@ import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Use the {@link StmtDef} template form as a property template for parameterized
- * commands. This is a general purpose template which uses a map of named parameters.
- * The {@code command} property designates the verb component of the command.
- *
- * To be valid for use with this template type, the template specifier (the stmt String)
- * must either start with command= or have a single word at the start. In either case,
- * the command will be parsed as if it started with a command=...
- *
- * The semantics of command are meant to be generalized. For example, with HTTP, command
- * might mean the HTTP method like GET or PUT that is used. For web driver, it may be
- * a webdriver command as known by the SIDE file format.
+ * Use the {@link StmtDef} template form as a property template for parameterized commands. This is a general purpose
+ * template which uses a map of named parameters. The {@code command} property designates the verb component of the
+ * command.
+ * <p>
+ * To be valid for use with this template type, the template specifier (the stmt String) must either start with command=
+ * or have a single word at the start. In either case, the command will be parsed as if it started with a command=...
+ * <p>
+ * The semantics of command are meant to be generalized. For example, with HTTP, command might mean the HTTP method like
+ * GET or PUT that is used. For web driver, it may be a webdriver command as known by the SIDE file format.
  */
 public class CommandTemplate {
 
     private final static Logger logger = LoggerFactory.getLogger(CommandTemplate.class);
+
     private final String name;
-    private LinkedHashMap<String, StringBindings> cmdspec = new LinkedHashMap<>();
+    private final Map<String, String> statics = new HashMap<>();
+    private final Map<String, StringBindings> dynamics = new HashMap<>();
 
-    public CommandTemplate(StmtDef stmt, boolean canonicalize) {
-        this.name = stmt.getName();
-        String prefixed = stmt.getStmt();
-        prefixed = (prefixed.startsWith("command=") ? prefixed : "command=" + prefixed);
+    public CommandTemplate(OpTemplate stmt) {
+        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), null);
+    }
 
-        Map<String,String> cmdMap = ParamsParser.parse(prefixed, canonicalize);
-        Map<String, String> paramsMap = stmt.getParamsAsValueType(String.class);
-        paramsMap.forEach((k,v) -> {
-            if (cmdMap.containsKey(k)) {
+    public CommandTemplate(OpTemplate stmt, Function<String, Map<String, String>> parser) {
+        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), parser);
+    }
+
+    /**
+     * Create a command template from a set of optional properties.
+     *
+     * @param name     The name of the command template
+     * @param oneline  A oneline version of the parameters. Passed as 'stmt' in the yaml format.
+     * @param params   A set of named parameters and values in name:value form.
+     * @param bindings A set of named bindings in name:recipe form.
+     */
+    public CommandTemplate(String name, String oneline, Map<String, String> params, Map<String, String> bindings, Function<String, Map<String, String>> optionalParser) {
+
+        this.name = name;
+
+        Map<String, String> cmd = new HashMap<>();
+
+
+        // Only parse and inject the oneline form if it is defined.
+        // The first parser to match and return a map will be the last one tried.
+        // If none of the suppliemental parsers work, the default params parser is used
+        if (oneline != null) {
+            List<Function<String,Map<String,String>>> parserlist = new ArrayList<>(List.of(optionalParser));
+            parserlist.add(s -> ParamsParser.parse(s,false));
+            for (Function<String, Map<String, String>> parser : parserlist) {
+                Map<String, String> parsed = parser.apply(oneline);
+                if (parsed!=null) {
+                    logger.debug("parsed request: " + parsed.toString());
+                    cmd.putAll(parsed);
+                    break;
+                }
+            }
+        }
+
+        // Always add the named params, but warn if they overwrite any oneline named params
+        params.forEach((k, v) -> {
+            if (cmd.containsKey(k)) {
                 logger.warn("command property override: '" + k + "' superseded by param form with value '" + v + "'");
             }
-            cmdMap.put(k,v);
         });
+        cmd.putAll(params);
 
-        cmdMap.forEach((param,value) -> {
-            ParsedTemplate paramTemplate = new ParsedTemplate(value, stmt.getBindings());
-            BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
-            StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
-            cmdspec.put(param,paramStringBindings);
+        cmd.forEach((param, value) -> {
+            ParsedTemplate paramTemplate = new ParsedTemplate(value, bindings);
+            if (paramTemplate.getBindPoints().size() > 0) {
+                BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
+                StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
+                dynamics.put(param, paramStringBindings);
+                statics.put(param, null);
+            } else {
+                statics.put(param, value);
+            }
         });
     }
 
-    public CommandTemplate(String command, Map<String,String> bindings, String name, boolean canonicalize) {
-        this.name = name;
-        Map<String, String> cmdMap = ParamsParser.parse(command, canonicalize);
-        cmdMap.forEach((param,value) -> {
-            ParsedTemplate paramTemplate = new ParsedTemplate(command,bindings);
-            BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
-            StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
-            cmdspec.put(param,paramStringBindings);
-        });
-    }
 
-    public Map<String,String> getCommand(long cycle) {
-        LinkedHashMap<String, String> cmd = new LinkedHashMap<>(cmdspec.size());
-        cmdspec.forEach((k,v) -> {
-            cmd.put(k,v.bind(cycle));
+    public Map<String, String> getCommand(long cycle) {
+        HashMap<String, String> map = new HashMap<>(statics);
+        dynamics.forEach((k, v) -> {
+            map.put(k, v.bind(cycle));
         });
-        return cmd;
+        return map;
     }
 
     public String getName() {
         return name;
     }
+
+    public boolean isStatic() {
+        return this.dynamics.size() == 0;
+    }
+
+    public Set<String> getPropertyNames() {
+        return this.statics.keySet();
+    }
+
+//    private static List<String> namedGroups(String regex) {
+//        List<String> namedGroups = new ArrayList<String>();
+//
+//        Matcher m = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>").matcher(regex);
+//
+//        while (m.find()) {
+//            namedGroups.add(m.group(1));
+//        }
+//
+//        return namedGroups;
+//    }
+
 }

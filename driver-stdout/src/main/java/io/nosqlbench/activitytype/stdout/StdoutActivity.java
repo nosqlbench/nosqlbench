@@ -19,6 +19,7 @@ package io.nosqlbench.activitytype.stdout;
 
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
@@ -133,7 +134,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
 
         String format = getParams().getOptionalString("format").orElse(null);
 
@@ -156,7 +157,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 sequencer.addOp(sb,1L);
             }
         } else if (stmts.size() > 0) {
-            for (StmtDef stmt : stmts) {
+            for (OpTemplate stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
                 BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
                 String statement = parsed.getPositionalStatement(Function.identity());

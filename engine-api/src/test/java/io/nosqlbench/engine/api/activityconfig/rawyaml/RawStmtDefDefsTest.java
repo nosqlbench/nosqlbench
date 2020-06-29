@@ -18,10 +18,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
@@ -70,9 +67,9 @@ public class RawStmtDefDefsTest {
         StmtsDoc doc1 = all.getStmtDocs().get(0);
         StmtsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getName()).isEqualTo("doc1--block0");
-        List<StmtDef> assys = block1.getStmts();
+        List<OpTemplate> assys = block1.getStmts();
         assertThat(assys).hasSize(2);
-        StmtDef sdef1 = assys.get(0);
+        OpTemplate sdef1 = assys.get(0);
         assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
         assertThat(assys.get(0).getStmt()).isEqualTo("s1");
     }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,8 +110,8 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         TagFilter tagFilter = new TagFilter(tagfilter);
         stmtsDocList.getStmts().stream().map(tagFilter::matchesTaggedResult).forEach(r -> logger.info(r.getLog()));
 
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
-        for (StmtDef stmt : stmts) {
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+        for (OpTemplate stmt : stmts) {
             ParsedStmt parsed = stmt.getParsed().orError();
             String statement = parsed.getPositionalStatement(Function.identity());
             Objects.requireNonNull(statement);

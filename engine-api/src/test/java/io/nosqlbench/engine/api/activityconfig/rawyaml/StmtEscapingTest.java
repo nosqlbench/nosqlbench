@@ -18,10 +18,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.*;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StmtEscapingTest {
 
     private final static Logger logger = LoggerFactory.getLogger(StmtEscapingTest.class);
-    private static List<StmtDef> defs;
+    private static List<OpTemplate> defs;
 
     @BeforeClass
     public static void testLayering() {

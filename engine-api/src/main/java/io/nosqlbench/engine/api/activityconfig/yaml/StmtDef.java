@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class StmtDef implements Tagged {
+public class StmtDef implements OpTemplate {
 
     private final RawStmtDef rawStmtDef;
     private StmtsBlock block;
@@ -37,21 +37,27 @@ public class StmtDef implements Tagged {
         this.rawStmtDef = rawStmtDef;
     }
 
+    @Override
     public String getName() {
         return block.getName() + "--" + rawStmtDef.getName();
     }
 
+    @Override
     public String getStmt() {
         return rawStmtDef.getStmt();
     }
 
+    @Override
     public Map<String,String> getBindings() {
         return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
     }
 
+    @Override
     public Map<String, Object> getParams() {
         return new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
     }
+
+    @Override
     public <T> Map<String,T> getParamsAsValueType(Class<? extends T> type) {
         MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         Map<String,T> map = new LinkedHashMap<>();
@@ -59,6 +65,7 @@ public class StmtDef implements Tagged {
         return map;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <V> V getParamOrDefault(String name, V defaultValue) {
         Objects.requireNonNull(defaultValue);
@@ -75,6 +82,7 @@ public class StmtDef implements Tagged {
         }
     }
 
+    @Override
     public <V> V getParam(String name, Class<? extends V> type) {
         MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         Object object = lookup.get(name);
@@ -82,6 +90,7 @@ public class StmtDef implements Tagged {
         return value;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <V> Optional<V> getOptionalParam(String name, Class<? extends V> type) {
         if (type.isPrimitive()) {
@@ -104,11 +113,13 @@ public class StmtDef implements Tagged {
         return Optional.empty();
     }
 
+    @Override
     public Optional<String> getOptionalParam(String name) {
         return getOptionalParam(name,String.class);
     }
 
 
+    @Override
     public Map<String,String> getTags() {
         return new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags());
     }
@@ -118,15 +129,12 @@ public class StmtDef implements Tagged {
         return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
     }
 
-    /**
-     * Parse the statement for anchors and return a richer view of the StmtDef which
-     * is simpler to use for most statement configuration needs.
-     * @return a new {@link ParsedStmt}
-     */
+    @Override
     public ParsedStmt getParsed() {
         return new ParsedStmt(this);
     }
 
+    @Override
     public String getDesc() {
         return rawStmtDef.getDesc();
     }

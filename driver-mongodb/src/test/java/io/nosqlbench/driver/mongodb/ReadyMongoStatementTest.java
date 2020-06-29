@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -41,9 +42,9 @@ public class ReadyMongoStatementTest {
     public void testResolvePhaseRampup() {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:rampup");
 
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
-        for (StmtDef stmt : stmts) {
+        for (OpTemplate stmt : stmts) {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(2);
 
@@ -64,9 +65,9 @@ public class ReadyMongoStatementTest {
     public void testResolvePhaseMainRead() {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:main-find");
 
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
-        for (StmtDef stmt : stmts) {
+        for (OpTemplate stmt : stmts) {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(1);
 
@@ -86,9 +87,9 @@ public class ReadyMongoStatementTest {
     public void testResolvePhaseMainWrite() {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:main-insert");
 
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
-        for (StmtDef stmt : stmts) {
+        for (OpTemplate stmt : stmts) {
             ParsedStmt parsed = stmt.getParsed().orError();
             assertThat(parsed.getBindPoints()).hasSize(2);
 

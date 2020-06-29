@@ -1,5 +1,6 @@
 package io.nosqlbench.activitytype.http;
 
+import io.nosqlbench.activitytype.cmds.ReadyHttpRequest;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
@@ -52,7 +53,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     private String[] hosts;
     private int port;
 
-    private OpSequence<CommandTemplate> opSequence;
+    private OpSequence<ReadyHttpRequest> opSequence;
 
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -65,15 +66,14 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public void initActivity() {
         super.initActivity();
 
-        stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
-
+//        stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
         maxTries = activityDef.getParams().getOptionalInteger("maxTries").orElse(1);
-        showstmnts = activityDef.getParams().getOptionalBoolean("showstmnts").orElse(false);
+//        showstmnts = activityDef.getParams().getOptionalBoolean("showstmnts").orElse(false);
 
-        hosts = activityDef.getParams().getOptionalString("host").orElse("localhost").split(",");
-        port = activityDef.getParams().getOptionalInteger("port").orElse(80);
+//        hosts = activityDef.getParams().getOptionalString("host").orElse("localhost").split(",");
+//        port = activityDef.getParams().getOptionalInteger("port").orElse(80);
 
-        this.opSequence = createDefaultOpSequence();
+        this.opSequence = createOpSequence(ReadyHttpRequest::new);
         setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
@@ -108,7 +108,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return port;
     }
 
-    public OpSequence<CommandTemplate> getOpSequence() {
+    public OpSequence<ReadyHttpRequest> getOpSequence() {
         return opSequence;
     }
 }

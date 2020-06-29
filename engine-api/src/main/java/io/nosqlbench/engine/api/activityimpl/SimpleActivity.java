@@ -12,6 +12,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -329,7 +331,7 @@ public class SimpleActivity implements Activity {
 
     }
 
-    protected OpSequence<CommandTemplate> createDefaultOpSequence() {
+    protected <O> OpSequence<O> createOpSequence(Function<OpTemplate,O> opinit) {
         StrInterpolator interp = new StrInterpolator(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
         StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
@@ -338,19 +340,21 @@ public class SimpleActivity implements Activity {
                 .getOptionalString("seq")
                 .map(SequencerType::valueOf)
                 .orElse(SequencerType.bucket);
-        SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
+        SequencePlanner<O> planner = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
 
         if (stmts.size() == 0) {
             throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
         }
 
-        for (StmtDef optemplate : stmts) {
+        for (OpTemplate optemplate : stmts) {
             long ratio = optemplate.getParamOrDefault("ratio", 1);
-            CommandTemplate cmd = new CommandTemplate(optemplate, false);
-            planner.addOp(cmd, ratio);
+
+//            CommandTemplate cmd = new CommandTemplate(optemplate);
+            O driverSpecificOp = opinit.apply(optemplate);
+            planner.addOp(driverSpecificOp, ratio);
         }
         return planner.resolve();
     }

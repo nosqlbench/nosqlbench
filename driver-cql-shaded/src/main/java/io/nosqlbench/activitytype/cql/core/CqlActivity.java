@@ -30,6 +30,7 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -61,7 +62,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private final ActivityDef activityDef;
     private final Map<String, Writer> namedWriters = new HashMap<>();
-    protected List<StmtDef> stmts;
+    protected List<OpTemplate> stmts;
     Timer retryDelayTimer;
     Timer bindTimer;
     Timer executeTimer;
@@ -157,7 +158,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             throw new RuntimeException("There were no unfiltered statements found for this activity.");
         }
 
-        for (StmtDef stmtDef : stmts) {
+        for (OpTemplate stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
