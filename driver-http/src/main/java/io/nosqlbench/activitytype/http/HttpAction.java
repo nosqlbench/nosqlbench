@@ -4,24 +4,38 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class HttpAction implements SyncAction {
 
     private final static Logger logger = LoggerFactory.getLogger(HttpAction.class);
+
     private final HttpActivity httpActivity;
     private final int slot;
     private int maxTries = 1;
     private boolean showstmts;
 
-    private OpSequence<StringBindings> sequencer;
+    private OpSequence<CommandTemplate> sequencer;
+    private HttpClient client;
+    private HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
+    private long timeoutMillis;
 
 
     public HttpAction(ActivityDef activityDef, int slot, HttpActivity httpActivity) {
@@ -32,6 +46,8 @@ public class HttpAction implements SyncAction {
     @Override
     public void init() {
         this.sequencer = httpActivity.getOpSequence();
+        this.client = HttpClient.newHttpClient();
+
     }
 
     @Override
@@ -40,86 +56,179 @@ public class HttpAction implements SyncAction {
         String statement = null;
         InputStream result = null;
 
-        try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            stringBindings = sequencer.get(cycleValue);
-            statement = stringBindings.bind(cycleValue);
+        // The bind timer captures all the time involved in preparing the
+        // operation for execution, including data generation as well as
+        // op construction
 
-            String[] splitStatement = statement.split("\\?");
-            String path, query;
+        // The request to be used must be constructed from the template each time.
+        HttpRequest request=null;
+
+        // A specifier for what makes a response ok. If this is provided, then it is
+        // either a list of valid http status codes, or if non-numeric, a regex for the body
+        // which must match.
+        // If not provided, then status code 200 is the only thing required to be matched.
+        String ok;
+
+        try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
+            CommandTemplate commandTemplate = httpActivity.getOpSequence().get(cycleValue);
+            Map<String, String> cmdMap = commandTemplate.getCommand(cycleValue);
 
             String host = httpActivity.getHosts()[(int) cycleValue % httpActivity.getHosts().length];
+            String[] command = cmdMap.get("command").split(" ", 3); // RFC 2616 Section 5.1.2
+            ok = cmdMap.remove("ok");
 
-            path = splitStatement[0];
-            query = "";
+            // Base request
+            String method = command[0].toUpperCase();
 
-            if (splitStatement.length >= 2) {
-                query = splitStatement[1];
+            String baseuri = command[1].trim();
+            URI uri = URI.create(baseuri);
+
+            HttpRequest.Builder builder = HttpRequest.newBuilder(uri);
+
+            HttpRequest.BodyPublisher bodysource = bodySourceFrom(cmdMap);
+            builder = builder.method(method, bodysource);
+
+            if (command.length == 3) {
+                HttpClient.Version version = HttpClient.Version.valueOf(command[2]);
+                builder.version(version);
             }
 
-            URI uri = new URI(
-                "http",
-                null,
-                host,
-                httpActivity.getPort(),
-                path,
-                query,
-                null);
-
-                statement = uri.toString();
-
-            showstmts = httpActivity.getShowstmts();
-            if (showstmts) {
-                logger.info("STMT(cycle=" + cycleValue + "):\n" + statement);
+            // All known command options must be processed by this point, so the rest are headers
+            for (String mustBeAHeader : cmdMap.keySet()) {
+                builder.header(mustBeAHeader, cmdMap.get(mustBeAHeader));
             }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+
+            request = builder.build();
+        } catch (Exception e) {
+            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(),e);
         }
 
-        long nanoStartTime=System.nanoTime();
         int tries = 0;
-
         while (tries < maxTries) {
             tries++;
 
+            CompletableFuture<HttpResponse<String>> responseFuture;
             try (Timer.Context executeTime = httpActivity.executeTimer.time()) {
-                URL url = new URL(statement);
-//
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                result = conn.getInputStream();
+                responseFuture = client.sendAsync(request, this.bodyreader);
             } catch (Exception e) {
-                throw new RuntimeException("Error writing output:" + e, e);
+                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }
 
-            Timer.Context resultTime = httpActivity.resultTimer.time();
-            try {
-                StringBuilder res = new StringBuilder();
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(result));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    res.append(line);
-                }
-                rd.close();
-
+            HttpResponse<String> response;
+            try (Timer.Context resultTime = httpActivity.resultTimer.time()) {
+                response = responseFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
-                long resultNanos = resultTime.stop();
-                resultTime=null;
-            } finally {
-                if (resultTime!=null) {
-                    resultTime.stop();
-                }
-
+                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }
 
+            if (ok == null) {
+                if (response.statusCode() != 200) {
+                    throw new ResponseError("Result had status code " +
+                            response.statusCode() + ", but 'ok' was not set for this statement," +
+                            "so it is considered an error.");
+                }
+            } else {
+                String[] oks = ok.split(",");
+                for (String ok_condition : oks) {
+                    if (ok_condition.charAt(0)>='0' && ok_condition.charAt(0)<='9') {
+                        int matching_status = Integer.parseInt(ok_condition);
+                    } else {
+                        Pattern successRegex = Pattern.compile(ok);
+                    }
+                }
+//                Matcher matcher = successRegex.matcher(String.valueOf(response.statusCode()));
+//                if (!matcher.matches()) {
+//                    throw new BasicError("status code " + response.statusCode() + " did not match " + success);
+//                }
+            }
         }
-        long resultNanos=System.nanoTime() - nanoStartTime;
-        httpActivity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
-
-
         return 0;
     }
-    protected HttpActivity getHttpActivity() {
-        return httpActivity;
+
+//                String body = future.body();
+
+
+//            String[] splitStatement = statement.split("\\?");
+//            String path, query;
+//
+//            path = splitStatement[0];
+//            query = "";
+//
+//            if (splitStatement.length >= 2) {
+//                query = splitStatement[1];
+//            }
+//
+//            URI uri = new URI(
+//                "http",
+//                null,
+//                host,
+//                httpActivity.getPort(),
+//                path,
+//                query,
+//                null);
+//
+//                statement = uri.toString();
+//
+//            showstmts = httpActivity.getShowstmts();
+
+//            if (showstmts) {
+//                logger.info("STMT(cycle=" + cycleValue + "):\n" + statement);
+//            }
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+//
+//        long nanoStartTime=System.nanoTime();
+//
+
+//                Timer.Context resultTime = httpActivity.resultTimer.time();
+//                try {
+//                    StringBuilder res = new StringBuilder();
+//
+//                    BufferedReader rd = new BufferedReader(new InputStreamReader(result));
+//                    String line;
+//                    while ((line = rd.readLine()) != null) {
+//                        res.append(line);
+//                    }
+//                    rd.close();
+//
+//                } catch (Exception e) {
+//                    long resultNanos = resultTime.stop();
+//                    resultTime = null;
+//                } finally {
+//                    if (resultTime != null) {
+//                        resultTime.stop();
+//                    }
+//
+//                }
+//
+//            }
+//            long resultNanos = System.nanoTime() - nanoStartTime;
+//            httpActivity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+
+
+//        protected HttpActivity getHttpActivity () {
+//            return httpActivity;
+//        }
+//    }
+
+    private HttpRequest.BodyPublisher bodySourceFrom(Map<String, String> cmdMap) {
+        if (cmdMap.containsKey("body")) {
+            String body = cmdMap.remove("body");
+            return HttpRequest.BodyPublishers.ofString(body);
+        } else if (cmdMap.containsKey("file")) {
+            try {
+                String file = cmdMap.get("file");
+                Path path = Path.of(file);
+                return HttpRequest.BodyPublishers.ofFile(path);
+            } catch (FileNotFoundException e) {
+                throw new BasicError("Could not find file content for request at " + cmdMap.get("file"));
+            }
+        } else {
+            return HttpRequest.BodyPublishers.noBody();
+        }
+
     }
+
+
 }

@@ -1,52 +1,84 @@
-# http activity type
+# HTTP driver
 
-This activity type allows for basic HTTP requests.
-As of this release, only GET requests are supported.
+This driver allows you to make http requests using the native HTTP client that is bundled with the
+JVM. It supports free-form construction of requests.
 
-## Example activity definitions
+## Example Statements
 
-Run an http activity named 'http-test', with definitions from activities/http-google.yaml:
-~~~
-... driver=http workload=http-google
-~~~
+You can use an _inline request template_ form below to represent a request as it would be submitted
+according to the HTTP protocol. This isn't actually the content that is submitted, but it is
+recognized as a valid way to express the request parameters in a familiar and condensed form:
 
-This last example shows that the cycle range is [inclusive..exclusive),
-to allow for stacking test intervals. This is standard across all
-activity types.
+```yaml
+statements:
+ - s1: |
+    POST http://{host}:{port}/{path}?{query} HTTP/1.1
+    Content-Type: application/json
+    token: mybearertokenfoobarbazomgwtfbbq
+    
+    {body} 
+```
 
-## stdout ActivityType Parameters
+You can also provide the building blocks of a request in named fields:
 
-- **host** - The hosts to send requests to. The hosts are selected in
-  round-robin fashion.
-  (default: localhost)
-- **workload** - The workload definition file which holds the schema and statement defs.
-  (no default, required)
-- **cycles** - standard, however the activity type will default
-  this to however many statements are included in the current
-  activity, after tag filtering, etc.
-  (default: 0)
-- **alias** - this is a standard nosqlbench parameter
-  (default: derived from the workload name)
+```yaml
+  - method: GET
+    version: HTTP/1.1
+    "Content-Type": "application/json"
+    body: {body}
+    path: {path}
+    ok-status: 2[0-9][0-9]
+    ok-body: ^(OK, account id is .*)$
+```
 
-## Configuration
+As you may guess from the above example, some reserved words are recognized as standard request
+parameters. They are explained here in more detail:
 
-This activity type uses the uniform yaml configuration format.
-For more details on this format, please refer to the
-[Standard YAML Format](http://docs.nosqlbench.io/user-guide/standard_yaml/)
+- **method** - An optional request method. If not provided, "GET" is assumed. Any method name will
+  work here, even custom ones that are specific to a given target system. No validation is done for
+  standard method names, as there is no way to know what method names may be valid.
+- **host** - The name of the host which should go into the URI. This can also be an ip address if
+  you do not need support for virtual hosts. If there are multiple hosts provided to the activity,
+  then this value is selected in round-robin style. **default: localhost**
+- **port** - The post to connect to. If it is provided, then it is added to the URI, even if it is
+  the default for the scheme (80 for http, or 443 for https)
+- **path** - The path component of the URI.
+- **query** - A query string. If this is provided, it is appended to the path in the URI with a
+  leading question mark.
+- **version** - The HTTP version to use. If this value is not provided, the default version for the
+  Java HttpClient is used. If it is provided, it must be one of 'HTTP_1_1', or 'HTTP_2'.
+- **body** - The content of the request body, for methods which support it.
+- **ok-status** - An optional set of rules to use to verify that a response is valid. This is a
+  simple comma or space separated list of integer status codes or a pattern which is used as a regex
+  against the string form of a status code. If any characters other than digits spaces and commas
+  are found in this value, then it is taken as a regex. If this is not provided, then any status
+  code which is >=200 and <300 is considered valid.
+- **ok-body** - An optional regex pattern which will be applied to the body to verify that it is a
+  valid response. If this is not provided, then content bodies are read, but any content is
+  considered valid.
 
-## Configuration Parameters
+Any other statement parameter which is capitalized is taken as a request header. If additional
+fields are provided which are not included in the above list, or which are not capitalized, then an
+error is thrown.
 
-- **ratio** - If a statement has this param defined, then it determines
-  whether or not to automatically add a missing newline for that statement
-  only. If this is not defined for a statement, then the activity-level
-  parameter takes precedence.
-- **seq** - The statement sequencer scheme.
-  (default: bucket)
+## Error Handling & Retries
 
-## Statement Format
+Presently, no determination is made about whether or not an errored response *should* be retryable.
+Contextual error handling may be added in a future version.
 
-The statement format for this activity type is a simple string. Tokens between
-curly braces are used to refer to binding names, as in the following example:
+## SSL Support
 
-    statements:
-     - "/{path}?{queryparam1}"
+SSL Support will be added before this driver is considered ready for general use.
+
+## Client Behavior
+
+### TCP Sessions
+
+The HTTP clients are allocated one to each thread. The TCP connection caching is entirely left to
+the defaults for the current HttpClient library that is bundled within the JVM.
+
+### Chunked encoding and web sockets
+
+Presently, this driver only does basic request-response style requests. Thus, adding headers which
+take TCP socket control away from the HttpClient will likely yield inconsistent (or undefined)
+results. Support may be added for long-lived connections in a future release.

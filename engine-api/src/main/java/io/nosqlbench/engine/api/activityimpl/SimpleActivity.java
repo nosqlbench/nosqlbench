@@ -6,10 +6,18 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispens
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
+import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -320,4 +328,31 @@ public class SimpleActivity implements Activity {
         }
 
     }
+
+    protected OpSequence<CommandTemplate> createDefaultOpSequence() {
+        StrInterpolator interp = new StrInterpolator(activityDef);
+        String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+
+        SequencerType sequencerType = getParams()
+                .getOptionalString("seq")
+                .map(SequencerType::valueOf)
+                .orElse(SequencerType.bucket);
+        SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
+
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+
+        if (stmts.size() == 0) {
+            throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+        }
+
+        for (StmtDef optemplate : stmts) {
+            long ratio = optemplate.getParamOrDefault("ratio", 1);
+            CommandTemplate cmd = new CommandTemplate(optemplate, false);
+            planner.addOp(cmd, ratio);
+        }
+        return planner.resolve();
+    }
+
 }

@@ -15,6 +15,9 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
@@ -32,7 +35,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return stmtsDocList;
     }
 
-    private final StmtsDocList stmtsDocList;
+    private StmtsDocList stmtsDocList;
 
 
     private int stride;
@@ -49,17 +52,11 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     private String[] hosts;
     private int port;
 
-    private OpSequence<StringBindings> opSequence;
+    private OpSequence<CommandTemplate> opSequence;
 
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
         this.activityDef = activityDef;
-
-        String yaml_loc = activityDef.getParams()
-                .getOptionalString("yaml", "workload")
-                .orElse("default");
-
-        stmtsDocList = StatementsLoader.loadPath(logger,yaml_loc, "activities");
     }
 
 
@@ -76,8 +73,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         hosts = activityDef.getParams().getOptionalString("host").orElse("localhost").split(",");
         port = activityDef.getParams().getOptionalInteger("port").orElse(80);
 
-
-        opSequence = initOpSequencer();
+        this.opSequence = createDefaultOpSequence();
         setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
@@ -89,34 +85,6 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         resultSuccessTimer = ActivityMetrics.timer(activityDef,"result-success");
 
         onActivityDefUpdate(activityDef);
-    }
-
-    private OpSequence<StringBindings> initOpSequencer() {
-        SequencerType sequencerType = SequencerType.valueOf(
-                getParams().getOptionalString("seq").orElse("bucket")
-        );
-        SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
-
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
-
-        if (stmts.size() > 0) {
-            for (StmtDef stmt : stmts) {
-                ParsedStmt parsed = stmt.getParsed().orError();
-                BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
-                String statement = parsed.getPositionalStatement(Function.identity());
-                Objects.requireNonNull(statement);
-
-                StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
-                StringBindings sb = sbt.resolve();
-                sequencer.addOp(sb,stmt.getParamOrDefault("ratio",1));
-            }
-        } else {
-            logger.error("Unable to create an HTTP statement if no bindings or statements are defined.");
-        }
-//
-        OpSequence<StringBindings> opSequence = sequencer.resolve();
-        return opSequence;
     }
 
     @Override
@@ -140,7 +108,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return port;
     }
 
-    public OpSequence<StringBindings> getOpSequence() {
+    public OpSequence<CommandTemplate> getOpSequence() {
         return opSequence;
     }
 }

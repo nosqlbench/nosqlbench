@@ -1,7 +1,7 @@
 package io.nosqlbench.driver.webdriver.verbs;
 
-import io.nosqlbench.driver.webdriver.CommandTemplate;
 import io.nosqlbench.driver.webdriver.WebContext;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

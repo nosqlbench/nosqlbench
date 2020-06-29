@@ -4,6 +4,7 @@ import io.nosqlbench.driver.webdriver.verbs.WebDriverVerbs;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class WebDriverAction implements SyncAction, ActivityDefObserver {
     // factor.
     @Override
     public int runCycle(long value) {
+
         CommandTemplate commandTemplate = activity.getOpSequence().get(value);
         try {
             WebDriverVerbs.execute(value, commandTemplate, context, dryrun);

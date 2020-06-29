@@ -22,14 +22,24 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.content.Content;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
 public class StatementsLoader {
 
+    private final static Logger logger = LoggerFactory.getLogger(StatementsLoader.class);
+
     public enum Loader {
         original,
         generified
+    }
+
+    public static StmtsDocList loadString(String yamlContent) {
+        RawStmtsLoader loader = new RawStmtsLoader();
+        RawStmtsDocList rawDocList = loader.loadString(logger, yamlContent);
+        StmtsDocList layered = new StmtsDocList(rawDocList);
+        return layered;
     }
 
     public static StmtsDocList loadContent(

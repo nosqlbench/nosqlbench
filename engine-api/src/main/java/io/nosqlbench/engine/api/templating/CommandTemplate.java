@@ -1,17 +1,14 @@
-package io.nosqlbench.driver.webdriver;
+package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.nodes.ScalarNode;
 
-import java.security.InvalidParameterException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,6 +16,14 @@ import java.util.Map;
  * Use the {@link StmtDef} template form as a property template for parameterized
  * commands. This is a general purpose template which uses a map of named parameters.
  * The {@code command} property designates the verb component of the command.
+ *
+ * To be valid for use with this template type, the template specifier (the stmt String)
+ * must either start with command= or have a single word at the start. In either case,
+ * the command will be parsed as if it started with a command=...
+ *
+ * The semantics of command are meant to be generalized. For example, with HTTP, command
+ * might mean the HTTP method like GET or PUT that is used. For web driver, it may be
+ * a webdriver command as known by the SIDE file format.
  */
 public class CommandTemplate {
 
@@ -46,7 +51,6 @@ public class CommandTemplate {
             StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
             cmdspec.put(param,paramStringBindings);
         });
-
     }
 
     public CommandTemplate(String command, Map<String,String> bindings, String name, boolean canonicalize) {
@@ -58,7 +62,6 @@ public class CommandTemplate {
             StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
             cmdspec.put(param,paramStringBindings);
         });
-
     }
 
     public Map<String,String> getCommand(long cycle) {
