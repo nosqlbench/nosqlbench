@@ -236,7 +236,7 @@ public class SimpleActivity implements Activity {
                 .map(RateSpec::new)
                 .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
 
-        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
+        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate","rate")
                 .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
