@@ -28,7 +28,7 @@ public class TargetRateInputType implements InputType {
 
     @Override
     public String getName() {
-        return "targetrate";
+        return "atomicseq";
     }
 
     @Override
