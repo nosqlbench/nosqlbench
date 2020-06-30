@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Use the {@link StmtDef} template form as a property template for parameterized commands. This is a general purpose
@@ -35,11 +33,11 @@ public class CommandTemplate {
     private final Map<String, StringBindings> dynamics = new HashMap<>();
 
     public CommandTemplate(OpTemplate stmt) {
-        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), null);
+        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), List.of());
     }
 
-    public CommandTemplate(OpTemplate stmt, Function<String, Map<String, String>> parser) {
-        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), parser);
+    public CommandTemplate(OpTemplate stmt, List<Function<String, Map<String, String>>> parsers) {
+        this(stmt.getName(), stmt.getStmt(), stmt.getParamsAsValueType(String.class), stmt.getBindings(), parsers);
     }
 
     /**
@@ -50,7 +48,7 @@ public class CommandTemplate {
      * @param params   A set of named parameters and values in name:value form.
      * @param bindings A set of named bindings in name:recipe form.
      */
-    public CommandTemplate(String name, String oneline, Map<String, String> params, Map<String, String> bindings, Function<String, Map<String, String>> optionalParser) {
+    public CommandTemplate(String name, String oneline, Map<String, String> params, Map<String, String> bindings, List<Function<String, Map<String, String>>> optionalParsers) {
 
         this.name = name;
 
@@ -61,7 +59,7 @@ public class CommandTemplate {
         // The first parser to match and return a map will be the last one tried.
         // If none of the suppliemental parsers work, the default params parser is used
         if (oneline != null) {
-            List<Function<String,Map<String,String>>> parserlist = new ArrayList<>(List.of(optionalParser));
+            List<Function<String,Map<String,String>>> parserlist = new ArrayList<>(optionalParsers);
             parserlist.add(s -> ParamsParser.parse(s,false));
             for (Function<String, Map<String, String>> parser : parserlist) {
                 Map<String, String> parsed = parser.apply(oneline);

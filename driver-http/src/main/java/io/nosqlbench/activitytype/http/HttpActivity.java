@@ -41,6 +41,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
     private int stride;
     private Integer maxTries;
+    private long timeout_ms = 30_000L;
     private Boolean showstmnts;
     public Timer bindTimer;
     public Timer executeTimer;
@@ -68,6 +69,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
 //        stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
         maxTries = activityDef.getParams().getOptionalInteger("maxTries").orElse(1);
+        timeout_ms = activityDef.getParams().getOptionalLong("timeout_ms").orElse(30_000L);
 //        showstmnts = activityDef.getParams().getOptionalBoolean("showstmnts").orElse(false);
 
 //        hosts = activityDef.getParams().getOptionalString("host").orElse("localhost").split(",");
@@ -110,5 +112,9 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
     public OpSequence<ReadyHttpRequest> getOpSequence() {
         return opSequence;
+    }
+
+    public long getTimeoutMs() {
+        return timeout_ms;
     }
 }

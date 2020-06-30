@@ -7,7 +7,14 @@ import java.util.Map;
 
 public class HttpFormatParser {
 
-    public static Map<String,String> parse(String command) {
+    public static Map<String,String> parseUrl(String uri) {
+        if (uri.matches("http.+")) {
+            return Map.of("uri",uri);
+        }
+        return null;
+    }
+
+    public static Map<String,String> parseInline(String command) {
         if (command==null) {
             return null;
         }

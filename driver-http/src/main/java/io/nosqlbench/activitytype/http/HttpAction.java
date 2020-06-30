@@ -36,7 +36,7 @@ public class HttpAction implements SyncAction {
     private OpSequence<ReadyHttpRequest> sequencer;
     private HttpClient client;
     private HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
-    private long timeoutMillis;
+    private long timeoutMillis=30000L;
 
 
     public HttpAction(ActivityDef activityDef, int slot, HttpActivity httpActivity) {
@@ -90,7 +90,7 @@ public class HttpAction implements SyncAction {
 
             HttpResponse<String> response;
             try (Timer.Context resultTime = httpActivity.resultTimer.time()) {
-                response = responseFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+                response = responseFuture.get(httpActivity.getTimeoutMs(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }

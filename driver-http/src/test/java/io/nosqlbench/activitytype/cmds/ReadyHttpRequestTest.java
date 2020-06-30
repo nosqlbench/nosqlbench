@@ -2,7 +2,6 @@ package io.nosqlbench.activitytype.cmds;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import org.junit.Test;
 
@@ -98,14 +97,14 @@ public class ReadyHttpRequestTest {
                 " body: StaticString('test')\n");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        Map<String, String> parse = HttpFormatParser.parse(stmtDef.getStmt());
+        Map<String, String> parse = HttpFormatParser.parseInline(stmtDef.getStmt());
         assertThat(parse).containsAllEntriesOf(
                 Map.of(
                         "method", "{method}",
                         "uri", "{scheme}://{host}/{path}?{query}",
                         "version", "{version}",
                         "Header1","{header1val}",
-                        "body","{body}\n"
+                        "body","{body}"
                 )
         );
 

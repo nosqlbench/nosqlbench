@@ -160,7 +160,7 @@ public class WebDriverActivity extends SimpleActivity {
             .orElse(SequencerType.bucket);
         SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
         commands.forEach((name,cmd) -> {
-            CommandTemplate commandTemplate = new CommandTemplate(name, cmd, Map.of(), Map.of());
+            CommandTemplate commandTemplate = new CommandTemplate(name, cmd, Map.of(), Map.of(),List.of());
             planner.addOp(commandTemplate,(c) -> 1L);
         });
         OpSequence<CommandTemplate> sequence = planner.resolve();
