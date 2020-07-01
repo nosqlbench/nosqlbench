@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -26,6 +28,12 @@ import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodec;
+import org.bson.codecs.configuration.CodecRegistry;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class MongoActivity extends SimpleActivity implements ActivityDefObserver {
 
@@ -45,8 +53,8 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
     Timer bindTimer;
     Timer resultTimer;
     Timer resultSuccessTimer;
-    Histogram resultSetSizeHisto;
     Histogram triesHisto;
+    Histogram resultSetSizeHisto;
 
     public MongoActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -74,7 +82,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         opSequence = initOpSequencer();
         setDefaultsFromOpSequence(opSequence);
 
-        client = MongoClients.create(connectionString);
+        client = createMongoClient(connectionString);
         mongoDatabase = client.getDatabase(databaseName);
         showQuery = activityDef.getParams().getOptionalBoolean("showquery")
                                .orElse(false);
@@ -111,15 +119,30 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         stmtsDocList.getStmts().stream().map(tagFilter::matchesTaggedResult).forEach(r -> logger.info(r.getLog()));
 
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
-        for (OpTemplate stmt : stmts) {
-            ParsedStmt parsed = stmt.getParsed().orError();
-            String statement = parsed.getPositionalStatement(Function.identity());
-            Objects.requireNonNull(statement);
+        if (stmts.isEmpty()) {
+            logger.error("No statements found for this activity");
+        } else {
+            for (OpTemplate stmt : stmts) {
+                ParsedStmt parsed = stmt.getParsed().orError();
+                String statement = parsed.getPositionalStatement(Function.identity());
+                Objects.requireNonNull(statement);
 
-            sequencer.addOp(new ReadyMongoStatement(stmt), stmt.getParamOrDefault("ratio",1));
+                sequencer.addOp(new ReadyMongoStatement(stmt), stmt.getParamOrDefault("ratio",1));
+            }
         }
 
         return sequencer.resolve();
+    }
+
+    MongoClient createMongoClient(String connectionString) {
+        CodecRegistry codecRegistry = fromRegistries(fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
+                                                     MongoClientSettings.getDefaultCodecRegistry());
+        MongoClientSettings settings = MongoClientSettings.builder()
+                                                          .applyConnectionString(new ConnectionString(connectionString))
+                                                          .codecRegistry(codecRegistry)
+                                                          .uuidRepresentation(UuidRepresentation.STANDARD)
+                                                          .build();
+        return MongoClients.create(settings);
     }
 
     protected MongoDatabase getDatabase() {

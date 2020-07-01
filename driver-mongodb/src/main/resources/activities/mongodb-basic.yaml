@@ -1,15 +1,15 @@
-# nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup
+# nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup cycles=1M
 description: An exmaple of a basic mongo insert and find.
 
 scenarios:
   default:
-    - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    - run driver=mongodb tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,1000000) threads=auto
+    - run driver=mongodb tags==phase:main cycles===TEMPLATE(main-cycles,1000000) threads=auto
 bindings:
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  seq_key: Mod(<<keyCount:1000000>>L); ToInt()
+  seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToString() -> String
+  rw_key: <<keyDist:Uniform(0,1000000)->long>>; ToInt()
+  rw_value: <<valDist:Uniform(0,1000000000)->int>>; <<valueSizeDist:Hash()>>; ToString() -> String
 
 blocks:
   - name: rampup
@@ -19,24 +19,24 @@ blocks:
       - rampup-insert: |
           {
             insert: "<<collection:keyvalue>>",
-            documents: [ { key: {seq_key},
+            documents: [ { _id: {seq_key},
                            value: {seq_value} } ]
           }
         params:
           readPreference: primary
         tags:
-           name: rampup-insert
+          name: rampup-insert
   - name: main-read
     tags:
       phase: main
       type: read
     params:
-      ratio: <<read_ratio:5>>
+      ratio: <<read_ratio:1>>
     statements:
       - main-find: |
           {
             find: "<<collection:keyvalue>>",
-            filter: { key: {rw_key} }
+            filter: { _id: {rw_key} }
           }
         params:
           readPreference: primary
@@ -47,15 +47,15 @@ blocks:
       phase: main
       type: write
     params:
-      ratio: <<write_ratio:5>>
+      ratio: <<write_ratio:1>>
     statements:
       - main-insert: |
           {
             insert: "<<collection:keyvalue>>",
-            documents: [ { key: {rw_key},
+            documents: [ { _id: {rw_key},
                            value: {rw_value} } ]
           }
         params:
           readPreference: primary
         tags:
-           name: main-insert
+          name: main-insert

@@ -28,8 +28,7 @@ public class MongoActivityType implements ActivityType<MongoActivity> {
 
         private final MongoActivity activity;
 
-        public MongoActionDispenser(MongoActivity activity)
-        {
+        public MongoActionDispenser(MongoActivity activity) {
             this.activity = activity;
         }
 
