@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.*;
 
-public class StatementsOwner extends BlockParams {
+public class StatementsOwner extends RawStmtFields {
 
     private List<RawStmtDef> rawStmtDefs = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class StatementsOwner extends BlockParams {
         }
 
         if (statementsObject!=null) {
-            setByObject(statementsObject);
+            setStatementsFieldByObjectType(statementsObject);
         }
 //        if (statementsObject!=null) {
 //            if (statementsObject instanceof List) {
@@ -55,7 +55,7 @@ public class StatementsOwner extends BlockParams {
     }
 
     @SuppressWarnings("unchecked")
-    public void setByObject(Object object) {
+    public void setStatementsFieldByObjectType(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
             List<RawStmtDef> defs = new ArrayList<>(stmtList.size());
@@ -90,7 +90,7 @@ public class StatementsOwner extends BlockParams {
                     throw new RuntimeException("Unknown inner value type on map-based statement definition.");
                 }
             }
-            setByObject(itemizedMaps);
+            setStatementsFieldByObjectType(itemizedMaps);
         } else if (object instanceof String) {
             List<RawStmtDef> defs = new ArrayList<>();
             defs.add(new RawStmtDef(null,(String)object));

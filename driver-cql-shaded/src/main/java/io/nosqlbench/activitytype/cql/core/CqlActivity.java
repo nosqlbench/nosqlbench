@@ -31,7 +31,6 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
@@ -165,13 +164,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             boolean parametrized = stmtDef.getParamOrDefault("parametrized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
-            Optional<ConsistencyLevel> cl = stmtDef.getOptionalParam("cl", String.class).map(ConsistencyLevel::valueOf);
-            Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalParam("serial_cl").map(ConsistencyLevel::valueOf);
-            Optional<Boolean> idempotent = stmtDef.getOptionalParam("idempotent").map(Boolean::parseBoolean);
+            Optional<ConsistencyLevel> cl = stmtDef.getOptionalStringParam("cl", String.class).map(ConsistencyLevel::valueOf);
+            Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalStringParam("serial_cl").map(ConsistencyLevel::valueOf);
+            Optional<Boolean> idempotent = stmtDef.getOptionalStringParam("idempotent",Boolean.class);
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = stmtDef.getOptionalParam("instrument",Boolean.class)
+            boolean instrument = stmtDef.getOptionalStringParam("instrument",Boolean.class)
                     .or(() -> getParams().getOptionalBoolean("instrument"))
                     .orElse(false);
 
@@ -205,7 +204,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     prepare.setIdempotent(i);
                 });
 
-                CqlBinderTypes binderType = stmtDef.getOptionalParam("binder")
+                CqlBinderTypes binderType = stmtDef.getOptionalStringParam("binder")
                         .map(CqlBinderTypes::valueOf)
                         .orElse(CqlBinderTypes.DEFAULT);
 
@@ -229,7 +228,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         parsed.getName(), parametrized);
             }
 
-            stmtDef.getOptionalParam("save")
+            stmtDef.getOptionalStringParam("save")
                     .map(s -> s.split("[,: ]"))
                     .map(Save::new)
                     .ifPresent(save_op -> {
@@ -237,7 +236,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         template.addRowCycleOperators(save_op);
                     });
 
-            stmtDef.getOptionalParam("rsoperators")
+            stmtDef.getOptionalStringParam("rsoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(ResultSetCycleOperators::newOperator)
@@ -246,7 +245,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         template.addResultSetOperators(rso);
                     });
 
-            stmtDef.getOptionalParam("rowoperators")
+            stmtDef.getOptionalStringParam("rowoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(RowCycleOperators::newOperator)
