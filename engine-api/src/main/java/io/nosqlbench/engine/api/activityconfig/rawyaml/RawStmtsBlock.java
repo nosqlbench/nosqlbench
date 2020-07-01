@@ -17,12 +17,11 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * A StmtsDef contains a list of rawStmts, as well as all of the optional
- * block parameters that can be assigned to {@link BlockParams}, which includes
+ * block parameters that can be assigned to {@link RawStmtFields}, which includes
  * a name, config values, data bindings, and filtering tags.
  */
 public class RawStmtsBlock extends StatementsOwner {

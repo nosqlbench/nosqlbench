@@ -18,18 +18,17 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class BlockParams extends Tags {
+public class RawStmtFields extends Tags {
 
     private String name = "";
     private String desc = "";
     private final Map<String, String> bindings = new LinkedHashMap<>();
     private final Map<String, Object> params = new LinkedHashMap<>();
 
-    public BlockParams() {
+    public RawStmtFields() {
     }
 
     public String getDesc() {
@@ -76,7 +75,7 @@ public class BlockParams extends Tags {
         this.params.putAll(config);
     }
 
-    public void applyBlockParams(BlockParams other) {
+    public void applyBlockParams(RawStmtFields other) {
         setName(other.getName());
         setBindings(other.getBindings());
         setTags(other.getTags());
@@ -110,7 +109,13 @@ public class BlockParams extends Tags {
         if (paramsObject!=null) {
             if (paramsObject instanceof Map) {
                 Map<Object,Object> paramsMap = (Map<Object,Object>) paramsObject;
-                paramsMap.forEach((ko,vo) -> params.put(ko.toString(),vo));
+                paramsMap.forEach(
+                        (ko,vo) -> {
+                            String paramkey = ko.toString();
+                            Object paramVal = vo;
+                            params.put(paramkey, paramVal);
+                        }
+                );
             } else {
                 throw new RuntimeException("Invalid type for params object:" + paramsObject.getClass().getCanonicalName());
             }

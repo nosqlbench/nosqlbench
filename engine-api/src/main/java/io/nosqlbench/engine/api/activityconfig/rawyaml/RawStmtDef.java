@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
-public class RawStmtDef extends BlockParams {
+public class RawStmtDef extends RawStmtFields {
 
     private String statement;
 
@@ -74,7 +74,7 @@ public class RawStmtDef extends BlockParams {
             setName(defaultName);
         }
 
-        map.forEach((key, value) -> getParams().put(key, String.valueOf(value)));
+        map.forEach((key, value) -> getParams().put(key, value));
     }
 
     public String getStmt() {

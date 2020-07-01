@@ -20,12 +20,11 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A statements doc can have both a list of statement blocks and/or a
  * list of statements. It can also have all the block parameters
- * assignable to {@link BlockParams}.
+ * assignable to {@link RawStmtFields}.
  * <p>
  * The reason for having support both statements or statement blocks
  * is merely convenience. If you do not need or want to deal with the
