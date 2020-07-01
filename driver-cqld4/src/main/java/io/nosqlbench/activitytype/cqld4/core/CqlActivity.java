@@ -34,7 +34,6 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
@@ -171,7 +170,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = stmtDef.getOptionalParam("instrument")
+            boolean instrument = stmtDef.getOptionalStringParam("instrument")
                     .or(() -> getParams().getOptionalString("instrument"))
                     .map(Boolean::parseBoolean)
                     .orElse(false);
@@ -194,7 +193,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             psummary.append(" statement=>").append(stmtForDriver);
 
 
-            stmtDef.getOptionalParam("cl")
+            stmtDef.getOptionalStringParam("cl")
                     .map(DefaultConsistencyLevel::valueOf)
                     .map(conlvl -> {
                         psummary.append(" consistency_level=>").append(conlvl);
@@ -202,7 +201,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     })
                     .ifPresent(stmtBuilder::setConsistencyLevel);
 
-            stmtDef.getOptionalParam("serial_cl")
+            stmtDef.getOptionalStringParam("serial_cl")
                     .map(DefaultConsistencyLevel::valueOf)
                     .map(sconlvel -> {
                         psummary.append(" serial_consistency_level=>").append(sconlvel);
@@ -210,7 +209,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     })
                     .ifPresent(stmtBuilder::setSerialConsistencyLevel);
 
-            stmtDef.getOptionalParam("idempotent")
+            stmtDef.getOptionalStringParam("idempotent")
                     .map(Boolean::valueOf)
                     .map(idempotent -> {
                         psummary.append(" idempotent=").append(idempotent);
@@ -222,7 +221,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             if (prepared) {
                 PreparedStatement preparedStatement = getSession().prepare(stmtBuilder.build());
 
-                CqlBinderTypes binderType = stmtDef.getOptionalParam("binder")
+                CqlBinderTypes binderType = stmtDef.getOptionalStringParam("binder")
                         .map(CqlBinderTypes::valueOf)
                         .orElse(CqlBinderTypes.DEFAULT);
 
@@ -241,7 +240,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             }
 
 
-            stmtDef.getOptionalParam("save")
+            stmtDef.getOptionalStringParam("save")
                     .map(s -> s.split("[,; ]"))
                     .map(Save::new)
                     .ifPresent(save_op -> {
@@ -249,7 +248,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         template.addRowCycleOperators(save_op);
                     });
 
-            stmtDef.getOptionalParam("rsoperators")
+            stmtDef.getOptionalStringParam("rsoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(ResultSetCycleOperators::newOperator)
@@ -258,7 +257,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         template.addResultSetOperators(rso);
                     });
 
-            stmtDef.getOptionalParam("rowoperators")
+            stmtDef.getOptionalStringParam("rowoperators")
                     .map(s -> s.split(","))
                     .stream().flatMap(Arrays::stream)
                     .map(RowCycleOperators::newOperator)

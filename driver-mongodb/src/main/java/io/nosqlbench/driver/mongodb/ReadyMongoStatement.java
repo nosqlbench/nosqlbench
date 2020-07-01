@@ -2,7 +2,6 @@ package io.nosqlbench.driver.mongodb;
 
 import com.mongodb.ReadPreference;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
@@ -21,7 +20,7 @@ public class ReadyMongoStatement {
         StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
 
         this.bindings = template.resolve();
-        this.readPreference = stmtDef.getOptionalParam("readPreference")
+        this.readPreference = stmtDef.getOptionalStringParam("readPreference")
                 .map(ReadPreference::valueOf)
                 .orElse(ReadPreference.primary());
     }

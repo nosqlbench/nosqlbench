@@ -24,9 +24,9 @@ public interface OpTemplate extends Tagged {
     <V> V getParam(String name, Class<? extends V> type);
 
     @SuppressWarnings("unchecked")
-    <V> Optional<V> getOptionalParam(String name, Class<? extends V> type);
+    <V> Optional<V> getOptionalStringParam(String name, Class<? extends V> type);
 
-    Optional<String> getOptionalParam(String name);
+    Optional<String> getOptionalStringParam(String name);
 
     Map<String,String> getTags();
 

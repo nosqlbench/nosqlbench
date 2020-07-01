@@ -20,7 +20,6 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
-import io.nosqlbench.engine.api.util.Tagged;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -92,7 +91,7 @@ public class StmtDef implements OpTemplate {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Optional<V> getOptionalParam(String name, Class<? extends V> type) {
+    public <V> Optional<V> getOptionalStringParam(String name, Class<? extends V> type) {
         if (type.isPrimitive()) {
             throw new RuntimeException("Do not use primitive types for the target class here. For example, Boolean.class is accepted, but boolean.class is not.");
         }
@@ -114,8 +113,8 @@ public class StmtDef implements OpTemplate {
     }
 
     @Override
-    public Optional<String> getOptionalParam(String name) {
-        return getOptionalParam(name,String.class);
+    public Optional<String> getOptionalStringParam(String name) {
+        return getOptionalStringParam(name,String.class);
     }
 
 
