@@ -1,3 +1,9 @@
 - a689b4c9 initial NBUI docs
 - cd450c17 Fix typo
 - b723924e #159 Possible NPE bug in URL resolver
+- c5a98420 start of op grammar
+- d083483f function adapter handles LongToIntFunction
+- b3eecb4d clarify naming of statement fields
+- a0dc30a6 clarify default type of parameter
+- 5ca319e7 #169 fix template preprocessor regression
+- e7daf97d #168 fix parameter types for free params on statements
