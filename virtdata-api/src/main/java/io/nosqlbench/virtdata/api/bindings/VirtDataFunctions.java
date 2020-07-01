@@ -10,6 +10,7 @@ public class VirtDataFunctions {
 
     private enum FuncType {
         LongToDoubleFunction(java.util.function.LongToDoubleFunction.class, double.class),
+        LongToIntFunction(java.util.function.LongToIntFunction.class, int.class),
         LongFunction(LongFunction.class, long.class),
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class),
@@ -61,6 +62,8 @@ public class VirtDataFunctions {
                 return truncate ? adaptDoubleFunction(func, output) : adaptDoubleFunctionStrict(func, output);
             case LongFunction:
                 return truncate ? (F) adaptLongFunction(func, output) : (F) adaptLongFunctionStrict(func, output);
+            case LongToIntFunction:
+                return truncate ? (F) adaptLongFunction(func, output) : (F) adaptLongFunctionStrict(func, output);
             case IntFunction:
                 return truncate ? adaptIntFunction(func, output) : adaptIntFunction(func, output);
             case Function:
@@ -82,6 +85,9 @@ public class VirtDataFunctions {
             case LongUnaryOperator:
                 LongUnaryOperator f2 = assertTypesAssignable(func, LongUnaryOperator.class);
                 return f2::applyAsLong;
+            case LongToIntFunction:
+                LongToIntFunction f3 = assertTypesAssignable(func, LongToIntFunction.class);
+                return f3::applyAsInt;
             case Function:
                 Function<Long, Long> f7 = assertTypesAssignable(func, Function.class, Long.class);
                 return (long l) -> f7.apply(l);
@@ -119,6 +125,9 @@ public class VirtDataFunctions {
                 DoubleUnaryOperator f6 = (DoubleUnaryOperator)func;
                 Function<Double,?> rf6 = f6::applyAsDouble;
                 return rf6;
+            case LongToIntFunction:
+                LongToIntFunction f7 = (LongToIntFunction)func;
+                Function<Long,Integer> rf7 = f7::applyAsInt;
             case Function:
                 return (Function<?,?>) func;
             default:
@@ -190,6 +199,10 @@ public class VirtDataFunctions {
                 Function<Long, Object> f7 = assertTypesAssignable(func, Function.class);
                 assertOutputAssignable(f7.apply(1L),output);
                 return (long l) -> f7.apply(l);
+            case LongToIntFunction:
+                LongToIntFunction f8 = assertTypesAssignable(func, LongToIntFunction.class);
+                assertOutputAssignable(f8.applyAsInt(1L),output);
+                return (long l) -> f8.applyAsInt(l);
             default:
                 throw new RuntimeException("Unable to convert " + func.getClass().getCanonicalName() + " to a " +
                         LongUnaryOperator.class.getCanonicalName());
