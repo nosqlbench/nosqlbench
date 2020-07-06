@@ -75,7 +75,7 @@ public class NBCLIScenarioParser {
         while (arglist.size() > 0
                 && arglist.peekFirst().contains("=")
                 && !arglist.peekFirst().startsWith("-")) {
-            String[] arg = arglist.removeFirst().split("=");
+            String[] arg = arglist.removeFirst().split("=",2);
             arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userParams.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
