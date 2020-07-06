@@ -225,6 +225,19 @@ activity types.
     with EBDSE.
 - **showcql** - logs cql statements as INFO (to see INFO messages in stdout use -v or greater) Note: this is expensive
     and should only be done to troubleshoot workloads. Do not use `showcql` for your tests.
+- **lbp** - configures the load balancing policies for the Java driver. With this parameter, you can
+  configure nested load balancing policies in short-hand form.
+
+  The policies available are documented in detail under the help topic `cql-loadbalancing`. See that
+  guide if you need more than the examples below.
+
+  Examples:
+  - `lbp=LAP(retry_period=3,scale=10)` - Latency aware policy with retry period of 3 seconds.
+    (Seconds is the default time unit, unless _ms parameter is used) and scale 10.
+  - `lbp=LAP(rp=3,s=10)` - Same as above, using the equivalent but terser form.
+  - `lbp=LAP(rp_ms=3000,s_ms=10000)` - Same as above, with milliseconds instead of
+    seconds.
+  - `loadbalancing=LAP(s=10),TAP(
 
 ### CQL YAML Parameters
 

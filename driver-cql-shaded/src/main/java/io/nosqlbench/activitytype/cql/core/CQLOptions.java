@@ -85,21 +85,21 @@ public class CQLOptions {
     }
 
     public static ReconnectionPolicy reconnectPolicyFor(String spec) {
-       if(spec.startsWith("exponential(")){
-           String argsString = spec.substring(12);
-           String[] args = argsString.substring(0, argsString.length() - 1).split("[,;]");
-           if (args.length != 2){
-               throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>)");
-           }
-           long baseDelay = Long.parseLong(args[0]);
-           long maxDelay = Long.parseLong(args[1]);
-           return new ExponentialReconnectionPolicy(baseDelay,maxDelay);
-       }else if(spec.startsWith("constant(")){
-           String argsString = spec.substring(9);
-           long constantDelayMs= Long.parseLong(argsString.substring(0, argsString.length() - 1));
-           return new ConstantReconnectionPolicy(constantDelayMs);
-       }
-       throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>) or constant(<constantDelayMs>)");
+        if (spec.startsWith("exponential(")) {
+            String argsString = spec.substring(12);
+            String[] args = argsString.substring(0, argsString.length() - 1).split("[,;]");
+            if (args.length != 2) {
+                throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>)");
+            }
+            long baseDelay = Long.parseLong(args[0]);
+            long maxDelay = Long.parseLong(args[1]);
+            return new ExponentialReconnectionPolicy(baseDelay, maxDelay);
+        } else if (spec.startsWith("constant(")) {
+            String argsString = spec.substring(9);
+            long constantDelayMs = Long.parseLong(argsString.substring(0, argsString.length() - 1));
+            return new ConstantReconnectionPolicy(constantDelayMs);
+        }
+        throw new BasicError("Invalid reconnectionpolicy, try reconnectionpolicy=exponential(<baseDelay>, <maxDelay>) or constant(<constantDelayMs>)");
     }
 
     public static SocketOptions socketOptionsFor(String spec) {
@@ -186,6 +186,146 @@ public class CQLOptions {
             innerPolicy = new RoundRobinPolicy();
         }
         return new WhiteListPolicy(innerPolicy, sockAddrs);
+    }
+
+    public static LoadBalancingPolicy lbpolicyFor(String polspec, LoadBalancingPolicy policy) {
+        Pattern polcall = Pattern.compile(",?(?<policyname>\\w+)\\((?<args>[^)]+)?\\)");
+        Matcher matcher = polcall.matcher(polspec);
+        Deque<List<String>> policies = new ArrayDeque<>();
+
+        while (matcher.find()) {
+            String policyname = matcher.group("policyname");
+            String argsgroup = matcher.group("args");
+            String args = argsgroup==null ? "" : argsgroup;
+            logger.debug("policyname=" + policyname);
+            logger.debug("args=" + args);
+            policies.push(List.of(policyname,args));
+        }
+
+        // reverse order for proper nesting
+        while (policies.size()>0) {
+            List<String> nextpolicy = policies.pop();
+            String policyname = nextpolicy.get(0)
+                    .replaceAll("_", "")
+                    .replaceAll("policy", "");
+            String argslist = nextpolicy.get(1);
+            String[] args= argslist.isBlank() ? new String[0] : argslist.split(",");
+
+            switch (policyname) {
+                case "WLP":
+                case "whitelist":
+                    List<InetSocketAddress> sockAddrs = Arrays.stream(args)
+                            .map(CQLOptions::toSocketAddr)
+                            .collect(Collectors.toList());
+                    policy = new WhiteListPolicy(policy, sockAddrs);
+                    break;
+                case "TAP":
+                case "tokenaware":
+                    TokenAwarePolicy.ReplicaOrdering ordering = TokenAwarePolicy.ReplicaOrdering.NEUTRAL;
+                    if (args.length==1) {
+                        if (args[0].startsWith("ordering=") || args[0].startsWith("ordering:")) {
+                            String orderingSpec = args[0].substring("ordering=".length()).toUpperCase();
+                            ordering=TokenAwarePolicy.ReplicaOrdering.valueOf(orderingSpec);
+                        } else {
+                            throw new BasicError("Unrecognized option for " + TokenAwarePolicy.class.getCanonicalName());
+                        }
+                    }
+                    policy = new TokenAwarePolicy(policy, ordering);
+                    break;
+                case "LAP":
+                case "latencyaware":
+                    policy = latencyAwarePolicyFor(args,policy);
+                    break;
+                case "DCARRP":
+                case "dcawareroundrobin":
+                case "datacenterawareroundrobin":
+                    if (policy!=null) {
+                        throw new BasicError(DCAwareRoundRobinPolicy.class.getCanonicalName() + " can not wrap another policy.");
+                    }
+                    policy = dcAwareRoundRobinPolicyFor(args);
+                    break;
+                default:
+                    throw new BasicError("Unrecognized policy selector '" + policyname + "', please select one of WLP,TAP,LAP,DCARRP, or " +
+                            "one of whitelist, tokenaware, latencyaware, dcawareroundrobin.");
+            }
+        }
+        return policy;
+    }
+
+    private static LoadBalancingPolicy dcAwareRoundRobinPolicyFor(String[] args) {
+        if (args.length==0){
+            throw new BasicError(DCAwareRoundRobinPolicy.class.getCanonicalName() + " requires a local DC name.");
+        }
+        DCAwareRoundRobinPolicy.Builder builder = DCAwareRoundRobinPolicy.builder();
+        for (String arg : args) {
+            String[] kv = arg.split("[:=]", 2);
+            if (kv.length != 2) {
+                throw new BasicError("LatencyAwarePolicy specifier requires named parameters like `exclusion_threshold=23.0`");
+            }
+            switch(kv[0]) {
+                case "local":
+                case "localdc":
+                    builder.withLocalDc(kv[1]);
+                    break;
+                default:
+                    throw new BasicError("Unknown option for " + DCAwareRoundRobinPolicy.class.getSimpleName() + ": '" + kv[0] + "'");
+            }
+        }
+        return builder.build();
+    }
+
+    private static LoadBalancingPolicy latencyAwarePolicyFor(String[] args, LoadBalancingPolicy childPolicy) {
+        LatencyAwarePolicy.Builder builder = LatencyAwarePolicy.builder(childPolicy);
+
+        for (String arg : args) {
+            String[] kv = arg.split("[:=]", 2);
+            if (kv.length != 2) {
+                throw new BasicError("LatencyAwarePolicy specifier requires named parameters like `exclusion_threshold=23.0`");
+            }
+
+            switch (kv[0]) {
+                case "exclusion_threshold":
+                case "et":
+                    builder = builder.withExclusionThreshold(Double.parseDouble(kv[1]));
+                    break;
+
+                case "minimum_measurements":
+                case "mm":
+                    builder = builder.withMininumMeasurements(Integer.parseInt(kv[1]));
+                    break;
+
+                case "retry_period_ms":
+                case "rp_ms":
+                    builder = builder.withRetryPeriod(Long.parseLong(kv[1]), TimeUnit.MILLISECONDS);
+                    break;
+
+                case "retry_period":
+                case "rp":
+                    builder = builder.withRetryPeriod(Long.parseLong(kv[1]), TimeUnit.SECONDS);
+                    break;
+
+                case "scale":
+                case "s":
+                    builder = builder.withScale(Long.parseLong(kv[1]), TimeUnit.SECONDS);
+                    break;
+
+                case "scale_ms":
+                case "s_ms":
+                    builder = builder.withScale(Long.parseLong(kv[1]), TimeUnit.MILLISECONDS);
+                    break;
+
+                case "update_rate":
+                case "ur":
+                    builder.withUpdateRate(Long.parseLong(kv[1]), TimeUnit.SECONDS);
+                    break;
+                case "update_rate_ms":
+                case "ur_ms":
+                    builder.withUpdateRate(Long.parseLong(kv[1]), TimeUnit.MILLISECONDS);
+                    break;
+            }
+
+        }
+        return builder.build();
     }
 
     public static NettyOptions withTickDuration(String tick) {

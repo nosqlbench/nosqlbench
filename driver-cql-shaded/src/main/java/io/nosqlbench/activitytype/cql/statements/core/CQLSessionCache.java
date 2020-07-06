@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,6 +159,12 @@ public class CQLSessionCache implements Shutdownable {
             }
         }
 
+        if (activityDef.getParams().getOptionalString("whitelist").isPresent() &&
+        activityDef.getParams().getOptionalString("lbp","loadbalancingpolicy").isPresent()) {
+            throw new BasicError("You specified both whitelist=.. and lbp=..., if you need whitelist and other policies together," +
+                    " be sure to use the lbp option only with a whitelist policy included.");
+        }
+
         SpeculativeExecutionPolicy speculativePolicy = activityDef.getParams()
                 .getOptionalString("speculative")
                 .map(speculative -> {
@@ -201,6 +208,14 @@ public class CQLSessionCache implements Shutdownable {
                 .map(p -> CQLOptions.whitelistFor(p, null))
                 .ifPresent(builder::withLoadBalancingPolicy);
 
+        activityDef.getParams().getOptionalString("lbp")
+                .map(lbp -> {
+                    logger.info("lbp=>" + lbp);
+                    return lbp;
+                })
+                .map(p -> CQLOptions.lbpolicyFor(p,null))
+                .ifPresent(builder::withLoadBalancingPolicy);
+
         activityDef.getParams().getOptionalString("tickduration")
                 .map(tickduration -> {
                     logger.info("tickduration=>" + tickduration);
@@ -216,6 +231,7 @@ public class CQLSessionCache implements Shutdownable {
                 })
                 .map(CQLOptions::withCompression)
                 .ifPresent(builder::withCompression);
+
 
         SSLContext context = SSLKsFactory.get().getContext(activityDef);
         if (context != null) {
