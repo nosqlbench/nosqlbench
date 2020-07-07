@@ -22,10 +22,8 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import java.util.function.LongFunction;
 
 /**
- * <p>An AsyncAction allows an activity type to implement asynchronous
+ * An AsyncAction allows an activity type to implement asynchronous
  * operations within each thread.
- * </p>
- *
  */
 public interface AsyncAction<D> extends Action {
 
@@ -63,34 +61,5 @@ public interface AsyncAction<D> extends Action {
      * @return true, if the action is ready immediately for another operation
      */
     boolean enqueue(TrackedOp<D> opc);
-
-//    /**
-//     * Await completion of all pending operations for this thread.
-//     * If all tasks are already complete when this is called, then it
-//     * should return immediately.
-//     * @param timeout Timeout in milliseconds
-//     * @return true, if all tasks pending for this thread are completed.
-//     */
-//    boolean awaitCompletion(long timeout);
-
-//    /**
-//     * Once constructed, all async actions are expected to provide a tracker
-//     * object which can be used to register callback for operational events,
-//     * as well as to provide a diagnostic view of what is happening with
-//     * the number of pending operations per thread.
-//     * @return An async operations tracker
-//     */
-//    OpTracker<D> getTracker();
-
-//    /**
-//     * When the activity needs to create a new op context which tracks all
-//     * things interesting for the operation, it will call this method.
-//     * The payload type D determines any and all of what an async action
-//     * may know about an op.
-//     *
-//     * @return A new op state of parameterized type D
-//     */
-//    D allocateOpData(long cycle);
-
 
 }

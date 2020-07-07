@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 
+set -e
 set -x
 
 APPDIR=target/NB.AppDir
 mkdir -p ${APPDIR}
 
+
+BUILD_OPENJ9="false"
+if [ "$1" = "--with-openj9" ]
+then
+ BUILD_OPENJ9="true"
+ printf "using openj9 for build\n"
+ shift;
+fi
+
 if [ ! -f target/nb.jar ]
 then
- print "target/nb.jar does not exist"
+ printf "target/nb.jar does not exist"
  exit 2
 fi
 
@@ -25,10 +35,21 @@ then
   printf "getting jre once into cache/jre\n";
   mkdir -p cache
   (cd cache && (
-   wget -c https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
-   tar xf OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
-   mv jdk-12.0.2+10-jre jre
-   rm OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   if [ "$BUILD_OPENJ9" = "true" ]
+   then
+    wget -c https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk14u-2020-04-27-07-27/OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
+    tar xf OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
+    mv jdk-14.0.1+7-jre jre
+    rm OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
+   else
+    wget -c https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk14u-2020-04-27-07-27/OpenJDK14U-jre_x64_linux_hotspot_2020-04-27-07-27.tar.gz
+    tar xf OpenJDK14U-jre_x64_linux_hotspot_2020-04-27-07-27.tar.gz
+    mv jdk-14.0.1+7-jre jre
+   fi
+   # wget -c https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   # tar xf OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   # mv jdk-12.0.2+10-jre jre
+   # rm OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
   ))
 fi
 

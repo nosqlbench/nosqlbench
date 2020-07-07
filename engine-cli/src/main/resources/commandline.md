@@ -46,9 +46,9 @@ List only the available workloads which contain the above scenarios:
 
     --list-workloads
 
-Copy a workload to your local directory as a starting point:
+Copy a workload or other file to your local directory as a starting point:
 
-    --copy-workload <name>
+    --copy <name>
 
 Provide the metrics that are available for scripting
 

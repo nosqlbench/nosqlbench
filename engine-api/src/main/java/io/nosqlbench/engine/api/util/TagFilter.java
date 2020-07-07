@@ -88,21 +88,29 @@ public class TagFilter {
      */
     public TagFilter(String filterSpec) {
         if ((filterSpec != null) && (!filterSpec.isEmpty())) {
-            String[] keyvalues = filterSpec.split("[, ] *");
+            filterSpec=unquote(filterSpec);
+
+            String[] keyvalues = filterSpec.split("[,] *");
             for (String assignment : keyvalues) {
                 String[] keyvalue = assignment.split("[:=]", 2);
                 String key = keyvalue[0];
                 String value = keyvalue.length > 1 ? keyvalue[1] : null;
                 if (value != null) {
-                    if ((value.indexOf("\'") == 0) && ((value.indexOf("\'", 1) == (value.length() - 1)))) {
-                        value = value.substring(1, value.length() - 1);
-                    } else {
-                        value = value.trim();
-                    }
+                    value = unquote(value);
+                    value = value.trim();
                 }
                 filter.put(key, value);
             }
         }
+    }
+
+    private static String unquote(String filterSpec) {
+        for (String s : new String[]{"'","\""}) {
+            if (filterSpec.indexOf(s)==0 && filterSpec.indexOf(s,1)==filterSpec.length()-1) {
+                filterSpec=filterSpec.substring(1,filterSpec.length()-1);
+            }
+        }
+        return filterSpec;
     }
 
     /**

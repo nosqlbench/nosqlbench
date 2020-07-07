@@ -64,8 +64,8 @@ public class URLContent implements Content<URL> {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             Stream<String> lines = bufferedReader.lines();
-            String buffdata = lines.collect(Collectors.joining());
-            this.buffer = ByteBuffer.wrap(buffdata.getBytes(StandardCharsets.UTF_8)).asCharBuffer().asReadOnlyBuffer();
+            String buffdata = lines.map(l -> l+"\n").collect(Collectors.joining());
+            return CharBuffer.wrap(buffdata);
         }
 
         return buffer;

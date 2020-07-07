@@ -1,3 +1,5 @@
+description: a quintessential description
+
 scenarios:
   default:
     - run driver=stdout alias=step1

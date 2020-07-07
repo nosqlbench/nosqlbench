@@ -96,7 +96,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
         Optional.ofNullable(this.stdinBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stderrBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stdoutBuffer).map(t->t.timedLog).ifPresent(log::addAll);
-        log = log.stream().map(l -> l+"\n").collect(Collectors.toList());
+        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
         return log;
     }
     public String getTimedLog() {
@@ -140,6 +140,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
         private final String prefix;
         CharArrayWriter buffer = new CharArrayWriter();
         private List<String> timedLog = new ArrayList<String>();
+        private final StringBuilder sb = new StringBuilder();
 
         public DiagWriter(Writer wrapped, String prefix) {
             this.wrapped = wrapped;
@@ -152,9 +153,22 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
 
             buffer.write(cbuf, off, len);
             String text = new String(cbuf, off, len);
-            if (!text.equals("\n")) {
-                String tslogEntry = tsprefix + prefix + new String(cbuf, off, len);
-                timedLog.add(tslogEntry);
+
+            sb.append(text);
+
+            if (text.contains("\n")) {
+                String msgs = sb.toString();
+                String extra = msgs.substring(msgs.lastIndexOf("\n")+1);
+                sb.setLength(0);
+                sb.append(extra);
+                String[] parts = msgs.substring(0,msgs.length()-extra.length()).split("\n");
+                for (String part : parts) {
+                    if (!part.isBlank()) {
+                        String tslogEntry = tsprefix + prefix + part + "\n";
+                        timedLog.add(tslogEntry);
+                    }
+                }
+
             }
 
             wrapped.write(cbuf, off, len);

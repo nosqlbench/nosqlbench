@@ -3,7 +3,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>3.12.83-SNAPSHOT</version>
+    <version>3.12.127-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -11,7 +11,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench</javadoc.name>
 
-        <java.target.version>12</java.target.version>
+        <java.target.version>11</java.target.version>
 
         <!-- properties for package versions -->
         <antlr4.version>4.8</antlr4.version>
@@ -25,7 +25,7 @@
         <commons.text.version>1.8</commons.text.version>
         <docker.java.version>3.2.1</docker.java.version>
         <dse.driver.version>1.9.0</dse.driver.version>
-        <flexmark.version>0.50.20</flexmark.version>
+        <flexmark.version>0.61.6</flexmark.version>
         <greenrobot.version>3.0.0-RC1</greenrobot.version>
         <gson.version>2.8.5</gson.version>
         <hdrhistogram.version>2.1.10</hdrhistogram.version>
@@ -43,13 +43,15 @@
         <joda.time.version>2.9.9</joda.time.version>
         <junit.jupiter.version>5.3.2</junit.jupiter.version>
         <junit.version>4.12</junit.version>
-        <log4j.version>2.13.0</log4j.version>
+        <log4j.version>2.13.3</log4j.version>
         <logback.version>1.2.3</logback.version>
         <lz4.version>1.4.1</lz4.version>
         <metrics.reservoir.version>1.1.0</metrics.reservoir.version>
-        <metrics.version>3.2.6</metrics.version>
+        <metrics.version>4.0.7</metrics.version>
         <mvel2.version>2.4.3.Final</mvel2.version>
-        <netty.version>4.1.45.Final</netty.version>
+        <!--        <netty.version>4.1.45.Final</netty.version>-->
+        <netty.version>4.1.47.Final</netty.version>
+        <!--        <netty.version>4.1.31.Final</netty.version>-->
         <number.to.words.version>1.0.0</number.to.words.version>
         <oshi.version>4.5.0</oshi.version>
         <slf4j.version>1.7.29</slf4j.version>
@@ -57,7 +59,6 @@
         <snappy.version>1.1.2.6</snappy.version>
 
         <!-- plugin versions -->
-        <antlr4.plugin.version>4.8</antlr4.plugin.version>
         <clean.plugin.version>3.1.0</clean.plugin.version>
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
@@ -71,10 +72,10 @@
         <nexus.staging.plugin.version>1.6.8</nexus.staging.plugin.version>
         <release.plugin.version>2.5.3</release.plugin.version>
         <resources.plugin.version>3.1.0</resources.plugin.version>
-        <shade.plugin.version>3.2.1</shade.plugin.version>
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <assertj.version>3.15.0</assertj.version>
+        <graalvm.version>20.1.0</graalvm.version>
     </properties>
 
     <name>${project.artifactId}</name>
@@ -231,6 +232,13 @@
             </dependency>
 
             <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-transport-native-kqueue</artifactId>
+                <version>4.1.47.Final</version>
+                <classifier>linux-x86_64</classifier>
+            </dependency>
+
+            <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-api</artifactId>
                 <version>${docker.java.version}</version>
@@ -262,7 +270,12 @@
 
             <dependency>
                 <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-html-parser</artifactId>
+                <artifactId>flexmark-ext-yaml-front-matter</artifactId>
+                <version>${flexmark.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-html2md-converter</artifactId>
                 <version>${flexmark.version}</version>
             </dependency>
 
@@ -434,22 +447,54 @@
                 <version>${assertj.version}</version>
             </dependency>
 
+            <!-- graalvm -->
+            <dependency>
+                <groupId>org.graalvm.sdk</groupId>
+                <artifactId>graal-sdk</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>profiler</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>chromeinspector</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <build>
         <plugins>
-            <!-- Compile & Source 11 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <debug>true</debug>
-                    <release>${java.target.version}</release>
-                    <source>${java.target.version}</source>
-                    <target>${java.target.version}</target>
+<!--                    <release>${java.target.version}</release>-->
+                    <source>11</source>
+                    <target>11</target>
+<!--                    <compilerArgs>-->
+<!--                        &#45;&#45;enable-preview-->
+<!--                    </compilerArgs>-->
                     <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
-                    <compilerArgument>-Xlint:all</compilerArgument>
+<!--                    <compilerArgument>-Xlint:all</compilerArgument>-->
                 </configuration>
             </plugin>
 
@@ -457,6 +502,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+<!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -483,6 +529,7 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <forkMode>always</forkMode>
                     <includes>
                         <include>**/*Integrated*Test*.java</include>
@@ -558,28 +605,12 @@
 
         <pluginManagement>
             <plugins>
-                <!-- Shading -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>${shade.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                        </transformers>
-                        <createSourcesJar>true</createSourcesJar>
-                        <createDependencyReducedPom>false</createDependencyReducedPom>
-                        <minimizeJar>false</minimizeJar>
-                    </configuration>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
@@ -593,7 +624,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${compiler.plugin.version}</version>
+                    <version>3.8.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -623,7 +654,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>${antlr4.plugin.version}</version>
+                    <version>4.8</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

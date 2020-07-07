@@ -3,6 +3,8 @@ title: 00 YAML Organization
 weight: 00
 ---
 
+# YAML Organization
+
 It is best to keep every workload self-contained within a single YAML file, including schema, data rampup, and the main
 phase of testing. The phases of testing are controlled by tags as described in the Standard YAML section.
 
@@ -11,7 +13,7 @@ The phase names described below have been adopted as a convention within the bui
 that new workload YAMLs use the same tagging scheme so that workload are more plugable across YAMLs.
 :::
 
-### Schema phase
+## Schema phase
 
 The schema phase is simply a phase of your test which creates the necessary schema on your target system. For CQL, this
 generally consists of a keyspace and one ore more table statements. There is no special schema layer in nosqlbench. All
@@ -28,7 +30,7 @@ block:
     tags:
       phase: schema
 
-### Rampup phase
+## Rampup phase
 
 When you run a performance test, it is very important to be aware of how much data is present. Higher density tests are
 more realistic for systems which accumulate data over time, or which have a large working set of data. The amount of
@@ -51,7 +53,7 @@ block:
     tags:
       phase: rampup
 
-### Main phase
+## Main phase
 
 The main phase of a nosqlbench scenario is the one during which you really care about the metric. This is the actual
 test that everything else has prepared your system for.

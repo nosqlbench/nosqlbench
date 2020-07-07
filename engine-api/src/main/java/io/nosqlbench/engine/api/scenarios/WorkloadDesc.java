@@ -1,26 +1,32 @@
 package io.nosqlbench.engine.api.scenarios;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.Map;
 
-public class WorkloadDesc {
+public class WorkloadDesc implements Comparable<WorkloadDesc> {
     private final String yamlPath;
     private final List<String> scenarioNames;
     private final Map<String, String> templates;
+    private final String description;
 
-    public WorkloadDesc(String yamlPath, List<String> scenarioNames, Map<String, String> templates) {
+    public WorkloadDesc(String yamlPath,
+                        List<String> scenarioNames,
+                        Map<String, String> templates,
+                        String description) {
         this.yamlPath = yamlPath;
         this.scenarioNames = scenarioNames;
         this.templates = templates;
+        this.description = description;
     }
 
     public String getYamlPath() {
         return yamlPath;
     }
 
-    public String getWorkloadName(){
+    public String getWorkloadName() {
         return getYamlPath().replaceAll("\\.yaml", "");
-
     }
 
     public List<String> getScenarioNames() {
@@ -29,5 +35,70 @@ public class WorkloadDesc {
 
     public Map<String, String> getTemplates() {
         return templates;
+    }
+
+    public String getDescription() {
+        return this.description != null ? this.description : "";
+    }
+
+
+    public String toString() {
+        return toString(true);
+    }
+
+    public String toString(boolean includeScenarios) {
+
+        StringBuilder sb = new StringBuilder();
+
+        if (description.isEmpty()) {
+            sb.append("# no description provided\n");
+        }
+
+        if (!description.isEmpty()) {
+//            sb.append("# description:\n");
+            String formttedDesc = "# " + String.join("\n# ",description.split("\n"));
+            sb.append(formttedDesc).append("\n");
+            while (sb.toString().endsWith("\n\n")) {
+                sb.setLength(sb.length()-1);
+            }
+//            if (!description.endsWith("\n")) {
+//                sb.append("\n");
+//            }
+        }
+
+        if (includeScenarios) {
+            sb.append("# workload found in ");
+        }
+        sb.append(getYamlPath()).append("\n");
+
+
+        if (includeScenarios) {
+            sb.append("    # scenarios:\n");
+
+            for (String scenario : getScenarioNames()) {
+                sb.append("    nb ")
+                    .append(this.getWorkloadName())
+                    .append(" ").append(scenario).append("\n");
+            }
+
+
+            if (templates.size() > 0) {
+                sb.append("        # defaults\n");
+            }
+
+            for (Map.Entry<String, String> templateEntry : templates.entrySet()) {
+                sb.append("        ")
+                    .append(templateEntry.getKey()).append(" = ").append(templateEntry.getValue())
+                    .append("\n");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+
+    }
+
+    @Override
+    public int compareTo(@NotNull WorkloadDesc o) {
+        return this.yamlPath.compareTo(o.yamlPath);
     }
 }

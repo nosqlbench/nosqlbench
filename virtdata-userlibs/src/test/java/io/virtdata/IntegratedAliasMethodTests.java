@@ -20,7 +20,7 @@ public class IntegratedAliasMethodTests {
     public void testCSVFrequencySampler() {
         CSVFrequencySampler names= new CSVFrequencySampler("data/countries", "COUNTRY_CODE" );
         String n = names.apply(23);
-        assertThat(n).isEqualTo("CZ");
+        assertThat(n).isEqualTo("TK");
     }
 
     @Test
@@ -31,6 +31,6 @@ public class IntegratedAliasMethodTests {
                 ','
         );
         String n = names.apply(23);
-        assertThat(n).isEqualTo("CZ");
+        assertThat(n).isEqualTo("TK");
     }
 }

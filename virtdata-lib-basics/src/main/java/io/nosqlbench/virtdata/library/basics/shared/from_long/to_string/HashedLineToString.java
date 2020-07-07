@@ -19,8 +19,9 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashInterval;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -35,7 +36,7 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class HashedLineToString implements LongFunction<String> {
     private final static Logger logger = LogManager.getLogger(HashedLineToString.class);
-    private final HashRange indexRange;
+    private final HashInterval indexRange;
 
     private List<String> lines = new ArrayList<>();
 
@@ -44,7 +45,10 @@ public class HashedLineToString implements LongFunction<String> {
     public HashedLineToString(String filename) {
         this.filename = filename;
         this.lines = NBIO.readLines(filename);
-        this.indexRange = new HashRange(0, lines.size() - 2);
+        if (lines.size()<1) {
+            throw new BasicError("Read " + lines.size() + " lines from " + filename + ", empty files are not supported");
+        }
+        this.indexRange = new HashInterval(0, lines.size());
     }
 
     public String toString() {

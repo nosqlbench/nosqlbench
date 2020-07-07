@@ -3,7 +3,7 @@ title: 01 Statement Templates
 weight: 01
 ---
 
-## Statement Templates
+# Statement Templates
 
 A valid config file for an activity consists of statement templates, parameters for them, bindings to generate the data
 to use with them, and tags for organizing them.

@@ -1,0 +1,14 @@
+- a689b4c9 initial NBUI docs
+- cd450c17 Fix typo
+- b723924e #159 Possible NPE bug in URL resolver
+- c5a98420 start of op grammar
+- d083483f function adapter handles LongToIntFunction
+- b3eecb4d clarify naming of statement fields
+- a0dc30a6 clarify default type of parameter
+- 5ca319e7 #169 fix template preprocessor regression
+- e7daf97d #168 fix parameter types for free params on statements
+- 2f083001 Allow easy load balancer configuration for CQL driver #173
+- 73464c43 fix scenario parsing bug when named arg contains assignments
+- 105c59d3 Bump log4j.version from 2.13.0 to 2.13.3 in /mvn-defaults
+- 8725cc40 Fix MongoAction incorrect error message
+- 7f2c2e31 mongodb: Update yaml

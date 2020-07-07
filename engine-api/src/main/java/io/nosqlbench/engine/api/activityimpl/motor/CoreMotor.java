@@ -256,7 +256,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     }
 
                     if (cycleSegment == null) {
-                        logger.debug("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
                         slotStateTracker.enterState(Finished);
                         continue;
                     }
@@ -368,7 +368,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     }
 
                     if (cycleSegment == null) {
-                        logger.debug("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
                         slotStateTracker.enterState(Finished);
                         continue;
                     }

@@ -3,7 +3,7 @@ package io.nosqlbench.engine.docs;
 import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 
 @Service(DocsysDynamicManifest.class)
 public class NosqlbenchMarkdownManifest implements DocsysDynamicManifest {

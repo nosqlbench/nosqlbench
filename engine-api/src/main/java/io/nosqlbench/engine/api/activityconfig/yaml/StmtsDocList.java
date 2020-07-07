@@ -17,7 +17,6 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawScenarios;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
 
@@ -46,7 +45,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
                 .collect(Collectors.toList());
     }
 
-    public List<StmtDef> getStmts() {
+    public List<OpTemplate> getStmts() {
         return getStmts("");
     }
 
@@ -55,10 +54,10 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * including the inherited and overridden values from the this doc and the parent block.
      * @param tagFilterSpec a comma-separated tag filter spec
      */
-    public List<StmtDef> getStmts(String tagFilterSpec) {
+    public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
 
-        List<StmtDef> stmts = getStmtDocs().stream()
+        List<OpTemplate> stmts = getStmtDocs().stream()
                 .flatMap(d -> d.getStmts().stream())
                 .filter(ts::matchesTagged)
                 .collect(Collectors.toList());
@@ -89,8 +88,18 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * on the first doc, any `scenarios` defined in different docs will be ignored.
      */
 
+    /**
+     * @return the list of named scenarios for the first document in the list.
+     */
     public Scenarios getDocScenarios() {
         return this.getStmtDocs().get(0).getScenarios();
+    }
+
+    /**
+     * @return the description of the first document in the list.
+     */
+    public String getDescription() {
+        return this.getStmtDocs().get(0).getDescription();
     }
 
 }

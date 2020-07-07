@@ -90,9 +90,9 @@ public class MetricReporters implements Shutdownable {
         }
     }
 
-    public MetricReporters addGraphite(String host, int graphitePort, String prefix) {
+    public MetricReporters addGraphite(String host, int graphitePort, String globalPrefix) {
 
-        logger.debug("Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + prefix);
+        logger.debug("Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + globalPrefix);
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");
@@ -101,8 +101,9 @@ public class MetricReporters implements Shutdownable {
         for (PrefixedRegistry prefixedRegistry : metricRegistries) {
 
             Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
+            String _prefix = prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? globalPrefix + "." + prefixedRegistry.prefix : globalPrefix) : globalPrefix;
             GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
-                    .prefixedWith(prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? prefix + "." + prefixedRegistry.prefix : prefix) : prefix)
+                    .prefixedWith(_prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)

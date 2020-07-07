@@ -5,7 +5,8 @@ public class Expression {
     private Assignment assignment;
     private FunctionCall call;
 
-    public Expression() {}
+    public Expression() {
+    }
 
     public Expression(Assignment assignment, FunctionCall call) {
         this.assignment = assignment;
@@ -26,5 +27,10 @@ public class Expression {
 
     public void setCall(FunctionCall call) {
         this.call = call;
+    }
+
+    @Override
+    public String toString() {
+        return (assignment != null ? assignment + "=" : "") + call.toString();
     }
 }

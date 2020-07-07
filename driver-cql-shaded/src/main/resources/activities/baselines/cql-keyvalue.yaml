@@ -1,0 +1,102 @@
+description: A workload with only text keys and text values
+
+scenarios:
+  default:
+    schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  astra:
+    schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+bindings:
+  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    params:
+      prepared: false
+    statements:
+    - create-keyspace: |
+        create keyspace if not exists <<keyspace:baselines>>
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        AND durable_writes = true;
+      tags:
+         name: create-keyspace
+    - create-table: |
+        create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
+        key text,
+         value text,
+         PRIMARY KEY (key)
+        );
+      tags:
+        name: create-table
+  - name: schema-astra
+    tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+    - create-table: |
+        create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
+        key text,
+         value text,
+         PRIMARY KEY (key)
+        );
+      tags:
+        name: create-table-astra
+  - name: rampup
+    tags:
+      phase: rampup
+    params:
+      cl: <<write_cl:LOCAL_QUORUM>>
+    statements:
+      - rampup-insert: |
+          insert into <<keyspace:baselines>>.<<table:keyvalue>>
+          (key, value)
+          values ({seq_key},{seq_value});
+        tags:
+           name: rampup-insert
+  - name: verify
+    tags:
+      phase: verify
+      type: read
+    params:
+      cl: <<read_cl:LOCAL_QUORUM>>
+    statements:
+      - verify-select: |
+          select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={seq_key};
+        verify-fields: key->seq_key, value->seq_value
+        tags:
+           name: verify
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 5
+      cl: <<read_cl:LOCAL_QUORUM>>
+    statements:
+      - main-select: |
+         select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={rw_key};
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 5
+      cl: <<write_cl:LOCAL_QUORUM>>
+    statements:
+      - main-insert: |
+          insert into <<keyspace:baselines>>.<<table:keyvalue>>
+          (key, value) values ({rw_key}, {rw_value});
+        tags:
+           name: main-insert

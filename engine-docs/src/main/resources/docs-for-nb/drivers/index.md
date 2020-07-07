@@ -3,12 +3,14 @@ title: Driver Types
 weight: 50
 ---
 
+# Driver Types
+
 Each nosqlbench scenario is comprised of one or more activities of a specific type. The types of activities available
 are provided by the version of nosqlbench.
 
 You can see this list at any time by running the command:
 
-    nb --list-driver-types
+    nb --list-drivers
 
 Each one comes with its own built-in documentation. It can be accessed with this command:
 

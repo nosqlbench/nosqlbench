@@ -49,12 +49,9 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class CSVFrequencySampler implements LongFunction<String> {
 
-    private final String filename;
-    private final String columnName;
-
     private final String[] lines;
     private final AliasSamplerDoubleInt sampler;
-    private Hash hash;
+    private final Hash hash;
 
     /**
      * Create a sampler of strings from the given CSV file. The CSV file must have plain CSV headers
@@ -64,8 +61,7 @@ public class CSVFrequencySampler implements LongFunction<String> {
      */
     @Example({"CSVFrequencySampler('values.csv','modelno')","Read values.csv, count the frequency of values in 'modelno' column, and sample from this column proportionally"})
     public CSVFrequencySampler(String filename, String columnName) {
-        this.filename = filename;
-        this.columnName = columnName;
+        String filename1 = filename;
 
         this.hash=new Hash();
 
@@ -78,13 +74,15 @@ public class CSVFrequencySampler implements LongFunction<String> {
         CSVParser csvdata = NBIO.readFileCSV(filename);
         Frequency freq = new Frequency();
         for (CSVRecord csvdatum : csvdata) {
-            String value = csvdatum.get(columnName);
-            freq.addValue(value);
-            values.add(value);
+            if (csvdatum.get(columnName) != null) {
+                String value = csvdatum.get(columnName);
+                freq.addValue(value);
+                values.add(value);
+            }
         }
         int i = 0;
         for (String value : values) {
-            frequencies.add(new EvProbD(i++,Double.valueOf(freq.getCount(value))));
+            frequencies.add(new EvProbD(i++, (double) freq.getCount(value)));
         }
         sampler = new AliasSamplerDoubleInt(frequencies);
         lines = values.toArray(new String[0]);

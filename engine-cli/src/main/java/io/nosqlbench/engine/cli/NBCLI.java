@@ -1,25 +1,23 @@
 package io.nosqlbench.engine.cli;
 
+import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
+import io.nosqlbench.engine.core.*;
+import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.core.MarkdownDocInfo;
-import io.nosqlbench.engine.core.ScenarioLogger;
-import io.nosqlbench.engine.core.ScenariosResults;
-import io.nosqlbench.engine.core.ShutdownManager;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
@@ -30,9 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 public class NBCLI {
@@ -71,9 +71,17 @@ public class NBCLI {
             DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
+        if (args.length>0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
+            MarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
 
         NBCLIOptions options = new NBCLIOptions(args);
+        NBIO.addGlobalIncludes(options.wantsIncludes());
+
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
+
+        ActivityMetrics.setHdrDigits(options.getHdrDigits());
 
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("basic.md"));
@@ -96,23 +104,38 @@ public class NBCLI {
         }
 
         if (options.wantsWorkloadsList()) {
-            printWorkloads(false);
+            NBCLIScenarios.printWorkloads(false, options.wantsIncludes());
             System.exit(0);
         }
 
         if (options.wantsScenariosList()) {
-            printWorkloads(true);
+            NBCLIScenarios.printWorkloads(true, options.wantsIncludes());
             System.exit(0);
         }
 
-        if (options.wantsToCopyWorkload()) {
-            String workloadToCopy = options.wantsToCopyWorkloadNamed();
-            logger.debug("user requests to copy out " + workloadToCopy);
+        if (options.wantsToCopyResource()) {
+            String resourceToCopy = options.wantsToCopyResourceNamed();
+            logger.debug("user requests to copy out " + resourceToCopy);
 
-            Optional<Content<?>> tocopy = NBIO.classpath().prefix("activities")
-                .name(workloadToCopy).extension("yaml").first();
-            Content<?> data = tocopy.orElseThrow(() -> new BasicError("Unable to find " + workloadToCopy + " in " +
-                "classpath to copy out"));
+            Optional<Content<?>> tocopy = NBIO.classpath()
+                .prefix("activities")
+                .prefix(options.wantsIncludes())
+                .name(resourceToCopy).extension("yaml").first();
+
+            if (tocopy.isEmpty()) {
+
+                tocopy = NBIO.classpath()
+                    .prefix().prefix(options.wantsIncludes())
+                    .prefix(options.wantsIncludes())
+                    .name(resourceToCopy).first();
+            }
+
+            Content<?> data = tocopy.orElseThrow(
+                () -> new BasicError(
+                    "Unable to find " + resourceToCopy +
+                        " in classpath to copy out")
+            );
+
             Path writeTo = Path.of(data.asPath().getFileName().toString());
             if (Files.exists(writeTo)) {
                 throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
@@ -163,15 +186,18 @@ public class NBCLI {
         }
 
         String reportGraphiteTo = options.wantsReportGraphiteTo();
+
         if (options.wantsDockerMetrics()) {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
-            dmh.startMetrics();
-            String info = "Docker Containers are started, for grafana and prometheus, hit" +
-                "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
-                "the default grafana creds are admin/admin";
-            logger.info(info);
-            System.out.println(info);
+            Map<String,String> dashboardOptions = Map.of(
+                    DockerMetricsManager.GRAFANA_TAG, options.getDockerGrafanaTag()
+            );
+            dmh.startMetrics(dashboardOptions);
+
+            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
+                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+            logger.warn(warn);
             if (reportGraphiteTo != null) {
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
                         " but graphite reporting (--report-graphite-to) is set to %s \n" +
@@ -230,11 +256,21 @@ public class NBCLI {
 
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
-        Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        NBCLIScriptAssembly.ScriptData scriptData = NBCLIScriptAssembly.assembleScript(options);
+        Scenario scenario = new Scenario(
+            sessionName,
+            options.getScriptingEngine(),
+            options.getProgressSpec(),
+            options.wantsGraaljsCompatMode()
+        );
+        ScriptBuffer buffer = new BasicScriptBuffer(
+            options.getLogsDirectory()+ FileSystems.getDefault().getSeparator()+ "_scenario."+ scenario.getName() +".js"
+        ).add(options.getCommands().toArray(new Cmd[0]));
+        String scriptData = buffer.getParsedScript();
+        Map<String,String> globalParams=buffer.getCombinedParams();
+
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
-            System.out.println(scriptData.getScriptParamsAndText());
+            System.out.println(scriptData);
             System.exit(0);
         }
 
@@ -245,53 +281,51 @@ public class NBCLI {
             logger.info("Charting disabled");
         }
 
-        scenario.addScenarioScriptParams(scriptData.getScriptParams());
-        scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
+
+        // Execute Scenario!
+
+        Level clevel = options.wantsConsoleLogLevel();
+        Level llevel = Level.toLevel(options.getLogsLevel());
+        if (llevel.toInt()>clevel.toInt()) {
+            logger.info("raising scenario logging level to accommodate console logging level");
+        }
+        Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
+
+        scenario.addScriptText(scriptData);
+        ScriptParams scriptParams = new ScriptParams();
+        scriptParams.putAll(buffer.getCombinedParams());
+        scenario.addScenarioScriptParams(scriptParams);
         ScenarioLogger sl = new ScenarioLogger(scenario)
             .setLogDir(options.getLogsDirectory())
             .setMaxLogs(options.getLogsMax())
-            .setLevel(options.getLogsLevel())
+            .setLevel(maxLevel)
             .setLogLevelOverrides(options.getLogLevelOverrides())
             .start();
 
         executor.execute(scenario, sl);
+
+        while (true) {
+            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getName());
+            if (pendingResult.isEmpty()) {
+                LockSupport.parkNanos(100000000L);
+            } else {
+                break;
+            }
+        }
+
         ScenariosResults scenariosResults = executor.awaitAllResults();
+
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
         if (scenariosResults.hasError()) {
+            Exception exception = scenariosResults.getOne().getException().get();
+            System.err.println("ERROR while running scenario: " + exception.getMessage());
+            exception.printStackTrace(System.err);
             System.exit(2);
         } else {
             System.exit(0);
-        }
-    }
-
-    public void printWorkloads(boolean includeScenarios) {
-        List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts();
-        for (WorkloadDesc workload : workloads) {
-            System.out.println(workload.getYamlPath());
-
-            if (includeScenarios) {
-                System.out.println("    # scenarios:");
-
-                List<String> scenarioList = workload.getScenarioNames();
-                String workloadName = workload.getWorkloadName();
-
-                for (String scenario : scenarioList) {
-                    System.out.println("    nb " + workloadName + " " + scenario);
-                }
-
-                Map<String, String> templates = workload.getTemplates();
-                if (templates.size() > 0) {
-                    System.out.println("        # defaults");
-                    for (Map.Entry<String, String> templateEntry: templates.entrySet()) {
-                        System.out.println("        " + templateEntry.getKey() + " = " + templateEntry.getValue());
-                    }
-                }
-                System.out.println();
-            }
-
         }
     }
 

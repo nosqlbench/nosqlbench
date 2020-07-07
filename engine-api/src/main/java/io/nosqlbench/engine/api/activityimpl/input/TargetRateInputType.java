@@ -21,14 +21,14 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 
 @Service(InputType.class)
 public class TargetRateInputType implements InputType {
 
     @Override
     public String getName() {
-        return "targetrate";
+        return "atomicseq";
     }
 
     @Override

@@ -3,7 +3,7 @@ title: NoSQLBench Intro
 weight: 0
 ---
 
-## Welcome to NoSQLBench
+# Welcome to NoSQLBench
 
 Welcome to the documentation for NoSQLBench. This is a power tool that emulates real application workloads. This means
 that you can fast-track performance, sizing and data model testing without writing your own testing harness.

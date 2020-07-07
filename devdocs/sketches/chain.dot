@@ -1,0 +1,44 @@
+
+digraph {
+//    rankdir=LR;
+    node [shape = none]
+
+
+    cycles[label="read input"]
+    c_err[shape="none",label="[ERR,null]"]
+    c_ok[shape="none",label="[OK,cycle]"]
+
+    cycles -> c_err
+    cycles -> c_ok
+
+
+    bind_template[label="bind template"]
+    template_ok[label="[OK,template]"]
+    template_err[label="[ERR,template]"]
+    c_ok -> bind_template
+    bind_template -> template_err
+    bind_template -> template_ok
+
+    exec_cmd[label="execute command"]
+    command_err[label="[ERR,template]"]
+    command_ok[label="[OK,result]"]
+    template_ok -> exec_cmd
+    exec_cmd -> command_err
+    exec_cmd -> command_ok
+
+    verify_result[label="verify result"]
+    command_ok -> verify_result
+    result_invalid[label="[ERR,result]"]
+    result_ok[label="[OK,result]"]
+    verify_result -> result_invalid
+    verify_result -> result_ok
+
+
+
+
+//        <tr><td>Error<sub>none</sub></td></tr>
+// ⁅⁆⟦⟧ ⟬⟭ ⟮⟯  ⟨⟩ ⁅⁆
+//       <td rowspan="*"><FONT POINT-SIZE="32">{</FONT></td>
+//       <td rowspan="*"><FONT POINT-SIZE="32">}</FONT></td>
+
+}

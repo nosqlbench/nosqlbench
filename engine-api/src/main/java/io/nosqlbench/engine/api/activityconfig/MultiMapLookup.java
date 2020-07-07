@@ -17,22 +17,24 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MultiMapLookup implements Map<String, String> {
+public class MultiMapLookup<V> implements Map<String, V> {
 
-    private final List<Map<String, String>> maps = new ArrayList<>();
+    private final List<Map<String, V>> maps = new ArrayList<>();
 
     public MultiMapLookup() {
     }
 
-    public MultiMapLookup(Map<String,String> map1, Map<String,String> map2) {
+    public MultiMapLookup(Map<String,V> map1, Map<String,V> map2) {
         add(map1);
         add(map2);
     }
 
-    public MultiMapLookup add(Map<String,String> map) {
+    public MultiMapLookup<V> add(Map<String,V> map) {
         maps.add(map);
         return this;
     }
@@ -59,26 +61,26 @@ public class MultiMapLookup implements Map<String, String> {
     }
 
     @Override
-    public String get(Object key) {
+    public V get(Object key) {
         return maps.stream()
                 .filter(m -> m.containsKey(String.valueOf(key)))
                 .findFirst()
-                .map(m -> String.valueOf(m.get(key)))
+                .map(m -> m.get(key))
                 .orElse(null);
     }
 
     @Override
-    public String put(String key, String value) {
+    public V put(String key, V value) {
         throw immutable();
     }
 
     @Override
-    public String remove(Object key) {
+    public V remove(Object key) {
         throw immutable();
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends String> m) {
+    public void putAll(Map<? extends String, ? extends V> m) {
         throw immutable();
     }
 
@@ -88,6 +90,7 @@ public class MultiMapLookup implements Map<String, String> {
     }
 
     @Override
+    @NotNull
     public Set<String> keySet() {
         Set<String> keys = new HashSet<>();
         maps.stream().map(Map::keySet).flatMap(Set::stream)
@@ -96,18 +99,19 @@ public class MultiMapLookup implements Map<String, String> {
     }
 
     @Override
-    public Collection<String> values() {
+    @NotNull
+    public Collection<V> values() {
         return entrySet().stream()
                 .map(Entry::getValue)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Set<Entry<String, String>> entrySet() {
-        Map<String, String> compositeMap = new HashMap<>();
+    public Set<Entry<String, V>> entrySet() {
+        Map<String, V> compositeMap = new HashMap<>();
 
-        for (Map<String, String> map : maps) {
-            for (Entry<String, String> entry : map.entrySet()) {
+        for (Map<String, V> map : maps) {
+            for (Entry<String, V> entry : map.entrySet()) {
                 if (!compositeMap.containsKey(entry.getKey())) {
                     compositeMap.put(entry.getKey(), entry.getValue());
                 }

@@ -18,50 +18,89 @@
 package io.nosqlbench.engine.api.activityconfig;
 
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawYamlStatementLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class StatementsLoader {
 
-    public static StmtsDocList load(Logger logger, Content<?> content) {
-        RawYamlStatementLoader loader = new RawYamlStatementLoader();
-        RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
+    private final static Logger logger = LoggerFactory.getLogger(StatementsLoader.class);
+
+    public enum Loader {
+        original,
+        generified
+    }
+
+    public static StmtsDocList loadString(String yamlContent) {
+        RawStmtsLoader loader = new RawStmtsLoader();
+        loader.addTransformer(new StrInterpolator());
+        RawStmtsDocList rawDocList = loader.loadString(logger, yamlContent);
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
     }
 
-//    public static StmtsDocList load(Logger logger, Path path) {
-//        RawYamlStatementLoader loader = new RawYamlStatementLoader();
-//        RawStmtsDocList rawDocList = loader.load(logger, path);
+    public static StmtsDocList loadContent(
+            Logger logger,
+            Content<?> content) {
+        RawStmtsLoader loader = new RawStmtsLoader();
+        loader.addTransformer(new StrInterpolator());
+        RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
+        StmtsDocList layered = new StmtsDocList(rawDocList);
+        return layered;
+    }
+
+    public static StmtsDocList loadPath(
+            Logger logger,
+            String path,
+            String... searchPaths) {
+        RawStmtsDocList list = null;
+
+        RawStmtsLoader gloaderImpl = new RawStmtsLoader();
+        gloaderImpl.addTransformer(new StrInterpolator());
+
+        list = gloaderImpl.loadPath(logger, path, searchPaths);
+        return new StmtsDocList(list);
+    }
+
+    public static StmtsDocList loadPath(
+            Logger logger,
+            String path,
+            Function<String, String> transformer,
+            String... searchPaths) {
+        RawStmtsDocList list = null;
+
+        RawStmtsLoader gloaderImpl = new RawStmtsLoader();
+        gloaderImpl.addTransformer(transformer);
+        list = gloaderImpl.loadPath(logger, path, searchPaths);
+        return new StmtsDocList(list);
+    }
+
+//    public static StmtsDocList load(Logger logger, String path, String... searchPaths) {
+//        Content<?> content = NBIO.all()
+//                .prefix(searchPaths)
+//                .name(path)
+//                .one();
+//        try {
+//            RawYamlStatementLoader loader = new RawYamlStatementLoader();
+//            RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
+//            StmtsDocList layered = new StmtsDocList(rawDocList);
+//            return layered;
+//        } catch (Exception e) {
+//            throw new RuntimeException("error while reading file " + path, e);
+//        }
+//    }
+
+//    public static StmtsDocList load(Logger logger, String path, Function<String, String> transformer, String... searchPaths) {
+//        RawYamlStatementLoader loader = new RawYamlStatementLoader(transformer);
+//        RawStmtsDocList rawDocList = loader.load(logger, path, searchPaths);
 //        StmtsDocList layered = new StmtsDocList(rawDocList);
 //        return layered;
 //    }
 
-    public static StmtsDocList load(Logger logger, String path, String... searchPaths) {
-        Content<?> content = NBIO.all()
-            .prefix(searchPaths)
-            .name(path)
-            .one();
-
-        RawYamlStatementLoader loader = new RawYamlStatementLoader();
-        RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
-        StmtsDocList layered = new StmtsDocList(rawDocList);
-        return layered;
-    }
-
-    public static StmtsDocList load(Logger logger, String path, Function<String, String> transformer, String... searchPaths) {
-        RawYamlStatementLoader loader = new RawYamlStatementLoader(transformer);
-        RawStmtsDocList rawDocList = loader.load(logger, path, searchPaths);
-        StmtsDocList layered = new StmtsDocList(rawDocList);
-        return layered;
-    }
 
 }

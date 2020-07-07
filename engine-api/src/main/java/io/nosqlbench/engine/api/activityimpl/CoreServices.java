@@ -66,7 +66,7 @@ public class CoreServices {
 //    }
 //
     public static <A extends Activity> InputDispenser getInputDispenser(A activity) {
-        String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("targetrate");
+        String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("atomicseq");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
         Optional<Predicate<ResultReadable>> inputFilterDispenser = getInputFilter(activity);

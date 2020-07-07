@@ -15,7 +15,7 @@
  * /
  */
 
-cycle_rate_change = {
+activitydef = {
     "alias" : "cycle_rate_change",
     "type" : "diag",
     "cycles" : "0..1000000",
@@ -26,7 +26,7 @@ cycle_rate_change = {
 };
 
 print('starting cycle_rate_change');
-scenario.start(cycle_rate_change);
+scenario.start(activitydef);
 print('started');
 print('cyclerate at 0ms:' + activities.cycle_rate_change.cyclerate);
 scenario.waitMillis(1000);
@@ -48,6 +48,7 @@ for(i=0;i<20;i++) {
         break;
     }
 }
+scenario.stop(activitydef);
 print('cycle_rate_change activity finished');
 
 

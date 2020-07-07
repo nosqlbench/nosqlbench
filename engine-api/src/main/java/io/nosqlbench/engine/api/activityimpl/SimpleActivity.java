@@ -6,16 +6,26 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispens
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
+import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.templating.CommandTemplate;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -143,6 +153,7 @@ public class SimpleActivity implements Activity {
     @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
+            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable.toString());
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -227,7 +238,7 @@ public class SimpleActivity implements Activity {
                 .map(RateSpec::new)
                 .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
 
-        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
+        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate","rate")
                 .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
@@ -243,7 +254,7 @@ public class SimpleActivity implements Activity {
      * by the provided ratios. Also, modify the ActivityDef with reasonable defaults when requested.
      * @param seq - The {@link OpSequence} to derive the defaults from
      */
-    public void setDefaultsFromOpSequence(OpSequence seq) {
+    public void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
@@ -285,7 +296,12 @@ public class SimpleActivity implements Activity {
             int processors = Runtime.getRuntime().availableProcessors();
             if (spec.toLowerCase().equals("auto")) {
                 int threads = processors*10;
-                logger.info("setting threads to " + threads + " (auto)");
+                if (threads>activityDef.getCycleCount()) {
+                    threads=(int) activityDef.getCycleCount();
+                    logger.info("setting threads to " + threads + " (auto) [10xCORES, cycle count limited]");
+                } else {
+                    logger.info("setting threads to " + threads + " (auto) [10xCORES]");
+                }
                 activityDef.setThreads(threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
@@ -296,6 +312,12 @@ public class SimpleActivity implements Activity {
                 logger.info("setting threads to " + spec + "(direct)");
                 activityDef.setThreads(Integer.parseInt(spec));
             }
+
+            if (activityDef.getThreads()>activityDef.getCycleCount()) {
+                logger.warn("threads="+activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+                + ", you should have more cycles than threads.");
+            }
+
         } else {
             if (cycleCount>1000) {
                 logger.warn("For testing at scale, it is highly recommended that you " +
@@ -308,4 +330,33 @@ public class SimpleActivity implements Activity {
         }
 
     }
+
+    protected <O> OpSequence<O> createOpSequence(Function<OpTemplate,O> opinit) {
+        StrInterpolator interp = new StrInterpolator(activityDef);
+        String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+
+        SequencerType sequencerType = getParams()
+                .getOptionalString("seq")
+                .map(SequencerType::valueOf)
+                .orElse(SequencerType.bucket);
+        SequencePlanner<O> planner = new SequencePlanner<>(sequencerType);
+
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+
+        if (stmts.size() == 0) {
+            throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+        }
+
+        for (OpTemplate optemplate : stmts) {
+            long ratio = optemplate.getParamOrDefault("ratio", 1);
+
+//            CommandTemplate cmd = new CommandTemplate(optemplate);
+            O driverSpecificOp = opinit.apply(optemplate);
+            planner.addOp(driverSpecificOp, ratio);
+        }
+        return planner.resolve();
+    }
+
 }

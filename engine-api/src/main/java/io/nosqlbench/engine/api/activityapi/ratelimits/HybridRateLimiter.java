@@ -214,9 +214,17 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     @Override
     public String toString() {
-        return
-                //"ID:"+System.identityHashCode(this)+" "+
-                this.getRateSpec().toString() + "(" + this.state + ") pool:" + filler;
+        StringBuilder sb = new StringBuilder(HybridRateLimiter.class.getSimpleName());
+        if (this.getRateSpec()!=null) {
+            sb.append(" spec=").append(this.getRateSpec().toString());
+        }
+        if (this.state!=null) {
+            sb.append(" state=").append(this.state);
+        }
+        if (this.filler !=null) {
+            sb.append(" filler=").append(this.filler.toString());
+        }
+        return sb.toString();
     }
 
 //    public String getRefillLog() {

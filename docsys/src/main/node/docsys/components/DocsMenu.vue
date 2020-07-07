@@ -105,13 +105,13 @@
     .v-list-item--disabled {
         color: #DDDDDD !important;
     }
-    .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+
+    div.theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
         color: #DDDDDD !important;
     }
-
-    /*.v-list-item .theme--light.v-list-item {*/
-    /*    color: #FFFFFF;*/
-    /*}*/
+    a.theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+        color: #DDDDDD !important;
+    }
 
     .nuxt-link-exact-active {
         /*color: #52c41a;*/
@@ -119,11 +119,6 @@
         color: #52c41a;
         /*color: #000000;*/
     }
-
-    /* .v-list-item--active */
-    /* .v-list-item--link */
-    /* a .nuxt-link-exact-active*/
-    /* a .nuxt-link-active */
 
     .isactive {
         background-color: #7F828B;

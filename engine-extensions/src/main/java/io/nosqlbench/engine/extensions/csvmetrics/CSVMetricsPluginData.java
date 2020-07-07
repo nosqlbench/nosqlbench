@@ -19,7 +19,7 @@ package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;

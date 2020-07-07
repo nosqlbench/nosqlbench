@@ -51,9 +51,9 @@ List only the available workloads which contain the above scenarios:
 
     --list-workloads
 
-Copy a workload to your local directory as a starting point:
+Copy a workload or other file to your local directory as a starting point:
 
-    --copy-workload <name>
+    --copy <name>
 
 Provide the metrics that are available for scripting
 
@@ -152,6 +152,17 @@ Name the current session, for logfile naming, etc By default, this will be "scen
 created for this name.
 
     --session-name <name>
+
+If you want to control the number of significant digits in all of the HDR metrics, including histograms and timers, then
+you can do so this way:
+
+    --hdr-digits 4
+
+The default is 4 digits, which creates 10000 equisized histogram buckets for every named metric in every reporting
+interval. For longer running test or for test which do not require this level of precision in metrics, you can set this
+down to 3 or 2. Note that this only sets the global default. Each activity can also override this value with the
+hdr_digits parameter.
+
 
 Enlist engineblock to stand up your metrics infrastructure using a local docker runtime:
 

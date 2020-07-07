@@ -23,8 +23,8 @@ public class JoinTemplate extends Template implements LongFunction<String>  {
         super(templateFor(prefix,delimiter,suffix,funcs), funcs);
     }
 
-    @Example({"JoinTemplate(Add(3),'[',';',']',NumberNameToString(),NumberNameToString(),NumberNameToString())",
-    "create values like '[zero;three,six]', '[one;four,seven]', ..."})
+    @Example({"JoinTemplate(Add(3),'<',';','>',NumberNameToString(),NumberNameToString(),NumberNameToString())",
+    "create values like '<zero;three,six>', '<one;four,seven>', ..."})
     public JoinTemplate(LongUnaryOperator iterop, String prefix, String delimiter, String suffix, LongFunction<?>... funcs) {
         super(iterop, templateFor(prefix,delimiter,suffix,funcs), funcs);
 

@@ -2,10 +2,7 @@ package io.nosqlbench.engine.docker;
 
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
-import com.github.dockerjava.api.command.ListContainersCmd;
-import com.github.dockerjava.api.command.LogContainerCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -22,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static io.nosqlbench.engine.docker.RestHelper.post;
 
@@ -34,20 +32,21 @@ public class DockerHelper {
     private DockerClient dockerClient;
     private Logger logger = LoggerFactory.getLogger(DockerHelper.class);
 
-    public DockerHelper(){
+    public DockerHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(DOCKER_HOST_ADDR).build();
         DockerCmdExecFactory dockerCmdExecFactory = new OkHttpDockerCmdExecFactory()
-            .withReadTimeout(60000)
-            .withConnectTimeout(60000);
+                .withReadTimeout(60000)
+                .withConnectTimeout(60000);
 
         this.dockerClient = DockerClientBuilder.getInstance(config)
-            .withDockerCmdExecFactory(dockerCmdExecFactory)
-            .build();
+                .withDockerCmdExecFactory(dockerCmdExecFactory)
+                .build();
     }
-    public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload) {
+
+    public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
         logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
-            "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
+                "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
         boolean existingContainer = removeExitedContainers(name);
 
@@ -59,7 +58,7 @@ public class DockerHelper {
 
         Container containerId = searchContainer(name, reload);
         if (containerId != null) {
-            logger.debug("container is already up with the id: "+ containerId.getId());
+            logger.debug("container is already up with the id: " + containerId.getId());
             return null;
         }
 
@@ -71,14 +70,14 @@ public class DockerHelper {
         List<Image> dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
         if (dockerList.size() == 0) {
             dockerClient.pullImageCmd(IMG)
-                .withTag(tag)
-                .exec(new PullImageResultCallback()).awaitSuccess();
+                    .withTag(tag)
+                    .exec(new PullImageResultCallback()).awaitSuccess();
 
             dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
             if (dockerList.size() == 0) {
                 logger.error(String.format("Image %s not found, unable to automatically pull image." +
-                        " Check `docker images`",
-                    IMG));
+                                " Check `docker images`",
+                        IMG));
                 System.exit(1);
             }
         }
@@ -106,41 +105,27 @@ public class DockerHelper {
             volumeBindList.add(new Bind(volFrom, vol));
         }
 
-
-        CreateContainerResponse containerResponse;
-        if (envList == null) {
-            containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
-                .withCmd(cmdList)
-                .withExposedPorts(tcpPorts)
-                .withHostConfig(
-                    new HostConfig()
-                        .withPortBindings(portBindings)
-                        .withPublishAllPorts(true)
-                        .withBinds(volumeBindList)
-                )
-                .withName(name)
-                //.withVolumes(volumeList)
-                .exec();
-        } else {
-            long user = new UnixSystem().getUid();
-            containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
-                .withEnv(envList)
-                .withExposedPorts(tcpPorts)
-                .withHostConfig(
-                    new HostConfig()
-                        .withPortBindings(portBindings)
-                        .withPublishAllPorts(true)
-                        .withBinds(volumeBindList)
-                )
-                .withName(name)
-                .withUser(""+user)
-                //.withVolumes(volumeList)
-                .exec();
+        List<Link> links = linkNames.stream().map(x -> new Link(x, x)).collect(Collectors.toList());
+        CreateContainerCmd builder = dockerClient.createContainerCmd(IMG + ":" + tag);
+        if (cmdList!=null) {
+            builder = builder.withCmd(cmdList);
         }
 
+        builder = builder.withUser(String.valueOf(new UnixSystem().getUid()));
+        builder = builder.withExposedPorts(tcpPorts);
+        builder = builder.withHostConfig(new HostConfig()
+                .withPortBindings(portBindings)
+                .withPublishAllPorts(true)
+                .withBinds(volumeBindList));
+        builder = builder.withName(name);
+        builder = builder.withLinks(links);
+        if (envList!=null) {
+            builder = builder.withEnv(envList);
+        }
+        CreateContainerResponse containerResponse = builder.exec();
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
 
-        if (existingContainer){
+        if (existingContainer) {
             logger.debug("Started existing container");
             return null;
         }
@@ -213,7 +198,11 @@ public class DockerHelper {
             logger.info(String.format("Hupping config"));
 
             if (reload != null) {
-                post(reload, null, false, "reloading config");
+                try {
+                    post(reload, null, false, "reloading config");
+                } catch (Exception e) {
+                    logger.error(String.format("Unexpected config/state for docker container %s, consider removing the container", name));
+                }
             }
 
             return runningContainers.get(0);
@@ -224,12 +213,12 @@ public class DockerHelper {
     public void pollLog(String containerId, ResultCallbackTemplate<LogContainerResultCallback, Frame> logCallback) {
 
         LogContainerResultCallback loggingCallback = new
-            LogContainerResultCallback();
+                LogContainerResultCallback();
 
         LogContainerCmd cmd = dockerClient.logContainerCmd(containerId)
-            .withStdOut(true)
-            .withFollowStream(true)
-            .withTailAll();
+                .withStdOut(true)
+                .withFollowStream(true)
+                .withTailAll();
 
         final boolean[] httpStarted = {false};
         cmd.exec(logCallback);

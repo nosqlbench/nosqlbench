@@ -1,0 +1,46 @@
+@startuml
+title NoSQLBench docserver in embedded mode
+participant "UserBrowser" as u
+participant "NoSQLBench\n:12345 (HTTP)" as nb
+participant "Static Content\nService" as content
+participant "Markdown Content\nService" as SPI
+
+u -> nb : Load Page
+activate nb
+nb -> content : Read Generated App
+activate content
+nb <- content : static files
+deactivate content
+u <- nb : HTTP Content
+deactivate nb
+
+note over u
+The client app initializes
+and makes subsequent
+calls to the origin server
+for content and services
+end note
+
+u -> nb: Read Content Manifest
+activate nb
+nb -> SPI : List Content
+activate SPI
+SPI -> SPI: Discover and \nEnumerate
+nb <- SPI : markdown\nmanifest
+deactivate SPI
+u <- nb: markdown\nmanifest
+deactivate nb
+
+u -> nb: Read Named Content
+activate nb
+nb -> SPI : Lookup
+activate SPI
+SPI -> SPI: Lookup
+nb <- SPI : Named Content
+deactivate SPI
+u <- nb: Named Content
+deactivate nb
+
+... Subsequent calls are similar ...
+
+@enduml

@@ -1,0 +1,92 @@
+description: |
+  This set of bindings demonstrates example settings for all
+  of the built-in probability curves.
+
+scenarios:
+  default:
+    readout1: run driver===stdout format=readout cycles=1
+
+bindings:
+  cycle: Identity()
+  # parameter types and symbolic names included below with links
+  #
+  # https://en.wikipedia.org/wiki/L%C3%A9vy_distribution
+  # (double location, double scale)
+  levy: Levy(0.0,0.5)
+  # https://en.wikipedia.org/wiki/Nakagami_distribution
+  # (double shape, double spread)
+  nakagami: Nakagami(0.5,1.0)
+  # https://en.wikipedia.org/wiki/Triangular_distribution
+  # (double a, double b, double c)
+  triangular: Triangular(1.0, 2.0, 3.0)
+  # http://homepage.divms.uiowa.edu/~mbognar/applets/exp.html
+  # https://en.wikipedia.org/wiki/Exponential_distribution
+  # (double rate)
+  exponential: Exponential(1.5)
+  # https://en.wikipedia.org/wiki/Logistic_distribution
+  # (double mean, double scale)
+  logistic: Logistic(5.0,2.0)
+  # https://en.wikipedia.org/wiki/Wrapped_asymmetric_Laplace_distribution
+  # (double location, double scale)
+  laplace: Laplace(1.0,2.0)
+  # https://en.wikipedia.org/wiki/Log-normal_distribution
+  # (double mean, double stddev)
+  log_normal: LogNormal(1.0,0.25)
+  # https://en.wikipedia.org/wiki/Cauchy_distribution
+  # (double location, double scale)
+  cauchy: Cauchy(0.0,0.5)
+  # https://en.wikipedia.org/wiki/F-distribution
+  # (double d1, double d2)
+  f: F(10.0,1.0)
+  # https://en.wikipedia.org/wiki/Student%27s_t-distribution
+  # (double dof)
+  t: T(2.0)
+  # https://en.wikipedia.org/wiki/Empirical_distribution_function
+  # (int bincount)
+  # empirical: empirical(10)
+  # https://en.wikipedia.org/wiki/Normal_distribution
+  # (double mean, double variance)
+  normal: Normal(5.0, 1.0)
+  # https://en.wikipedia.org/wiki/Weibull_distribution
+  # (double scale, double shape)
+  weibull: Weibull(1.0,1.5)
+  # https://en.wikipedia.org/wiki/Chi-squared_distribution
+  # (double dof)
+  chi_squared: ChiSquared(5.0)
+  # https://en.wikipedia.org/wiki/Gumbel_distribution
+  # (double location, double scale)
+  gumbel: Gumbel(0.5,2.0)
+  # https://en.wikipedia.org/wiki/Beta_distribution
+  # (double shape1, double shape2)
+  beta: Beta(2.0,2.0)
+  # https://en.wikipedia.org/wiki/Pareto_distribution
+  # (double scale, double shape)
+  pareto: Pareto(1.0, 3.0)
+  # https://en.wikipedia.org/wiki/Gamma_distribution
+  # (double shape, double scale)
+  gamma: Gamma(3.0,2.0)
+  # https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)
+  # (double min, double max)
+  uniform_real: Uniform(0.0,100.0) -> double
+  # http://homepage.divms.uiowa.edu/~mbognar/applets/hg.html
+  # https://en.wikipedia.org/wiki/Hypergeometric_distribution
+  # (int pop, int successes, int sample)
+  hypergeometric: Hypergeometric(40,20,10)
+  # (int min, int max)
+  uniform_int: Uniform(0,100) -> int
+  # http://homepage.divms.uiowa.edu/~mbognar/applets/geo1.html
+  # https://en.wikipedia.org/wiki/Geometric_distribution
+  # (double probability)
+  geometric: Geometric(0.5)
+  # https://en.wikipedia.org/wiki/Poisson_distribution
+  # (double avgrate)
+  poisson: Poisson(5.0)
+  # https://en.wikipedia.org/wiki/Zipf%27s_law
+  # (int elements, double exponent)
+  zipf: Zipf(10,5.0)
+  # https://en.wikipedia.org/wiki/Binomial_distribution
+  # (int trials, double probability)
+  binomial: Binomial(8,0.5)
+  # https://en.wikipedia.org/wiki/Negative_binomial_distribution
+  # (int successes, double probability)
+  pascal: Pascal(10,0.33)

@@ -2,30 +2,43 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.*;
 
-public class RawScenarios extends LinkedHashMap<String, LinkedList<String>> {
+public class RawScenarios {
+
+    public static String STEPNAME = "%03d";
+    private Map<String, Map<String, String>> scenarios = new LinkedHashMap<>();
 
     public List<String> getScenarioNames() {
-        return new LinkedList<>(this.keySet());
+        return new ArrayList<>(scenarios.keySet());
     }
 
-    public List<String> getNamedScenario(String scenarioName) {
-        Object v = this.get(scenarioName);
-        if (v==null) { return null; }
+    public void setPropertiesByReflection(Object scenariosObject) {
+        scenarios.clear();
 
-        // Yes this looks strange. Yes it will work. SnakeYaml and generics are a bad combo.
-        if (v instanceof List) {
-            return (List<String>) v;
-        } else if (v instanceof CharSequence) {
-            return List.of(v.toString());
-        } else if (v instanceof Map) {
-            Object[] o = ((Map) v).values().toArray();
-            ArrayList<String> strings = new ArrayList<>(o.length);
-            for (Object o1 : o) {
-                strings.add(o1.toString());
+        Objects.requireNonNull(scenariosObject);
+        if (scenariosObject instanceof Map) {
+            Map<String, Object> rawNamedScenarios = (Map<String, Object>) scenariosObject;
+            for (Map.Entry<String, Object> namedEntry : rawNamedScenarios.entrySet()) {
+                String scenarioName = namedEntry.getKey();
+                Object scenarioObj = namedEntry.getValue();
+                if (scenarioObj instanceof CharSequence) {
+                    scenarios.put(scenarioName, Map.of(String.format(STEPNAME, 1), scenarioObj.toString()));
+                } else if (scenarioObj instanceof List) {
+                    List<String> list = (List<String>) scenarioObj;
+                    Map<String, String> scenarioMap = new LinkedHashMap<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        scenarioMap.put(String.format(STEPNAME, i), list.get(i));
+                    }
+                    scenarios.put(scenarioName, scenarioMap);
+                } else if (scenarioObj instanceof Map) {
+                    scenarios.put(scenarioName, (Map<String,String>)scenarioObj);
+                }
             }
-            return strings;
         } else {
-            throw new RuntimeException("Unknown type while access raw named scenarios data: " + v.getClass().getCanonicalName());
+            throw new RuntimeException("Named scenarios must be a map at the top level, instead found '" + scenariosObject.getClass().getCanonicalName() + "'");
         }
+    }
+
+    public Map<String, String> getNamedScenario(String scenarioName) {
+        return scenarios.get(scenarioName);
     }
 }

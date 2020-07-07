@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
-public class RawStmtDef extends BlockParams {
+public class RawStmtDef extends RawStmtFields {
 
     private String statement;
 
@@ -33,15 +33,20 @@ public class RawStmtDef extends BlockParams {
         this.statement = statement;
     }
 
+
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
 
         Optional.ofNullable((String) map.remove("stmt")).ifPresent(this::setStmt);
         Optional.ofNullable((String) map.remove("statement")).ifPresent(this::setStmt);
         Optional.ofNullable((String) map.remove("name")).ifPresent(this::setName);
+        Optional.ofNullable((String) map.remove("desc")).ifPresent(this::setDesc);
+        Optional.ofNullable((String) map.remove("description")).ifPresent(this::setDesc);
+
         Optional.ofNullable((Map<String, String>) map.remove("tags")).ifPresent(this::setTags);
         Optional.ofNullable((Map<String, String>) map.remove("bindings")).ifPresent(this::setBindings);
-        Optional.ofNullable((Map<String, String>) map.remove("params")).ifPresent(this::setParams);
+        Optional.ofNullable((Map<String, Object>) map.remove("params")).ifPresent(this::setParams);
+
 
         // Depends on order stability, relying on LinkedHashMap -- Needs stability unit tests
         if (this.statement == null) {
@@ -69,7 +74,7 @@ public class RawStmtDef extends BlockParams {
             setName(defaultName);
         }
 
-        map.forEach((key, value) -> getParams().put(key, String.valueOf(value)));
+        map.forEach((key, value) -> getParams().put(key, value));
     }
 
     public String getStmt() {
@@ -79,8 +84,12 @@ public class RawStmtDef extends BlockParams {
     private void setStmt(String statement) {
         this.statement = statement;
     }
-
+    
     public String getName() {
-        return getParams().getOrDefault("name", super.getName());
+        Object name = getParams().get("name");
+        if (name!=null) {
+            return name.toString();
+        }
+        return super.getName();
     }
 }

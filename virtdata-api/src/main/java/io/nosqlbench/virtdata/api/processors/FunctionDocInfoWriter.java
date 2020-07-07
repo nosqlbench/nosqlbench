@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.api.processors;
 
 import com.squareup.javapoet.*;
-import io.nosqlbench.nb.api.annotations.Service;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.api.annotations.Category;
 
 import javax.annotation.processing.Filer;

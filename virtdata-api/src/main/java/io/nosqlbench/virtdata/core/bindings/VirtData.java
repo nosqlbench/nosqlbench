@@ -19,7 +19,7 @@ public class VirtData {
      * @param namesAndSpecs names and specs in "name", "spec", ... form
      * @return A bindings template that can be used to resolve a bindings instance
      */
-    public static BindingsTemplate getTemplate(String... namesAndSpecs) {
+    public static BindingsTemplate getTemplate(Map<String,Object> config, String... namesAndSpecs) {
         if ((namesAndSpecs.length % 2) != 0) {
             throw new RuntimeException(
                     "args must be in 'name','spec', pairs. " +
@@ -29,7 +29,11 @@ public class VirtData {
         for (int i = 0; i < namesAndSpecs.length; i += 2) {
             bindPoints.add(new BindPoint(namesAndSpecs[i],namesAndSpecs[i+1]));
         }
-        return getTemplate(bindPoints);
+        return getTemplate(config, bindPoints);
+    }
+
+    public static BindingsTemplate getTemplate(String... namesAndSpecs) {
+        return getTemplate(Map.of(), namesAndSpecs);
     }
 
 //    /**
@@ -57,7 +61,7 @@ public class VirtData {
      * @param bindPoints A list of {@link BindPoint}s
      * @return A BindingsTemplate
      */
-    public static BindingsTemplate getTemplate(List<BindPoint> bindPoints) {
+    public static BindingsTemplate getTemplate(Map<String,Object> config, List<BindPoint> bindPoints) {
         for (BindPoint bindPoint : bindPoints) {
             String bindspec = bindPoint.getBindspec();
             VirtDataDSL.ParseResult parseResult = VirtDataDSL.parse(bindspec);
@@ -65,7 +69,7 @@ public class VirtData {
                 throw new RuntimeException(parseResult.throwable);
             }
         }
-        return new BindingsTemplate(bindPoints);
+        return new BindingsTemplate(config, bindPoints);
     }
 
     /**

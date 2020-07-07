@@ -19,7 +19,7 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.metrics.MetricRegistryBindings;
+import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +68,13 @@ public class MetricsMapper {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
         }
         Activity activity = activityType.get().getAssembledActivity(activityDef, new HashMap<>());
-        MetricRegistryBindings metricRegistryBindings = new MetricRegistryBindings(ActivityMetrics.getMetricRegistry());
+        NashornMetricRegistryBindings nashornMetricRegistryBindings = new NashornMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenserDelegate().getInput(0);
         activity.getActionDispenserDelegate().getAction(0);
         activity.getMotorDispenserDelegate().getMotor(activityDef, 0);
 
-        Map<String, Metric> metricMap = metricRegistryBindings.getMetrics();
+        Map<String, Metric> metricMap = nashornMetricRegistryBindings.getMetrics();
 
 //        Map<String, Map<String,String>> details = new LinkedHashMap<>();
 

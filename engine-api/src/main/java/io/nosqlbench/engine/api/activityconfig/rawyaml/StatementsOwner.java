@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.*;
 
-public class StatementsOwner extends BlockParams {
+public class StatementsOwner extends RawStmtFields {
 
     private List<RawStmtDef> rawStmtDefs = new ArrayList<>();
 
@@ -34,8 +34,28 @@ public class StatementsOwner extends BlockParams {
         this.rawStmtDefs = rawStmtDefs;
     }
 
+    public void setFieldsByReflection(Map<String, Object> propsmap) {
+        Object statementsObject = propsmap.remove("statements");
+
+        if (statementsObject==null) {
+            statementsObject = propsmap.remove("statement");
+        }
+
+        if (statementsObject!=null) {
+            setStatementsFieldByObjectType(statementsObject);
+        }
+//        if (statementsObject!=null) {
+//            if (statementsObject instanceof List) {
+//                setByObject(statementsObject);
+//            } else {
+//                throw new RuntimeException("Invalid type for statements property: " + statementsObject.getClass().getCanonicalName());
+//            }
+//        }
+        super.setFieldsByReflection(propsmap);
+    }
+
     @SuppressWarnings("unchecked")
-    public void setByObject(Object object) {
+    public void setStatementsFieldByObjectType(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
             List<RawStmtDef> defs = new ArrayList<>(stmtList.size());
@@ -61,7 +81,7 @@ public class StatementsOwner extends BlockParams {
                     valueMap.put("name", entries.getKey());
                     itemizedMaps.add(valueMap);
                 } else if (value instanceof String) {
-                    Map<String,Object> stmtDetails = new HashMap<String,Object>() {{
+                    Map<String,Object> stmtDetails = new HashMap<>() {{
                         put("name", entries.getKey());
                         put("stmt", entries.getValue());
                     }};
@@ -70,7 +90,7 @@ public class StatementsOwner extends BlockParams {
                     throw new RuntimeException("Unknown inner value type on map-based statement definition.");
                 }
             }
-            setByObject(itemizedMaps);
+            setStatementsFieldByObjectType(itemizedMaps);
         } else if (object instanceof String) {
             List<RawStmtDef> defs = new ArrayList<>();
             defs.add(new RawStmtDef(null,(String)object));

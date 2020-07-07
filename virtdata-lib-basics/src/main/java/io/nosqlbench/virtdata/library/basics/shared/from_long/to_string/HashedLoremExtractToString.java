@@ -33,11 +33,12 @@ public class HashedLoremExtractToString implements LongFunction<String> {
     private final HashedFileExtractToString randomFileExtractMapper;
 
     public HashedLoremExtractToString(int minsize, int maxsize) {
-        randomFileExtractMapper = new HashedFileExtractToString("lorem-ipsum.txt", minsize, maxsize);
+        randomFileExtractMapper = new HashedFileExtractToString("data/lorem_ipsum_full.txt", minsize, maxsize);
     }
 
     @Override
     public String apply(long input) {
         return randomFileExtractMapper.apply(input);
     }
+
 }

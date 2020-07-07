@@ -166,24 +166,24 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testChainedHashRanges() {
         final int initialCycle = 0;
-        final int intermediateCycle = 39;
+        final int intermediateCycle = 52;
         final int finalCycle = 81;
 
-        Object intermediateValue = assertMapper("compose HashRange(0,100) -> int", initialCycle);
-        assertInteger(intermediateValue, intermediateCycle);
+        Object intermediateValue = assertMapper("compose HashRange(0,100) -> int", 0);
+        assertThat(intermediateValue).isEqualTo(52);
 
         Object finalValue = assertMapper("compose HashRange(0,100) -> int", intermediateCycle);
-        assertInteger(finalValue, finalCycle);
+        assertThat(finalValue).isEqualTo(16);
 
         Object finalChainedValue = assertMapper("compose HashRange(0,100); HashRange(0,100) -> int", initialCycle);
-        assertInteger(finalChainedValue, finalCycle);
+        assertThat(finalChainedValue).isEqualTo(16);
     }
 
     @Test
     public void testLeadingIdentityDoesNotImpactTypes()
     {
         final int initialCycle = 0;
-        final int finalCycle = 167;
+        final int finalCycle = 160;
 
         Object o1 = assertMapper("compose HashRange(0,1000); HashRange(0,1000) -> int", initialCycle);
         assertInteger(o1, finalCycle);

@@ -39,7 +39,7 @@ use two commands:
 
 
     # copy a workload to your local directory
-    nb --copy-workload cql-iot
+    nb --copy cql-iot
 
 ### Follow the conventions
 

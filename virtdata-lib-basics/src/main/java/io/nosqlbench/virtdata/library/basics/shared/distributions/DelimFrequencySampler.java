@@ -81,9 +81,11 @@ public class DelimFrequencySampler implements LongFunction<String> {
         CSVParser csvdata = NBIO.readFileDelimCSV(filename,delimiter);
         Frequency freq = new Frequency();
         for (CSVRecord csvdatum : csvdata) {
-            String value = csvdatum.get(columnName);
-            freq.addValue(value);
-            values.add(value);
+            if (csvdatum.get(columnName) != null) {
+                String value = csvdatum.get(columnName);
+                freq.addValue(value);
+                values.add(value);
+            }
         }
         int i = 0;
         for (String value : values) {

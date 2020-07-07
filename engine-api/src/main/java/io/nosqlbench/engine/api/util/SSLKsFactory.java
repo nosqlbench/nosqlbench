@@ -17,29 +17,40 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 
 public class SSLKsFactory {
     private final static Logger logger = LoggerFactory.getLogger(SSLKsFactory.class);
 
-    private static SSLKsFactory instance = new SSLKsFactory();
+    private static final SSLKsFactory instance = new SSLKsFactory();
+
+    private static final Pattern CERT_PATTERN = Pattern.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+([a-z0-9+/=\\r\\n]+)-+END\\s+.*CERTIFICATE[^-]*-+", 2);
+    private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", 2);
 
     /**
      * Consider: https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3
@@ -52,128 +63,165 @@ public class SSLKsFactory {
     }
 
     public ServerSocketFactory createSSLServerSocketFactory(ActivityDef def) {
-        return ((SSLContext) getContext(def)).getServerSocketFactory();
+        SSLContext context = getContext(def);
+        if (context == null) {
+            throw new IllegalArgumentException("SSL is not enabled.");
+        }
+        return context.getServerSocketFactory();
     }
 
     public SocketFactory createSocketFactory(ActivityDef def) {
-        return ((SSLContext) getContext(def)).getSocketFactory();
+        SSLContext context = getContext(def);
+        if (context == null) {
+            throw new IllegalArgumentException("SSL is not enabled.");
+        }
+        return context.getSocketFactory();
     }
 
-    public Object getContext(ActivityDef def) {
+    public SSLContext getContext(ActivityDef def) {
         Optional<String> sslParam = def.getParams().getOptionalString("ssl");
         if (sslParam.isPresent()) {
+            String tlsVersion = def.getParams().getOptionalString("tlsversion").orElse("TLSv1.2");
+
+            KeyStore keyStore;
+            char[] keyPassword = null;
+            KeyStore trustStore;
+
             if (sslParam.get().equals("jdk") || sslParam.get().equals("true")) {
                 if (sslParam.get().equals("true")) {
                     logger.warn("Please update your 'ssl=true' parameter to 'ssl=jdk'");
                 }
 
-                Optional<String> keystorePath = def.getParams().getOptionalString("keystore");
-                Optional<String> keystorePass = def.getParams().getOptionalString("kspass");
-                Optional<String> truststorePath = def.getParams().getOptionalString("truststore");
-                Optional<String> truststorePass = def.getParams().getOptionalString("tspass");
-                String tlsVersion = def.getParams().getOptionalString("tlsversion").orElse("TLSv1.2");
+                keyPassword = def.getParams().getOptionalString("keyPassword")
+                                 .map(String::toCharArray)
+                                 .orElse(null);
 
-                if (keystorePath.isPresent() && keystorePass.isPresent() && truststorePath.isPresent() && truststorePass.isPresent()) {
+                keyStore = def.getParams().getOptionalString("keystore").map(ksPath -> {
                     try {
-                        KeyStore ks = KeyStore.getInstance("JKS");
-                        ks.load(new FileInputStream(keystorePath.get()), keystorePass.get().toCharArray());
-
-                        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                        kmf.init(ks, keystorePass.get().toCharArray());
-
-                        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                        if (!truststorePath.get().isEmpty()) {
-                            KeyStore ts = KeyStore.getInstance("JKS");
-                            InputStream trustStore = new FileInputStream(truststorePath.get());
-
-                            String truststorePassword = truststorePass.get();
-                            ts.load(trustStore, truststorePassword.toCharArray());
-                            tmf.init(ts);
-                        } else {
-                            tmf.init(ks);
-                        }
-
-                        SSLContext sc = SSLContext.getInstance(tlsVersion);
-                        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-                        return sc;
+                        return KeyStore.getInstance(new File(ksPath),
+                                                    def.getParams().getOptionalString("kspass")
+                                                       .map(String::toCharArray)
+                                                       .orElse(null));
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Unable to load the keystore. Please check.", e);
                     }
+                }).orElse(null);
 
-                } else if (keystorePath.isEmpty() && keystorePass.isEmpty() && truststorePath.isPresent() && truststorePass.isPresent()) {
+                trustStore = def.getParams().getOptionalString("truststore").map(tsPath -> {
                     try {
-                        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                        KeyStore ts = KeyStore.getInstance("JKS");
-                        InputStream trustStore = new FileInputStream(truststorePath.get());
-                        String truststorePassword = truststorePass.get();
-                        ts.load(trustStore, truststorePassword.toCharArray());
-                        tmf.init(ts);
-                        SSLContext sc = SSLContext.getInstance(tlsVersion);
-                        sc.init(null, tmf.getTrustManagers(), null);
-                        return sc;
+                        return KeyStore.getInstance(new File(tsPath),
+                                                    def.getParams().getOptionalString("tspass")
+                                                       .map(String::toCharArray)
+                                                       .orElse(null));
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Unable to load the truststore. Please check.", e);
                     }
-                } else {
-                    throw new RuntimeException("SSL arguments are incorrectly configured. Please Check.");
-                }
-
+                }).orElse(null);
 
             } else if (sslParam.get().equals("openssl")) {
-
-                logger.info("Cluster builder proceeding with SSL and Client Auth");
-                String keyPassword = def.getParams().getOptionalString("keyPassword").orElse(null);
-                String caCertFileLocation = def.getParams().getOptionalString("caCertFilePath").orElse(null);
-                String certFileLocation = def.getParams().getOptionalString("certFilePath").orElse(null);
-                String keyFileLocation = def.getParams().getOptionalString("keyFilePath").orElse(null);
-                String truststorePath = def.getParams().getOptionalString("truststore").orElse(null);
-                String truststorePass = def.getParams().getOptionalString("tspass").orElse(null);
-
                 try {
-                    KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-                    ks.load(null, keyPassword.toCharArray());
+                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-                    X509Certificate cert = (X509Certificate) CertificateFactory.
-                            getInstance("X509").
-                            generateCertificate(new FileInputStream(caCertFileLocation));
+                    keyStore = KeyStore.getInstance("JKS");
+                    keyStore.load(null, null);
 
-                    //set alias to cert
-                    ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
+                    Certificate cert = def.getParams().getOptionalString("certFilePath").map(certFilePath -> {
+                        try (InputStream is = new ByteArrayInputStream(loadCertFromPem(new File(certFilePath)))) {
+                            return cf.generateCertificate(is);
+                        } catch (Exception e) {
+                            throw new RuntimeException(String.format("Unable to load cert from %s. Please check.",
+                                                                     certFilePath),
+                                                       e);
+                        }
+                    }).orElse(null);
 
-                    TrustManagerFactory tMF = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    //String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+                    if (cert != null)
+                        keyStore.setCertificateEntry("certFile", cert);
 
-                    if (truststorePath != null && !truststorePath.isEmpty() && truststorePass != null) {
-                        KeyStore ts = KeyStore.getInstance("JKS");
-                        InputStream trustStore = new FileInputStream(truststorePath);
-                        ts.load(trustStore, truststorePass.toCharArray());
-                        tMF.init(ts);
-                    } else {
-                        tMF.init(ks);
+                    File keyFile = def.getParams().getOptionalString("keyFilePath").map(File::new)
+                                      .orElse(null);
+                    if (keyFile != null) {
+                        try {
+                            keyPassword = def.getParams().getOptionalString("keyPassword")
+                                             .map(String::toCharArray)
+                                             .orElse("temp_key_password".toCharArray());
+
+                            KeyFactory kf = KeyFactory.getInstance("RSA");
+                            PrivateKey key = kf.generatePrivate(new PKCS8EncodedKeySpec(loadKeyFromPem(keyFile)));
+                            keyStore.setKeyEntry("key", key, keyPassword,
+                                                 cert != null ? new Certificate[]{ cert } : null);
+                        } catch (Exception e) {
+                            throw new RuntimeException(String.format("Unable to load key from %s. Please check.",
+                                                                     keyFile),
+                                                       e);
+                        }
                     }
 
-                    SslContext sslContext = SslContextBuilder
-                            .forClient()
-                            /* configured with the TrustManagerFactory that has the cert from the ca.cert
-                             * This tells the driver to trust the server during the SSL handshake */
-                            .trustManager(tMF)
-                            /* These are needed because the server is configured with require_client_auth
-                             * In this case the client's public key must be in the truststore on each DSE
-                             * server node and the CA configured */
-                            .keyManager(new File(certFileLocation), new File(keyFileLocation))
-                            .build();
+                    trustStore = def.getParams().getOptionalString("caCertFilePath").map(caCertFilePath -> {
+                        try (InputStream is = new FileInputStream(new File(caCertFilePath))) {
+                            KeyStore ts = KeyStore.getInstance("JKS");
+                            ts.load(null, null);
 
-                    return sslContext;
+                            Certificate caCert = cf.generateCertificate(is);
+                            ts.setCertificateEntry("caCertFile", caCert);
+                            return ts;
+                        } catch (Exception e) {
+                            throw new RuntimeException(String.format("Unable to load caCert from %s. Please check.",
+                                                                     caCertFilePath),
+                                                       e);
+                        }
+                    }).orElse(null);
 
+                } catch (RuntimeException re) {
+                    throw re;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             } else {
                 throw new RuntimeException("The 'ssl' parameter must have one of jdk, or openssl");
             }
+
+            KeyManagerFactory kmf;
+            try {
+                kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keyStore, keyPassword);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to init KeyManagerFactory. Please check.", e);
+            }
+
+            TrustManagerFactory tmf;
+            try {
+                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(trustStore != null ? trustStore : keyStore);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to init TrustManagerFactory. Please check.", e);
+            }
+
+            try {
+                SSLContext sslContext = SSLContext.getInstance(tlsVersion);
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                return sslContext;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } else {
             return null;
         }
+    }
+
+    private static byte[] loadPem(Pattern pattern, File pemFile) throws IOException {
+        try (InputStream in = new FileInputStream(pemFile)) {
+            String pem = new String(in.readAllBytes(), StandardCharsets.ISO_8859_1);
+            String encoded = pattern.matcher(pem).replaceFirst("$1");
+            return Base64.getMimeDecoder().decode(encoded);
+        }
+    }
+
+    private static byte[] loadKeyFromPem(File keyPemFile) throws IOException {
+        return loadPem(KEY_PATTERN, keyPemFile);
+    }
+
+    private static byte[] loadCertFromPem(File certPemFile) throws IOException {
+        return loadPem(CERT_PATTERN, certPemFile);
     }
 }

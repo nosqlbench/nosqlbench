@@ -1,0 +1,30 @@
+description: examples of bindings that help you design data sets
+
+scenarios:
+  default:
+    stdout: run driver===stdout format=readout
+
+bindings:
+
+# The Identity() function is just a handy place holder to let you get the
+# cycle number unchanged.
+
+  n: Identity();
+
+# NumberNameToString produces a name for a number all the way up to
+# Long.MAX_VALUE, and all negative values except for LONG.MIN_VALUE.
+# It is quite useful for sketching data and relationships where you
+# need a text field in your data. For fluffy text, use a higher
+# cycle range.
+
+  name: NumberNameToString();
+
+# The TypeOf() function tells you the java class of its input
+
+  typeof: TypeOf();
+
+# The Show() function provides a snapshot of what is in the thread-local
+# variable map as a String
+
+  show: Show();
+

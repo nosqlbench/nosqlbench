@@ -124,7 +124,7 @@ of the command templates in the order they appear on the command line.
 
 This is a little counter-intuitive at first, but once you see some examples it should make sense.
 
-## Parameter Overide Examples
+## Parameter Override Examples
 
 Consider a simple workload with three named scenarios:
 ```yaml
@@ -204,10 +204,48 @@ Ultimately, it is up to the scenario designer when to lock parameters for users.
 examples on how to set these parameters so that the right value are locked in place without bother the user, but some
 values are made very clear in how they should be set. Please look at these examples for inspiration when you need.
 
-## Enforcing UNDEF
+## Forcing Undefined (default) Parameters
 
 If you want to ensure that any parameter in a named scenario template remains unset in the generated scenario script,
 you can assign it a value of UNDEF. The locking behaviors described above apply to this one as well. Thus, for schema
 commands which rely on the default sequence length (which is based on the number of active statements), you can set
 cycles==UNDEF to ensure that when a user passes a cycles parameter the schema phase doesn't break with too many cycles.
+
+## Automatic Parameters
+
+Some parameters are already known due to the fact that you are using named scenarios.
+
+### workload
+
+The `workload` parameter is, by default, set to the logical path (fully qualified workload name) of the yaml file
+containing the named scenario. However, if the command template contains this parameter, it may be overridden by users
+as any other parameter depending on the assignment operators as explained above.
+
+### alias
+
+The `alias` parameter is, by default, set to the expanded name of WORKLOAD_SCENARIO_STEP, which means that each activity
+within the scenario has a distinct and symbolic name. This is important for distinguishing metrics from one another
+across workloads, named scenarios, and steps within a named scenario. The above words are interpolated into the alias as
+follows:
+
+- WORKLOAD - The simple name part of the fully qualified workload name. For example, with a workload (yaml path) of
+  foo/bar/baz.yaml, the WORKLOAD name used here would be `baz`.
+
+- SCENARIO - The name of the scenario as provided on the command line.
+
+- STEP - The name of the step in the named scenario. If you used the list or string forms to provide a command template,
+  then the steps are automatically named as a zero-padded number representing the step in the named scenario, starting
+  from `000`, per named scenario. (The numbers are not globally assigned)
+
+Because it is important to have uniquely named activities for the sake of sane metrics and logging, any alias provided
+when using named scenarios which does not include the three tokens above will cause a warning to be issued to the user
+explaining why this is a bad idea.
+
+:::info
+
+UNDEF is handled before alias expansion above, so it is possible to force the default activity naming behavior above
+with `alias===UNDEF`. This is generally recommended, and will inform users if they try to set the alias in an unsafe
+way.
+
+:::
 

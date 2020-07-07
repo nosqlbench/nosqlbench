@@ -13,6 +13,7 @@ public class HashedRangeToLongListTest {
     public void longListRangeTest() {
         HashedRangeToLongList gener = new HashedRangeToLongList(3, 6, 9, 12);
         for (int i = 0; i < 100; i++) {
+            System.out.println("long list range test size: " + i);
             List<Long> list= gener.apply(i);
             assertThat(list.size()).isBetween(9,12);
             for (Long longVal : list) {

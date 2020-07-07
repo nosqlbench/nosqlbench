@@ -19,11 +19,12 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A statements doc can have both a list of statement blocks and/or a
  * list of statements. It can also have all the block parameters
- * assignable to {@link BlockParams}.
+ * assignable to {@link RawStmtFields}.
  * <p>
  * The reason for having support both statements or statement blocks
  * is merely convenience. If you do not need or want to deal with the
@@ -35,7 +36,34 @@ public class RawStmtsDoc extends StatementsOwner {
     private List<RawStmtsBlock> blocks = new ArrayList<>();
 
     // no-args ctor is required
-    public RawStmtsDoc() {}
+    public RawStmtsDoc() {
+    }
+
+    public void setFieldsByReflection(Map<String, Object> properties) {
+        Object blocksObjects = properties.remove("blocks");
+        if (blocksObjects instanceof List) {
+            List<Object> blockList = ((List<Object>) blocksObjects);
+            for (Object blockData : blockList) {
+                if (blockData instanceof Map) {
+                    Map<String, Object> blockDataMap = (Map<String, Object>) blockData;
+                    RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
+                    rawStmtsBlock.setFieldsByReflection(blockDataMap);
+                    blocks.add(rawStmtsBlock);
+                } else {
+                    throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
+                }
+            }
+        }
+
+        Object scenariosData = properties.remove("scenarios");
+
+        if (scenariosData != null) {
+            scenarios.setPropertiesByReflection(scenariosData);
+        }
+
+        super.setFieldsByReflection(properties);
+
+    }
 
     /**
      * Return the list of statement blocks in this RawStmtsDoc.
@@ -69,4 +97,5 @@ public class RawStmtsDoc extends StatementsOwner {
     public void setScenarios(RawScenarios scenarios) {
         this.scenarios = scenarios;
     }
+
 }

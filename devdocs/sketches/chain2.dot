@@ -1,0 +1,80 @@
+
+digraph {
+
+    node [shape = none]
+
+//    rankdir=LR;
+
+
+    do_read_input[label="read input"]
+    c_err[shape="none",label="[ERR,null]"fontcolor=red]
+    c_ok[shape="none",label="[OK,cycle]",fontcolor=blue]
+
+    do_read_input -> c_err [color=red]
+    do_read_input -> c_ok [color=blue]
+
+
+    bind_template[label="bind template"]
+    template_ok[label="[OK,template]",fontcolor=blue]
+    template_err[label="[ERR,cycle]"fontcolor=red]
+    c_ok -> bind_template
+    bind_template -> template_err [color=red]
+    bind_template -> template_ok [color=blue]
+
+    exec_cmd[label="execute command"]
+    command_err[label="[ERR,template]"fontcolor=red]
+    command_ok[label="[OK,result]",fontcolor=blue]
+    template_ok -> exec_cmd
+    exec_cmd -> command_err [color=red]
+    exec_cmd -> command_ok [color=blue]
+
+    verify[label="verify result"]
+    command_ok -> verify
+    verify_err[label="[ERR,result]",fontcolor=red]
+    verify_ok[label="[OK,status]",fontcolor=blue]
+    verify -> verify_err [color=red]
+    verify -> verify_ok [color=blue]
+
+
+    clusterrank="local"
+
+    {
+        c_ok; command_ok; verify_ok
+    }
+
+    {
+
+        do_read_input; bind_template; exec_cmd; verify;
+    }
+
+    {
+        c_err; command_err; template_err; verify_err;
+    }
+
+    {
+    rank=sink;
+        errs[fontcolor=red];
+        ok[fontcolor=blue];
+    }
+
+    template_err -> errs [color=red]
+    verify_err -> errs [color=red]
+    c_err -> errs [color=red]
+    command_err -> errs [color=red]
+
+//    c_ok -> ok;
+//    template_ok -> ok;
+//    command_ok -> ok;
+    verify_ok -> ok [color=blue]
+
+
+
+
+
+
+    //        <tr><td>Error<sub>none</sub></td></tr>
+// ⁅⁆⟦⟧ ⟬⟭ ⟮⟯  ⟨⟩ ⁅⁆
+//       <td rowspan="*"><FONT POINT-SIZE="32">{</FONT></td>
+//       <td rowspan="*"><FONT POINT-SIZE="32">}</FONT></td>
+
+}

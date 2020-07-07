@@ -32,15 +32,57 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class NumberNameToString implements LongFunction<String> {
 
+    private final static ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
+
+    private final static String THOUSAND = "thousand";
+    private final static String MILLION = "million";
+    private final static String BILLION = "billion";
+    private final static String TRILLION = "trillion";
+    private final static String QUADRILLION = "quadrillion";
+    private final static String QUINTILLION = "quintillion";
+
     private final NumberInWordsFormatter formatter = NumberInWordsFormatter.getInstance();
 
     @Override
     public String apply(long input) {
-        if (input==0L) {
+        if (input == 0L) {
             return "zero";
+        } else if (input > 0 && input <= 999999999L) {
+            return formatter.format((int) input);
+        } else if (input < 0 && input >= -999999999L) {
+            return "negative " + formatter.format((int) -input);
+        } else {
+            StringBuilder sb = tlsb.get();
+            sb.setLength(0);
+            long value = input;
+
+            if (value < 0) {
+                value = -value;
+                sb.append("negative");
+            }
+
+            long higher = (value / 1000000000L);
+            if (higher > 1000000000L) {
+                long evenhigher = higher / 1000000000L;
+                sb.append(formatter.format((int) evenhigher)).append(" quintillion");
+                higher = higher % 1000000000L;
+            }
+
+            String val = formatter.format((int) higher)
+                .replaceAll(THOUSAND, TRILLION)
+                .replaceAll(MILLION, QUADRILLION)
+                .replaceAll(BILLION, QUINTILLION);
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(val).append(" billion");
+
+            String rstr = formatter.format((int) (input % 1000000000L));
+            if (!rstr.isEmpty()) {
+                sb.append(" ").append(rstr);
+            }
+            return sb.toString();
         }
-        String result = formatter.format((int) input % Integer.MAX_VALUE);
-        return result;
     }
 
 }

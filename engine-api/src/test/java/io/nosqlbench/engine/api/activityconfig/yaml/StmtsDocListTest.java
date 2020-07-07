@@ -51,7 +51,7 @@ public class StmtsDocListTest {
 
     @BeforeClass
     public static void testLoadYaml() {
-        doclist = StatementsLoader.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        doclist = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class StmtsDocListTest {
     @Test
     public void testStmtInheritsBlockData() {
         StmtsDoc doc0 = doclist.getStmtDocs().get(0);
-        List<StmtDef> stmts1 = doc0.getBlocks().get(0).getStmts();
+        List<OpTemplate> stmts1 = doc0.getBlocks().get(0).getStmts();
         assertThat(stmts1).hasSize(2);
 
         StmtsBlock block0 = doc0.getBlocks().get(0);
@@ -101,7 +101,7 @@ public class StmtsDocListTest {
         StmtsBlock block0 = doc1.getBlocks().get(0);
 
         Map<String, String> doc1block0tags = block0.getTags();
-        Map<String, String> doc1block0params = block0.getParams();
+        Map<String, String> doc1block0params = block0.getParamsAsText();
         Map<String, String> doc1block0bindings = block0.getBindings();
 
         assertThat(doc1block0tags).hasSize(3);
@@ -121,13 +121,13 @@ public class StmtsDocListTest {
     @Test
     public void testStmtsGetter() {
         StmtsDoc doc1 = doclist.getStmtDocs().get(1);
-        List<StmtDef> stmts = doc1.getStmts();
+        List<OpTemplate> stmts = doc1.getStmts();
         assertThat(stmts).hasSize(4);
     }
 
     @Test
     public void testFilteredStmts() {
-        List<StmtDef> stmts = doclist.getStmts("");
+        List<OpTemplate> stmts = doclist.getStmts("");
         assertThat(stmts).hasSize(6);
         stmts = doclist.getStmts("root1:value23");
         assertThat(stmts).hasSize(2);

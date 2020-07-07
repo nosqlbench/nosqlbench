@@ -56,6 +56,11 @@ public class ScenarioLogger {
         return this;
     }
 
+    public ScenarioLogger setLevel(Level level) {
+        this.logLevel = level;
+        return this;
+    }
+
     public ScenarioLogger setLevel(String levelname) {
         this.logLevel = Level.toLevel(levelname);
         return this;
@@ -88,6 +93,7 @@ public class ScenarioLogger {
         fileAppender.setFile(scenarioLog);
         fileAppender.setEncoder(ple);
         fileAppender.setContext(loggerContext);
+        fileAppender.setImmediateFlush(true);
         System.err.println("Logging to " + scenarioLog);
         fileAppender.start();
 

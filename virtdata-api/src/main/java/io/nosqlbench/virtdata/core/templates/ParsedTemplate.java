@@ -333,8 +333,9 @@ public class ParsedTemplate {
      */
     public String getPositionalStatement(Function<String, String> tokenFormatter) {
         StringBuilder sb = new StringBuilder(spans[0]);
+
         for (int i = 1; i < spans.length; i += 2) {
-            sb.append(tokenFormatter.apply(spans[i]));
+            sb.append(tokenFormatter!=null ? tokenFormatter.apply(spans[i]) : spans[i]);
             sb.append(spans[i + 1]);
         }
         return sb.toString();

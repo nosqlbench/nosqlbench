@@ -34,7 +34,7 @@ export central_runtime_version=$(
    .nosqlbench"%20AND%20a:"engine-cli"%20AND%20p:"jar"&wt=json&rows=1' \
    | perl -pe 'if (/"latestVersion":"([\d\.]+?)"/) { $_ = $1 } else {$_="nope"}'
 )
-export DOWNLOAD_VERSION=${central_runtime_version:?"Unable to find a downloadble version via maven central search."}
+export DOWNLOAD_VERSION=${central_runtime_version:?"Unable to find a downloadable version via maven central search."}
 printf 'Downloading version: %s\n...' ${DOWNLOAD_VERSION} 1>&2
 export DOWNLOAD_URL="https://repo1.maven
 .org/maven2/io/nosqlbench/engine-cli/${DOWNLOAD_VERSION}/engine-cli-$

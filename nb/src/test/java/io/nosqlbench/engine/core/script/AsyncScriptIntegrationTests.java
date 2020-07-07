@@ -20,12 +20,15 @@ package io.nosqlbench.engine.core.script;
 import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
+import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -51,9 +54,20 @@ public class AsyncScriptIntegrationTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
         ScenariosExecutor e = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
-        Scenario s = new Scenario(scenarioName);
+        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm);
         s.addScenarioScriptParams(paramsMap);
-        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
+
+        ClassLoader cl = AsyncScriptIntegrationTests.class.getClassLoader();
+        String script;
+        try {
+            InputStream sstream = cl.getResourceAsStream("scripts/async/" + scriptname + ".js");
+            byte[] bytes = IOUtils.toByteArray(sstream);
+            script = new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        s.addScriptText(script);
+//        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
         e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();

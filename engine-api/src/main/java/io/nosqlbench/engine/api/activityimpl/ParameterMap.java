@@ -17,6 +17,9 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
 import io.nosqlbench.engine.api.util.Unit;
+
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +41,7 @@ import java.util.stream.Collectors;
  * <p>No non-String types are used internally. Everything is encoded as a String, even though the
  * generic type is parameterized for Bindings support.</p>
  */
-public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings {
+public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings, ProxyObject {
     private final static Logger logger = LoggerFactory.getLogger(ParameterMap.class);
 
 
@@ -253,7 +256,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         if (encodedParams == null) {
             throw new RuntimeException("Must provide a non-null String to parse parameters.");
         }
-        Map<String, String> parsedMap = ParamsParser.parse(encodedParams);
+        Map<String, String> parsedMap = ParamsParser.parse(encodedParams,true);
         return new ParameterMap(parsedMap);
     }
 
@@ -276,7 +279,33 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return getOptionalString(paramName).map(Integer::valueOf);
     }
 
-//    /**
+    @Override
+    public Object getMember(String key) {
+        return this.get(key);
+    }
+
+    @Override
+    public Object getMemberKeys() {
+        return new ArrayList<>(this.keySet());
+    }
+
+    @Override
+    public boolean hasMember(String key) {
+        return this.containsKey(key);
+    }
+
+    @Override
+    public void putMember(String key, Value value) {
+        this.put(key,value);
+    }
+
+    @Override
+    public boolean removeMember(String key) {
+        Object removed = this.remove(key);
+        return removed!=null;
+    }
+
+    //    /**
 //     * Parse positional parameters, each suffixed with the ';' terminator.
 //     * This form simply allows for the initial parameter names to be elided, so long as they
 //     * are sure to match up with a well-known order. This method cleans up the input, injecting
@@ -344,6 +373,13 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         public String getValue() {
             return value;
         }
+    }
+
+    public static String toJSON(Map<?,?> map) {
+        StringBuilder sb = new StringBuilder();
+        List<String> l = new ArrayList<>();
+        map.forEach((k,v) -> l.add("'" + k + "': '" + v + "'"));
+        return "params={"+String.join(",\n  ",l)+"};\n";
     }
 
 }

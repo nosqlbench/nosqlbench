@@ -3,7 +3,7 @@ title: YAML Diagnostics
 weight: 99
 ---
 
-## Diagnostics
+# YAML Diagnostics
 
 This section describes errors that you might see if you have a YAML loading issue, and what you can do to fix them.
 

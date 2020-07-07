@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 public class ScenarioController {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioController.class);
+    private static final Logger scenariologger = LoggerFactory.getLogger("SCENARIO");
 
     private final Map<String, ActivityExecutor> activityExecutors = new ConcurrentHashMap<>();
 
@@ -45,7 +46,9 @@ public class ScenarioController {
      * @param activityDef string in alias=value1;driver=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
-        getActivityExecutor(activityDef, true).startActivity();
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
+        scenariologger.debug("START " + activityDef.getAlias());
+        activityExecutor.startActivity();
     }
 
     /**
@@ -82,8 +85,12 @@ public class ScenarioController {
      */
     public synchronized void run(int timeout, ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
+        scenariologger.debug("RUN alias=" + activityDef.getAlias());
+        scenariologger.debug(" (RUN/START) alias=" + activityDef.getAlias());
         activityExecutor.startActivity();
-        activityExecutor.awaitCompletion(timeout);
+        scenariologger.debug(" (RUN/AWAIT before) alias=" + activityDef.getAlias());
+        boolean completed = activityExecutor.awaitCompletion(timeout);
+        scenariologger.debug(" (RUN/AWAIT after) completed=" + activityDef.getAlias());
     }
 
     public synchronized void run(int timeout, String activityDefString) {
@@ -98,6 +105,7 @@ public class ScenarioController {
     public synchronized void run(String activityDefString) {
         run(Integer.MAX_VALUE, activityDefString);
     }
+
 
     public synchronized void run(ActivityDef activityDef) {
         run(Integer.MAX_VALUE, activityDef);
@@ -131,6 +139,7 @@ public class ScenarioController {
         if (activityExecutor == null) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
         }
+        scenariologger.debug("STOP " + activityDef.getAlias());
         activityExecutor.stopActivity();
     }
 
@@ -170,6 +179,7 @@ public class ScenarioController {
         }
         ActivityExecutor activityExecutor = getActivityExecutor(alias);
         ParameterMap params = activityExecutor.getActivityDef().getParams();
+        scenariologger.debug("SET ("+alias+"/"+param + ")=(" + value + ")");
         params.set(param, value);
     }
 
@@ -268,6 +278,8 @@ public class ScenarioController {
      * @param waitMillis time to wait, in milliseconds
      */
     public void waitMillis(long waitMillis) {
+        scenariologger.debug("WAITMILLIS " + waitMillis);
+
         logger.trace("#> waitMillis(" + waitMillis + ")");
         long endTime = System.currentTimeMillis() + waitMillis;
 
@@ -335,9 +347,12 @@ public class ScenarioController {
     public boolean awaitCompletion(int waitTimeMillis) {
         boolean completed = false;
         for (ActivityExecutor executor : activityExecutors.values()) {
-            if (!executor.awaitCompletion(waitTimeMillis))
+            if (!executor.awaitCompletion(waitTimeMillis)) {
+                logger.debug("awaiting completion signaled FALSE");
                 return false;
+            }
         }
+        logger.debug("All activities awaiting completion signaled TRUE");
         return true;
     }
 
@@ -349,22 +364,35 @@ public class ScenarioController {
         }
     }
 
+    public boolean await(Map<String,String> activityDefMap) {
+        return this.awaitActivity(activityDefMap);
+    }
     public boolean awaitActivity(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         return awaitActivity(ad);
     }
 
+    public boolean await(String alias) {
+        return this.awaitActivity(alias);
+    }
     public boolean awaitActivity(String alias) {
         ActivityDef toAwait = aliasToDef(alias);
         return awaitActivity(toAwait);
     }
 
+    public boolean await(ActivityDef activityDef) {
+        return this.awaitActivity(activityDef);
+    }
     public boolean awaitActivity(ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
         if (activityExecutor == null) {
             throw new RuntimeException("Could not await missing activity: " + activityDef);
         }
-        return activityExecutor.awaitFinish(Integer.MAX_VALUE);
+        scenariologger.debug("AWAIT/before alias=" + activityDef.getAlias());
+        boolean finished = activityExecutor.awaitFinish(Integer.MAX_VALUE);
+        scenariologger.debug("AWAIT/after  completed=" + finished);
+        return finished;
+
     }
 
     /**

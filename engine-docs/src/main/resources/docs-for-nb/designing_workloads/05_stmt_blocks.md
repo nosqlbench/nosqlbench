@@ -3,7 +3,7 @@ title: 05 Statement Blocks
 weight: 05
 ---
 
-## Statement Blocks
+# Statement Blocks
 
 All the basic primitives described above (names, statements, bindings, params, tags) can be used to describe and
 parameterize a set of statements in a yaml document. In some scenarios, however, you may need to structure your

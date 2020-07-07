@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,8 +31,8 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadPropertiesBlock() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList rawBlockDocs = ysl.load(logger, "testdocs/rawblock.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList rawBlockDocs = ysl.loadPath(logger, "testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
         RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getRawStmtDefs()).hasSize(1);
@@ -43,8 +44,8 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadFullFormat() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList erthing = ysl.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
@@ -57,23 +58,33 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadScenarios() {
-        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList erthing = ysl.load(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
         List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
+        assertThat(rawStmtsDoc.getDesc()).isEqualTo("a quintessential" +
+            " description");
+
         RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
-        List<String> defaultScenario = rawScenarios.getNamedScenario("default");
-        assertThat(defaultScenario).containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
-        List<String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
-        assertThat(schemaOnlyScenario).containsExactly("run driver=blah tags=phase:schema");
+        Map<String, String> defaultScenario = rawScenarios.getNamedScenario("default");
+        assertThat(defaultScenario.keySet())
+            .containsExactly("000","001");
+        assertThat(defaultScenario.values())
+            .containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
+        Map<String, String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
+        assertThat(schemaOnlyScenario.keySet())
+            .containsExactly("000");
+        assertThat(schemaOnlyScenario.values())
+            .containsExactly("run driver=blah tags=phase:schema");
 
         assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
         RawStmtsBlock rawStmtsBlock = blocks.get(0);
         assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
+
 
     }
 

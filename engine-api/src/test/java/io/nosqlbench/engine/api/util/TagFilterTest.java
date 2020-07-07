@@ -36,7 +36,7 @@ public class TagFilterTest {
 
     @Test
     public void testEmptyTagFilterDoesMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("a","tag");
         }};
         TagFilter tf = new TagFilter("");
@@ -45,7 +45,7 @@ public class TagFilterTest {
 
     @Test
     public void testSomeFilterTagsNoItemTagsDoesNotMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
         }};
         TagFilter tf = new TagFilter("tag=foo");
         assertThat(tf.matches(itemtags).matched()).isFalse();
@@ -54,7 +54,7 @@ public class TagFilterTest {
 
     @Test
     public void testEmptyTagFilterValueDoesMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","two");
         }};
         TagFilter tf = new TagFilter("");
@@ -64,14 +64,14 @@ public class TagFilterTest {
 
     @Test
     public void testMatchingTagKeyValueDoesMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","two");
         }};
         TagFilter tf = new TagFilter("one");
         TagFilter.Result result = tf.matches(itemtags);
         assertThat(result.matched()).isTrue();
 
-        Map<String,String> itemtags2 = new HashMap<String,String>() {{
+        Map<String,String> itemtags2 = new HashMap<>() {{
             put("one",null);
         }};
         assertThat(tf.matches(itemtags2).matched()).isTrue();
@@ -80,7 +80,7 @@ public class TagFilterTest {
 
     @Test
     public void testMatchingKeyMismatchingValueDoesNotMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","four");
         }};
         TagFilter tf = new TagFilter("one:two");
@@ -90,7 +90,7 @@ public class TagFilterTest {
 
     @Test
     public void testMatchingKeyAndValueDoesMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","four");
         }};
         TagFilter tf = new TagFilter("one:four");
@@ -99,7 +99,7 @@ public class TagFilterTest {
 
     @Test
     public void testMatchingKeyAndValueRegexDoesMatch() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","four-five-six");
         }};
         TagFilter tfLeft = new TagFilter("one:'four-.*'");
@@ -114,7 +114,7 @@ public class TagFilterTest {
         Tagged tagged = new Tagged() {
             @Override
             public Map<String, String> getTags() {
-                return new HashMap<String,String>() {{
+                return new HashMap<>() {{
                     put("one","four-five-six");
                     put("two","three-seven-nine");
                     put("five",null);
@@ -136,7 +136,7 @@ public class TagFilterTest {
 
     @Test
     public void testRawSubstringDoesNotMatchRegex() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","four-five-six");
         }};
         TagFilter tf = new TagFilter("one:'five'");
@@ -145,10 +145,21 @@ public class TagFilterTest {
 
     @Test
     public void testAlternation() {
-        Map<String,String> itemtags = new HashMap<String,String>() {{
+        Map<String,String> itemtags = new HashMap<>() {{
             put("one","four-five-six");
         }};
         TagFilter tf = new TagFilter("one:'four.*|seven'");
+        assertThat(tf.matches(itemtags).matched()).isTrue();
+    }
+
+    @Test
+    public void testLeadingSpaceTrimmedInQuotedTag() {
+
+        Map<String,String> itemtags = new HashMap<>() {{
+            put("phase","main");
+        }};
+
+        TagFilter tf = new TagFilter("\"phase: main\"");
         assertThat(tf.matches(itemtags).matched()).isTrue();
     }
 

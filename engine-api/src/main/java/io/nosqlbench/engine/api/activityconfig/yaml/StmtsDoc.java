@@ -68,7 +68,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
     /**
      * @return a usable map of parameters, including those inherited from the parent doc
      */
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return rawStmtsDoc.getParams();
     }
 
@@ -90,7 +90,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
      * @return The list of all included statements for all included block in this document,
      * including the inherited and overridden values from the this doc and the parent block.
      */
-    public List<StmtDef> getStmts() {
+    public List<OpTemplate> getStmts() {
         return getBlocks().stream().flatMap(b -> b.getStmts().stream()).collect(Collectors.toList());
     }
 
@@ -108,4 +108,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
         return new Scenarios(rawStmtsDoc.getRawScenarios());
     }
 
+    public String getDescription() {
+        return rawStmtsDoc.getDesc();
+    }
 }

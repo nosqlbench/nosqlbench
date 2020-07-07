@@ -18,7 +18,6 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class StmtDetailOverrideTest {
     @Test
     public void testStmtOverrides() {
 
-        StmtsDocList doclist = StatementsLoader.load(logger, "testdocs/stmt_details.yaml");
+        StmtsDocList doclist = StatementsLoader.loadPath(logger, "testdocs/stmt_details.yaml");
 
         assertThat(doclist).isNotNull();
 
@@ -43,7 +42,7 @@ public class StmtDetailOverrideTest {
         assertThat(doc1.getBlocks()).hasSize(2);
         StmtsBlock doc1block0 = doc1.getBlocks().get(0);
         assertThat(doc1block0.getStmts().size()).isEqualTo(1);
-        StmtDef s = doc1block0.getStmts().get(0);
+        OpTemplate s = doc1block0.getStmts().get(0);
         assertThat(s.getName()).isEqualTo("block0--stmt1");
         assertThat(s.getStmt()).isEqualTo("globalstatement1");
         assertThat(s.getBindings()).hasSize(1);
@@ -51,7 +50,7 @@ public class StmtDetailOverrideTest {
         assertThat(s.getTags()).hasSize(1);
 
         StmtsBlock doc1block1 = doc1.getBlocks().get(1);
-        List<StmtDef> stmts = doc1block1.getStmts();
+        List<OpTemplate> stmts = doc1block1.getStmts();
         assertThat(stmts).hasSize(4);
 
         s = stmts.get(0);

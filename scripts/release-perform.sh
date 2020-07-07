@@ -20,10 +20,10 @@ if [[ "${last_release_commit_hash}" = "${GITHUB_SHA}" ]]; then
 fi
 
 # Filter the branch to execute the release on
-readonly local branch=${GITHUB_REF##*/}
+readonly local current_branch=$(git rev-parse --abbrev-ref HEAD)
 echo "Current branch: ${branch}"
-if [[ -n "$RELEASE_BRANCH_NAME" && ! "${branch}" = "$RELEASE_BRANCH_NAME" ]]; then
-     echo "Skipping for ${branch} branch"
+if [[ -n "$RELEASE_BRANCH_NAME" && ! "${current_branch}" = "$RELEASE_BRANCH_NAME" ]]; then
+     echo "Skipping for ${current_branch} branch"
      exit 0
 fi
 

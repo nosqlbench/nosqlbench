@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.83-SNAPSHOT</version>
+        <version>3.12.127-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -22,13 +22,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-basics</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -74,46 +74,43 @@
         <!--</dependency>-->
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>shade</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>7.0</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.apache.commons.statistics</pattern>
-                                    <shadedPattern>io.nosqlbench.virtdata
-                                        .shaded.oac.statistics</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.math4.stat</pattern>
-                                    <shadedPattern>io.nosqlbench.virtdata
-                                        .shaded.oac.statistics</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.statistics.distribution</pattern>
-                                    <shadedPattern>io.nosqlbench.virtdata
-                                        .shaded.oac.statistics.distribution</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+<!--    <profiles>-->
+<!--        <profile>-->
+<!--            <id>shade</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <build>-->
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <artifactId>maven-shade-plugin</artifactId>-->
+<!--                        <dependencies>-->
+<!--                            <dependency>-->
+<!--                                <groupId>org.ow2.asm</groupId>-->
+<!--                                <artifactId>asm</artifactId>-->
+<!--                                <version>7.0</version>-->
+<!--                            </dependency>-->
+<!--                        </dependencies>-->
+<!--                        <configuration>-->
+<!--                            <relocations>-->
+<!--                                <relocation>-->
+<!--                                    <pattern>org.apache.commons.statistics</pattern>-->
+<!--                                    <shadedPattern>io.nosqlbench.virtdata.shaded.oac.statistics</shadedPattern>-->
+<!--                                </relocation>-->
+<!--                                <relocation>-->
+<!--                                    <pattern>org.apache.commons.math4.stat</pattern>-->
+<!--                                    <shadedPattern>io.nosqlbench.virtdata.shaded.oac.statistics</shadedPattern>-->
+<!--                                </relocation>-->
+<!--                                <relocation>-->
+<!--                                    <pattern>org.apache.commons.statistics.distribution</pattern>-->
+<!--                                    <shadedPattern>io.nosqlbench.virtdata.shaded.oac.statistics.distribution</shadedPattern>-->
+<!--                                </relocation>-->
+<!--                            </relocations>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
+<!--            </build>-->
+<!--        </profile>-->
+<!--    </profiles>-->
 
 </project>

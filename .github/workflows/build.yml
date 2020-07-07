@@ -2,8 +2,9 @@ name: build
 
 on:
   push:
-    tags:
-     - '!invoke-release'
+    branches: main
+    paths:
+     - '!RELEASENOTES.**'
 
 jobs:
   build:

@@ -24,6 +24,18 @@ To read any topic, simply use the command:
 The documentation system you are looking at right now includes the same docs you can find above already and more. They
 are automatically included when NoSQLBench is built.
 
+## NoSQLBench Slack
+
+There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You
+can get that through this simple form, which will send you an invite in email:
+[Slack Invite](https://docs.google.com/forms/d/e/1FAIpQLSdUOJ8iAPqyxsLfh1nBBsKShI53RAeuzYW4bKExmRMWjj4ufQ/viewform).
+This is just a simple google form that automates the invite process.
+
+Please join it if you are a new or existing NoSQLBench user and help us get it going!
+
+
+
+
 ## General Feedback
 
 These guidelines are mirrored at the

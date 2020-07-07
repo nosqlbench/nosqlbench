@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.83-SNAPSHOT</version>
+        <version>3.12.127-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -23,64 +23,86 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-web</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-kafka</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <version>3.12.127-SNAPSHOT</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>driver-web</artifactId>-->
+<!--            <version>3.12.83-SNAPSHOT</version>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-stdout</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-stdout</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-diag</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-diag</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-tcp</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-tcp</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-http</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-http</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-cql-shaded</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-cql</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-cqlverify</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>activitytype-cqlverify</artifactId>
-            <version>3.12.83-SNAPSHOT</version>
+            <artifactId>driver-mongodb</artifactId>
+            <version>3.12.127-SNAPSHOT</version>
         </dependency>
-
 
         <!--        <dependency>-->
         <!--            <groupId>io.nosqlbench</groupId>-->
@@ -144,43 +166,41 @@
 
         <plugins>
             <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assembly.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>shade-nb-jar</id>
+                        <id>assemble-nb</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <!--                    <shadedArtifactAttached>true</shadedArtifactAttached>-->
-                    <!--                    <shadedClassifierName>jarapp</shadedClassifierName>-->
-                    <!--                    <shadedArtifactId>${project.artifactId}</shadedArtifactId>-->
-
-                    <transformers combine.children="append">
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                            <resource>topics.md</resource>
-                        </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
-                        </transformer>
-                    </transformers>
-                    <!--                    <finalName>${project.artifactId}</finalName>-->
-
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
             </plugin>
+
+<!--            <filters>-->
+<!--                <filter>-->
+<!--                    <artifact>*:*</artifact>-->
+<!--                    <excludes>-->
+<!--                        <exclude>META-INF/*.SF</exclude>-->
+<!--                        <exclude>META-INF/*.DSA</exclude>-->
+<!--                        <exclude>META-INF/*.RSA</exclude>-->
+<!--                    </excludes>-->
+<!--                </filter>-->
+<!--            </filters>-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -217,6 +237,32 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>with-cql-d4</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-cqld4</artifactId>
+                    <version>3.12.120-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>with-mongodb</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-mongodb</artifactId>
+                    <version>3.12.127-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>build-nb-appimage</id>
             <activation>

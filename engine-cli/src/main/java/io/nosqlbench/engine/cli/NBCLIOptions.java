@@ -4,12 +4,12 @@ import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,69 +20,80 @@ import java.util.stream.Collectors;
  */
 public class NBCLIOptions {
 
-    public static final String docoptFileName = "commandline.md";
     private final static Logger logger = LoggerFactory.getLogger(NBCLIOptions.class);
+
+    // Options which may contextualize other CLI options or commands.
+    // These must be parsed first
+    private static final String INCLUDE = "--include";
+    private static final String METRICS_PREFIX = "--metrics-prefix";
 
     // Discovery
     private static final String HELP = "--help";
-    private static final String METRICS = "--list-metrics";
-    private static final String DRIVER_TYPES = "--list-drivers";
-    private static final String ACTIVITY_TYPES = "--list-activity-types";
+    private static final String LIST_METRICS = "--list-metrics";
+    private static final String LIST_DRIVERS = "--list-drivers";
+    private static final String LIST_ACTIVITY_TYPES = "--list-activity-types";
     private static final String LIST_WORKLOADS = "--list-workloads";
     private static final String LIST_SCENARIOS = "--list-scenarios";
-    private static final String WANTS_INPUT_TYPES = "--list-input-types";
-    private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
-    private static final String WANTS_VERSION_COORDS = "--version-coords";
-    private static final String WANTS_VERSION_SHORT = "--version";
+    private static final String LIST_INPUT_TYPES = "--list-input-types";
+    private static final String LIST_OUTPUT_TYPES = "--list-output-types";
+    private static final String VERSION_COORDS = "--version-coords";
+    private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
-    private static final String COPY_WORKLOAD = "--copy-workload";
+    private static final String COPY = "--copy";
 
     // Execution
     private static final String SCRIPT = "script";
     private static final String ACTIVITY = "activity";
     private static final String SCENARIO = "scenario";
-    private static final String RUN_ACTIVITY = "run";
-    private static final String START_ACTIVITY = "start";
-    private static final String SCRIPT_FRAGMENT = "fragment";
-    private static final String STOP_ACTIVITY = "stop";
-    private static final String AWAIT_ACTIVITY = "await";
+    private static final String RUN = "run";
+    private static final String START = "start";
+    private static final String FRAGMENT = "fragment";
+    private static final String STOP = "stop";
+    private static final String AWAIT = "await";
     private static final String WAIT_MILLIS = "waitmillis";
-    private static final String DUMP_CYCLELOG = "--export-cycle-log";
-    private static final String IMPORT_CYCLELOG = "--import-cycle-log";
+    private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
+    private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
+    private static final String HDR_DIGITS = "--hdr-digits";
 
     // Execution Options
+
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
     private static final String LOGS_MAX = "--logs-max";
     private static final String LOGS_LEVEL = "--logs-level";
-    private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
-    private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
-    private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
+    private static final String DASH_V_INFO = "-v";
+    private static final String DASH_VV_DEBUG = "-vv";
+    private static final String DASH_VVV_TRACE = "-vvv";
     private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String REPORT_CSV_TO = "--report-csv-to";
-    private static final String METRICS_PREFIX = "--metrics-prefix";
-    private static final String PROGRESS_INDICATOR = "--progress";
+    private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
-    private static final String LOG_HISTO = "--log-histograms";
-    private static final String LOG_STATS = "--log-histostats";
-    private static final String CLASSIC_HISTOS = "--classic-histograms";
+    private static final String LOG_HISTOGRAMS = "--log-histograms";
+    private static final String LOG_HISTOSTATS = "--log-histostats";
+    private static final String CLASSIC_HISTOGRAMS = "--classic-histograms";
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
 
+    private static final String GRAALJS_ENGINE = "--graaljs";
+    private static final String NASHORN_ENGINE = "--nashorn";
+    private static final String GRAALJS_COMPAT = "--graaljs-compat";
+    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
+
+
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
             Arrays.asList(
-                SCRIPT, ACTIVITY, SCENARIO, RUN_ACTIVITY, START_ACTIVITY,
-                SCRIPT_FRAGMENT, STOP_ACTIVITY, AWAIT_ACTIVITY, WAIT_MILLIS, ACTIVITY_TYPES, HELP
+                SCRIPT, ACTIVITY, SCENARIO, RUN, START,
+                FRAGMENT, STOP, AWAIT, WAIT_MILLIS, LIST_ACTIVITY_TYPES, HELP
             )
         );
     }};
 
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
-    private LinkedList<Cmd> cmdList = new LinkedList<>();
+    private final LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
     private boolean wantsVersionShort = false;
     private boolean wantsVersionCoords = false;
@@ -93,14 +104,14 @@ public class NBCLIOptions {
     private String reportGraphiteTo = null;
     private String reportCsvTo = null;
     private int reportInterval = 10;
-    private String metricsPrefix = "nosqlbench.";
+    private String metricsPrefix = "nosqlbench";
     private String wantsMetricsForActivity;
     private String sessionName = "";
     private boolean showScript = false;
     private Level consoleLevel = Level.WARN;
-    private List<String> histoLoggerConfigs = new ArrayList<>();
-    private List<String> statsLoggerConfigs = new ArrayList<>();
-    private List<String> classicHistoConfigs = new ArrayList<>();
+    private final List<String> histoLoggerConfigs = new ArrayList<>();
+    private final List<String> statsLoggerConfigs = new ArrayList<>();
+    private final List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logsDirectory = "logs";
     private boolean wantsInputTypes = false;
@@ -115,6 +126,11 @@ public class NBCLIOptions {
     private boolean wantsScenariosList = false;
     private String wantsToCopyWorkload = null;
     private boolean wantsWorkloadsList = false;
+    private final List<String> wantsToIncludePaths = new ArrayList<>();
+    private Scenario.Engine engine = Scenario.Engine.Graalvm;
+    private boolean graaljs_compat = false;
+    private int hdr_digits = 4;
+    private String docker_grafana_tag = "7.0.1";
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -131,6 +147,8 @@ public class NBCLIOptions {
             return;
         }
 
+        // Preprocess --include regardless of position
+        LinkedList<String> nonincludes = new LinkedList<>();
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
@@ -140,55 +158,59 @@ public class NBCLIOptions {
                 arglist.offerFirst(split[0]);
                 continue;
             }
+
+            if (INCLUDE.equals(word)) {
+                arglist.removeFirst();
+                String include = readWordOrThrow(arglist, "path to include");
+                wantsToIncludePaths.add(include);
+            } else if (METRICS_PREFIX.equals(word)) {
+                arglist.removeFirst();
+                metricsPrefix = arglist.removeFirst();
+            } else {
+                nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+        arglist = nonincludes;
+        nonincludes = new LinkedList<>();
+
+        PathCanonicalizer canonicalizer = new PathCanonicalizer(wantsIncludes());
+
+        while (arglist.peekFirst() != null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+
             switch (word) {
+                case DOCKER_GRAFANA_TAG:
+                    arglist.removeFirst();
+                    docker_grafana_tag = readWordOrThrow(arglist,"grafana docker tag");
+                    break;
+                case GRAALJS_COMPAT:
+                    graaljs_compat = true;
+                    arglist.removeFirst();
+                    break;
+                case GRAALJS_ENGINE:
+                    engine = Scenario.Engine.Graalvm;
+                    arglist.removeFirst();
+                    break;
+                case NASHORN_ENGINE:
+                    engine = Scenario.Engine.Nashorn;
+                    arglist.removeFirst();
+                    break;
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
                     break;
-                case SCRIPT_FRAGMENT:
-                    Cmd fragment = parseFragmentCmd(arglist);
-                    cmdList.add(fragment);
-                    break;
-                case ACTIVITY:
-                    arglist.removeFirst();
-                    arglist.addFirst("run");
-                case START_ACTIVITY:
-                case RUN_ACTIVITY:
-                    Cmd activity = parseActivityCmd(arglist);
-                    cmdList.add(activity);
-                    break;
-                case METRICS:
+                case LIST_METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
-                    Cmd introspectActivity = parseActivityCmd(arglist);
-                    wantsMetricsForActivity = introspectActivity.cmdSpec;
-                    break;
-                case AWAIT_ACTIVITY:
-                    String awaitCmdType = arglist.removeFirst();
-                    String activityToAwait = readWordOrThrow(arglist, "activity alias to await");
-                    assertNotParameter(activityToAwait);
-                    assertNotReserved(activityToAwait);
-                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType), activityToAwait);
-                    cmdList.add(awaitActivityCmd);
-                    break;
-                case STOP_ACTIVITY:
-                    String stopCmdType = readWordOrThrow(arglist, "stop command");
-                    String activityToStop = readWordOrThrow(arglist, "activity alias to await");
-                    assertNotParameter(activityToStop);
-                    assertNotReserved(activityToStop);
-                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType), activityToStop);
-                    cmdList.add(stopActivityCmd);
-                    break;
-                case WAIT_MILLIS:
-                    String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
-                    String millisCount = readWordOrThrow(arglist, "millis count");
-                    Long.parseLong(millisCount); // sanity check
-                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
-                    cmdList.add(awaitMillisCmd);
-                    break;
-                case SCRIPT:
-                    Cmd cmd = parseScriptCmd(arglist);
-                    cmdList.add(cmd);
+                    Cmd cmd = Cmd.parseArg(arglist,canonicalizer);
+                    wantsMetricsForActivity = cmd.getArg("driver");
                     break;
                 case SESSION_NAME:
                     arglist.removeFirst();
@@ -198,9 +220,13 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     logsDirectory = readWordOrThrow(arglist, "a log directory");
                     break;
+                case HDR_DIGITS:
+                    arglist.removeFirst();
+                    hdr_digits = Integer.parseInt(readWordOrThrow(arglist, "significant digits"));
+                    break;
                 case LOGS_MAX:
                     arglist.removeFirst();
-                    logsMax = Integer.valueOf(readWordOrThrow(arglist, "max logfiles to keep"));
+                    logsMax = Integer.parseInt(readWordOrThrow(arglist, "max logfiles to keep"));
                     break;
                 case LOGS_LEVEL:
                     arglist.removeFirst();
@@ -210,15 +236,15 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     logLevelsOverrides = parseLogLevelOverrides(readWordOrThrow(arglist, "log levels in name:LEVEL,... format"));
                     break;
-                case PROGRESS_INDICATOR:
+                case PROGRESS:
                     arglist.removeFirst();
                     progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
-                case WANTS_VERSION_SHORT:
+                case VERSION:
                     arglist.removeFirst();
                     wantsVersionShort = true;
                     break;
-                case WANTS_VERSION_COORDS:
+                case VERSION_COORDS:
                     arglist.removeFirst();
                     wantsVersionCoords = true;
                     break;
@@ -242,32 +268,32 @@ public class NBCLIOptions {
                         wantsActivityHelpFor = readWordOrThrow(arglist, "topic");
                     }
                     break;
-                case DUMP_CYCLELOG:
+                case EXPORT_CYCLE_LOG:
                     arglist.removeFirst();
                     rleDumpOptions = readAllWords(arglist);
                     break;
-                case IMPORT_CYCLELOG:
+                case IMPORT_CYCLE_LOG:
                     arglist.removeFirst();
                     cyclelogImportOptions = readAllWords(arglist);
                     break;
-                case LOG_HISTO:
+                case LOG_HISTOGRAMS:
                     arglist.removeFirst();
                     String logto = arglist.removeFirst();
                     histoLoggerConfigs.add(logto);
                     break;
-                case LOG_STATS:
+                case LOG_HISTOSTATS:
                     arglist.removeFirst();
                     String logStatsTo = arglist.removeFirst();
                     statsLoggerConfigs.add(logStatsTo);
                     break;
-                case CLASSIC_HISTOS:
+                case CLASSIC_HISTOGRAMS:
                     arglist.removeFirst();
                     String classicHistos = arglist.removeFirst();
                     classicHistoConfigs.add(classicHistos);
                     break;
                 case REPORT_INTERVAL:
                     arglist.removeFirst();
-                    reportInterval = Integer.valueOf(readWordOrThrow(arglist, "report interval"));
+                    reportInterval = Integer.parseInt(readWordOrThrow(arglist, "report interval"));
                     break;
                 case REPORT_CSV_TO:
                     arglist.removeFirst();
@@ -277,32 +303,28 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
                     break;
-                case METRICS_PREFIX:
-                    arglist.removeFirst();
-                    metricsPrefix = arglist.removeFirst();
-                    break;
-                case DRIVER_TYPES:
-                case ACTIVITY_TYPES:
+                case LIST_DRIVERS:
+                case LIST_ACTIVITY_TYPES:
                     arglist.removeFirst();
                     wantsActivityTypes = true;
                     break;
-                case WANTS_INPUT_TYPES:
+                case LIST_INPUT_TYPES:
                     arglist.removeFirst();
                     wantsInputTypes = true;
                     break;
-                case WANTS_OUTPUT_TYPES:
+                case LIST_OUTPUT_TYPES:
                     arglist.removeFirst();
                     wantsMarkerTypes = true;
                     break;
-                case WANTS_DEBUG_CONSOLE_LOGGING:
-                    consoleLevel = Level.DEBUG;
-                    arglist.removeFirst();
-                    break;
-                case WANTS_INFO_CONSOLE_LOGGING:
+                case DASH_V_INFO:
                     consoleLevel = Level.INFO;
                     arglist.removeFirst();
                     break;
-                case WANTS_TRACE_CONSOLE_LOGGING:
+                case DASH_VV_DEBUG:
+                    consoleLevel = Level.DEBUG;
+                    arglist.removeFirst();
+                    break;
+                case DASH_VVV_TRACE:
                     consoleLevel = Level.TRACE;
                     arglist.removeFirst();
                     break;
@@ -316,11 +338,38 @@ public class NBCLIOptions {
                     break;
                 case LIST_WORKLOADS:
                     arglist.removeFirst();
-                    wantsWorkloadsList =true;
+                    wantsWorkloadsList = true;
                     break;
-                case COPY_WORKLOAD:
+                case COPY:
                     arglist.removeFirst();
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
+                    break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+        arglist = nonincludes;
+
+        while (arglist.peekFirst() != null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+            Cmd cmd=null;
+            switch (word) {
+                case FRAGMENT:
+                case SCRIPT:
+                case START:
+                case RUN:
+                case AWAIT:
+                case STOP:
+                case WAIT_MILLIS:
+                    cmd = Cmd.parseArg(arglist,canonicalizer);
+                    cmdList.add(cmd);
                     break;
                 default:
                     Optional<Content<?>> scriptfile = NBIO.local()
@@ -334,11 +383,10 @@ public class NBCLIOptions {
                         arglist.removeFirst();
                         arglist.addFirst("scripts/auto/" + word);
                         arglist.addFirst("script");
-                        Cmd script = parseScriptCmd(arglist);
-                        cmdList.add(script);
-                        //Scripted yaml
-                    } else if (NBCLIScenarioParser.isFoundWorkload(word)) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS);
+                        cmd = Cmd.parseArg(arglist,canonicalizer);
+                        cmdList.add(cmd);
+                    } else if (NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())) {
+                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, wantsIncludes());
                     } else {
                         throw new InvalidParameterException("unrecognized option:" + word);
                     }
@@ -347,6 +395,10 @@ public class NBCLIOptions {
         }
     }
 
+
+    public String[] wantsIncludes() {
+        return wantsToIncludePaths.toArray(new String[0]);
+    }
 
     private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
         Map<String, Level> levels = new HashMap<>();
@@ -360,21 +412,29 @@ public class NBCLIOptions {
         return levels;
     }
 
+    public Scenario.Engine getScriptingEngine() {
+        return engine;
+    }
+
+    public boolean wantsGraaljsCompatMode() {
+        return graaljs_compat;
+    }
+
     public List<LoggerConfig> getHistoLoggerConfigs() {
         List<LoggerConfig> configs = histoLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
-        checkLoggerConfigs(configs, LOG_HISTO);
+        checkLoggerConfigs(configs, LOG_HISTOGRAMS);
         return configs;
     }
 
     public List<LoggerConfig> getStatsLoggerConfigs() {
         List<LoggerConfig> configs = statsLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
-        checkLoggerConfigs(configs, LOG_STATS);
+        checkLoggerConfigs(configs, LOG_HISTOSTATS);
         return configs;
     }
 
     public List<LoggerConfig> getClassicHistoConfigs() {
         List<LoggerConfig> configs = classicHistoConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
-        checkLoggerConfigs(configs, CLASSIC_HISTOS);
+        checkLoggerConfigs(configs, CLASSIC_HISTOGRAMS);
         return configs;
     }
 
@@ -454,10 +514,6 @@ public class NBCLIOptions {
         }
     }
 
-    private String readOptionally(LinkedList<String> argList) {
-        return argList.pollFirst();
-    }
-
     private String readWordOrThrow(LinkedList<String> arglist, String required) {
         if (arglist.peekFirst() == null) {
             throw new InvalidParameterException(required + " not found");
@@ -471,35 +527,23 @@ public class NBCLIOptions {
         return args;
     }
 
-    private Cmd parseScriptCmd(LinkedList<String> arglist) {
-        String cmdType = arglist.removeFirst();
-        String scriptName = readWordOrThrow(arglist, "script name");
-        assertNotReserved(scriptName);
-        assertNotParameter(scriptName);
-        Map<String, String> scriptParams = new LinkedHashMap<>();
-        while (arglist.size() > 0 && !RESERVED_WORDS.contains(arglist.peekFirst())
-            && arglist.peekFirst().contains("=")) {
-            String[] split = arglist.removeFirst().split("=", 2);
-            scriptParams.put(split[0], split[1]);
-        }
-        return new Cmd(CmdType.script, scriptName, scriptParams);
-    }
+//    private Cmd parseScriptCmd(LinkedList<String> arglist) {
+//        String cmdType = arglist.removeFirst();
+//        String scriptName = readWordOrThrow(arglist, "script name");
+//        assertNotReserved(scriptName);
+//        assertNotParameter(scriptName);
+//        Map<String, String> scriptParams = new LinkedHashMap<>();
+//        while (arglist.size() > 0 && !RESERVED_WORDS.contains(arglist.peekFirst())
+//            && arglist.peekFirst().contains("=")) {
+//            String[] split = arglist.removeFirst().split("=", 2);
+//            scriptParams.put(split[0], split[1]);
+//        }
+//        return new Cmd(CmdType.script, scriptName, scriptParams);
+//    }
 
-    private Cmd parseFragmentCmd(LinkedList<String> arglist) {
-        String cmdType = arglist.removeFirst();
-        String scriptFragment = arglist.removeFirst();
-        return new Cmd(CmdType.valueOf(cmdType), scriptFragment);
-    }
 
-    private Cmd parseActivityCmd(LinkedList<String> arglist) {
-        String cmdType = arglist.removeFirst();
-        List<String> activitydef = new ArrayList<String>();
-        while (arglist.size() > 0 &&
-            !RESERVED_WORDS.contains(arglist.peekFirst())
-            && arglist.peekFirst().contains("=")) {
-            activitydef.add(arglist.removeFirst());
-        }
-        return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
+    public int getHdrDigits() {
+        return hdr_digits;
     }
 
     public String getProgressSpec() {
@@ -580,11 +624,11 @@ public class NBCLIOptions {
         return wantsScenariosList;
     }
 
-    public boolean wantsToCopyWorkload() {
-        return wantsToCopyWorkload!=null;
+    public boolean wantsToCopyResource() {
+        return wantsToCopyWorkload != null;
     }
 
-    public String wantsToCopyWorkloadNamed() {
+    public String wantsToCopyResourceNamed() {
         return wantsToCopyWorkload;
     }
 
@@ -592,62 +636,12 @@ public class NBCLIOptions {
         return wantsWorkloadsList;
     }
 
-    public static enum CmdType {
-        start,
-        run,
-        stop,
-        await,
-        script,
-        fragment,
-        waitmillis,
-    }
-
-    public static class Cmd {
-        private CmdType cmdType;
-        private String cmdSpec;
-        private Map<String, String> cmdArgs;
-
-        public Cmd(CmdType cmdType, String cmdSpec) {
-            this.cmdSpec = cmdSpec;
-            this.cmdType = cmdType;
-        }
-
-        public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
-            this(cmdType, cmdSpec);
-            this.cmdArgs = cmdArgs;
-        }
-
-        public String getCmdSpec() {
-
-            if (cmdSpec.startsWith("'") && cmdSpec.endsWith("'")) {
-                return cmdSpec.substring(1, cmdSpec.length() - 1);
-            }
-            if (cmdSpec.startsWith("\"") && cmdSpec.endsWith("\"")) {
-                return cmdSpec.substring(1, cmdSpec.length() - 1);
-            }
-            return cmdSpec;
-        }
-
-        public CmdType getCmdType() {
-            return cmdType;
-        }
-
-        public void setCmdType(CmdType cmdType) {
-            this.cmdType = cmdType;
-        }
-
-        public Map<String, String> getCmdArgs() {
-            return cmdArgs;
-        }
-
-        public String toString() {
-            return "type:" + cmdType + ";spec=" + cmdSpec
-                + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
-        }
+    public String getDockerGrafanaTag() {
+        return docker_grafana_tag;
     }
 
     public static class LoggerConfig {
-        public String file = "";
+        public String file;
         public String pattern = ".*";
         public String interval = "30 seconds";
 
@@ -666,7 +660,7 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                        LOG_HISTO +
+                        LOG_HISTOGRAMS +
                             " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }

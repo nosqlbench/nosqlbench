@@ -1,0 +1,72 @@
+# You can run this file with this command line to see the values printed to stdout:
+# ./ebdse run driver=stdout yaml=bindings/timestamp.yaml cycles=10
+
+# This file demonstrates different types of timestamp recipes
+# that you can use with virtdata. (The bindings used in ebdse)
+
+# If you want to control the output, uncomment and edit the statement template below
+# and modify the named anchors to suit your output requirements.
+
+#statements:
+#  example1: "{epochMillis}\n"
+
+bindings:
+
+# All uncommented lines under this are indented, so they become named bindings below
+# the entry above
+
+# Normally, the value that you get with a cycle starts at 0.
+
+ cycleNum: Identity();
+
+# So far, we've only been dealing in milliseconds. This is important to get working
+# before adding the next step, converting to a more specific type.
+# You can take any millisecond output and add conversion functions as shown below.
+
+# this one converts to a java.util.Time
+
+ randomDateWithinFeb2018: AddHashRange(0,2419200000L); StartingEpochMillis('2018-02-01 05:00:00'); ToDate();
+
+# ToDate(...) supports a few argument forms that you can experiment with.
+# ToDate(int) will space the dates apart by this many milliseconds.
+# ToDate(int,int) will space the dates apart by some millis and also repeat the value for some number of cycles.
+
+# Alternately, you might want to use a org.joda.time.DateTime instead of a java.util.Time:
+
+ randomJodaDateWithinFeb2018: AddHashRange(0,2419200000L); StartingEpochMillis('2018-02-01 05:00:00'); ToJodaDateTime();
+
+# ToJodaDateTime(...) also supports the space and repeat forms as shown above for ToDate(...)
+
+# You can also have the dates in order, but with some limited out-of-order pertubation.
+# In this case, we are swizzling the offset by some pseudo-random amount, up to an hour (in millis)
+
+ randomDateWithinFeb2018Jittery: AddHashRange(0,3600000L); StartingEpochMillis('2018-02-01 05:00:00'); ToDate();
+
+# If you want to have the result be a string-formatted date representation for testing, try this:
+# You can use any formatter from here: http://joda-time.sourceforge.net/apidocs/org/joda/time/format/DateTimeFormat.html
+
+ timeuuid_string: AddHashRange(0,2419200000L); StartingEpochMillis('2018-02-01 05:00:00'); StringDateWrapper("yyyy-MM-dd HH:mm:ss.SSS");
+
+
+
+
+# ebdse bundles some specialized mapping functions in addition to those explained above, which
+# come with eb. These are shown below.
+
+# You can create a com.datastax.driver.core.LocalDate for use with the java driver.
+# This takes as its input, the number of days since the unix epoch.
+
+ localdate: LongToLocalDateDays()
+
+# You can also take the millis from any of the examples above which provide epoch millis,
+# and convert the output to a millisecond-stable value, analogous to the CQL functions
+# that do the same.
+
+ minUUID: AddHashRange(0,3600000); StartingEpochMillis('2018-02-01 05:00:00'); ToTimeUUIDMin();
+
+ maxUUID: AddHashRange(0,3600000); StartingEpochMillis('2018-02-01 05:00:00'); ToTimeUUIDMax();
+
+# If you find useful recipes which are needed by others, please contribute them back to our examples!
+
+
+

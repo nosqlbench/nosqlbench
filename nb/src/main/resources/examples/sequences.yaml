@@ -1,0 +1,21 @@
+# eb sequences concat
+# yields A B B C C C D D D D A B B C C C D D D D
+# eb run driver=stdout workload=examples/sequences cycles=20 seq=interval
+# yields A B C D D C B D C D A B C D D C B D C D
+# eb run driver=stdout workload=examples/sequences cycles=20 seq=bucket
+# yields A B C D B C D C D D A B C D B C D C D D
+
+scenarios:
+  concat: run driver===stdout seq===concat cycles=20
+  bucket: run driver===stdout seq===bucket cycles=20
+  interval: run driver===stdout seq===interval cycles=20
+
+statements:
+ - A1: "A "
+   ratio: 1
+ - B2: "B "
+   ratio: 2
+ - C3: "C "
+   ratio: 3
+ - D4: "D "
+   ratio: 4

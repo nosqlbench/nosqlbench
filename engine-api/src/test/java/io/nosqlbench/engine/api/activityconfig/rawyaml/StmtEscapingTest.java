@@ -18,10 +18,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.*;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StmtEscapingTest {
 
     private final static Logger logger = LoggerFactory.getLogger(StmtEscapingTest.class);
-    private static List<StmtDef> defs;
+    private static List<OpTemplate> defs;
 
     @BeforeClass
     public static void testLayering() {
 
-        StmtsDocList all = StatementsLoader.load(logger, "testdocs/escaped_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/escaped_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(1);
         StmtsDoc doc1 = all.getStmtDocs().get(0);

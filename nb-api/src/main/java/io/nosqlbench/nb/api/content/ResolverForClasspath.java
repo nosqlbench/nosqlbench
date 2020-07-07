@@ -60,7 +60,7 @@ public class ResolverForClasspath implements ContentResolver {
             fs = FileSystems.getFileSystem(resolved);
         } catch (FileSystemNotFoundException notfound) {
             try {
-                fs = FileSystems.newFileSystem(resolved, Collections.EMPTY_MAP);
+                fs = FileSystems.newFileSystem(resolved, Map.of());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -73,6 +73,9 @@ public class ResolverForClasspath implements ContentResolver {
     @Override
     public List<Content<?>> resolve(URI uri) {
         List<Path> paths = resolvePaths(uri);
+        if (paths==null) {
+            return List.of();
+        }
         List<Content<?>> contents = paths.stream().map(PathContent::new).collect(Collectors.toList());
         return contents;
 
