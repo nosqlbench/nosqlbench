@@ -14,14 +14,12 @@ import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
+ * Create a List from a long input based on a set of provided functions.
  *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * As a 'Pair-wise' function, the size of the resulting collection is determined directly by the
+ * number of provided element functions.
+ *
+ *  As a 'Stepped' function, the input value is incremented before being used by each element function.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper

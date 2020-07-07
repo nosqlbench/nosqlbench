@@ -15,10 +15,12 @@ import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Create a {@code List} from a long input
- * based on pseudo-randomly hash list of functions without any size boundaries,
- * each function in the list functions populate the hash list with
- * object value.
+ * Create a List from a long input based on a set of provided functions.
+ *
+ * As a 'Pair-wise' function, the size of the resulting collection is determined directly by the
+ * number of provided element functions.
+ *
+ * As a 'Hashed' function, the input value is hashed again before being used by each element function.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -29,8 +31,8 @@ public class ListHashed implements LongFunction<List<Object>> {
     private final Hash hasher = new Hash();
 
     @Example({
-        "ListHashed(long->ToString(), long->WeightedStrings('text:1'))",
-        "Create a hash list of object values of each function output. ListHashed output ['2945182322382062539','text']"
+            "ListHashed(ToString(), WeightedStrings('text:1'))",
+            "Create a hash list of object values of each function output. ListHashed output ['2945182322382062539','text']"
     })
     public ListHashed(LongFunction<? extends Object>... funcs) {
         this.valueFuncs = Arrays.asList(funcs);
@@ -46,9 +48,9 @@ public class ListHashed implements LongFunction<List<Object>> {
         this.size = building.size();
     }
 
-    public ListHashed(Function<Long,Object>... funcs) {
+    public ListHashed(Function<Long, Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long,Object> func : funcs) {
+        for (Function<Long, Object> func : funcs) {
             building.add(func::apply);
         }
         this.valueFuncs = building;

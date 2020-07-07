@@ -14,10 +14,14 @@ import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Create a {@code List} from a long input
- * based on at least two functions, the first function to
- * determine the list functions size, and the remaining functions onwards to populate
- * the list with object values till the end of the list size.
+ * Create a List from a long input based on a set of provided functions.
+ *
+ * As a 'Sized' function, the first argument is a function which determines the size of the resulting list.
+ * Additional functions provided are used to generate the elements to add to the collection. If the size
+ * is larger than the number of provided functions, the last provided function is used repeatedly as needed.
+ *
+ *  As neither a 'Stepped' nor a 'Hashed' function, the input value used by each element function is the same
+ *  as that provided to the outer function.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -27,10 +31,10 @@ public class ListSized implements LongFunction<List<Object>> {
     private final LongToIntFunction sizeFunc;
 
     @Example({
-        "ListSized(FixedValue(5), NumberNameToString(),NumberNameToString(), WeightedStrings('text:1'))",
-        "Create a sized list of object values of each function output. List size function will recursively call the last function till" +
-            "end of the list size functions",
-        "ListSized output ['one','one','text','text','text']"
+            "ListSized(FixedValue(5), NumberNameToString(),NumberNameToString(), WeightedStrings('text:1'))",
+            "Create a sized list of object values of each function output. List size function will recursively call the last function till" +
+                    "end of the list size functions",
+            "ListSized output ['one','one','text','text','text']"
     })
     public ListSized(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
         this.sizeFunc = sizeFunc;
@@ -46,9 +50,9 @@ public class ListSized implements LongFunction<List<Object>> {
         this.valueFuncs = building;
     }
 
-    public ListSized(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
+    public ListSized(LongToIntFunction sizeFunc, Function<Long, Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long,Object> func : funcs) {
+        for (Function<Long, Object> func : funcs) {
             building.add(func::apply);
         }
         this.sizeFunc = sizeFunc;

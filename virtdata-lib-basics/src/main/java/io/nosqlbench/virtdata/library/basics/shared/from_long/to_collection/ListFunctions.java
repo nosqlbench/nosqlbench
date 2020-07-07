@@ -13,10 +13,13 @@ import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Create a {@code List} from a long input
- * based on list of functions without any size boundaries,
- * each function in the list functions populate the list with
- * object value.
+ * Create a List from a long input based on a set of provided functions.
+ *
+ * As a 'Pair-wise' function, the size of the resulting collection is determined directly by the
+ * number of provided element functions.
+ *
+ *  As neither a 'Stepped' nor a 'Hashed' function, the input value used by each element function is the same
+ *  as that provided to the outer function.
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
@@ -26,8 +29,8 @@ public class ListFunctions implements LongFunction<java.util.List<Object>> {
     private final int size;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString(),NumberNameToString())",
-        "Create a list of object values of each function output. ListFunctions output ['one','one','one']"
+            "ListFunctions(NumberNameToString(),NumberNameToString(),NumberNameToString())",
+            "Create a list of object values of each function output. Produces values like ['one','one','one']"
     })
     public ListFunctions(LongFunction<? extends Object>... funcs) {
         this.valueFuncs = Arrays.asList(funcs);
@@ -43,9 +46,9 @@ public class ListFunctions implements LongFunction<java.util.List<Object>> {
         this.size = building.size();
     }
 
-    public ListFunctions(Function<Long,Object>... funcs) {
+    public ListFunctions(Function<Long, Object>... funcs) {
         List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long,Object> func : funcs) {
+        for (Function<Long, Object> func : funcs) {
             building.add(func::apply);
         }
         this.valueFuncs = building;
