@@ -1,29 +1,24 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
-import io.nosqlbench.virtdata.api.annotations.Categories;
-import io.nosqlbench.virtdata.api.annotations.Category;
-import io.nosqlbench.virtdata.api.annotations.Example;
-import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.*;
 
 import java.util.ArrayList;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
 /**
- * Create a {@code List<String>} from a long value,
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * String values. The input fed to the second function is incremented
- * between elements. Regardless of the object type provided by the
- * second function, {@link java.lang.Object#toString()} is used to get
- * the value to add to the list.
- *
- * To create Lists of any type of object simply use {@link List} with
- * an specific value mapping function.
+ * Create a {@code List<String>} from a long value, based on two functions, the first to determine the list size, and
+ * the second to populate the list with String values. The input fed to the second function is incremented between
+ * elements. Regardless of the object type provided by the second function, {@link java.lang.Object#toString()} is used
+ * to get the value to add to the list.
+ * <p>
+ * To create Lists of any type of object simply use {@link List} with an specific value mapping function.
  */
 
 @Categories({Category.collections})
 @ThreadSafeMapper
+@DeprecatedFunction("Use ListSizedStepped")
+@Deprecated
 public class StringList implements LongFunction<java.util.List<String>> {
 
     private final LongToIntFunction sizeFunc;
@@ -41,7 +36,7 @@ public class StringList implements LongFunction<java.util.List<String>> {
         int size = sizeFunc.applyAsInt(value);
         java.util.List<String> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            list.add(valueFunc.apply(value+i).toString());
+            list.add(valueFunc.apply(value + i).toString());
         }
         return list;
     }

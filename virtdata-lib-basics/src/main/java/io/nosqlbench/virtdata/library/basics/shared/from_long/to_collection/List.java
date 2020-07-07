@@ -7,18 +7,19 @@ import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
 /**
- * Create a {@code List} from a long input
- * based on two functions, the first to
- * determine the list size, and the second to populate the list with
- * object values. The input fed to the second function is incremented
- * between elements.
+ * Create a {@code List} from a long input based on two functions, the first to determine the list size, and the second
+ * to populate the list with object values. The input fed to the second function is incremented between elements.
+ * <p>
+ * To directly create Lists of Strings from the String version of the same mapping functions, simply use {@link
+ * StringList} instead.
  *
- * To directly create Lists of Strings from the String version of the same
- * mapping functions, simply use {@link StringList} instead.
+ * <p>This function is not recommended, given that the other List functions are more clear about how they construct values.
+ * This function may be removed in the next major release, but it will be retained as deprecated for now.</p>
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
 @DeprecatedFunction("Use ListSizedStepped")
+@Deprecated
 public class List implements LongFunction<java.util.List<Object>> {
 
     private final LongToIntFunction sizeFunc;
@@ -36,7 +37,7 @@ public class List implements LongFunction<java.util.List<Object>> {
         int size = sizeFunc.applyAsInt(value);
         java.util.List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            list.add(valueFunc.apply(value+i));
+            list.add(valueFunc.apply(value + i));
         }
         return list;
     }
