@@ -75,7 +75,7 @@
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <assertj.version>3.15.0</assertj.version>
-        <graalvm.version>20.0.0</graalvm.version>
+        <graalvm.version>20.1.0</graalvm.version>
     </properties>
 
     <name>${project.artifactId}</name>
