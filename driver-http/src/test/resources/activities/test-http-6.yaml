@@ -1,0 +1,7 @@
+statements:
+  - s1: |
+      {method} {scheme}://{host}:{port}/{path}?{query} {version}
+      Content-Type: {content_type}
+      Token: {mybearertoken}
+
+      {body}

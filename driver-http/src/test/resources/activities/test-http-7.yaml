@@ -1,0 +1,7 @@
+statements:
+  - method: {method}
+    uri: {scheme}://{host}:{port}/{path}?{query}
+    version: {version}
+    "Content-Type": {content_type}
+    "Token": {mybearertoken}
+    body: {body}
