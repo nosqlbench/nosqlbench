@@ -1,0 +1,21 @@
+description: examples of collections bindings
+
+scenarios:
+  default:
+    stdout: run driver===stdout format=readout
+
+bindings:
+  # This will always create a list like [5L, "five", "5-six"]
+  list_functions: ListFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
+  list_stepped: ListStepped(Identity(),NumberNameToString(),NumberNameToString())
+  list_hashed: ListHashed(Identity(),ToString())
+  list_sized: ListSized(HashRange(3,4),Identity(),NumberNameToString()))
+  list_sized_stepped: ListSizedStepped(HashRange(3,4),Identity(),NumberNameToString()))
+  list_sized_hashed: ListSizedHashed(HashRange(3,4),Identity(),ToString()))
+  set_functions: SetFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
+  set_stepped: SetStepped(Identity(),NumberNameToString(),NumberNameToString())
+  set_hashed: SetHashed(Identity(),ToString())
+  set_sized: SetSized(HashRange(3,4),Identity(),NumberNameToString()))
+  set_sized_stepped: SetSizedStepped(HashRange(3,4),Identity(),NumberNameToString()))
+  set_sized_hashed: SetSizedHashed(HashRange(3,4),Identity(),ToString()))
+
