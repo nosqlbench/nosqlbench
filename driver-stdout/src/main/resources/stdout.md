@@ -38,6 +38,12 @@ activity types.
   - When 'format=diag', then the internal construction logic for the binding is logged in detail and nosqlbench exits.
     This is useful for detailed diagnostics when you run into trouble, but not generally otherwise. This provides
     details that you may include in a bug report if you think there is a bindings bug.
+- **bindings** - This is a simple way to specify a filter for the names of bindings that you want to use.
+  If this is 'doc', then all the document level bindings are used. If it is any other value, it is taken
+  as a pattern (regex) to subselect a set of bindings by name. You can simply use the name of a binding
+  here as well.
+  default: doc
+
 
 ## Configuration
 
