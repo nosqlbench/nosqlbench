@@ -48,7 +48,7 @@ public class SetFunctionsTest {
     public void testStepped() {
         SetStepped f1 = new SetStepped((LongToIntFunction) i -> (int)i, (IntFunction<String>) String::valueOf);
         Set<Object> set = f1.apply(3L);
-        assertThat(set).contains("3",4);
+        assertThat(set).contains("4",3);
         //This is because there is no sizing function. Both functions are value functions
         //And whatever type they produce is put into the set of objects
     }
