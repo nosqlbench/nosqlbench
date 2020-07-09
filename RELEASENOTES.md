@@ -30,3 +30,6 @@
 - 9aaf2991 bump graalvm to 20.1.0
 - 2d9512c2 start error handling dev guide
 - 102f60ac restore support for adhoc activities in docker metrics
+- 3841693b (HEAD -> main) fix integration tests after alias renaming
+- 138251cb (origin/main) dashboard fix release
+- 102f60ac restore support for adhoc activities in docker metrics
