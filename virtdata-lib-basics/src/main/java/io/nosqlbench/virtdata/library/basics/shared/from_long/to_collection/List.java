@@ -1,6 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import io.nosqlbench.virtdata.api.annotations.*;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
 import java.util.ArrayList;
 import java.util.function.LongFunction;
@@ -26,10 +27,10 @@ public class List implements LongFunction<java.util.List<Object>> {
     private final LongFunction<Object> valueFunc;
 
     @Example({"List(HashRange(3,7),Add(15L))", "create a list between 3 and 7 elements of Long values"})
-    public List(LongToIntFunction sizeFunc,
-                LongFunction<Object> valueFunc) {
-        this.sizeFunc = sizeFunc;
-        this.valueFunc = valueFunc;
+    public List(Object sizeFunc,
+                Object valueFunc) {
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFunc = VirtDataConversions.adaptFunction(valueFunc, LongFunction.class, Object.class);
     }
 
     @Override

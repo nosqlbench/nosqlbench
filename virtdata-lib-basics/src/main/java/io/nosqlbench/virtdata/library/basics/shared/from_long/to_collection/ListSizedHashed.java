@@ -4,6 +4,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.function.LongUnaryOperator;
 @ThreadSafeMapper
 public class ListSizedHashed implements LongFunction<List<Object>> {
 
-    private final List<LongFunction<? extends Object>> valueFuncs;
+    private final List<LongFunction> valueFuncs;
     private final Hash hasher = new Hash();
     private final LongToIntFunction sizeFunc;
 
@@ -37,27 +38,9 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
             "end of the list size functions",
         "ListSizedHashed output ['2945182322382062539', 'text', '37945690212757860', '287864597160630738', '3299224200079606887']"
     })
-    public ListSizedHashed(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = Arrays.asList(funcs);
-    }
-
-    public ListSizedHashed(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (LongUnaryOperator func : funcs) {
-            building.add(func::applyAsLong);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
-    }
-
-    public ListSizedHashed(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long,Object> func : funcs) {
-            building.add(func::apply);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
+    public ListSizedHashed(Object sizeFunc, Object... funcs) {
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
     @Override

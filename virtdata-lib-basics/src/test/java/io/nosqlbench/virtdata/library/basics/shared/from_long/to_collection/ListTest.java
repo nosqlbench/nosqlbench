@@ -3,13 +3,16 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
 import org.junit.Test;
 
+import java.util.function.LongFunction;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ListTest {
 
     @Test
     public void testList() {
-        io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.List lf = new io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.List(new HashRange(2, 3), (l) -> "_" + l);
+        io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.List lf =
+                new io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.List(new HashRange(2, 3), (LongFunction) (l) -> "_" + l);
         java.util.List<Object> l1 = lf.apply(2L);
         assertThat(l1).containsExactly("_2","_3","_4");
     }

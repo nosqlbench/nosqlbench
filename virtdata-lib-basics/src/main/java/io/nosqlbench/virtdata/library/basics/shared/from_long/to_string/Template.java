@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -45,7 +45,7 @@ public class Template implements LongFunction<String> {
     private final String rawTemplate;
     private LongUnaryOperator iterOp;
     private String[] literals;
-    private LongFunction<?>[] adaptedFuncs;
+    private List<LongFunction> functions;
 
     @Example({"Template('{}-{}',Add(10),Hash())","concatenate input+10, '-', and a pseudo-random long"})
     public Template(String template, Object...funcs) {
@@ -54,21 +54,29 @@ public class Template implements LongFunction<String> {
 
     @Example({"Template(true, '{}-{}', Add(10),Hash())", "throws an error, as the Add(10) function causes a narrowing conversion for a long input"})
     public Template(boolean truncate, String template, Object... funcs) {
-        this.adaptedFuncs = adapt(funcs, truncate);
+        this.functions = functions = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
         this.rawTemplate = template;
         this.literals = parseTemplate(template, funcs.length);
     }
 
-    private LongFunction<?>[] adapt(Object[] funcs, boolean truncate) {
-
-        List<LongFunction<?>> adapted = new ArrayList<>();
-        for (Object func : funcs) {
-            LongFunction lf= VirtDataFunctions.adapt(func, LongFunction.class, Object.class, truncate);
-            adapted.add(lf);
+    private LongFunction<?>[] adapt(Object[] funcs) {
+        LongFunction<?>[] aryFuncs = new LongFunction[funcs.length];
+        for (int i = 0; i < funcs.length; i++) {
+            aryFuncs[i] =  VirtDataConversions.adaptFunction(funcs[i],LongFunction.class, Object.class);
         }
-        return adapted.toArray(new LongFunction<?>[0]);
+        return aryFuncs;
     }
 
+//    private LongFunction<?>[] adapt(Object[] funcs, boolean truncate) {
+//
+//        List<LongFunction<?>> adapted = new ArrayList<>();
+//        for (Object func : funcs) {
+//            LongFunction lf= VirtDataConversions.adapt(func, LongFunction.class, Object.class);
+//            adapted.add(lf);
+//        }
+//        return adapted.toArray(new LongFunction<?>[0]);
+//    }
+//
 
     /**
      * If an operator is provided, it is used to change the function input value in an additional way before each function.
@@ -134,9 +142,9 @@ public class Template implements LongFunction<String> {
         buffer.setLength(0);
         buffer.append(literals[0]);
         if (literals.length > 1) {
-            for (int i = 0; i < adaptedFuncs.length; i++) {
+            for (int i = 0; i < functions.size(); i++) {
                 long input = iterOp != null ? iterOp.applyAsLong(value + i) : value + i;
-                String genString = String.valueOf(adaptedFuncs[i].apply(input));
+                String genString = String.valueOf(functions.get(i).apply(input));
                 buffer.append(genString);
                 buffer.append(literals[i + 1]);
             }

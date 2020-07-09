@@ -4,6 +4,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.ArrayList;
@@ -27,42 +28,16 @@ import java.util.function.LongUnaryOperator;
 @ThreadSafeMapper
 public class ListSizedStepped implements LongFunction<List<Object>> {
 
-    private final List<LongFunction<? extends Object>> valueFuncs;
+    private final List<LongFunction> valueFuncs;
     private final LongToIntFunction sizeFunc;
 
     @Example({
         "ListFunctions(NumberNameToString(),NumberNameToString())",
         "Create a list of ['one','one']"
     })
-    public ListSizedStepped(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = Arrays.asList(funcs);
-    }
-
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
-    public ListSizedStepped(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (LongUnaryOperator func : funcs) {
-            building.add(func::applyAsLong);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
-    }
-
-    @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
-    })
-    public ListSizedStepped(LongToIntFunction sizeFunc, Function<Long,Object>... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long,Object> func : funcs) {
-            building.add(func::apply);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
+    public ListSizedStepped(Object sizeFunc, Object... funcs) {
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc,LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
     @Override

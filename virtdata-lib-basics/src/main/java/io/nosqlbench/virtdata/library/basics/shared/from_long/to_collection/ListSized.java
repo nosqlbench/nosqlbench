@@ -4,9 +4,9 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -27,7 +27,7 @@ import java.util.function.LongUnaryOperator;
 @ThreadSafeMapper
 public class ListSized implements LongFunction<List<Object>> {
 
-    private final List<LongFunction<? extends Object>> valueFuncs;
+    private final List<LongFunction> valueFuncs;
     private final LongToIntFunction sizeFunc;
 
     @Example({
@@ -36,27 +36,9 @@ public class ListSized implements LongFunction<List<Object>> {
                     "end of the list size functions",
             "ListSized output ['one','one','text','text','text']"
     })
-    public ListSized(LongToIntFunction sizeFunc, LongFunction<? extends Object>... funcs) {
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = Arrays.asList(funcs);
-    }
-
-    public ListSized(LongToIntFunction sizeFunc, LongUnaryOperator... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (LongUnaryOperator func : funcs) {
-            building.add(func::applyAsLong);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
-    }
-
-    public ListSized(LongToIntFunction sizeFunc, Function<Long, Object>... funcs) {
-        List<LongFunction<?>> building = new ArrayList<>(funcs.length);
-        for (Function<Long, Object> func : funcs) {
-            building.add(func::apply);
-        }
-        this.sizeFunc = sizeFunc;
-        this.valueFuncs = building;
+    public ListSized(Object sizeFunc, Object... funcs) {
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
     @Override
