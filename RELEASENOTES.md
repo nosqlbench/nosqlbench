@@ -29,3 +29,4 @@
 - 7461f0e8 add http test yamls
 - 9aaf2991 bump graalvm to 20.1.0
 - 2d9512c2 start error handling dev guide
+- 102f60ac restore support for adhoc activities in docker metrics
