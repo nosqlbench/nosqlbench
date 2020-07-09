@@ -1,9 +1,12 @@
 package io.nosqlbench.virtdata.api.bindings;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.TypeVariable;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.*;
 
 public class VirtDataFunctions {
@@ -44,8 +47,8 @@ public class VirtDataFunctions {
      * @param func     The original function object.
      * @param type     The type of function object needed.
      * @param output   The output type required for the adapted function.
-     * @param truncate Whether to throw an exception on any narrowing conversion. If this is set to false,
-     *                 then basic roll-over logic is applied on narrowing conversions.
+     * @param truncate Whether to throw an exception on any narrowing conversion. If this is set to false, then basic
+     *                 roll-over logic is applied on narrowing conversions.
      * @param <F>      The type of function object needed.
      * @return An instance of F
      */
@@ -62,19 +65,100 @@ public class VirtDataFunctions {
                 return truncate ? adaptDoubleFunction(func, output) : adaptDoubleFunctionStrict(func, output);
             case LongFunction:
                 return truncate ? (F) adaptLongFunction(func, output) : (F) adaptLongFunctionStrict(func, output);
+            case LongToDoubleFunction:
+                return truncate ? (F) adaptLongToDoubleFunction(func, output) : (F) adaptLongToDoubleFunctionStrict(func, output);
             case LongToIntFunction:
-                return truncate ? (F) adaptLongFunction(func, output) : (F) adaptLongFunctionStrict(func, output);
+                return truncate ? (F) adaptLongToIntFunction(func, output) : (F) adaptLongFunctionStrict(func, output);
             case IntFunction:
                 return truncate ? adaptIntFunction(func, output) : adaptIntFunction(func, output);
             case Function:
                 return truncate ? (F) adaptFunction(func, output) : adaptFunctionStrict(func, output);
             default:
-                throw new RuntimeException("Unable to convert " + func.getClass().getCanonicalName() +
-                        " to " + type.getCanonicalName() + (truncate ? " WITH " : " WITHOUT ") + "truncation");
+                throw new RuntimeException("Unable to convert function type '" + funcType + "' (" + func.getClass().getCanonicalName() +
+                        ") to " + type.getCanonicalName() + (truncate ? " WITH " : " WITHOUT ") + "truncation");
 
         }
     }
 
+
+    public static <F extends Object> List<F> adaptList(Object[] funcs, Class<F> type, Class<?> output, boolean truncate) {
+        List<F> adapted = new ArrayList<>();
+        for (Object func : funcs) {
+            F f = adapt(func, type, output, truncate);
+            adapted.add(f);
+        }
+        return adapted;
+    }
+
+    private static LongToDoubleFunction adaptLongToDoubleFunctionStrict(Object func, Class<?> output) {
+        FuncType isaType = FuncType.valueOf(func.getClass());
+        switch (isaType) {
+            case LongToDoubleFunction:
+                LongToDoubleFunction f1 = assertTypesAssignable(func, LongToDoubleFunction.class);
+                return f1::applyAsDouble;
+            case LongToIntFunction:
+                LongToIntFunction f2 = assertTypesAssignable(func, LongToIntFunction.class);
+                return f2::applyAsInt;
+            case LongFunction:
+                LongFunction<Double> f3 = assertTypesAssignable(func, LongFunction.class, double.class);
+                return f3::apply;
+            case LongUnaryOperator:
+                LongUnaryOperator f4 = assertTypesAssignable(func, LongUnaryOperator.class);
+                return f4::applyAsLong;
+            case DoubleFunction:
+                DoubleFunction<Double> f7 = assertTypesAssignable(func, DoubleFunction.class, double.class);
+                return f7::apply;
+            case DoubleUnaryOperator:
+                DoubleUnaryOperator f8 = assertTypesAssignable(func, DoubleUnaryOperator.class);
+                return f8::applyAsDouble;
+            case Function:
+                Function<Double, Double> f9 = assertTypesAssignable(func, Function.class, double.class, double.class);
+                return l -> f9.apply((double) l).doubleValue();
+            case IntFunction:
+            case IntUnaryOperator:
+                throwNarrowingError(func, isaType.functionClazz);
+            default:
+                throw new BasicError("I don't know how to convert a " + func.getClass().getCanonicalName() + " function to a LongToDoubleFunction.");
+
+        }
+    }
+
+    private static LongToDoubleFunction adaptLongToDoubleFunction(Object func, Class<?> output) {
+        FuncType isaType = FuncType.valueOf(func.getClass());
+        switch (isaType) {
+            case LongToDoubleFunction:
+                LongToDoubleFunction f1 = assertTypesAssignable(func, LongToDoubleFunction.class);
+                return null;
+            case LongToIntFunction:
+                LongToIntFunction f2 = assertTypesAssignable(func, LongToIntFunction.class);
+                return null;
+            case LongFunction:
+                LongFunction<Double> f3 = assertTypesAssignable(func, LongFunction.class, double.class);
+                return null;
+            case LongUnaryOperator:
+                LongUnaryOperator f4 = assertTypesAssignable(func, LongUnaryOperator.class);
+                return null;
+            case IntFunction:
+                IntFunction<Double> f5 = assertTypesAssignable(func, IntFunction.class, double.class);
+                return null;
+            case IntUnaryOperator:
+                IntUnaryOperator f6 = assertTypesAssignable(func, IntUnaryOperator.class);
+                return null;
+            case DoubleFunction:
+                DoubleFunction<Double> f7 = assertTypesAssignable(func, DoubleFunction.class, double.class);
+                return null;
+            case DoubleUnaryOperator:
+                DoubleUnaryOperator f8 = assertTypesAssignable(func, DoubleUnaryOperator.class);
+                return null;
+            case Function:
+                Function<Double, Double> f9 = assertTypesAssignable(func, Function.class, double.class, double.class);
+                return null;
+
+            default:
+                throw new BasicError("I don't know how to convert a " + func.getClass().getCanonicalName() + " function to a LongToDoubleFunction.");
+
+        }
+    }
 
     private static LongFunction<?> adaptLongFunctionStrict(Object func, Class<?> output) {
         FuncType isaType = FuncType.valueOf(func.getClass());
@@ -98,38 +182,38 @@ public class VirtDataFunctions {
 
     }
 
-    private static Function<?,?>  adaptFunction(Object func, Class<?> output) {
+    private static Function<?, ?> adaptFunction(Object func, Class<?> output) {
         FuncType isaType = FuncType.valueOf(func.getClass());
         switch (isaType) {
             case LongFunction:
-                LongFunction<?> f1 = (LongFunction<?>)func;
-                Function<Long,?> rf1 = f1::apply;
+                LongFunction<?> f1 = (LongFunction<?>) func;
+                Function<Long, ?> rf1 = f1::apply;
                 return rf1;
             case LongUnaryOperator:
-                LongUnaryOperator f2 = (LongUnaryOperator)func;
-                Function<Long,Long> rf2 = f2::applyAsLong;
+                LongUnaryOperator f2 = (LongUnaryOperator) func;
+                Function<Long, Long> rf2 = f2::applyAsLong;
                 return rf2;
             case IntFunction:
-                IntFunction f3 = (IntFunction)func;
-                Function<Integer,?> rf3 = f3::apply;
+                IntFunction f3 = (IntFunction) func;
+                Function<Integer, ?> rf3 = f3::apply;
                 return rf3;
             case IntUnaryOperator:
-                IntUnaryOperator f4 = (IntUnaryOperator)func;
-                Function<Integer,?> rf4 = f4::applyAsInt;
+                IntUnaryOperator f4 = (IntUnaryOperator) func;
+                Function<Integer, ?> rf4 = f4::applyAsInt;
                 return rf4;
             case DoubleFunction:
-                DoubleFunction f5 = (DoubleFunction)func;
-                Function<Double,?> rf5 = f5::apply;
+                DoubleFunction f5 = (DoubleFunction) func;
+                Function<Double, ?> rf5 = f5::apply;
                 return rf5;
             case DoubleUnaryOperator:
-                DoubleUnaryOperator f6 = (DoubleUnaryOperator)func;
-                Function<Double,?> rf6 = f6::applyAsDouble;
+                DoubleUnaryOperator f6 = (DoubleUnaryOperator) func;
+                Function<Double, ?> rf6 = f6::applyAsDouble;
                 return rf6;
             case LongToIntFunction:
-                LongToIntFunction f7 = (LongToIntFunction)func;
-                Function<Long,Integer> rf7 = f7::applyAsInt;
+                LongToIntFunction f7 = (LongToIntFunction) func;
+                Function<Long, Integer> rf7 = f7::applyAsInt;
             case Function:
-                return (Function<?,?>) func;
+                return (Function<?, ?>) func;
             default:
                 throw new RuntimeException("Unable to map function:" + func);
         }
@@ -174,6 +258,43 @@ public class VirtDataFunctions {
         throw new RuntimeException("This must be implemented, now that it is used.");
     }
 
+    protected static LongToIntFunction adaptLongToIntFunction(Object func, Class<?> output) {
+        FuncType isaType = FuncType.valueOf(func.getClass());
+
+        switch (isaType) {
+            case LongToDoubleFunction:
+                LongToDoubleFunction f1 = assertTypesAssignable(func, LongToDoubleFunction.class, double.class);
+                return l -> (int) (f1.applyAsDouble(l) % Integer.MAX_VALUE);
+            case LongToIntFunction:
+                LongToIntFunction f2 = assertTypesAssignable(func, LongToIntFunction.class);
+                return f2;
+            case LongFunction:
+                LongFunction<Double> f3 = assertTypesAssignable(func, LongFunction.class, double.class);
+                return l -> (int) f3.apply((int) l % Integer.MAX_VALUE).longValue();
+            case LongUnaryOperator:
+                LongUnaryOperator f4 = assertTypesAssignable(func, LongUnaryOperator.class);
+                return l -> (int) (f4.applyAsLong(l) % Integer.MAX_VALUE);
+            case IntFunction:
+                IntFunction<Long> f5 = assertTypesAssignable(func, IntFunction.class, double.class);
+                return l -> (int) f5.apply((int) l % Integer.MAX_VALUE).longValue() % Integer.MAX_VALUE;
+            case IntUnaryOperator:
+                IntUnaryOperator f6 = assertTypesAssignable(func, IntUnaryOperator.class);
+                return l -> f6.applyAsInt((int) l % Integer.MAX_VALUE);
+            case DoubleFunction:
+                DoubleFunction<Double> f7 = assertTypesAssignable(func, DoubleFunction.class, double.class);
+                return l -> (int) f7.apply(l).longValue() & Integer.MAX_VALUE;
+            case DoubleUnaryOperator:
+                DoubleUnaryOperator f8 = assertTypesAssignable(func, DoubleUnaryOperator.class);
+                return l -> (int) f8.applyAsDouble(l) % Integer.MAX_VALUE;
+            case Function:
+                Function<Double, Double> f9 = assertTypesAssignable(func, Function.class, double.class, double.class);
+                return l -> (int) f9.apply((double) l).longValue() % Integer.MAX_VALUE;
+            default:
+                throw new IllegalStateException("Unexpected value: " + isaType);
+        }
+    }
+
+
     private static LongFunction<?> adaptLongFunction(Object func, Class<?> output) {
         FuncType isaType = FuncType.valueOf(func.getClass());
         switch (isaType) {
@@ -197,12 +318,15 @@ public class VirtDataFunctions {
                 return f6::applyAsDouble;
             case Function:
                 Function<Long, Object> f7 = assertTypesAssignable(func, Function.class);
-                assertOutputAssignable(f7.apply(1L),output);
+                assertOutputAssignable(f7.apply(1L), output);
                 return (long l) -> f7.apply(l);
+            case LongToDoubleFunction:
+                LongToDoubleFunction f8 = assertTypesAssignable(func, LongToDoubleFunction.class);
+                return f8::applyAsDouble;
             case LongToIntFunction:
-                LongToIntFunction f8 = assertTypesAssignable(func, LongToIntFunction.class);
-                assertOutputAssignable(f8.applyAsInt(1L),output);
-                return (long l) -> f8.applyAsInt(l);
+                LongToIntFunction f9 = assertTypesAssignable(func, LongToIntFunction.class);
+                assertOutputAssignable(f9.applyAsInt(1L), output);
+                return (long l) -> f9.applyAsInt(l);
             default:
                 throw new RuntimeException("Unable to convert " + func.getClass().getCanonicalName() + " to a " +
                         LongUnaryOperator.class.getCanonicalName());
@@ -258,11 +382,33 @@ public class VirtDataFunctions {
             case Function:
                 Function<Long, Long> o7 = assertTypesAssignable(func, Function.class, long.class, long.class);
                 return o7::apply;
+            case LongToDoubleFunction:
+                LongToDoubleFunction o8 = assertTypesAssignable(func, LongToDoubleFunction.class);
+                return l -> (long) o8.applyAsDouble(l % Long.MAX_VALUE) % Long.MAX_VALUE;
+            case LongToIntFunction:
+                LongToIntFunction o9 = assertTypesAssignable(func, LongToIntFunction.class);
+                return o9::applyAsInt;
         }
         throw new InvalidParameterException("Unable to convert " + func.getClass().getCanonicalName() + " to a " +
                 LongUnaryOperator.class.getCanonicalName());
     }
 
+    /**
+     * Given a base object and a wanted type to convert it to, assert that the type of the base object is assignable to
+     * the wanted type. Further, if the wanted type is a generic type, assert that additional classes are assignable to
+     * the generic type parameters. Thus, if you want to assign to a generic type from a non-generic type, you must
+     * qualify the types of values that will be used in those generic parameter positions in declaration order.
+     *
+     * <p>This is useful for taking any object and a known type and reifying it as the known type so that it can be
+     * then used idiomatically with normal type awareness. This scenario occurs when you are accepting an open type for
+     * flexiblity but then need to narrow the type sufficiently for additional conversion in a type-safe way.</p>
+     *
+     * @param base     The object to be assigned to the wanted type
+     * @param wantType The class type that the base object needs to be assignable to
+     * @param clazzes  The types of values which will checked against generic type parameters of the wanted type
+     * @param <T>      Generic parameter T for the wanted type
+     * @return The original object casted to the wanted type after verification of parameter assignability
+     */
     private static <T> T assertTypesAssignable(
             Object base,
             Class<T> wantType,
@@ -292,6 +438,16 @@ public class VirtDataFunctions {
         }
 
         return (T) (base);
+    }
+
+    /**
+     * Throw an error indicating a narrowing conversion was attempted for strict conversion.
+     * @param func The source function to convert from
+     * @param targetClass The target class which was requested
+     */
+    private static void throwNarrowingError(Object func, Class<?> targetClass) {
+        throw new BasicError("Converting from " + func.getClass().getCanonicalName() + " to " + targetClass.getCanonicalName() +
+                " is not allowed when strict conversion is requested.");
     }
 
 
