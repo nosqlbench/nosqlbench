@@ -52,7 +52,7 @@ public class ExitStatusIntegrationTests {
             "driver=diag", "initdelay=notanumber"
         );
         String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
-        assertThat(stderr).contains("Error initializing activity 'ALIAS_UNSET': For input string: \"notanumber\"");
+        assertThat(stderr).contains("For input string: \"notanumber\"");
         assertThat(result.exitStatus).isEqualTo(2);
     }
 
