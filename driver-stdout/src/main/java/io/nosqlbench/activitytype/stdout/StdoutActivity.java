@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
@@ -43,11 +44,10 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
@@ -83,7 +83,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     @Override
     public void shutdownActivity() {
         try {
-            if (pw!=null) {
+            if (pw != null) {
                 pw.close();
             }
         } catch (Exception e) {
@@ -138,8 +138,8 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         String format = getParams().getOptionalString("format").orElse(null);
 
-        if ((stmts.size()==0 && stmtsDocList.getDocBindings().size() > 0) || format!=null) {
-            if (format!=null && format.startsWith("diag")) {
+        if ((stmts.size() == 0 && stmtsDocList.getDocBindings().size() > 0) || format != null) {
+            if (format != null && format.startsWith("diag")) {
                 logger.info("Creating diagnostic log for resolver construction...");
                 BindingsTemplate bt = new BindingsTemplate();
                 stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
@@ -149,12 +149,33 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 System.exit(2);
             } else {
                 logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
-                String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
+                Set<String> activeBindingNames = new LinkedHashSet<>();
+
+                String bindings = getActivityDef().getParams().getOptionalString("bindings").orElse("doc");
+                activeBindingNames.addAll(stmtsDocList.getDocBindings().keySet());
+
+                Pattern bindingsFilter = Pattern.compile(bindings.toLowerCase().equals("doc") ? ".*" : bindings);
+                Set<String> filteredBindingNames = new LinkedHashSet<>();
+                activeBindingNames
+                        .stream()
+                        .filter(n -> {
+                            if (bindingsFilter.matcher(n).matches()) {
+                                logger.trace("bindings filter kept binding '" + n + "'");
+                                return true;
+                            } else {
+                                logger.trace("bindings filter removed binding '" + n + "'");
+                                return false;
+                            }
+                        })
+                        .forEach(filteredBindingNames::add);
+                activeBindingNames = filteredBindingNames;
+
+                String generatedStmt = genStatementTemplate(activeBindingNames);
                 BindingsTemplate bt = new BindingsTemplate();
                 stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
                 StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
                 StringBindings sb = sbt.resolve();
-                sequencer.addOp(sb,1L);
+                sequencer.addOp(sb, 1L);
             }
         } else if (stmts.size() > 0) {
             for (OpTemplate stmt : stmts) {
@@ -163,12 +184,12 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);
                 if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
-                    statement = statement+"\n";
+                    statement = statement + "\n";
                 }
 
                 StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
                 StringBindings sb = sbt.resolve();
-                sequencer.addOp(sb,stmt.getParamOrDefault("ratio",1));
+                sequencer.addOp(sb, stmt.getParamOrDefault("ratio", 1));
             }
         } else {
             logger.error("Unable to create a stdout statement if you have no active statements or bindings configured.");
@@ -184,7 +205,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 .orElse(TemplateFormat.assignments);
         boolean ensureNewline = getParams().getOptionalBoolean("newline")
                 .orElse(true);
-        String stmtTemplate = format.format(ensureNewline,new ArrayList<>(keySet));
+        String stmtTemplate = format.format(ensureNewline, new ArrayList<>(keySet));
         return stmtTemplate;
     }
 
