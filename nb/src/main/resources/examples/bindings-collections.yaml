@@ -3,19 +3,39 @@ description: examples of collections bindings
 scenarios:
   default:
     stdout: run driver===stdout format=readout
+  sets:
+    stdout: run driver===stdout format=readout bindings='set_.*'
+  lists:
+    stdout: run driver===stdout format=readout bindings='list_.*'
+
+
+
+# For collection building functions, there are 6 varieties:
+# - "functions" - The main input is the same for the element functions
+# - stepped - The main input is incremented by one between element functions
+# - hashed - The main input is hashed bewteen element functions
+# - sized- The first argument is a function that sets the size, the last function is reused if needed to meet that size
+# - sized and stepped - Both attributes as described above
+# - sized and hashed - Both of these attributes as described above
 
 bindings:
   # This will always create a list like [5L, "five", "5-six"]
   list_functions: ListFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
+  # The input to the element functions is incremented by 1 for
   list_stepped: ListStepped(Identity(),NumberNameToString(),NumberNameToString())
   list_hashed: ListHashed(Identity(),ToString())
   list_sized: ListSized(HashRange(3,4),Identity(),NumberNameToString()))
   list_sized_stepped: ListSizedStepped(HashRange(3,4),Identity(),NumberNameToString()))
   list_sized_hashed: ListSizedHashed(HashRange(3,4),Identity(),ToString()))
+  list_of_sets: ListSizedStepped(HashRange(3,4),SetSized(HashRange(2,4),NumberNameToString())
+
   set_functions: SetFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
   set_stepped: SetStepped(Identity(),NumberNameToString(),NumberNameToString())
   set_hashed: SetHashed(Identity(),ToString())
   set_sized: SetSized(HashRange(3,4),Identity(),NumberNameToString()))
   set_sized_stepped: SetSizedStepped(HashRange(3,4),Identity(),NumberNameToString()))
   set_sized_hashed: SetSizedHashed(HashRange(3,4),Identity(),ToString()))
+  set_of_lists: SetSizedStepped( HashRange(3,4), ListSizedStepped(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
+  set_of_hashed_lists: SetSizedStepped( HashRange(3,4), ListSizedHashed(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
+  set_of_lists_withduplicates: SetSized( HashRange(3,4), ListSized(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
 
