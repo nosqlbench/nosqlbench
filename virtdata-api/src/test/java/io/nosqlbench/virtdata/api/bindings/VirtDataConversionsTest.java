@@ -89,40 +89,40 @@ public class VirtDataConversionsTest {
     @Test
     public void testFunctionConversions() {
         for (Object func : funcs) {
-            LongUnaryOperator f1 = VirtDataConversions.adapt(func, LongUnaryOperator.class);
+            LongUnaryOperator f1 = VirtDataConversions.adaptFunction(func, LongUnaryOperator.class);
             f1.applyAsLong(1);
 
-            LongToDoubleFunction f2 = VirtDataConversions.adapt(func, LongToDoubleFunction.class);
+            LongToDoubleFunction f2 = VirtDataConversions.adaptFunction(func, LongToDoubleFunction.class);
             f2.applyAsDouble(2);
 
-            LongToIntFunction f3 = VirtDataConversions.adapt(func, LongToIntFunction.class);
+            LongToIntFunction f3 = VirtDataConversions.adaptFunction(func, LongToIntFunction.class);
             f3.applyAsInt(3);
 
-            LongFunction<Double> f4 = VirtDataConversions.adapt(func, LongFunction.class, Double.class);
+            LongFunction<Double> f4 = VirtDataConversions.adaptFunction(func, LongFunction.class, Double.class);
             f4.apply(4L);
 
-            LongFunction<Object> f41 = VirtDataConversions.adapt(func, LongFunction.class, Object.class);
+            LongFunction<Object> f41 = VirtDataConversions.adaptFunction(func, LongFunction.class, Object.class);
             f41.apply(41L);
 
-            LongFunction<Integer> f5 = VirtDataConversions.adapt(func, LongFunction.class, Integer.class);
+            LongFunction<Integer> f5 = VirtDataConversions.adaptFunction(func, LongFunction.class, Integer.class);
             f5.apply(5L);
 
-            IntUnaryOperator f6 = VirtDataConversions.adapt(func, IntUnaryOperator.class);
+            IntUnaryOperator f6 = VirtDataConversions.adaptFunction(func, IntUnaryOperator.class);
             f6.applyAsInt(6);
 
-            IntFunction<Long> f7 = VirtDataConversions.adapt(func, IntFunction.class, Long.class);
+            IntFunction<Long> f7 = VirtDataConversions.adaptFunction(func, IntFunction.class, Long.class);
             f7.apply(7);
 
-            IntFunction<Integer> f8 = VirtDataConversions.adapt(func,IntFunction.class, Integer.class);
+            IntFunction<Integer> f8 = VirtDataConversions.adaptFunction(func,IntFunction.class, Integer.class);
             f8.apply(8);
 
-            IntFunction<Double> f9 = VirtDataConversions.adapt(func,IntFunction.class, Double.class);
+            IntFunction<Double> f9 = VirtDataConversions.adaptFunction(func,IntFunction.class, Double.class);
             f9.apply(9);
 
-            DoubleUnaryOperator f10 = VirtDataConversions.adapt(func, DoubleUnaryOperator.class);
+            DoubleUnaryOperator f10 = VirtDataConversions.adaptFunction(func, DoubleUnaryOperator.class);
             f10.applyAsDouble(10d);
 
-            LongFunction<Long> f11 = VirtDataConversions.adapt(func, LongFunction.class, Long.class);
+            LongFunction<Long> f11 = VirtDataConversions.adaptFunction(func, LongFunction.class, Long.class);
             f11.apply(11L);
 
         }

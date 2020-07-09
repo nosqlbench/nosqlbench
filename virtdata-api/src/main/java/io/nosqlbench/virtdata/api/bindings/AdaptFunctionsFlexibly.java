@@ -712,6 +712,9 @@ public class AdaptFunctionsFlexibly {
         return v->(long) (f.applyAsLong(v));
     }
 
+    public static LongFunction<Object> adapt(Function<Object,Class> f, Object i1, Class i2, LongFunction i3, Object i4) {
+        return f::apply;
+    }
 
 
 

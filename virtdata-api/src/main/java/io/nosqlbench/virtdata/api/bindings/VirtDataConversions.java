@@ -44,10 +44,10 @@ public class VirtDataConversions {
 
     }
 
-    public static <F, T> List<T> adaptList(F[] funcs, Class<T> resultType, Class<Object>... resultSignature) {
+    public static <F, T> List<T> adaptFunctionList(F[] funcs, Class<T> resultType, Class<Object>... resultSignature) {
         List<T> functions = new ArrayList<>();
         for (Object func : funcs) {
-            T adapted = adapt(func, resultType, resultSignature);
+            T adapted = adaptFunction(func, resultType, resultSignature);
             functions.add(adapted);
         }
         return functions;
@@ -62,7 +62,7 @@ public class VirtDataConversions {
      * @param resultSignature The signature of all output types, linearized for use after type-erasure.
      * @return An instance of T
      */
-    public static <F, T> T adapt(F func, Class<T> resultType, Class<?>... resultSignature) {
+    public static <F, T> T adaptFunction(F func, Class<T> resultType, Class<?>... resultSignature) {
         FuncType funcType = FuncType.valueOf(func.getClass());
 
         List<Class<?>> signature = new ArrayList<>();
