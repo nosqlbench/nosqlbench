@@ -7,14 +7,10 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
-import java.util.function.LongUnaryOperator;
 
 /**
  * Create a Set from a long input based on a set of provided functions.
@@ -38,8 +34,8 @@ public class SetSizedHashed implements LongFunction<java.util.Set<Object>> {
         "Create a sized set of values like ['2945182322382062539', 'text', '37945690212757860', '287864597160630738', '3299224200079606887']"
     })
     public SetSizedHashed(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adapt(sizeFunc, LongToIntFunction.class);
-        this.valueFuncs = VirtDataConversions.adaptList(funcs, LongFunction.class, Object.class);
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
     @Override

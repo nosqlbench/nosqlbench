@@ -36,7 +36,7 @@ public class SetFunctions implements LongFunction<java.util.Set<Object>> {
     })
 
     public SetFunctions(Object... funcs) {
-        this.valueFuncs = VirtDataConversions.adaptList(funcs, LongFunction.class, Object.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
         this.size = valueFuncs.size();
     }
 

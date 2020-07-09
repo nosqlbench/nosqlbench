@@ -6,14 +6,10 @@ import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
-import java.util.function.LongUnaryOperator;
 
 /**
  * Create a Set from a long input based on a set of provided functions.
@@ -37,8 +33,8 @@ public class SetSized implements LongFunction<java.util.Set<Object>> {
             "Create a sized set of object values, like ['one','text'], because 'text' is duplicated 4 times"
     })
     public SetSized(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adapt(sizeFunc, LongToIntFunction.class);
-        this.valueFuncs = VirtDataConversions.adaptList(funcs, LongFunction.class, Object.class);
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
     @Override
