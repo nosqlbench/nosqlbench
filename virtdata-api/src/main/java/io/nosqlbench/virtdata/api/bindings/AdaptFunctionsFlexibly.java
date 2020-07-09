@@ -584,7 +584,7 @@ public class AdaptFunctionsFlexibly {
     // to DoubleFunction<String>
 
     public static LongUnaryOperator adapt(DoubleFunction<String> f, String i1, LongUnaryOperator i2) {
-        return v -> (long) (Double.parseDouble(f.apply(v))%Long.MAX_VALUE);
+        return v -> (long) (Double.parseDouble(f.apply(v)) % Long.MAX_VALUE);
     }
 
     public static LongToDoubleFunction adapt(DoubleFunction<String> f, String i1, LongToDoubleFunction i2) {
@@ -592,7 +592,7 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongToIntFunction adapt(DoubleFunction<String> f, String i1, LongToIntFunction i2) {
-        return v -> (int) (Double.parseDouble(f.apply(v))%Integer.MAX_VALUE);
+        return v -> (int) (Double.parseDouble(f.apply(v)) % Integer.MAX_VALUE);
     }
 
     public static LongFunction<Double> adapt(DoubleFunction<String> f, String i1, LongFunction i2, Double i3) {
@@ -600,23 +600,23 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongFunction<Integer> adapt(DoubleFunction<String> f, String i1, LongFunction i2, Integer i3) {
-        return v -> (int) (Double.parseDouble(f.apply(v))%Integer.MAX_VALUE);
+        return v -> (int) (Double.parseDouble(f.apply(v)) % Integer.MAX_VALUE);
     }
 
     public static IntUnaryOperator adapt(DoubleFunction<String> f, String i1, IntUnaryOperator i2) {
-        return v -> (int) (Double.parseDouble(f.apply(v))%Integer.MAX_VALUE);
+        return v -> (int) (Double.parseDouble(f.apply(v)) % Integer.MAX_VALUE);
     }
 
     public static IntFunction<Long> adapt(DoubleFunction<String> f, String i1, IntFunction i2, Long i3) {
-        return v -> (long) (Double.parseDouble(f.apply(v))%Long.MAX_VALUE);
+        return v -> (long) (Double.parseDouble(f.apply(v)) % Long.MAX_VALUE);
     }
 
     public static IntFunction<Integer> adapt(DoubleFunction<String> f, String i1, IntFunction i2, Integer i3) {
-        return v -> (int) (Double.parseDouble(f.apply(v))%Integer.MAX_VALUE);
+        return v -> (int) (Double.parseDouble(f.apply(v)) % Integer.MAX_VALUE);
     }
 
     public static IntFunction<Double> adapt(DoubleFunction<String> f, String i1, IntFunction i2, Double i3) {
-        return v-> Double.parseDouble(f.apply(v));
+        return v -> Double.parseDouble(f.apply(v));
     }
 
     public static DoubleUnaryOperator adapt(DoubleFunction<String> f, String i1, DoubleUnaryOperator i2) {
@@ -624,7 +624,7 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongFunction<Long> adapt(DoubleFunction<String> f, String i1, LongFunction i2, Long i3) {
-        return v -> (long) (Double.parseDouble(f.apply(v))%Long.MAX_VALUE);
+        return v -> (long) (Double.parseDouble(f.apply(v)) % Long.MAX_VALUE);
     }
 
     public static LongFunction<Object> adapt(LongToDoubleFunction f, LongFunction i1, Object i2) {
@@ -640,19 +640,19 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongFunction<Object> adapt(IntUnaryOperator f, LongFunction i1, Object i2) {
-        return v -> f.applyAsInt((int) (v%Integer.MAX_VALUE));
+        return v -> f.applyAsInt((int) (v % Integer.MAX_VALUE));
     }
 
     public static LongFunction<Object> adapt(IntFunction<Integer> f, Integer i1, LongFunction i2, Object i3) {
-        return v -> f.apply((int) (v%Integer.MAX_VALUE));
+        return v -> f.apply((int) (v % Integer.MAX_VALUE));
     }
 
     public static LongFunction<Object> adapt(IntFunction<Double> f, Double i1, LongFunction i2, Object i3) {
-        return v -> f.apply((int) (v%Integer.MAX_VALUE));
+        return v -> f.apply((int) (v % Integer.MAX_VALUE));
     }
 
     public static LongFunction<Object> adapt(IntFunction<String> f, String i1, LongFunction i2, Object i3) {
-        return v -> f.apply((int) (v%Integer.MAX_VALUE));
+        return v -> f.apply((int) (v % Integer.MAX_VALUE));
     }
 
     public static LongFunction<Object> adapt(DoubleFunction<Double> f, Double i1, LongFunction i2, Object i3) {
@@ -668,11 +668,49 @@ public class AdaptFunctionsFlexibly {
         return f::applyAsLong;
     }
 
+    public static LongUnaryOperator adapt(DoubleToLongFunction f, LongUnaryOperator i1) {
+        return v -> (long) (f.applyAsLong(v));
+    }
 
+    public static LongToDoubleFunction adapt(DoubleToLongFunction f, LongToDoubleFunction i1) {
+        return v -> (double) f.applyAsLong(v);
+    }
 
+    public static LongToIntFunction adapt(DoubleToLongFunction f, LongToIntFunction i1) {
+        return v -> (int) ((f.applyAsLong(v)) % Integer.MAX_VALUE);
+    }
 
+    public static LongFunction<Double> adapt(DoubleToLongFunction f, LongFunction i1, Double i2) {
+        return v -> (double) f.applyAsLong(v);
+    }
 
+    public static LongFunction<Integer> adapt(DoubleToLongFunction f, LongFunction i1, Integer i2) {
+        return v -> (int) ((f.applyAsLong(v)) % Integer.MAX_VALUE);
+    }
 
+    public static IntUnaryOperator adapt(DoubleToLongFunction f, IntUnaryOperator i1) {
+        return v -> (int) ((f.applyAsLong(v)) % Integer.MAX_VALUE);
+    }
+
+    public static IntFunction<Long> adapt(DoubleToLongFunction f, IntFunction i1, Long i2) {
+        return v -> (long) f.applyAsLong(v);
+    }
+
+    public static IntFunction<Integer> adapt(DoubleToLongFunction f, IntFunction i1, Integer i2) {
+        return v->(int) ((int)f.applyAsLong(v)%Integer.MAX_VALUE);
+    }
+
+    public static IntFunction<Double> adapt(DoubleToLongFunction f, IntFunction i1, Double i2) {
+        return v->(double) (f.applyAsLong(v));
+    }
+
+    public static DoubleUnaryOperator adapt(DoubleToLongFunction f, DoubleUnaryOperator i1) {
+        return v->(double)(f.applyAsLong(v));
+    }
+
+    public static LongFunction<Long> adapt(DoubleToLongFunction f, LongFunction i1, Long i2) {
+        return v->(long) (f.applyAsLong(v));
+    }
 
 
 
