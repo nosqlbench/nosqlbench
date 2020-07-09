@@ -12,3 +12,20 @@
 - 105c59d3 Bump log4j.version from 2.13.0 to 2.13.3 in /mvn-defaults
 - 8725cc40 Fix MongoAction incorrect error message
 - 7f2c2e31 mongodb: Update yaml
+- 46a3bb62 (HEAD -> main) improve bindings-collections
+- a69ae0ba add optional bindings filter to stdout
+- 91ea3c71 document stdout bindings filter
+- 8992dd12 add collection bindings example
+- eb470df3 switch list functions over to better function adapter
+- e8f76ddf move set functions over to better function adapter
+- 7ee17265 improve function adapter coverage
+- fdeacc86 (origin/main) add test for new functional type
+- 658d400f add missing support for DoubleToLongFunction
+- 878c8896 bring Set functions up to parity with List Functions
+- 6099ac3e add function and generic specific conversion support
+- 9899a15f collection functions blurb
+- 9a42aacd deprecate old list funcs
+- 6a22d411 make list function descriptions follow a pattern
+- 7461f0e8 add http test yamls
+- 9aaf2991 bump graalvm to 20.1.0
+- 2d9512c2 start error handling dev guide
