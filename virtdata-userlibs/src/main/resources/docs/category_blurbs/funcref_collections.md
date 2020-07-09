@@ -51,10 +51,10 @@ All of the useful collection binding functions follow the same basic patterns ab
 
 |               |  Same Input | Stepped Input| Hashed Input |
 |---------------|----------|--------|----------|
-| **Pair-wise** | ListFunctions(...)<sub>1</sub> | ListStepped(...)       | ListHashed(...)      |
+| **Pair-wise** | ListFunctions(...)             | ListStepped(...)       | ListHashed(...)      |
 | **Sized**     | ListSized(...)                 | ListSizedStepped(...)  | ListSizedHashed(...) |
 
-(1) This name was chosen to avoid clashing with the existing `List(...)` function.
+The name `ListFunctions(...)` was chosen to avoid clashing with the existing `List(...)` function.
 
 ### Set Functions
 
@@ -65,28 +65,8 @@ collection.  Overwrites are allowed, although they may not be intended in most c
 
 |               | Same Input                    | Stepped Input        | Hashed Input        |
 | ---           | ---                           | ---                  | ---                 |
-| **Pair-wise** | SetFunctions(...)<sub>2</sub> | SetStepped(...)      | SetHashed(...)      |
+| **Pair-wise** | SetFunctions(...)             | SetStepped(...)      | SetHashed(...)      |
 | **Sized**     | SetSized(...)                 | SetSizedStepped(...) | SetSizedHashed(...) |
 
-(2) This name was chosen to avoid clashing with the existing `Set(...)` function.
-
-### Map Functions
-
-Map functions work much like set and list functions except for one key difference. When the pair-wise
-forms are used, the key and value functions are taken as even-odd pairs. For example
-`MapFunctions(NumberNameToString(),Identity())` will produce a single element map with a key like "four",
-and a value like 4L, except that the value will be auto-boxed to a Long type.
-
-Just as with Sets, you must take care that your element functions for the key values are distinct
-as needed to avoid ovewrites. Overwrites are allowed, although they may not be intended in most cases.
-
-|               | Same Input                    | Stepped Input        | Hashed Input        |
-| ---           | ---                           | ---                  | ---                 |
-| **Pair-wise** | MapFunctions(...)<sub>3</sub> | MapStepped(...)      | MapHashed(...)      |
-| **Sized**     | MapSized(...)                 | MapSizedStepped(...) | MapSizedHashed(...) |
-
-(3) This name was chosen to avoid clashing with the existing `Map(...)` function.
-
-
-
+The name `SetFunctions(...)` was chosen to avoid clashing with the existing `Set(...)` function.
 

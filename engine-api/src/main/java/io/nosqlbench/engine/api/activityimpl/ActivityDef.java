@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ActivityDef {
 
     // milliseconds between cycles per thread, for slow tests only
-    public static final String DEFAULT_ALIAS = "ALIAS_UNSET";
-    public static final String DEFAULT_ATYPE = "TYPE_UNSET";
+    public static final String DEFAULT_ALIAS = "UNNAMEDACTIVITY";
+    public static final String DEFAULT_ATYPE = "stdout  ";
     public static final String DEFAULT_CYCLES = "0";
     public static final int DEFAULT_THREADS = 1;
     private final static Logger logger = LoggerFactory.getLogger(ActivityDef.class);
