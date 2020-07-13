@@ -158,3 +158,23 @@ the defaults for the current HttpClient library that is bundled within the JVM.
 Presently, this driver only does basic request-response style requests. Thus, adding headers which
 take TCP socket control away from the HttpClient will likely yield inconsistent (or undefined)
 results. Support may be added for long-lived connections in a future release.
+
+## HTTP Activity Parameters
+
+- **client_scope** - default: activity - One of activity, or thread. This controls how many
+  clients instances you use with an HTTP activity. By default, all threads will use the same
+  client instance.
+- **follow_redirects** - default: normal - One of never, always, or normal. Normal redirects
+  are those which do not redirect from HTTPS to HTTP.
+- **diagnostics** - default: none -
+  This setting is a selector for what level of verbosity you will get on console. If you set
+  this to true, you'll get every request and response logged to console. This is only for
+  verifying that a test is configured and to spot check services before running higher scale
+  tests.
+  If you want finer control over how much information diagnostics provides, you can specify
+  a comma separated list of the below.
+  - all - Includes all of the below categories
+  - stats - Counts of redirects, headers, body length, etc
+  - headers - include header details
+  - content - include
+  - a number, like 3000 - causes the diagnostics to be reported only on this cycle modulo
