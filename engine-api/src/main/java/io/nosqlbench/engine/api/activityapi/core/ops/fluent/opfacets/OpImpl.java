@@ -100,7 +100,7 @@ public class OpImpl<D> implements OpFacets<D> {
     }
 
     @Override
-    public D getData() {
+    public D getOpData() {
         return data;
     }
 

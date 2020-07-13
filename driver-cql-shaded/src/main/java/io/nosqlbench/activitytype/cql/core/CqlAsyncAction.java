@@ -79,7 +79,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
     @Override
     public void startOpCycle(TrackedOp<CqlOpData> opc) {
-        CqlOpData cqlop = opc.getData();
+        CqlOpData cqlop = opc.getOpData();
         long cycle = opc.getCycle();
 
         // bind timer covers all statement selection and binding, skipping, transforming logic
@@ -123,7 +123,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
 
     public void onSuccess(StartedOp<CqlOpData> sop) {
-        CqlOpData cqlop = sop.getData();
+        CqlOpData cqlop = sop.getOpData();
 
         HashedCQLErrorHandler.resetThreadStatusCode();
         if (cqlop.skipped) {
@@ -217,7 +217,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
     public void onFailure(StartedOp<CqlOpData> startedOp) {
 
-        CqlOpData cqlop = startedOp.getData();
+        CqlOpData cqlop = startedOp.getOpData();
         long serviceTime = startedOp.getCurrentServiceTimeNanos();
 
         // Even if this is retryable, we expose error events
