@@ -12,14 +12,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.LongFunction;
 
-public class ReadyHttpRequest implements LongFunction<HttpRequest> {
+public class ReadyHttpOp implements LongFunction<HttpOp> {
 
     private final CommandTemplate propertyTemplate;
 
     // only populated if there is no value which is an actual bindings template
-    private final HttpRequest cachedRequest;
+    private final HttpOp cachedOp;
 
-    public ReadyHttpRequest(OpTemplate stmtDef) {
+    public ReadyHttpOp(OpTemplate stmtDef) {
         propertyTemplate = new CommandTemplate(stmtDef,
                 List.of(
                         HttpFormatParser::parseUrl,
@@ -28,18 +28,18 @@ public class ReadyHttpRequest implements LongFunction<HttpRequest> {
         );
 
         if (propertyTemplate.isStatic()) {
-            cachedRequest = apply(0);
+            cachedOp = apply(0);
         } else {
-            cachedRequest = null;
+            cachedOp = null;
         }
     }
 
     @Override
-    public HttpRequest apply(long value) {
+    public HttpOp apply(long value) {
 
         // If the request is invariant, simply return it, since it is thread-safe
-        if (this.cachedRequest != null) {
-            return this.cachedRequest;
+        if (this.cachedOp != null) {
+            return this.cachedOp;
         }
 
         Map<String, String> cmd = propertyTemplate.getCommand(value);
@@ -76,12 +76,15 @@ public class ReadyHttpRequest implements LongFunction<HttpRequest> {
             }
         }
 
+        String ok_status = cmd.remove("ok-status");
+        String ok_body = cmd.remove("ok-body");
+
         if (cmd.size()>0) {
             throw new BasicError("Some provided request fields were not used: " + cmd.toString());
         }
 
         HttpRequest request = builder.build();
-        return request;
+        return new HttpOp(request, ok_status, ok_body);
     }
 
 }
