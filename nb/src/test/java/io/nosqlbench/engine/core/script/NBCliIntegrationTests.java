@@ -48,7 +48,7 @@ public class NBCliIntegrationTests {
         assertThat(result.exitStatus).isEqualTo(0);
     }
     // disabled till after release
-    // This is not disabled on testbranch, only on master
+    // This is not disabled on testbranch, only on main
 //    @Test
 //    public void dockerMetrics() {
 //        ProcessInvoker invoker = new ProcessInvoker();
