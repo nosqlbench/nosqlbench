@@ -8,35 +8,35 @@ import javax.management.*;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.util.Map;
 
 public class JMXReadOperation extends JmxOp {
-    private final String attribute;
-    private final String asType;
-    private final String asName;
+    public final static String READVAR = "readvar";
+    public final static String AS_TYPE = "as_type";
+    public final static String AS_NAME = "as_name";
 
-    public JMXReadOperation(JMXConnector connector, ObjectName objectName, String attribute, String asType, String asName) {
+    protected final String attribute;
+    protected final String asType;
+    protected final String asName;
+
+    public JMXReadOperation(JMXConnector connector, ObjectName objectName, String attribute, Map<String, String> cfg) {
         super(connector, objectName);
         this.attribute = attribute;
-        this.asType = asType;
-        this.asName = asName;
+        this.asType = cfg.remove(AS_TYPE);
+        this.asName = cfg.remove(AS_NAME);
     }
 
     @Override
     public void execute() {
-        try {
-            Object value = getMBeanConnection().getAttribute(objectName, this.attribute);
-            logger.trace("read attribute '" + value +"': " + value);
+        Object value = readObject(attribute);
 
-            if (asType!=null) {
-                value = ValueConverter.convert(asType,value);
-            }
-
-            String storedName = (asName==null) ? attribute : asName;
-            SharedState.tl_ObjectMap.get().put(storedName,value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (asType != null) {
+            value = ValueConverter.convert(asType, value);
         }
+        String storedName = (asName == null) ? attribute : asName;
 
+        SharedState.tl_ObjectMap.get().put(storedName, value);
     }
+
 
 }

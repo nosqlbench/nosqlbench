@@ -32,5 +32,15 @@ public abstract class JmxOp {
         }
     }
 
+    protected Object readObject(String attributeName) {
+        try {
+            Object value = getMBeanConnection().getAttribute(objectName, attributeName);
+            logger.trace("read attribute '" + value + "': " + value);
+            return value;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public abstract void execute();
 }

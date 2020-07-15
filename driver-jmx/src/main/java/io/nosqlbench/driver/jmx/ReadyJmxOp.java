@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.jmx;
 
 import io.nosqlbench.driver.jmx.ops.JMXExplainOperation;
+import io.nosqlbench.driver.jmx.ops.JMXPrintOperation;
 import io.nosqlbench.driver.jmx.ops.JMXReadOperation;
 import io.nosqlbench.driver.jmx.ops.JmxOp;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
@@ -42,9 +43,11 @@ public class ReadyJmxOp {
             e.printStackTrace();
         }
 
-        if (cmdmap.containsKey("readvar")) {
-            return new JMXReadOperation(connector, objectName, cmdmap.get("readvar"), cmdmap.get("as_type"),cmdmap.get("as_name"));
-        } else if (cmdmap.containsKey("explain")) {
+        if (cmdmap.containsKey(JMXReadOperation.READVAR)) {
+            return new JMXReadOperation(connector, objectName, cmdmap.get(JMXReadOperation.READVAR), cmdmap);
+        } else if (cmdmap.containsKey(JMXPrintOperation.PRINTVAR)) {
+            return new JMXPrintOperation(connector,objectName, cmdmap.get(JMXPrintOperation.PRINTVAR), cmdmap);
+        } else if (cmdmap.containsKey(JMXExplainOperation.EXPLAIN)) {
             return new JMXExplainOperation(connector,objectName);
         }
 

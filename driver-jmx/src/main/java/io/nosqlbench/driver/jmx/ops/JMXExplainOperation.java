@@ -7,6 +7,8 @@ import javax.management.remote.JMXConnector;
 import java.io.IOException;
 
 public class JMXExplainOperation extends JmxOp {
+    public final static String EXPLAIN = "explain";
+
     public JMXExplainOperation(JMXConnector connector, ObjectName objectName) {
         super(connector,objectName);
     }
