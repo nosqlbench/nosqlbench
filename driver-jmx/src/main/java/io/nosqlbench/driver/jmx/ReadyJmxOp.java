@@ -13,6 +13,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,7 +36,7 @@ public class ReadyJmxOp {
         ObjectName objectName = null;
         try {
             String object = cmdmap.get("object");
-            if (object==null) {
+            if (object == null) {
                 throw new RuntimeException("You must specify an object name for any JMX operation.");
             }
             objectName = new ObjectName(object);
@@ -46,9 +47,9 @@ public class ReadyJmxOp {
         if (cmdmap.containsKey(JMXReadOperation.READVAR)) {
             return new JMXReadOperation(connector, objectName, cmdmap.get(JMXReadOperation.READVAR), cmdmap);
         } else if (cmdmap.containsKey(JMXPrintOperation.PRINTVAR)) {
-            return new JMXPrintOperation(connector,objectName, cmdmap.get(JMXPrintOperation.PRINTVAR), cmdmap);
+            return new JMXPrintOperation(connector, objectName, cmdmap.get(JMXPrintOperation.PRINTVAR), cmdmap);
         } else if (cmdmap.containsKey(JMXExplainOperation.EXPLAIN)) {
-            return new JMXExplainOperation(connector,objectName);
+            return new JMXExplainOperation(connector, objectName);
         }
 
         throw new RuntimeException("No valid form of JMX operation was determined from the provided command details:" + cmdmap.toString());
@@ -56,10 +57,19 @@ public class ReadyJmxOp {
 
     private JMXConnector bindConnector(Map<String, String> cmdmap) {
 
+        Map<String, Object> connectorEnv = new HashMap<>();
+        String username = cmdmap.remove("username");
+        String password = cmdmap.remove("password");
+        username = SecureUtils.readSecret("JMX username", username);
+        password = SecureUtils.readSecret("JMX password", password);
+        if (username != null && password != null) {
+            connectorEnv.put(JMXConnector.CREDENTIALS, new String[]{username, password});
+        }
+
         JMXConnector connector = null;
         try {
             JMXServiceURL url = bindJMXServiceURL(cmdmap);
-            connector = JMXConnectorFactory.connect(url);
+            connector = JMXConnectorFactory.connect(url, connectorEnv);
         } catch (IOException e) {
             e.printStackTrace();
         }

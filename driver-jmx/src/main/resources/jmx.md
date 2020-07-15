@@ -13,9 +13,14 @@ In the first version of this driver, only reads are supported.
 
 JMX transports can be configured in a myriad of ways. The options below allow you to add
 connection options such as SSL and authentication.
-
-- **ssl** - Use SSL settings provided. Thes SSL settings are from the NoSQLBench standard
-  SSL support
+- **username** - The username to authenticate to the JMX server as. This can be specifed as the
+  actual username to use, or 'file:...' to indicate a filename to load the user name from, or as
+   'console:' to force the user name to be prompted for on the console. If an empty value is provided,
+   then the console is used by default.
+- **password** - The password to authentiate to the JMX server with. This can be specifed as the
+  actual password to use, or 'file:...' to indicate a filename to load the user name from, or as
+  'console:' to force the user name to be prompted for on the console. If an empty value is provided,
+   then the console is used by default.
 
 # Example Operations
 
