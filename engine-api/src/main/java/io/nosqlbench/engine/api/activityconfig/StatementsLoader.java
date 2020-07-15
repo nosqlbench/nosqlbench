@@ -17,6 +17,8 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -25,6 +27,7 @@ import io.nosqlbench.nb.api.content.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class StatementsLoader {
@@ -65,6 +68,15 @@ public class StatementsLoader {
 
         list = gloaderImpl.loadPath(logger, path, searchPaths);
         return new StmtsDocList(list);
+    }
+
+    public static StmtsDocList loadStmt(
+            Logger logger,
+            String statement, Function<String,String> transformer) {
+        String transformed = transformer.apply(statement);
+        RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(transformed);
+        return new StmtsDocList(rawStmtsDocList);
+
     }
 
     public static StmtsDocList loadPath(

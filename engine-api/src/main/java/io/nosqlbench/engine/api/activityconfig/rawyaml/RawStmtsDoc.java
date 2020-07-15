@@ -39,6 +39,12 @@ public class RawStmtsDoc extends StatementsOwner {
     public RawStmtsDoc() {
     }
 
+    public static RawStmtsDoc forSingleStatement(String statement) {
+        RawStmtsDoc rawStmtsDoc = new RawStmtsDoc();
+        rawStmtsDoc.setStatementsFieldByObjectType(statement);
+        return rawStmtsDoc;
+    }
+
     public void setFieldsByReflection(Map<String, Object> properties) {
         Object blocksObjects = properties.remove("blocks");
         if (blocksObjects instanceof List) {

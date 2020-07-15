@@ -27,6 +27,11 @@ public class RawStmtsDocList {
         this.rawStmtsDocList = rawStmtsDocList;
     }
 
+    public static RawStmtsDocList forSingleStatement(String statement) {
+        RawStmtsDoc rawStmtsDoc = RawStmtsDoc.forSingleStatement(statement);
+        return new RawStmtsDocList(List.of(rawStmtsDoc));
+    }
+
     public List<RawStmtsDoc> getStmtsDocs() {
         return rawStmtsDocList;
     }
