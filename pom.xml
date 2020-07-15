@@ -45,6 +45,7 @@
         <module>driver-web</module>
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
+        <module>driver-jmx</module>
 
         <!-- VIRTDATA MODULES -->
 
