@@ -2,7 +2,6 @@
 
 This is a work in progress...
 
-
 This is the document to read if you want to know if your NoSQLBench driver is complete.
 Within this document, the phrase `conformant` will be taken to mean that a driver or feature
 is implemented according to the design intent and standards of the NoSQLBench driver API.
@@ -56,3 +55,10 @@ Complete driver implementations should also come with a set of eaxmples under th
 
 ## Examples
 
+## Testing and Docs
+
+Testing Examples in Docs vs Testing Doc Examples, practices and intentions
+
+## Usage of the Op Template
+
+Structural variations and conventions.
