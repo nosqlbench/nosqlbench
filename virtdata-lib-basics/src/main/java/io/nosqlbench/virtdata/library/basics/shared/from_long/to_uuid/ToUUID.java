@@ -29,7 +29,6 @@ import java.util.function.LongFunction;
 public class ToUUID implements LongFunction<UUID> {
 
     private final long msbs;
-    private Hash longHash = new Hash();
 
     public ToUUID() {
         // Something memorable, but the correct version

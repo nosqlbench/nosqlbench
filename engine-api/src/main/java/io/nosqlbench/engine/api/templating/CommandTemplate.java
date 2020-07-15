@@ -113,16 +113,4 @@ public class CommandTemplate {
         return this.statics.keySet();
     }
 
-//    private static List<String> namedGroups(String regex) {
-//        List<String> namedGroups = new ArrayList<String>();
-//
-//        Matcher m = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>").matcher(regex);
-//
-//        while (m.find()) {
-//            namedGroups.add(m.group(1));
-//        }
-//
-//        return namedGroups;
-//    }
-
 }
