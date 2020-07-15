@@ -1,35 +1,5 @@
-- a689b4c9 initial NBUI docs
-- cd450c17 Fix typo
-- b723924e #159 Possible NPE bug in URL resolver
-- c5a98420 start of op grammar
-- d083483f function adapter handles LongToIntFunction
-- b3eecb4d clarify naming of statement fields
-- a0dc30a6 clarify default type of parameter
-- 5ca319e7 #169 fix template preprocessor regression
-- e7daf97d #168 fix parameter types for free params on statements
-- 2f083001 Allow easy load balancer configuration for CQL driver #173
-- 73464c43 fix scenario parsing bug when named arg contains assignments
-- 105c59d3 Bump log4j.version from 2.13.0 to 2.13.3 in /mvn-defaults
-- 8725cc40 Fix MongoAction incorrect error message
-- 7f2c2e31 mongodb: Update yaml
-- 46a3bb62 (HEAD -> main) improve bindings-collections
-- a69ae0ba add optional bindings filter to stdout
-- 91ea3c71 document stdout bindings filter
-- 8992dd12 add collection bindings example
-- eb470df3 switch list functions over to better function adapter
-- e8f76ddf move set functions over to better function adapter
-- 7ee17265 improve function adapter coverage
-- fdeacc86 (origin/main) add test for new functional type
-- 658d400f add missing support for DoubleToLongFunction
-- 878c8896 bring Set functions up to parity with List Functions
-- 6099ac3e add function and generic specific conversion support
-- 9899a15f collection functions blurb
-- 9a42aacd deprecate old list funcs
-- 6a22d411 make list function descriptions follow a pattern
-- 7461f0e8 add http test yamls
-- 9aaf2991 bump graalvm to 20.1.0
-- 2d9512c2 start error handling dev guide
-- 102f60ac restore support for adhoc activities in docker metrics
-- 3841693b (HEAD -> main) fix integration tests after alias renaming
-- 138251cb (origin/main) dashboard fix release
-- 102f60ac restore support for adhoc activities in docker metrics
+- 0b3d30ca (HEAD -> main) add initial JMX driver implementation
+- fff55212 allow map-only named statement constructions in YAML
+- a4b7a8da allow simpler op construction
+- c728eafb minor reminder for standards doc
+- 7e5818c2 simple cleanups
