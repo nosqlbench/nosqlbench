@@ -92,8 +92,7 @@ public class StatementsOwner extends RawStmtFields {
             }
             setStatementsFieldByObjectType(itemizedMaps);
         } else if (object instanceof String) {
-            List<RawStmtDef> defs = new ArrayList<>();
-            defs.add(new RawStmtDef(null,(String)object));
+            setStatementsFieldByObjectType(Map.of("stmt1",(String)object));
         } else {
             throw new RuntimeException("Unknown object type: " + object.getClass());
         }
