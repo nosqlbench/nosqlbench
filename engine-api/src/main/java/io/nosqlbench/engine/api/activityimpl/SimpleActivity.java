@@ -330,6 +330,11 @@ public class SimpleActivity implements Activity {
         }
 
     }
+    protected <O> OpSequence<O> createOpSequenceFromCommands(Function<CommandTemplate,O> opinit) {
+        Function<OpTemplate,CommandTemplate> f = CommandTemplate::new;
+        Function<OpTemplate, O> opTemplateOFunction = f.andThen(opinit);
+        return createOpSequence(opTemplateOFunction);
+    }
 
     protected <O> OpSequence<O> createOpSequence(Function<OpTemplate,O> opinit) {
         StrInterpolator interp = new StrInterpolator(activityDef);
