@@ -54,6 +54,25 @@ statements:
     object: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks
 ```
 
+## printvar
+
+If you want to simply read a value from a metric and print it out on stdout, you can do it with
+the `printvar` command. This is identical to the readvar command except that it puts the resulting
+variable (after any as_name and as_type options are applied) on the console.
+
+```
+statements:
+  - read1: printvar=Value as_type=int as_name=pending_tasks     
+    url: service:jmx:rmi:///jndi/rmi://dsehost:7199/jmxrmi
+    object: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks
+```
+
+This will produce an output like this:
+```
+# read JMX attribute ' Value' as class java.lang.Integer as_type=int as_name=pending_tasks
+pending_tasks=0
+```
+
 ## explain
 
 If you want to see the details about a managed object, you can use the explain command:
@@ -69,3 +88,17 @@ statements:
 This will use the MBeanInfo to interrogate the named management bean and provide a summary
 of it's available attriburtes, operations, notifications, and constructors to stdout.
 This is not meant for bulk testing, but more for explaining and documenting JMX beans.
+
+The above example will produce an output like this:
+
+```
+### MBeanInfo for 'org.apache.cassandra.metrics:type=Compaction,name=PendingTasks'
+# classname: org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+# Information on the management interface of the MBean
+## attributes:
+# Attribute exposed for management
+- 'Value' type=java.lang.Objectreadable=true writable=false is_is=false
+## operations:
+# Operation exposed for management
+- objectName() -> javax.management.ObjectName impact=UNKNOWN
+```
