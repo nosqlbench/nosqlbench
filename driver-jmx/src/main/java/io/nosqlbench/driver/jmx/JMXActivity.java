@@ -17,6 +17,8 @@ public class JMXActivity extends SimpleActivity implements Activity {
     public void initActivity() {
         super.initActivity();
         this.sequence = createOpSequenceFromCommands(ReadyJmxOp::new);
+        setDefaultsFromOpSequence(sequence);
+        // TODO: Require qualified default with an op sequence as the input
     }
 
     public OpSequence<ReadyJmxOp> getSequencer() {
