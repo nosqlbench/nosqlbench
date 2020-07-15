@@ -62,3 +62,7 @@ Testing Examples in Docs vs Testing Doc Examples, practices and intentions
 ## Usage of the Op Template
 
 Structural variations and conventions.
+
+## Handling secrets
+
+Reading passwords ...
