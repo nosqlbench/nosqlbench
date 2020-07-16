@@ -3,3 +3,26 @@
 - a4b7a8da allow simpler op construction
 - c728eafb minor reminder for standards doc
 - 7e5818c2 simple cleanups
+- 16e4309e (HEAD -> main) add scope controls to jmx driver
+- c81c5187 avoid repeating initial error message
+- 1db36d84 avoid showing stack trace unless asked for
+- 452224a2 clarify scenario error handling logic
+- 1fe38b43 either log or throw, but not both
+- 0230686a include engine-api for cqld4
+- c93c1756 provide summary of scenarios results
+- 3afbaddf typo fixes
+- cb6d79f2 add note to design guide
+- ca81e1bc disable console echo when reading secure info
+- 9d2e8086 add secure username and password options to jmx driver
+- 1cc9d209 Add SSL context init to JMX driver
+- f8ebefd1 add more JMX docs
+- 974ee656 JMX printvar improvements
+- 532c3854 add JMX auto defaults from op sequence
+- 74ea7ee1 allow single ops to be specified on CLI
+- 8e8591ea pull single statement fix to main branch
+- dd81656e jmx driver release
+- 0b3d30ca add initial JMX driver implementation
+- fff55212 allow map-only named statement constructions in YAML
+- a4b7a8da allow simpler op construction
+- c728eafb minor reminder for standards doc
+- 7e5818c2 simple cleanups
