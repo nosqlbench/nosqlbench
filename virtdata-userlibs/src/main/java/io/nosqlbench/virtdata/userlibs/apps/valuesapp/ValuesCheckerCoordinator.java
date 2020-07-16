@@ -188,7 +188,7 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
             lock.lock();
             goTime.signalAll();
         } catch (Exception e) {
-            logger.error("Error while signaling threads: " + e.getMessage(), e);
+            logger.error("Error while signaling threads:", e);
             throw new RuntimeException(e);
         } finally {
             lock.unlock();

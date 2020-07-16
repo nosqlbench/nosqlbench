@@ -28,7 +28,6 @@ public class RawStmtsLoader {
             }
         } catch (Exception e) {
             RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
-            if (logger != null) logger.error(t.getMessage(), t);
             throw t;
         }
 
@@ -76,7 +75,6 @@ public class RawStmtsLoader {
                 data = xform.apply(data);
             } catch (Exception e) {
                 RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
-                if (logger != null) logger.error(t.getMessage(), t);
                 throw t;
             }
         }

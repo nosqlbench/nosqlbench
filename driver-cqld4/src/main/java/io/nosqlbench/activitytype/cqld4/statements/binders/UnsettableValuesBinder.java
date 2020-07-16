@@ -58,7 +58,7 @@ public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStateme
             List<ColumnDefinition> cdefs = new ArrayList<>();
             preparedStatement.getVariableDefinitions().forEach(cdefs::add);
 
-            logger.error("Error binding column " + cdefs.get(i).getName() + " with class " + typNam + ": " + e.getMessage(), e);
+            logger.error("Error binding column " + cdefs.get(i).getName() + " with class " + typNam, e);
             throw e;
 //            StringBuilder sb = new StringBuilder();
 //            sb.append("Error binding objects to prepared statement directly, falling back to diagnostic binding layer:");

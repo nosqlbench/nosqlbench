@@ -154,8 +154,7 @@ public class CQLSessionCache implements Shutdownable {
                 builder = clusterEval.eval();
                 logger.info("successfully applied:" + clusteropts.get());
             } catch (Exception e) {
-                logger.error("Unable to evaluate: " + clusteropts.get() + " in script context:" + e.getMessage());
-                throw e;
+                throw new RuntimeException("Unable to evaluate: " + clusteropts.get() + " in script context:",e);
             }
         }
 

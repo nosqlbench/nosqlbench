@@ -45,7 +45,6 @@ public class HistoStatsCSVWriter {
             PrintStream writer = new PrintStream(logfile);
             return writer;
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
