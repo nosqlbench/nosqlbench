@@ -40,6 +40,7 @@ public class NBCLIOptions {
     private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
     private static final String COPY = "--copy";
+    private static final String SHOW_STACKTRACES = "--show-stacktraces";
 
     // Execution
     private static final String SCRIPT = "script";
@@ -131,6 +132,7 @@ public class NBCLIOptions {
     private boolean graaljs_compat = false;
     private int hdr_digits = 4;
     private String docker_grafana_tag = "7.0.1";
+    private boolean showStackTraces = false;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -205,6 +207,10 @@ public class NBCLIOptions {
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
+                    break;
+                case SHOW_STACKTRACES:
+                    arglist.removeFirst();
+                    showStackTraces = true;
                     break;
                 case LIST_METRICS:
                     arglist.removeFirst();
@@ -462,6 +468,9 @@ public class NBCLIOptions {
         return wantsActivityHelp;
     }
 
+    public boolean wantsStackTraces() {
+        return showStackTraces;
+    }
     public String wantsTopicalHelpFor() {
         return wantsActivityHelpFor;
     }
