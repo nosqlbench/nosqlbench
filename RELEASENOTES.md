@@ -1,9 +1,6 @@
-- 0b3d30ca (HEAD -> main) add initial JMX driver implementation
-- fff55212 allow map-only named statement constructions in YAML
-- a4b7a8da allow simpler op construction
-- c728eafb minor reminder for standards doc
-- 7e5818c2 simple cleanups
-- 16e4309e (HEAD -> main) add scope controls to jmx driver
+- b53c9c6e (HEAD -> main) fix for error handler NPE
+- 754ed25e general improvements release
+- 16e4309e add scope controls to jmx driver
 - c81c5187 avoid repeating initial error message
 - 1db36d84 avoid showing stack trace unless asked for
 - 452224a2 clarify scenario error handling logic
@@ -20,9 +17,3 @@
 - 532c3854 add JMX auto defaults from op sequence
 - 74ea7ee1 allow single ops to be specified on CLI
 - 8e8591ea pull single statement fix to main branch
-- dd81656e jmx driver release
-- 0b3d30ca add initial JMX driver implementation
-- fff55212 allow map-only named statement constructions in YAML
-- a4b7a8da allow simpler op construction
-- c728eafb minor reminder for standards doc
-- 7e5818c2 simple cleanups
