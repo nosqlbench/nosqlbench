@@ -87,25 +87,6 @@ public class DocServerApp {
         }
     }
 
-//    private static void configureDocServerLogging(LoggerContext context) {
-//        JoranConfigurator jc = new JoranConfigurator();
-//        jc.setContext(context);
-//        context.reset();
-//        context.putProperty("application-name", APPNAME_DOCSERVER);
-//        InputStream is = DocServerApp.class.getClassLoader().getResourceAsStream("logback-docsys.xml");
-//        if (is != null) {
-//            try {
-//                jc.doConfigure(is);
-//            } catch (JoranException e) {
-//                System.err.println("error initializing logging system: " + e.getMessage());
-//                throw new RuntimeException(e);
-//            }
-//        } else {
-//            throw new RuntimeException("No logging context was provided, and " +
-//                    "logback-docsys.xml could not be loaded from the classpath.");
-//        }
-//    }
-
     private static void runServer(String[] serverArgs) {
         DocServer server = new DocServer();
         for (int i = 0; i < serverArgs.length; i++) {

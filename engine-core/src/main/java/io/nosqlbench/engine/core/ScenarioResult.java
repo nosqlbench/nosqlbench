@@ -55,10 +55,6 @@ public class ScenarioResult {
         reporter.report();
         logger.info("-- END METRICS DETAIL --");
 
-//        if (this.exception!=null && !(this.exception instanceof UserException)) {
-//            logger.error("Scenario error: " + this.exception.getMessage(),this.exception);
-//        }
-
     }
 
 
