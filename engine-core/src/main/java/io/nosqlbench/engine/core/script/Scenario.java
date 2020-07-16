@@ -218,6 +218,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.out.flush();
             } catch (Exception e) {
                 ScenarioErrorHandler.handle(script,e,wantsStackTraces);
+                throw new RuntimeException(e);
             } finally {
                 scenarioController.forceStopScenario(5000);
                 System.out.flush();

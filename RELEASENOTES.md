@@ -1,4 +1,5 @@
-- b53c9c6e (HEAD -> main) fix for error handler NPE
+- 7a23d910 (HEAD -> main) error handling improvements release
+- b53c9c6e fix for error handler NPE
 - 754ed25e general improvements release
 - 16e4309e add scope controls to jmx driver
 - c81c5187 avoid repeating initial error message
