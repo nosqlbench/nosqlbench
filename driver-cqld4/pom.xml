@@ -115,6 +115,12 @@
             <version>3.12.124-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>3.12.129-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
