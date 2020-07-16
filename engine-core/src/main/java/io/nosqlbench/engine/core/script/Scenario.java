@@ -19,16 +19,12 @@ import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.EnvironmentAccess;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.PolyglotAccess;
+import org.graalvm.polyglot.*;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
@@ -61,17 +57,19 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private Engine engine = Engine.Graalvm;
+    private boolean wantsStackTraces=false;
 
     public enum Engine {
         Nashorn,
         Graalvm
     }
 
-    public Scenario(String name, Engine engine, String progressInterval, boolean wantsGraaljsCompatMode) {
+    public Scenario(String name, Engine engine, String progressInterval, boolean wantsGraaljsCompatMode, boolean wantsStackTraces) {
         this.name = name;
         this.engine = engine;
         this.progressInterval = progressInterval;
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
+        this.wantsStackTraces = wantsStackTraces;
     }
 
     public Scenario(String name, Engine engine) {
@@ -218,28 +216,10 @@ public class Scenario implements Callable<ScenarioResult> {
                 }
                 System.err.flush();
                 System.out.flush();
-            } catch (ScriptException e) {
-                String diagname = "diag_" + System.currentTimeMillis() + ".js";
-                try {
-                    Path diagFilePath = Paths.get(scenarioLogger.getLogDir(), diagname);
-                    Files.writeString(diagFilePath, script);
-                } catch (Exception ignored) {
-                }
-                String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;
-                e.printStackTrace();
-                logger.error(errorDesc, e);
-                scenarioController.forceStopScenario(5000);
-                throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
-            } catch (BasicError ue) {
-                logger.error(ue.getMessage());
-                scenarioController.forceStopScenario(5000);
-                throw ue;
-            } catch (Exception o) {
-                String errorDesc = "Non-Script error while running scenario:" + o.getMessage();
-                logger.error(errorDesc, o);
-                scenarioController.forceStopScenario(5000);
-                throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
+            } catch (Exception e) {
+                ScenarioErrorHandler.handle(script,e,wantsStackTraces);
             } finally {
+                scenarioController.forceStopScenario(5000);
                 System.out.flush();
                 System.err.flush();
             }
