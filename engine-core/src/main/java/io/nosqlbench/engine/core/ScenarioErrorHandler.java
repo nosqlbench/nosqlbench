@@ -40,7 +40,7 @@ public class ScenarioErrorHandler {
 
     private static void handleInternalError(Exception e, boolean wantsStackTraces) {
         String prefix = "internal error: ";
-        if (!e.getCause().getClass().getCanonicalName().contains("io.nosqlbench")) {
+        if (e.getCause()!=null && !e.getCause().getClass().getCanonicalName().contains("io.nosqlbench")) {
             prefix = "Error from driver or included library: ";
         }
 

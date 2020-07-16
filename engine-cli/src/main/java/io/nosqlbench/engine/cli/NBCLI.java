@@ -321,9 +321,11 @@ public class NBCLI {
         ShutdownManager.shutdown();
 
         if (scenariosResults.hasError()) {
-            logger.info(scenariosResults.getExecutionSummary());
+            logger.warn(scenariosResults.getExecutionSummary());
+            logger.error("error running scenario:",scenariosResults.getOne().getException().get());
             System.exit(2);
         } else {
+            logger.info(scenariosResults.getExecutionSummary());
             System.exit(0);
         }
     }
