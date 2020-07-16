@@ -52,8 +52,8 @@ public class NBCLI {
             cli.run(args);
         } catch (Exception e) {
             if (e instanceof BasicError) {
-                System.out.println("ERROR: " + e.getMessage());
-                System.out.flush();
+//                System.out.println("ERROR: " + e.getMessage());
+//                System.out.flush();
                 logger.error("ERROR: " + e.getMessage());
                 System.exit(2);
             } else {
@@ -71,8 +71,8 @@ public class NBCLI {
             DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
-        if (args.length>0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
-            MarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
+        if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
+            MarkdownExporter.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
 
@@ -118,22 +118,22 @@ public class NBCLI {
             logger.debug("user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .prefix("activities")
-                .prefix(options.wantsIncludes())
-                .name(resourceToCopy).extension("yaml").first();
+                    .prefix("activities")
+                    .prefix(options.wantsIncludes())
+                    .name(resourceToCopy).extension("yaml").first();
 
             if (tocopy.isEmpty()) {
 
                 tocopy = NBIO.classpath()
-                    .prefix().prefix(options.wantsIncludes())
-                    .prefix(options.wantsIncludes())
-                    .name(resourceToCopy).first();
+                        .prefix().prefix(options.wantsIncludes())
+                        .prefix(options.wantsIncludes())
+                        .name(resourceToCopy).first();
             }
 
             Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                    () -> new BasicError(
+                            "Unable to find " + resourceToCopy +
+                                    " in classpath to copy out")
             );
 
             Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -173,7 +173,7 @@ public class NBCLI {
         if (options.wantsTopicalHelp()) {
             Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             System.exit(0);
         }
@@ -190,19 +190,19 @@ public class NBCLI {
         if (options.wantsDockerMetrics()) {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
-            Map<String,String> dashboardOptions = Map.of(
+            Map<String, String> dashboardOptions = Map.of(
                     DockerMetricsManager.GRAFANA_TAG, options.getDockerGrafanaTag()
             );
             dmh.startMetrics(dashboardOptions);
 
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             logger.warn(warn);
             if (reportGraphiteTo != null) {
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                        "usually only one of the two is configured.",
-                    reportGraphiteTo));
+                                " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                                "usually only one of the two is configured.",
+                        reportGraphiteTo));
             } else {
                 //TODO: is this right?
                 logger.info("Setting graphite reporting to localhost");
@@ -257,16 +257,17 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(
-            sessionName,
-            options.getScriptingEngine(),
-            options.getProgressSpec(),
-            options.wantsGraaljsCompatMode()
+                sessionName,
+                options.getScriptingEngine(),
+                options.getProgressSpec(),
+                options.wantsGraaljsCompatMode(),
+                options.wantsStackTraces()
         );
         ScriptBuffer buffer = new BasicScriptBuffer(
-            options.getLogsDirectory()+ FileSystems.getDefault().getSeparator()+ "_scenario."+ scenario.getName() +".js"
+                options.getLogsDirectory() + FileSystems.getDefault().getSeparator() + "_scenario." + scenario.getName() + ".js"
         ).add(options.getCommands().toArray(new Cmd[0]));
         String scriptData = buffer.getParsedScript();
-        Map<String,String> globalParams=buffer.getCombinedParams();
+        Map<String, String> globalParams = buffer.getCombinedParams();
 
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
@@ -286,7 +287,7 @@ public class NBCLI {
 
         Level clevel = options.wantsConsoleLogLevel();
         Level llevel = Level.toLevel(options.getLogsLevel());
-        if (llevel.toInt()>clevel.toInt()) {
+        if (llevel.toInt() > clevel.toInt()) {
             logger.info("raising scenario logging level to accommodate console logging level");
         }
         Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
@@ -296,11 +297,11 @@ public class NBCLI {
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
         ScenarioLogger sl = new ScenarioLogger(scenario)
-            .setLogDir(options.getLogsDirectory())
-            .setMaxLogs(options.getLogsMax())
-            .setLevel(maxLevel)
-            .setLogLevelOverrides(options.getLogLevelOverrides())
-            .start();
+                .setLogDir(options.getLogsDirectory())
+                .setMaxLogs(options.getLogsMax())
+                .setLevel(maxLevel)
+                .setLogLevelOverrides(options.getLogLevelOverrides())
+                .start();
 
         executor.execute(scenario, sl);
 
@@ -320,9 +321,7 @@ public class NBCLI {
         ShutdownManager.shutdown();
 
         if (scenariosResults.hasError()) {
-            Exception exception = scenariosResults.getOne().getException().get();
-            System.err.println("ERROR while running scenario: " + exception.getMessage());
-            exception.printStackTrace(System.err);
+            logger.info(scenariosResults.getExecutionSummary());
             System.exit(2);
         } else {
             System.exit(0);

@@ -74,7 +74,7 @@ public class HttpAction implements SyncAction {
             ReadyHttpRequest readyHttpRequest = httpActivity.getOpSequence().get(cycleValue);
             request =readyHttpRequest.apply(cycleValue);
         } catch (Exception e) {
-            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(),e);
+            throw new RuntimeException("while binding request in cycle " + cycleValue + ": ",e);
         }
 
         int tries = 0;
@@ -92,7 +92,7 @@ public class HttpAction implements SyncAction {
             try (Timer.Context resultTime = httpActivity.resultTimer.time()) {
                 response = responseFuture.get(httpActivity.getTimeoutMs(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
-                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
+                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":", e);
             }
 
 //            if (ok == null) {

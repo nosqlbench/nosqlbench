@@ -67,7 +67,7 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
         boolean retry = false;
         switch (errorResponse) {
             case stop:
-                logger.error("error with cycle " + cycle + ": statement: " + cce.getStatement() + " errmsg: " + error.getMessage());
+                logger.error("error with cycle " + cycle + ": statement: " + cce.getStatement() + " errmsg: ",error);
                 if (throwExceptionOnStop) {
                     throw new RuntimeException(error);
                 }

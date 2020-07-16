@@ -117,7 +117,7 @@ public class SysPerf {
             logger.info("Loaded previously cached system timing data from " + cache.getCanonicalPath());
             return cachedData;
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error("error while loading sysperf data",e);
             if (cache.exists()) {
                 boolean deleted = cache.delete();
                 if (deleted) {

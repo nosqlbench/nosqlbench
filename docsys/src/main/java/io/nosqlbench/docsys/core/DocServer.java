@@ -305,7 +305,7 @@ public class DocServer implements Runnable {
 
             server.join();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("error while starting doc server", e);
             e.printStackTrace(System.out);
             System.exit(2);
         }

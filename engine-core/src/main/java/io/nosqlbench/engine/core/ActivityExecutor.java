@@ -98,9 +98,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             activity.initActivity();
             //activity.onActivityDefUpdate(activityDef);
         } catch (Exception e) {
-            this.stoppingException = new RuntimeException("Error initializing activity '" +
-                    activity.getAlias() +"': " + e.getMessage(),e);
-            activitylogger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
+            this.stoppingException = new RuntimeException("Error initializing activity '" + activity.getAlias() +"':\n" + e.getMessage(),e);
+//            activitylogger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
             throw stoppingException;
         }
         adjustToActivityDef(activity.getActivityDef());
