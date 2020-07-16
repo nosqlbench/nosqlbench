@@ -37,10 +37,14 @@ statements:
      readvar: Value
      as_type: int
      as_name: pending_tasks     
+     # process or thread, process is default
+     scope: process
+     
 ```
 
-The `as_type` and `as_name` are optional, and if provided will set the name and data type used in
-the thread local variable map.
+The `as_type` and `as_name`, and `scope` are optional, and if provided will set the name and
+data type used in the thread local variable map, and whether the variable is stored in the
+thread scope or the process (global) scope.
 
 - *as_type* can be any of long, int, double, float, byte, short, or String. If the original type
 is convertable to a number, then it will be converted to a number and then to the desired type. If it
@@ -48,13 +52,18 @@ is not, it will be converted to String form first and then to the desired type. 
 contains dots, as in a fully-qualified class name, then direct class casting will be used if the
 types are compatible.
 
+- *as_name* will change the name used to store the value in the map.
+
+- *scope* can be either `thread` or `process` and determines the scope of the varaible map
+  which is used to store the variable.
+
 A combined format is available if you don't want to put every command property on a separate line.
 In this format, the first entry in the command map is taken as the command name and a set of key=value
 command arguments. It is semantically equivalent to the above example, only more compact.
 
 ```
 statements:
-  - read1: readvar=Value as_type=int as_name=pending_tasks     
+  - read1: readvar=Value as_type=int as_name=pending_tasks    
     url: service:jmx:rmi:///jndi/rmi://dsehost:7199/jmxrmi
     object: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks
 ```
