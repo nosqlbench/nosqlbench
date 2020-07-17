@@ -107,7 +107,10 @@ public class Cmd {
             sb.append(toJSONBlock(getParams(), false));
         } else {
             for (String value : getParams().values()) {
-                sb.append("'").append(value).append("'").append(",");
+                String trimmed = ((value.startsWith("'") && value.endsWith("'"))
+                        || (value.startsWith("\"")) && value.endsWith("\"")) ?
+                        value.substring(1,value.length()-1) : value;
+                sb.append("'").append(trimmed).append("'").append(",");
             }
             sb.setLength(sb.length() - 1);
         }
@@ -172,12 +175,27 @@ public class Cmd {
         int klen = map.keySet().stream().mapToInt(String::length).max().orElse(1);
         StringBuilder sb = new StringBuilder();
         List<String> l = new ArrayList<>();
-        map.forEach((k, v) -> l.add(
-            (oneline ? "" : "    ") + "'" + k + "'"
-                + ": " + (oneline ? "" : " ".repeat(klen - k.length())) +
-                "'" + v + "'"
-        ));
+        for (Map.Entry<String, String> entries : map.entrySet()) {
+            String key = entries.getKey();
+            String value = sanitizeQuotes(entries.getValue());
+            if (oneline) {
+                l.add("'" + key + "':'"+value+"'");
+            } else {
+                l.add("    '"+key+"': " + " ".repeat(klen - key.length()) + "'" + value + "'");
+            }
+        }
         return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
+    }
+
+    private static String sanitizeQuotes(String value) {
+        if (value.startsWith("'") && value.endsWith("'")) {
+            return value.substring(1,value.length()-1);
+        }
+        if (value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1,value.length()-1);
+        }
+        return value;
+
     }
 
     public static String toJSONParams(String varname, Map<String, String> map, boolean oneline) {
