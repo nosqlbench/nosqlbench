@@ -287,7 +287,8 @@ public class SimpleActivity implements Activity {
 
         long cycleCount = getActivityDef().getCycleCount();
         long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
-        if ((cycleCount % stride) != 0) {
+
+        if (stride>0 && (cycleCount % stride) != 0) {
             logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
                     "leaving some cycles unused.");
         }
@@ -331,6 +332,9 @@ public class SimpleActivity implements Activity {
             }
         }
 
+        if (activityDef.getCycleCount()>0 && seq.getOps().size()==0) {
+            throw new BasicError("You have configured a zero-length sequence and non-zero cycles. Tt is not possible to continue with this activity.");
+        }
     }
 
     protected <O> OpSequence<O> createOpSequenceFromCommands(Function<CommandTemplate, O> opinit) {
