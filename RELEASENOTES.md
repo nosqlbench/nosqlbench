@@ -1,20 +1,17 @@
-- 7a23d910 (HEAD -> main) error handling improvements release
-- b53c9c6e fix for error handler NPE
-- 754ed25e general improvements release
-- 16e4309e add scope controls to jmx driver
-- c81c5187 avoid repeating initial error message
-- 1db36d84 avoid showing stack trace unless asked for
-- 452224a2 clarify scenario error handling logic
-- 1fe38b43 either log or throw, but not both
-- 0230686a include engine-api for cqld4
-- c93c1756 provide summary of scenarios results
-- 3afbaddf typo fixes
-- cb6d79f2 add note to design guide
-- ca81e1bc disable console echo when reading secure info
-- 9d2e8086 add secure username and password options to jmx driver
-- 1cc9d209 Add SSL context init to JMX driver
-- f8ebefd1 add more JMX docs
-- 974ee656 JMX printvar improvements
-- 532c3854 add JMX auto defaults from op sequence
-- 74ea7ee1 allow single ops to be specified on CLI
-- 8e8591ea pull single statement fix to main branch
+- b1cd3342 (HEAD -> main) updated test values after unifying function forms
+- a3419747 allow setting size directly on all binding functions for collections
+- b35426c3 always hash input for hashed collection functions
+- 8874d3dc allow direct sizing in sized collection bindings
+- 4f71f3fb cleanup collection examples
+- 80497b2e deprecate raw Set binding
+- 7c80bbd7 fix iterative hashing bug in binding functions
+- 6d99deba introduce uniform Map binding functions
+- b5879e2a update seq length and cycle warning to be more correct, less chatty
+- 60360b45 update docs for threads=auto
+- d6c06cf7 update docs for any and all tag conjugates
+- dfee2f82 sanitize JSON map for script composition of params
+- c6e4fc3e make force stop scenario quieter (debug)
+- e5d02dae allow all/any/none semantics on tag matching
+- e0b682a4 shutdown delay is much lower
+- 8af57065 add inspiring docs example
+- f4d94e28 restore main error output
