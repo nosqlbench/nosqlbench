@@ -217,6 +217,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.err.flush();
                 System.out.flush();
             } catch (Exception e) {
+                this.scenarioController.forceStopScenario(5000);
                 throw new RuntimeException(e);
             } finally {
                 System.out.flush();
