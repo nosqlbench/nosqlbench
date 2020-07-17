@@ -28,9 +28,9 @@ public class ScenarioErrorHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenarioErrorHandler.class);
 
-    public static void handle(String script, Throwable t, boolean wantsStackTraces) {
+    public static void handle(Throwable t, boolean wantsStackTraces) {
         if (t instanceof ScriptException) {
-            handleScriptException(script, (ScriptException) t, wantsStackTraces);
+            handleScriptException((ScriptException) t, wantsStackTraces);
         } else if (t instanceof BasicError) {
             handleBasicError((BasicError) t, wantsStackTraces);
         } else if (t instanceof Exception){
@@ -52,14 +52,14 @@ public class ScenarioErrorHandler {
         }
     }
 
-    private static void handleScriptException(String script, ScriptException e, boolean wantsStackTraces) {
+    private static void handleScriptException(ScriptException e, boolean wantsStackTraces) {
         Throwable cause = e.getCause();
         if (cause instanceof PolyglotException) {
             Throwable hostException = ((PolyglotException) cause).asHostException();
             if (hostException instanceof BasicError) {
                 handleBasicError((BasicError)hostException, wantsStackTraces);
             } else {
-                handle(script,hostException, wantsStackTraces);
+                handle(hostException, wantsStackTraces);
             }
         } else {
             if (wantsStackTraces) {
