@@ -29,7 +29,6 @@ public class ListFunctions implements LongFunction<java.util.List<Object>> {
             "ListFunctions(NumberNameToString(),NumberNameToString(),NumberNameToString())",
             "Create a list of object values of each function output. Produces values like ['one','one','one']"
     })
-
     public ListFunctions(Object... funcs) {
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
         this.size = valueFuncs.size();

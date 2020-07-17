@@ -30,11 +30,6 @@ public class SetFunctions implements LongFunction<java.util.Set<Object>> {
             "SetFunctions(NumberNameToString(),NumberNameToString(),NumberNameToString())",
             "Create a list of object values of each function output. Produces values like ['one'], as each function produces the same value."
     })
-    @Example({
-            "SetFunctions(NumberNameToString(),FixedValue('bar'))",
-            "Create a list of object values of each function output. Produces values like ['one','bar']."
-    })
-
     public SetFunctions(Object... funcs) {
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
         this.size = valueFuncs.size();
