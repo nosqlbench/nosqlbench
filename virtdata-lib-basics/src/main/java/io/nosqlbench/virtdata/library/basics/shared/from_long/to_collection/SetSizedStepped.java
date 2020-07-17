@@ -36,6 +36,11 @@ public class SetSizedStepped implements LongFunction<java.util.Set<Object>> {
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
+    public SetSizedStepped(int size, Object... funcs) {
+        this.sizeFunc = s -> size;
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
+    }
+
     @Override
     public java.util.Set<Object> apply(long value) {
         int size = sizeFunc.applyAsInt(value);

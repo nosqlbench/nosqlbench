@@ -37,6 +37,10 @@ public class SetSizedHashed implements LongFunction<java.util.Set<Object>> {
         this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
+    public SetSizedHashed(int size, Object... funcs) {
+        this.sizeFunc = s -> size;
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
+    }
 
     @Override
     public java.util.Set<Object> apply(long value) {

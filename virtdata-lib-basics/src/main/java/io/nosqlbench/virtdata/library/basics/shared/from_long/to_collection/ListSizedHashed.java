@@ -43,6 +43,11 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 
+    public ListSizedHashed(int size, Object... funcs) {
+        this.sizeFunc = s -> size;
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
+    }
+
     @Override
     public List<Object> apply(long value) {
         int size = sizeFunc.applyAsInt(value);

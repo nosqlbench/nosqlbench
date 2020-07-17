@@ -46,6 +46,11 @@ public class MapSizedHashed implements LongFunction<java.util.Map<Object,Object>
         this.keyFuncs = VirtDataConversions.getFunctions(2, 0, LongFunction.class, funcs);
         this.valueFuncs = VirtDataConversions.getFunctions(2,1, LongFunction.class, funcs);
     }
+    public MapSizedHashed(int size, Object... funcs) {
+        this.sizeFunc = s -> size;
+        this.keyFuncs = VirtDataConversions.getFunctions(2, 0, LongFunction.class, funcs);
+        this.valueFuncs = VirtDataConversions.getFunctions(2,1, LongFunction.class, funcs);
+    }
 
     @Override
     public java.util.Map<Object,Object> apply(long value) {
