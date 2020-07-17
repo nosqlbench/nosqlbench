@@ -333,7 +333,7 @@ public class ScenarioController {
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
     public void forceStopScenario(int waitTimeMillis) {
-        logger.warn("Scenario force stopped.");
+        logger.debug("Scenario force stopped.");
         activityExecutors.values().forEach(a -> a.forceStopExecutor(waitTimeMillis));
     }
 
