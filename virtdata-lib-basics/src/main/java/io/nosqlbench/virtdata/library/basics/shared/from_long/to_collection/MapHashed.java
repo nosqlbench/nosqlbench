@@ -48,9 +48,9 @@ public class MapHashed implements LongFunction<java.util.Map<Object,Object>> {
 
         java.util.Map<Object,Object> map = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
+            hash = hasher.applyAsLong(hash);
             int keySelector = Math.min(i, keyFuncs.size() - 1);
             int valSelector = Math.min(i, valueFuncs.size() -1);
-            hash = hasher.applyAsLong(hash);
 
             Object keyObject = keyFuncs.get(keySelector).apply(hash);
             Object valueObject = valueFuncs.get(valSelector).apply(hash);
