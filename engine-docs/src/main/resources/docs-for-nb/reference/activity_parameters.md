@@ -88,11 +88,11 @@ _default value_ : For now, the default is simply *1*. Users must be
 aware of this setting and adjust it to a reasonable value for their
 workloads.
 
-`threads=_auto_` : When you set `threads=auto`, it will set the number of threads to 10x the number of cores
+`threads=auto` : When you set `threads=auto`, it will set the number of threads to 10x the number of cores
 in your system. There is no distinction here between full cores and hardware threads. This is generally
 a reasonable number of threads to tap into the procesing power of a client system.
 
-`threads=_n_x` : When you set `threads=5x` or `threads=10x`, you will set the number of threads to some multiplier
+`threads=__x` : When you set `threads=5x` or `threads=10x`, you will set the number of threads to some multiplier
 of the logical CPUs in the local system.
 
 :::info

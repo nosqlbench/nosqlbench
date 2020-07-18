@@ -70,3 +70,22 @@ collection.  Overwrites are allowed, although they may not be intended in most c
 
 The name `SetFunctions(...)` was chosen to avoid clashing with the existing `Set(...)` function.
 
+### Map Functions
+
+The values produced by the provided element functions for Maps do not check for duplicate values.
+This means that you must ensure that your element functions yield distinct keys to insert into
+the collection as it is being built if you want to have a particular cardinality of values in your
+collection.  Overwrites are allowed, although they may not be intended in most cases.
+
+|               | Same Input                    | Stepped Input        | Hashed Input        |
+| ---           | ---                           | ---                  | ---                 |
+| **Pair-wise** | MapFunctions(...)             | MapStepped(...)      | MapHashed(...)      |
+| **Sized**     | MapSized(...)                 | MapSizedStepped(...) | MapSizedHashed(...) |
+
+The name `MapFunctions(...)` was chosen to avoid clashing with the existing `Map(...)` function.
+
+For the key and value functions provided to a Map function, they are taken as even-odd pairs (starting
+ at zero). For sized functions, the last defined key function will be used for elements past
+ the size of the _key_ functions provided. The same is true for the value functions. For example,
+ a call to `MapSized(3,f(...),g(...),h(...))` will use `f(...)` and `g(...)` for the first key and value,
+ but from that point forward will use `h(...)` for all keys and `g(...)` for all values.
