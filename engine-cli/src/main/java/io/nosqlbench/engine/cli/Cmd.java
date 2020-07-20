@@ -8,10 +8,9 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Encapsulate Command parsing and structure for the NoSQLBench command line.
- * Commands always have a name, sometimes have a list of positional arguments,
- * and sometimes have a map of named parameters.
- * An example of a command tha thas both would look like {@code script test.js p1=v1}
+ * Encapsulate Command parsing and structure for the NoSQLBench command line. Commands always have a name, sometimes
+ * have a list of positional arguments, and sometimes have a map of named parameters. An example of a command tha thas
+ * both would look like {@code script test.js p1=v1}
  */
 public class Cmd {
 
@@ -72,8 +71,9 @@ public class Cmd {
         public static Arg<String> of(String name) {
             return new Arg<>(name, s -> s, false);
         }
+
         public static Arg<String> ofFreeform(String name) {
-            return new Arg<>(name, s->s, true);
+            return new Arg<>(name, s -> s, true);
         }
     }
 
@@ -109,7 +109,7 @@ public class Cmd {
             for (String value : getParams().values()) {
                 String trimmed = ((value.startsWith("'") && value.endsWith("'"))
                         || (value.startsWith("\"")) && value.endsWith("\"")) ?
-                        value.substring(1,value.length()-1) : value;
+                        value.substring(1, value.length() - 1) : value;
                 sb.append("'").append(trimmed).append("'").append(",");
             }
             sb.setLength(sb.length() - 1);
@@ -131,18 +131,18 @@ public class Cmd {
 
             if (nextarg == null) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + " requires a value for " + arg.name
-                        + ", but there were no remaining arguments after it.");
+                        "command '" + cmdName + " requires a value for " + arg.name
+                                + ", but there were no remaining arguments after it.");
             } else if (arg.freeform) {
                 logger.debug("freeform parameter:" + nextarg);
             } else if (nextarg.contains("=")) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + "' requires a value for " + arg.name + "" +
-                        ", but a named parameter was found instead: " + nextarg);
+                        "command '" + cmdName + "' requires a value for " + arg.name + "" +
+                                ", but a named parameter was found instead: " + nextarg);
             } else if (NBCLIOptions.RESERVED_WORDS.contains(nextarg)) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + "' requires a value for " + arg.name
-                        + ", but a reserved word was found instead: " + nextarg);
+                        "command '" + cmdName + "' requires a value for " + arg.name
+                                + ", but a reserved word was found instead: " + nextarg);
             }
 
             logger.debug("cmd name:" + cmdName + ", positional " + arg.name + ": " + nextarg);
@@ -150,8 +150,8 @@ public class Cmd {
         }
 
         while (arglist.size() > 0 &&
-            !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())
-            && arglist.peekFirst().contains("=")) {
+                !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())
+                && arglist.peekFirst().contains("=")) {
             String arg = arglist.removeFirst();
             String[] assigned = arg.split("=", 2);
             String pname = assigned[0];
@@ -179,9 +179,9 @@ public class Cmd {
             String key = entries.getKey();
             String value = sanitizeQuotes(entries.getValue());
             if (oneline) {
-                l.add("'" + key + "':'"+value+"'");
+                l.add("'" + key + "':'" + value + "'");
             } else {
-                l.add("    '"+key+"': " + " ".repeat(klen - key.length()) + "'" + value + "'");
+                l.add("    '" + key + "': " + " ".repeat(klen - key.length()) + "'" + value + "'");
             }
         }
         return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
@@ -189,10 +189,10 @@ public class Cmd {
 
     private static String sanitizeQuotes(String value) {
         if (value.startsWith("'") && value.endsWith("'")) {
-            return value.substring(1,value.length()-1);
+            return value.substring(1, value.length() - 1);
         }
         if (value.startsWith("\"") && value.endsWith("\"")) {
-            return value.substring(1,value.length()-1);
+            return value.substring(1, value.length() - 1);
         }
         return value;
 
