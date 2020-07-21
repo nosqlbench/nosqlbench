@@ -1,6 +1,6 @@
 ---
 title: Scripting
-weight: 10
+weight: 95
 ---
 
 # Scripting with NoSQLBench

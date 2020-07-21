@@ -1,6 +1,6 @@
 ---
-title: Scripting
-weight: 10
+title: Script Parameters
+weight: 20
 ---
 
 # Script Parameters
@@ -15,20 +15,21 @@ that you would for an activity. For example, you might have a scenario script li
       cycles:   '1000'
     });
 
-This is what the script form of starting an activity in a scenario might look like. It is
+This is what the script form of starting an activity might look like. It is
 simply passing a parameter map with the activity parameters to the scenario controller.
+
 You might invoke it like this:
 
     nb script myscript
 
 Suppose that you want to allow the user to run such an activity by calling the script directly,
-but you also want them to to allow them to add their own parameters specifically to the
+but you also want them to allow them to add their own parameters specifically to the
 activity.
 
 NoSQLBench supports this type of flexibility by providing any command-line arguments to the
 script as a script object. It is possible to then combine the parameters that a user provides
 with any templated parameters in your script. You can make either one the primary, while allowing
-the otehr to backfill values. In either case, it's a matter of using helper methods that are
+the other to backfill values. In either case, it's a matter of using helper methods that are
 baked into the command line parameters object.
 
 To force parameters to specific values while allowing user command line parameters to backfill,
