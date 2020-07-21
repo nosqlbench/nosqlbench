@@ -1,17 +1,6 @@
-- b1cd3342 (HEAD -> main) updated test values after unifying function forms
-- a3419747 allow setting size directly on all binding functions for collections
-- b35426c3 always hash input for hashed collection functions
-- 8874d3dc allow direct sizing in sized collection bindings
-- 4f71f3fb cleanup collection examples
-- 80497b2e deprecate raw Set binding
-- 7c80bbd7 fix iterative hashing bug in binding functions
-- 6d99deba introduce uniform Map binding functions
-- b5879e2a update seq length and cycle warning to be more correct, less chatty
-- 60360b45 update docs for threads=auto
-- d6c06cf7 update docs for any and all tag conjugates
-- dfee2f82 sanitize JSON map for script composition of params
-- c6e4fc3e make force stop scenario quieter (debug)
-- e5d02dae allow all/any/none semantics on tag matching
-- e0b682a4 shutdown delay is much lower
-- 8af57065 add inspiring docs example
-- f4d94e28 restore main error output
+- be746562 (HEAD -> main) minor cleanup on error handling output
+- ac22b3b3 add initial docs for scripting
+- 6c1b92e6 allow for 'UNSET' on overrides
+- 2091c5ad reformat file
+- e6731971 Document flexible YAML statement formats #177
+- bcdf718c docs updates for collections and threads
