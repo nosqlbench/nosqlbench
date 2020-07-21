@@ -6,3 +6,4 @@
 - 2091c5ad reformat file
 - e6731971 Document flexible YAML statement formats #177
 - bcdf718c docs updates for collections and threads
+- 36884319 minor doc updates
