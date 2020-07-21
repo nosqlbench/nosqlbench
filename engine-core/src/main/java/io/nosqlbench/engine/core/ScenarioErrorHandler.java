@@ -28,17 +28,19 @@ public class ScenarioErrorHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenarioErrorHandler.class);
 
-    public static void handle(Throwable t, boolean wantsStackTraces) {
+    public static String handle(Throwable t, boolean wantsStackTraces) {
         if (t instanceof ScriptException) {
-            handleScriptException((ScriptException) t, wantsStackTraces);
+            return handleScriptException((ScriptException) t, wantsStackTraces);
         } else if (t instanceof BasicError) {
-            handleBasicError((BasicError) t, wantsStackTraces);
+            return handleBasicError((BasicError) t, wantsStackTraces);
         } else if (t instanceof Exception){
-            handleInternalError((Exception) t, wantsStackTraces);
+            return handleInternalError((Exception) t, wantsStackTraces);
+        } else {
+          throw new RuntimeException("Error in exception handler", t);
         }
     }
 
-    private static void handleInternalError(Exception e, boolean wantsStackTraces) {
+    private static String handleInternalError(Exception e, boolean wantsStackTraces) {
         String prefix = "internal error: ";
         if (e.getCause()!=null && !e.getCause().getClass().getCanonicalName().contains("io.nosqlbench")) {
             prefix = "Error from driver or included library: ";
@@ -50,9 +52,10 @@ public class ScenarioErrorHandler {
             logger.error(e.getMessage());
             logger.error("for the full stack trace, run with --show-stacktraces");
         }
+        return e.getMessage();
     }
 
-    private static void handleScriptException(ScriptException e, boolean wantsStackTraces) {
+    private static String handleScriptException(ScriptException e, boolean wantsStackTraces) {
         Throwable cause = e.getCause();
         if (cause instanceof PolyglotException) {
             Throwable hostException = ((PolyglotException) cause).asHostException();
@@ -69,15 +72,17 @@ public class ScenarioErrorHandler {
                 logger.error("for the full stack trace, run with --show-stacktraces");
             }
         }
+        return e.getMessage();
     }
 
-    private static void handleBasicError(BasicError e, boolean wantsStackTraces) {
+    private static String handleBasicError(BasicError e, boolean wantsStackTraces) {
         if (wantsStackTraces) {
             logger.error(e.getMessage(),e);
         } else {
             logger.error(e.getMessage());
             logger.error("for the full stack trace, run with --show-stacktraces");
         }
+        return e.getMessage();
     }
 
 }

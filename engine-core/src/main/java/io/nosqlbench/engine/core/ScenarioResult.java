@@ -62,6 +62,16 @@ public class ScenarioResult {
         return Optional.ofNullable(exception);
     }
 
+    public void rethrowIfError() {
+        if (exception!=null) {
+            if (exception instanceof RuntimeException) {
+                throw ((RuntimeException) exception);
+            } else {
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+
     public String getIOLog() {
         return this.iolog;
     }

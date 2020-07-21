@@ -18,6 +18,7 @@ import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
@@ -51,14 +52,12 @@ public class NBCLI {
             NBCLI cli = new NBCLI("eb");
             cli.run(args);
         } catch (Exception e) {
-            if (e instanceof BasicError) {
-//                System.out.println("ERROR: " + e.getMessage());
-//                System.out.flush();
-                logger.error("ERROR: " + e.getMessage());
-                System.exit(2);
-            } else {
-                throw e;
+            String error = ScenarioErrorHandler.handle(e,true);
+            if (error!=null) {
+                System.out.println(error);
             }
+            System.out.flush();
+            System.exit(2);
         }
     }
 
@@ -285,12 +284,12 @@ public class NBCLI {
 
         // Execute Scenario!
 
-        Level clevel = options.wantsConsoleLogLevel();
-        Level llevel = Level.toLevel(options.getLogsLevel());
-        if (llevel.toInt() > clevel.toInt()) {
+        Level consoleLogLevel = options.wantsConsoleLogLevel();
+        Level scenarioLogLevel = Level.toLevel(options.getLogsLevel());
+        if (scenarioLogLevel.toInt() > consoleLogLevel.toInt()) {
             logger.info("raising scenario logging level to accommodate console logging level");
         }
-        Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
+        Level maxLevel = Level.toLevel(Math.min(consoleLogLevel.toInt(), scenarioLogLevel.toInt()));
 
         scenario.addScriptText(scriptData);
         ScriptParams scriptParams = new ScriptParams();
@@ -320,10 +319,13 @@ public class NBCLI {
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
+        logger.info(scenariosResults.getExecutionSummary());
+
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();
 //            logger.warn(scenariosResults.getExecutionSummary());
             ScenarioErrorHandler.handle(exception,options.wantsStackTraces());
+            System.out.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             System.exit(2);
         } else {
             logger.info(scenariosResults.getExecutionSummary());
