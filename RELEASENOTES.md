@@ -1,4 +1,6 @@
-- be746562 (HEAD -> main) minor cleanup on error handling output
+- 8e172544 (HEAD -> main, origin/main) restore stderr logging for main error
+- 3874b365 fixes and cleanups for error handling, unset feature, better docs
+- be746562 minor cleanup on error handling output
 - ac22b3b3 add initial docs for scripting
 - 6c1b92e6 allow for 'UNSET' on overrides
 - 2091c5ad reformat file
