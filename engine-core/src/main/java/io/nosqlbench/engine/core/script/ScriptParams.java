@@ -18,36 +18,56 @@
 package io.nosqlbench.engine.core.script;
 
 import ch.qos.logback.classic.Logger;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Wrap the script parameters in a type which allows for easy manipulation
+ */
 public class ScriptParams extends HashMap<String, String> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(ScriptParams.class);
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public Map<String, String> withOverrides(Map<String, String> overrides) {
+    public Map<String,String> withOverrides(Map<String, String> overrides) {
         if (overrides == null) {
             logger.warn("A null map was provided to withOverrides. This could be a bug in your script.");
             overrides=Map.of();
         }
         checkForNulls("params", "calling withOverrides", this);
         checkForNulls("overrides", "calling withOverrides", overrides);
-        HashMap<String, String> result = new HashMap<>();
+        ScriptParams result = new ScriptParams();
         result.putAll(this);
-        result.putAll(overrides);
+
+        for (Entry<String, String> overrideEntry : overrides.entrySet()) {
+            String oKey = overrideEntry.getKey();
+            String oVal = overrideEntry.getValue();
+            if (oVal.toUpperCase().endsWith("UNDEF")) {
+                String removed = result.remove(oKey);
+                logger.trace("Removed key '" + oKey + "': '" + removed + "' from script params because it was "+ oVal + " in overrides");
+            } else {
+                String was = result.get(oKey);
+                was = (was==null ? "NULL" : was);
+                result.put(oKey,oVal);
+                logger.trace("Overrode key '" + oKey + "': from '" + was + " to " + oVal);
+            }
+        }
         return result;
     }
 
-    public Map<String, String> withDefaults(Map<String, String> defaults) {
+    public Map<String,String> withDefaults(Map<String, String> defaults) {
         if (defaults == null) {
             logger.warn("A null map was provided to withDefaults. This could be a bug in your script.");
             defaults=Map.of();
         }
-        HashMap<String, String> result = new HashMap<>();
+        ScriptParams result = new ScriptParams();
         checkForNulls("params", "calling withDefaults", this);
         checkForNulls("defaults", "calling withDefaults", defaults);
         result.putAll(defaults);
@@ -76,6 +96,11 @@ public class ScriptParams extends HashMap<String, String> {
             .map(e -> valueOf(e.getKey()) + ":" + valueOf(e.getValue()))
             .collect(Collectors.joining(","));
         logger.info(mapdetail);
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(this,Map.class).toString();
     }
 
     private static String valueOf(Object o) {

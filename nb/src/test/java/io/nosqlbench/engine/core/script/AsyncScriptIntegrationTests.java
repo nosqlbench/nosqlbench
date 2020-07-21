@@ -162,6 +162,13 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
+    public void testScriptParamsUndefVariableWithOverride() {
+        ScenarioResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
+        assertThat(scenarioResult.getIOLog()).contains("before: params.get(\"three\"):four");
+        assertThat(scenarioResult.getIOLog()).contains("after: params.get(\"three\"):null");
+    }
+
+    @Test
     public void testExtensionHistoStatsLogger() throws IOException {
         ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
         assertThat(scenarioResult.getIOLog()).contains("stdout started " +
