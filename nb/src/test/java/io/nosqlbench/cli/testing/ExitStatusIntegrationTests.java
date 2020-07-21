@@ -40,7 +40,7 @@ public class ExitStatusIntegrationTests {
         );
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("unrecognized option:badparam");
-        assertThat(result.exitStatus).isEqualTo(1);
+        assertThat(result.exitStatus).isEqualTo(2);
     }
 
     @Test

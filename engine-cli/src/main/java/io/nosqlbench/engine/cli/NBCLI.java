@@ -54,8 +54,9 @@ public class NBCLI {
         } catch (Exception e) {
             String error = ScenarioErrorHandler.handle(e,true);
             if (error!=null) {
-                System.out.println(error);
+                System.err.println(error);
             }
+            System.err.flush();
             System.out.flush();
             System.exit(2);
         }
@@ -325,7 +326,7 @@ public class NBCLI {
             Exception exception = scenariosResults.getOne().getException().get();
 //            logger.warn(scenariosResults.getExecutionSummary());
             ScenarioErrorHandler.handle(exception,options.wantsStackTraces());
-            System.out.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
+            System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             System.exit(2);
         } else {
             logger.info(scenariosResults.getExecutionSummary());
