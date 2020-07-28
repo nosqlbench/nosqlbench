@@ -3,7 +3,7 @@ title: NoSQLBench CLI Options
 weight: 01
 ---
 
-# The NoSQLBEnch Command Line
+# The NoSQLBench Command Line
 
 This is the same documentation you get in markdown format with the
 `nb --help` command.

@@ -9,6 +9,23 @@ The _Virtual Dataset_ capabilities within NoSQLBench allow you to generate
 data on the fly. There are many reasons for using this technique in
 testing, but it is often a topic that is overlooked or taken for granted.
 
+This has multiple positive effects on the fidelity of the test:
+
+1) It is much much more efficient than interacting with storage systems and piping data around. Even loading
+   data from lightweight storage like NVMe will be more time intensive than simply generating it in most cases.
+2) As such, it leaves significant headroom on the table for introducing other valuable capabilities into
+   the test system, like advanced rate metering, coordinated ommission awareness, etc.
+3) Changing the data which is generated is as easy as changing the recipe.
+4) The efficiency of the client is often high enough to support single-client test setups without appreciable
+   loss of capacity.
+5) Because of modern procedural generation techniques, the variety and shape of data available is significant.
+   Increasing the space of possibilities is a matter of adding new algorithms. There is no data bulk to manage.
+6) Sophisticated test setups that are highly data dependent are portable. All you need is the test client.
+   The building blocks for data generation are included, and many pre-built testing scenarios are already
+   wired to use them.
+
+Additional details of this approach are explained below.
+
 ## Industrial Strength
 
 The algorithms used to generate data are based on advanced techniques in
