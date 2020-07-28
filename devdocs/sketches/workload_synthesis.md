@@ -94,7 +94,7 @@ There are several operational scenarios and possibilities to consider. These can
    to deal with in practice, and navigating it successfully requires more diligence and investment
    than just accepting the tools as-is. This means that the results are often unreliable as the
    perceived cost of doing it "right" are too high. This doesn't have to be the case.
-   
+
    The raw statement replay is not able to take advantage of optimizations that applications of
    scale depend on for efficiency, such as prepared statements.
    
@@ -105,7 +105,7 @@ There are several operational scenarios and possibilities to consider. These can
    by off-board tools.
 
    The amount of data captured is the amount of data available for replay.
-   
+
    The data captured may not be representative across a whole system unless it is sampled across
    all clients and connections.
          

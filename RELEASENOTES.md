@@ -7,3 +7,10 @@
 - e6731971 Document flexible YAML statement formats #177
 - bcdf718c docs updates for collections and threads
 - 36884319 minor doc updates
+- e403ec69 add missing puml file
+- 7578e91d provide easy data streams for testing in API
+- 392bbcc5 add design sketch backgrounder for workload synthesis
+- 5bbf8177 fix: HashedToByteBuffer uses configured limit
+- 4070d6c8 fix: HashedToByteBuffer uses configured limit
+- 152f1d64 add testing practices docs section
+- 331c03c7 docs updates
