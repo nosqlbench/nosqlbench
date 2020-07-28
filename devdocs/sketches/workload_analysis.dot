@@ -1,0 +1,25 @@
+digraph {
+
+    { rank = same; data_shape; op_shape; }
+    { rank = same; data_types; data_samples; }
+    system -> op_log;
+    op_log -> op_syntax_samples;
+    { rank = same; op_syntax_samples; op_field_samples; }
+    op_syntax_samples -> op_shape;
+    op_log -> op_field_samples;
+    op_field_samples -> data_samples;
+    schema -> data_types;
+    schema -> op_shape;
+    data_shape -> workload;
+    op_shape -> workload;
+    exported_data -> data_samples;
+    interactive_sampling -> data_samples;
+    interactive_sampling -> schema;
+    dataset -> exported_data;
+    dataset -> interactive_sampling;
+
+    data_types -> data_shape;
+    data_samples -> data_shape;
+
+    workload [label = "synthesized\nworkload"]
+}

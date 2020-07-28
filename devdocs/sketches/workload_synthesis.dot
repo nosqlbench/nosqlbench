@@ -1,0 +1,42 @@
+digraph ws {
+    node [shape = none]
+    label = "Workload Synthesis Data Flow"
+    edge [fontsize = 8]
+
+    {
+    rank = min;
+    app [label = "application"];
+    analyzer;
+    nosqlbench;
+    }
+
+    subgraph clusterf {
+    rank = same;
+    label="";
+
+    appops [label = "ops in\nflight"];
+    oplog [label="full query\nlog"];
+    workload [label="Synthesized\nWorkload"];
+    test_ops[label="ops in\nflight"];
+    }
+
+    {
+    rank = same;
+    system[label="Capture\nTarget"];
+    test_system[label="Test\nTarget"];
+    }
+
+    app -> appops[label="normal\noperation"];
+    appops -> system;
+    system -> oplog;
+
+    analyzer [rank = min]
+    oplog -> analyzer
+    analyzer -> workload [label="pattern\nanalysis"];
+
+    workload -> nosqlbench;
+    nosqlbench -> test_ops  [label = "run\nscenario"];
+    test_ops -> test_system;
+
+
+}
