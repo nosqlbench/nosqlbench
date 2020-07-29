@@ -97,6 +97,19 @@ export default {
     ** Build configuration
     */
     build: {
+        html: {
+          minify: {
+            collapseBooleanAttributes: false,
+            decodeEntities: false,
+            minifyCSS: false,
+            minifyJS: false,
+            processConditionalComments: false,
+            removeEmptyAttributes: false,
+            removeRedundantAttributes: false,
+            trimCustomFragments: false,
+            useShortDoctype: false
+          }
+        },
 //        analyze: {
 //            analyzerMode: 'static'
 //        },
@@ -108,6 +121,13 @@ export default {
         */
         extend(config, ctx) {
             config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.module.rules.push({
+              test: /.g4/, loader: 'antlr4-webpack-loader'
+            })
+            config.node = {
+                fs: 'empty'
+            }
+            config.optimization.minimize = false;
         }
     }
     , generate: {

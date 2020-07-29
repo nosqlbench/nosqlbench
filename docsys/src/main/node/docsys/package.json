@@ -8,11 +8,14 @@
     "dev": "nuxt -c nuxt.config.dev.js",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "antlr": "cd antlr && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CqlLexer.g4 && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CqlParser.g4"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.9.5",
     "@nuxtjs/vuetify": "^1.11.0",
+    "antlr4": "^4.8.0",
+    "antlr4-cli": "^4.5.3",
     "front-matter": "^3.1.0",
     "markdown-it-smartarrows": "^1.0.1",
     "markdown-it-vue": "^1.0.11",
