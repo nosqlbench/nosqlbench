@@ -13,4 +13,6 @@ These are doc sites that have examples of good docs.
 - [TiKV docs - explore the tabs](https://tikv.org/docs/3.0/concepts/overview/)
 - [rocket](https://rocket.rs/v0.4/overview/)
 - [stripe](https://stripe.com/docs/payments/integration-builder)
+- [tokio.rs](https://tokio.rs/)
+- [amazon ion](http://amzn.github.io/ion-docs/guides/cookbook.html)
 
