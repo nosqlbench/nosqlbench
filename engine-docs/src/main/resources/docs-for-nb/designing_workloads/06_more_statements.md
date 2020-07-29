@@ -126,7 +126,7 @@ map for the statement.
 By combining all the forms together with a map in the middle, we get this form, which allows for the
 enumeration of multiple statements, each with an obvious name, and a set of properties:
 
-```
+```yaml
 statements:
  - foostmt:
      stmt: "{alpha},{beta}\n"
@@ -284,7 +284,6 @@ statements:
  #    }
  # }
 
- # ---------------------------------------------------------------------------------------
-    
+ # ---------------------------------------------------------------------------------------    
 ```
 

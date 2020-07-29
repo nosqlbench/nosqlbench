@@ -57,7 +57,7 @@ row data, you must apply a row operator as explained below.
 
 Examples:
 
-```
+```yaml
  statements:
    - s1: |
       a statement
@@ -70,7 +70,7 @@ Examples:
 
 Examples:
 
-```
+```yaml
   statements:
     - s2: |
        a statement

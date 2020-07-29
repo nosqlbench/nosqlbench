@@ -17,7 +17,7 @@ For this example we see that we averaged 3732 operations / second with 3.6ms 75t
 percentile latency. Note the raw metrics are in microseconds. This duration_unit may change depending on how a user
 configures nosqlbench, so always double-check it.
 
-```
+```text
 2019-08-12 15:46:01,310 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=TIMER,
  name=cql-keyvalue.result, count=100000, min=233.48, max=358596.607, mean=3732.00338612, stddev=10254.850416061185,
  median=1874.815, p75=3648.767, p95=10115.071, p98=15855.615, p99=23916.543, p999=111292.415,
@@ -34,7 +34,7 @@ Here we see that all 100k of our cycles succeeded. Note that the metrics for thr
 different than the `results` metric simply because this is a separate timer that only includes operations which
 completed with no exceptions.
 
-```
+```text
 2019-08-12 15:46:01,452 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=TIMER,
  name=cql-keyvalue.result-success, count=100000, min=435.168, max=358645.759, mean=3752.40990808,
  stddev=10251.524945886964, median=1889.791, p75=3668.479, p95=10154.495, p98=15884.287, p99=24280.063,
@@ -47,7 +47,7 @@ completed with no exceptions.
 For read workloads, this metric shows the size of result sent back to nosqlbench from the server. This is useful to
 confirm that you are reading rows that already exist in the database.
 
-```
+```text
 2019-08-12 15:46:00,298 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=HISTOGRAM,
  name=cql-keyvalue.resultset-size, count=100000, min=0, max=1, mean=8.0E-5, stddev=0.008943914131967056,
  median=0.0, p75=0.0, p95=0.0, p98=0.0, p99=0.0, p999=0.0
@@ -59,7 +59,7 @@ NoSQLBench will retry failures 10 times by default, this is configurable via the
 cql activity type. This metric shows a histogram of the number of tries that each operation required, in this example,
 there were no retries as the `count` is 100k.
 
-```
+```text
 2019-08-12 15:46:00,341 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=HISTOGRAM,
  name=cql-keyvalue.tries, count=100000, min=1, max=1, mean=1.0, stddev=0.0, median=1.0,
  p75=1.0, p95=1.0, p98=1.0, p99=1.0, p999=1.0

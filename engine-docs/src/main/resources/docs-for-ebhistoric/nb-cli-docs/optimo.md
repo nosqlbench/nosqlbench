@@ -8,7 +8,7 @@ scenarios to take advantage of the BOBYQA optimization algorithm.
 To instantiate a new instance of optimo, call the extension object
 `optimos` in this way:
 
-```
+```js
 var optimo1 = optimos.init();
 ```
 
@@ -18,7 +18,7 @@ there only as a dispenser of new optimo instances, nothing more.
 To add a parameter to the optimo instance, use the `param` method like
 this:
 
-```
+```js
 optimo1.param('pressure', 1, 500);
 optimo1.param('temperature', 275, 307);
 ```
@@ -31,7 +31,7 @@ You should also set some initial parameters, which are key settings for
 the BOBYQA optimizer. Read more about BOBYQA to understand what these
 settings mean.
 
-```
+```js
 optimo1
  .setInitialRadius(10000.0) // The initial trust radius
  .setStoppingRadius(0.001)  // The stopping condition (trust radius)
@@ -47,7 +47,7 @@ parameters as you like.
 
 For example, you can add a function with this syntax:
 
-```
+```js
 optimo1.setObjectiveFunction(function(params) {
   return params.temperature * params.pressure
 });
@@ -55,7 +55,7 @@ optimo1.setObjectiveFunction(function(params) {
 
 In practice, this function will look much more like this:
 
-```
+```js
 optimo1.setObjectiveFunctikon(function(params) {
   provide_user_feedback_about_params(params);
   var result=run_test_with_params(params);
@@ -73,7 +73,7 @@ search pattern.
 Once you have configured an optimo instance, you can put it in control
 of the scenario with a call like this:
 
-```
+```js
 var result = optimo.optimize();
 ```
 

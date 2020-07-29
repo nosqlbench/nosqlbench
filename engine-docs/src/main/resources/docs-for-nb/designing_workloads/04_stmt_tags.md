@@ -88,6 +88,5 @@ I'm alive!
 # any(...) form will work as long as one of the tags match
 [test]$ ./nb run driver=stdout workload=stdout-test tags='any(name=fox.*,thisone:wontmatch)',unit=bravo
 I'm alive!
-
 ```
 
