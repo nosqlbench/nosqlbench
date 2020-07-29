@@ -15,9 +15,9 @@
       </v-toolbar-items>
     </v-app-bar>
 
-    <v-content>
+    <v-main>
       <v-container>
-        <v-row align="stretch">
+        <v-row>
           <div>{{testdata}}</div>
 
           <div class="Doc">
@@ -31,7 +31,7 @@
 
         </v-row>
       </v-container>
-    </v-content>
+    </v-main>
 
     <v-footer app dark color="secondary">
       <span>&copy; 2020</span>
@@ -95,9 +95,10 @@
     margin: 0 auto;
     min-height: 60vh;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     text-align: center;
+    margin-left: 15px;
   }
 
   .title {

@@ -16,9 +16,9 @@
 
     </v-app-bar>
 
-    <v-content>
+    <v-main>
       <v-container>
-        <v-row align="stretch">
+        <v-row align-content="start" align="start" justify="start">
           <div>{{testdata}}</div>
 
           <div class="Doc">
@@ -32,7 +32,7 @@
 
         </v-row>
       </v-container>
-    </v-content>
+    </v-main>
 
     <v-footer app dark color="secondary">
       <span>&copy; 2020</span>
@@ -91,3 +91,37 @@
         }
     }
 </script>
+<style>
+.container {
+  margin: 0 auto;
+  min-height: 60vh;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: start;
+  margin-left: 15px;
+}
+
+.title {
+  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: block;
+  font-weight: 300;
+  font-size: 100px;
+  color: #35495e;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-weight: 300;
+  font-size: 42px;
+  color: #526488;
+  word-spacing: 5px;
+  padding-bottom: 15px;
+}
+
+.links {
+  padding-top: 15px;
+}
+</style>
+

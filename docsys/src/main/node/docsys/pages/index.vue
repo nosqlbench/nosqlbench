@@ -1,9 +1,9 @@
 <template>
   <!-- https://github.com/Microsoft/vscode-recipes/tree/master/vuejs-cli -->
-    <div class="container">
+    <div class="container" style="justify-content: center; align-content: center; display: flex; width: 100%; margin-left: unset">
 <!--        <recursive-menu/>-->
-        <div>
-            <logo/>
+        <div style="justify-content: center" align="middle">
+            <logo align="middle" style="justify-content: center; align-content: center"></logo>
             <h1 class="title">nosqlbench</h1>
             <h2 class="subtitle">open source, pluggable, nosql benchmarking suite</h2>
             <div class="links">

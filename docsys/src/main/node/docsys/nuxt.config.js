@@ -4,6 +4,7 @@ var glob = require('glob');
 var path = require('path');
 
 export default {
+    // target: 'static',
     mode: 'spa',
     /*
     ** Headers of the page
@@ -97,6 +98,9 @@ export default {
     ** Build configuration
     */
     build: {
+        html: {
+          minify: false
+        },
 //        analyze: {
 //            analyzerMode: 'static'
 //        },
@@ -117,8 +121,8 @@ export default {
 }
 
 var dynamicRoutes = getDynamicPaths({
-    '/docs': 'docs/*.md',
-    '/#/docs': '/#/docs/*.md'
+    // '/docs': 'docs/*.md',
+    // '/#/docs': '/#/docs/*.md'
 });
 
 function getDynamicPaths(urlFilepathTable) {

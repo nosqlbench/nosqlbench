@@ -3,7 +3,6 @@
 
         <div class="menu">
             <!--      active_category: {{active_category}} active_topic: {{active_topic}}-->
-
             <!-- Use active_category and active_topic to select inactive -->
 
             <v-list nav dense>
@@ -19,21 +18,15 @@
                 <!-- by category -->
                 <v-list-group v-for="(category,c) in categories" :key="c"
                               :value="active_category === category.category" active-class="isactive">
-                    <!--                                        <nuxt-link :to="{path: category.category}">foo</nuxt-link>-->
-                    <!--                    <router-link :to="{path: category.category+'.html'}">-->
                     <template v-slot:activator>
                         <v-list-item-content>
-                            <v-list-item-title @click="$nuxt.$router.push({path: category.category})">
+                            <v-list-item-title @click="$nuxt.$router.push({path: category.categoryPath})">
                                 {{category.categoryName}}
                             </v-list-item-title>
                         </v-list-item-content>
                     </template>
-                    <!--                    </router-link>-->
                     <v-list-item v-for="(doc, i) in category.docs" :key="i" link :to="doc.filename">
-                        <!--            <router-link :to="{ name: 'docs-slug', params: {lockmenu:lockmenu}}">-->
-                        <!--                        <router-link :to="{ path: doc.filename}">-->
-                        <v-list-item-title @click="$nuxt.$router.push({path: doc.filename})">{{doc.attributes.title}}</v-list-item-title>
-                        <!--                        </router-link>-->
+                      <v-list-item-title @click="$nuxt.$router.push({path: doc.filename})">{{doc.attributes.title}}</v-list-item-title>
                     </v-list-item>
 
                 </v-list-group>

@@ -13,7 +13,7 @@
       justify-center
       align-center>
 
-    <v-content>
+    <v-main>
       <v-container fluid v-if="enabled">
 
             <v-select
@@ -36,7 +36,7 @@
                 md="10"
                 lg="10"
          >
- 
+
          <v-card>
              <v-card-title>
                 {{ workloadName }}
@@ -66,8 +66,8 @@
 
 
         </v-container>
-        
-    </v-content>
+
+    </v-main>
     </v-layout>
 
     <v-footer app dark color="secondary">

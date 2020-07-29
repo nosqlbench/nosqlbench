@@ -51,6 +51,9 @@
   code::before {
     content: '';
   }
+  code:after {
+    content: '';
+  }
 
   pre {
     padding: 5px;
@@ -60,9 +63,6 @@
     padding-bottom: 10px;
   }
 
-  code:after {
-    content: '';
-  }
   code::after {
     content: '';
   }
