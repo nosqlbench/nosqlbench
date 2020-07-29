@@ -57,7 +57,9 @@
 </template>
 <script>
     import get_data from '~/mixins/get_data.js';
-    import CqlParser from '~/antlr/CqlParser.js';
+    import antlr4 from "antlr4";
+    import CQL3Parser from '~/antlr/CQL3Parser.js';
+    import CQL3Lexer from '~/antlr/CQL3Lexer.js';
 
     export default {
         mixins: [get_data],
@@ -68,14 +70,68 @@
         methods: {
             async parseStatement() {
                 console.log(this.$data.createTableDef);
-                console.log(CqlParser)
-                debugger
-                /*
-                const data = await this.$axios.$get('/services/nb/parameters?workloadName=' + this.workloadName)
-                if (!data.err) {
-                    this.$data.templates = data;
-                }
-                 */
+
+                const input = this.$data.createTableDef;
+
+                const chars = new antlr4.InputStream(input);
+                const lexer = new CQL3Lexer.CQL3Lexer(chars);
+
+                lexer.strictMode = false; // do not use js strictMode
+
+                const tokens = new antlr4.CommonTokenStream(lexer);
+                const parser = new CQL3Parser.CQL3Parser(tokens);
+
+                const context = parser.create_table_stmt();
+
+                const keyspaceName = context.table_name().keyspace_name().getChild(0).getText()
+                const tableName = context.table_name().table_name_noks().getChild(0).getText()
+
+                const columnDefinitions = context.column_definitions().column_definition();
+
+                var columns = [];
+                var partitionKeys = [];
+                var clusteringKeys = [];
+                columnDefinitions.forEach(columnDef => {
+                    if (columnDef.column_name() != null) {
+                        columns.push({"name": columnDef.column_name().getText(), "type": columnDef.column_type().getText()})
+                    }else{
+                        const primaryKeyContext = columnDef.primary_key()
+                        if (primaryKeyContext.partition_key() != null){
+                            const partitionKeysContext = primaryKeyContext.partition_key().column_name();
+                            partitionKeysContext.map((partitionKey, i) => {
+                                const partitionKeyName = partitionKey.getText()
+                                const col = {
+                                    "name": partitionKeyName,
+                                    "type": columns.filter(x => x.name == partitionKeyName)[0].type
+                                }
+                                partitionKeys.push(col)
+                            })
+                        }
+                        if (primaryKeyContext.clustering_column().length != 0){
+                            const clusteringKeysContext = primaryKeyContext.clustering_column();
+                            clusteringKeysContext.map((clusteringKey, i) => {
+                                const clusteringKeyName = clusteringKey.getText()
+                                const col = {
+                                    "name": clusteringKeyName,
+                                    "type": columns.filter(x => x.name == clusteringKeyName)[0].type
+                                }
+                                clusteringKeys.push(col)
+                            })
+                        }
+
+                    }
+                })
+
+                columns = columns.filter(col => {
+                    return partitionKeys.filter(pk => pk.name == col.name).length == 0 && clusteringKeys.filter(cc => cc.name == col.name).length == 0
+                })
+
+                this.$data.tableName = tableName;
+                this.$data.keyspaceName = keyspaceName;
+                this.$data.columns = columns;
+                this.$data.clusteringKeys = clusteringKeys;
+                this.$data.partitionKeys = partitionKeys;
+
             },
         },
         data(context) {

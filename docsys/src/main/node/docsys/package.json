@@ -9,7 +9,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "antlr": "cd antlr && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CqlLexer.g4 && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CqlParser.g4"
+    "antlr": "cd antlr && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CQL3.g4"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.9.5",
