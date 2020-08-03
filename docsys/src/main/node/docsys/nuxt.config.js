@@ -124,6 +124,10 @@ export default {
             config.module.rules.push({
               test: /.g4/, loader: 'antlr4-webpack-loader'
             })
+            config.module.rules.push({
+              test: /\.ya?ml$/,
+              use: 'js-yaml-loader',
+            })
             config.node = {
                 fs: 'empty'
             }
