@@ -162,7 +162,32 @@
                     allColumns.forEach(column => {
                         let recipe = basictypes.bindings[column.type+"val"];
                         if (recipe == undefined){
-                            alert("Could not generate recipe for type: " + column.type + " for column: " + column.name)
+                            const chars = new antlr4.InputStream(column.type);
+                            const lexer = new CQL3Lexer.CQL3Lexer(chars);
+                            lexer.strictMode = false; // do not use js strictMode
+                            const tokens = new antlr4.CommonTokenStream(lexer);
+                            const parser = new CQL3Parser.CQL3Parser(tokens);
+
+                            const typeContext = parser.column_type();
+                            const collectionTypeContext = typeContext.data_type().collection_type();
+                            const collectionType = collectionTypeContext.children[0].getText();
+                            if (collectionType.toLowerCase() == "set"){
+                                const type = collectionTypeContext.children[2].getText();
+                                recipe = "Set(HashRange(1,<<set-count-"+column.name+":5>>),"+basictypes.bindings[type+"val"]+") -> java.util.Set"
+                            }
+                            else if (collectionType.toLowerCase() == "list"){
+                                const type = collectionTypeContext.children[2].getText();
+                                recipe = "List(HashRange(1,<<list-count-"+column.name+":5>>),"+basictypes.bindings[type+"val"]+") -> java.util.List"
+
+                            }
+                            else if (collectionType.toLowerCase() == "map"){
+                                const type1 = collectionTypeContext.children[2].getText();
+                                const type2 = collectionTypeContext.children[4].getText();
+                                recipe = "Map(HashRange(1,<<map-count-"+column.name+":5>>),"+basictypes.bindings[type1+"val"]+","+basictypes.bindings[type2+"val"]+") -> java.util.Map"
+                            }
+                            else{
+                                alert("Could not generate recipe for type: " + column.type + " for column: " + column.name)
+                            }
                         }
                         defaultYaml.bindings[column.name] = recipe
                         createTableStatement = createTableStatement+ column.name+ " " + column.type + ",\n";
