@@ -92,14 +92,14 @@ public class ScenariosExecutor {
         boolean isShutdown = false;
 
         while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-            long updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             long waitedAt = System.currentTimeMillis();
+            long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
             while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
 
                 while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
-                        long timeRemaining = timeoutAt - System.currentTimeMillis();
-                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MICROSECONDS);
+                        long timeRemaining = updateAt - System.currentTimeMillis();
+                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException ignored) {
                     }
                 }
