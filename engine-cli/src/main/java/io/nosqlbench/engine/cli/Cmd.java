@@ -78,7 +78,7 @@ public class Cmd {
     }
 
 
-    private Map<String, String> cmdArgs;
+    private final Map<String, String> cmdArgs;
 
     public String getArg(String paramName) {
         return this.cmdArgs.get(paramName);
@@ -139,7 +139,7 @@ public class Cmd {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name + "" +
                                 ", but a named parameter was found instead: " + nextarg);
-            } else if (NBCLIOptions.RESERVED_WORDS.contains(nextarg)) {
+            } else if (NBCLICommandParser.RESERVED_WORDS.contains(nextarg)) {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name
                                 + ", but a reserved word was found instead: " + nextarg);
@@ -150,7 +150,7 @@ public class Cmd {
         }
 
         while (arglist.size() > 0 &&
-                !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())
+                !NBCLICommandParser.RESERVED_WORDS.contains(arglist.peekFirst())
                 && arglist.peekFirst().contains("=")) {
             String arg = arglist.removeFirst();
             String[] assigned = arg.split("=", 2);

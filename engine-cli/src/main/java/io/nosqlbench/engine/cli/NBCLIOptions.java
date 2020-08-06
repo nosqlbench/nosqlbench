@@ -44,15 +44,6 @@ public class NBCLIOptions {
     private static final String SHOW_STACKTRACES = "--show-stacktraces";
 
     // Execution
-    private static final String SCRIPT = "script";
-    private static final String ACTIVITY = "activity";
-    private static final String SCENARIO = "scenario";
-    private static final String RUN = "run";
-    private static final String START = "start";
-    private static final String FRAGMENT = "fragment";
-    private static final String STOP = "stop";
-    private static final String AWAIT = "await";
-    private static final String WAIT_MILLIS = "waitmillis";
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
     private static final String HDR_DIGITS = "--hdr-digits";
@@ -180,13 +171,6 @@ public class NBCLIOptions {
 
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
-            if (word.startsWith("--") && word.contains("=")) {
-                String wordToSplit = arglist.removeFirst();
-                String[] split = wordToSplit.split("=", 2);
-                arglist.offerFirst(split[1]);
-                arglist.offerFirst(split[0]);
-                continue;
-            }
 
             switch (word) {
                 case DOCKER_GRAFANA_TAG:
@@ -356,50 +340,7 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-
-        while (arglist.peekFirst() != null) {
-            String word = arglist.peekFirst();
-            if (word.startsWith("--") && word.contains("=")) {
-                String wordToSplit = arglist.removeFirst();
-                String[] split = wordToSplit.split("=", 2);
-                arglist.offerFirst(split[1]);
-                arglist.offerFirst(split[0]);
-                continue;
-            }
-            Cmd cmd=null;
-            switch (word) {
-                case FRAGMENT:
-                case SCRIPT:
-                case START:
-                case RUN:
-                case AWAIT:
-                case STOP:
-                case WAIT_MILLIS:
-                    cmd = Cmd.parseArg(arglist,canonicalizer);
-                    cmdList.add(cmd);
-                    break;
-                default:
-                    Optional<Content<?>> scriptfile = NBIO.local()
-                        .prefix("scripts/auto")
-                        .name(word)
-                        .extension("js")
-                        .first();
-
-                    //Script
-                    if (scriptfile.isPresent()) {
-                        arglist.removeFirst();
-                        arglist.addFirst("scripts/auto/" + word);
-                        arglist.addFirst("script");
-                        cmd = Cmd.parseArg(arglist,canonicalizer);
-                        cmdList.add(cmd);
-                    } else if (NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, wantsIncludes());
-                    } else {
-                        throw new InvalidParameterException("unrecognized option:" + word);
-                    }
-                    break;
-            }
-        }
+        NBCLICommandParser.parse(arglist,cmdList);
     }
 
 
@@ -512,18 +453,6 @@ public class NBCLIOptions {
         return consoleLevel;
     }
 
-    private void assertNotParameter(String scriptName) {
-        if (scriptName.contains("=")) {
-            throw new InvalidParameterException("script name must precede script arguments");
-        }
-    }
-
-    private void assertNotReserved(String name) {
-        if (RESERVED_WORDS.contains(name)) {
-            throw new InvalidParameterException(name + " is a reserved word and may not be used here.");
-        }
-    }
-
     private String readWordOrThrow(LinkedList<String> arglist, String required) {
         if (arglist.peekFirst() == null) {
             throw new InvalidParameterException(required + " not found");
@@ -536,21 +465,6 @@ public class NBCLIOptions {
         arglist.clear();
         return args;
     }
-
-//    private Cmd parseScriptCmd(LinkedList<String> arglist) {
-//        String cmdType = arglist.removeFirst();
-//        String scriptName = readWordOrThrow(arglist, "script name");
-//        assertNotReserved(scriptName);
-//        assertNotParameter(scriptName);
-//        Map<String, String> scriptParams = new LinkedHashMap<>();
-//        while (arglist.size() > 0 && !RESERVED_WORDS.contains(arglist.peekFirst())
-//            && arglist.peekFirst().contains("=")) {
-//            String[] split = arglist.removeFirst().split("=", 2);
-//            scriptParams.put(split[0], split[1]);
-//        }
-//        return new Cmd(CmdType.script, scriptName, scriptParams);
-//    }
-
 
     public int getHdrDigits() {
         return hdr_digits;
