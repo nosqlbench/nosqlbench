@@ -11,10 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * TODO: Make this a value type
@@ -93,9 +90,27 @@ public class ParsedMarkdown implements MarkdownInfo, HasDiagnostics {
         return new ParsedMarkdown(frontMatter.withTopics(assigning), this.content);
     }
 
+    public MarkdownInfo withIncluded(List<String> included) {
+        return new ParsedMarkdown(frontMatter.withIncluded(included), this.content);
+    }
+
     @Override
     public String toString() {
         return "ParsedMarkdown/" +
             frontMatter.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ParsedMarkdown that = (ParsedMarkdown) o;
+        return Objects.equals(frontMatter, that.frontMatter) &&
+                Objects.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frontMatter, content);
     }
 }

@@ -1,0 +1,35 @@
+digraph {
+    newrank=true
+    compound=true
+    node [fontsize = 8,shape = record]
+    rankdir = LR;
+
+    subgraph cluster0 {
+    rankdir = LR;
+    step0[shape=none]
+    node [fontsize = 8, shape = record]
+    A0 [label="A|topic:a,(b)"]
+    B0 [label="B|topic:b,(c)"]
+    C0 [label="C|topic:c"]
+    }
+
+    subgraph cluster1 {
+    node [fontsize = 8, shape = record]
+    step1[shape=none]
+    a1 [label="a",shape=oval]
+    A1 -> a1 [label="topic of"]
+    A1 -> b1 [label="topic of"]
+    expr_b1 -> b1 [label="match"]
+    expr_b1[label="(b)",shape=oval]
+
+    B1 [label="match"]
+    b1 [label="b", shape=oval]
+    B1 -> b1 [label="topic of"]
+    A1 [label="A"]
+    B1 [label="B|topic:a,(b)"]
+    C1 [label="C|topic:b,(c)"]
+    }
+
+    step0 -> step1[ltail=cluster0,lhead=cluster1]
+
+}

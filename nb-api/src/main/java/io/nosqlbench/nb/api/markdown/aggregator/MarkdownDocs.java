@@ -72,95 +72,122 @@ public class MarkdownDocs {
         ordered.addAll(markdownWithTopicGlobs);
         ordered.addAll(markdownInfos);
 
-        List<Edge<List<String>>> edges = new ArrayList<>();
-        List<String> assigning = null;
+        MDGraph mdgraph = new MDGraph();
+        ordered.forEach(mdgraph::add);
 
-        for (int i = 0; i < ordered.size()-1; i++) {
-            MarkdownInfo mdHavingGlobs = ordered.get(i);
-            List<Pattern> topicGlobs = mdHavingGlobs.getTopicGlobs();
-
-            // TODO track and warn if a glob doesn't match anything
-            for (int j = i+1; j < ordered.size(); j++) {
-
-                MarkdownInfo mdHavingTopics = ordered.get(j);
-                List<String> topics = mdHavingTopics.getTopics();
-
-                for (Pattern topicGlob : topicGlobs) {
-
-                    for (String topic : topics) {
-                        if (topicGlob.matcher(topic).matches()) {
-                            assigning=assigning==null ? new ArrayList<>() : assigning;
-                            assigning.add(topic);
-                            logger.debug("added topic=" + topic + " to " + i + "->" + j + " with " + topicGlob);
-                        }
-                    }
-                    if (assigning!=null) {
-                        assigning.addAll(mdHavingGlobs.getTopics());
-                        ordered.set(i,mdHavingGlobs.withTopics(assigning));
-                        logger.debug("assigned new mdinfo");
-                    }
-                }
-            }
-        }
-
-        int loopsremaining=100;
-
-        // Assign glob topics to non-glob topics that match
-
-//        for (MarkdownInfo parsedMarkdown : markdownInfos) {
-//            FrontMatterInfo fm = parsedMarkdown.getFrontmatter();
-//            Set<String> topics = fm.getTopics();
-//            Set<String> newTopics = new HashSet<>();
-//            for (String topic : topics) {
-//                if (isPattern(topic)) {
-//                    Pattern p = Pattern.compile(topic);
-//                    for (String nonGlobTopic : nonGlobTopics) {
-//                        if (p.matcher(nonGlobTopic).matches()) {
-//                            newTopics.add(topic);
+        return mdgraph.processed();
+//
+//
+//
+//        List<Edge<List<String>>> edges = new ArrayList<>();
+//        List<String> matchedtopics = null;
+//
+//        for (int i = 0; i < ordered.size()-1; i++) {
+//            MarkdownInfo mdHavingGlobs = ordered.get(i);
+//            List<Pattern> topicGlobs = mdHavingGlobs.getTopicGlobs();
+//
+//            for (Pattern topicGlob : topicGlobs) {
+//                for (int matchidx = i+1; matchidx < ordered.size(); matchidx++) {
+//                    MarkdownInfo matchableContent = ordered.get(matchidx);
+//                    List<String> matchableTopics = matchableContent.getTopics();
+//                    for (String matchableTopic : matchableTopics) {
+//                        if (topicGlob.matcher(matchableTopic).matches()) {
+//                            matchedtopics=matchedtopics==null ? new ArrayList<>() : matchedtopics;
+//                            matchedtopics.add(matchableTopic);
+//                            logger.debug("added topic=" + matchableTopic + " to " + i + "->" + matchidx + " with " + topicGlob);
 //                        }
 //                    }
-//                } else {
-//                    newTopics.add(topic);
+//                    if (matchedtopics!=null) {
+//                        matchedtopics.addAll(mdHavingGlobs.getTopics());
+//                        ordered.set(i,mdHavingGlobs.withTopics(matchedtopics));
+//                        logger.debug("assigned new mdinfo");
+//                        matchedtopics=null;
+//                    }
 //                }
 //            }
-//            fm.setTopics(newTopics);
-//        }
 //
-//        // create topic to content map
-//        HashMap<String,List<ParsedMarkdown>> contentByTopic = new HashMap<>();
-//        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
-//            for (String topic : parsedMarkdown.getFrontmatter().getTopics()) {
-//                contentByTopic.computeIfAbsent(topic, t -> new ArrayList<>()).add(parsedMarkdown);
-//            }
-//        }
+//            // TODO track and warn if a glob doesn't match anything
+//            for (int j = i+1; j < ordered.size(); j++) {
 //
-//        ListIterator<? extends MarkdownInfo> lit = markdownInfos.listIterator();
-//        while (lit.hasNext()) {
-//            MarkdownInfo mif = lit.next();
-//            if (mif.hasAggregations()) {
-//                lit.remove();
-//                mif = new CompositeMarkdownInfo().add(mif);
-//                lit.add(mif);
-//            }
-//        }
+//                MarkdownInfo mdHavingTopics = ordered.get(j);
+//                List<String> topics = mdHavingTopics.getTopics();
 //
-//        // combine aggregate targets
-//        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
-//            List<Pattern> aggregations = parsedMarkdown.getFrontmatter().getAggregations();
-//            if (aggregations.size()>0) {
-//                for (Pattern aggregation : aggregations) {
+//                for (Pattern topicGlob : topicGlobs) {
 //
+//                    for (String topic : topics) {
+//                        if (topicGlob.matcher(topic).matches()) {
+//                            matchedtopics=matchedtopics==null ? new ArrayList<>() : matchedtopics;
+//                            matchedtopics.add(topic);
+//                            logger.debug("added topic=" + topic + " to " + i + "->" + j + " with " + topicGlob);
+//                        }
+//                    }
+//                    if (matchedtopics!=null) {
+//                        matchedtopics.addAll(mdHavingGlobs.getTopics());
+//                        ordered.set(i,mdHavingGlobs.withTopics(matchedtopics));
+//                        logger.debug("assigned new mdinfo");
+//                    }
 //                }
 //            }
 //        }
 //
-//        // Assign glob topics
+//        int loopsremaining=100;
 //
-//        // Assign content aggregates
-//        System.out.println("topics: " + topicSets);
+//        // Assign glob topics to non-glob topics that match
 //
-//        aggregated.addAll(markdownInfos);
-        return aggregated;
+////        for (MarkdownInfo parsedMarkdown : markdownInfos) {
+////            FrontMatterInfo fm = parsedMarkdown.getFrontmatter();
+////            Set<String> topics = fm.getTopics();
+////            Set<String> newTopics = new HashSet<>();
+////            for (String topic : topics) {
+////                if (isPattern(topic)) {
+////                    Pattern p = Pattern.compile(topic);
+////                    for (String nonGlobTopic : nonGlobTopics) {
+////                        if (p.matcher(nonGlobTopic).matches()) {
+////                            newTopics.add(topic);
+////                        }
+////                    }
+////                } else {
+////                    newTopics.add(topic);
+////                }
+////            }
+////            fm.setTopics(newTopics);
+////        }
+////
+////        // create topic to content map
+////        HashMap<String,List<ParsedMarkdown>> contentByTopic = new HashMap<>();
+////        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
+////            for (String topic : parsedMarkdown.getFrontmatter().getTopics()) {
+////                contentByTopic.computeIfAbsent(topic, t -> new ArrayList<>()).add(parsedMarkdown);
+////            }
+////        }
+////
+////        ListIterator<? extends MarkdownInfo> lit = markdownInfos.listIterator();
+////        while (lit.hasNext()) {
+////            MarkdownInfo mif = lit.next();
+////            if (mif.hasAggregations()) {
+////                lit.remove();
+////                mif = new CompositeMarkdownInfo().add(mif);
+////                lit.add(mif);
+////            }
+////        }
+////
+////        // combine aggregate targets
+////        for (ParsedMarkdown parsedMarkdown : markdownInfos) {
+////            List<Pattern> aggregations = parsedMarkdown.getFrontmatter().getAggregations();
+////            if (aggregations.size()>0) {
+////                for (Pattern aggregation : aggregations) {
+////
+////                }
+////            }
+////        }
+////
+////        // Assign glob topics
+////
+////        // Assign content aggregates
+////        System.out.println("topics: " + topicSets);
+////
+////        aggregated.addAll(markdownInfos);
+//        return aggregated;
 
 
     }

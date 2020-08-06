@@ -16,7 +16,10 @@ public interface FrontMatterInfo {
     String TOPICS = "topics";
     String WEIGHT = "weight";
     String TITLE = "title";
-    Set<String> FrontMatterKeyWords = Set.of(SCOPES, AGGREGATE,TOPICS,WEIGHT,TITLE);
+    String INCLUDED = "included";
+
+    Set<String> FrontMatterKeyWords =
+            Set.of(SCOPES, AGGREGATE,TOPICS,WEIGHT, TITLE,INCLUDED);
 
 
     /**
@@ -49,6 +52,18 @@ public interface FrontMatterInfo {
      * @return A list of categories
      */
     Set<String> getTopics();
+
+    /**
+     * <p>If content is included in an item from another topic, then the
+     * topic name with which the additional content was added is in the
+     * inclueded list of topics.</p>
+     *
+     * <p>This is distinct from {@link #getTopics()}, which is not modified
+     * by the included topic names.</p>
+     *
+     * @return A list of included topics.
+     */
+    List<String> getIncluded();
 
     /**
      * <p>
