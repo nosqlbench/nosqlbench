@@ -154,18 +154,19 @@ public class AsyncScriptIntegrationTests {
     @Test
     public void testScriptParamsVariable() {
         ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("params.get(\"one\")='two'");
-        assertThat(scenarioResult.getIOLog()).contains("params.get(\"three\")='four'");
-        assertThat(scenarioResult.getIOLog()).contains("params.size()=2");
-        assertThat(scenarioResult.getIOLog()).contains("params.get(\"three\") [overridden-three-five]='five'");
-        assertThat(scenarioResult.getIOLog()).contains("params.get(\"four\") [defaulted-four-niner]='niner'");
+        assertThat(scenarioResult.getIOLog()).contains("params[\"one\"]='two'");
+        assertThat(scenarioResult.getIOLog()).contains("params.[\"three\"]='four'");
+        assertThat(scenarioResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
+        assertThat(scenarioResult.getIOLog()).contains("defaulted.get[\"four\"] [defaulted-four-niner]='niner'");
     }
 
     @Test
     public void testScriptParamsUndefVariableWithOverride() {
         ScenarioResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("before: params.get(\"three\"):four");
-        assertThat(scenarioResult.getIOLog()).contains("after: params.get(\"three\"):null");
+        assertThat(scenarioResult.getIOLog()).contains("before: params[\"three\"]:four");
+        assertThat(scenarioResult.getIOLog()).contains("before: params.three:four");
+        assertThat(scenarioResult.getIOLog()).contains("after: params[\"three\"]:undefined");
+        assertThat(scenarioResult.getIOLog()).contains("after: params.three:undefined");
     }
 
     @Test
@@ -219,6 +220,7 @@ public class AsyncScriptIntegrationTests {
         ScenarioResult scenarioResult = runScenario("threadchange");
         int changedTo1At = scenarioResult.getIOLog().indexOf("threads now 1");
         int changedTo5At = scenarioResult.getIOLog().indexOf("threads now 5");
+        System.out.println("IOLOG:\n"+scenarioResult.getIOLog());
         assertThat(changedTo1At).isGreaterThan(0);
         assertThat(changedTo5At).isGreaterThan(changedTo1At);
     }
