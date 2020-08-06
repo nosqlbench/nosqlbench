@@ -24,10 +24,7 @@ import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -263,11 +260,9 @@ public class NBCLI {
                 options.wantsGraaljsCompatMode(),
                 options.wantsStackTraces()
         );
-        ScriptBuffer buffer = new BasicScriptBuffer(
-                options.getLogsDirectory() + FileSystems.getDefault().getSeparator() + "_scenario." + scenario.getName() + ".js"
-        ).add(options.getCommands().toArray(new Cmd[0]));
+        ScriptBuffer buffer = new BasicScriptBuffer()
+                .add(options.getCommands().toArray(new Cmd[0]));
         String scriptData = buffer.getParsedScript();
-        Map<String, String> globalParams = buffer.getCombinedParams();
 
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");

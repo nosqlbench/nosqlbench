@@ -26,18 +26,12 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
     private final StringBuilder sb = new StringBuilder();
     private final Map<String, String> scriptParams = new HashMap<>();
-    private final String createPath;
 
 //    public BasicScriptBuffer() {
 //        this.createPath = null;
 //    }
 
     public BasicScriptBuffer() {
-        this.createPath =  "_scenario.js";
-    }
-
-    public BasicScriptBuffer(String createPath) {
-        this.createPath = createPath;
     }
 
     public ScriptBuffer add(Cmd cmd) {
@@ -113,27 +107,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
     @Override
     public String getParsedScript() {
         String scripttext = sb.toString();
-
-        if (this.createPath != null && !this.createPath.isEmpty()) {
-            Path tocreate = Path.of(createPath);
-
-            if (Files.exists(tocreate) && !tocreate.getFileName().toString().startsWith("_")) {
-                throw new BasicError("Unable to overwrite file at " + tocreate.toString() + ". If you start the name " +
-                    "with _, it will always be overwritten.");
-            }
-            try {
-                if (!Files.exists(tocreate.getParent())) {
-                    Path directories = Files.createDirectories(tocreate.getParent());
-                    logger.debug("added directory for parsed script: " + directories);
-                }
-
-                String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
-                Files.writeString(tocreate, appended, StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
-                logger.debug("Wrote script to " + tocreate.toString());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
         return scripttext;
     }
 

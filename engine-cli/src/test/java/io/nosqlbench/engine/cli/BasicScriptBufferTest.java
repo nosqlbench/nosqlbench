@@ -12,7 +12,7 @@ public class BasicScriptBufferTest {
     public void testScriptInterpolation() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "script_to_interpolate", "parameter1=replaced"});
 
-        BasicScriptBuffer b = new BasicScriptBuffer(null);
+        BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String s = b.getParsedScript();
 
@@ -23,7 +23,7 @@ public class BasicScriptBufferTest {
     @Test
     public void testAutoScriptCommand() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "acommand" });
-        BasicScriptBuffer b = new BasicScriptBuffer(null);
+        BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String s = b.getParsedScript();
 
@@ -37,7 +37,7 @@ public class BasicScriptBufferTest {
             "testscripts/printscript.js",
             "param1=value1"
         });
-        BasicScriptBuffer b = new BasicScriptBuffer(null);
+        BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String script = b.getParsedScript();
 
@@ -55,7 +55,7 @@ public class BasicScriptBufferTest {
             "paramname=another",
             "param2=andanother"
         });
-        BasicScriptBuffer b = new BasicScriptBuffer(null);
+        BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String script = b.getParsedScript();
 
@@ -65,7 +65,7 @@ public class BasicScriptBufferTest {
     @Test(expected = NumberFormatException.class)
     public void shouldThrowErrorForInvalidWaitMillisOperand() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "noway" });
-        BasicScriptBuffer b = new BasicScriptBuffer(null);
+        BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String s = b.getParsedScript();
     }
