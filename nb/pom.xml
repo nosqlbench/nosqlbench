@@ -35,7 +35,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-rest</artifactId>
-            <version>3.12.134-SNAPSHOT</version>
+            <version>3.12.135-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
