@@ -12,10 +12,11 @@ import java.util.Map;
  *    "name" : "auto",
  *    "basedir" : "/tmp/nosqlbench",
  *    "filemap" : {
- *        "file1.yaml": "contents of file1"
+ *        "file1.yaml": "bindings:\n i: Identity()\n",
+ *        "myscb:base64" : "base64encodeddata.."
  *    },
  *    "commands": [
- *      "run", "workload=file1.yaml", "driver=stdout", "cycles=10M", "cyclerate=100"
+ *      "run", "workload=file1.yaml", "driver=stdout", "cycles=10M", "cyclerate=100", "scb=myscb"
  *    ]
  *  }
  * }</pre>
