@@ -99,7 +99,17 @@ export default {
     */
     build: {
         html: {
-          minify: false
+          minify: {
+              collapseBooleanAttributes: true,
+              decodeEntities: true,
+              minifyCSS: false,
+              minifyJS: false,
+              processConditionalComments: true,
+              removeEmptyAttributes: true,
+              removeRedundantAttributes: true,
+              trimCustomFragments: true,
+              useShortDoctype: true
+          }
         },
 //        analyze: {
 //            analyzerMode: 'static'
@@ -107,11 +117,15 @@ export default {
         cssSourceMap: true,
         extractCSS: false,
 //        parallel: true,
+        optimization: {
+          minimize: false
+        },
         /*
         ** You can extend webpack config here
         */
         extend(config, ctx) {
-            config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.devtool = 'souce-map'
+            // config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
         }
     }
     , generate: {
