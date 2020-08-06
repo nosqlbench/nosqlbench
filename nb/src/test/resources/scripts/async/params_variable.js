@@ -11,7 +11,7 @@
 // Called with one=two three=four
 
 print('params["one"]=\'' + params["one"] + "'");
-print('params.["three"]=\'' + params["three"] + "'");
+print('params["three"]=\'' + params["three"] + "'");
 
 var overrides = {
   'three': "five"

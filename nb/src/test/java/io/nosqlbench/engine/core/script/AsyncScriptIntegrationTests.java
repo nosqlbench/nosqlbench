@@ -155,7 +155,7 @@ public class AsyncScriptIntegrationTests {
     public void testScriptParamsVariable() {
         ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
         assertThat(scenarioResult.getIOLog()).contains("params[\"one\"]='two'");
-        assertThat(scenarioResult.getIOLog()).contains("params.[\"three\"]='four'");
+        assertThat(scenarioResult.getIOLog()).contains("params[\"three\"]='four'");
         assertThat(scenarioResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
         assertThat(scenarioResult.getIOLog()).contains("defaulted.get[\"four\"] [defaulted-four-niner]='niner'");
     }
