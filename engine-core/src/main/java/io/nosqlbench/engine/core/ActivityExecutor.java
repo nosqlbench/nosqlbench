@@ -289,16 +289,17 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             motors.add(motor);
         }
 
-        adjustToIntendedActivityState();
+        applyIntendedStateToDivergentMotors();
         awaitActivityAndMotorStateAlignment();
 
         logger.trace(">post-adjust->" + getSlotStatus());
 
     }
 
-    private void adjustToIntendedActivityState() {
-        logger.trace("ADJUSTING to INTENDED " + activity.getRunState());
-        switch (activity.getRunState()) {
+    private void applyIntendedStateToDivergentMotors() {
+        RunState intended = activity.getRunState();
+        logger.trace("ADJUSTING to INTENDED " + intended);
+        switch (intended) {
             case Uninitialized:
                 break;
             case Running:
