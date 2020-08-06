@@ -100,15 +100,15 @@ export default {
     build: {
         html: {
           minify: {
-              collapseBooleanAttributes: true,
-              decodeEntities: true,
-              minifyCSS: false,
-              minifyJS: false,
-              processConditionalComments: true,
-              removeEmptyAttributes: true,
-              removeRedundantAttributes: true,
-              trimCustomFragments: true,
-              useShortDoctype: true
+            collapseBooleanAttributes: false,
+            decodeEntities: false,
+            minifyCSS: false,
+            minifyJS: false,
+            processConditionalComments: false,
+            removeEmptyAttributes: false,
+            removeRedundantAttributes: false,
+            trimCustomFragments: false,
+            useShortDoctype: false
           }
         },
 //        analyze: {
@@ -124,8 +124,18 @@ export default {
         ** You can extend webpack config here
         */
         extend(config, ctx) {
-            config.devtool = 'souce-map'
-            // config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.module.rules.push({
+              test: /.g4/, loader: 'antlr4-webpack-loader'
+            })
+            config.module.rules.push({
+              test: /\.ya?ml$/,
+              use: 'js-yaml-loader',
+            })
+            config.node = {
+                fs: 'empty'
+            }
+            config.optimization.minimize = false;
         }
     }
     , generate: {
@@ -135,8 +145,8 @@ export default {
 }
 
 var dynamicRoutes = getDynamicPaths({
-    // '/docs': 'docs/*.md',
-    // '/#/docs': '/#/docs/*.md'
+    '/docs': 'docs/*.md',
+    '/#/docs': '/#/docs/*.md'
 });
 
 function getDynamicPaths(urlFilepathTable) {
