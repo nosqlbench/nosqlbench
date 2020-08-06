@@ -301,11 +301,12 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         switch (activity.getRunState()) {
             case Uninitialized:
                 break;
-            case Starting:
             case Running:
+            case Starting:
                 motors.stream()
                         .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Running)
                         .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Finished)
+                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
                         .forEach(m -> {
                             m.getSlotStateTracker().enterState(RunState.Starting);
                             executorService.execute(m);
@@ -319,6 +320,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             case Finished:
             case Stopping:
                 throw new RuntimeException("Invalid requested state in activity executor:" + activity.getRunState());
+
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
         }
