@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.services;
+package io.nosqlbench.engine.rest.resources;
 
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.nb.annotations.Service;

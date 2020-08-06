@@ -87,7 +87,7 @@ public class ScenarioLogger {
         ple.setContext(loggerContext);
         ple.start();
 
-        String scenarioLog = loggerDir.getPath() + File.separator + scenario.getName()+".log";
+        String scenarioLog = loggerDir.getPath() + File.separator + scenario.getScenarioName()+".log";
         scenarioLog = scenarioLog.replaceAll("\\s","_");
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
         fileAppender.setFile(scenarioLog);

@@ -29,8 +29,8 @@ public class ScenariosResults {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenariosResults.class);
 
-    private String scenariosExecutorName;
-    private Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
+    private final String scenariosExecutorName;
+    private final Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
@@ -68,7 +68,7 @@ public class ScenariosResults {
             if (oresult != null) {
                 oresult.reportToLog();
             } else {
-                logger.error(scenario.getName() + ": incomplete (missing result)");
+                logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
             }
         }
     }

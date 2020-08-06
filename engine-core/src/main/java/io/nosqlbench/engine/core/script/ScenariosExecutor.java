@@ -40,7 +40,7 @@ public class ScenariosExecutor {
     }
 
     public ScenariosExecutor(String name, int threads) {
-        executor = new ThreadPoolExecutor(1, 1,
+        executor = new ThreadPoolExecutor(1, threads,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
@@ -53,8 +53,8 @@ public class ScenariosExecutor {
 
     public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
         scenario.setScenarioLogger(scenarioLogger);
-        if (submitted.get(scenario.getName()) != null) {
-            throw new BasicError("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
+        if (submitted.get(scenario.getScenarioName()) != null) {
+            throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
         Future<ScenarioResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
@@ -229,7 +229,7 @@ public class ScenariosExecutor {
         }
 
         public String getName() {
-            return scenario.getName();
+            return scenario.getScenarioName();
         }
     }
 

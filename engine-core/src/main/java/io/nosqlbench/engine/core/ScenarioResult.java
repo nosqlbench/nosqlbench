@@ -33,7 +33,6 @@ public class ScenarioResult {
 
     private Exception exception;
     private String iolog;
-    private String report;
 
     public ScenarioResult(String iolog) {
         this.iolog = iolog;

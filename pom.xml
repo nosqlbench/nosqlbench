@@ -26,16 +26,19 @@
         <module>nb-api</module>
         <module>nb-annotations</module>
 
-        <!-- ENGINE MODULES -->
+        <!-- engine modules -->
         <module>engine-api</module>
         <module>engine-core</module>
-        <module>engine-cli</module>
         <module>engine-extensions</module>
         <module>engine-docker</module>
         <module>engine-docs</module>
+        <module>engine-cli</module>
+        <module>engine-rest</module>
 
         <!-- a binary (appimage) build option for nb -->
         <module>nb</module>
+
+        <!-- driver modules -->
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
