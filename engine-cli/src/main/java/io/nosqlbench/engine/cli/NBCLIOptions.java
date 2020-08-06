@@ -16,8 +16,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is good enough.
- * If something better is needed later, this can be replaced.
+ * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is
+ * good enough. If something better is needed later, this can be replaced.
  */
 public class NBCLIOptions {
 
@@ -40,6 +40,8 @@ public class NBCLIOptions {
     private static final String VERSION_COORDS = "--version-coords";
     private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
+    private static final String COMPILE_SCRIPT = "--compile-script";
+    private static final String SCRIPT_FILE = "--script-file";
     private static final String COPY = "--copy";
     private static final String SHOW_STACKTRACES = "--show-stacktraces";
 
@@ -73,16 +75,6 @@ public class NBCLIOptions {
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
-
-
-    public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
-        addAll(
-            Arrays.asList(
-                SCRIPT, ACTIVITY, SCENARIO, RUN, START,
-                FRAGMENT, STOP, AWAIT, WAIT_MILLIS, LIST_ACTIVITY_TYPES, HELP
-            )
-        );
-    }};
 
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -125,6 +117,8 @@ public class NBCLIOptions {
     private int hdr_digits = 4;
     private String docker_grafana_tag = "7.0.1";
     private boolean showStackTraces = false;
+    private boolean compileScript = false;
+    private String scriptFile = null;
 
     public NBCLIOptions(String[] args) {
         parse(args);
@@ -175,7 +169,7 @@ public class NBCLIOptions {
             switch (word) {
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();
-                    docker_grafana_tag = readWordOrThrow(arglist,"grafana docker tag");
+                    docker_grafana_tag = readWordOrThrow(arglist, "grafana docker tag");
                     break;
                 case GRAALJS_COMPAT:
                     graaljs_compat = true;
@@ -189,6 +183,10 @@ public class NBCLIOptions {
                     engine = Scenario.Engine.Nashorn;
                     arglist.removeFirst();
                     break;
+                case COMPILE_SCRIPT:
+                    arglist.removeFirst();
+                    compileScript = true;
+                    break;
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
@@ -200,7 +198,7 @@ public class NBCLIOptions {
                 case LIST_METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
-                    Cmd cmd = Cmd.parseArg(arglist,canonicalizer);
+                    Cmd cmd = Cmd.parseArg(arglist, canonicalizer);
                     wantsMetricsForActivity = cmd.getArg("driver");
                     break;
                 case SESSION_NAME:
@@ -331,6 +329,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsWorkloadsList = true;
                     break;
+                case SCRIPT_FILE:
+                    arglist.removeFirst();
+                    scriptFile = readWordOrThrow(arglist, "script file");
+                    break;
                 case COPY:
                     arglist.removeFirst();
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
@@ -394,6 +396,10 @@ public class NBCLIOptions {
         return showScript;
     }
 
+    public boolean wantsCompileScript() {
+        return compileScript;
+    }
+
     public boolean wantsVersionCoords() {
         return wantsVersionCoords;
     }
@@ -413,6 +419,7 @@ public class NBCLIOptions {
     public boolean wantsStackTraces() {
         return showStackTraces;
     }
+
     public String wantsTopicalHelpFor() {
         return wantsActivityHelpFor;
     }
@@ -485,7 +492,7 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
             if (files.contains(s)) {
                 logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                    "in the first matching config. Reorder your options if you need to control this.");
+                        "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
@@ -509,6 +516,18 @@ public class NBCLIOptions {
 
     public boolean wantsInputTypes() {
         return this.wantsInputTypes;
+    }
+
+    public String getScriptFile() {
+        if (scriptFile==null) {
+            return logsDirectory+File.separator+"_SESSIONNAME_"+".js";
+        }
+
+        String expanded = scriptFile;
+        if (!expanded.startsWith(File.separator)) {
+            expanded = getLogsDirectory()+File.separator+expanded;
+        }
+        return expanded;
     }
 
     public boolean wantsMarkerTypes() {
@@ -584,8 +603,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                        LOG_HISTOGRAMS +
-                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                            LOG_HISTOGRAMS +
+                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -610,7 +629,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

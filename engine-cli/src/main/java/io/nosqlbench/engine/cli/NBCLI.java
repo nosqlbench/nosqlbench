@@ -18,7 +18,6 @@ import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
-import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
@@ -254,10 +253,12 @@ public class NBCLI {
 
         Scenario scenario = new Scenario(
                 sessionName,
+                options.getScriptFile(),
                 options.getScriptingEngine(),
                 options.getProgressSpec(),
                 options.wantsGraaljsCompatMode(),
-                options.wantsStackTraces()
+                options.wantsStackTraces(),
+                options.wantsCompileScript()
         );
         ScriptBuffer buffer = new BasicScriptBuffer()
                 .add(options.getCommands().toArray(new Cmd[0]));

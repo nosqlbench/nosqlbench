@@ -28,12 +28,15 @@ import org.graalvm.polyglot.*;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,20 +59,31 @@ public class Scenario implements Callable<ScenarioResult> {
     private String scenarioName;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
+    private String scriptfile;
     private Engine engine = Engine.Graalvm;
     private boolean wantsStackTraces=false;
+    private boolean wantsCompiledScript;
 
     public enum Engine {
         Nashorn,
         Graalvm
     }
 
-    public Scenario(String name, Engine engine, String progressInterval, boolean wantsGraaljsCompatMode, boolean wantsStackTraces) {
-        this.name = name;
+    public Scenario(
+            String scenarioName,
+            String scriptfile,
+            Engine engine,
+            String progressInterval,
+            boolean wantsGraaljsCompatMode,
+            boolean wantsStackTraces,
+            boolean wantsCompiledScript) {
+        this.scenarioName = scenarioName;
+        this.scriptfile = scriptfile;
         this.engine = engine;
         this.progressInterval = progressInterval;
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
         this.wantsStackTraces = wantsStackTraces;
+        this.wantsCompiledScript = wantsCompiledScript;
     }
 
     public Scenario(String name, Engine engine) {
@@ -198,7 +212,7 @@ public class Scenario implements Callable<ScenarioResult> {
         for (String script : scripts) {
             try {
                 Object result = null;
-                if (scriptEngine instanceof Compilable) {
+                if (scriptEngine instanceof Compilable && wantsCompiledScript) {
                     logger.debug("Using direct script compilation");
                     Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
@@ -206,9 +220,26 @@ public class Scenario implements Callable<ScenarioResult> {
                     result = compiled.eval();
                     logger.debug("<- scenario completed (compiled)");
                 } else {
-                    logger.debug("-> invoking main scenario script (interpreted)");
-                    result = scriptEngine.eval(script);
-                    logger.debug("<- scenario completed (interpreted)");
+                    if (scriptfile != null && !scriptfile.isEmpty()) {
+
+                        String filename = scriptfile.replace("_SESSIONNAME_", scenarioName);
+                        logger.debug("-> invoking main scenario script (" +
+                                "interpreted from " + filename +")");
+                        Path written = Files.write(
+                                Path.of(filename),
+                                script.getBytes(StandardCharsets.UTF_8),
+                                StandardOpenOption.TRUNCATE_EXISTING,
+                                StandardOpenOption.CREATE
+                        );
+                        BufferedReader reader = Files.newBufferedReader(written);
+                        scriptEngine.eval(reader);
+                        logger.debug("<- scenario completed (interpreted " +
+                                "from " + filename + ")");
+                    } else {
+                        logger.debug("-> invoking main scenario script (interpreted)");
+                        result = scriptEngine.eval(script);
+                        logger.debug("<- scenario completed (interpreted)");
+                    }
                 }
 
                 if (result != null) {
