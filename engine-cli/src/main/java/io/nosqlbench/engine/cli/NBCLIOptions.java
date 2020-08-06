@@ -479,10 +479,15 @@ public class NBCLIOptions {
 
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
-        if (spec.indicatorMode == IndicatorMode.console
-            && Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
-            logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
-            spec.indicatorMode = IndicatorMode.logonly;
+        if (spec.indicatorMode == IndicatorMode.console) {
+            if (Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
+                logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
+                spec.indicatorMode = IndicatorMode.logonly;
+            } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
+                logger.info("Command line includes script calls, so progress data on console is " +
+                        "suppressed.");
+                spec.indicatorMode = IndicatorMode.logonly;
+            }
         }
         return spec.toString();
     }
