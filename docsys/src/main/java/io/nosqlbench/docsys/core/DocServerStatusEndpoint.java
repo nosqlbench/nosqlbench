@@ -26,7 +26,7 @@ public class DocServerStatusEndpoint implements WebServiceObject {
     private String name;
 
     @GET
-    @Path("stats")
+    @Path("status")
     @Produces(MediaType.APPLICATION_JSON)
     public String getStats() {
         DocServer s = (DocServer) config.getProperty("server");
