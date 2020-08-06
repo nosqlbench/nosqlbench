@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -301,7 +300,7 @@ public class NBCLI {
         executor.execute(scenario, sl);
 
         while (true) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getName());
+            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
             if (pendingResult.isEmpty()) {
                 LockSupport.parkNanos(100000000L);
             } else {

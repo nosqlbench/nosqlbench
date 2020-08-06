@@ -53,7 +53,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private String progressInterval = "console:1m";
     private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
-    private String name;
+    private String scenarioName;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private Engine engine = Engine.Graalvm;
@@ -73,7 +73,7 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public Scenario(String name, Engine engine) {
-        this.name = name;
+        this.scenarioName = name;
         this.engine = engine;
     }
 
@@ -194,7 +194,7 @@ public class Scenario implements Callable<ScenarioResult> {
     public void run() {
         init();
 
-        logger.debug("Running control script for " + getName() + ".");
+        logger.debug("Running control script for " + getScenarioName() + ".");
         for (String script : scripts) {
             try {
                 Object result = null;
@@ -241,16 +241,16 @@ public class Scenario implements Callable<ScenarioResult> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Scenario scenario = (Scenario) o;
-        return getName() != null ? getName().equals(scenario.getName()) : scenario.getName() == null;
+        return getScenarioName() != null ? getScenarioName().equals(scenario.getScenarioName()) : scenario.getScenarioName() == null;
     }
 
     @Override
     public int hashCode() {
-        return getName() != null ? getName().hashCode() : 0;
+        return getScenarioName() != null ? getScenarioName().hashCode() : 0;
     }
 
-    public String getName() {
-        return name;
+    public String getScenarioName() {
+        return scenarioName;
     }
 
     public ScenarioController getScenarioController() {
@@ -266,7 +266,7 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public String toString() {
-        return "name:'" + this.getName() + "'";
+        return "name:'" + this.getScenarioName() + "'";
     }
 
     public void setScenarioLogger(ScenarioLogger scenarioLogger) {
