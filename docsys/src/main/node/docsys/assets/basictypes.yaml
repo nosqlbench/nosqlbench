@@ -10,7 +10,7 @@ bindings:
   booleanval: ModuloToBoolean()
   decimalval: ModuloToBigDecimal(9223372036854775807L)
   doubleval: Pareto(1.161,5.0) -> double
-  floatval: compose Normal(15.0,3.0); DoubleToFloat() -> float
+  floatval: compose Normal(15.0,3.0); ToFloat();
   inetval: ToInetAddress()
   intval: ToInt()
   timestampval: ToDate()
