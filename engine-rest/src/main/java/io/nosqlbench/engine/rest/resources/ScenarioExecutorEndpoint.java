@@ -28,7 +28,7 @@ import java.util.*;
 @Service(WebServiceObject.class)
 @Singleton
 @Path("/services/executor/")
-public class ScenarioExecutorService implements WebServiceObject {
+public class ScenarioExecutorEndpoint implements WebServiceObject {
 
     private ScenariosExecutor executor = new ScenariosExecutor("executor-service", 1);
 
@@ -73,7 +73,7 @@ public class ScenarioExecutorService implements WebServiceObject {
 
         executor.execute(scenario);
 
-        return Response.created(UriBuilder.fromResource(ScenarioExecutorService.class).path(
+        return Response.created(UriBuilder.fromResource(ScenarioExecutorEndpoint.class).path(
                 "scenario/" + rq.getScenarioName()).build()).build();
 
     }

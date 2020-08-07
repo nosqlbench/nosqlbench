@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core.services;
+package io.nosqlbench.engine.rest.resources;
 
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
