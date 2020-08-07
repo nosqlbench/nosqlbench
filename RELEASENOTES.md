@@ -1,16 +1,42 @@
-- 8e172544 (HEAD -> main, origin/main) restore stderr logging for main error
-- 3874b365 fixes and cleanups for error handling, unset feature, better docs
-- be746562 minor cleanup on error handling output
-- ac22b3b3 add initial docs for scripting
-- 6c1b92e6 allow for 'UNSET' on overrides
-- 2091c5ad reformat file
-- e6731971 Document flexible YAML statement formats #177
-- bcdf718c docs updates for collections and threads
-- 36884319 minor doc updates
-- e403ec69 add missing puml file
-- 7578e91d provide easy data streams for testing in API
-- 392bbcc5 add design sketch backgrounder for workload synthesis
-- 5bbf8177 fix: HashedToByteBuffer uses configured limit
-- 4070d6c8 fix: HashedToByteBuffer uses configured limit
-- 152f1d64 add testing practices docs section
-- 331c03c7 docs updates
+- 637fbba9 (HEAD -> main) stdout activity should not close stdout fd
+- 45e77f8d endpoint organization
+- 7e47f7bc add workspaces endpoint
+- 3f680e65 add maven central repo to config to appease IntelliJ update option
+- 03f2ca70 (origin/main) float fix
+- f70b40bd static guidebook update
+- b3ca71b5 merge in nbui updates
+- a42038ca merge in nbui updates
+- 9c91f5f3 sketch service formats
+- 886eda12 fix broken test
+- ce6fc359 clarify purposes of method
+- d838afdc fix race condition error in slot state
+- 2d39aad2 correct time base for await updates
+- 625be1db adapt param usage to polyglot APIs
+- d422a24c suppress default console progress for scripts
+- 8cecd406 externalize interpreted script file by default
+- 209641b6 disable markdown system tests until completion
+- 67b59e9b status instead of stats for clarity
+- 2cdd290f docsys development configs
+- aef0179b add engine-rest
+- 77bd830b start design guide for docs formats
+- 94159a21 scenarioName instead of name for clarity
+- b0d58781 doc system service layer improvements
+- 459b84c8 more docs for doc system
+- 6b5d4c3a make command parsing separately useful
+- e2505f71 make script params work with graaljs
+- a5339013 make parameter map work cleanly with graaljs
+- 8889d34b refine script name logic
+- 7dc99de8 docsys version updates
+- 3f62020b introduce findmax
+- 6c44dd00 improve diagnostics of activity shutdown
+- 6497a39e (origin/schema-ui, schema-ui) map support, FROZEN is broken
+- 88238c23 yaml generation works
+- 845fecd3 working create statement parsing
+- 3cc5cdc2 Parser loaded in js
+- d1aa85fe guidebook update
+- a597fad9 updated vuetify version
+- 4230108c checkpoint app update
+- 5bf3df66 catchall route handler with clean paths
+- 9a6ed2cf qualify preformatted blocks
+- fddebd27 minor versions update
+- 011d5876 additional doc references
