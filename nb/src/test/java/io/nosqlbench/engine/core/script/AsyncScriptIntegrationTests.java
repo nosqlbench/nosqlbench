@@ -23,7 +23,6 @@ import io.nosqlbench.engine.core.ScenariosResults;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -215,6 +214,7 @@ public class AsyncScriptIntegrationTests {
         assertThat(stoppedAt).isGreaterThan(startedAt);
     }
 
+    // TODO: find out why this causes a long delay after stop is called.
     @Test
     public void testThreadChange() {
         ScenarioResult scenarioResult = runScenario("threadchange");
