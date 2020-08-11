@@ -7,10 +7,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorkspacesInfo {
+public class WorkspacesView {
 
     private Path workspacesRoot;
-    public WorkspacesInfo(Path workspacesRoot) {
+    public WorkspacesView(Path workspacesRoot) {
         this.workspacesRoot = workspacesRoot;
     }
 

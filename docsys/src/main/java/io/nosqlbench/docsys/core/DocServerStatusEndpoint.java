@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 @Singleton
 @Path("_")
 public class DocServerStatusEndpoint implements WebServiceObject {
+
     private final static Logger logger =
             LogManager.getLogger(DocServerStatusEndpoint.class);
 
