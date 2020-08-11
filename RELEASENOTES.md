@@ -1,3 +1,7 @@
-- 17030dbd (HEAD -> main, origin/main) test build
-- 1b96f887 workspaces incremental progress
+- dca18d9a (HEAD -> main) mark fenced code sections with type
+- d9e68275 move findmax into prod resources path
+- a4f4ac13 re-enable integrated test log capture
+- e644a0fa (origin/main) release testing
+- 38284f9a release testing
+- 17030dbd test build
 - 1b96f887 workspaces incremental progress
