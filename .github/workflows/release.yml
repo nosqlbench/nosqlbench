@@ -100,6 +100,19 @@ jobs:
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
 
+    - name: bundle integration test logs
+      run: |
+        pwd
+        ls -l
+        mkdir -p itlogs/nb && cp -R nb/logs itlogs/nb
+
+    - name: upload integration test logs
+      uses: actions/upload-artifact@v1
+      with:
+        name: itlogs
+        path: itlogs
+
+
     - name: perform release
       run: scripts/release-perform.sh
       continue-on-error: true
