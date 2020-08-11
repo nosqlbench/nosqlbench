@@ -19,9 +19,8 @@ a very high value. In this case, the tries metric will still give you some measu
 ## Examples
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
-~~~
-... driver=tcpserver yaml=stdout-test
-~~~
+
+    ... driver=tcpserver yaml=stdout-test
 
 ## Driver Parameters
 
@@ -41,7 +40,7 @@ Run a stdout activity named 'stdout-test', with definitions from activities/stdo
   To enable, specifies the type of the SSL implementation with either `jdk` or `openssl`.
 
   [Additional parameters may need to be provided](../../../../driver-cql/src/main/resources/ssl.md).
-  
+
 - **host** - this is the name to connect to (remote server IP address)
   - default: localhost
   - dynamic: false

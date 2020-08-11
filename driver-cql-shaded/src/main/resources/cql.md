@@ -6,24 +6,21 @@ detailed metrics provided for both.
 ### Example activity definitions
 
 Run a cql activity named 'cql1', with definitions from activities/cqldefs.yaml
-~~~
-... driver=cql alias=cql1 workload=cqldefs
-~~~
+
+    ... driver=cql alias=cql1 workload=cqldefs
 
 Run a cql activity defined by cqldefs.yaml, but with shortcut naming
-~~~
-... driver=cql workload=cqldefs
-~~~
+
+    ... driver=cql workload=cqldefs
 
 Only run statement groups which match a tag regex
-~~~
-... driver=cql workload=cqldefs tags=group:'ddl.*'
-~~~
+
+    ... driver=cql workload=cqldefs tags=group:'ddl.*'
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
-~~~
-... driver=cql workload=cqldefs tags=group:'dml.*' cycles=1000..1100
-~~~
+
+    ... driver=cql workload=cqldefs tags=group:'dml.*' cycles=1000..1100
+
 This last example shows that the cycle range is [inclusive..exclusive),
 to allow for stacking test intervals. This is standard across all
 activity types.

@@ -21,9 +21,9 @@ saturation.
 ## Examples
 
 Run a stdout activity named 'stdout-test', with definitions from activities/stdout-test.yaml
-~~~
-... driver=tcpserver yaml=stdout-test
-~~~
+
+
+    ... driver=tcpserver yaml=stdout-test
 
 ## Driver Parameters
 
@@ -40,11 +40,11 @@ Run a stdout activity named 'stdout-test', with definitions from activities/stdo
 - **ssl** - boolean to enable or disable ssl
   - default: false
   - dynamic: false
-  
+
   To enable, specifies the type of the SSL implementation with either `jdk` or `openssl`.
 
   [Additional parameters may need to be provided](../../../../driver-cql/src/main/resources/ssl.md).
-  
+
 - **host** - this is the name to bind to (local interface address)
   - default: localhost
   - dynamic: false
