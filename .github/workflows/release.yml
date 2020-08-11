@@ -117,17 +117,17 @@ jobs:
        MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
        MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
 
-    - name: bundle build logs
-      run: |
-        pwd
-        ls -l
-        mkdir -p buildlogs && cp -R logs buildlogs
-
-    - name: upload build logs
-      uses: actions/upload-artifact@v1
-      with:
-        name: buildlogs
-        path: buildlogs
+#    - name: bundle build logs
+#      run: |
+#        pwd
+#        ls -l
+#        mkdir -p buildlogs && cp -R logs buildlogs
+#
+#    - name: upload build logs
+#      uses: actions/upload-artifact@v1
+#      with:
+#        name: buildlogs
+#        path: buildlogs
 
     - name: bundle artifacts
       run: |
