@@ -1,10 +1,1 @@
-- edc3cb28 (HEAD -> main) fix named scenarios substution bug
-- af7f1718 allow specification of workspaces directory
-- 2171d5ea allow specification of workspaces directory
-- f6108fef allow specification of workspaces directory
-- f16f3fb3 start CLI DSL for parameterization
-- 40d6e600 simplify build yaml
-- 4c91fcbc organize core endpoints
-- c3cdcd64 consolidate testing dependencies and clean up poms
-- 7a2dfeff establish canonical ordering of commands
-- 302d41ff move non-prod file to test
+- e3f16dbc fixed dual dashboard init issue
