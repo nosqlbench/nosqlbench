@@ -25,7 +25,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
     private final static Logger logger =
         LogManager.getLogger(WorkspacesEndpoint.class);
 
-    public static final String WORKSPACE_ROOT = "workspace_root";
+    public static final String WORKSPACE_ROOT = "workspaces_root";
 
     @Context
     private Configuration config;

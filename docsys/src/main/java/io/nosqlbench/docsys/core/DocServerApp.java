@@ -115,10 +115,10 @@ public class DocServerApp {
                 }
                 logger.info("running public server on interface with address " + net_addr);
                 server.withHost(net_addr);
-            } else if (arg.matches("--workspaces.*")) {
-                String workspace_dir = serverArgs[i + 1];
+            } else if (arg.matches("--workspaces")) {
+                String workspaces_root = serverArgs[i + 1];
                 logger.info("Setting workspace directory to workspace_dir");
-                server.withContextParam("workspaces_dir", workspace_dir);
+                server.withContextParam("workspaces_root", workspaces_root);
             }
         }
 //
