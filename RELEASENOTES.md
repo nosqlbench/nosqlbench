@@ -1,7 +1,10 @@
-- dca18d9a (HEAD -> main) mark fenced code sections with type
-- d9e68275 move findmax into prod resources path
-- a4f4ac13 re-enable integrated test log capture
-- e644a0fa (origin/main) release testing
-- 38284f9a release testing
-- 17030dbd test build
-- 1b96f887 workspaces incremental progress
+- edc3cb28 (HEAD -> main) fix named scenarios substution bug
+- af7f1718 allow specification of workspaces directory
+- 2171d5ea allow specification of workspaces directory
+- f6108fef allow specification of workspaces directory
+- f16f3fb3 start CLI DSL for parameterization
+- 40d6e600 simplify build yaml
+- 4c91fcbc organize core endpoints
+- c3cdcd64 consolidate testing dependencies and clean up poms
+- 7a2dfeff establish canonical ordering of commands
+- 302d41ff move non-prod file to test
