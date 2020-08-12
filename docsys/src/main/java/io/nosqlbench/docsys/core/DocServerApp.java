@@ -104,7 +104,21 @@ public class DocServerApp {
             } else if (arg.matches("\\d+")) {
                 server.withPort(Integer.parseInt(arg));
             } else if (arg.matches("--public")) {
-                server.withHost("0.0.0.0");
+                int nextidx = i+1;
+                String net_addr = "0.0.0.0";
+                if (
+                    serverArgs.length>nextidx+1 &&
+                        serverArgs[nextidx].matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
+                ) {
+                    i++;
+                    net_addr = serverArgs[nextidx];
+                }
+                logger.info("running public server on interface with address " + net_addr);
+                server.withHost(net_addr);
+            } else if (arg.matches("--workspaces.*")) {
+                String workspace_dir = serverArgs[i + 1];
+                logger.info("Setting workspace directory to workspace_dir");
+                server.withContextParam("workspaces_dir", workspace_dir);
             }
         }
 //
