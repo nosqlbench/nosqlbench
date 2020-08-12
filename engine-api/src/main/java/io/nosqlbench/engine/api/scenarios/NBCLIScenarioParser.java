@@ -83,10 +83,10 @@ public class NBCLIScenarioParser {
             userParams.put(arg[0], arg[1]);
         }
 
-        StrInterpolator userParamsInterp = new StrInterpolator(userParams);
-
         // This will buffer the new command before adding it to the main arg list
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
+        StrInterpolator userParamsInterp = new StrInterpolator(userParams);
+
 
         for (String scenarioName : scenarioNames) {
 
@@ -98,7 +98,7 @@ public class NBCLIScenarioParser {
                     .extension("yaml")
                     .one();
 
-            StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios);
+            StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userParams);
 
             Scenarios scenarios = stmts.getDocScenarios();
 

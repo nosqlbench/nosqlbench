@@ -17,8 +17,6 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -27,7 +25,7 @@ import io.nosqlbench.nb.api.content.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class StatementsLoader {
@@ -48,14 +46,27 @@ public class StatementsLoader {
     }
 
     public static StmtsDocList loadContent(
-            Logger logger,
-            Content<?> content) {
+        Logger logger,
+        Content<?> content,
+        Map<String,String> params
+    ) {
         RawStmtsLoader loader = new RawStmtsLoader();
-        loader.addTransformer(new StrInterpolator());
+        loader.addTransformer(new StrInterpolator(params));
         RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
     }
+
+    public static StmtsDocList loadContent(
+        Logger logger,
+        Content<?> content
+    ) {
+        RawStmtsLoader loader = new RawStmtsLoader();
+        RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
+        StmtsDocList layered = new StmtsDocList(rawDocList);
+        return layered;
+    }
+//    }
 
     public static StmtsDocList loadPath(
             Logger logger,
