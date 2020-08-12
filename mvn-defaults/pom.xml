@@ -16,7 +16,6 @@
         <!-- properties for package versions -->
         <antlr4.version>4.8</antlr4.version>
         <ascii.data.version>1.2.0</ascii.data.version>
-        <assertj.java8.version>1.0.0m1</assertj.java8.version>
         <commons.codec.version>1.14</commons.codec.version>
         <commons.compress.version>1.20</commons.compress.version>
         <commons.csv.version>1.8</commons.csv.version>
@@ -42,7 +41,6 @@
         <jmh.version>1.22</jmh.version>
         <joda.time.version>2.9.9</joda.time.version>
         <junit.jupiter.version>5.3.2</junit.jupiter.version>
-        <junit.version>4.12</junit.version>
         <log4j.version>2.13.3</log4j.version>
         <logback.version>1.2.3</logback.version>
         <lz4.version>1.4.1</lz4.version>
@@ -74,7 +72,6 @@
         <resources.plugin.version>3.1.0</resources.plugin.version>
         <source.plugin.version>3.0.1</source.plugin.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-        <assertj.version>3.15.0</assertj.version>
         <graalvm.version>20.1.0</graalvm.version>
     </properties>
 
@@ -105,6 +102,13 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <version>5.6.2</version>
+                <artifactId>junit-jupiter</artifactId>
+                <scope>test</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -427,26 +431,6 @@
                 <version>${jaxb.impl.version}</version>
             </dependency>
 
-            <!-- test dependencies -->
-
-<!--            <dependency>-->
-<!--                <groupId>org.assertj</groupId>-->
-<!--                <artifactId>assertj-core</artifactId>-->
-<!--                <version>${assertj.java8.version}</version>-->
-<!--            </dependency>-->
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-            </dependency>
-
             <!-- graalvm -->
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
@@ -479,6 +463,41 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.15.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 
     <build>
         <plugins>

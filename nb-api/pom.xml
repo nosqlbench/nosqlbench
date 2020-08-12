@@ -80,20 +80,6 @@
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
 
-        <!-- unit testing -->
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- TODO: Move this down to virtdata if it is the only module group using it -->
         <dependency>
             <groupId>org.apache.commons</groupId>
