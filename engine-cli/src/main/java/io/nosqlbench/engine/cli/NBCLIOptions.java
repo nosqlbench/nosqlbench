@@ -2,11 +2,8 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +51,7 @@ public class NBCLIOptions {
 
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
+    private static final String WORKSPACES_DIR = "--workspaces-dir";
     private static final String LOGS_MAX = "--logs-max";
     private static final String LOGS_LEVEL = "--logs-level";
     private static final String DASH_V_INFO = "-v";
@@ -99,6 +97,7 @@ public class NBCLIOptions {
     private final List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logsDirectory = "logs";
+    private String workspacesDirectory = "workspaces";
     private boolean wantsInputTypes = false;
     private boolean wantsMarkerTypes = false;
     private String[] rleDumpOptions = new String[0];
@@ -208,6 +207,10 @@ public class NBCLIOptions {
                 case LOGS_DIR:
                     arglist.removeFirst();
                     logsDirectory = readWordOrThrow(arglist, "a log directory");
+                    break;
+                case WORKSPACES_DIR:
+                    arglist.removeFirst();
+                    workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
                     break;
                 case HDR_DIGITS:
                     arglist.removeFirst();

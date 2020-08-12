@@ -1,5 +1,6 @@
 package io.nosqlbench.docsys.core;
 
+import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -88,7 +89,7 @@ public class DocServerApp {
     }
 
     private static void runServer(String[] serverArgs) {
-        DocServer server = new DocServer();
+        NBWebServer server = new NBWebServer();
         for (int i = 0; i < serverArgs.length; i++) {
             String arg = serverArgs[i];
             if (arg.matches(".*://.*")) {

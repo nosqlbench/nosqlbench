@@ -41,9 +41,9 @@ import java.util.stream.Collectors;
 /**
  * For examples, see <a href="https://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/examples/embedded/src/main/java/org/eclipse/jetty/embedded/">embedded examples</a>
  */
-public class DocServer implements Runnable {
+public class NBWebServer implements Runnable {
 
-    private final static Logger logger  = LogManager.getLogger(DocServer.class);
+    private final static Logger logger  = LogManager.getLogger(NBWebServer.class);
 
     private final List<Path> basePaths = new ArrayList<>();
     private final List<Class> servletClasses = new ArrayList<>();
@@ -55,17 +55,29 @@ public class DocServer implements Runnable {
     private String bindHost = "localhost";
     private int bindPort = 12345;
 
-    public DocServer withHost(String bindHost) {
+    private Map<String,Object> contextParams = new LinkedHashMap<>();
+
+    public NBWebServer withContextParams(Map<String,Object> cp) {
+        this.contextParams.putAll(cp);
+        return this;
+    }
+
+    public NBWebServer withContextParam(String name, Object object) {
+        this.contextParams.put(name, object);
+        return this;
+    }
+
+    public NBWebServer withHost(String bindHost) {
         this.bindHost = bindHost;
         return this;
     }
 
-    public DocServer withPort(int bindPort) {
+    public NBWebServer withPort(int bindPort) {
         this.bindPort = bindPort;
         return this;
     }
 
-    public DocServer withURL(String urlSpec) {
+    public NBWebServer withURL(String urlSpec) {
         try {
             URL url = new URL(urlSpec);
             this.bindPort = url.getPort();
@@ -81,7 +93,7 @@ public class DocServer implements Runnable {
         return this;
     }
 
-    public DocServer withScheme(String scheme) {
+    public NBWebServer withScheme(String scheme) {
         this.bindScheme = scheme;
         return this;
     }
@@ -129,7 +141,7 @@ public class DocServer implements Runnable {
         return servletHolder;
     }
 
-    public DocServer addPaths(Path... paths) {
+    public NBWebServer addPaths(Path... paths) {
         for (Path path : paths) {
             try {
                 path.getFileSystem().provider().checkAccess(path, AccessMode.READ);
@@ -216,6 +228,7 @@ public class DocServer implements Runnable {
 
 
         ResourceConfig rc = new ResourceConfig();
+        rc.addProperties(contextParams);
         rc.property("server", this);
 
         ServletContainer container = new ServletContainer(rc);
