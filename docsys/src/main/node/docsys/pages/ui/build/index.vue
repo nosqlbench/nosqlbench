@@ -161,7 +161,7 @@
                     defaultYaml.bindings = {}
                     allColumns.forEach(column => {
                         let recipe = basictypes.bindings[column.type+"val"];
-                        if (recipe == undefined){
+                        if (recipe == undefined && column.type.toLowerCase().includes("set", "map", "list")){
                             const chars = new antlr4.InputStream(column.type);
                             const lexer = new CQL3Lexer.CQL3Lexer(chars);
                             lexer.strictMode = false; // do not use js strictMode
@@ -187,6 +187,7 @@
                             }
                             else{
                                 alert("Could not generate recipe for type: " + column.type + " for column: " + column.name)
+                                recipe = "TODO"
                             }
                         }
                         defaultYaml.bindings[column.name] = recipe
