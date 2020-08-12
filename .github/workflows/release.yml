@@ -104,7 +104,8 @@ jobs:
       run: |
         pwd
         ls -l
-        mkdir -p itlogs/nb && cp -R nb/logs itlogs/nb
+        mkdir -p itlogs/nb
+        cp -R nb/logs itlogs/nb
 
     - name: upload integration test logs
       uses: actions/upload-artifact@v1
@@ -134,7 +135,8 @@ jobs:
       run: |
         pwd
         ls -l
-        mkdir staging && cp nb/target/nb.jar nb/target/nb staging
+        mkdir staging
+        cp nb/target/nb.jar nb/target/nb staging
 
     - name: upload artifacts
       uses: actions/upload-artifact@v1
