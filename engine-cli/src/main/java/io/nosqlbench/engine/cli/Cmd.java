@@ -17,13 +17,13 @@ public class Cmd {
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
 
     public enum CmdType {
-        script(Arg.of("script_path", s -> s)),
-        fragment(Arg.ofFreeform("script_fragment")),
-        start(),
         run(),
-        await(Arg.of("alias_name")),
+        start(),
         stop(Arg.of("alias_name")),
-        waitMillis(Arg.of("millis_to_wait", Long::parseLong));
+        script(Arg.of("script_path", s -> s)),
+        await(Arg.of("alias_name")),
+        waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
+        fragment(Arg.ofFreeform("script_fragment")),;
 
         private final Arg<?>[] positional;
 
