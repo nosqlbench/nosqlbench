@@ -1,5 +1,7 @@
-package io.nosqlbench.docsys.core;
+package io.nosqlbench.docsys.endpoints;
 
+import io.nosqlbench.docsys.core.DocsysPathLoader;
+import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.docsys.api.DocsNameSpace;
 import io.nosqlbench.docsys.api.Docs;

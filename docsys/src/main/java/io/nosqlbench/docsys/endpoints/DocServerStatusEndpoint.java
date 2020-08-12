@@ -1,5 +1,6 @@
-package io.nosqlbench.docsys.core;
+package io.nosqlbench.docsys.endpoints;
 
+import io.nosqlbench.docsys.core.NBWebServer;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +31,7 @@ public class DocServerStatusEndpoint implements WebServiceObject {
     @Path("status")
     @Produces(MediaType.APPLICATION_JSON)
     public String getStats() {
-        DocServer s = (DocServer) config.getProperty("server");
+        NBWebServer s = (NBWebServer) config.getProperty("server");
         return s.toString();
     }
 
