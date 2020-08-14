@@ -1,7 +1,9 @@
 package io.nosqlbench.engine.rest.services;
 
+import io.nosqlbench.engine.rest.domain.WorkSpace;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
 
+import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,15 +14,19 @@ import java.util.List;
 public class WorkspaceService {
     private final Path root;
     public static String DEFAULT = "default";
+    public static final String WORKSPACE_ROOT = "workspaces_root";
 
-    public WorkspaceService(Object root) {
+    public WorkspaceService(Configuration config) {
+        Object root = config.getProperties().get(WORKSPACE_ROOT);
         if (root instanceof Path) {
             this.root = (Path) root;
         } else if (root instanceof CharSequence) {
             this.root = Paths.get(((CharSequence) root).toString());
         } else if (root == null) {
-            this.root = Paths.get(System.getProperty("user.dir"),
-                "workspaces");
+            this.root = Paths.get(
+                System.getProperty("user.dir"),
+                "workspaces"
+            );
             try {
                 Files.createDirectories(this.root);
             } catch (IOException e) {
@@ -30,6 +36,11 @@ public class WorkspaceService {
             throw new RuntimeException("Unable to use workspaces root " +
                 "path of type " + root.getClass().getCanonicalName());
         }
+        createDefaultIfNotExist();
+    }
+
+    public WorkspaceService(Path root) {
+        this.root = root;
         createDefaultIfNotExist();
     }
 
@@ -52,21 +63,20 @@ public class WorkspaceService {
         return views;
     }
 
-    public WorkspaceView getWorkspaceView(String workspace) {
-        if (!workspace.matches("[a-zA-Z][a-zA-Z0-9]+")) {
+    public WorkSpace getWorkspace(String workspaceName) {
+        assertLegalWorkspaceName(workspaceName);
+        return new WorkSpace(this.root,workspaceName);
+    }
+
+    public static void assertLegalWorkspaceName(String workspaceName) {
+        if (!workspaceName.matches("[a-zA-Z][a-zA-Z0-9]+")) {
             throw new RuntimeException("Workspaces must start with an alphabetic" +
                 " character, and contain only letters and numbers.");
         }
+    }
 
-        Path wspath = root.resolve(Paths.get(workspace));
-        if (!Files.exists(wspath)) {
-            try {
-                Files.createDirectories(wspath);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return new WorkspaceView(wspath);
+    public WorkspaceView getWorkspaceView(String workspaceName) {
+        return getWorkspace(workspaceName).getWorkspaceView();
     }
 
     public void putFile(String workspaceName, String filename, ByteBuffer content) {
@@ -129,6 +139,10 @@ public class WorkspaceService {
                 throw new RuntimeException(e);
             }
             return ByteBuffer.wrap(bytes);
+        }
+
+        public Path getPath() {
+            return path;
         }
     }
 }

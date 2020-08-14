@@ -8,11 +8,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.List;
@@ -22,10 +20,7 @@ import java.util.List;
 @Service(WebServiceObject.class)
 public class WorkspacesEndpoint implements WebServiceObject {
 
-    private final static Logger logger =
-        LogManager.getLogger(WorkspacesEndpoint.class);
-
-    public static final String WORKSPACE_ROOT = "workspaces_root";
+    private final static Logger logger = LogManager.getLogger(WorkspacesEndpoint.class);
 
     @Context
     private Configuration config;
@@ -62,13 +57,17 @@ public class WorkspacesEndpoint implements WebServiceObject {
 
     @POST
     @Path("{workspaceName}/{filepath}")
-    public Response putFileInWorkspace(
-        @PathParam("workspaceName") String workspaceName,
-        @PathParam("filepath") String filename,
-        ByteBuffer content
-    ) {
+    @Consumes(MediaType.WILDCARD)
+    @Produces(MediaType.WILDCARD)
+    public Response doSomething(@Context HttpServletRequest request, byte[] input) {
+        logger.debug("Content-Type: {}", request.getContentType());
+        logger.debug("Preferred output: {}", request.getHeader(HttpHeaders.ACCEPT));
         try {
-            getSvc().putFile(workspaceName, filename, content);
+            String pathInfo = request.getPathInfo();
+            String[] parts = pathInfo.split("/");
+            String workspaceName = parts[parts.length-2];
+            String filename = parts[parts.length-1];
+            getSvc().putFile(workspaceName, filename, ByteBuffer.wrap(input));
             return Response.ok().build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -84,7 +83,8 @@ public class WorkspacesEndpoint implements WebServiceObject {
         try {
             WorkspaceService.FileInfo fileinfo = getSvc().readFile(workspaceName, filename);
             if (fileinfo != null) {
-                return Response.ok(fileinfo.getContent(), fileinfo.getMediaType()).build();
+                return Response.ok(fileinfo.getPath().toFile(), fileinfo.getMediaType()).build();
+//                return Response.ok(fileinfo.getContent(), fileinfo.getMediaType()).build();
             } else {
                 return Response.noContent().status(Response.Status.NOT_FOUND).build();
             }
@@ -95,7 +95,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
 
     private WorkspaceService getSvc() {
         if (svc == null) {
-            svc = new WorkspaceService(config.getProperties().get(WORKSPACE_ROOT));
+            svc = new WorkspaceService(config);
         }
         return svc;
     }

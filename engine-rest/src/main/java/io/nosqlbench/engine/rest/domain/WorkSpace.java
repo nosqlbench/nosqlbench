@@ -1,22 +1,34 @@
 package io.nosqlbench.engine.rest.domain;
 
+import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public class WorkSpace {
-    private Path workspacesRoot;
-    private String workspace;
+    private final Path workspacesRoot;
+    private final Path workspacePath;
+    private final String workspaceName;
 
-    public WorkSpace(Path workspacesRoot, String workspace) {
+    public WorkSpace(Path workspacesRoot, String workspaceName) {
         this.workspacesRoot = workspacesRoot;
-        this.workspace = workspace;
+        this.workspaceName = workspaceName;
+        this.workspacePath = workspacesRoot.resolve(workspaceName);
+        if (!Files.exists(workspacePath)) {
+            try {
+                Files.createDirectories(workspacePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
-    public Optional<Path> get(String filename) {
-        return Optional.empty();
+    public WorkspaceView getWorkspaceView() {
+        return new WorkspaceView(workspacesRoot.resolve(workspaceName));
     }
 
-    public Optional<javax.ws.rs.Path> put(WorkSpace workspace) {
-        return Optional.empty();
+    public Path getWorkspacePath() {
+        return workspacePath;
     }
 }
