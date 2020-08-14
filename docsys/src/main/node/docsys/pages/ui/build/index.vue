@@ -5,6 +5,7 @@
       <v-toolbar-title>NoSQLBench - Worlkoad Generator</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
+        <workspace-selector></workspace-selector>
         <v-btn text href="https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
       </v-toolbar-items>
     </v-app-bar>
@@ -70,11 +71,12 @@
     import CQL3Lexer from '~/antlr/CQL3Lexer.js';
     import defaultYaml from '~/assets/default.yaml';
     import basictypes from '~/assets/basictypes.yaml';
-
+    import WorkspaceSelector from "~/components/WorkspaceSelector";
 
     export default {
         mixins: [get_data],
         components: {
+          WorkspaceSelector
         },
         computed: {
         },
