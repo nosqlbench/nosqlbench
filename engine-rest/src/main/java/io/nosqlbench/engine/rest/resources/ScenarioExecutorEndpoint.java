@@ -8,16 +8,14 @@ import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.engine.rest.services.WorkspaceService;
 import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.engine.rest.transfertypes.ScenarioInfo;
-import io.nosqlbench.engine.rest.transfertypes.ResultInfo;
 import io.nosqlbench.nb.annotations.Service;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +29,10 @@ import java.util.*;
 public class ScenarioExecutorEndpoint implements WebServiceObject {
 
     private ScenariosExecutor executor = new ScenariosExecutor("executor-service", 1);
+
+    @Context
+    private Configuration config;
+
 
     @POST
     @Path("cli")
@@ -92,12 +94,13 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     private void storeFiles(RunScenarioRequest rq) {
         Map<String, String> filemap = rq.getFilemap();
 
+        WorkspaceService workspaces = new WorkspaceService(config);
+
         for (String filename : filemap.keySet()) {
             try {
-                Paths.get(rq.getBasedir(),rq.getScenarioName());
 
                 Files.createDirectories(
-                        Paths.get(rq.getBasedir(),rq.getScenarioName()),
+                    workspaces.getWorkspace(rq.getWorkspace()).getWorkspacePath(),
                         PosixFilePermissions.asFileAttribute(
                                 PosixFilePermissions.fromString("rwxr-x---")
                         ));
@@ -167,8 +170,10 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     @Produces(MediaType.APPLICATION_JSON)
     public synchronized ScenarioInfo getScenario(@PathParam("scenarioName") String scenarioName) {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
+
         if (pendingScenario.isPresent()) {
-            return new ScenarioInfo(pendingScenario.get());
+            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenarioName);
+            return new ScenarioInfo(pendingScenario.get(),pendingResult.orElse(null));
         } else {
             throw new RuntimeException("Scenario name '" + scenarioName + "' not found.");
         }
@@ -178,33 +183,16 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     @Path("scenarios")
     @Produces(MediaType.APPLICATION_JSON)
     public synchronized List<ScenarioInfo> getScenarios() {
+
         List<ScenarioInfo> scenarioInfos = new ArrayList<>();
         List<String> pendingScenarios = executor.getPendingScenarios();
-        for (String pendingName : pendingScenarios) {
-            Optional<Scenario> pendingScenario = executor.getPendingScenario(pendingName);
-            pendingScenario.ifPresent(scenario -> scenarioInfos.add(new ScenarioInfo(scenario)));
+
+        for (String pendingScenario : pendingScenarios) {
+            ScenarioInfo scenarioInfo = getScenario(pendingScenario);
+            scenarioInfos.add(scenarioInfo);
         }
         return scenarioInfos;
     }
 
-    @GET
-    @Path("result/{scenarioName}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public synchronized ResultInfo getResult(@PathParam("scenarioName") String scenarioName) {
-        return new ResultInfo(scenarioName, executor.getPendingResult(scenarioName).orElse(null));
-    }
-
-    @GET
-    @Path("results")
-    @Produces(MediaType.APPLICATION_JSON)
-    public synchronized List<ResultInfo> getResults() {
-        List<ResultInfo> results = new ArrayList<>();
-        List<String> pendingScenarios = executor.getPendingScenarios();
-        for (String pendingScenario : pendingScenarios) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(pendingScenario);
-            results.add(new ResultInfo(pendingScenario, pendingResult.orElse(null)));
-        }
-        return results;
-    }
 
 }
