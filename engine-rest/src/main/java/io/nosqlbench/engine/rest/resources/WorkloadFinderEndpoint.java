@@ -20,25 +20,18 @@ import java.util.stream.Collectors;
 
 @Service(WebServiceObject.class)
 @Singleton
-@Path("/services/nb/")
+@Path("/services/workloads")
 public class WorkloadFinderEndpoint implements WebServiceObject {
     private final static Logger logger = LogManager.getLogger(AutoDocsWebService.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("enabled")
-    public boolean isEnabled() {
-        return true;
+    public List<String> getWorkloadNames(@QueryParam("workspace") String workspace) {
+        String[] includes = (workspace!=null ? new String[]{workspace} : new String[]{});
+        List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts(includes);
+        return workloads.stream().map(WorkloadDesc::getWorkloadName).collect(Collectors.toList());
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("workloads")
-    public List<String> getWorkloadNames() {
-        List<WorkloadDesc> workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts();
-
-        return workloads.stream().map(x -> x.getWorkloadName()).collect(Collectors.toList());
-    }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("parameters")
