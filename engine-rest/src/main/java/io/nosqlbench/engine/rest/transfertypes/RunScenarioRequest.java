@@ -1,5 +1,7 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +25,27 @@ import java.util.Map;
  */
 public class RunScenarioRequest {
 
+    @JsonProperty("commands")
     private List<String> commands;
+
+    @JsonProperty("filemap")
     private Map<String, String> filemap;
+
     private String stdout;
+
+    @JsonProperty("name")
     private String scenarioName = "auto";
-    private String basedir = "/tmp/nosqlbench";
+
+    @JsonProperty("workspace")
+    private String workspace = "default";
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
+    }
 
     public void setScenarioName(String scenarioName) {
         this.scenarioName = scenarioName;
@@ -61,11 +79,4 @@ public class RunScenarioRequest {
         return stdout;
     }
 
-    public void setBasedir(String basedir) {
-        this.basedir = basedir;
-    }
-
-    public String getBasedir() {
-        return basedir;
-    }
 }
