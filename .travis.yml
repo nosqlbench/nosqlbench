@@ -1,7 +1,0 @@
-language: java
-jdk:
- - openjdk12
-cache:
-  directories:
-  - .autoconf
-  - $HOME/.m2
