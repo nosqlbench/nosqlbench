@@ -7,7 +7,7 @@
                :active_category_name="active_category_name"
                :active_topic="active_topic"/>
 
-    <v-app-bar app dark color="secondary" collapse-on-scroll dense >
+    <v-app-bar app dark color="secondary" collapse-on-scroll dense>
       <v-app-bar-nav-icon @click.stop="toggleDrawer"/>
       <v-toolbar-title>NoSQLBench Docs</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -19,7 +19,7 @@
     <v-main>
       <v-container>
         <v-row align-content="start" align="start" justify="start">
-          <div>{{testdata}}</div>
+          <div>{{ testdata }}</div>
 
           <div class="Doc">
             <div class="doc-title">
@@ -41,55 +41,55 @@
   </v-app>
 </template>
 <script>
-    import get_data from '~/mixins/get_data.js';
-    import DocsMenu from '~/components/DocsMenu.vue'
-    import MarkdownVue from "~/components/MarkdownVue";
+import get_data from '~/mixins/get_data.js';
+import DocsMenu from '~/components/DocsMenu.vue'
+import MarkdownVue from "~/components/MarkdownVue";
 
-    export default {
-        mixins: [get_data],
-        components: {
-            DocsMenu, MarkdownVue
-        },
-        computed: {
-            isDrawerOpen() {
-                return this.$store.state.docs.isDrawerOpen;
-            },
-            isDrawerOpen2() {
-                return this.$store.getters.drawerState;
-            }
-        },
-        methods: {
-            toggleDrawer() {
-                this.$store.commit('docs/toggleDrawerState');
-            }
-        },
-        data(context) {
-            console.log("data context.params:" + JSON.stringify(context.params));
-            console.log("data context.route:" + JSON.stringify(context.route));
-            console.log("data context.query:" + JSON.stringify(context.query));
-
-            return {
-                testdata: this.$store.state.docs.example,
-                categories_list: [],
-                markdown_body: '',
-                active_topic: null,
-                active_category: null,
-                options: function () {
-                    return {
-                        markdownIt: {
-                            linkify: true
-                        },
-                        linkAttributes: {
-                            attrs: {
-                                target: '_blank',
-                                rel: 'noopener'
-                            }
-                        }
-                    }
-                }
-            }
-        }
+export default {
+  mixins: [get_data],
+  components: {
+    DocsMenu, MarkdownVue
+  },
+  computed: {
+    isDrawerOpen() {
+      return this.$store.state.docs.isDrawerOpen;
+    },
+    isDrawerOpen2() {
+      return this.$store.getters.drawerState;
     }
+  },
+  methods: {
+    toggleDrawer() {
+      this.$store.commit('docs/toggleDrawerState');
+    }
+  },
+  data(context) {
+    console.log("data context.params:" + JSON.stringify(context.params));
+    console.log("data context.route:" + JSON.stringify(context.route));
+    console.log("data context.query:" + JSON.stringify(context.query));
+
+    return {
+      testdata: this.$store.state.docs.example,
+      categories_list: [],
+      markdown_body: '',
+      active_topic: null,
+      active_category: null,
+      options: function () {
+        return {
+          markdownIt: {
+            linkify: true
+          },
+          linkAttributes: {
+            attrs: {
+              target: '_blank',
+              rel: 'noopener'
+            }
+          }
+        }
+      }
+    }
+  }
+}
 </script>
 <style>
 .container {
