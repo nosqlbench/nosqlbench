@@ -63,6 +63,8 @@ public class Scenario implements Callable<ScenarioResult> {
     private Engine engine = Engine.Graalvm;
     private boolean wantsStackTraces=false;
     private boolean wantsCompiledScript;
+    private long startedAtMillis = -1L;
+    private long endedAtMillis = -1L;
 
     public enum Engine {
         Nashorn,
@@ -206,6 +208,8 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
+        startedAtMillis=System.currentTimeMillis();
+
         init();
 
         logger.debug("Running control script for " + getScenarioName() + ".");
@@ -253,12 +257,24 @@ public class Scenario implements Callable<ScenarioResult> {
             } finally {
                 System.out.flush();
                 System.err.flush();
+                endedAtMillis=System.currentTimeMillis();
             }
         }
         int awaitCompletionTime = 86400 * 365 * 1000;
         logger.debug("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
+        //TODO: Ensure control flow covers controller shutdown in event of internal error.
+
         logger.debug("scenario completed without errors");
+        endedAtMillis=System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+    }
+
+    public long getStartedAtMillis() {
+        return startedAtMillis;
+    }
+
+    public long getEndedAtMillis() {
+        return endedAtMillis;
     }
 
     public ScenarioResult call() {
