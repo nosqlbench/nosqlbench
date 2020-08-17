@@ -1,1 +1,13 @@
-- e3f16dbc fixed dual dashboard init issue
+- 82cf6b3e (HEAD -> main) fixup version merging
+- 1d6e4f29 incremental work on ui
+- 9717487d make scenarios run in workspace
+- 61796921 remove pre formatting to appease markdown-it fenced code sections
+- 421bcdc1 make scenarios run in workspace
+- 10e46ed7 make scenarios run in workspace
+- e1263ee8 make scenarios run in workspace
+- d0521668 make scenarios run in workspace
+- 2aa99ba2 make scenarios run in workspace
+- 894e65d9 make scenarios run in workspace
+- 8ba43027 make scenarios run in workspace
+- 13855329 incremental work on ui
+- 3d16789b consolidate scenario transfer types
