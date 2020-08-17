@@ -15,7 +15,7 @@ import java.util.function.Function;
  * name is fixed or a generated variable name from a provided function.
  * Note that the input type is not that suitable for constructing names,
  * so this is more likely to be used in an indirect naming pattern like
- * <pre>SaveDouble(Load('id'))</pre>
+ * SaveDouble(Load('id'))
  */
 @Categories(Category.state)
 @ThreadSafeMapper

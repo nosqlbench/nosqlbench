@@ -1,7 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid;
 
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.UUID;
 import java.util.function.LongFunction;
@@ -10,15 +9,6 @@ import java.util.function.LongFunction;
  * This function creates a non-random UUID in the type 4 version (Random).
  * It always puts the same value in the MSB position of the UUID format.
  * The input value is put in the LSB position.
- * <pre>
- * xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
- * mmmmmmmm-mmmm-Mmmm-Llll-llllllllllll
- *               4    3
- * </pre>
- * As shown above, the LSB position does not have the complication of having
- * a version identifier (position M) dividing the dynamic range of the data type.
- * For this reason, only the LSB side is used for this mapper, which allows
- * an effective range of Long.MAX_VALUE/8, given the loss of 3 digits of precision.
  *
  * This function is suitable for deterministic testing of scenarios which depend
  * on type 4 UUIDs, but without the mandated randomness that makes testing difficult.
