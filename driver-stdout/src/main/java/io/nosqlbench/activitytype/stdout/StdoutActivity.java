@@ -113,7 +113,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     protected Writer createPrintWriter() {
         PrintWriter pw;
         if (fileName.toLowerCase().equals("stdout")) {
-            pw = new PrintWriter(System.out);
+            pw = getConsoleOut();
         } else {
             try {
                 pw = new PrintWriter(fileName);
@@ -144,8 +144,9 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 BindingsTemplate bt = new BindingsTemplate();
                 stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
                 String diagnostics = bt.getDiagnostics();
-                System.out.println(diagnostics);
-                System.out.flush();
+
+                getConsoleOut().println(diagnostics);
+                getConsoleOut().flush();
                 System.exit(2);
             } else {
                 logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");

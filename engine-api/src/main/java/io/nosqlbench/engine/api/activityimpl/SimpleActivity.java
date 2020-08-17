@@ -13,8 +13,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
@@ -23,6 +21,8 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +48,7 @@ public class SimpleActivity implements Activity {
     private RateLimiter phaseLimiter;
     private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
+    private PrintWriter console;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -230,6 +231,24 @@ public class SimpleActivity implements Activity {
             activityInstrumentation = new CoreActivityInstrumentation(this);
         }
         return activityInstrumentation;
+    }
+
+    @Override
+    public synchronized PrintWriter getConsoleOut() {
+        if (this.console==null) {
+            this.console = new PrintWriter(System.out);
+        }
+        return this.console;
+    }
+
+    @Override
+    public synchronized InputStream getConsoleIn() {
+        return System.in;
+    }
+
+    @Override
+    public void setConsoleOut(PrintWriter writer) {
+        this.console = writer;
     }
 
     @Override

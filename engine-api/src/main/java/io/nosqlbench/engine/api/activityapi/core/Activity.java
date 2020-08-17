@@ -26,6 +26,8 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 /**
@@ -181,4 +183,10 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
      * @return A new or existing instrumentation object for this activity.
      */
     ActivityInstrumentation getInstrumentation();
+
+    PrintWriter getConsoleOut();
+
+    InputStream getConsoleIn();
+
+    void setConsoleOut(PrintWriter writer);
 }

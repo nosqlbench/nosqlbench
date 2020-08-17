@@ -145,6 +145,7 @@ public class Scenario implements Callable<ScenarioResult> {
                     .option("js.ecmascript-version", "2020")
                     .option("js.nashorn-compat", "true");
 
+                // TODO: add in, out, err for this scenario
                 this.scriptEngine = GraalJSScriptEngine.create(null, contextSettings);
 
 //                try {
