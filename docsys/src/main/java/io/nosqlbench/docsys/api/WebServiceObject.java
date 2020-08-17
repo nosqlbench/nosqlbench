@@ -11,6 +11,9 @@ package io.nosqlbench.docsys.api;
  * .io/documentation/latest/jaxrs-resources.html#d0e2040">Jersey jax-rs
  * resources documentation</A>
  *
+ * @see <A href="https://repo1.maven.org/maven2/org/glassfish/jersey/jersey-documentation/2.5
+ * .1/jersey-documentation-2.5.1-user-guide.pdf">Jersey 2.5.1 user guide</a>
+ *
  * @see <A href="https://github.com/jax-rs/spec/blob/master/spec
  * .pdf">JAX-RS: Java™ API for RESTful Web Services Version 2.1
  * Proposed Final Draft June 9, 2017</A>

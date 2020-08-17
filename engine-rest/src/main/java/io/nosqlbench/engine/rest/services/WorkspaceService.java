@@ -2,6 +2,8 @@ package io.nosqlbench.engine.rest.services;
 
 import io.nosqlbench.engine.rest.domain.WorkSpace;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.MediaType;
@@ -9,9 +11,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class WorkspaceService {
+    private final static Logger logger = LogManager.getLogger(WorkspaceService.class);
+
     private final Path root;
     public static String DEFAULT = "default";
     public static final String WORKSPACE_ROOT = "workspaces_root";
@@ -65,13 +71,12 @@ public class WorkspaceService {
 
     public WorkSpace getWorkspace(String workspaceName) {
         assertLegalWorkspaceName(workspaceName);
-        return new WorkSpace(this.root,workspaceName);
+        return new WorkSpace(this.root, workspaceName);
     }
 
     public static void assertLegalWorkspaceName(String workspaceName) {
-        if (!workspaceName.matches("[a-zA-Z][a-zA-Z0-9]+")) {
-            throw new RuntimeException("Workspaces must start with an alphabetic" +
-                " character, and contain only letters and numbers.");
+        if (!workspaceName.matches("[a-zA-Z0-9]+")) {
+            throw new RuntimeException("Workspace names must contain only letters and numbers.");
         }
     }
 
@@ -112,6 +117,47 @@ public class WorkspaceService {
 
     private Path workspacePath(String workspaceName) {
         return root.resolve(workspaceName);
+    }
+
+    public void purgeWorkspace(String workspaceName, int deleteCount) {
+        assertLegalWorkspaceName(workspaceName);
+        Path path = workspacePath(workspaceName);
+        if (Files.exists(path)) {
+            try (Stream<Path> counter = Files.walk(path)) {
+                long foundFiles = counter.count();
+                if (foundFiles > 100 && deleteCount != foundFiles) {
+                    throw new RuntimeException(
+                        "To delete " + foundFiles + " files, you must provide a deleteCount=<count> " +
+                            "parameter that matches. This is a safety mechanism."
+                    );
+                }
+                logger.debug("found " + foundFiles + " to delete.");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            Path relativize = root.relativize(path);
+            if (relativize.toString().contains("..")) {
+                throw new RuntimeException("Illegal path to delete: " + path.toString());
+            }
+
+
+            try (Stream<Path> walk = Files.walk(path)) {
+                walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+//                    .peek(System.out::println)
+                    .forEach(f -> {
+                        logger.debug("deleting '" + f.toString() + "'");
+                        if (!f.delete()) {
+                            throw new RuntimeException("Unable to delete " + f.toString());
+                        };
+                    });
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 
     public final static class FileInfo {

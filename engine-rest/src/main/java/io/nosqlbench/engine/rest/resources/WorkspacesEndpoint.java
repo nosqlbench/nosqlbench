@@ -39,12 +39,30 @@ public class WorkspacesEndpoint implements WebServiceObject {
         return Response.ok(wsviews).build();
     }
 
+    @DELETE
+    @Path("{workspace}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteWorkspace(@PathParam("workspace") String workspace,
+                                    @QueryParam("deleteCount") String deleteCount) {
+        try {
+            int dc = deleteCount!=null ? Integer.valueOf(deleteCount):0;
+            getSvc().purgeWorkspace(workspace,dc);
+            return Response.ok("removed workspace " + workspace).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
     @GET
     @Path("{workspace}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkspaceInfo(@PathParam("workspace") String workspace) {
-        WorkspaceView workpaceView = getSvc().getWorkspaceView(workspace);
-        return Response.ok(workpaceView).build();
+        try {
+            WorkspaceView workpaceView = getSvc().getWorkspaceView(workspace);
+            return Response.ok(workpaceView).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
     }
 
     @POST

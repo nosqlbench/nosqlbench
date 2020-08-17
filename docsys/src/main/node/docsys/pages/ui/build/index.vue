@@ -14,7 +14,7 @@
       justify-center
       align-center>
 
-    <v-content>
+    <v-main>
         <v-container fluid>
             <v-layout row>
                 <v-flex>
@@ -53,7 +53,7 @@
 
         </v-container>
 
-    </v-content>
+    </v-main>
     </v-layout>
 
       <v-footer app dark color="secondary">
@@ -251,7 +251,7 @@
             return data;
         },
         async asyncData({ $axios, store }) {
-            let enabled = await $axios.$get("/services/nb/enabled")
+            let enabled = await $axios.$get("/services/status")
                     .then(res => {
                         return res
                     })

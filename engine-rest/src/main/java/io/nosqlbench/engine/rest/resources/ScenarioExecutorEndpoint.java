@@ -12,6 +12,8 @@ import io.nosqlbench.engine.rest.services.WorkspaceService;
 import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.engine.rest.transfertypes.ScenarioInfo;
 import io.nosqlbench.nb.annotations.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -27,6 +29,7 @@ import java.util.*;
 @Singleton
 @Path("/services/executor/")
 public class ScenarioExecutorEndpoint implements WebServiceObject {
+    private final static Logger logger = LogManager.getLogger(ScenarioExecutorEndpoint.class);
 
     private ScenariosExecutor executor = new ScenariosExecutor("executor-service", 1);
 
