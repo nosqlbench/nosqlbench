@@ -5,6 +5,7 @@
       <v-toolbar-title>NoSQLBench</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
+        <app-selector></app-selector>
         <workspace-selector></workspace-selector>
         <v-btn text href="https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
       </v-toolbar-items>
@@ -81,16 +82,19 @@
 <script>
 import get_data from '~/mixins/get_data.js';
 import WorkspaceSelector from "~/components/WorkspaceSelector";
+import AppSelector from "@/components/AppSelector";
 
 export default {
+  name: 'app-run',
   mixins: [get_data],
   components: {
+    AppSelector,
     WorkspaceSelector
   },
   computed: {},
   methods: {
     async getTemplates() {
-      const data = await this.$axios.$get('/services/workloads/parameters?workloadName=' + this.workloadName)
+      const data = await this.$axios.$get('/workloads/parameters?workloadName=' + this.workloadName)
       if (!data.err) {
         this.$data.templates = data;
       }
@@ -106,21 +110,21 @@ export default {
     return data;
   },
   async asyncData({$axios, store}) {
-    let enabled = await $axios.$get("/services/status")
+    let enabled = await $axios.$get("/status")
         .then(res => {
           return res
         })
         .catch((e) => {
           console.log("back-end not found");
         })
-    let workloadNames = await $axios.$get("/services/workloads")
+    let workloadNames = await $axios.$get("/workloads")
         .then(res => {
           return res
         })
         .catch((e) => {
           console.log("back-end not found");
         })
-    let workspaces = await $axios.$get("/services/workspaces")
+    let workspaces = await $axios.$get("/workspaces")
         .then(res => {
           return res
         }).catch((e) => {

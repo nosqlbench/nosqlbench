@@ -10,7 +10,7 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.rest.services.WorkspaceService;
 import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
-import io.nosqlbench.engine.rest.transfertypes.ScenarioInfo;
+import io.nosqlbench.engine.rest.transfertypes.LiveScenarioView;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -171,12 +171,12 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     @GET
     @Path("scenario/{scenarioName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public synchronized ScenarioInfo getScenario(@PathParam("scenarioName") String scenarioName) {
+    public synchronized LiveScenarioView getScenario(@PathParam("scenarioName") String scenarioName) {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
 
         if (pendingScenario.isPresent()) {
             Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenarioName);
-            return new ScenarioInfo(pendingScenario.get(),pendingResult.orElse(null));
+            return new LiveScenarioView(pendingScenario.get(),pendingResult.orElse(null));
         } else {
             throw new RuntimeException("Scenario name '" + scenarioName + "' not found.");
         }
@@ -185,16 +185,16 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     @GET
     @Path("scenarios")
     @Produces(MediaType.APPLICATION_JSON)
-    public synchronized List<ScenarioInfo> getScenarios() {
+    public synchronized List<LiveScenarioView> getScenarios() {
 
-        List<ScenarioInfo> scenarioInfos = new ArrayList<>();
+        List<LiveScenarioView> liveScenarioViews = new ArrayList<>();
         List<String> pendingScenarios = executor.getPendingScenarios();
 
         for (String pendingScenario : pendingScenarios) {
-            ScenarioInfo scenarioInfo = getScenario(pendingScenario);
-            scenarioInfos.add(scenarioInfo);
+            LiveScenarioView liveScenarioView = getScenario(pendingScenario);
+            liveScenarioViews.add(liveScenarioView);
         }
-        return scenarioInfos;
+        return liveScenarioViews;
     }
 
 

@@ -5,6 +5,7 @@
       <v-toolbar-title>NoSQLBench - Worlkoad Generator</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
+        <app-selector></app-selector>
         <workspace-selector></workspace-selector>
         <v-btn text href="https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
       </v-toolbar-items>
@@ -72,10 +73,12 @@
     import defaultYaml from '~/assets/default.yaml';
     import basictypes from '~/assets/basictypes.yaml';
     import WorkspaceSelector from "~/components/WorkspaceSelector";
+    import AppSelector from "@/components/AppSelector";
 
     export default {
         mixins: [get_data],
         components: {
+          AppSelector,
           WorkspaceSelector
         },
         computed: {
@@ -251,7 +254,7 @@
             return data;
         },
         async asyncData({ $axios, store }) {
-            let enabled = await $axios.$get("/services/status")
+            let enabled = await $axios.$get("/status")
                     .then(res => {
                         return res
                     })

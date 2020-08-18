@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ScenarioInfo {
+public class LiveScenarioView {
 
     private final Scenario scenario;
     private final ScenarioResult result;
 
-    public ScenarioInfo(Scenario scenario, ScenarioResult result) {
+    public LiveScenarioView(Scenario scenario, ScenarioResult result) {
         this.scenario = scenario;
         this.result = result;
     }
