@@ -12,24 +12,25 @@
     "antlr": "cd antlr && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CQL3.g4"
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.9.5",
+    "@nuxtjs/axios": "^5.12.1",
+    "@nuxtjs/vuetify": "^2.0.0-beta.2",
+    "vue": "^2.6.11",
+    "front-matter": "^4.0.1",
     "antlr4": "^4.8.0",
     "antlr4-cli": "^4.5.3",
     "file-saver": "^2.0.2",
-    "@nuxtjs/vuetify": "^2.0.0-beta.2",
-    "front-matter": "^3.1.0",
     "js-yaml": "^3.14.0",
     "js-yaml-loader": "^1.2.2",
+
     "markdown-it-smartarrows": "^1.0.1",
-    "markdown-it-vue": "^1.0.11",
+    "markdown-it-relativelink": "^0.2.0",
+    "markdown-it-replace-link": "^1.1.0",
+    "markdown-it-vue": "^1.1.3",
     "node-fetch": "^2.6.0",
     "npm": "^6.14.7",
-    "nuxt": "^2.14.0",
-    "vue": "^2.6.11",
+    "nuxt": "^2.14.3",
     "vue-template-compiler": "^2.6.11",
-    "webpack": "^4.44.0"
-  },
-  "disabled-modules": {
-    "markdown-it-highlight": "^0.2.0"
+    "webpack": "^4.44.1",
+    "markdown-it-highlightjs": "^3.2.0"
   }
 }
