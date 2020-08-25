@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class DocServerApp {
     public final static String APPNAME_DOCSERVER = "docserver";
-    private static Logger logger = LogManager.getLogger(DocServerApp.class);
+    private static final Logger logger = LogManager.getLogger(DocServerApp.class);
 
 //    static {
 //        // defer to an extant logger context if it is there, otherwise
@@ -82,9 +82,11 @@ public class DocServerApp {
             Path relativePath = dirpath.resolve(Path.of("services/docs/markdown", markdownFile));
             logger.info("Creating " + relativePath.toString());
 
-            String markdown = dds.getFileByPath(markdownFile);
+            Path path = dds.findPath(markdownFile);
+//            String markdown = dds.getFileByPath(markdownFile);
+//            Files.writeString(relativePath, markdown, OVERWRITE);
             Files.createDirectories(relativePath.getParent());
-            Files.writeString(relativePath, markdown, OVERWRITE);
+            Files.write(relativePath,Files.readAllBytes(path),OVERWRITE);
         }
     }
 

@@ -2,10 +2,13 @@ package io.nosqlbench.engine.api.scenarios;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 public class WorkloadDesc implements Comparable<WorkloadDesc> {
+    private final String workspace;
     private final String yamlPath;
     private final List<String> scenarioNames;
     private final Map<String, String> templates;
@@ -14,11 +17,13 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
     public WorkloadDesc(String yamlPath,
                         List<String> scenarioNames,
                         Map<String, String> templates,
-                        String description) {
+                        String description,
+                        String workspace) {
         this.yamlPath = yamlPath;
         this.scenarioNames = scenarioNames;
         this.templates = templates;
         this.description = description;
+        this.workspace = workspace;
     }
 
     public String getYamlPath() {
@@ -100,5 +105,23 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
     @Override
     public int compareTo(@NotNull WorkloadDesc o) {
         return this.yamlPath.compareTo(o.yamlPath);
+    }
+
+    public WorkloadDesc relativize(Path wsPath) {
+        Path yPath = Paths.get(this.yamlPath).toAbsolutePath();
+        Path relativePath = wsPath.relativize(yPath);
+        String wsName = wsPath.getFileName().toString();
+
+        return new WorkloadDesc(
+            relativePath.toString(),
+            this.scenarioNames,
+            this.templates,
+            description,
+            wsName
+        );
+    }
+
+    public String getWorkspace() {
+        return workspace;
     }
 }

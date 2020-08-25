@@ -3,10 +3,11 @@ package io.nosqlbench.engine.api.scenarios;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.nb.api.config.Synonyms;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.config.Synonyms;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.content.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,8 +32,7 @@ public class NBCLIScenarioParser {
     private static final String SEARCH_IN = "activities";
     public static final String WORKLOAD_SCENARIO_STEP = "WORKLOAD_SCENARIO_STEP";
 
-    public static boolean isFoundWorkload(String workload,
-                                          String... includes) {
+    public static boolean isFoundWorkload(String workload, String... includes) {
         Optional<Content<?>> found = NBIO.all()
                 .prefix("activities")
                 .prefix(includes)
@@ -252,30 +253,39 @@ public class NBCLIScenarioParser {
         }
     }
 
-    private static Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
-    private static Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
+    private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
+    private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
-    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(String... includes) {
+    public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
 
-        List<Content<?>> activities = NBIO.all()
-                .prefix(SEARCH_IN)
-                .prefix(includes)
-                .extension("yaml")
-                .list();
-
-        List<Path> yamlPathList = activities.stream().map(Content::asPath).collect(Collectors.toList());
+        List<Path> yamlPathList = candidates.stream().map(Content::asPath).collect(Collectors.toList());
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
 
         for (Path yamlPath : yamlPathList) {
+
             String referenced = yamlPath.toString();
-            referenced = referenced.startsWith("/") ? referenced.substring(1) :
-                    referenced;
+
+            if (referenced.startsWith("/")) {
+                if (yamlPath.getFileSystem()==FileSystems.getDefault()) {
+                    Path relative = Paths.get(System.getProperty("user.dir")).toAbsolutePath().relativize(yamlPath);
+                    if (!relative.toString().contains("..")) {
+                        referenced=relative.toString();
+                    }
+                }
+//                String alternate = referenced.startsWith("/") ? referenced.substring(1) : referenced;
+//                Optional<Content<?>> checkLoad = NBIO.all().prefix(SEARCH_IN)
+//                    .name(alternate).extension("yaml")
+//                    .first();
+//                if (checkLoad.isPresent()) {
+//                    referenced = alternate;
+//                }
+            }
 
             Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                    .name(referenced).extension("yaml")
-                    .one();
+                .name(referenced).extension("yaml")
+                .one();
 
             StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
 
@@ -295,8 +305,8 @@ public class NBCLIScenarioParser {
             List<String> scenarioNames = scenarios.getScenarioNames();
 
             if (scenarioNames != null && scenarioNames.size() > 0) {
-                String path = yamlPath.toString();
-                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
+//                String path = yamlPath.toString();
+//                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
                 LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
                 ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
                 Collections.sort(keyNames);
@@ -305,12 +315,29 @@ public class NBCLIScenarioParser {
                 }
 
                 String description = stmts.getDescription();
-                workloadDescriptions.add(new WorkloadDesc(path, scenarioNames, sortedTemplates, description));
+                workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description,""));
             }
         }
         Collections.sort(workloadDescriptions);
 
         return workloadDescriptions;
+
+    }
+
+    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(boolean defaultIncludes, String... includes) {
+
+        NBPathsAPI.GetPrefix searchin = NBIO.all();
+        if (defaultIncludes) {
+            searchin= searchin.prefix(SEARCH_IN);
+        }
+
+        List<Content<?>> activities = searchin
+            .prefix(includes)
+            .extension("yaml")
+            .list();
+
+        return filterForScenarios(activities);
+
     }
 
     public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
