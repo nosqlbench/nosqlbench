@@ -3,27 +3,19 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class BasicScriptBuffer implements ScriptBuffer {
 
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
-
+    private final List<Cmd> commands = new ArrayList<>();
     private final StringBuilder sb = new StringBuilder();
     private final Map<String, String> scriptParams = new HashMap<>();
 
@@ -34,7 +26,13 @@ public class BasicScriptBuffer implements ScriptBuffer {
     public BasicScriptBuffer() {
     }
 
+    @Override
+    public List<Cmd> getCommands() {
+        return this.commands;
+    }
+
     public ScriptBuffer add(Cmd cmd) {
+        commands.add(cmd);
         Map<String, String> params = cmd.getParams();
 
         switch (cmd.getCmdType()) {
