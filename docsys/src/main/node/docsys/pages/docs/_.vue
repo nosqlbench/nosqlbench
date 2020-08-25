@@ -1,105 +1,115 @@
 <template>
   <v-app>
 
-    <docs-menu v-model="isDrawerOpen"
-               :categories="categories"
-               :active_category="active_category"
-               :active_category_name="active_category_name"
-               :active_topic="active_topic"/>
+    <docs-menu
+        :active_category="active_category"
+        :active_topic="active_topic"
+        :categories="categories"
+        @change="menuChanged()"
+    @select="menuChanged()"></docs-menu>
 
-    <v-app-bar app dark color="secondary" collapse-on-scroll dense>
+    <v-app-bar app collapse-on-scroll dense>
       <v-app-bar-nav-icon @click.stop="toggleDrawer"/>
-      <v-toolbar-title>NoSQLBench Docs</v-toolbar-title>
-      <v-spacer></v-spacer>
+      <v-toolbar-title>{{ toolbarTitle }}</v-toolbar-title>
       <v-toolbar-items>
       </v-toolbar-items>
 
     </v-app-bar>
 
     <v-main>
-      <v-container>
-        <v-row align-content="start" align="start" justify="start">
-          <div>{{ testdata }}</div>
-
-          <div class="Doc">
-            <div class="doc-title">
-              <h1></h1>
-            </div>
-            <div>
-              <markdown-vue class="md-body content" :mdcontent="markdown_body"/>
-            </div>
-          </div>
-
-        </v-row>
-      </v-container>
+      <markdown-vue :mdcontent="markdown_body"/>
     </v-main>
 
-    <v-footer app dark color="secondary">
+    <v-footer app>
       <span>&copy; 2020</span>
     </v-footer>
 
   </v-app>
 </template>
+
 <script>
-import get_data from '~/mixins/get_data.js';
 import DocsMenu from '~/components/DocsMenu.vue'
 import MarkdownVue from "~/components/MarkdownVue";
+import docpaths from "@/js/docpaths.js"
 
 export default {
-  mixins: [get_data],
+  data() {
+    return {
+      markdown_body: "testing",
+      active_category: null,
+      active_topic: null
+    }
+  },
   components: {
     DocsMenu, MarkdownVue
   },
   computed: {
-    isDrawerOpen() {
-      return this.$store.state.docs.isDrawerOpen;
+    categories: {
+      get() {
+        return this.$store.getters["docs/getCategories"]
+      }
     },
-    isDrawerOpen2() {
-      return this.$store.getters.drawerState;
+    toolbarTitle: {
+      get() {
+        if (this.active_category) {
+          return this.active_category.title
+        }
+        return "NoSQLBench Docs"
+      }
+    },
+    // markdown_body: {
+    //   get() {
+    //     return this.$store.getters["docs/getActiveMarkdownContent"]
+    //   }
+    // },
+    active_category: {
+      get() {
+        return this.$store.getters["docs/getActiveCategory"]
+      },
+      async set(val) {
+        await this.$store.dispatch("docs/setCategories", val)
+      }
+    },
+    active_topic: {
+      get() {
+        return this.$store.getters["docs/getActiveTopic"]
+      },
+      async set(val) {
+        await this.$store.dispatch("docs/setActiveTopic")
+      }
+    }
+  },
+  async asyncData({params, route, store}) {
+    await store.dispatch("docs/loadCategories")
+    let categories = await store.getters["docs/getCategories"]
+    let active_category =docpaths.getCategory(route,categories);
+    let active_topic = docpaths.getTopic(route,categories, active_category);
+
+    return {
+      active_category,
+      active_topic,
+      markdown_body: active_topic.content
     }
   },
   methods: {
-    toggleDrawer() {
-      this.$store.commit('docs/toggleDrawerState');
-    }
-  },
-  data(context) {
-    console.log("data context.params:" + JSON.stringify(context.params));
-    console.log("data context.route:" + JSON.stringify(context.route));
-    console.log("data context.query:" + JSON.stringify(context.query));
-
-    return {
-      testdata: this.$store.state.docs.example,
-      categories_list: [],
-      markdown_body: '',
-      active_topic: null,
-      active_category: null,
-      options: function () {
-        return {
-          markdownIt: {
-            linkify: true
-          },
-          linkAttributes: {
-            attrs: {
-              target: '_blank',
-              rel: 'noopener'
-            }
-          }
-        }
-      }
+    async toggleDrawer() {
+      await this.$store.dispatch("docs/setIsDrawerOpen", this.$store.getters["docs/getIsDrawerOpen"])
+    },
+    menuChanged(evt) {
+      console.log("menu changed:" + JSON.stringify(evt, null, 2))
+      this.$forceUpdate()
     }
   }
 }
 </script>
 <style>
 .container {
-  margin: 0 auto;
   min-height: 60vh;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   text-align: start;
-  margin-left: 15px;
+  margin: 0 auto 0 15px;
 }
 
 .title {

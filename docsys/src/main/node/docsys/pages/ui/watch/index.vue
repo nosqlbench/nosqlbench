@@ -1,14 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app dark color="secondary">
-      <v-toolbar-title>NoSQLBench - Scenario Status</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <app-selector></app-selector>
-        <workspace-selector></workspace-selector>
-        <v-btn text href="https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback">SUBMIT FEEDBACK</v-btn>
-      </v-toolbar-items>
-    </v-app-bar>
+    <main-app-bar>NoSQLBench - Execution Status</main-app-bar>
 
     <!--
       {
@@ -30,11 +22,11 @@
         <v-card min-width="300" max-width="300" max-height="400" raised elevation="5"
                 v-for="(invocation,w) in invocations" :key="w"
                 class="pa-4 ma-4" :loading="is_loading(invocation)">
-          <v-row>
+          <v-row :title="JSON.stringify(invocation)">
             <v-card-title title="running scenario name">{{ invocation.scenario_name }}</v-card-title>
 <!--            <v-icon v-if="workspace === cardspace.name">mdi-check-bold</v-icon>-->
           </v-row>
-          <v-card-subtitle :title="sdf">sdf</v-card-subtitle>
+          <v-card-subtitle title="title">sdf</v-card-subtitle>
           <v-card-subtitle title="started at">{{invocation.started_at}}</v-card-subtitle>
 
 
@@ -87,40 +79,42 @@
 
 <script>
 
-import WorkspaceSelector from "~/components/WorkspaceSelector";
+import WorkspaceSelector from "@/components/WorkspaceSelector";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import AppSelector from "@/components/AppSelector";
+import MainAppBar from "@/components/MainAppBar";
 
 export default {
   name: "workspaces.vue",
   components: {
+    MainAppBar,
     AppSelector,
     WorkspaceSelector
   },
   data(context) {
     let data = {
-      invocations: [
-        {
-          "scenario_name": "mytestscenario",
-          "progress": [
-            {
-              "name": "/tmp/nosqlbench/mytestscenario3888869514662003808file1.yaml",
-              "state": "Running",
-              "details": "min=0 cycle=1692 max=10000000",
-              "completed": 1.692E-4
-            }
-          ],
-          "started_at": 1597749369800,
-          "ended_at": -1,
-          "activity_states": [
-            {
-              "completion": "1.692E-4",
-              "name": "/tmp/nosqlbench/mytestscenario3888869514662003808file1.yaml",
-              "state": "Running"
-            }
-          ]
-        }
-      ]
+      // invocations: [
+      //   {
+      //     "scenario_name": "mytestscenario",
+      //     "progress": [
+      //       {
+      //         "name": "/tmp/nosqlbench/mytestscenario3888869514662003808file1.yaml",
+      //         "state": "Running",
+      //         "details": "min=0 cycle=1692 max=10000000",
+      //         "completed": 1.692E-4
+      //       }
+      //     ],
+      //     "started_at": 1597749369800,
+      //     "ended_at": -1,
+      //     "activity_states": [
+      //       {
+      //         "completion": "1.692E-4",
+      //         "name": "/tmp/nosqlbench/mytestscenario3888869514662003808file1.yaml",
+      //         "state": "Running"
+      //       }
+      //     ]
+      //   }
+      // ]
     };
     return data;
   },
@@ -140,14 +134,13 @@ export default {
       return name;
     }
   },
-  // created() {
-  //   console.log("created component...");
-  //   this.$store.dispatch("invocations/loadInvocations", "status panel load");
-  // }
+  created() {
+    console.log("created component...");
+    this.$store.dispatch("invocations/loadInvocations", "watch panel load");
+  }
 }
 
 </script>
 
-<style scoped>
-
+<style>
 </style>
