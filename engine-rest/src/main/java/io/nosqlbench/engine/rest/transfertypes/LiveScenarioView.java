@@ -1,13 +1,11 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.nosqlbench.engine.core.ActivityExecutor;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LiveScenarioView {
@@ -18,6 +16,13 @@ public class LiveScenarioView {
     public LiveScenarioView(Scenario scenario, ScenarioResult result) {
         this.scenario = scenario;
         this.result = result;
+    }
+
+    public ResultView getResult() {
+        if (result==null) {
+            return null;
+        }
+        return new ResultView(result);
     }
 
     @JsonProperty("scenario_name")
@@ -33,7 +38,6 @@ public class LiveScenarioView {
     @JsonProperty("ended_at")
     public long getEndMillis() {
         return scenario.getEndedAtMillis();
-
     }
 
     @JsonProperty("progress")
@@ -44,18 +48,4 @@ public class LiveScenarioView {
             .stream().map(ProgressView::new).collect(Collectors.toList());
     }
 
-    @JsonProperty("activity_states")
-    public List<Map<String, String>> getActivityStates() {
-        List<Map<String, String>> states = new ArrayList<>();
-        for (ActivityExecutor ae : scenario.getScenarioController().getActivityExecutorMap().values()) {
-            states.add(
-                Map.of(
-                    "name", ae.getProgressName(),
-                    "completion", String.valueOf(ae.getProgress()),
-                    "state", ae.getProgressState().toString()
-                )
-            );
-        }
-        return states;
-    }
 }

@@ -102,7 +102,6 @@ public class WorkspacesEndpoint implements WebServiceObject {
             WorkspaceService.FileInfo fileinfo = getSvc().readFile(workspaceName, filename);
             if (fileinfo != null) {
                 return Response.ok(fileinfo.getPath().toFile(), fileinfo.getMediaType()).build();
-//                return Response.ok(fileinfo.getContent(), fileinfo.getMediaType()).build();
             } else {
                 return Response.noContent().status(Response.Status.NOT_FOUND).build();
             }

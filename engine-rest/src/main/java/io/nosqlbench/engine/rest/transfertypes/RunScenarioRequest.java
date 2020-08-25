@@ -11,6 +11,7 @@ import java.util.Map;
  *
  * <pre>{@code
  *  {
+ *    "workspace" : "",
  *    "name" : "auto",
  *    "basedir" : "/tmp/nosqlbench",
  *    "filemap" : {

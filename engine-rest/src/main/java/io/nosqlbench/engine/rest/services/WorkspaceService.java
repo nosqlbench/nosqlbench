@@ -18,9 +18,10 @@ import java.util.stream.Stream;
 public class WorkspaceService {
     private final static Logger logger = LogManager.getLogger(WorkspaceService.class);
 
-    private final Path root;
     public static String DEFAULT = "default";
     public static final String WORKSPACE_ROOT = "workspaces_root";
+
+    private final Path root;
 
     public WorkspaceService(Configuration config) {
         Object root = config.getProperties().get(WORKSPACE_ROOT);
@@ -94,7 +95,6 @@ public class WorkspaceService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -141,7 +141,6 @@ public class WorkspaceService {
                 throw new RuntimeException("Illegal path to delete: " + path.toString());
             }
 
-
             try (Stream<Path> walk = Files.walk(path)) {
                 walk.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
@@ -150,7 +149,7 @@ public class WorkspaceService {
                         logger.debug("deleting '" + f.toString() + "'");
                         if (!f.delete()) {
                             throw new RuntimeException("Unable to delete " + f.toString());
-                        };
+                        }
                     });
 
             } catch (IOException e) {
@@ -191,4 +190,5 @@ public class WorkspaceService {
             return path;
         }
     }
+
 }

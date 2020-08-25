@@ -8,9 +8,10 @@ import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.engine.rest.domain.WorkSpace;
 import io.nosqlbench.engine.rest.services.WorkspaceService;
-import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.engine.rest.transfertypes.LiveScenarioView;
+import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,11 +19,6 @@ import org.apache.logging.log4j.Logger;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
 @Service(WebServiceObject.class)
@@ -31,7 +27,7 @@ import java.util.*;
 public class ScenarioExecutorEndpoint implements WebServiceObject {
     private final static Logger logger = LogManager.getLogger(ScenarioExecutorEndpoint.class);
 
-    private ScenariosExecutor executor = new ScenariosExecutor("executor-service", 1);
+    private final ScenariosExecutor executor = new ScenariosExecutor("executor-service", 1);
 
     @Context
     private Configuration config;
@@ -45,7 +41,7 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
 
         String name = rq.getScenarioName();
         if (name.equals("auto")) {
-            rq.setScenarioName("scenario"+String.valueOf(System.currentTimeMillis()));
+            rq.setScenarioName("scenario"+ System.currentTimeMillis());
         }
 
         // First, virtualize files provided
@@ -96,34 +92,19 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
 
     private void storeFiles(RunScenarioRequest rq) {
         Map<String, String> filemap = rq.getFilemap();
+        if (filemap==null) {
+            return;
+        }
 
-        WorkspaceService workspaces = new WorkspaceService(config);
+        WorkspaceService ws = new WorkspaceService(config);
+        WorkSpace workspace = ws.getWorkspace(rq.getWorkspace());
+
+        Map<String,String> replacements = new HashMap<>();
 
         for (String filename : filemap.keySet()) {
-            try {
-
-                Files.createDirectories(
-                    workspaces.getWorkspace(rq.getWorkspace()).getWorkspacePath(),
-                        PosixFilePermissions.asFileAttribute(
-                                PosixFilePermissions.fromString("rwxr-x---")
-                        ));
-                java.nio.file.Path tmpyaml = Files.createTempFile(
-                        Paths.get("/tmp/nosqlbench"),
-                        rq.getScenarioName(),
-                        filename
-                );
-//            // TODO: Find a better way to do this, like scoping resources to executor
-//            tmpyaml.toFile().deleteOnExit();
-
-                Files.write(
-                        tmpyaml,
-                        filemap.get(filename).getBytes(StandardCharsets.UTF_8)
-                );
-                rq.getFilemap().put(filename, tmpyaml.toString());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+                java.nio.file.Path targetPath = workspace.storeFile(filename, filemap.get(filename), replacements);
         }
+        rq.setFileMap(replacements);
     }
 
 //    /**
