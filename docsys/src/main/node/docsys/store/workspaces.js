@@ -24,20 +24,8 @@ export const mutations = {
     setWorkspaces(state, workspaces) {
         state.workspaces = workspaces;
     }
-    // initializeStore(state) {
-    //     if(localStorage.getItem('store')) {
-    //         this.replaceState(
-    //             Object.assign(state,JSON.parse(localStorage.getItem('store')))
-    //         );
-    //     }
-    // },
-
 };
 
-/**
- * The base url is already set for the API by this point
- * @type {{getWorkspaces({commit: *}): void, return: ([]|[{name: string}]|[{name: string}]|default.computed.workspaces)}}
- */
 export const actions = {
     async setWorkspace({commit, state, dispatch}, val) {
         console.log("committing setWorkspace:" + JSON.stringify(val));
@@ -59,6 +47,22 @@ export const actions = {
                 console.error("axios/nuxt workspaces async error:", e);
             })
     },
+    async putFile({commit, state, dispatch}, params) {
+        let to_workspace = params.workspace;
+        let to_filename = params.filename;
+        let to_content = params.content;
+        if (!to_workspace || !to_filename || !to_content) {
+            throw("Unable to save file to workspace without params having workspace, filename, content");
+        }
+        const result = await this.$axios.$post("/workspaces/" + to_workspace + "/" + to_filename, to_content)
+            .then(res => {
+                console.log("axios/vuex workspace put:" + JSON.stringify(res));
+                return res;
+            })
+            .catch((e) => {
+                console.error("axios/vuex workspace put:", e)
+            });
+    },
     async activateWorkspace({commit, state, dispatch}, workspace) {
         const fresh_workspace = await this.$axios.$get("/workspaces/" + workspace)
             .then(res => {
@@ -68,11 +72,11 @@ export const actions = {
             .catch((e) => {
                 console.error("axios/nuxt getWorkspace async error:", e)
             })
-        await dispatch('initWorkspaces',"workspace '" + workspace + "' added");
+        await dispatch('initWorkspaces', "workspace '" + workspace + "' added");
         // await dispatch.initWorkspaces({commit, state, dispatch}, "workspace '" + workspace + "' added")
         // await this.$store.dispatch("workspaces/initWorkspaces", "workspace '" + workspace + "' added")
         // await this.initWorkspaces({commit}, "workspace added");
-        commit('setWorkspace', fresh_workspace)
+        commit('setWorkspace', fresh_workspace.name)
         return workspace;
     },
     async purgeWorkspace({commit, state, dispatch}, workspace) {
@@ -84,15 +88,11 @@ export const actions = {
             .catch((e) => {
                 console.error("axios/nuxt purgeWorkspace error:", e)
             })
-        await dispatch('initWorkspaces',"workspace '" + workspace + "' purged");
-        // dispatch.dispatch('initWorkspaces',"workspace '" + workspace + "' purged");
-        // dispatch.initWorkspaces({commit, state, dispatch}, "workspace '" + workspace + "' purged")
-        const found = this.state.workspaces.workspaces.find(w => {w.name === workspace});
+        const found = this.state.workspaces.workspaces.find(w => w.name === workspace);
         if (!found) {
             console.log("setting active workspace to 'default' since the previous workspace '" + workspace + "' is not found")
-            await dispatch.activateWorkspace({commit, state, dispatch}, "default");
+            await dispatch('activateWorkspace', "default");
         }
-
-
+        await dispatch('initWorkspaces', "workspace '" + workspace + "' purged");
     }
 };
