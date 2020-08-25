@@ -1,5 +1,5 @@
 # nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup cycles=1M
-description: An exmaple of a basic mongo insert and find.
+description: An example of a basic mongo insert and find.
 
 scenarios:
   default:

@@ -65,8 +65,6 @@ nb scenario myworkloads longrun default longrun scenario another.yaml name1 name
 # workload names and scenario names. That's why the explicit form is provided, afterall.
 ```
 
-You can run multiple named scenarios in the same command if
-
 ## Workload selection
 
 The examples above contain no reference to a workload (formerly called _yaml_). They don't need to, as they refer to
