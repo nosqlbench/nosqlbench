@@ -119,20 +119,30 @@ public class NBCLIOptions {
     private boolean compileScript = false;
     private String scriptFile = null;
 
-    public NBCLIOptions(String[] args) {
-        parse(args);
+    public enum Mode {
+        ParseGlobalsOnly,
+        ParseAllOptions
     }
 
-    private void parse(String[] args) {
+    public NBCLIOptions(String[] args) {
+        this(args,Mode.ParseAllOptions);
+    }
 
+    public NBCLIOptions(String[] args, Mode mode) {
+        switch (mode) {
+            case ParseGlobalsOnly:
+                parseGlobalOptions(args);
+                break;
+            case ParseAllOptions:
+                parseAllOptions(args);
+                break;
+        }
+    }
+
+    private LinkedList<String> parseGlobalOptions(String[] args) {
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
         }};
-
-        if (arglist.peekFirst() == null) {
-            wantsBasicHelp = true;
-            return;
-        }
 
         // Preprocess --include regardless of position
         LinkedList<String> nonincludes = new LinkedList<>();
@@ -146,30 +156,61 @@ public class NBCLIOptions {
                 continue;
             }
 
-            if (INCLUDE.equals(word)) {
-                arglist.removeFirst();
-                String include = readWordOrThrow(arglist, "path to include");
-                wantsToIncludePaths.add(include);
-            } else if (METRICS_PREFIX.equals(word)) {
-                arglist.removeFirst();
-                metricsPrefix = arglist.removeFirst();
-            } else {
-                nonincludes.addLast(arglist.removeFirst());
+            switch (word) {
+                case INCLUDE:
+                    arglist.removeFirst();
+                    String include = readWordOrThrow(arglist, "path to include");
+                    wantsToIncludePaths.add(include);
+                    break;
+                case METRICS_PREFIX:
+                    arglist.removeFirst();
+                    metricsPrefix = arglist.removeFirst();
+                    break;
+                case WORKSPACES_DIR:
+                    arglist.removeFirst();
+                    workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
+                    break;
+                case DOCKER_GRAFANA_TAG:
+                    arglist.removeFirst();
+                    docker_grafana_tag = readWordOrThrow(arglist, "grafana docker tag");
+                    break;
+                case VERSION:
+                    arglist.removeFirst();
+                    wantsVersionShort = true;
+                    break;
+                case VERSION_COORDS:
+                    arglist.removeFirst();
+                    wantsVersionCoords = true;
+                    break;
+                case DOCKER_METRICS:
+                    arglist.removeFirst();
+                    dockerMetrics = true;
+                    break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+
             }
+
         }
-        arglist = nonincludes;
-        nonincludes = new LinkedList<>();
+        return nonincludes;
+    }
+
+    private void parseAllOptions(String[] args) {
+        LinkedList<String> arglist = parseGlobalOptions(args);
 
         PathCanonicalizer canonicalizer = new PathCanonicalizer(wantsIncludes());
+
+        if (arglist.peekFirst() == null) {
+            wantsBasicHelp = true;
+            return;
+        }
+
+        LinkedList<String> nonincludes = new LinkedList<>();
 
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
 
             switch (word) {
-                case DOCKER_GRAFANA_TAG:
-                    arglist.removeFirst();
-                    docker_grafana_tag = readWordOrThrow(arglist, "grafana docker tag");
-                    break;
                 case GRAALJS_COMPAT:
                     graaljs_compat = true;
                     arglist.removeFirst();
@@ -208,10 +249,6 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     logsDirectory = readWordOrThrow(arglist, "a log directory");
                     break;
-                case WORKSPACES_DIR:
-                    arglist.removeFirst();
-                    workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
-                    break;
                 case HDR_DIGITS:
                     arglist.removeFirst();
                     hdr_digits = Integer.parseInt(readWordOrThrow(arglist, "significant digits"));
@@ -232,21 +269,9 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
-                case VERSION:
-                    arglist.removeFirst();
-                    wantsVersionShort = true;
-                    break;
-                case VERSION_COORDS:
-                    arglist.removeFirst();
-                    wantsVersionCoords = true;
-                    break;
                 case ENABLE_CHART:
                     arglist.removeFirst();
                     enableChart = true;
-                    break;
-                case DOCKER_METRICS:
-                    arglist.removeFirst();
-                    dockerMetrics = true;
                     break;
                 case HELP:
                 case "-h":
@@ -345,7 +370,7 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-        NBCLICommandParser.parse(arglist,cmdList);
+        NBCLICommandParser.parse(arglist, cmdList);
     }
 
 
@@ -488,7 +513,7 @@ public class NBCLIOptions {
                 spec.indicatorMode = IndicatorMode.logonly;
             } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
                 logger.info("Command line includes script calls, so progress data on console is " +
-                        "suppressed.");
+                    "suppressed.");
                 spec.indicatorMode = IndicatorMode.logonly;
             }
         }
@@ -500,7 +525,7 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
             if (files.contains(s)) {
                 logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                        "in the first matching config. Reorder your options if you need to control this.");
+                    "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
@@ -527,13 +552,13 @@ public class NBCLIOptions {
     }
 
     public String getScriptFile() {
-        if (scriptFile==null) {
-            return logsDirectory+File.separator+"_SESSIONNAME_"+".js";
+        if (scriptFile == null) {
+            return logsDirectory + File.separator + "_SESSIONNAME_" + ".js";
         }
 
         String expanded = scriptFile;
         if (!expanded.startsWith(File.separator)) {
-            expanded = getLogsDirectory()+File.separator+expanded;
+            expanded = getLogsDirectory() + File.separator + expanded;
         }
         return expanded;
     }
@@ -611,8 +636,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                            LOG_HISTOGRAMS +
-                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                        LOG_HISTOGRAMS +
+                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -637,7 +662,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

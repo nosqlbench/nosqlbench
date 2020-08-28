@@ -1,33 +1,38 @@
 package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
+import io.nosqlbench.docsys.core.DocServerApp;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.core.*;
-import io.nosqlbench.engine.core.script.ScriptParams;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.engine.core.script.ScriptParams;
+import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
-import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
@@ -36,7 +41,7 @@ public class NBCLI {
     private static final Logger logger = LoggerFactory.getLogger(NBCLI.class);
     private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
-    private String commandName;
+    private final String commandName;
 
     public NBCLI(String commandName) {
         this.commandName = commandName;
@@ -58,6 +63,36 @@ public class NBCLI {
     }
 
     public void run(String[] args) {
+
+        NBCLIOptions globalOptions = new NBCLIOptions(args,NBCLIOptions.Mode.ParseGlobalsOnly);
+
+
+        // Global only processing
+
+        String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
+
+        if (globalOptions.wantsDockerMetrics()) {
+            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
+            DockerMetricsManager dmh = new DockerMetricsManager();
+            Map<String, String> dashboardOptions = Map.of(
+                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag()
+            );
+            dmh.startMetrics(dashboardOptions);
+
+            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
+                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+            logger.warn(warn);
+            if (reportGraphiteTo != null) {
+                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
+                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                        "usually only one of the two is configured.",
+                    reportGraphiteTo));
+            } else {
+                logger.info("Setting graphite reporting to localhost");
+                reportGraphiteTo = "localhost:9109";
+            }
+        }
+
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
@@ -178,31 +213,6 @@ public class NBCLI {
             System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
-        }
-
-        String reportGraphiteTo = options.wantsReportGraphiteTo();
-
-        if (options.wantsDockerMetrics()) {
-            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
-            DockerMetricsManager dmh = new DockerMetricsManager();
-            Map<String, String> dashboardOptions = Map.of(
-                    DockerMetricsManager.GRAFANA_TAG, options.getDockerGrafanaTag()
-            );
-            dmh.startMetrics(dashboardOptions);
-
-            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
-            logger.warn(warn);
-            if (reportGraphiteTo != null) {
-                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                                " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                                "usually only one of the two is configured.",
-                        reportGraphiteTo));
-            } else {
-                //TODO: is this right?
-                logger.info("Setting graphite reporting to localhost");
-                reportGraphiteTo = "localhost:9109";
-            }
         }
 
         if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {
