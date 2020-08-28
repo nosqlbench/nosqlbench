@@ -17,11 +17,11 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
+import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
+
 /**
  * Any type that implements this interface can provide a double indicating relative progress.
  */
 public interface ProgressCapable {
-    double getProgress();
-    double getTotal();
-    String getProgressDetails();
+    ProgressMeter getProgressMeter();
 }

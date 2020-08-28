@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.core;
 
-import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
+import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.metrics.PeriodicRunnable;
 import io.nosqlbench.engine.api.util.Unit;
@@ -30,18 +30,18 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-public class ProgressIndicator implements Runnable {
+public class ActivityProgressIndicator implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProgressIndicator.class);
+    private final static Logger logger = LoggerFactory.getLogger(ActivityProgressIndicator.class);
     private final String indicatorSpec;
     private final ScenarioController sc;
-    private PeriodicRunnable<ProgressIndicator> runnable;
+    private PeriodicRunnable<ActivityProgressIndicator> runnable;
     private IndicatorMode indicatorMode = IndicatorMode.console;
-    private Set<String> seen = new HashSet<>();
+    private final Set<String> seen = new HashSet<>();
 
-    private long intervalMillis=1L;
+    private long intervalMillis = 1L;
 
-    public ProgressIndicator(ScenarioController sc, String indicatorSpec) {
+    public ActivityProgressIndicator(ScenarioController sc, String indicatorSpec) {
         this.sc = sc;
         this.indicatorSpec = indicatorSpec;
         start();
@@ -76,21 +76,22 @@ public class ProgressIndicator implements Runnable {
 
     @Override
     public void run() {
-        Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
-        for (ProgressMeter meter : progressMeters) {
+        Collection<ProgressAndStateMeter> progressMeters = sc.getProgressMeters();
+        for (ProgressAndStateMeter meter : progressMeters) {
 
-            boolean lastReport=false;
-            if (meter.getProgress()>=1.0d || meter.getProgressState()== RunState.Finished) {
+            boolean lastReport = false;
+            if (meter.getProgressRatio() >= 1.0d || meter.getRunState() == RunState.Finished) {
                 if (seen.contains(meter.getProgressName())) {
                     continue;
                 } else {
                     seen.add(meter.getProgressName());
-                    lastReport=true;
+                    lastReport = true;
                 }
             }
 
-            String progress = meter.getProgressName() + ": " + formatProgress(meter.getProgress()) + "/" + meter.getProgressState() +
-                    " (details: " + meter.getProgressDetails()+")" + (lastReport ? " (last report)" : "");
+            String progress =
+                meter.getProgressName() + ": " + formatProgress(meter.getProgressRatio()) + "/" + meter.getRunState() +
+                    " (details: " + meter.getProgressSummary() + ")" + (lastReport ? " (last report)" : "");
 
             switch (indicatorMode) {
                 case console:

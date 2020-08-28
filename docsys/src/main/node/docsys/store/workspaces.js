@@ -3,7 +3,8 @@ import {mapGetters} from "vuex";
 
 export const state = () => ({
     workspace: 'default',
-    workspaces: []
+    workspaces: [],
+    fileview: []
 });
 
 export const getters = {
@@ -12,6 +13,9 @@ export const getters = {
     },
     getWorkspaces: (state, getters) => {
         return state.workspaces;
+    },
+    getFileview: (state, getters) => {
+        return state.fileview;
     }
 
     // ...mapGetters(['workspace','workspaces'])
@@ -23,24 +27,27 @@ export const mutations = {
     },
     setWorkspaces(state, workspaces) {
         state.workspaces = workspaces;
+    },
+    setFileview(state, fileview) {
+        state.fileview = fileview;
     }
 };
 
 export const actions = {
     async setWorkspace({commit, state, dispatch}, val) {
-        console.log("committing setWorkspace:" + JSON.stringify(val));
+        // console.log("committing setWorkspace:" + JSON.stringify(val));
         commit('setWorkspace', val);
     },
     async setWorkspaces({commit, state, dispatch}, val) {
-        console.log("committing setWorkspaces:" + JSON.stringify(val));
+        // console.log("committing setWorkspaces:" + JSON.stringify(val));
         commit('setWorkspaces', val);
     },
     async initWorkspaces({commit, state, dispatch}, reason) {
-        console.log("initializing workspaces because '" + reason + "'")
+        // console.log("initializing workspaces because '" + reason + "'")
         this.$axios.$get("/workspaces/")
             .then(res => {
-                console.log("axios/vuex workspaces async get:" + JSON.stringify(res));
-                console.log("committing setWorkspaces:" + JSON.stringify(res));
+                // console.log("axios/vuex workspaces async get:" + JSON.stringify(res));
+                // console.log("committing setWorkspaces:" + JSON.stringify(res));
                 commit('setWorkspaces', res)
             })
             .catch((e) => {
@@ -66,7 +73,7 @@ export const actions = {
     async activateWorkspace({commit, state, dispatch}, workspace) {
         const fresh_workspace = await this.$axios.$get("/workspaces/" + workspace)
             .then(res => {
-                console.log("axios/vuex workspace async get:" + JSON.stringify(res))
+                // console.log("axios/vuex workspace async get:" + JSON.stringify(res))
                 return res;
             })
             .catch((e) => {

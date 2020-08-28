@@ -20,50 +20,7 @@
 
     <v-content justify-start align-start class="d-inline-block pa-4 ma-10">
       <div class="row no-gutters">
-        <v-card min-width="300" max-width="300" max-height="400" raised elevation="5" v-for="(cardspace,w) in workspaces" :key="w"
-                class="pa-4 ma-4">
-          <v-row>
-            <v-card-title title="workspace name">{{ cardspace.name }}</v-card-title>
-            <v-icon v-if="workspace === cardspace.name">mdi-check-bold</v-icon>
-          </v-row>
 
-          <v-card-subtitle title="last change">{{ abbrev(cardspace.summary.last_changed_filename) }}</v-card-subtitle>
-          <v-divider></v-divider>
-          <v-list align-start>
-            <v-simple-table>
-              <tbody>
-              <tr>
-                <td>Bytes</td>
-                <td>{{ cardspace.summary.total_bytes }}</td>
-              </tr>
-              <tr>
-                <td>Files</td>
-                <td>{{ cardspace.summary.total_files }}</td>
-              </tr>
-              </tbody>
-            </v-simple-table>
-            <v-divider></v-divider>
-
-            <v-list-item>
-              <v-btn title="view details of workspace">
-                <v-icon>mdi-magnify</v-icon>
-              </v-btn>
-
-              <v-spacer></v-spacer>
-
-              <v-btn title="download zipped workspace">
-                <v-icon>mdi-folder-download</v-icon>
-              </v-btn>
-
-              <v-spacer></v-spacer>
-
-              <v-btn title="purge workspace">
-                <v-icon @click="purgeWorkspace(cardspace.name)">mdi-trash-can</v-icon>
-              </v-btn>
-
-            </v-list-item>
-          </v-list>
-        </v-card>
       </div>
     </v-content>
 

@@ -12,7 +12,7 @@ public class NBCLIScenarios {
             NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
 
         for (WorkloadDesc workload : workloads) {
-            System.out.println(workload.toString(includeScenarios));
+            System.out.println(workload.toMarkdown(includeScenarios));
         }
 
         if (!includeScenarios) {

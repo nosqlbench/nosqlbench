@@ -78,7 +78,7 @@ export default {
       });
     },
     commitWorkspace: function ({$store}) {
-      console.log("commit:" + JSON.stringify(this.new_workspace));
+      // console.log("commit:" + JSON.stringify(this.new_workspace));
       this.$store.dispatch("workspaces/activateWorkspace", this.new_workspace);
       this.new_workspace = "";
       this.mode = "showing";

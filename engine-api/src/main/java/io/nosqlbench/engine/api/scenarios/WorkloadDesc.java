@@ -48,10 +48,13 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
 
 
     public String toString() {
-        return toString(true);
+        return
+            ((workspace != null && !workspace.isEmpty()) ? workspace + ":" : "")
+                + this.yamlPath;
+//                + (this.description != null ? "\ndesc: " + this.description : "");
     }
 
-    public String toString(boolean includeScenarios) {
+    public String toMarkdown(boolean includeScenarios) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -61,10 +64,10 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
 
         if (!description.isEmpty()) {
 //            sb.append("# description:\n");
-            String formttedDesc = "# " + String.join("\n# ",description.split("\n"));
+            String formttedDesc = "# " + String.join("\n# ", description.split("\n"));
             sb.append(formttedDesc).append("\n");
             while (sb.toString().endsWith("\n\n")) {
-                sb.setLength(sb.length()-1);
+                sb.setLength(sb.length() - 1);
             }
 //            if (!description.endsWith("\n")) {
 //                sb.append("\n");
@@ -124,4 +127,5 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
     public String getWorkspace() {
         return workspace;
     }
+
 }

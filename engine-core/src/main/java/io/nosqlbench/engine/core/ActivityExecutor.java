@@ -15,10 +15,8 @@
 package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityapi.core.*;
-import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityimpl.SlotStateTracker;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
  * </ul>
  */
 
-public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressMeter {
+public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressCapable {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
     private static final Logger activitylogger = LoggerFactory.getLogger("ACTIVITY");
@@ -121,14 +119,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     }
 
-    /**
-     * Shutdown the activity executor, with a grace period for the motor threads.
-     *
-     * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing
-     *                            everything to stop
-     */
-    public synchronized void forceStopExecutor(int initialMillisToWait) {
-
+    public synchronized RuntimeException forceStopScenario(int initialMillisToWait) {
         activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
 
         activity.setRunState(RunState.Stopped);
@@ -164,13 +155,26 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         activity.closeAutoCloseables();
         long activityShutdownEndedAt = System.currentTimeMillis();
         logger.debug("took " + (activityShutdownEndedAt - activityShutdownStartedAt) + " ms to shutdown activity threads");
+        activitylogger.debug("FORCE STOP/after alias=(" + activity.getAlias() + ")");
 
         if (stoppingException != null) {
             activitylogger.debug("FORCE STOP/exception alias=(" + activity.getAlias() + ")");
-            throw stoppingException;
         }
-        activitylogger.debug("FORCE STOP/after alias=(" + activity.getAlias() + ")");
+        return stoppingException;
 
+    }
+
+    /**
+     * Shutdown the activity executor, with a grace period for the motor threads.
+     *
+     * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing
+     *                            everything to stop
+     */
+    public synchronized void forceStopScenarioAndThrow(int initialMillisToWait, boolean rethrow) {
+        RuntimeException exception = forceStopScenario(initialMillisToWait);
+        if (exception != null && rethrow) {
+            throw exception;
+        }
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
@@ -465,61 +469,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         return activity;
     }
 
-    @Override
-    public synchronized double getProgress() {
-        ArrayList<Input> inputs = motors.stream()
-            .map(Motor::getInput)
-            .distinct()
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        double startCycle = getActivityDef().getStartCycle();
-        double endCycle = getActivityDef().getEndCycle();
-        double totalCycles = endCycle - startCycle;
-
-        double total = 0.0D;
-        double progress = 0.0D;
-
-        for (Input input : inputs) {
-            if (input instanceof ProgressCapable) {
-                ProgressCapable progressInput = (ProgressCapable) input;
-                total += progressInput.getTotal();
-                progress += progressInput.getProgress();
-
-            } else {
-                logger.warn("input does not support activity progress: " + input);
-                return Double.NaN;
-            }
-        }
-
-        return progress / total;
-    }
-
-    @Override
-    public String getProgressDetails() {
-        return motors.stream().map(Motor::getInput).distinct().findFirst()
-            .filter(i -> i instanceof ProgressCapable)
-            .map(i -> ((ProgressCapable) i).getProgressDetails()).orElse("");
-    }
-
-
-    @Override
-    public String getProgressName() {
-        return activityDef.getAlias();
-    }
-
-    @Override
-    public RunState getProgressState() {
-        Optional<RunState> first = motors.stream()
-            .map(Motor::getSlotStateTracker).map(SlotStateTracker::getSlotState)
-            .distinct().sorted().findFirst();
-        return first.orElse(RunState.Uninitialized);
-    }
-
-
     public synchronized void notifyException(Thread t, Throwable e) {
         //logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
         this.stoppingException = new RuntimeException("Error in activity thread " + t.getName(), e);
-        forceStopExecutor(10000);
+        forceStopScenario(10000);
     }
 
     @Override
@@ -544,4 +497,11 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
         requestStopMotors();
     }
+
+    @Override
+    public ProgressMeter getProgressMeter() {
+        return this.activity.getProgressMeter();
+    }
+
+
 }

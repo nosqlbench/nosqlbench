@@ -2,9 +2,7 @@
   <v-app>
   <main-app-bar>NoSQLBench - Workload Builder</main-app-bar>
 
-    <v-layout
-        justify-center
-        align-center>
+    <v-layout>
 
       <v-main>
         <v-container fluid>
@@ -62,9 +60,9 @@ import {saveAs} from "file-saver";
 import yamlDumper from "js-yaml";
 import CQL3Parser from '@/antlr/CQL3Parser.js';
 import CQL3Lexer from '@/antlr/CQL3Lexer.js';
-import defaultYaml from '~/assets/default.yaml';
-import basictypes from '@/assets/basictypes.yaml';
-import WorkspaceSelector from "~/components/WorkspaceSelector";
+import defaultYaml from 'assets/default.yaml';
+import basictypes from 'assets/basictypes.yaml';
+import WorkspaceSelector from "@/components/WorkspaceSelector";
 import AppSelector from "@/components/AppSelector";
 import MainAppBar from "@/components/MainAppBar";
 

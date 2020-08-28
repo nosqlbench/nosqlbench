@@ -45,7 +45,7 @@ export default {
     }
 
     let result={namespaces: collated};
-    console.log("namespaces result:"+JSON.stringify(result));
+    // console.log("namespaces result:"+JSON.stringify(result));
     return result;
   }
 

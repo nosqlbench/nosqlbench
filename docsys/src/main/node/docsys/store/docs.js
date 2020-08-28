@@ -62,7 +62,7 @@ export const getters = {
             throw "unable to load active markdown for undefined category";
         }
         if (state.active_topic===null) {
-            throw "uanble to load active markdown for undefined topic";
+            throw "unable to load active markdown for undefined topic";
         }
         return state.active_topic.content;
     }
@@ -78,13 +78,6 @@ export const mutations = {
     setCategories(state, categories) {
         state.categories = categories;
     },
-    // initializeStore(state) {
-    //     if(localStorage.getItem('store')) {
-    //         this.replaceState(
-    //             Object.assign(state,JSON.parse(localStorage.getItem('store')))
-    //         );
-    //     }
-    // },
     toggleDrawerState(state, newDrawerState) {
         if (state.isMenuLocked) {
             return;

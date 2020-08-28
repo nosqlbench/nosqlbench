@@ -5,7 +5,7 @@
   "author": "Sebastian Estevez & Jonathan Shook",
   "private": true,
   "scripts": {
-    "dev": "nuxt -c nuxt.config.dev.js",
+    "dev": "nuxt -c nuxt.config.dev.js --port 3003",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",

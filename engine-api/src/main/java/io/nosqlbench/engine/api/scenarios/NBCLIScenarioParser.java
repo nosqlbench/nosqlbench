@@ -315,7 +315,7 @@ public class NBCLIScenarioParser {
                 }
 
                 String description = stmts.getDescription();
-                workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description,""));
+                workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description, ""));
             }
         }
         Collections.sort(workloadDescriptions);
@@ -324,11 +324,15 @@ public class NBCLIScenarioParser {
 
     }
 
+    public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(boolean defaultIncludes, Set<String> includes) {
+        return getWorkloadsWithScenarioScripts(defaultIncludes, includes.toArray(new String[0]));
+    }
+
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(boolean defaultIncludes, String... includes) {
 
         NBPathsAPI.GetPrefix searchin = NBIO.all();
         if (defaultIncludes) {
-            searchin= searchin.prefix(SEARCH_IN);
+            searchin = searchin.prefix(SEARCH_IN);
         }
 
         List<Content<?>> activities = searchin

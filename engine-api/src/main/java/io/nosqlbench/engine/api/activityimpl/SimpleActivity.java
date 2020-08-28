@@ -3,6 +3,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
+import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -14,6 +15,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
@@ -32,11 +34,11 @@ import java.util.function.Supplier;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity {
+public class SimpleActivity implements Activity, ProgressCapable {
     private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
 
     protected ActivityDef activityDef;
-    private List<AutoCloseable> closeables = new ArrayList<>();
+    private final List<AutoCloseable> closeables = new ArrayList<>();
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
@@ -49,6 +51,7 @@ public class SimpleActivity implements Activity {
     private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
+    private long startedAtMillis;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -70,6 +73,14 @@ public class SimpleActivity implements Activity {
 
     public synchronized void setRunState(RunState runState) {
         this.runState = runState;
+        if (runState == RunState.Running) {
+            this.startedAtMillis = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public long getStartedAtMillis() {
+        return startedAtMillis;
     }
 
     @Override
@@ -205,6 +216,7 @@ public class SimpleActivity implements Activity {
     public RateLimiter getPhaseLimiter() {
         return phaseLimiter;
     }
+
 
 
     @Override
@@ -398,5 +410,17 @@ public class SimpleActivity implements Activity {
 
         return planner.resolve();
     }
+
+    @Override
+    public ProgressMeter getProgressMeter() {
+        Input input = getInputDispenserDelegate().getInput(0);
+        if (input instanceof ProgressCapable) {
+            ProgressMeter meter = ((ProgressCapable) input).getProgressMeter();
+            return new ProgressAndStateMeter(meter, this);
+        } else {
+            throw new RuntimeException("Progress meter must be implemented here.");
+        }
+    }
+
 
 }

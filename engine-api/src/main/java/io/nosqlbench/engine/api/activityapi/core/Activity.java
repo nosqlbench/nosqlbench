@@ -25,6 +25,8 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
+import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -34,15 +36,17 @@ import java.util.function.Supplier;
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
-public interface Activity extends Comparable<Activity>, ActivityDefObserver {
+public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable {
 
     /**
      * Provide the activity with the controls needed to stop itself.
+     *
      * @param activityController The dedicated control interface for this activity
      */
     void setActivityController(ActivityController activityController);
 
     ActivityController getActivityController();
+
     /**
      * Register an object which should be closed after this activity is shutdown.
      *
@@ -89,7 +93,10 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
     void setOutputDispenserDelegate(OutputDispenser outputDispenser);
 
     RunState getRunState();
+
     void setRunState(RunState runState);
+
+    long getStartedAtMillis();
 
     default void shutdownActivity() {
     }
