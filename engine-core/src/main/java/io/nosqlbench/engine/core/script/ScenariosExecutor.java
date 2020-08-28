@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
-    private LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
+    private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 
     private final ExecutorService executor;
-    private String name;
+    private final String name;
     private RuntimeException stoppingException;
 
     public ScenariosExecutor(String name) {
@@ -196,10 +196,27 @@ public class ScenariosExecutor {
         return Optional.empty();
     }
 
-    public synchronized void cancelScenario(String scenarioName) {
+    public synchronized void stopScenario(String scenarioName) {
+        this.stopScenario(scenarioName,false);
+    }
+
+    public synchronized void stopScenario(String scenarioName, boolean rethrow) {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
-            pendingScenario.get().getScenarioController().forceStopScenario(0);
+            ScenarioController controller = pendingScenario.get().getScenarioController();
+            if (controller!=null) {
+                controller.forceStopScenario(0, rethrow);
+            }
+        } else {
+            throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
+        }
+    }
+
+    public synchronized void deleteScenario(String scenarioName) {
+        stopScenario(scenarioName, false);
+
+        Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
+        if (pendingScenario.isPresent()) {
             submitted.remove(scenarioName);
             logger.info("cancelled scenario " + scenarioName);
         } else {
@@ -212,8 +229,8 @@ public class ScenariosExecutor {
     }
 
     private static class SubmittedScenario {
-        private Scenario scenario;
-        private Future<ScenarioResult> resultFuture;
+        private final Scenario scenario;
+        private final Future<ScenarioResult> resultFuture;
 
         SubmittedScenario(Scenario scenario, Future<ScenarioResult> resultFuture) {
             this.scenario = scenario;
