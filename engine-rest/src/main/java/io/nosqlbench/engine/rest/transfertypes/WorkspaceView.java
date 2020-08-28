@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -32,6 +33,7 @@ public class WorkspaceView {
         return workspaceRoot.getFileName().toString();
     }
 
+    @JsonProperty("modified")
     public long getModified() {
         try {
             return Files.getLastModifiedTime(workspaceRoot).toMillis();
@@ -40,6 +42,7 @@ public class WorkspaceView {
         }
     }
 
+    @JsonProperty("summary")
     public Summary getSummary() {
         if (this.summary == null) {
             Summary v = new Summary(this.workspaceRoot);

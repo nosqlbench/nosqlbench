@@ -5,36 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A CliRequest is what the user sends when they want to invoke NoSQLBench via web request in the
- * same way they may on the command line.
- *
- * <pre>{@code
- *  {
- *    "workspace" : "",
- *    "name" : "auto",
- *    "basedir" : "/tmp/nosqlbench",
- *    "filemap" : {
- *        "file1.yaml": "bindings:\n i: Identity()\n",
- *        "myscb:base64" : "base64encodeddata.."
- *    },
- *    "commands": [
- *      "run", "workload=file1.yaml", "driver=stdout", "cycles=10M", "cyclerate=100", "scb=myscb"
- *    ]
- *  }
- * }</pre>
- */
 public class RunScenarioRequest {
 
     @JsonProperty("commands")
-    private List<String> commands;
+    private List<String> commands = List.of();
 
     @JsonProperty("filemap")
-    private Map<String, String> filemap;
+    private Map<String, String> filemap = Map.of();
 
+    @JsonProperty("console")
     private String stdout;
 
-    @JsonProperty("name")
+    @JsonProperty("scenario_name")
     private String scenarioName = "auto";
 
     @JsonProperty("workspace")

@@ -1,6 +1,5 @@
 package io.nosqlbench.engine.rest.services;
 
-import io.nosqlbench.engine.rest.domain.WorkSpace;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,15 +14,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class WorkspaceService {
-    private final static Logger logger = LogManager.getLogger(WorkspaceService.class);
+public class WorkspaceFinder {
+    private final static Logger logger = LogManager.getLogger(WorkspaceFinder.class);
 
     public static String DEFAULT = "default";
     public static final String WORKSPACE_ROOT = "workspaces_root";
 
     private final Path root;
 
-    public WorkspaceService(Configuration config) {
+    public WorkspaceFinder(Configuration config) {
         Object root = config.getProperties().get(WORKSPACE_ROOT);
         if (root instanceof Path) {
             this.root = (Path) root;
@@ -46,7 +45,7 @@ public class WorkspaceService {
         createDefaultIfNotExist();
     }
 
-    public WorkspaceService(Path root) {
+    public WorkspaceFinder(Path root) {
         this.root = root;
         createDefaultIfNotExist();
     }

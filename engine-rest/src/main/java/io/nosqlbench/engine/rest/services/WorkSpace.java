@@ -1,7 +1,8 @@
-package io.nosqlbench.engine.rest.domain;
+package io.nosqlbench.engine.rest.services;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
+import io.nosqlbench.engine.rest.transfertypes.WorkspaceItemView;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
@@ -78,6 +79,8 @@ public class WorkSpace {
         }
 
         Path targetPath = Paths.get(filename);
+        assertLegalWorkspacePath(targetPath);
+
         if (targetPath.isAbsolute()) {
             throw new RuntimeException("You may not use absolute paths in workspaces: '" + targetPath.toString() + "'");
         }
@@ -110,5 +113,41 @@ public class WorkSpace {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public List<WorkspaceItemView> getWorkspaceListingView(String filepath) {
+
+        Path target = this.workspacePath.resolve(filepath);
+        assertLegalWorkspacePath(target);
+
+        List<WorkspaceItemView> items = new ArrayList<>();
+
+        try {
+            DirectoryStream<Path> elementPaths = Files.newDirectoryStream(target);
+            for (Path elementPath : elementPaths) {
+                items.add(new WorkspaceItemView(this.workspacePath,elementPath));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return items;
+    }
+
+    private void assertLegalWorkspacePath(Path target) {
+        if (target.toString().contains("..")) {
+            throw new RuntimeException("Possible path injection:" + target.toString());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.workspaceName;
+    }
+
+    public String[] asIncludes() {
+        Path relativePath =
+            this.workspacesRoot.toAbsolutePath().getParent().relativize(this.workspacePath.toAbsolutePath());
+        return new String[]{ relativePath.toString() };
     }
 }

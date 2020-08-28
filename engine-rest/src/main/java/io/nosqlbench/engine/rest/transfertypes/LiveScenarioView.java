@@ -1,12 +1,14 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LiveScenarioView {
 
@@ -18,6 +20,9 @@ public class LiveScenarioView {
         this.result = result;
     }
 
+    @JsonProperty
+    @JsonPropertyDescription("Optionally populated result, "+
+        " present only if there was an error or the scenario is complete")
     public ResultView getResult() {
         if (result==null) {
             return null;
@@ -40,12 +45,24 @@ public class LiveScenarioView {
         return scenario.getEndedAtMillis();
     }
 
+    public Scenario.State getState() {
+        return scenario.getScenarioState();
+    }
+
     @JsonProperty("progress")
     public List<ProgressView> getProgress() {
-        List<ProgressView> progress = new ArrayList<>();
+        List<ProgressView> progressView = new ArrayList<>();
+        if (scenario.getScenarioController()==null) {
+            return progressView;
+        }
 
-        return scenario.getScenarioController().getProgressMeters()
-            .stream().map(ProgressView::new).collect(Collectors.toList());
+        Collection<? extends ProgressMeter> meters = scenario.getScenarioController().getProgressMeters();
+        for (ProgressMeter progressMeter : meters) {
+            ProgressView meterView = new ProgressView(progressMeter);
+            progressView.add(meterView);
+        }
+
+        return progressView;
     }
 
 }
