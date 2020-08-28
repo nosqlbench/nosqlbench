@@ -48,15 +48,24 @@ public class Scenario implements Callable<ScenarioResult> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
 
+    private State state = State.Scheduled;
+
+    public enum State {
+        Scheduled,
+        Running,
+        Errored,
+        Finished
+    }
+
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
-    private ProgressIndicator progressIndicator;
+    private ActivityProgressIndicator activityProgressIndicator;
     private String progressInterval = "console:1m";
     private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
-    private String scenarioName;
+    private final String scenarioName;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private String scriptfile;
@@ -109,7 +118,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 e.printStackTrace();
             }
             ByteBuffer bb = ByteBuffer.wrap(bytes);
-            Charset utf8 = Charset.forName("UTF8");
+            Charset utf8 = StandardCharsets.UTF_8;
             String scriptData = utf8.decode(bb).toString();
             addScriptText(scriptData);
         }
@@ -160,7 +169,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
         scenarioController = new ScenarioController();
         if (!progressInterval.equals("disabled")) {
-            progressIndicator = new ProgressIndicator(scenarioController, progressInterval);
+            activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
 
         scriptEnv = new ScenarioContext(scenarioController);
@@ -209,10 +218,10 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
+        state=State.Running;
+
         startedAtMillis=System.currentTimeMillis();
-
         init();
-
         logger.debug("Running control script for " + getScenarioName() + ".");
         for (String script : scripts) {
             try {
@@ -253,9 +262,13 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.err.flush();
                 System.out.flush();
             } catch (Exception e) {
-                this.scenarioController.forceStopScenario(5000);
+                this.state = State.Errored;
+                this.scenarioController.forceStopScenario(5000,false);
                 throw new RuntimeException(e);
             } finally {
+                if (this.state==State.Running) {
+                    this.state = State.Finished;
+                }
                 System.out.flush();
                 System.err.flush();
                 endedAtMillis=System.currentTimeMillis();
@@ -329,6 +342,10 @@ public class Scenario implements Callable<ScenarioResult> {
         addScenarioScriptParams(new ScriptParams() {{
             putAll(scriptParams);
         }});
+    }
+
+    public State getScenarioState() {
+        return state;
     }
 
     public void enableCharting() {
