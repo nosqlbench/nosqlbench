@@ -288,6 +288,10 @@ public class NBCLIScenarioParser {
                 .one();
 
             StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
+            if (stmts.getStmtDocs().size() == 0) {
+                logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                continue;
+            }
 
             Map<String, String> templates = new LinkedHashMap<>();
             try {

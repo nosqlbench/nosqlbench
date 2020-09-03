@@ -20,13 +20,15 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
 
-
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
 
-    private RawStmtsDocList rawStmtsDocList;
+    private final RawStmtsDocList rawStmtsDocList;
 
     public StmtsDocList(RawStmtsDocList rawStmtsDocList) {
         this.rawStmtsDocList = rawStmtsDocList;
@@ -35,14 +37,14 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     public List<StmtsDoc> getStmtDocs(String tagFilter) {
         TagFilter tf = new TagFilter(tagFilter);
         return getStmtDocs().stream()
-                .filter(tf::matchesTagged)
-                .collect(Collectors.toList());
+            .filter(tf::matchesTagged)
+            .collect(Collectors.toList());
     }
 
     public List<StmtsDoc> getStmtDocs() {
         return rawStmtsDocList.getStmtsDocs().stream()
-                .map(StmtsDoc::new)
-                .collect(Collectors.toList());
+            .map(StmtsDoc::new)
+            .collect(Collectors.toList());
     }
 
     public List<OpTemplate> getStmts() {
@@ -50,17 +52,17 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     }
 
     /**
+     * @param tagFilterSpec a comma-separated tag filter spec
      * @return The list of all included statements for all included blocks of  in this document,
      * including the inherited and overridden values from the this doc and the parent block.
-     * @param tagFilterSpec a comma-separated tag filter spec
      */
     public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
 
         List<OpTemplate> stmts = getStmtDocs().stream()
-                .flatMap(d -> d.getStmts().stream())
-                .filter(ts::matchesTagged)
-                .collect(Collectors.toList());
+            .flatMap(d -> d.getStmts().stream())
+            .filter(ts::matchesTagged)
+            .collect(Collectors.toList());
         return stmts;
     }
 
@@ -73,13 +75,14 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     /**
      * Return the list of all bindings combined across all docs, not including
      * the block or statement level bindings.
+     *
      * @return A map of all bindings at the doc level.
      */
-    public Map<String,String> getDocBindings() {
-        LinkedHashMap<String,String> docBindings= new LinkedHashMap<>();
+    public Map<String, String> getDocBindings() {
+        LinkedHashMap<String, String> docBindings = new LinkedHashMap<>();
         getStmtDocs().stream()
-                .map(StmtsDoc::getBindings)
-                .forEach(docBindings::putAll);
+            .map(StmtsDoc::getBindings)
+            .forEach(docBindings::putAll);
         return docBindings;
     }
 
@@ -92,6 +95,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * @return the list of named scenarios for the first document in the list.
      */
     public Scenarios getDocScenarios() {
+        if (this.getStmtDocs().size() == 0) {
+            throw new RuntimeException("No statement docs were found, so source file is empty.");
+        }
         return this.getStmtDocs().get(0).getScenarios();
     }
 
