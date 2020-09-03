@@ -47,7 +47,8 @@ export default {
     ],
     axios: {
         port: 12345,
-        browserBaseURL: 'http://localhost:12345/services/',
+        __browserBaseURL: 'http://localhost:12345/services/',
+        baseUrl: '/services/',
         progress: true
     },
     /*

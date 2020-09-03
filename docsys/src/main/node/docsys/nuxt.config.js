@@ -1,7 +1,7 @@
 import colors from 'vuetify/es5/util/colors'
 
-var glob = require('glob');
-var path = require('path');
+// var glob = require('glob');
+// var path = require('path');
 
 export default {
     // target: 'static',
@@ -47,8 +47,10 @@ export default {
         '@nuxtjs/axios'
     ],
     axios: {
-        port: 12345,
-        browserBaseURL: 'http://localhost:12345/services/',
+        // port: 12345,
+        // browserBaseURL: 'http://localhost:12345/services/',
+        // baseURL: '/services/',
+        // browserBaseURL: '/services/',
         progress: true
     },
     /*
@@ -130,8 +132,8 @@ export default {
               test: /.g4/, loader: 'antlr4-webpack-loader'
             })
             config.module.rules.push({
-              test: /\.ya?ml$/,
-              use: 'js-yaml-loader',
+                test: /\.ya?ml$/,
+                use: 'js-yaml-loader',
             })
             config.node = {
                 fs: 'empty'
@@ -139,24 +141,23 @@ export default {
             config.optimization.minimize = false;
         }
     }
-    , generate: {
-        routes: dynamicRoutes
-    }
-
 }
+// , generate: {
+//     routes: dynamicRoutes
+// }
 
-var dynamicRoutes = getDynamicPaths({
-    '/docs': 'docs/*.md',
-    '/#/docs': '/#/docs/*.md'
-});
-
-function getDynamicPaths(urlFilepathTable) {
-    return [].concat(
-        ...Object.keys(urlFilepathTable).map(url => {
-            var filepathGlob = urlFilepathTable[url];
-            return glob
-                .sync(filepathGlob, {cwd: 'content'})
-                .map(filepath => `${url}/${path.basename(filepath, '.md')}`);
-        })
-    );
-}
+// var dynamicRoutes = getDynamicPaths({
+//     '/docs': 'docs/*.md',
+//     '/#/docs': '/#/docs/*.md'
+// });
+//
+// function getDynamicPaths(urlFilepathTable) {
+//     return [].concat(
+//         ...Object.keys(urlFilepathTable).map(url => {
+//             var filepathGlob = urlFilepathTable[url];
+//             return glob
+//                 .sync(filepathGlob, {cwd: 'content'})
+//                 .map(filepath => `${url}/${path.basename(filepath, '.md')}`);
+//         })
+//     );
+// }

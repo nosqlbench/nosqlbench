@@ -101,6 +101,9 @@ export default {
     workspace: function () {
       return this.$store.getters["workspaces/getWorkspace"]
     },
+    enabled: function () {
+      return this.$store.getters["service_status/getEndpoints"]
+    }
   },
   methods: {
     async parseStatement() {
@@ -270,18 +273,9 @@ export default {
       })
     }
   },
-  async asyncData({$axios, store}) {
-    let enabled = await $axios.$get("/status")
-        .then(res => {
-          return res
-        })
-        .catch((e) => {
-          console.log("back-end not found");
-        })
-    return {
-      enabled: enabled,
-    }
-  },
+  created() {
+    this.$store.dispatch('service_status/loadEndpoints')
+  }
 }
 </script>
 <style>

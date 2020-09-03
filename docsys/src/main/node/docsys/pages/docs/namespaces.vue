@@ -32,11 +32,11 @@
 </template>
 
 <script>
-    import get_namespaces from '@/mixins/get_namespaces.js';
+    // import get_namespaces from '@/mixins/get_namespaces.js';
 
     export default {
         name: "namespaces",
-        mixins: [get_namespaces],
+        // mixins: [get_namespaces],
         data(context) {
             // return {
             //     namespaces: []

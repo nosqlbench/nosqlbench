@@ -1,9 +1,11 @@
+import endpoints from "@/js/endpoints";
+
 // https://www.mikestreety.co.uk/blog/vue-js-using-localstorage-with-the-vuex-store
 
 
 /**
  categories: [
-   {
+ {
      name,
      title,
      topics,
@@ -108,27 +110,37 @@ export const actions = {
     async setIsDrawerOpen({commit, state, dispatch}, isDrawerOpen) {
         await commit("setIsDrawerOpen", isDrawerOpen)
     },
-    async setCategories({commit, state, dispatch}, categories) {
+    async setCategories({commit, state, dispatch, context}, categories) {
         await commit("setCategories", categories)
     },
-    async loadCategories({commit, state, dispatch}) {
+    async loadCategories(context) {
+        // let location = document.location;
+        // console.log("location:" + location);
+
+        let commit = context.commit;
+        let state = context.state;
+        let dispatch = context.dispatch;
         if (state.categories === null || state.categories.length === 0) {
 
             let fm = require('front-matter');
 
-            const category_data = await this.$axios.get("/docs/markdown.csv")
+            const category_data = await this.$axios.get(endpoints.url(document, context, "/services/docs/markdown.csv"))
                 .then(manifest => {
                     // console.log("typeof(manifest):" + typeof (manifest))
                     // console.log("manifest:" + JSON.stringify(manifest, null, 2))
                     return manifest.data.split("\n").filter(x => {
-                        return x!==null && x.length>0
+                        return x !== null && x.length > 0
                     })
+                })
+                .catch((e) => {
+                    console.log("error getting data:" + e);
+                    throw e;
                 })
                 .then(async lines => {
                     let val = await Promise.all(lines.map(line => {
                         let url = "/docs" + "/" + line;
                         // console.log("url:"+url)
-                        return this.$axios.get("/docs/" + line)
+                        return this.$axios.get(endpoints.url(document, context, "/services/docs/" + line))
                             .then(res => {
                                 // console.log("typeof(res):" + typeof(res))
                                 return {
@@ -145,8 +157,14 @@ export const actions = {
                     //  console.log("mapof:" + JSON.stringify(mapof, null, 2))
                     //  return mapof;
                 })
+                .catch((e) => {
+                    console.log("error getting entries:" + e);
+                    throw e;
+                })
                 .then(fetched => {
                         return fetched.map(entry => {
+
+                            // console.log("entry:" + JSON.stringify(entry,null,2))
                             let [, name] = entry.path.match(/(.+)\.md$/);
                             let basename = entry.path.split("/").find(x => x.includes(".md"))
                             let categories = entry.path.split("/").filter(x => !x.includes("."))
@@ -156,7 +174,9 @@ export const actions = {
                             let weight = ((mdMeta.attributes.weight) ? mdMeta.attributes.weight : 0)
                             let title = ((mdMeta.attributes.title) ? mdMeta.attributes.title : basename)
                             let path = "/docs/" + entry.path
-
+                            let baseurl = endpoints.url(document, context, "/services/docs/" + path);
+                            console.log("baseurl for doc:" + baseurl);
+                            let body = endpoints.localize(mdMeta.body, baseurl)
                             // console.log("path:" + entry.path)
                             return {
                                 name,
@@ -170,6 +190,10 @@ export const actions = {
                         })
                     }
                 )
+                .catch((e) => {
+                    console.log("error parsing entries:" + e);
+                    throw e;
+                })
                 .then(alltopics => {
                     // console.log("input:" + JSON.stringify(input, null, 2))
                     let categorySet = new Set();
@@ -224,7 +248,6 @@ export const actions = {
 
         // console.log("typeof(result):" + typeof (docinfo))
         // console.log("result:" + JSON.stringify(docinfo, null, 2))
-
 
 
     }

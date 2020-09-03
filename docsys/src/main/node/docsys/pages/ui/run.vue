@@ -284,7 +284,7 @@ export default {
         commands
       }
       console.log("submitting:" + JSON.stringify(erq));
-      this.$axios.$post("/executor/cli", erq);
+      this.$store.dispatch("scenarios/runScenario", erq);
     }
   }
 }

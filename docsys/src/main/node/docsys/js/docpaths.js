@@ -15,7 +15,6 @@
 
 
 export default {
-
     getCategory(route, categories) {
         let active_category = categories[0];
         if (!route.path) {
@@ -26,12 +25,9 @@ export default {
                 throw "invalid path for docs: '" + route.path + "' parts[0]=" + parts[0] + " parts=" + JSON.stringify(parts,null,2)
             }
             if (parts.length>2) {
-                let active_category_name = parts[2];
-                active_category = categories.find(x => x.name === active_category_name);
-                if (active_category === undefined) {
-                    console.error("unable to find category named '" + active_category_name + "', resetting to root")
-                    // console.log("categories:" + JSON.stringify(categories, null, 2))
-                    active_category = categories[0];
+                let found = categories.find(x => x.name === parts[2]);
+                if (found) {
+                    active_category = found;
                 }
             }
         }

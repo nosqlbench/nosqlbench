@@ -1,5 +1,6 @@
 // https://www.mikestreety.co.uk/blog/vue-js-using-localstorage-with-the-vuex-store
 import {mapGetters} from "vuex";
+import endpoints from "@/js/endpoints";
 
 export const state = () => ({
     workloads: [],
@@ -32,19 +33,19 @@ export const mutations = {
 };
 
 export const actions = {
-    async setWorkloads({commit, state, dispatch}, val) {
+    async setWorkloads(context, val) {
         // console.log("committing setWorkloads:" + JSON.stringify(val));
-        commit('setWorkloads', val);
+        context.commit('setWorkloads', val);
     },
-    async setTemplates({commit, state, dispatch}, val) {
+    async setTemplates(context, val) {
         // console.log("commiting setTemplates:" + JSON.stringify(val));
-        commit("setTemplates", val);
+        context.commit("setTemplates", val);
     },
-    async setSearchin({commit, state, dispatch}, val) {
+    async setSearchin(context, val) {
         // console.log("committing setsearchin:" + JSON.stringify(val));
-        commit('setSearchin', val);
+        context.commit('setSearchin', val);
     },
-    async fetchWorkloads({commit, state, dispatch}, params) {
+    async fetchWorkloads(context, params) {
         let reason = params.reason;
         let searchin = params.searchin;
         if (reason === undefined || searchin === undefined) {
@@ -52,17 +53,17 @@ export const actions = {
         }
         // console.log("fetching workloads because '" + reason + "'")
 
-        commit("setTemplates", undefined);
-        this.$axios.$get("/workloads/?searchin=" + searchin)
+        context.commit("setTemplates", undefined);
+        this.$axios.$get(endpoints.url(document, context, "/services/workloads/?searchin=" + searchin))
             .then(res => {
                 // console.log("axios/vuex workloads async get:" + JSON.stringify(res));
-                commit("setWorkloads", res);
+                context.commit("setWorkloads", res);
             })
             .catch((e) => {
                 console.error("axios/nuxt workloads async error:", e);
             })
     },
-    fetchTemplates({commit, state, dispatch}, params) {
+    async fetchTemplates(context, params) {
         let reason = params.reason;
         let workload = params.workload;
         let searchin = params.searchin;
@@ -71,15 +72,17 @@ export const actions = {
         }
         console.log("fetching templates for '" + workload + "' because '" + reason + "'")
 
-        this.$axios.$get("/workloads/parameters?workloadName=" + workload + "&" + "searchin=" + searchin)
+        this.$axios.$get(endpoints.url(document, context, "/services/workloads/parameters?workloadName=" + workload + "&" + "searchin=" + searchin))
             .then(res => {
                 // console.log("axios/vuex templates async get:" + JSON.stringify(res));
-                dispatch("setTemplates", res);
+                context.dispatch("setTemplates", res)
+                    .then(r => {
+                        console.log("setTemplates result:" + JSON.stringify(r, null, 2))
+                    });
             })
             .catch((e) => {
                 console.error("axios/nuxt templates async error:", e);
             })
-
 
     }
 };
