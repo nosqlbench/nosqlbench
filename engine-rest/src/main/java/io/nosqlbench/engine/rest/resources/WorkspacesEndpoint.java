@@ -80,7 +80,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
     }
 
     @POST
-    @Path("/{workspaceName}/{filepath:.*}")
+    @Path("/{workspaceName}/{filepath:.+}")
     @Consumes(MediaType.WILDCARD)
     @Produces(MediaType.WILDCARD)
     public Response doSomething(@Context HttpServletRequest request, byte[] input) {

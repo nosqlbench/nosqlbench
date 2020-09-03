@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.rest.resources;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.AutoDocsWebService;
@@ -13,6 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
 @Service(WebServiceObject.class)
 @Singleton
@@ -25,8 +28,32 @@ public class ServiceStatusEndpoint implements WebServiceObject {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public boolean isEnabled() {
-        return true;
+    public Response isEnabled() {
+        try {
+            StatusEncoding status = new StatusEncoding(true, Map.of());
+            return Response.ok(status).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
     }
 
+    private final static class StatusEncoding {
+        @JsonProperty("enabled")
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @JsonProperty("endpoints")
+        public Map<String, String> getEndpoints() {
+            return endpoints;
+        }
+
+        private final boolean enabled;
+        private final Map<String, String> endpoints;
+
+        public StatusEncoding(boolean enabled, Map<String, String> endpoints) {
+            this.enabled = enabled;
+            this.endpoints = endpoints;
+        }
+    }
 }

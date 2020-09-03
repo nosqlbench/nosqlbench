@@ -79,7 +79,7 @@ public class DocServerApp {
         String[] markdownFileArray = markdownList.split("\n");
 
         for (String markdownFile : markdownFileArray) {
-            Path relativePath = dirpath.resolve(Path.of("services/docs/markdown", markdownFile));
+            Path relativePath = dirpath.resolve(Path.of("services/docs", markdownFile));
             logger.info("Creating " + relativePath.toString());
 
             Path path = dds.findPath(markdownFile);
