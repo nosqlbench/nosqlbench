@@ -46,7 +46,7 @@
         <lz4.version>1.4.1</lz4.version>
         <metrics.reservoir.version>1.1.0</metrics.reservoir.version>
         <metrics.version>4.0.7</metrics.version>
-        <mvel2.version>2.4.3.Final</mvel2.version>
+        <mvel2.version>2.4.10.Final</mvel2.version>
         <!--        <netty.version>4.1.45.Final</netty.version>-->
         <netty.version>4.1.47.Final</netty.version>
         <!--        <netty.version>4.1.31.Final</netty.version>-->
