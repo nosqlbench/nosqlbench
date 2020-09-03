@@ -1,13 +1,19 @@
-- 82cf6b3e (HEAD -> main) fixup version merging
-- 1d6e4f29 incremental work on ui
-- 9717487d make scenarios run in workspace
-- 61796921 remove pre formatting to appease markdown-it fenced code sections
-- 421bcdc1 make scenarios run in workspace
-- 10e46ed7 make scenarios run in workspace
-- e1263ee8 make scenarios run in workspace
-- d0521668 make scenarios run in workspace
-- 2aa99ba2 make scenarios run in workspace
-- 894e65d9 make scenarios run in workspace
-- 8ba43027 make scenarios run in workspace
-- 13855329 incremental work on ui
-- 3d16789b consolidate scenario transfer types
+- ac0d8202 (HEAD -> main) nbui updates
+- a4b41754 nbui updates
+- fc0f1c8d nb endpoint updates for nbui
+- 69e64756 guard against empty scenario files
+- 24d485fd doc phrasing updates
+- 0ce2f635 allow nested Template within thread
+- 428ffe71 make error propagation modal
+- 4c940ec7 expose scenario state
+- 6db06818 endpoint updates for nbui
+- 1b81f432 clarify stop vs cancel in scenario handler
+- 4786a227 allow global param preprocessing before app invocation
+- 77a2207a version bump
+- 6107ba07 typo fixes
+- 866b606e relativize within workspaces
+- 8ee27c15 nb endpoint additions
+- 9cb9ee87 allow preview of script progress
+- 7b140ed2 app improvements
+- 630cf748 add vuex stores
+- 579efb76 incremental work on ui
