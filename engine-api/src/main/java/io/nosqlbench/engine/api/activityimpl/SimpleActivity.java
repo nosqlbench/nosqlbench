@@ -321,7 +321,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
         if (stride>0 && (cycleCount % stride) != 0) {
             logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
-                    "leaving some cycles unused.");
+                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
         }
 
         Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");

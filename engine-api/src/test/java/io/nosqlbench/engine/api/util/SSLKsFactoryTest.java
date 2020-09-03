@@ -17,11 +17,10 @@
 
 package io.nosqlbench.engine.api.util;
 
-import java.io.FileNotFoundException;
-
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.junit.Test;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import java.io.FileNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -141,8 +140,8 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageMatching("Unable to init KeyManagerFactory. Please check.");
+            .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+            .withMessageMatching("Unable to init KeyManagerFactory. Please check.*");
     }
 
     @Test
