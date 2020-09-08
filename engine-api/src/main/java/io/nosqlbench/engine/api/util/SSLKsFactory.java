@@ -87,16 +87,16 @@ public class SSLKsFactory {
                     logger.warn("Please update your 'ssl=true' parameter to 'ssl=jdk'");
                 }
 
+                final char[] keyStorePassword = def.getParams().getOptionalString("kspass")
+                                             .map(String::toCharArray)
+                                             .orElse(null);
                 keyPassword = def.getParams().getOptionalString("keyPassword")
                                  .map(String::toCharArray)
-                                 .orElse(null);
+                                 .orElse(keyStorePassword);
 
                 keyStore = def.getParams().getOptionalString("keystore").map(ksPath -> {
                     try {
-                        return KeyStore.getInstance(new File(ksPath),
-                                                    def.getParams().getOptionalString("kspass")
-                                                       .map(String::toCharArray)
-                                                       .orElse(null));
+                        return KeyStore.getInstance(new File(ksPath), keyStorePassword);
                     } catch (Exception e) {
                         throw new RuntimeException("Unable to load the keystore. Please check.", e);
                     }
