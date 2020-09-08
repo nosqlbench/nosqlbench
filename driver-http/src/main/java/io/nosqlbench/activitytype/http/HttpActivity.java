@@ -1,32 +1,18 @@
 package io.nosqlbench.activitytype.http;
 
-import io.nosqlbench.activitytype.cmds.ReadyHttpRequest;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.activitytype.cmds.ReadyHttpRequest;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
-import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.templating.CommandTemplate;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.StringBindings;
-import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.Function;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
     private final static Logger logger = LoggerFactory.getLogger(HttpActivity.class);
@@ -76,7 +62,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 //        port = activityDef.getParams().getOptionalInteger("port").orElse(80);
 
         this.opSequence = createOpSequence(ReadyHttpRequest::new);
-        setDefaultsFromOpSequence(opSequence);
+        this.setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
