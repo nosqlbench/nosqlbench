@@ -358,16 +358,31 @@ public class SimpleActivity implements Activity, ProgressCapable {
                         "set threads to a value higher than the default of 1." +
                         " hint: you can use threads=auto for reasonable default, or" +
                         " consult the topic on threads with `help threads` for" +
-                        " more information.");
+                    " more information.");
 
             }
         }
 
-        if (activityDef.getCycleCount()>0 && seq.getOps().size()==0) {
+        if (activityDef.getCycleCount() > 0 && seq.getOps().size() == 0) {
             throw new BasicError("You have configured a zero-length sequence and non-zero cycles. Tt is not possible to continue with this activity.");
         }
     }
 
+    /**
+     * Given a function that can create an op of type <O> from a CommandTemplate, generate
+     * an indexed sequence of ready to call operations.
+     *
+     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function)},
+     * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
+     * for map-based specification of operations with bindings in each field.
+     *
+     * It is recommended to use the CommandTemplate form
+     * than the
+     *
+     * @param opinit
+     * @param <O>
+     * @return
+     */
     protected <O> OpSequence<O> createOpSequenceFromCommands(Function<CommandTemplate, O> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, O> opTemplateOFunction = f.andThen(opinit);
@@ -375,13 +390,35 @@ public class SimpleActivity implements Activity, ProgressCapable {
         return createOpSequence(opTemplateOFunction);
     }
 
+    /**
+     * Given a function that can create an op of type <O> from an OpTemplate, generate
+     * an indexed sequence of ready to call operations.
+     *
+     * This method uses the following conventions to derive the sequence:
+     *
+     * <OL>
+     * <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
+     * taken as the only provided statement.</LI>
+     * <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
+     * are taken with their ratios </LI>
+     * <LI>Any provided tags filter is used to select only the statements which have matching
+     * tags. If no tags are provided, then all the found statements are included.</LI>
+     * <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
+     * where the sequence length is the sum of the ratios.</LI>
+     * </OL>
+     *
+     * @param opinit A function to map an OpTemplate to the executable operation form required by
+     *               the native driver for this activity.
+     * @param <O>    A holder for an executable operation for the native driver used by this activity.
+     * @return The sequence of operations as determined by filtering and ratios
+     */
     protected <O> OpSequence<O> createOpSequence(Function<OpTemplate, O> opinit) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
-                .getOptionalString("seq")
-                .map(SequencerType::valueOf)
-                .orElse(SequencerType.bucket);
+            .getOptionalString("seq")
+            .map(SequencerType::valueOf)
+            .orElse(SequencerType.bucket);
         SequencePlanner<O> planner = new SequencePlanner<>(sequencerType);
 
         StmtsDocList stmtsDocList = null;
