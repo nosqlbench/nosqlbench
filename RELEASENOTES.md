@@ -1,19 +1,9 @@
-- ac0d8202 (HEAD -> main) nbui updates
-- a4b41754 nbui updates
-- fc0f1c8d nb endpoint updates for nbui
-- 69e64756 guard against empty scenario files
-- 24d485fd doc phrasing updates
-- 0ce2f635 allow nested Template within thread
-- 428ffe71 make error propagation modal
-- 4c940ec7 expose scenario state
-- 6db06818 endpoint updates for nbui
-- 1b81f432 clarify stop vs cancel in scenario handler
-- 4786a227 allow global param preprocessing before app invocation
-- 77a2207a version bump
-- 6107ba07 typo fixes
-- 866b606e relativize within workspaces
-- 8ee27c15 nb endpoint additions
-- 9cb9ee87 allow preview of script progress
-- 7b140ed2 app improvements
-- 630cf748 add vuex stores
-- 579efb76 incremental work on ui
+- 1c5a2d55 (HEAD -> main) phrasing update
+- 079fd9e4 typo fixes in cql md
+- a9d70a77 make prometheus pull latest docker by default #189 #186 #197
+- 1c86fd78 improve javadoc for op sequences
+- c5f33248 improve javadoc for command template
+- 073a0a19 improve docs for new developers
+- 7ba14409 do not set speculative on cql when it is not provided
+- 8f2da8f4 Improve SSLKsFactory
+- a2a4a5ea fix for #195
