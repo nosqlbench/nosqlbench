@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +34,7 @@ public class DockerMetricsManager {
 
     String userHome = System.getProperty("user.home");
 
-    private Logger logger = LoggerFactory.getLogger(DockerMetricsManager.class);
+    private final Logger logger = LoggerFactory.getLogger(DockerMetricsManager.class);
 
     public DockerMetricsManager() {
         dh = new DockerHelper();
@@ -98,7 +97,8 @@ public class DockerMetricsManager {
 
         logger.info("preparing to start docker metrics");
         String PROMETHEUS_IMG = "prom/prometheus";
-        String tag = "v2.4.3";
+        String tag = "latest";
+//        String tag = "v2.20.1";
         String name = "prom";
         List<Integer> port = Arrays.asList(9090);
 
@@ -107,8 +107,8 @@ public class DockerMetricsManager {
         }
 
         List<String> volumeDescList = Arrays.asList(
-                //cwd+"/docker-metrics/prometheus:/prometheus",
-                userHome + "/.nosqlbench/prometheus-conf:/etc/prometheus",
+            //cwd+"/docker-metrics/prometheus:/prometheus",
+            userHome + "/.nosqlbench/prometheus-conf:/etc/prometheus",
                 userHome + "/.nosqlbench/prometheus:/prometheus"
                 //"./prometheus/tg_dse.json:/etc/prometheus/tg_dse.json"
         );
