@@ -234,7 +234,8 @@ activity types.
   - `lbp=LAP(rp=3,s=10)` - Same as above, using the equivalent but terser form.
   - `lbp=LAP(rp_ms=3000,s_ms=10000)` - Same as above, with milliseconds instead of
     seconds.
-  - `loadbalancing=LAP(s=10),TAP(
+  - `loadbalancing=LAP(s=10),TAP()` - Latency aware policy, followed by
+    token aware policy.
 
 ### CQL YAML Parameters
 
