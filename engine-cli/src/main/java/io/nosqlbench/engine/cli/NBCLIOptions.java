@@ -144,6 +144,11 @@ public class NBCLIOptions {
             addAll(Arrays.asList(args));
         }};
 
+        if (arglist.peekFirst() == null) {
+            wantsBasicHelp = true;
+            return arglist;
+        }
+
         // Preprocess --include regardless of position
         LinkedList<String> nonincludes = new LinkedList<>();
         while (arglist.peekFirst() != null) {
@@ -199,11 +204,6 @@ public class NBCLIOptions {
         LinkedList<String> arglist = parseGlobalOptions(args);
 
         PathCanonicalizer canonicalizer = new PathCanonicalizer(wantsIncludes());
-
-        if (arglist.peekFirst() == null) {
-            wantsBasicHelp = true;
-            return;
-        }
 
         LinkedList<String> nonincludes = new LinkedList<>();
 
