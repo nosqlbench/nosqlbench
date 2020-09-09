@@ -21,3 +21,9 @@
 # --docker-metrics to stand up a live metrics dashboard at port 3000.
 
     ./nb cql-iot --docker-metrics
+
+# Details on all command line options are available with
+
+    ./nb help commandline
+    ./nb help cli-scripting
+
