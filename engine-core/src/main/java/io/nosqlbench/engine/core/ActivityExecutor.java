@@ -135,6 +135,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         while (time < waitUntil && !executorService.isTerminated()) {
             try {
                 Thread.sleep(polltime);
+                time = System.currentTimeMillis();
             } catch (InterruptedException ignored) {
             }
         }
