@@ -31,6 +31,19 @@ public class MVResult {
         return result;
     }
 
+    public Map<String,Map<String,Double>> getMap() {
+        Map<String,Map<String,Double>> map = new HashMap<>();
+        for (int i = 0; i < params.size(); i++) {
+            Map<String,Double> entry = Map.of(
+                "min", params.get(i).min,
+                "max", params.get(i).max,
+                "value", this.vars[i]
+            );
+            map.put(params.get(i).name, entry);
+        }
+        return map;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int pos = 0;

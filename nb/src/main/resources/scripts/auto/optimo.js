@@ -285,9 +285,7 @@ function optimo() {
         latency_ms: results_array[results_array.length - 1].latency_ms,
         ops_per_second: results_array[results_array.length - 1].ops_per_second,
         total_seconds: total_seconds,
-        vars: result.vars,
-        params: result.params,
-        log: result.datalog
+        result: result.map
     };
 
 }
