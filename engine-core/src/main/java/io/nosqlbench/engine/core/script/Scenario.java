@@ -263,7 +263,8 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.out.flush();
             } catch (Exception e) {
                 this.state = State.Errored;
-                this.scenarioController.forceStopScenario(5000,false);
+                logger.warn("Error in scenario, shutting down.");
+                this.scenarioController.forceStopScenario(5000, false);
                 throw new RuntimeException(e);
             } finally {
                 if (this.state==State.Running) {
