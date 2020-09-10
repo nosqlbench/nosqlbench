@@ -13,7 +13,7 @@ public class PolyglotMultivariateObjectScript implements MultivariateFunction {
 
     private final MVParams params;
     private final Object function;
-    private Logger logger;
+    private final Logger logger;
 
     public PolyglotMultivariateObjectScript(Logger logger, MVParams params, Object function) {
         this.logger = logger;
@@ -37,10 +37,12 @@ public class PolyglotMultivariateObjectScript implements MultivariateFunction {
 
         if (result instanceof Double) {
             return (Double) result;
+        } else if (result instanceof Integer) {
+            return (double) ((Integer) result);
         } else {
             throw new RuntimeException(
                 "Unable to case result of polyglot function return value as a double:" +
-                    result.getClass().getCanonicalName()+", toString=" + result.toString());
+                    result.getClass().getCanonicalName() + ", toString=" + result.toString());
         }
     }
 }
