@@ -17,16 +17,14 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import oshi.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.DoubleSummaryStatistics;
+import java.util.Optional;
 
 public class CpuInfo {
     private final static Logger logger = LoggerFactory.getLogger(CpuInfo.class);
@@ -61,8 +59,8 @@ public class CpuInfo {
         }
 
         public String getMhz() {
-            // or use processor.getCurrentFreq, and average, or min?
-            return Long.toString(processor.getMaxFreq()/ (1024*1024));
+            double vendorFreq = processor.getProcessorIdentifier().getVendorFreq();
+            return String.valueOf((long) (vendorFreq/1E6));
         }
 
         public String toString() {
@@ -84,8 +82,8 @@ public class CpuInfo {
         public double getCurrentSpeed(int cpu) {
             double curFreq = getCurFreq(cpu);
             double maxFreq = getMaxFreq(cpu);
-            if (Double.isNaN(curFreq) || Double.isNaN(maxFreq)) {
-                return Double.NaN;
+            if (curFreq < 0 || maxFreq < 0) {
+                return -1;
             }
             return curFreq / maxFreq;
         }
