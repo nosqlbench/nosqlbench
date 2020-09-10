@@ -1,9 +1,8 @@
-- 1c5a2d55 (HEAD -> main) phrasing update
-- 079fd9e4 typo fixes in cql md
-- a9d70a77 make prometheus pull latest docker by default #189 #186 #197
-- 1c86fd78 improve javadoc for op sequences
-- c5f33248 improve javadoc for command template
-- 073a0a19 improve docs for new developers
-- 7ba14409 do not set speculative on cql when it is not provided
-- 8f2da8f4 Improve SSLKsFactory
-- a2a4a5ea fix for #195
+- 273177eb (HEAD -> main) add improvements from oshi maintainer recommendations
+- ab5538d1 pull sequence type up
+- 5f5c08d7 Add more verbose error indicator for scenario
+- 5a3ac649 fix missing expiry variable
+- 43f41cae add experimental optimo into project
+- 9e4551a7 add experimental optimo into project
+- 42a7e2ab include full cli topics in initial help
+- 5df86396 fix single-option regression
