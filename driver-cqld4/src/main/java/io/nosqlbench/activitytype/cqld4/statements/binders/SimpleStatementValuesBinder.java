@@ -8,27 +8,27 @@ import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
 /**
  * This binder is not meant to be used with anything but DDL or statements
  * which should not be trying to parameterize values in general.
- * Parametrized values are still possible through parametrized constructor parameter.
+ * Parametrized values are still possible through parameterized constructor parameter.
  * This binder should be avoided in favor of binders returning PreparedStatement
  */
 public class SimpleStatementValuesBinder
     implements ValuesArrayBinder<SimpleStatement, Statement> {
 
-    private final boolean parametrized;
+    private final boolean parameterized;
 
-    public SimpleStatementValuesBinder(boolean parametrized){
-        this.parametrized = parametrized;
+    public SimpleStatementValuesBinder(boolean parameterized) {
+        this.parameterized = parameterized;
     }
 
     @Override
     public Statement bindValues(SimpleStatement context, Object[] values) {
         String query = context.getQuery();
-        if(parametrized) {
+        if (parameterized) {
             String[] splits = query.split("\\?");
-            assert splits.length == values.length+1;
+            assert splits.length == values.length + 1;
             StringBuilder sb = new StringBuilder();
             sb.append(splits[0]);
-            for(int i = 1; i < splits.length; i++) {
+            for (int i = 1; i < splits.length; i++) {
                 sb.append(values[i - 1]);
                 sb.append(splits[i]);
             }

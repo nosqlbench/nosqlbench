@@ -21,7 +21,8 @@ public class Synonyms {
         put("hosts",Set.of("host"));
         put("workload",Set.of("yaml"));
         put("driver",Set.of("type"));
-        put("cyclerate",Set.of("targetrate","rate"));
+        put("cyclerate", Set.of("targetrate", "rate"));
+        put("parameterized", Set.of("parametrized")); // mispelling safety net
     }};
 
     /**

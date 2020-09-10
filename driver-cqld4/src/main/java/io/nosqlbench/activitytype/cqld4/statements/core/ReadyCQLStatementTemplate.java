@@ -26,9 +26,9 @@ public class ReadyCQLStatementTemplate {
 
     private final static Logger logger = LoggerFactory.getLogger(ReadyCQLStatementTemplate.class);
     private final Session session;
-    private ContextualBindingsArrayTemplate<?, Statement<?>> template;
-    private long ratio;
-    private String name;
+    private final ContextualBindingsArrayTemplate<?, Statement<?>> template;
+    private final long ratio;
+    private final String name;
 
     private D4ResultSetCycleOperator[] pageInfoCycleOperators;
     private RowCycleOperator[] rowCycleOperators;
@@ -60,19 +60,19 @@ public class ReadyCQLStatementTemplate {
     }
 
     public ReadyCQLStatementTemplate(
-            Map<String,Object> fconfig,
-            Session session,
-            SimpleStatement simpleStatement,
-            long ratio,
-            String name,
-            boolean parametrized
+        Map<String,Object> fconfig,
+        Session session,
+        SimpleStatement simpleStatement,
+        long ratio,
+        String name,
+        boolean parameterized
     ) {
         this.session = session;
         this.name = name;
         template = new ContextualBindingsArrayTemplate(
                 simpleStatement,
                 new BindingsTemplate(fconfig),
-                new SimpleStatementValuesBinder(parametrized)
+            new SimpleStatementValuesBinder(parameterized)
         );
         this.ratio = ratio;
     }

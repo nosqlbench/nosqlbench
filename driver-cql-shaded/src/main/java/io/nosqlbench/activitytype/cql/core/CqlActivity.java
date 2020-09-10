@@ -161,17 +161,21 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
-            boolean parametrized = stmtDef.getParamOrDefault("parametrized", false);
+            if (stmtDef.getOptionalStringParam("parametrized").isPresent()) {
+                throw new RuntimeException("Please use 'parameterized' instead of 'parametrized'. This was recently " +
+                    "corrected. This warning will be removed in the future.");
+            }
+            boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
             Optional<ConsistencyLevel> cl = stmtDef.getOptionalStringParam("cl", String.class).map(ConsistencyLevel::valueOf);
             Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalStringParam("serial_cl").map(ConsistencyLevel::valueOf);
-            Optional<Boolean> idempotent = stmtDef.getOptionalStringParam("idempotent",Boolean.class);
+            Optional<Boolean> idempotent = stmtDef.getOptionalStringParam("idempotent", Boolean.class);
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = stmtDef.getOptionalStringParam("instrument",Boolean.class)
-                    .or(() -> getParams().getOptionalBoolean("instrument"))
+            boolean instrument = stmtDef.getOptionalStringParam("instrument", Boolean.class)
+                .or(() -> getParams().getOptionalBoolean("instrument"))
                     .orElse(false);
 
             String logresultcsv = stmtDef.getParamOrDefault("logresultcsv", "");
@@ -225,7 +229,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                        parsed.getName(), parametrized);
+                    parsed.getName(), parameterized);
             }
 
             stmtDef.getOptionalStringParam("save")
