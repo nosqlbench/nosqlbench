@@ -22,15 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import java.util.stream.Collectors;
 
 public class SequencePlanner<T> {
     private final static Logger logger = LoggerFactory.getLogger(SequencePlanner.class);
-    private SequencerType sequencerType;
+    private final SequencerType sequencerType;
     private List<T> elements = new ArrayList<>();
-    private List<Long> ratios = new ArrayList<>();
+    private final List<Long> ratios = new ArrayList<>();
     private int[] elementIndex;
 
     public SequencePlanner(SequencerType sequencerType) {
@@ -63,45 +61,6 @@ public class SequencePlanner<T> {
         }
         this.elements = elements;
         return new Sequence<>(sequencerType, elements, elementIndex);
-    }
-
-    public static class Sequence<T> implements OpSequence<T> {
-        private final SequencerType type;
-        private final List<T> elems;
-        private final int[] seq;
-
-        Sequence(SequencerType type, List<T> elems, int[] seq) {
-            this.type = type;
-            this.elems = elems;
-            this.seq = seq;
-        }
-
-        @Override
-        public T get(long selector) {
-            int index = (int) (selector % seq.length);
-            index = seq[index];
-            return elems.get(index);
-        }
-
-        @Override
-        public List<T> getOps() {
-            return elems;
-        }
-
-        @Override
-        public int[] getSequence() {
-            return seq;
-        }
-
-        public SequencerType getSequencerType() {
-            return type;
-        }
-
-        @Override
-        public <U> Sequence<U> transform(Function<T,U> func) {
-            return new Sequence<U>(type, elems.stream().map(func).collect(Collectors.toList()), seq);
-        }
-
     }
 
 }
