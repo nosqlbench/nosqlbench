@@ -1,8 +1,4 @@
-- 273177eb (HEAD -> main) add improvements from oshi maintainer recommendations
-- ab5538d1 pull sequence type up
-- 5f5c08d7 Add more verbose error indicator for scenario
-- 5a3ac649 fix missing expiry variable
-- 43f41cae add experimental optimo into project
-- 9e4551a7 add experimental optimo into project
-- 42a7e2ab include full cli topics in initial help
-- 5df86396 fix single-option regression
+- 13240cd8 (HEAD -> main) phase 1 of openapi testing endpoints
+- 35abcc03 provide JSON friendly optimo result
+- f22a0462 correct mispelling of parametrized
+- 832064c8 correct mispelling of parametrized
