@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,45 +10,45 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-  <artifactId>engine-cli</artifactId>
-  <packaging>jar</packaging>
-  <name>${project.artifactId}</name>
-  <description>CLI for nosqlbench</description>
+    <artifactId>engine-cli</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>CLI for nosqlbench</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javadoc.name>nosqlbench Command Line</javadoc.name>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.name>nosqlbench Command Line</javadoc.name>
+    </properties>
 
-  <dependencies>
+    <dependencies>
 
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>engine-core</artifactId>
-      <version>3.12.145-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-core</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-    </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-docker</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>engine-docker</artifactId>
-      <version>3.12.145-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
 
-  </dependencies>
+    </dependencies>
 
-  <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-  </build>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 
 </project>

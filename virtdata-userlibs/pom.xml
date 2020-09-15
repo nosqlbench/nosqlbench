@@ -41,14 +41,14 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>3.12.145-SNAPSHOT</version>
             <artifactId>virtdata-lib-basics</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>3.12.145-SNAPSHOT</version>
             <artifactId>virtdata-lib-curves4</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <!-- TODO: remove this after pivoting deps to core nb-api doc manifest -->
