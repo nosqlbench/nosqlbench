@@ -97,7 +97,7 @@ public class NBCLI {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
-        if (args.length > 0 && args[0].toLowerCase().equals("docserver")) {
+        if (args.length > 0 && args[0].toLowerCase().matches("docserver|appserver")) {
             DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
