@@ -177,5 +177,5 @@ results. Support may be added for long-lived connections in a future release.
   - headers - include header details
   - content - include
   - a number, like 3000 - causes the diagnostics to be reported only on this cycle modulo
-- **timeout** - default: tbd -
-  Sets the
+- **timeout** - default: forever -
+  Sets the timeout of each request in milliseconds.
