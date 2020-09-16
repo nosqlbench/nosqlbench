@@ -8,3 +8,6 @@
 - 4e848169 minor reformatting
 - 003ba6c3 use 'appserver' instead of 'docserver' with backwards compatible
 - 60f7f551 document module deps
+- 5cab2e83 (HEAD -> main) typo fixes
+- 3a7775af disable async mode for http until feature complete
+- d93efe16 add nosqlbench root dir to docker image
