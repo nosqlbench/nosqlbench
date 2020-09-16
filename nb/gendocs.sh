@@ -38,9 +38,10 @@ then
 fi
 
 $JAVA -jar target/nb.jar docserver generate ${GUIDEBOOK}/
-$JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/markdown/bindings
 
-driversdir="${GUIDEBOOK}/services/docs/markdown/drivers"
+$JAVA -jar target/nb.jar virtdata gendocs basedir ${GUIDEBOOK}/services/docs/bindings
+
+driversdir="${GUIDEBOOK}/services/docs/drivers"
 mkdir -p $driversdir
 
 drivers=$($JAVA -jar target/nb.jar --list-drivers)
@@ -55,8 +56,7 @@ do
 done
 (
  cd ${GUIDEBOOK}/services/docs;
- ( cd markdown && find * -name '*.md' ) | sort > markdown.csv
- find .
+ find * -type f -name '*.md' | sort > markdown.csv
 )
 
 #JAVA_HOME=${JAVA_HOME:-JAVA_HOME must be specified if java isn not in the path}

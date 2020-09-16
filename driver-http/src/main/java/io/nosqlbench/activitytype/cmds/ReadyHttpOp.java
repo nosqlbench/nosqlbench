@@ -7,6 +7,8 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,6 +80,11 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
 
         String ok_status = cmd.remove("ok-status");
         String ok_body = cmd.remove("ok-body");
+
+        String timeoutStr = cmd.remove("timeout");
+        if (timeoutStr!=null) {
+            builder.timeout(Duration.of(Long.parseLong(timeoutStr), ChronoUnit.MILLIS));
+        }
 
         if (cmd.size()>0) {
             throw new BasicError("Some provided request fields were not used: " + cmd.toString());

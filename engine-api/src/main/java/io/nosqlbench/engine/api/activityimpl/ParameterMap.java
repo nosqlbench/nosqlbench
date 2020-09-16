@@ -46,12 +46,13 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
 
 //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
-    private final AtomicLong changeCounter = new AtomicLong(0L);
+    private final AtomicLong changeCounter;
     private final LinkedList<Listener> listeners = new LinkedList<>();
 
     public ParameterMap(Map<String, String> valueMap) {
         logger.trace("new parameter map:" + valueMap.toString());
-        super.putAll(valueMap);
+        this.changeCounter=new AtomicLong(0L);
+        putAll(valueMap);
     }
 
     public void assertOnlyOneOf(String... paramName) {
@@ -165,9 +166,9 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         markMutation();
     }
 
-    private static Pattern encodedParamsSquote = Pattern.compile("(?<param>\\w+?)='(?<value>[^']+?);");
-    private static Pattern encodedParamsDquote = Pattern.compile("(?<param>\\w+?)=\"(?<value>[^\"]+?);");
-    private static Pattern encodedParamsPattern = Pattern.compile("(?<param>\\w+?)=(?<value>.+?);");
+    private static final Pattern encodedParamsSquote = Pattern.compile("(?<param>\\w+?)='(?<value>[^']+?);");
+    private static final Pattern encodedParamsDquote = Pattern.compile("(?<param>\\w+?)=\"(?<value>[^\"]+?);");
+    private static final Pattern encodedParamsPattern = Pattern.compile("(?<param>\\w+?)=(?<value>.+?);");
 
     @Override
     public Object put(String name, Object value) {
@@ -344,7 +345,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 //        return parameterMap;
 //    }
 
-    public static interface Listener {
+    public interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);
     }
 

@@ -32,8 +32,7 @@ public class ScenarioResult {
     private final static Logger logger = LoggerFactory.getLogger(ScenarioResult.class);
 
     private Exception exception;
-    private String iolog;
-    private String report;
+    private final String iolog;
 
     public ScenarioResult(String iolog) {
         this.iolog = iolog;
@@ -55,15 +54,21 @@ public class ScenarioResult {
         reporter.report();
         logger.info("-- END METRICS DETAIL --");
 
-//        if (this.exception!=null && !(this.exception instanceof UserException)) {
-//            logger.error("Scenario error: " + this.exception.getMessage(),this.exception);
-//        }
-
     }
 
 
     public Optional<Exception> getException() {
         return Optional.ofNullable(exception);
+    }
+
+    public void rethrowIfError() {
+        if (exception!=null) {
+            if (exception instanceof RuntimeException) {
+                throw ((RuntimeException) exception);
+            } else {
+                throw new RuntimeException(exception);
+            }
+        }
     }
 
     public String getIOLog() {

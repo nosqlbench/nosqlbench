@@ -16,7 +16,7 @@ import java.util.function.Function;
  * date time, yielding a DateTime object.
  *
  * If no arguments are provided, then the format is set to
- * <pre>yyyy-MM-dd HH:mm:ss.SSSZ</pre>.
+ * "yyyy-MM-dd HH:mm:ss.SSSZ".
  *
  * For details on formatting options, see @see <a href="https://www.joda.org/joda-time/apidocs/org/joda/time/format/DateTimeFormat.html">DateTimeFormat</a>
  */

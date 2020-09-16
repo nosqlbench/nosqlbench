@@ -1,10 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.api.annotations.Categories;
-import io.nosqlbench.virtdata.api.annotations.Category;
-import io.nosqlbench.virtdata.api.annotations.Example;
-import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.*;
 
 import java.util.HashSet;
 import java.util.function.LongFunction;
@@ -20,6 +17,8 @@ import java.util.function.LongUnaryOperator;
  */
 @Categories({Category.collections})
 @ThreadSafeMapper
+@Deprecated
+@DeprecatedFunction("use MapFunctions and related functions instead")
 public class Set implements LongFunction<java.util.Set<Object>> {
 
     private final LongToIntFunction sizeFunc;

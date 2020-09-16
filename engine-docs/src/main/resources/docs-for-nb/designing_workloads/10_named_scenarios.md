@@ -46,7 +46,7 @@ line, in which case it is automatically assumed to be _default_.
 
 Some examples may be more illustrative:
 
-```
+```text
 # runs the scenario named 'default' if it exists, or throws an error if it does not.
 nb myworkloads
 # or
@@ -64,8 +64,6 @@ nb scenario myworkloads longrun default longrun scenario another.yaml name1 name
 # In this form ^ you may have to add the explicit form to avoid conflicts between
 # workload names and scenario names. That's why the explicit form is provided, afterall.
 ```
-
-You can run multiple named scenarios in the same command if
 
 ## Workload selection
 
@@ -127,6 +125,7 @@ This is a little counter-intuitive at first, but once you see some examples it s
 ## Parameter Override Examples
 
 Consider a simple workload with three named scenarios:
+
 ```yaml
 # basics.yaml
 scenarios:
@@ -142,7 +141,8 @@ statements:
 ```
 
 Running this with no options prompts the user to select one of the named scenarios:
-```
+
+```text
 $ nb basics
 ERROR: Unable to find named scenario 'default' in workload 'basics', but you can pick from s1,s2,s3
 $
@@ -153,7 +153,7 @@ $
 If you run the first scenario `s1` with your own value for `cycles=7`, it does as you
 ask:
 
-```
+```text
 $ nb basics s1 cycles=7
 Logging to logs/scenario_20200324_205121_554.log
 cycle=0
@@ -171,7 +171,7 @@ $
 If you run the second scenario `s2` with your own value for `cycles=7`, then it does what the locked parameter
 `cycles==10` requires, without telling you that it is ignoring the specified value on your command line.
 
-```
+```text
 $ nb basics s2 cycles=7
 Logging to logs/scenario_20200324_205339_486.log
 cycle=0
@@ -194,7 +194,8 @@ Sometimes, this is appropriate, such as when specifying settings like `threads==
 If you run the third scenario `s3` with your own value for `cycles=7`, then you will get an error telling you that this
 is not possible. Sometimes you want to make sure tha the user knows a parameter should not be changed, and that if they
 want to change it, they'll have to make their own custom version of the scenario in question.
-```
+
+```text
 $ nb basics s3 cycles=7
 ERROR: Unable to reassign value for locked param 'cycles===7'
 $

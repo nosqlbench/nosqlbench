@@ -358,6 +358,26 @@ public class NBIO implements NBPathsAPI.Facets {
         return new ArrayList<>(foundFiles);
     }
 
+    @Override
+    public List<Path> relativeTo(String... base) {
+        String base1 = base[0];
+        String[] rest = new String[base.length-1];
+        System.arraycopy(base,1,rest,0,rest.length);
+
+        List<Path> paths = new ArrayList<>();
+
+        List<Content<?>> list = list();
+        for (Content<?> c : list) {
+            Path path = c.asPath();
+
+            Path fsBase = path.getFileSystem().getPath(base1,rest);
+            Path relative = fsBase.relativize(path);
+            paths.add(relative);
+        }
+
+        return paths;
+    }
+
     private static String tailmatch(String name) {
         if (!name.startsWith("^") && !name.startsWith(".")) {
             name = ".*" + name;

@@ -34,10 +34,14 @@ public class ListSized implements LongFunction<List<Object>> {
             "ListSized(FixedValue(5), NumberNameToString(),NumberNameToString(), WeightedStrings('text:1'))",
             "Create a sized list of object values of each function output. List size function will recursively call the last function till" +
                     "end of the list size functions",
-            "ListSized output ['one','one','text','text','text']"
+            "output: ['one','one','text','text','text']"
     })
     public ListSized(Object sizeFunc, Object... funcs) {
         this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
+    }
+    public ListSized(int size, Object... funcs) {
+        this.sizeFunc = (s) -> size;
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 

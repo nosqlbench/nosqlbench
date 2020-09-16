@@ -1,5 +1,6 @@
 package io.nosqlbench.docsys.core;
 
+import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,8 +12,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 public class DocServerApp {
-    public final static String APPNAME_DOCSERVER = "docserver";
-    private static Logger logger = LogManager.getLogger(DocServerApp.class);
+    private static final Logger logger = LogManager.getLogger(DocServerApp.class);
 
 //    static {
 //        // defer to an extant logger context if it is there, otherwise
@@ -78,36 +78,19 @@ public class DocServerApp {
         String[] markdownFileArray = markdownList.split("\n");
 
         for (String markdownFile : markdownFileArray) {
-            Path relativePath = dirpath.resolve(Path.of("services/docs/markdown", markdownFile));
+            Path relativePath = dirpath.resolve(Path.of("services/docs", markdownFile));
             logger.info("Creating " + relativePath.toString());
 
-            String markdown = dds.getFileByPath(markdownFile);
+            Path path = dds.findPath(markdownFile);
+//            String markdown = dds.getFileByPath(markdownFile);
+//            Files.writeString(relativePath, markdown, OVERWRITE);
             Files.createDirectories(relativePath.getParent());
-            Files.writeString(relativePath, markdown, OVERWRITE);
+            Files.write(relativePath,Files.readAllBytes(path),OVERWRITE);
         }
     }
 
-//    private static void configureDocServerLogging(LoggerContext context) {
-//        JoranConfigurator jc = new JoranConfigurator();
-//        jc.setContext(context);
-//        context.reset();
-//        context.putProperty("application-name", APPNAME_DOCSERVER);
-//        InputStream is = DocServerApp.class.getClassLoader().getResourceAsStream("logback-docsys.xml");
-//        if (is != null) {
-//            try {
-//                jc.doConfigure(is);
-//            } catch (JoranException e) {
-//                System.err.println("error initializing logging system: " + e.getMessage());
-//                throw new RuntimeException(e);
-//            }
-//        } else {
-//            throw new RuntimeException("No logging context was provided, and " +
-//                    "logback-docsys.xml could not be loaded from the classpath.");
-//        }
-//    }
-
     private static void runServer(String[] serverArgs) {
-        DocServer server = new DocServer();
+        NBWebServer server = new NBWebServer();
         for (int i = 0; i < serverArgs.length; i++) {
             String arg = serverArgs[i];
             if (arg.matches(".*://.*")) {
@@ -122,7 +105,21 @@ public class DocServerApp {
             } else if (arg.matches("\\d+")) {
                 server.withPort(Integer.parseInt(arg));
             } else if (arg.matches("--public")) {
-                server.withHost("0.0.0.0");
+                int nextidx = i+1;
+                String net_addr = "0.0.0.0";
+                if (
+                    serverArgs.length>nextidx+1 &&
+                        serverArgs[nextidx].matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
+                ) {
+                    i++;
+                    net_addr = serverArgs[nextidx];
+                }
+                logger.info("running public server on interface with address " + net_addr);
+                server.withHost(net_addr);
+            } else if (arg.matches("--workspaces")) {
+                String workspaces_root = serverArgs[i + 1];
+                logger.info("Setting workspace directory to workspace_dir");
+                server.withContextParam("workspaces_root", workspaces_root);
             }
         }
 //
@@ -131,14 +128,14 @@ public class DocServerApp {
 
     private static void showHelp(String... helpArgs) {
         System.out.println(
-                "Usage: " + APPNAME_DOCSERVER + " " +
-                        " [url] " +
-                        " [path]... " + "\n" +
-                        "\n" +
-                        "If [url] is provided, then the scheme, address and port are all taken from it.\n" +
-                        "Any additional paths are served from the filesystem, in addition to the internal ones.\n" +
-                        "\n" +
-                        "For now, only http:// is supported."
+                "Usage: appserver " +
+                    " [url] " +
+                    " [path]... " + "\n" +
+                    "\n" +
+                    "If [url] is provided, then the scheme, address and port are all taken from it.\n" +
+                    "Any additional paths are served from the filesystem, in addition to the internal ones.\n" +
+                    "\n" +
+                    "For now, only http:// is supported."
         );
     }
 

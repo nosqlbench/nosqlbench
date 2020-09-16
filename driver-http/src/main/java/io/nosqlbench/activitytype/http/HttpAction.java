@@ -27,14 +27,14 @@ public class HttpAction implements SyncAction {
 
     private final HttpActivity httpActivity;
     private final int slot;
-    private int maxTries = 1;
+    private final int maxTries = 1;
     private boolean showstmts;
 
     private OpSequence<ReadyHttpOp> sequencer;
     private HttpClient client;
 
-    private HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
-    private long timeoutMillis=30000L;
+    private final HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
+    private final long timeoutMillis=30000L;
 
 
     public HttpAction(ActivityDef activityDef, int slot, HttpActivity httpActivity) {
@@ -49,14 +49,7 @@ public class HttpAction implements SyncAction {
     }
 
     private HttpClient initClient(ClientScope clientScope) {
-        switch (clientScope) {
-            case thread:
-                return httpActivity.newClient();
-            case activity:
-               return httpActivity.getClient(Thread.currentThread());
-            default:
-                throw new RuntimeException("unrecognized client scope: " + clientScope);
-        }
+        return httpActivity.getClient().apply(Thread.currentThread());
     }
 
     @Override
@@ -109,7 +102,7 @@ public class HttpAction implements SyncAction {
             long startat = System.nanoTime();
             Exception error = null;
             try {
-                response = responseFuture.get(httpActivity.getTimeoutMs(), TimeUnit.MILLISECONDS);
+                response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
                 if (httpOp.ok_status!=null) {
                     if (!String.valueOf(response.statusCode()).matches(httpOp.ok_status)) {
                         throw new InvalidStatusCodeException(cycleValue,httpOp.ok_status,response.statusCode());

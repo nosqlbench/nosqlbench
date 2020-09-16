@@ -97,12 +97,12 @@ public class PathFinder {
                         throw new RuntimeException(e);
                     }
                 }
-                logger.debug("Found path in classpath: " + candidatePath + ": " + candidatePath.toString());
+                logger.debug("Found path in classpath: " + candidatePath + ": " + candidatePath);
                 return Optional.of(Path.of(uri));
             }
             return Optional.empty();
         } catch (Exception e) {
-            logger.trace("Error while looking in classpath for " + e.getMessage(), e);
+            logger.trace("Error while looking in classpath for " + candidatePath, e);
             return Optional.empty();
         }
     }

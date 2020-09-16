@@ -51,6 +51,7 @@ public class HashedToByteBuffer implements LongFunction<ByteBuffer> {
             buffer.putLong(l);
         }
         buffer.flip();
+        buffer.limit(length);
         return buffer;
     }
 

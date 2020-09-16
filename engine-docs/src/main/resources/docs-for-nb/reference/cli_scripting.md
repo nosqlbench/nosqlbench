@@ -34,7 +34,9 @@ All activities that run during a scenario run under the control of, but independ
 means that you can have a number of activities running while the scenario script is doing its own thing. The scenario
 only completes when both the scenario script and the activities are finished.
 
-### `start driver=<activity type> alias=<alias> ...`
+### start an activity
+
+`start driver=<activity type> alias=<alias> ...`
 
 You can start an activity with this command. At the time this command is evaluated, the activity is started, and the
 script continues without blocking. This is an asynchronous start of an activity. If you start multiple activities in
@@ -44,18 +46,24 @@ The type argument is required to identify the activity type to run. The alias pa
 you want to be able to interact with the started activity later. In any case, it is a good idea to name all your
 activities with a meaningful alias.
 
-### `stop <alias>`
+### stop an activity
+
+`stop <alias>`
 
 Stop an activity with the given alias. This is synchronous, and causes the scenario to pause until the activity is
 stopped. This means that all threads for the activity have completed and signalled that they're in a stopped state.
 
-### `await <alias>`
+### await an activity
+
+`await <alias>`
 
 Await the normal completion of an activity with the given alias. This causes the scenario script to pause while it waits
 for the named activity to finish. This does not tell the activity to stop. It simply puts the scenario script into a
 paused state until the named activity is complete.
 
-### `run driver=<activity type> alias=<alias> ...`
+### run an activity
+
+`run driver=<activity type> alias=<alias> ...`
 
 Run an activity to completion, waiting until it is complete before continuing with the scenario script. It is
 effectively the same as
@@ -63,21 +71,27 @@ effectively the same as
     start driver=<activity type> ... alias=<alias>
     await <alias>
 
-### `waitmillis <milliseconds>`
+### wait millis
+
+`waitmillis <milliseconds>`
 
 Pause the scenario script for this many milliseconds. This is useful for controlling workload run duration, etc.
 
-### `script <script file>`
+### add a script
+
+`script <script file>`
 
 Add the contents of the named file to the scenario script buffer.
 
-### `fragment <script text>`
+### add a fragment
+
+`fragment <script text>`
 
 Add the contents of the next argument to the scenario script buffer.
 
 # An example CLI script
 
-~~~
+~~~text
 ./nb \
 start driver=stdout alias=a cycles=100K workload=cql-iot tags=phase:main\
 start driver=stdout alias=b cycles=200K workload=cql-iot tags=phase:main\

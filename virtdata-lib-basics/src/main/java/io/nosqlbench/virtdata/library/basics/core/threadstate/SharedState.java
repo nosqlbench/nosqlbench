@@ -8,6 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SharedState {
 
+    public enum Scope {
+        process,
+        thread
+    }
+
     // A thread-local map of objects by name
     public static ThreadLocal<HashMap<String,Object>> tl_ObjectMap = ThreadLocal.withInitial(HashMap::new);
 

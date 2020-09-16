@@ -30,8 +30,8 @@ public class ListStepped implements LongFunction<List<Object>> {
     private final int size;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListStepped(NumberNameToString(),NumberNameToString())",
+        "Create a list of ['one','two']"
     })
     public ListStepped(Object... funcs) {
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs,LongFunction.class,Object.class);

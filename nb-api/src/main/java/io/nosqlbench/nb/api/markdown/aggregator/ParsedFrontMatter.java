@@ -52,9 +52,21 @@ public class ParsedFrontMatter implements FrontMatterInfo {
             for (String topic : topics) {
                 Collections.addAll(topicSet, topic.split(", *"));
             }
-            topicSet.addAll(topics);
+//            topicSet.addAll(topics);
         }
         return topicSet;
+    }
+
+    @Override
+    public List<String> getIncluded() {
+        List<String> included = data.get(FrontMatterInfo.INCLUDED);
+        List<String> includedList = new ArrayList<>();
+        if (included!=null) {
+            for (String s : included) {
+                Collections.addAll(includedList, s.split(", *"));
+            }
+        }
+        return includedList;
     }
 
     @Override
@@ -104,10 +116,30 @@ public class ParsedFrontMatter implements FrontMatterInfo {
         return new ParsedFrontMatter(newmap);
     }
 
+    public ParsedFrontMatter withIncluded(List<String> included) {
+        HashMap<String, List<String>> newmap = new HashMap<>();
+        newmap.putAll(this.data);
+        newmap.put(FrontMatterInfo.INCLUDED,included);
+        return new ParsedFrontMatter(newmap);
+    }
+
     @Override
     public String toString() {
         return "ParsedFrontMatter{" +
             "data=" + data +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ParsedFrontMatter that = (ParsedFrontMatter) o;
+        return Objects.equals(data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
     }
 }

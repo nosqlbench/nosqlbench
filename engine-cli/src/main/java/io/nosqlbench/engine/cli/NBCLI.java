@@ -1,25 +1,25 @@
 package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
+import io.nosqlbench.docsys.core.DocServerApp;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.core.*;
-import io.nosqlbench.engine.core.script.ScriptParams;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
+import io.nosqlbench.engine.core.script.ScriptParams;
+import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
-import io.nosqlbench.docsys.core.DocServerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class NBCLI {
     private static final Logger logger = LoggerFactory.getLogger(NBCLI.class);
     private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
-    private String commandName;
+    private final String commandName;
 
     public NBCLI(String commandName) {
         this.commandName = commandName;
@@ -51,28 +52,57 @@ public class NBCLI {
             NBCLI cli = new NBCLI("eb");
             cli.run(args);
         } catch (Exception e) {
-            if (e instanceof BasicError) {
-                System.out.println("ERROR: " + e.getMessage());
-                System.out.flush();
-                logger.error("ERROR: " + e.getMessage());
-                System.exit(2);
-            } else {
-                throw e;
+            String error = ScenarioErrorHandler.handle(e,true);
+            if (error!=null) {
+                System.err.println(error);
             }
+            System.err.flush();
+            System.out.flush();
+            System.exit(2);
         }
     }
 
     public void run(String[] args) {
+
+        NBCLIOptions globalOptions = new NBCLIOptions(args,NBCLIOptions.Mode.ParseGlobalsOnly);
+
+
+        // Global only processing
+
+        String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
+
+        if (globalOptions.wantsDockerMetrics()) {
+            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
+            DockerMetricsManager dmh = new DockerMetricsManager();
+            Map<String, String> dashboardOptions = Map.of(
+                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag()
+            );
+            dmh.startMetrics(dashboardOptions);
+
+            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
+                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+            logger.warn(warn);
+            if (reportGraphiteTo != null) {
+                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
+                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                        "usually only one of the two is configured.",
+                    reportGraphiteTo));
+            } else {
+                logger.info("Setting graphite reporting to localhost");
+                reportGraphiteTo = "localhost:9109";
+            }
+        }
+
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
-        if (args.length > 0 && args[0].toLowerCase().equals("docserver")) {
+        if (args.length > 0 && args[0].toLowerCase().matches("docserver|appserver")) {
             DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
-        if (args.length>0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
-            MarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
+        if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
+            MarkdownExporter.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
 
@@ -118,22 +148,22 @@ public class NBCLI {
             logger.debug("user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .prefix("activities")
-                .prefix(options.wantsIncludes())
-                .name(resourceToCopy).extension("yaml").first();
+                    .prefix("activities")
+                    .prefix(options.wantsIncludes())
+                    .name(resourceToCopy).extension("yaml").first();
 
             if (tocopy.isEmpty()) {
 
                 tocopy = NBIO.classpath()
-                    .prefix().prefix(options.wantsIncludes())
-                    .prefix(options.wantsIncludes())
-                    .name(resourceToCopy).first();
+                        .prefix().prefix(options.wantsIncludes())
+                        .prefix(options.wantsIncludes())
+                        .name(resourceToCopy).first();
             }
 
             Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                    () -> new BasicError(
+                            "Unable to find " + resourceToCopy +
+                                    " in classpath to copy out")
             );
 
             Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -173,7 +203,7 @@ public class NBCLI {
         if (options.wantsTopicalHelp()) {
             Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             System.exit(0);
         }
@@ -183,31 +213,6 @@ public class NBCLI {
             System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
-        }
-
-        String reportGraphiteTo = options.wantsReportGraphiteTo();
-
-        if (options.wantsDockerMetrics()) {
-            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
-            DockerMetricsManager dmh = new DockerMetricsManager();
-            Map<String,String> dashboardOptions = Map.of(
-                    DockerMetricsManager.GRAFANA_TAG, options.getDockerGrafanaTag()
-            );
-            dmh.startMetrics(dashboardOptions);
-
-            String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
-            logger.warn(warn);
-            if (reportGraphiteTo != null) {
-                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                        "usually only one of the two is configured.",
-                    reportGraphiteTo));
-            } else {
-                //TODO: is this right?
-                logger.info("Setting graphite reporting to localhost");
-                reportGraphiteTo = "localhost:9109";
-            }
         }
 
         if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {
@@ -257,16 +262,17 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(
-            sessionName,
-            options.getScriptingEngine(),
-            options.getProgressSpec(),
-            options.wantsGraaljsCompatMode()
+                sessionName,
+                options.getScriptFile(),
+                options.getScriptingEngine(),
+                options.getProgressSpec(),
+                options.wantsGraaljsCompatMode(),
+                options.wantsStackTraces(),
+                options.wantsCompileScript()
         );
-        ScriptBuffer buffer = new BasicScriptBuffer(
-            options.getLogsDirectory()+ FileSystems.getDefault().getSeparator()+ "_scenario."+ scenario.getName() +".js"
-        ).add(options.getCommands().toArray(new Cmd[0]));
+        ScriptBuffer buffer = new BasicScriptBuffer()
+                .add(options.getCommands().toArray(new Cmd[0]));
         String scriptData = buffer.getParsedScript();
-        Map<String,String> globalParams=buffer.getCombinedParams();
 
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
@@ -284,28 +290,28 @@ public class NBCLI {
 
         // Execute Scenario!
 
-        Level clevel = options.wantsConsoleLogLevel();
-        Level llevel = Level.toLevel(options.getLogsLevel());
-        if (llevel.toInt()>clevel.toInt()) {
+        Level consoleLogLevel = options.wantsConsoleLogLevel();
+        Level scenarioLogLevel = Level.toLevel(options.getLogsLevel());
+        if (scenarioLogLevel.toInt() > consoleLogLevel.toInt()) {
             logger.info("raising scenario logging level to accommodate console logging level");
         }
-        Level maxLevel = Level.toLevel(Math.min(clevel.toInt(), llevel.toInt()));
+        Level maxLevel = Level.toLevel(Math.min(consoleLogLevel.toInt(), scenarioLogLevel.toInt()));
 
         scenario.addScriptText(scriptData);
         ScriptParams scriptParams = new ScriptParams();
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
         ScenarioLogger sl = new ScenarioLogger(scenario)
-            .setLogDir(options.getLogsDirectory())
-            .setMaxLogs(options.getLogsMax())
-            .setLevel(maxLevel)
-            .setLogLevelOverrides(options.getLogLevelOverrides())
-            .start();
+                .setLogDir(options.getLogsDirectory())
+                .setMaxLogs(options.getLogsMax())
+                .setLevel(maxLevel)
+                .setLogLevelOverrides(options.getLogLevelOverrides())
+                .start();
 
         executor.execute(scenario, sl);
 
         while (true) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getName());
+            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
             if (pendingResult.isEmpty()) {
                 LockSupport.parkNanos(100000000L);
             } else {
@@ -319,12 +325,16 @@ public class NBCLI {
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
+        logger.info(scenariosResults.getExecutionSummary());
+
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();
-            System.err.println("ERROR while running scenario: " + exception.getMessage());
-            exception.printStackTrace(System.err);
+//            logger.warn(scenariosResults.getExecutionSummary());
+            ScenarioErrorHandler.handle(exception,options.wantsStackTraces());
+            System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             System.exit(2);
         } else {
+            logger.info(scenariosResults.getExecutionSummary());
             System.exit(0);
         }
     }

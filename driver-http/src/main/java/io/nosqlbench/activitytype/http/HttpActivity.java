@@ -1,9 +1,9 @@
 package io.nosqlbench.activitytype.http;
 
-import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -37,6 +37,8 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Timer resultSuccessTimer;
 
     private OpSequence<ReadyHttpOp> sequencer;
+    private boolean diagnosticsEnabled;
+    private long timeout = Long.MAX_VALUE;
 
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -55,17 +57,28 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         rowCounter = ActivityMetrics.meter(activityDef, "rows");
         skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
-
-        String[] diag = getParams().getOptionalString("diag").orElse("").split(",");
-        Set<String> diags = new HashSet<String>(Arrays.asList(diag));
-
-        this.console = new HttpConsoleFormats(diags);
-
-        getParams().getOptionalString("client_scope").map(ClientScope::valueOf).ifPresent(this::setClientScope);
-
         this.sequencer = createOpSequence(ReadyHttpOp::new);
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
+    }
+
+    @Override
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+        super.onActivityDefUpdate(activityDef);
+        String[] diag = getParams().getOptionalString("diag").orElse("").split(",");
+        Set<String> diags = new HashSet<String>(Arrays.asList(diag));
+        this.console = new HttpConsoleFormats(diags);
+        this.diagnosticsEnabled = console.isDiagnosticMode();
+        this.timeout = getParams().getOptionalLong("timeout").orElse(Long.MAX_VALUE);
+
+        getParams().getOptionalString("client_scope")
+            .map(ClientScope::valueOf)
+            .ifPresent(this::setClientScope);
+
+    }
+
+    public long getTimeoutMillis() {
+        return timeout;
     }
 
     private void setClientScope(ClientScope clientScope) {
@@ -99,11 +112,14 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
                     return r;
                 })
                 .ifPresent(builder::followRedirects);
-
         return builder.build();
     }
 
     public OpSequence<ReadyHttpOp> getSequencer() {
         return sequencer;
+    }
+
+    public boolean isDiagnosticMode() {
+        return diagnosticsEnabled;
     }
 }

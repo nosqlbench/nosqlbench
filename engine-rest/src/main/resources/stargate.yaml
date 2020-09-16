@@ -1,0 +1,1789 @@
+openapi: 3.0.1
+info:
+  title: Stargate REST on Astra
+  description: ""
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 2.0.0
+servers:
+  - url: https://{databaseId}-{region}.apps.astra.datastax.com
+externalDocs:
+  description: Reference Document
+  url: http://shorturl.at/hnqIQ
+tags:
+  - name: auth
+    description: auth
+  - name: namespaces
+    description: document data
+  - name: keyspaces
+    description: tablular data
+  - name: schemas
+    description: storage configuration
+paths:
+  /api/rest/v1/auth:
+    post:
+      tags:
+        - auth
+      summary: Create an auth token
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "authToken": "string" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/namespaces/{namespace-id}/collections/{collection-id}:
+    get:
+      tags:
+        - namespaces
+      summary: search for documents in {collection-id}
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/fields"
+        - $ref: "#/components/parameters/page-size"
+        - $ref: "#/components/parameters/page-state"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "count": 1,
+                      "pageState": "2f4acd34",
+                      "data":
+                        [
+                          {
+                            "documentId": "my-first-post-a6h54",
+                            "title": "Hello World",
+                            "author": { "name": "Cliff Wicklow" },
+                          },
+                        ],
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - namespaces
+      summary: add a new document to {collection-id}
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "title": "Hello World",
+                    "author":
+                      {
+                        "name": "CRW",
+                        "social":
+                          { "foo-bar-789": { "followers": 1, "likes": 7 } },
+                      },
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "documentId": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/namespaces/{namespace-id}/collections/{collection-id}/{document-id}:
+    get:
+      tags:
+        - namespaces
+      summary: get a document by id
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+        - $ref: "#/components/parameters/fields"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        {
+                          "documentId": "my-first-post-a6h54",
+                          "title": "Hello World",
+                          "author": { "name": "Cliff Wicklow" },
+                        },
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - namespaces
+      summary: replace a document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "title": "Hello World", "author": { "name": "DKG" } }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "documentId": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - namespaces
+      summary: update part of a document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "title": "Hello World" }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "documentId": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - namespaces
+      summary: delete a  document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/namespaces/{namespace-id}/collections/{collection-id}/{document-id}/{document-path}:
+    get:
+      tags:
+        - namespaces
+      summary: get a sub document by path
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+        - $ref: "#/components/parameters/document-path"
+        - $ref: "#/components/parameters/fields"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "documentPath": "author",
+                      "data": { "name": "Cliff Wicklow" },
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - namespaces
+      summary: replace a sub document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+        - $ref: "#/components/parameters/document-path"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "foo-bar-789": { "followers": 1, "likes": 7 } }
+
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "documentId": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - namespaces
+      summary: update part of a sub document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+        - $ref: "#/components/parameters/document-path"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "title": "Hello World" }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "documentId": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - namespaces
+      summary: delete a sub document
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/document-id"
+        - $ref: "#/components/parameters/document-path"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/keyspaces/{keyspace-id}/{table-id}:
+    get:
+      tags:
+        - keyspaces
+      summary: search a table
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/fields"
+        - $ref: "#/components/parameters/page-size"
+        - $ref: "#/components/parameters/page-state"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "count": 1,
+                      "pageState": "2f4acd34",
+                      "data":
+                        [ { "title": "Hello World", "author": "Cliff Wicklow" } ],
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - keyspaces
+      summary: add a new row
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+      requestBody:
+        description: row
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "pk": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7",
+                    "title": "Hello World",
+                    "author": "CRW",
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "pk": "e73c77ec-002d-457a-8b65-8ce7cfb15fc7" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/keyspaces/{keyspace-id}/{table-id}/{primary-key}:
+    get:
+      tags:
+        - keyspaces
+      summary: get a row(s)
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/primary-key"
+        - $ref: "#/components/parameters/fields"
+        - $ref: "#/components/parameters/page-size"
+        - $ref: "#/components/parameters/page-state"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "count": 1,
+                      "pageState": "2f4acd34",
+                      "data":
+                        [ { "title": "Hello World", "author": "Cliff Wicklow" } ],
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - keyspaces
+      summary: replace a row(s)
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/primary-key"
+        - $ref: "#/components/parameters/raw"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "title": "New Title" }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "rowsModified": 208, "data": { "title": "New Title" } }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    patch:
+      tags:
+        - keyspaces
+      summary: update part of a row(s)
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/primary-key"
+        - $ref: "#/components/parameters/raw"
+      requestBody:
+        description: document
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value: { "title": "New Title", "author": null }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    { "rowsModified": 208, "data": { "title": "New Title" } }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - keyspaces
+      summary: delete a row(s)
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/primary-key"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces:
+    get:
+      tags:
+        - schemas
+      summary: list keyspaces
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "killrvideo",
+                            "datacenters":
+                              [
+                                { "name": "dc1", "replicas": 3 },
+                                { "name": "dc2", "replicas": 3 },
+                              ],
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - schemas
+      summary: create a keyspace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              simple strategy:
+                value: { "name": "killrvideo" }
+              datacenters:
+                value:
+                  {
+                    "name": "killrvideo",
+                    "datacenters":
+                      [
+                        { "name": "dc1", "replicas": 3 },
+                        { "name": "dc2", "replicas": 3 },
+                      ],
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "killrvideo" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces/{keyspace-id}:
+    get:
+      tags:
+        - schemas
+      summary: get a keyspace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        {
+                          "name": "killrvideo",
+                          "datacenters":
+                            [
+                              { "name": "dc1", "replicas": 3 },
+                              { "name": "dc2", "replicas": 3 },
+                            ],
+                        },
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - schemas
+      summary: delete a keyspace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces/{keyspace-id}/tables:
+    get:
+      tags:
+        - schemas
+      summary: list tables
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "string",
+                            "keyspace": "string",
+                            "columnDefinitions":
+                              [
+                                {
+                                  "name": "emailaddress",
+                                  "typeDefinition": "text",
+                                  "static": false,
+                                },
+                              ],
+                            "primaryKey":
+                              {
+                                "partitionKey": [ "string" ],
+                                "clusteringKey": [ "string" ],
+                              },
+                            "tableOptions":
+                              {
+                                "defaultTimeToLive": 0,
+                                "clusteringExpression":
+                                  [ { "column": "string", "order": "ASC" } ],
+                              },
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - schemas
+      summary: create a table
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "users",
+                    "ifNotExists": false,
+                    "columnDefinitions":
+                      [
+                        {
+                          "name": "emailaddress",
+                          "typeDefinition": "text",
+                          "static": false,
+                        },
+                      ],
+                    "primaryKey":
+                      {
+                        "partitionKey": [ "string" ],
+                        "clusteringKey": [ "string" ],
+                      },
+                    "tableOptions":
+                      {
+                        "defaultTimeToLive": 0,
+                        "clusteringExpression":
+                          [ { "column": "string", "order": "ASC" } ],
+                      },
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "users" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces/{keyspace-id}/tables/{table-id}:
+    get:
+      tags:
+        - schemas
+      summary: get a table
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        {
+                          "name": "string",
+                          "keyspace": "string",
+                          "columnDefinitions":
+                            [
+                              {
+                                "name": "emailaddress",
+                                "typeDefinition": "text",
+                                "static": false,
+                              },
+                            ],
+                          "primaryKey":
+                            {
+                              "partitionKey": [ "string" ],
+                              "clusteringKey": [ "string" ],
+                            },
+                          "tableOptions":
+                            {
+                              "defaultTimeToLive": 0,
+                              "clusteringExpression":
+                                [ { "column": "string", "order": "ASC" } ],
+                            },
+                        },
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - schemas
+      summary: replace a table definition, except for columns
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "users",
+                    "ifNotExists": false,
+                    "primaryKey":
+                      {
+                        "partitionKey": [ "string" ],
+                        "clusteringKey": [ "string" ],
+                      },
+                    "tableOptions":
+                      {
+                        "defaultTimeToLive": 0,
+                        "clusteringExpression":
+                          [ { "column": "string", "order": "ASC" } ],
+                      },
+                  }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "users" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - schemas
+      summary: delete a table
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces/{keyspace-id}/tables/{table-id}/columns:
+    get:
+      tags:
+        - schemas
+      summary: list columns
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "emailaddress",
+                            "typeDefinition": "text",
+                            "static": false,
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - schemas
+      summary: create a column
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "emailaddress",
+                    "typeDefinition": "text",
+                    "static": false,
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "emailaddress" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/keyspaces/{keyspace-id}/tables/{table-id}/columns/{column-id}:
+    get:
+      tags:
+        - schemas
+      summary: get a column
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/column-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        {
+                          "name": "emailaddress",
+                          "typeDefinition": "text",
+                          "static": false,
+                        },
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - schemas
+      summary: replace a column definition
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/column-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "emailaddressRenamed",
+                    "typeDefinition": "text",
+                    "static": true,
+                  }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "users" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - schemas
+      summary: delete a column
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/keyspace-id"
+        - $ref: "#/components/parameters/table-id"
+        - $ref: "#/components/parameters/column-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/namespaces:
+    get:
+      tags:
+        - schemas
+      summary: list namespaces
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "killrvideo",
+                            "datacenters":
+                              [
+                                { "name": "dc1", "replicas": 3 },
+                                { "name": "dc2", "replicas": 3 },
+                              ],
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - schemas
+      summary: create a namespace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              simple strategy:
+                value: { "name": "killrvideo" }
+              datacenters:
+                value:
+                  {
+                    "name": "killrvideo",
+                    "datacenters":
+                      [
+                        { "name": "dc1", "replicas": 3 },
+                        { "name": "dc2", "replicas": 3 },
+                      ],
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "killrvideo" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/namespaces/{namespace-id}:
+    get:
+      tags:
+        - schemas
+      summary: get a namespace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        {
+                          "name": "killrvideo",
+                          "datacenters":
+                            [
+                              { "name": "dc1", "replicas": 3 },
+                              { "name": "dc2", "replicas": 3 },
+                            ],
+                        },
+                    }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        404:
+          $ref: "#/components/responses/404"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - schemas
+      summary: delete a namespace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/namespaces/{namespace-id}/collections:
+    get:
+      tags:
+        - schemas
+      summary: list collections in a namespace
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "users",
+                            "fields":
+                              { "name": { "type": "String", "index": true } },
+                            "validationAction": "warn",
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    post:
+      tags:
+        - schemas
+      summary: create a collection
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "users",
+                    "fields": { "name": { "type": "String", "index": true } },
+                    "validationAction": "warn",
+                  }
+      responses:
+        201:
+          description: resource created
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "killrvideo" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+  /api/rest/v2/schemas/namespaces/{namespace-id}/collections/{collection-id}:
+    get:
+      tags:
+        - schemas
+      summary: get a collection
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+        - $ref: "#/components/parameters/raw"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    {
+                      "data":
+                        [
+                          {
+                            "name": "users",
+                            "fields":
+                              { "name": { "type": "String", "index": true } },
+                            "validationAction": "warn",
+                          },
+                        ],
+                    }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+    put:
+      tags:
+        - schemas
+      summary: update (replace) a collection
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              default:
+                value:
+                  {
+                    "name": "users",
+                    "fields": { "name": { "type": "String", "index": true } },
+                    "validationAction": "warn",
+                  }
+      responses:
+        200:
+          description: resource updated
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { "name": "users" }
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        409:
+          $ref: "#/components/responses/409"
+        500:
+          $ref: "#/components/responses/500"
+    delete:
+      tags:
+        - schemas
+      summary: delete a collection
+      parameters:
+        - $ref: "#/components/parameters/X-Cassandra-Request-Id"
+        - $ref: "#/components/parameters/databaseId"
+        - $ref: "#/components/parameters/region"
+        - $ref: "#/components/parameters/pretty"
+        - $ref: "#/components/parameters/X-Cassandra-Token"
+        - $ref: "#/components/parameters/namespace-id"
+        - $ref: "#/components/parameters/collection-id"
+      responses:
+        204:
+          description: resource deleted
+          content:
+            application/json:
+              examples:
+                default:
+                  value: { }
+        401:
+          $ref: "#/components/responses/401"
+        500:
+          $ref: "#/components/responses/500"
+components:
+  parameters:
+    region:
+      name: "region"
+      description: "Cloud region where your database lives. </br> For example, `us-east-1`"
+      in: "path"
+      schema:
+        type: "string"
+      required: true
+    databaseId:
+      name: "databaseId"
+      description: "UUID of your database from the Astra URL. </br> For example, `d341f349-e5db-46d2-9c90-bb9ebaa6f0fc`."
+      in: "path"
+      schema:
+        type: "string"
+      required: true
+    X-Cassandra-Token:
+      name: X-Cassandra-Token
+      in: header
+      required: true
+      description: "The token returned from the authorization endpoint. Use this token in each request to the database."
+      schema:
+        type: string
+    X-Cassandra-Request-Id:
+      name: X-Cassandra-Request-Id
+      in: header
+      required: true
+      description: "Unique identifier (UUID) for the request. Use any valid UUID."
+      schema:
+        type: string
+        format: uuid
+    pretty:
+      name: pretty
+      in: query
+      description: format results
+      schema:
+        type: boolean
+    raw:
+      name: raw
+      in: query
+      description: unwrap results
+      schema:
+        type: boolean
+    namespace-id:
+      name: namespace-id
+      in: path
+      description: namespace name
+      required: true
+      schema:
+        type: string
+    collection-id:
+      name: collection-id
+      in: path
+      description: name of the document collection
+      required: true
+      schema:
+        type: string
+    document-id:
+      name: document-id
+      in: path
+      description: the id of the document
+      required: true
+      schema:
+        type: string
+    document-path:
+      name: document-path
+      in: path
+      description: a JSON path
+      required: true
+      schema:
+        type: string
+    keyspace-id:
+      name: keyspace-id
+      in: path
+      description: keyspace name
+      required: true
+      schema:
+        type: string
+    table-id:
+      name: table-id
+      in: path
+      description: table name
+      required: true
+      schema:
+        type: string
+    column-id:
+      name: column-id
+      in: path
+      description: column name
+      required: true
+      schema:
+        type: string
+    primary-key:
+      name: primary-key
+      in: path
+      required: true
+      description: |
+        Value from the primary key column for the table. Define composite keys by separating values with
+        slashes (`val1/val2...`) in the order they were defined. </br> For example, if the composite key
+        was defined as `PRIMARY KEY(race_year, race_name)` then the primary key in the path would be
+        `race_year/race_name`
+      schema:
+        type: string
+    fields:
+      name: fields
+      in: query
+      description: URL escaped, comma delimited list of keys to include
+      schema:
+        type: string
+      examples:
+        default:
+          value: "name, email"
+    sort:
+      name: sort
+      in: query
+      description: keys to sort by
+      schema:
+        type: object
+      examples:
+        default:
+          value: { "documentId": "asc", "name": "desc" }
+    page-state:
+      name: page-state
+      in: query
+      description: move the cursor to a particular result
+      schema:
+        type: string
+      examples:
+        default:
+          value: ""
+    page-size:
+      name: page-size
+      description: restrict the number of returned items (max 100)
+      in: query
+      schema:
+        type: integer
+        format: int32
+      examples:
+        default:
+          value: 10
+    where:
+      name: where
+      in: query
+      description: |
+        URL escaped JSON query using the following keys:
+        | Key | Operation |
+        |-|-|
+        | $lt | Less Than |
+        | $lte | Less Than Or Equal To |
+        | $gt | Greater Than |
+        | $gte | Greater Than Or Equal To |
+        | $ne | Not Equal To |
+        | $in | Contained In |
+        | $exists | A value is set for the key |
+        | $select | This matches a value for a key in the result of a different query |
+        | $dontSelect | Requires that a key’s value not match a value for a key in the result of a different query |
+        | $all | Contains all of the given values |
+        | $regex | Requires that a key’s value match a regular expression |
+        | $text | Performs a full text search on indexed fields |
+      schema:
+        type: object
+      examples:
+        search with or:
+          value:
+            {
+              "author.name": "Cliff Wicklow",
+              "createTime": { "$gte": 0 },
+              "$or":
+                [ { "name": "Cliff" }, { "documentId": "my-first-post-a6h54" } ],
+            }
+  examples: { }
+  responses:
+    404:
+      description: Not Found
+      content:
+        application/json:
+          examples:
+            default:
+              value: { "code": 404, "description": "Not Found" }
+    400:
+      description: Invalid input
+      content:
+        application/json:
+          examples:
+            default:
+              value: { "code": 400, "description": "Invalid input" }
+    401:
+      description: Unauthorized
+      content:
+        application/json:
+          examples:
+            default:
+              value: { "code": 401, "description": "Unauthorized" }
+    409:
+      description: Conflict
+      content:
+        application/json:
+          examples:
+            default:
+              value: { "code": 409, "description": "resource already exists." }
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          examples:
+            default:
+              value: { "code": 500, "description": "Internal server error" }
+  schemas:
+    Credentials:
+      type: object
+      required:
+        - username
+        - password
+      description: User credentials for authenticating
+      properties:
+        username:
+          type: string
+          description: Username
+        password:
+          type: string
+          description: Password

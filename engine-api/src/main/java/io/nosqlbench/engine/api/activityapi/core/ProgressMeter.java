@@ -18,8 +18,47 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 public interface ProgressMeter {
-    double getProgress();
     String getProgressName();
-    RunState getProgressState();
-    String getProgressDetails();
+
+    //    RunState getProgressState();
+    long getStartedAtMillis();
+
+    long getProgressMin();
+
+    long getProgressCurrent();
+
+    long getProgressMax();
+
+    long getRecyclesCurrent();
+
+    long getRecyclesMax();
+
+    default String getProgressSummary() {
+        return "min=" + getProgressMin() + " cycle=" + getProgressCurrent() + " max=" + getProgressMax() +
+            (getRecyclesMax() > 0L ? " recycles=" + getRecyclesCurrent() + "/" + getRecyclesMax() : "");
+    }
+
+    default double getProgressRatio() {
+        return
+            ((double) (getProgressCurrent() - getProgressMin()))
+                /
+                ((double) (getProgressMax() - getProgressMin()));
+    }
+
+    default double getProgressTotal() {
+        return (getProgressMax() - getProgressMin());
+    }
+
+    default double getProgressETAMillis() {
+        long then = getStartedAtMillis();
+        long now = System.currentTimeMillis();
+        double elapsed = now - then;
+
+        double completed = getProgressCurrent() - getProgressMin();
+        double rate = completed / elapsed;
+
+        double remaining = getProgressMax() - getProgressCurrent();
+        return remaining / rate;
+    }
 }
+

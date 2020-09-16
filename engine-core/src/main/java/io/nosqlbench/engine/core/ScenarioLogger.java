@@ -87,7 +87,7 @@ public class ScenarioLogger {
         ple.setContext(loggerContext);
         ple.start();
 
-        String scenarioLog = loggerDir.getPath() + File.separator + scenario.getName()+".log";
+        String scenarioLog = loggerDir.getPath() + File.separator + scenario.getScenarioName()+".log";
         scenarioLog = scenarioLog.replaceAll("\\s","_");
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
         fileAppender.setFile(scenarioLog);
@@ -157,7 +157,7 @@ public class ScenarioLogger {
         }
     }
 
-    private static Comparator<File> fileTimeComparator = new Comparator<File>() {
+    private static final Comparator<File> fileTimeComparator = new Comparator<File>() {
         @Override
         public int compare(File o1, File o2) {
             return Long.compare(o1.lastModified(),o2.lastModified());

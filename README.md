@@ -6,6 +6,8 @@
 
 [Get it Here](DOWNLOADS.md)
 
+[Contribute to NoSQLBench](CONTRIBUTING.md)
+
 [Read the Docs](http://docs.nosqlbench.io/)
 
 ## What is NoSQLBench?

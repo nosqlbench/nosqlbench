@@ -20,7 +20,7 @@ public class Save implements RowCycleOperator {
 
     ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 
-    private String[] varnames;
+    private final String[] varnames;
 
     public Save(String... varnames) {
         this.varnames = varnames;
@@ -38,7 +38,7 @@ public class Save implements RowCycleOperator {
             List<ColumnDefinitions.Definition> definitions = row.getColumnDefinitions().asList();
             logger.error("Unable to save '" + Arrays.toString(varnames) + "' from " +
                     definitions.stream().map(ColumnDefinitions.Definition::getName)
-            .collect(Collectors.joining(",","[","]")) + ": " + e.getMessage(),e);
+            .collect(Collectors.joining(",","[","]")) + ": ",e);
             throw e;
         }
         return 0;

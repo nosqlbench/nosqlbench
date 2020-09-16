@@ -153,7 +153,11 @@ public class CQLOptions {
     public static SpeculativeExecutionPolicy speculativeFor(String spec) {
         Matcher pctileMatcher = PERCENTILE_EAGER_PATTERN.matcher(spec);
         Matcher constantMatcher = CONSTANT_EAGER_PATTERN.matcher(spec);
-        if (pctileMatcher.matches()) {
+        if (spec.toLowerCase().trim().matches("disabled|none")) {
+            return null;
+        } else if (spec.toLowerCase().trim().equals("default")) {
+            return defaultSpeculativePolicy();
+        } else if (pctileMatcher.matches()) {
             double pctile = Double.valueOf(pctileMatcher.group("pctile"));
             if (pctile > 100.0 || pctile < 0.0) {
                 throw new RuntimeException("pctile must be between 0.0 and 100.0");

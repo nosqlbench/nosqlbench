@@ -19,16 +19,24 @@ tags:
 ### Tag Filtering
 
 The tag filters provide a flexible set of conventions for filtering tagged statements. Tag filters are usually provided
-as an activity parameter when an activity is launched. The rules for tag filtering are:
+as an activity parameter when an activity is launched. The rules for tag filtering are (updated in version 3.12):
 
+0. If no conjugate is specified, `all(...)` is assumed. This is in keeping with the previous default. If you do specify
+   a conjugate wrapper around the tag filter, it must be in the above form. `all(...)`, `any(...)`, and `none(...)` are
+   allowed.
 1. If no tag filter is specified, then the statement matches.
-2. A tag name predicate like `tags=name` asserts the presence of a specific
-   tag name, regardless of its value.
-3. A tag value predicate like `tags=name:foxtrot` asserts the presence of
-   a specific tag name and a specific value for it.
-4. A tag pattern predicate like `tags=name:'fox.*'` asserts the presence of a specific tag name and a value that matches the provided regular expression.
+2. A tag name predicate like `tags=name` asserts the presence of a specific tag name, regardless of its value.
+3. A tag value predicate like `tags=name:foxtrot` asserts the presence of a specific tag name and a specific value for it.
+4. A tag pattern predicate like `tags=name:'fox.*'` asserts the presence of a specific tag name and a value that matches
+   the provided regular expression.
 5. Multiple tag predicates may be specified as in `tags=name:'fox.*',unit:bravo`
-6. Tag predicates are joined by *and* when more than one is provided -- If any predicate fails to match a tagged element, then the whole tag filtering expression fails to match.
+6. 
+   0. If the `all` conjugate form is used (the default), then if any predicate fails to match a tagged element, then the
+   whole tag filtering expression fails to match.
+   1. If the `any` conjugate form is used, then if all predicates fail to match a tagged element, then the whole tag filtering
+   expression fails to match.
+   2. If the `none` conjugate form is used, then if any predicate _matches_, a tagged element, then the whole expression
+   matches.
 
 A demonstration:
 
@@ -76,5 +84,9 @@ I'm alive!
 # compound tag predicate does not fully match
 [test]$ ./nb run driver=stdout workload=stdout-test tags='name=fox.*',unit=delta
 11:02:53.490 [scenarios:001] ERROR i.e.activities.stdout.StdoutActivity - Unable to create a stdout statement if you have no active statements or bindings configured.
+
+# any(...) form will work as long as one of the tags match
+[test]$ ./nb run driver=stdout workload=stdout-test tags='any(name=fox.*,thisone:wontmatch)',unit=bravo
+I'm alive!
 ```
 

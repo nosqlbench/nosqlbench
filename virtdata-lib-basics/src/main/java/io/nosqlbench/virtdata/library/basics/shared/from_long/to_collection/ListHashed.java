@@ -45,9 +45,9 @@ public class ListHashed implements LongFunction<List<Object>> {
         long hash = value;
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
+            hash = hasher.applyAsLong(hash);
             int selector = Math.min(i, valueFuncs.size() - 1);
             LongFunction<?> func = valueFuncs.get(selector);
-            hash = hasher.applyAsLong(value);
             list.add(func.apply(hash));
         }
         return list;

@@ -1,0 +1,41 @@
+digraph {
+    node [fontsize = 8,shape = record]
+    rankdir = LR;
+
+    subgraph clusterB {
+    label = "after topic mapping"
+    node [fontsize = 8,shape = record]
+    rankdir = LR;
+
+    ap; bp; cp; dp; ep;
+    ap [label = "A|topics: all-topics|included: cli,time,temp"]
+    ap -> {bp; cp; dp; ep}
+
+    bp [label = "B|topics:|included: cli"]
+    cp [label = "C|topics:cli"]
+    bp -> cp
+
+    dp [label = "D|topics:temp"]
+    ep [label = "E|topics:time"]
+    }
+
+    subgraph clusterA {
+    label = "before topic mapping"
+    node [fontsize = 8,shape = record]
+    rankdir = LR;
+
+    a; b; c; d; e;
+
+    a [label = "A|topics: .*,all-topics"]
+    a -> {b; c; d; e}
+
+    b [label = "B|topics:(cli)"]
+    c [label = "C|topics:cli"]
+    b -> c
+
+    d [label = "D|topics:temp"]
+    e [label = "E|topics:time"]
+
+    }
+
+}

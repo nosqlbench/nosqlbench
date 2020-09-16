@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class AutoDocsWebService implements WebServiceObject {
 
     private final static Logger logger = LogManager.getLogger(AutoDocsWebService.class);
-    private List<DocFuncData> _docs = VirtDataDocs.getAllDocs();
+    private final List<DocFuncData> _docs = VirtDataDocs.getAllDocs();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -38,16 +38,15 @@ public class AutoDocsWebService implements WebServiceObject {
     @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("details")
-    public List<DocFuncData> getAutoDocsDetails(@QueryParam("function") String fname) {
-        if (fname == null || fname.isEmpty()) {
-            return _docs;
-        }
-
+    public List<DocFuncDataView> getAutoDocsDetails(@QueryParam("function") String fname) {
         return _docs.stream()
-                .filter(d -> {
-                    String fullname = d.getPackageName() + "." + d.getClassName();
-                    return fullname.contains(fname);
-                }).collect(Collectors.toList());
+            .filter(d -> {
+                if (fname == null || fname.isEmpty()) return true;
+                String fullname = d.getPackageName() + "." + d.getClassName();
+                return fullname.contains(fname);
+            })
+            .map(DocFuncDataView::new)
+            .collect(Collectors.toList());
 
     }
 

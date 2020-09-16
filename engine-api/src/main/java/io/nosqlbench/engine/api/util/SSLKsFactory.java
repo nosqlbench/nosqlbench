@@ -17,11 +17,16 @@
 
 package io.nosqlbench.engine.api.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ServerSocketFactory;
+import javax.net.SocketFactory;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyStore;
@@ -33,16 +38,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import javax.net.ServerSocketFactory;
-import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 
 public class SSLKsFactory {
     private final static Logger logger = LoggerFactory.getLogger(SSLKsFactory.class);
@@ -92,16 +87,16 @@ public class SSLKsFactory {
                     logger.warn("Please update your 'ssl=true' parameter to 'ssl=jdk'");
                 }
 
+                final char[] keyStorePassword = def.getParams().getOptionalString("kspass")
+                                             .map(String::toCharArray)
+                                             .orElse(null);
                 keyPassword = def.getParams().getOptionalString("keyPassword")
                                  .map(String::toCharArray)
-                                 .orElse(null);
+                                 .orElse(keyStorePassword);
 
                 keyStore = def.getParams().getOptionalString("keystore").map(ksPath -> {
                     try {
-                        return KeyStore.getInstance(new File(ksPath),
-                                                    def.getParams().getOptionalString("kspass")
-                                                       .map(String::toCharArray)
-                                                       .orElse(null));
+                        return KeyStore.getInstance(new File(ksPath), keyStorePassword);
                     } catch (Exception e) {
                         throw new RuntimeException("Unable to load the keystore. Please check.", e);
                     }
@@ -186,7 +181,7 @@ public class SSLKsFactory {
                 kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 kmf.init(keyStore, keyPassword);
             } catch (Exception e) {
-                throw new RuntimeException("Unable to init KeyManagerFactory. Please check.", e);
+                throw new RuntimeException("Unable to init KeyManagerFactory. Please check password and location.", e);
             }
 
             TrustManagerFactory tmf;

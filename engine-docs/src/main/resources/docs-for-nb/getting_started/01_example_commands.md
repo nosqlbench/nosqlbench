@@ -12,7 +12,7 @@ Let's run a simple test against a cluster to establish some basic familiarity wi
 We will start by creating a simple schema in the database. From your command line, go ahead and execute the following
 command, replacing the `host=<host-or-ip>` with that of one of your database nodes.
 
-```
+```text
 ./nb run driver=cql workload=cql-keyvalue tags=phase:schema host=<host-or-ip>
 ```
 
@@ -62,7 +62,7 @@ Go ahead and execute the following command:
 
 You should see 10 of the following statements in your console
 
-```
+```cql
 insert into baselines.keyvalue (key, value) values (0,382062539);
 insert into baselines.keyvalue (key, value) values (1,774912474);
 insert into baselines.keyvalue (key, value) values (2,949364593);
@@ -101,7 +101,7 @@ These parameters are explained in detail in the section on _Activity Parameters_
 
 You should see output that looks like this
 
-```
+```text
 cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
 cql-keyvalue: 0.00%/Running (details: min=0 cycle=1 max=100000)
 cql-keyvalue: 0.32%/Running (details: min=0 cycle=325 max=100000)
@@ -125,7 +125,7 @@ this runs a 50% read / 50% write workload.
 
 You should see output that looks like this:
 
-```
+```text
 Logging to logs/scenario_20190812_154431_028.log
 cql-keyvalue: 0.50%/Running (details: min=0 cycle=500 max=100000)
 cql-keyvalue: 2.50%/Running (details: min=0 cycle=2500 max=100000)

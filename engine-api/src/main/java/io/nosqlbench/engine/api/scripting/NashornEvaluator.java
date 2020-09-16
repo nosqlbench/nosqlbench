@@ -34,7 +34,7 @@ public class NashornEvaluator<T> implements Evaluator<T> {
     private final ScriptEngine scriptEngine;
     private final SimpleBindings bindings = new SimpleBindings();
     private String script = "";
-    private Class<? extends T> resultType;
+    private final Class<? extends T> resultType;
     private CompiledScript compiled;
 
     /**
@@ -71,8 +71,7 @@ public class NashornEvaluator<T> implements Evaluator<T> {
                 logger.trace("Did not compile script: " + script);
             }
         } catch (ScriptException e) {
-            String errorDesc = "Script compilation error for " + scriptText + ": " + e.getMessage();
-            throw new RuntimeException(errorDesc, e);
+            throw new RuntimeException("Script compilation error for " + scriptText + ": ", e);
         }
         return this;
     }
@@ -96,13 +95,9 @@ public class NashornEvaluator<T> implements Evaluator<T> {
             }
             result = convert(resultType, evaled);
         } catch (ScriptException e) {
-            String errorDesc = "Script error while evaluating result for '" + script + "':" + e.getMessage();
-            logger.error(errorDesc, e);
-            throw new RuntimeException(errorDesc, e);
+            throw new RuntimeException("Script error while evaluating result for '" + script + "':", e);
         } catch (Exception o) {
-            String errorDesc = "Non-Script error while evaluating result for '" + script + "':" + o.getMessage();
-            logger.error(errorDesc, o);
-            throw new RuntimeException(errorDesc, o);
+            throw new RuntimeException("Non-Script error while evaluating result for '" + script + "':", o);
         }
         return result;
     }

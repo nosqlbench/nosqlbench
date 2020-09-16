@@ -86,4 +86,8 @@ public class HttpConsoleFormats {
             }
         });
     }
+
+    public boolean isDiagnosticMode() {
+        return this.includes.size()>0;
+    }
 }

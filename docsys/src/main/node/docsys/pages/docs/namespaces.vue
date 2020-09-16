@@ -1,9 +1,9 @@
 <template>
-  <v-app>
+  <v-main>
     <div>
       <v-list v-model="namespaces">
         <v-list-item v-for="(namespace,idx) in namespaces" :key="idx" :title="namespace.namespace">
-          <div display="inline">ns:{{namespace.namespace + ": " + namespace.show}}</div>
+          <div>ns:{{namespace.namespace + ": " + namespace.show}}</div>
           <v-list-item-title>{{namespace.namespace}}</v-list-item-title>
           <v-switch v-model="namespace.show"></v-switch>
           <!--        <v-list-item-action>-->
@@ -28,15 +28,15 @@
     <!--    <v-list-item><v-label :v-bind="ns"/></v-list-item>-->
     <!--    {{ns}}-->
     <!--  </v-list>-->
-  </v-app>
+  </v-main>
 </template>
 
 <script>
-    import get_namespaces from '~/mixins/get_namespaces.js';
+    // import get_namespaces from '@/mixins/get_namespaces.js';
 
     export default {
         name: "namespaces",
-        mixins: [get_namespaces],
+        // mixins: [get_namespaces],
         data(context) {
             // return {
             //     namespaces: []

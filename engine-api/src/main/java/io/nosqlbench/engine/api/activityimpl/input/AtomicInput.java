@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.input;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
+import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -50,8 +51,9 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
 
     private final AtomicLong recycleValue = new AtomicLong(0L);
     private final AtomicLong recycleMax = new AtomicLong(0L);
+    private final long startedAt = System.currentTimeMillis();
 
-    private ActivityDef activityDef;
+    private final ActivityDef activityDef;
 
     public AtomicInput(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -64,15 +66,15 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
             long current = this.cycleValue.get();
             long next = current + stride;
             if (next > max.get()) {
-                if (recycleValue.get()>=recycleMax.get()) {
+                if (recycleValue.get() >= recycleMax.get()) {
                     logger.trace("Exhausted input for " + activityDef.getAlias() + " at " + current + ", recycle " +
                         "count " + recycleValue.get());
                     return null;
                 } else {
-                    if (cycleValue.compareAndSet(current,min.get()+stride)) {
+                    if (cycleValue.compareAndSet(current, min.get() + stride)) {
                         recycleValue.getAndIncrement();
                         logger.trace("recycling input for " + activityDef.getAlias() + " recycle:" + recycleValue.get());
-                        return new InputInterval.Segment(min.get(), min.get()+stride);
+                        return new InputInterval.Segment(min.get(), min.get() + stride);
                     }
                 }
             }
@@ -82,30 +84,30 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         }
     }
 
-    @Override
-    public double getProgress() {
-        return (double) (cycleValue.get() - min.get());
-    }
-
-    @Override
-    public double getTotal() {
-        return (double) (max.get() - min.get());
-    }
-
-    @Override
-    public String getProgressDetails() {
-        return "min=" +min.get() + " cycle=" + cycleValue.get() + " max=" + max.get() +
-                (recycleMax.get()>0L ? " recycles=" + recycleValue.get() +"/" + recycleMax.get() : "");
-    }
+//    @Override
+//    public double getProgress() {
+//        return (double) (cycleValue.get() - min.get());
+//    }
+//
+//    @Override
+//    public double getTotal() {
+//        return (double) (max.get() - min.get());
+//    }
+//
+//    @Override
+//    public AtomicInputProgress.Range getRange() {
+//        return new Range(this);
+//    }
+//
 
     @Override
     public String toString() {
         return "AtomicInput{" +
-                "cycleValue=" + cycleValue +
-                ", min=" + min +
-                ", max=" + max +
-                ", activity=" + activityDef.getAlias() +
-                '}';
+            "cycleValue=" + cycleValue +
+            ", min=" + min +
+            ", max=" + max +
+            ", activity=" + activityDef.getAlias() +
+            '}';
     }
 
     @Override
@@ -134,7 +136,10 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
 
         long recycles = activityDef.getParams().getOptionalString("recycles").flatMap(Unit::longCountFor).orElse(0L);
         this.recycleMax.set(recycles);
+    }
 
+    public long getStarteAtMillis() {
+        return this.startedAt;
     }
 
     @Override
@@ -142,4 +147,53 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         return true;
     }
 
+    @Override
+    public AtomicInputProgress getProgressMeter() {
+        return new AtomicInputProgress(activityDef.getAlias(), this);
+    }
+
+    private static class AtomicInputProgress implements ProgressMeter {
+        private final AtomicInput input;
+        private final String name;
+
+        public AtomicInputProgress(String name, AtomicInput input) {
+            this.name = name;
+            this.input = input;
+        }
+
+        @Override
+        public String getProgressName() {
+            return name;
+        }
+
+        @Override
+        public long getStartedAtMillis() {
+            return input.getStarteAtMillis();
+        }
+
+        @Override
+        public long getProgressMin() {
+            return input.min.get();
+        }
+
+        @Override
+        public long getProgressCurrent() {
+            return input.cycleValue.get();
+        }
+
+        @Override
+        public long getProgressMax() {
+            return input.max.get();
+        }
+
+        @Override
+        public long getRecyclesCurrent() {
+            return input.recycleValue.get();
+        }
+
+        @Override
+        public long getRecyclesMax() {
+            return input.recycleMax.get();
+        }
+    }
 }

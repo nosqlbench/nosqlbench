@@ -1,5 +1,5 @@
 # nb -v run driver=mongodb yaml=mongodb-basic-uuid connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup
-description: An exmaple of a basic mongo insert and find with UUID
+description: An example of a basic mongo insert and find with UUID
 
 scenarios:
   default:

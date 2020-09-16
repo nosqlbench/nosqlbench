@@ -20,7 +20,7 @@ public class SetFunctionsTest {
     public void testSetHashed() {
         SetHashed f1 = new SetHashed((DoubleUnaryOperator) i -> i, (DoubleToLongFunction) i -> (long) i);
         Set<Object> set = f1.apply(2L);
-        assertThat(set).contains(8218881827949364224L, 8.2188818279493642E18);
+        assertThat(set).contains(8.2188818279493642E18, 3417914777143645696L);
     }
 
     @Test

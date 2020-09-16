@@ -24,6 +24,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
@@ -32,9 +33,9 @@ import java.util.Optional;
 public class SysPerf {
     public final static Logger logger = LoggerFactory.getLogger(SysPerf.class);
 
-    private static final Charset CHARSET = Charset.forName("UTF8");
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static SysPerfData cachedData;
-    private static long currentImplVersion = 1L;
+    private static final long currentImplVersion = 1L;
     private static SysPerf instance;
 
     private SysPerf() {
@@ -112,12 +113,12 @@ public class SysPerf {
             String perfdata = new String(bytes, CHARSET);
 
             Yaml yaml = new Yaml();
-            SysPerfData perfinfo = (SysPerfData) yaml.load(perfdata);
+            SysPerfData perfinfo = yaml.load(perfdata);
             cachedData = perfinfo;
             logger.info("Loaded previously cached system timing data from " + cache.getCanonicalPath());
             return cachedData;
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error("error while loading sysperf data",e);
             if (cache.exists()) {
                 boolean deleted = cache.delete();
                 if (deleted) {

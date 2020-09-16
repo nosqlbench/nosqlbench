@@ -59,7 +59,13 @@ public class RawStmtDef extends RawStmtFields {
                         " docs for undefined-name-statement-tuple");
             }
             Map.Entry<String, Object> firstEntry = iterator.next();
-            setStmt((String) firstEntry.getValue());
+            if (firstEntry.getValue() instanceof Map && map.size()==1) {
+                Map values = (Map) firstEntry.getValue();
+                setFieldsByReflection(values);
+                map = values;
+            } else if (firstEntry.getValue() instanceof CharSequence){
+                setStmt(((CharSequence) firstEntry.getValue()).toString());
+            }
             map.remove(firstEntry.getKey());
             if (getName().isEmpty()) {
                 setName(firstEntry.getKey());

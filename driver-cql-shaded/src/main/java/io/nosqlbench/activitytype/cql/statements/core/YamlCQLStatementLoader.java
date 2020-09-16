@@ -42,7 +42,6 @@ public class YamlCQLStatementLoader {
                 data = xform.apply(data);
             } catch (Exception e) {
                 RuntimeException t = new ActivityInitializationError("Error applying string transform to input", e);
-                logger.error(t.getMessage(), t);
                 throw t;
             }
         }

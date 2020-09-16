@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.128-SNAPSHOT</version>
+        <version>3.12.145-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -21,44 +21,34 @@
 
         <!-- core dependencies -->
 
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>2.0.0</version>
-        </dependency>
+      <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka-clients</artifactId>
+        <version>2.0.0</version>
+      </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-api</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-stdout</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>drivers-api</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>driver-stdout</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
-        </dependency>
-
-        <!-- test only scope -->
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.13.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core-java8</artifactId>
-            <version>1.0.0m1</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

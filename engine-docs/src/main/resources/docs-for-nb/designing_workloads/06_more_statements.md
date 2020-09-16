@@ -5,6 +5,11 @@ weight: 06
 
 # More on Statements
 
+The template forms available in nosqlbench are very flexible. That means that there are multiple ways
+of expressing templates for statements or operations. Thankfully, in most cases, the forms look like
+what they do, and most of the ways you can imagine constructing a statement will simply work, as long
+as the required details are provided for which driver you are using.
+
 ## Statement Delimiting
 
 Sometimes, you want to specify the text of a statement in different ways. Since statements are strings, the simplest way
@@ -90,6 +95,8 @@ In this case, the values for `bindings`, `params`, and `tags` take precedence, o
 block or document or activity when the names match. Parameters called **free parameters** are allowed here, such as
 `freeparam3`. These are simply values that get assigned to the params map once all other processing has completed.
 
+## Named Statement form
+
 It is possible to mix the **`<name>: <statement>`** form as above in the example for mapping statement by name, so long
 as some specific rules are followed. An example, which is equivalent to the above:
 
@@ -113,6 +120,48 @@ The rules:
 As explained above, `parm1: pvalue1` is a *free parameter*, and is simply short-hand for setting values in the params
 map for the statement.
 
+
+## Named Statement Maps
+
+By combining all the forms together with a map in the middle, we get this form, which allows for the
+enumeration of multiple statements, each with an obvious name, and a set of properties:
+
+```yaml
+statements:
+ - foostmt:
+     stmt: "{alpha},{beta}\n"
+     parm1: pvalue1
+     bindings:
+      beta: Combinations('COMBINATIONS;')
+     tags:
+      tag1: tvalue1
+ - barstmt:
+     optype: setvar
+     parm3: 42
+     parm5: true
+     userid: 2342
+```
+
+This form is arguably the easiest to read, but retains all the expressive power of the other forms too.
+The distinction between this form and the named properties form is that the structure underneath the
+first value is a map rather than a single value. Particularly, under the 'foostmt' name above, all of
+content contained within it is formatted as properties of it -- indented properties.
+
+Here are the basic rules for using this form:
+
+1. Each statement is indicated by a YAML list entry like '-'.
+2. Each entry is a map with a single key. This key is taken as the statement name.
+3. The properties of this map work exactly the same as for named properties above, but repeating
+   the name will throw an error since this is ambiguous.
+4. If the template is being used for CQL or another driver type which expects a 'stmt' property,
+   it must be provided as an explicitly named 'stmt' property as in the foostmt example above.
+
+Notice in the 'barstmt' example above that there is no "stmt" property. Some drivers
+have more flexible op templates may not require this. This is just a property name that was chosen
+to represent the "main body" of a statement template in the shorter YAML forms. While the 'stmt'
+property is required for drivers like CQL which have a solid concept for "statement body", it isn't
+required for all driver types which may build their operations from other properties.
+
 ### Per-Statement Format
 
 It is indeed possible to use any of the three statement formats within each entry of a statement sequence:
@@ -120,18 +169,121 @@ It is indeed possible to use any of the three statement formats within each entr
 ```yaml
 statements:
  - first statement body
- - second: second statement body
  - name: statement3
    stmt: third statement body
+ - second: second statement body
  - forth: fourth statement body
    freeparam1: freeparamvalue1
    tags:
     type: preload
+ - fifth:
+    stmt: fifth statement body
+    freeparam2: freeparamvalue2
+    tags:
+     tag2: tagvalue2
 ```
-
-Specifically, the first statement is a simple statement body, the second is a named statement (via free param `<name>:
-statement` form), the third is a statement config map, and the fourth is a combination of the previous two.
 
 The above is valid nosqlbench YAML, although a reader would need to know about the rules explained above in order to
 really make sense of it. For most cases, it is best to follow one format convention, but there is flexibility for
-overrides and naming when you need it.
+overrides and naming when you need it. The main thing to remember is that the statement form is determined on an
+element-by-element basis for maximum flexibility.
+
+## Detailed Examples
+
+The above examples are explained in detail below in JSON schematic form, to assist users and developers
+understanding of the structural rules:
+
+```yaml
+statements:
+  
+ # ---------------------------------------------------------------------------------------
+ 
+ # string form
+ # detected when the element is a single string value
+
+ - first statement body
+
+ # read as:
+ # {
+ #   name: 'stmt1', // a generated name is also added
+ #   stmt: 'first stmt body'
+ # }
+ 
+ # ---------------------------------------------------------------------------------------
+
+ # properties form
+   
+ # detected when the element is a map and the value of the first entry is not a map
+   
+ - name: statement3
+   stmt: third statement body
+
+ # read as:
+ # {
+ #   name: 'statement3', 
+ #   stmt: 'third statement body'
+ # }
+ 
+ # ---------------------------------------------------------------------------------------
+
+ # named statement form:
+ # detected when reading properties form and the first property name is not a reserved 
+ # word, like stmt, name, params, bindings, tags, ...
+
+ - second: second statement body
+
+ # read as:
+ # {
+ #   name: 'second',
+ #   stmt: 'second statement body'
+ # }
+ 
+ # ---------------------------------------------------------------------------------------
+  
+ # properties form with free parameters:
+ # detected when properties are used which are not reserved words.
+ # Unrecognized words are pushed into the parameters map automatically.
+
+ - forth: fourth statement body
+   freeparam1: freeparamvalue1
+   tags:
+    type: preload
+
+ # read as: 
+ # {
+ #   name: 'fourth', 
+ #   stmt: 'fourth statement body',
+ #   params: {
+ #     freeparam1: 'freeparamvalue1'
+ #   },
+ #   tags: {
+ #     tag2: 'tagvalue2'
+ #   }
+ #  }
+   
+ # ---------------------------------------------------------------------------------------
+ 
+ # named statement maps
+ # detected when the element is a map and the only entry is a map.
+
+ - fifth:
+    stmt: fifth statement body
+    freeparam2: freeparamvalue2
+    tags:
+     tag2: tagvalue2
+
+ # read as:
+ # {
+ #    name: 'fifth',
+ #    stmt: 'fifth statement body'
+ #    params: {
+ #      freeparam2: 'freeparamvalue2'
+ #    },
+ #    tags: {
+ #      tag2: 'tagvalue2'
+ #    }
+ # }
+
+ # ---------------------------------------------------------------------------------------    
+```
+

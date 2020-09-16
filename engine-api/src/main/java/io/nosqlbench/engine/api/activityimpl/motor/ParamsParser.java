@@ -77,6 +77,15 @@ public class ParamsParser {
     private final static Logger logger = LoggerFactory.getLogger(ParamsParser.class);
 
 
+    /**
+     * Parse a string input as a loose-form param=value list, and be reasonable about formatting
+     * conventions that most users would follow in the absence of detailed rules.
+     * See {@link ParamsParser} for more details on how this works.
+     *
+     * @param input        The string form containing the parameter names and values to be extracted.
+     * @param canonicalize Whether or not to replace synonyms with modern forms and to warn when old forms are used
+     * @return A map of extracted keys and values
+     */
     public static Map<String, String> parse(String input, boolean canonicalize) {
 
         ParseState s = ParseState.expectingName;

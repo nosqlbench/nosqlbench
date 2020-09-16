@@ -2,21 +2,19 @@ package io.nosqlbench.engine.cli;
 
 import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is good enough.
- * If something better is needed later, this can be replaced.
+ * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is
+ * good enough. If something better is needed later, this can be replaced.
  */
 public class NBCLIOptions {
 
@@ -39,18 +37,12 @@ public class NBCLIOptions {
     private static final String VERSION_COORDS = "--version-coords";
     private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
+    private static final String COMPILE_SCRIPT = "--compile-script";
+    private static final String SCRIPT_FILE = "--script-file";
     private static final String COPY = "--copy";
+    private static final String SHOW_STACKTRACES = "--show-stacktraces";
 
     // Execution
-    private static final String SCRIPT = "script";
-    private static final String ACTIVITY = "activity";
-    private static final String SCENARIO = "scenario";
-    private static final String RUN = "run";
-    private static final String START = "start";
-    private static final String FRAGMENT = "fragment";
-    private static final String STOP = "stop";
-    private static final String AWAIT = "await";
-    private static final String WAIT_MILLIS = "waitmillis";
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
     private static final String HDR_DIGITS = "--hdr-digits";
@@ -59,6 +51,7 @@ public class NBCLIOptions {
 
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
+    private static final String WORKSPACES_DIR = "--workspaces-dir";
     private static final String LOGS_MAX = "--logs-max";
     private static final String LOGS_LEVEL = "--logs-level";
     private static final String DASH_V_INFO = "-v";
@@ -80,16 +73,6 @@ public class NBCLIOptions {
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
-
-
-    public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
-        addAll(
-            Arrays.asList(
-                SCRIPT, ACTIVITY, SCENARIO, RUN, START,
-                FRAGMENT, STOP, AWAIT, WAIT_MILLIS, LIST_ACTIVITY_TYPES, HELP
-            )
-        );
-    }};
 
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -114,6 +97,7 @@ public class NBCLIOptions {
     private final List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logsDirectory = "logs";
+    private String workspacesDirectory = "workspaces";
     private boolean wantsInputTypes = false;
     private boolean wantsMarkerTypes = false;
     private String[] rleDumpOptions = new String[0];
@@ -131,20 +115,38 @@ public class NBCLIOptions {
     private boolean graaljs_compat = false;
     private int hdr_digits = 4;
     private String docker_grafana_tag = "7.0.1";
+    private boolean showStackTraces = false;
+    private boolean compileScript = false;
+    private String scriptFile = null;
 
-    public NBCLIOptions(String[] args) {
-        parse(args);
+    public enum Mode {
+        ParseGlobalsOnly,
+        ParseAllOptions
     }
 
-    private void parse(String[] args) {
+    public NBCLIOptions(String[] args) {
+        this(args,Mode.ParseAllOptions);
+    }
 
+    public NBCLIOptions(String[] args, Mode mode) {
+        switch (mode) {
+            case ParseGlobalsOnly:
+                parseGlobalOptions(args);
+                break;
+            case ParseAllOptions:
+                parseAllOptions(args);
+                break;
+        }
+    }
+
+    private LinkedList<String> parseGlobalOptions(String[] args) {
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
         }};
 
         if (arglist.peekFirst() == null) {
             wantsBasicHelp = true;
-            return;
+            return arglist;
         }
 
         // Preprocess --include regardless of position
@@ -159,37 +161,56 @@ public class NBCLIOptions {
                 continue;
             }
 
-            if (INCLUDE.equals(word)) {
-                arglist.removeFirst();
-                String include = readWordOrThrow(arglist, "path to include");
-                wantsToIncludePaths.add(include);
-            } else if (METRICS_PREFIX.equals(word)) {
-                arglist.removeFirst();
-                metricsPrefix = arglist.removeFirst();
-            } else {
-                nonincludes.addLast(arglist.removeFirst());
+            switch (word) {
+                case INCLUDE:
+                    arglist.removeFirst();
+                    String include = readWordOrThrow(arglist, "path to include");
+                    wantsToIncludePaths.add(include);
+                    break;
+                case METRICS_PREFIX:
+                    arglist.removeFirst();
+                    metricsPrefix = arglist.removeFirst();
+                    break;
+                case WORKSPACES_DIR:
+                    arglist.removeFirst();
+                    workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
+                    break;
+                case DOCKER_GRAFANA_TAG:
+                    arglist.removeFirst();
+                    docker_grafana_tag = readWordOrThrow(arglist, "grafana docker tag");
+                    break;
+                case VERSION:
+                    arglist.removeFirst();
+                    wantsVersionShort = true;
+                    break;
+                case VERSION_COORDS:
+                    arglist.removeFirst();
+                    wantsVersionCoords = true;
+                    break;
+                case DOCKER_METRICS:
+                    arglist.removeFirst();
+                    dockerMetrics = true;
+                    break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+
             }
+
         }
-        arglist = nonincludes;
-        nonincludes = new LinkedList<>();
+        return nonincludes;
+    }
+
+    private void parseAllOptions(String[] args) {
+        LinkedList<String> arglist = parseGlobalOptions(args);
 
         PathCanonicalizer canonicalizer = new PathCanonicalizer(wantsIncludes());
 
+        LinkedList<String> nonincludes = new LinkedList<>();
+
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
-            if (word.startsWith("--") && word.contains("=")) {
-                String wordToSplit = arglist.removeFirst();
-                String[] split = wordToSplit.split("=", 2);
-                arglist.offerFirst(split[1]);
-                arglist.offerFirst(split[0]);
-                continue;
-            }
 
             switch (word) {
-                case DOCKER_GRAFANA_TAG:
-                    arglist.removeFirst();
-                    docker_grafana_tag = readWordOrThrow(arglist,"grafana docker tag");
-                    break;
                 case GRAALJS_COMPAT:
                     graaljs_compat = true;
                     arglist.removeFirst();
@@ -202,14 +223,22 @@ public class NBCLIOptions {
                     engine = Scenario.Engine.Nashorn;
                     arglist.removeFirst();
                     break;
+                case COMPILE_SCRIPT:
+                    arglist.removeFirst();
+                    compileScript = true;
+                    break;
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
                     break;
+                case SHOW_STACKTRACES:
+                    arglist.removeFirst();
+                    showStackTraces = true;
+                    break;
                 case LIST_METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
-                    Cmd cmd = Cmd.parseArg(arglist,canonicalizer);
+                    Cmd cmd = Cmd.parseArg(arglist, canonicalizer);
                     wantsMetricsForActivity = cmd.getArg("driver");
                     break;
                 case SESSION_NAME:
@@ -240,21 +269,9 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
-                case VERSION:
-                    arglist.removeFirst();
-                    wantsVersionShort = true;
-                    break;
-                case VERSION_COORDS:
-                    arglist.removeFirst();
-                    wantsVersionCoords = true;
-                    break;
                 case ENABLE_CHART:
                     arglist.removeFirst();
                     enableChart = true;
-                    break;
-                case DOCKER_METRICS:
-                    arglist.removeFirst();
-                    dockerMetrics = true;
                     break;
                 case HELP:
                 case "-h":
@@ -340,6 +357,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsWorkloadsList = true;
                     break;
+                case SCRIPT_FILE:
+                    arglist.removeFirst();
+                    scriptFile = readWordOrThrow(arglist, "script file");
+                    break;
                 case COPY:
                     arglist.removeFirst();
                     wantsToCopyWorkload = readWordOrThrow(arglist, "workload to copy");
@@ -349,50 +370,7 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-
-        while (arglist.peekFirst() != null) {
-            String word = arglist.peekFirst();
-            if (word.startsWith("--") && word.contains("=")) {
-                String wordToSplit = arglist.removeFirst();
-                String[] split = wordToSplit.split("=", 2);
-                arglist.offerFirst(split[1]);
-                arglist.offerFirst(split[0]);
-                continue;
-            }
-            Cmd cmd=null;
-            switch (word) {
-                case FRAGMENT:
-                case SCRIPT:
-                case START:
-                case RUN:
-                case AWAIT:
-                case STOP:
-                case WAIT_MILLIS:
-                    cmd = Cmd.parseArg(arglist,canonicalizer);
-                    cmdList.add(cmd);
-                    break;
-                default:
-                    Optional<Content<?>> scriptfile = NBIO.local()
-                        .prefix("scripts/auto")
-                        .name(word)
-                        .extension("js")
-                        .first();
-
-                    //Script
-                    if (scriptfile.isPresent()) {
-                        arglist.removeFirst();
-                        arglist.addFirst("scripts/auto/" + word);
-                        arglist.addFirst("script");
-                        cmd = Cmd.parseArg(arglist,canonicalizer);
-                        cmdList.add(cmd);
-                    } else if (NBCLIScenarioParser.isFoundWorkload(word, wantsIncludes())) {
-                        NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, wantsIncludes());
-                    } else {
-                        throw new InvalidParameterException("unrecognized option:" + word);
-                    }
-                    break;
-            }
-        }
+        NBCLICommandParser.parse(arglist, cmdList);
     }
 
 
@@ -446,6 +424,10 @@ public class NBCLIOptions {
         return showScript;
     }
 
+    public boolean wantsCompileScript() {
+        return compileScript;
+    }
+
     public boolean wantsVersionCoords() {
         return wantsVersionCoords;
     }
@@ -460,6 +442,10 @@ public class NBCLIOptions {
 
     public boolean wantsTopicalHelp() {
         return wantsActivityHelp;
+    }
+
+    public boolean wantsStackTraces() {
+        return showStackTraces;
     }
 
     public String wantsTopicalHelpFor() {
@@ -502,18 +488,6 @@ public class NBCLIOptions {
         return consoleLevel;
     }
 
-    private void assertNotParameter(String scriptName) {
-        if (scriptName.contains("=")) {
-            throw new InvalidParameterException("script name must precede script arguments");
-        }
-    }
-
-    private void assertNotReserved(String name) {
-        if (RESERVED_WORDS.contains(name)) {
-            throw new InvalidParameterException(name + " is a reserved word and may not be used here.");
-        }
-    }
-
     private String readWordOrThrow(LinkedList<String> arglist, String required) {
         if (arglist.peekFirst() == null) {
             throw new InvalidParameterException(required + " not found");
@@ -527,31 +501,21 @@ public class NBCLIOptions {
         return args;
     }
 
-//    private Cmd parseScriptCmd(LinkedList<String> arglist) {
-//        String cmdType = arglist.removeFirst();
-//        String scriptName = readWordOrThrow(arglist, "script name");
-//        assertNotReserved(scriptName);
-//        assertNotParameter(scriptName);
-//        Map<String, String> scriptParams = new LinkedHashMap<>();
-//        while (arglist.size() > 0 && !RESERVED_WORDS.contains(arglist.peekFirst())
-//            && arglist.peekFirst().contains("=")) {
-//            String[] split = arglist.removeFirst().split("=", 2);
-//            scriptParams.put(split[0], split[1]);
-//        }
-//        return new Cmd(CmdType.script, scriptName, scriptParams);
-//    }
-
-
     public int getHdrDigits() {
         return hdr_digits;
     }
 
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
-        if (spec.indicatorMode == IndicatorMode.console
-            && Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
-            logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
-            spec.indicatorMode = IndicatorMode.logonly;
+        if (spec.indicatorMode == IndicatorMode.console) {
+            if (Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
+                logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
+                spec.indicatorMode = IndicatorMode.logonly;
+            } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
+                logger.info("Command line includes script calls, so progress data on console is " +
+                    "suppressed.");
+                spec.indicatorMode = IndicatorMode.logonly;
+            }
         }
         return spec.toString();
     }
@@ -585,6 +549,18 @@ public class NBCLIOptions {
 
     public boolean wantsInputTypes() {
         return this.wantsInputTypes;
+    }
+
+    public String getScriptFile() {
+        if (scriptFile == null) {
+            return logsDirectory + File.separator + "_SESSIONNAME_" + ".js";
+        }
+
+        String expanded = scriptFile;
+        if (!expanded.startsWith(File.separator)) {
+            expanded = getLogsDirectory() + File.separator + expanded;
+        }
+        return expanded;
     }
 
     public boolean wantsMarkerTypes() {

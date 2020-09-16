@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>3.12.145-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>drivers-api</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        The drivers API for nosqlbench;
+        Provides the interfaces needed to build drivers that can be loaded
+        by nosqlbench core
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-userlibs</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

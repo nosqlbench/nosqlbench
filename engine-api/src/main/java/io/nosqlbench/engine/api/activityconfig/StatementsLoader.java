@@ -25,6 +25,7 @@ import io.nosqlbench.nb.api.content.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class StatementsLoader {
@@ -45,14 +46,27 @@ public class StatementsLoader {
     }
 
     public static StmtsDocList loadContent(
-            Logger logger,
-            Content<?> content) {
+        Logger logger,
+        Content<?> content,
+        Map<String,String> params
+    ) {
         RawStmtsLoader loader = new RawStmtsLoader();
-        loader.addTransformer(new StrInterpolator());
+        loader.addTransformer(new StrInterpolator(params));
         RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
     }
+
+    public static StmtsDocList loadContent(
+        Logger logger,
+        Content<?> content
+    ) {
+        RawStmtsLoader loader = new RawStmtsLoader();
+        RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
+        StmtsDocList layered = new StmtsDocList(rawDocList);
+        return layered;
+    }
+//    }
 
     public static StmtsDocList loadPath(
             Logger logger,
@@ -65,6 +79,15 @@ public class StatementsLoader {
 
         list = gloaderImpl.loadPath(logger, path, searchPaths);
         return new StmtsDocList(list);
+    }
+
+    public static StmtsDocList loadStmt(
+            Logger logger,
+            String statement, Function<String,String> transformer) {
+        String transformed = transformer.apply(statement);
+        RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(transformed);
+        return new StmtsDocList(rawStmtsDocList);
+
     }
 
     public static StmtsDocList loadPath(

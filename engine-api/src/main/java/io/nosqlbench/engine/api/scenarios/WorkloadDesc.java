@@ -2,10 +2,13 @@ package io.nosqlbench.engine.api.scenarios;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 public class WorkloadDesc implements Comparable<WorkloadDesc> {
+    private final String workspace;
     private final String yamlPath;
     private final List<String> scenarioNames;
     private final Map<String, String> templates;
@@ -14,11 +17,13 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
     public WorkloadDesc(String yamlPath,
                         List<String> scenarioNames,
                         Map<String, String> templates,
-                        String description) {
+                        String description,
+                        String workspace) {
         this.yamlPath = yamlPath;
         this.scenarioNames = scenarioNames;
         this.templates = templates;
         this.description = description;
+        this.workspace = workspace;
     }
 
     public String getYamlPath() {
@@ -43,10 +48,13 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
 
 
     public String toString() {
-        return toString(true);
+        return
+            ((workspace != null && !workspace.isEmpty()) ? workspace + ":" : "")
+                + this.yamlPath;
+//                + (this.description != null ? "\ndesc: " + this.description : "");
     }
 
-    public String toString(boolean includeScenarios) {
+    public String toMarkdown(boolean includeScenarios) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -56,10 +64,10 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
 
         if (!description.isEmpty()) {
 //            sb.append("# description:\n");
-            String formttedDesc = "# " + String.join("\n# ",description.split("\n"));
+            String formttedDesc = "# " + String.join("\n# ", description.split("\n"));
             sb.append(formttedDesc).append("\n");
             while (sb.toString().endsWith("\n\n")) {
-                sb.setLength(sb.length()-1);
+                sb.setLength(sb.length() - 1);
             }
 //            if (!description.endsWith("\n")) {
 //                sb.append("\n");
@@ -101,4 +109,23 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
     public int compareTo(@NotNull WorkloadDesc o) {
         return this.yamlPath.compareTo(o.yamlPath);
     }
+
+    public WorkloadDesc relativize(Path wsPath) {
+        Path yPath = Paths.get(this.yamlPath).toAbsolutePath();
+        Path relativePath = wsPath.relativize(yPath);
+        String wsName = wsPath.getFileName().toString();
+
+        return new WorkloadDesc(
+            relativePath.toString(),
+            this.scenarioNames,
+            this.templates,
+            description,
+            wsName
+        );
+    }
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
 }

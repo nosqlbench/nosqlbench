@@ -44,10 +44,10 @@ public class VirtDataConversions {
 
     }
 
-    public static <F, T> List<T> adaptFunctionList(F[] funcs, Class<T> resultType, Class<Object>... resultSignature) {
+    public static <F, T> List<T> adaptFunctionList(F[] funcs, Class<T> functionType, Class<Object>... resultSignature) {
         List<T> functions = new ArrayList<>();
         for (Object func : funcs) {
-            T adapted = adaptFunction(func, resultType, resultSignature);
+            T adapted = adaptFunction(func, functionType, resultSignature);
             functions.add(adapted);
         }
         return functions;
@@ -62,14 +62,14 @@ public class VirtDataConversions {
      * @param resultSignature The signature of all output types, linearized for use after type-erasure.
      * @return An instance of T
      */
-    public static <F, T> T adaptFunction(F func, Class<T> resultType, Class<?>... resultSignature) {
+    public static <F, T> T adaptFunction(F func, Class<T> functionType, Class<?>... resultSignature) {
         FuncType funcType = FuncType.valueOf(func.getClass());
 
         List<Class<?>> signature = new ArrayList<>();
         List<Class<?>> fromSignature = linearizeObjectSignature(func);
 
         List<Class<?>> resultTypes = new ArrayList<>();
-        resultTypes.add(resultType);
+        resultTypes.add(functionType);
         for (Class<?> aClass : resultSignature) {
             resultTypes.add(aClass);
         }
@@ -139,6 +139,26 @@ public class VirtDataConversions {
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Slice the incoming object list into a set of functions, based on a grouping interval and an offset.
+     * @param mod The grouping interval, or modulo to slice the function groups into
+     * @param offset The offset within the group for the provided function
+     * @param funcs A list of source objects to convert to functions.
+     * @return
+     */
+    public static <T> List<T> getFunctions(int mod, int offset, Class<? extends T> functionType, Object... funcs) {
+//        if ((funcs.length%mod)!=0) {
+//            throw new RuntimeException("uneven division of functions, where multiples of " + mod + " are expected.");
+//        }
+        List<T> functions = new ArrayList<>();
+        for (int i = offset; i < funcs.length; i+=mod) {
+            Object func = funcs[i];
+            T longFunction = VirtDataConversions.adaptFunction(func, functionType, Object.class);
+            functions.add(longFunction);
+        }
+        return functions;
     }
 
     private static boolean isAssignableFromTo(List<Class<?>> fromSignature, List<Class<?>> toSignature) {

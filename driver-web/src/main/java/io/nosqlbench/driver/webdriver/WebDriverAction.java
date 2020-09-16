@@ -53,7 +53,7 @@ public class WebDriverAction implements SyncAction, ActivityDefObserver {
             return 0;
 
         } catch (Exception e) {
-            logger.error("Error with cycle(" + value + "), statement(" + commandTemplate.getName() + "): " + e.getMessage());
+            logger.error("Error with cycle(" + value + "), statement(" + commandTemplate.getName() + "): "+e.getMessage());
             if (errors.equals("stop")) {
                 throw e;
             }

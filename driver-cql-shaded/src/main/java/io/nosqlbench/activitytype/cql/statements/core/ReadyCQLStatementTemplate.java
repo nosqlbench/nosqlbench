@@ -25,9 +25,9 @@ public class ReadyCQLStatementTemplate {
 
     private final static Logger logger = LoggerFactory.getLogger(ReadyCQLStatementTemplate.class);
     private final Session session;
-    private ContextualBindingsArrayTemplate<?, Statement> template;
-    private long ratio;
-    private String name;
+    private final ContextualBindingsArrayTemplate<?, Statement> template;
+    private final long ratio;
+    private final String name;
 
     private ResultSetCycleOperator[] resultSetCycleOperators;
     private RowCycleOperator[] rowCycleOperators;
@@ -37,7 +37,7 @@ public class ReadyCQLStatementTemplate {
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
 
-    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, CqlBinderTypes binderType, Session session,
+    public ReadyCQLStatementTemplate(Map<String, Object> fconfig, CqlBinderTypes binderType, Session session,
                                      PreparedStatement preparedStmt, long ratio, String name) {
         this.session = session;
         this.name = name;
@@ -52,13 +52,13 @@ public class ReadyCQLStatementTemplate {
         this.ratio = ratio;
     }
 
-    public ReadyCQLStatementTemplate(Map<String,Object> fconfig, Session session, SimpleStatement simpleStatement, long ratio, String name, boolean parametrized)     {
+    public ReadyCQLStatementTemplate(Map<String, Object> fconfig, Session session, SimpleStatement simpleStatement, long ratio, String name, boolean parameterized) {
         this.session = session;
         this.name = name;
         template = new ContextualBindingsArrayTemplate<>(
-                simpleStatement,
-                new BindingsTemplate(fconfig),
-                new SimpleStatementValuesBinder(parametrized)
+            simpleStatement,
+            new BindingsTemplate(fconfig),
+            new SimpleStatementValuesBinder(parameterized)
         );
         this.ratio = ratio;
     }

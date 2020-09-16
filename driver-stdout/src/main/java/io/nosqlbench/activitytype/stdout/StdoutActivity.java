@@ -17,18 +17,16 @@
 
 package io.nosqlbench.activitytype.stdout;
 
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -47,7 +45,6 @@ import java.io.Writer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
@@ -59,7 +56,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public Timer resultTimer;
     public Histogram triesHisto;
     private Writer pw;
-    private String fileName;
+    private final String fileName;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private int retry_delay = 0;
     private int retries;
@@ -84,7 +81,10 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public void shutdownActivity() {
         try {
             if (pw != null) {
-                pw.close();
+                if (!fileName.toLowerCase().equals("stdout")) {
+                    logger.trace("Closing non-stdout output stream.");
+                    pw.close();
+                }
             }
         } catch (Exception e) {
             logger.warn("error closing writer:" + e, e);
@@ -113,7 +113,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     protected Writer createPrintWriter() {
         PrintWriter pw;
         if (fileName.toLowerCase().equals("stdout")) {
-            pw = new PrintWriter(System.out);
+            pw = getConsoleOut();
         } else {
             try {
                 pw = new PrintWriter(fileName);
@@ -144,8 +144,9 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 BindingsTemplate bt = new BindingsTemplate();
                 stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
                 String diagnostics = bt.getDiagnostics();
-                System.out.println(diagnostics);
-                System.out.flush();
+
+                getConsoleOut().println(diagnostics);
+                getConsoleOut().flush();
                 System.exit(2);
             } else {
                 logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");

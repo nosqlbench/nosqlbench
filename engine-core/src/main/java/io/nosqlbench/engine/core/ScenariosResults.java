@@ -29,12 +29,12 @@ public class ScenariosResults {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenariosResults.class);
 
-    private String scenariosExecutorName;
-    private Map<Scenario,ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
+    private final String scenariosExecutorName;
+    private final Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
-        this.scenariosExecutorName =scenariosExecutor.getName();
+        this.scenariosExecutorName = scenariosExecutor.getName();
     }
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ScenarioResult> map) {
@@ -42,24 +42,16 @@ public class ScenariosResults {
         scenarioResultMap.putAll(map);
     }
 
-
-//    public void reportSummaryTo(PrintStream out) {
-//        for (Map.Entry<Scenario, Result> entry : this.scenarioResultMap.entrySet()) {
-//            Scenario scenario = entry.getKey();
-//            Result oresult = entry.getValue();
-//
-//            out.println("results for scenario: " + scenario);
-//
-//            if (oresult!=null) {
-//                oresult.reportTo(out);
-//            } else {
-//                out.println(": incomplete (missing result)");
-//            }
-//        }
-//    }
+    public String getExecutionSummary() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(scenarioResultMap.size()).append(" scenarios, ");
+        sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isEmpty()).count()).append(" normal, ");
+        sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isPresent()).count()).append(" errored");
+        return sb.toString();
+    }
 
     public ScenarioResult getOne() {
-        if (this.scenarioResultMap.size()!=1) {
+        if (this.scenarioResultMap.size() != 1) {
             throw new RuntimeException("getOne found " + this.scenarioResultMap.size() + " results instead of 1.");
         }
         return scenarioResultMap.values().stream().findFirst().orElseThrow(
@@ -73,10 +65,10 @@ public class ScenariosResults {
 
             logger.info("results for scenario: " + scenario);
 
-            if (oresult!=null) {
+            if (oresult != null) {
                 oresult.reportToLog();
             } else {
-                logger.error(scenario.getName() + ": incomplete (missing result)");
+                logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
             }
         }
     }

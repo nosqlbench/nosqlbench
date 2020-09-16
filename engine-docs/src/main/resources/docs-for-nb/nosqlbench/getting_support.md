@@ -26,15 +26,11 @@ are automatically included when NoSQLBench is built.
 
 ## NoSQLBench Slack
 
-There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You
-can get that through this simple form, which will send you an invite in email:
-[Slack Invite](https://docs.google.com/forms/d/e/1FAIpQLSdUOJ8iAPqyxsLfh1nBBsKShI53RAeuzYW4bKExmRMWjj4ufQ/viewform).
-This is just a simple google form that automates the invite process.
+Please click the
+[Invite Link for nosqlbench.slack.com](https://join.slack.com/t/nosqlbench/shared_invite/zt-grrg64g3-6SeVi2jaum0cxp51WnvOVA)
+to join us.
 
 Please join it if you are a new or existing NoSQLBench user and help us get it going!
-
-
-
 
 ## General Feedback
 

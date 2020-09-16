@@ -1,6 +1,6 @@
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.docsys.core.DocsysMarkdownEndpoint;
+import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
 
 /**
  * At runtime, any instances of this service will be used to find

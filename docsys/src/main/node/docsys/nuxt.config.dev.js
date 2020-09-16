@@ -46,30 +46,33 @@ export default {
         '@nuxtjs/axios'
     ],
     axios: {
-        baseURL: "http://localhost:12345/",
+        port: 12345,
+        __browserBaseURL: 'http://localhost:12345/services/',
+        baseUrl: '/services/',
+        progress: true
     },
     /*
     ** vuetify module configuration
     ** https://github.com/nuxt-community/vuetify-module
     */
     vuetify: {
-        theme: {
-            dark: false,
-            themes: {
-                light: {
-                    primary: '#51DDBD',
-                    secondary: '#2D4ADE',
-                    accent: '#FA7D2B',
-                    // primary: '#1976D2',
-                    // secondary: '#424242',
-                    // accent: '#82B1FF',
-                    error: '#FF5252',
-                    info: '#2196F3',
-                    success: '#4CAF50',
-                    warning: '#FFC107'
-                }
-            }
-        }
+        // theme: {
+        //     dark: false,
+        //     themes: {
+        //         light: {
+        //             primary: '#51DDBD',
+        //             secondary: '#2D4ADE',
+        //             accent: '#FA7D2B',
+        //             // primary: '#1976D2',
+        //             // secondary: '#424242',
+        //             // accent: '#82B1FF',
+        //             error: '#FF5252',
+        //             info: '#2196F3',
+        //             success: '#4CAF50',
+        //             warning: '#FFC107'
+        //         }
+        //     }
+        // }
     },
     router: {
         mode: 'hash'
@@ -96,6 +99,19 @@ export default {
     ** Build configuration
     */
     build: {
+        html: {
+          minify: {
+            collapseBooleanAttributes: false,
+            decodeEntities: false,
+            minifyCSS: false,
+            minifyJS: false,
+            processConditionalComments: false,
+            removeEmptyAttributes: false,
+            removeRedundantAttributes: false,
+            trimCustomFragments: false,
+            useShortDoctype: false
+          }
+        },
 //        analyze: {
 //            analyzerMode: 'static'
 //        },
@@ -107,6 +123,17 @@ export default {
         */
         extend(config, ctx) {
             config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.module.rules.push({
+              test: /.g4/, loader: 'antlr4-webpack-loader'
+            })
+            config.module.rules.push({
+              test: /\.ya?ml$/,
+              use: 'js-yaml-loader',
+            })
+            config.node = {
+                fs: 'empty'
+            }
+            config.optimization.minimize = false;
         }
     }
     , generate: {

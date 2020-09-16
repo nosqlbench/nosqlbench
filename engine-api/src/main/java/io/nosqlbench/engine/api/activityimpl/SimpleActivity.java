@@ -3,6 +3,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
+import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -13,8 +14,8 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
@@ -22,6 +23,8 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,11 +34,11 @@ import java.util.function.Supplier;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity {
+public class SimpleActivity implements Activity, ProgressCapable {
     private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
 
     protected ActivityDef activityDef;
-    private List<AutoCloseable> closeables = new ArrayList<>();
+    private final List<AutoCloseable> closeables = new ArrayList<>();
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
@@ -47,6 +50,8 @@ public class SimpleActivity implements Activity {
     private RateLimiter phaseLimiter;
     private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
+    private PrintWriter console;
+    private long startedAtMillis;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -68,6 +73,14 @@ public class SimpleActivity implements Activity {
 
     public synchronized void setRunState(RunState runState) {
         this.runState = runState;
+        if (runState == RunState.Running) {
+            this.startedAtMillis = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public long getStartedAtMillis() {
+        return startedAtMillis;
     }
 
     @Override
@@ -205,9 +218,10 @@ public class SimpleActivity implements Activity {
     }
 
 
+
     @Override
     public Timer getResultTimer() {
-        return ActivityMetrics.timer(getActivityDef(),"result");
+        return ActivityMetrics.timer(getActivityDef(), "result");
     }
 
     @Override
@@ -232,13 +246,31 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
+    public synchronized PrintWriter getConsoleOut() {
+        if (this.console==null) {
+            this.console = new PrintWriter(System.out);
+        }
+        return this.console;
+    }
+
+    @Override
+    public synchronized InputStream getConsoleIn() {
+        return System.in;
+    }
+
+    @Override
+    public void setConsoleOut(PrintWriter writer) {
+        this.console = writer;
+    }
+
+    @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
                 .map(RateSpec::new)
                 .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
 
-        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate","rate")
+        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
                 .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
@@ -249,9 +281,10 @@ public class SimpleActivity implements Activity {
     }
 
     /**
-     * Modify the provided ActivityDef with defaults for stride and cycles, if
-     * they haven't been provided, based on the length of the sequence as determined
-     * by the provided ratios. Also, modify the ActivityDef with reasonable defaults when requested.
+     * Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been provided, based on the
+     * length of the sequence as determined by the provided ratios. Also, modify the ActivityDef with reasonable
+     * defaults when requested.
+     *
      * @param seq - The {@link OpSequence} to derive the defaults from
      */
     public void setDefaultsFromOpSequence(OpSequence<?> seq) {
@@ -285,9 +318,10 @@ public class SimpleActivity implements Activity {
 
         long cycleCount = getActivityDef().getCycleCount();
         long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
-        if ((cycleCount % stride) != 0) {
+
+        if (stride>0 && (cycleCount % stride) != 0) {
             logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
-                    "leaving some cycles unused.");
+                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
         }
 
         Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
@@ -295,9 +329,9 @@ public class SimpleActivity implements Activity {
             String spec = threadSpec.get();
             int processors = Runtime.getRuntime().availableProcessors();
             if (spec.toLowerCase().equals("auto")) {
-                int threads = processors*10;
-                if (threads>activityDef.getCycleCount()) {
-                    threads=(int) activityDef.getCycleCount();
+                int threads = processors * 10;
+                if (threads > activityDef.getCycleCount()) {
+                    threads = (int) activityDef.getCycleCount();
                     logger.info("setting threads to " + threads + " (auto) [10xCORES, cycle count limited]");
                 } else {
                     logger.info("setting threads to " + threads + " (auto) [10xCORES]");
@@ -306,43 +340,97 @@ public class SimpleActivity implements Activity {
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
-                logger.info("setting threads to " + threads + " (" + multiplier +"x)");
+                logger.info("setting threads to " + threads + " (" + multiplier + "x)");
                 activityDef.setThreads(threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
                 logger.info("setting threads to " + spec + "(direct)");
                 activityDef.setThreads(Integer.parseInt(spec));
             }
 
-            if (activityDef.getThreads()>activityDef.getCycleCount()) {
-                logger.warn("threads="+activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
-                + ", you should have more cycles than threads.");
+            if (activityDef.getThreads() > activityDef.getCycleCount()) {
+                logger.warn("threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+                        + ", you should have more cycles than threads.");
             }
 
         } else {
-            if (cycleCount>1000) {
+            if (cycleCount > 1000) {
                 logger.warn("For testing at scale, it is highly recommended that you " +
                         "set threads to a value higher than the default of 1." +
                         " hint: you can use threads=auto for reasonable default, or" +
                         " consult the topic on threads with `help threads` for" +
-                        " more information.");
+                    " more information.");
 
             }
         }
 
+        if (activityDef.getCycleCount() > 0 && seq.getOps().size() == 0) {
+            throw new BasicError("You have configured a zero-length sequence and non-zero cycles. Tt is not possible to continue with this activity.");
+        }
     }
 
-    protected <O> OpSequence<O> createOpSequence(Function<OpTemplate,O> opinit) {
-        StrInterpolator interp = new StrInterpolator(activityDef);
-        String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+    /**
+     * Given a function that can create an op of type <O> from a CommandTemplate, generate
+     * an indexed sequence of ready to call operations.
+     *
+     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function)},
+     * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
+     * for map-based specification of operations with bindings in each field.
+     *
+     * It is recommended to use the CommandTemplate form
+     * than the
+     *
+     * @param opinit
+     * @param <O>
+     * @return
+     */
+    protected <O> OpSequence<O> createOpSequenceFromCommands(Function<CommandTemplate, O> opinit) {
+        Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
+        Function<OpTemplate, O> opTemplateOFunction = f.andThen(opinit);
 
+        return createOpSequence(opTemplateOFunction);
+    }
+
+    /**
+     * Given a function that can create an op of type <O> from an OpTemplate, generate
+     * an indexed sequence of ready to call operations.
+     *
+     * This method uses the following conventions to derive the sequence:
+     *
+     * <OL>
+     * <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
+     * taken as the only provided statement.</LI>
+     * <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
+     * are taken with their ratios </LI>
+     * <LI>Any provided tags filter is used to select only the statements which have matching
+     * tags. If no tags are provided, then all the found statements are included.</LI>
+     * <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
+     * where the sequence length is the sum of the ratios.</LI>
+     * </OL>
+     *
+     * @param opinit A function to map an OpTemplate to the executable operation form required by
+     *               the native driver for this activity.
+     * @param <O>    A holder for an executable operation for the native driver used by this activity.
+     * @return The sequence of operations as determined by filtering and ratios
+     */
+    protected <O> OpSequence<O> createOpSequence(Function<OpTemplate, O> opinit) {
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
-                .getOptionalString("seq")
-                .map(SequencerType::valueOf)
-                .orElse(SequencerType.bucket);
+            .getOptionalString("seq")
+            .map(SequencerType::valueOf)
+            .orElse(SequencerType.bucket);
         SequencePlanner<O> planner = new SequencePlanner<>(sequencerType);
 
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        StmtsDocList stmtsDocList = null;
+
+        Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
+        Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        if (stmt.isPresent()) {
+            stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), interp);
+        } else if (op_yaml_loc.isPresent()) {
+            stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), interp, "activities");
+        }
+
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
 
         if (stmts.size() == 0) {
@@ -356,7 +444,20 @@ public class SimpleActivity implements Activity {
             O driverSpecificOp = opinit.apply(optemplate);
             planner.addOp(driverSpecificOp, ratio);
         }
+
         return planner.resolve();
     }
+
+    @Override
+    public ProgressMeter getProgressMeter() {
+        Input input = getInputDispenserDelegate().getInput(0);
+        if (input instanceof ProgressCapable) {
+            ProgressMeter meter = ((ProgressCapable) input).getProgressMeter();
+            return new ProgressAndStateMeter(meter, this);
+        } else {
+            throw new RuntimeException("Progress meter must be implemented here.");
+        }
+    }
+
 
 }

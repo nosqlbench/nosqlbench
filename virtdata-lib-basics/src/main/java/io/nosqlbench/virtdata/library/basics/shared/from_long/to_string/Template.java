@@ -41,7 +41,7 @@ public class Template implements LongFunction<String> {
     private final static Logger logger  = LogManager.getLogger(Template.class);
     private static final String EXPR_BEGIN = "[[";
     private static final String EXPR_END = "]]";
-    private final static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
+//    private final static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     private final String rawTemplate;
     private LongUnaryOperator iterOp;
     private String[] literals;
@@ -138,7 +138,7 @@ public class Template implements LongFunction<String> {
 
     @Override
     public String apply(long value) {
-        StringBuilder buffer = sb.get();
+        StringBuilder buffer = new StringBuilder();
         buffer.setLength(0);
         buffer.append(literals[0]);
         if (literals.length > 1) {

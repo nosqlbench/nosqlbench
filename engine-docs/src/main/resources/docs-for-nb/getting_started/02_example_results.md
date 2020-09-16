@@ -26,7 +26,7 @@ will be meaningful.
 Below is a sample of the log that gives us our basic metrics. There is a lot to digest here, for now we will only focus
 a subset of the most important metrics.
 
-```
+```text
 2019-08-12 15:46:00,274 INFO [main] i.e.c.ScenarioResult [ScenarioResult.java:48] -- BEGIN METRICS DETAIL --
 2019-08-12 15:46:00,294 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=cql-keyvalue.cycles.config.burstrate, value=5500.0
 2019-08-12 15:46:00,295 INFO [main] i.e.c.ScenarioResult [Slf4jReporter.java:373] type=GAUGE, name=cql-keyvalue.cycles.config.cyclerate, value=5000.0

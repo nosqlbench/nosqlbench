@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.128-SNAPSHOT</version>
+        <version>3.12.145-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -14,43 +14,48 @@
     <url>http://nosqlbench.io/</url>
 
     <dependencies>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-realdata</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-realer</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-random</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>3.12.128-SNAPSHOT</version>
             <artifactId>virtdata-lib-basics</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>3.12.128-SNAPSHOT</version>
             <artifactId>virtdata-lib-curves4</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <!-- TODO: remove this after pivoting deps to core nb-api doc manifest -->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -58,16 +63,6 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

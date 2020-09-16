@@ -17,11 +17,10 @@
 
 package io.nosqlbench.engine.api.util;
 
-import java.io.FileNotFoundException;
-
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.junit.Test;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import java.io.FileNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -44,8 +43,21 @@ public class SSLKsFactoryTest {
                 "truststore=src/test/resources/ssl/server_truststore.p12",
                 "tspass=nosqlbench_server",
                 "keystore=src/test/resources/ssl/client.p12",
+                "kspass=nosqlbench_client"
+        };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+    }
+
+    @Test
+    public void testJdkGetContextWithTruststoreAndKeystoreAndDifferentKeyPassword() {
+        String[] params = {
+                "ssl=jdk",
+                "truststore=src/test/resources/ssl/server_truststore.p12",
+                "tspass=nosqlbench_server",
+                "keystore=src/test/resources/ssl/client_diff_password.p12",
                 "kspass=nosqlbench_client",
-                "keyPassword=nosqlbench_client"
+                "keyPassword=nosqlbench"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
@@ -67,8 +79,19 @@ public class SSLKsFactoryTest {
         String[] params = {
                 "ssl=jdk",
                 "keystore=src/test/resources/ssl/client.p12",
+                "kspass=nosqlbench_client"
+        };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+    }
+
+    @Test
+    public void testJdkGetContextWithKeystoreAndDifferentKeyPassword() {
+        String[] params = {
+                "ssl=jdk",
+                "keystore=src/test/resources/ssl/client_diff_password.p12",
                 "kspass=nosqlbench_client",
-                "keyPassword=nosqlbench_client"
+                "keyPassword=nosqlbench"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
@@ -141,8 +164,8 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageMatching("Unable to init KeyManagerFactory. Please check.");
+            .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+            .withMessageMatching("Unable to init KeyManagerFactory. Please check.*");
     }
 
     @Test

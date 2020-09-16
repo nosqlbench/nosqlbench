@@ -41,7 +41,7 @@ bindings:
 You can even make a detailed request with custom headers and result verification conditions:
 
 ```yaml
-# Require that the result be status code 200-299 match regex "OK, account id is .*" in the body 
+# Require that the result be status code 200-299 match regex "OK, account id is .*" in the body
 statements:
   - method: GET
     uri: https://google.com/
@@ -62,8 +62,7 @@ statements:
      GET https://google.com/ HTTP/1.1
      Content-Type: application/json
     ok-status: 2[0-9][0-9]
-    ok-body: ^(OK, account id is.*)$ 
-
+    ok-body: ^(OK, account id is.*)$
 ```
 
 Of course, in the above form, the response validators are still separate parameters.
@@ -79,8 +78,8 @@ statements:
      {method} {scheme}://{host}:{port}/{path}?{query} {version}
      Content-Type: {content_type}
      Token: {mybearertoken}
-     
-     {body} 
+
+     {body}
 ```
 
 The above example is in the inline request form. It is parsed and interpreted internally as if you
@@ -178,3 +177,5 @@ results. Support may be added for long-lived connections in a future release.
   - headers - include header details
   - content - include
   - a number, like 3000 - causes the diagnostics to be reported only on this cycle modulo
+- **timeout** - default: tbd -
+  Sets the

@@ -1,4 +1,5 @@
 .run/**
+workspaces/**
 workshop/**
 local/**
 metrics/**

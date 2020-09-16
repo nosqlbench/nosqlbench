@@ -43,8 +43,8 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
 
     private static final Logger logger = LoggerFactory.getLogger(NBCycleErrorHandler.class);
 
-    private ErrorResponse errorResponse;
-    private ExceptionCountMetrics exceptionCountMetrics;
+    private final ErrorResponse errorResponse;
+    private final ExceptionCountMetrics exceptionCountMetrics;
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private boolean throwExceptionOnStop=false;
 
@@ -67,7 +67,7 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
         boolean retry = false;
         switch (errorResponse) {
             case stop:
-                logger.error("error with cycle " + cycle + ": statement: " + cce.getStatement() + " errmsg: " + error.getMessage());
+                logger.error("error with cycle " + cycle + ": statement: " + cce.getStatement() + " errmsg: ",error);
                 if (throwExceptionOnStop) {
                     throw new RuntimeException(error);
                 }

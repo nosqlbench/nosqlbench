@@ -7,6 +7,8 @@ import java.util.Map;
  * Add cmd
  */
 public interface ScriptBuffer {
+    List<Cmd> getCommands();
+
     /**
      * Add parsed commands to the script buffer
      * @param cmd A parsed command

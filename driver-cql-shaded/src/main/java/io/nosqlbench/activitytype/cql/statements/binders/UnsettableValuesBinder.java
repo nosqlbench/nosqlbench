@@ -46,7 +46,7 @@ public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStateme
             return boundStmt;
         } catch (Exception e) {
             String typNam = (objects[i]==null ? "NULL" : objects[i].getClass().getCanonicalName());
-            logger.error("Error binding column " + preparedStatement.getVariables().asList().get(i).getName() + " with class " + typNam + ": " + e.getMessage(), e);
+            logger.error("Error binding column " + preparedStatement.getVariables().asList().get(i).getName() + " with class " + typNam, e);
             throw e;
 //            StringBuilder sb = new StringBuilder();
 //            sb.append("Error binding objects to prepared statement directly, falling back to diagnostic binding layer:");

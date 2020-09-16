@@ -19,6 +19,8 @@ scenario.start('type=diag;alias=threadchange;cycles=0..100000000;threads=1;inter
 activities.threadchange.threads=1;
 print("threads now " + activities.threadchange.threads);
 print('waiting 500 ms');
+scenario.waitMillis(500);
+
 activities.threadchange.threads=5;
 print("threads now " + activities.threadchange.threads);
 scenario.stop('threadchange');

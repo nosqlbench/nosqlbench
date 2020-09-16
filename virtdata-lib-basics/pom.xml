@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.128-SNAPSHOT</version>
+        <version>3.12.145-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -20,17 +20,19 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
         </dependency>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
@@ -49,21 +51,10 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.elega9t</groupId>
             <artifactId>number-to-words</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

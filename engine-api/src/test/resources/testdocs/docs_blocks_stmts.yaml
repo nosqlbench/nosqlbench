@@ -1,3 +1,4 @@
+name: doc1
 description: a quintessential description
 
 scenarios:
@@ -6,22 +7,29 @@ scenarios:
     - run driver=stdout alias=step2
   schema-only:
     - run driver=blah tags=phase:schema
+
 tags:
   atagname: atagvalue
-name: doc1
+
 statements:
   - s1
   - s2
+
 bindings:
   b1: b1d
   b2: b2d
+
 params:
   param1: value1
+
 ---
+
 name: doc2
+
 tags:
   root1: val1
   root2: val2
+
 blocks:
   - name: block1
     tags:
@@ -41,8 +49,10 @@ blocks:
     statements:
       s13: statement thirteen
       s14: statement fourteen
+
 params:
   foobar: beez
+
 bindings:
   b11: b11d
   b12: b12d

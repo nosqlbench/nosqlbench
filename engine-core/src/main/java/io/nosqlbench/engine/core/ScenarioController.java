@@ -16,11 +16,11 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -332,9 +332,9 @@ public class ScenarioController {
      *
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
-    public void forceStopScenario(int waitTimeMillis) {
-        logger.warn("Scenario force stopped.");
-        activityExecutors.values().forEach(a -> a.forceStopExecutor(waitTimeMillis));
+    public void forceStopScenario(int waitTimeMillis, boolean rethrow) {
+        logger.debug("Scenario force stopped.");
+        activityExecutors.values().forEach(a -> a.forceStopScenarioAndThrow(waitTimeMillis, rethrow));
     }
 
     /**
@@ -414,7 +414,11 @@ public class ScenarioController {
         return activityMap;
     }
 
-    public Collection<ProgressMeter> getProgressMeters() {
-        return this.activityExecutors.values().stream().map(e -> (ProgressMeter) e).collect(Collectors.toList());
+    public Collection<ProgressAndStateMeter> getProgressMeters() {
+        List<ProgressAndStateMeter> indicators = new ArrayList<>();
+        for (ActivityExecutor ae : activityExecutors.values()) {
+            indicators.add(new ProgressAndStateMeter(ae.getProgressMeter(), ae.getActivity()));
+        }
+        return indicators;
     }
 }

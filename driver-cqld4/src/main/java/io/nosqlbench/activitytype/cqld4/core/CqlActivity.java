@@ -165,7 +165,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             ParsedStmt parsed = stmtDef.getParsed().orError();
 
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
-            boolean parametrized = stmtDef.getParamOrDefault("parametrized", false);
+            boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
             StringBuilder psummary = new StringBuilder();
@@ -236,7 +236,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             } else {
                 SimpleStatement simpleStatement = SimpleStatement.newInstance(stmtForDriver);
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                        parsed.getName(), parametrized);
+                    parsed.getName(), parameterized);
             }
 
 

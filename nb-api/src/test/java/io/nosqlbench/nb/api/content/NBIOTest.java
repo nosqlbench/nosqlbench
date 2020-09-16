@@ -2,9 +2,12 @@ package io.nosqlbench.nb.api.content;
 
 import org.junit.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,6 +138,22 @@ public class NBIOTest {
             .extension("txt")
             .list();
         assertThat(list).hasSize(1);
+    }
+
+    @Test
+    public void testPathSearchInDifferentVantagePoints() {
+        List<Path> list = NBIO.fs()
+            .prefix("target/test-classes/nesteddir1")
+            .extension("csv")
+            .list().stream().map(Content::asPath)
+            .collect(Collectors.toList());
+
+//        assertThat(list).containsExactly(Paths.get("."));
+
+        List<Path> relatives = NBIORelativizer.relativizePaths(Paths.get("target/test-classes/"), list);
+
+        assertThat(relatives).hasSize(2);
+
     }
 
 }

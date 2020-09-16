@@ -1,16 +1,15 @@
 package io.nosqlbench.nb.api.content;
 
-import io.nosqlbench.nb.api.content.Content;
-
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 public interface NBPathsAPI {
 
-    public static interface Facets extends
+    interface Facets extends
         GetSource, GetPrefix, GetName, GetExtension, DoSearch {}
 
-    public static interface GetSource {
+    interface GetSource {
         /**
          * Only provide content from the class path and the local filesystem.
          * @return this builder
@@ -45,7 +44,7 @@ public interface NBPathsAPI {
         GetPrefix allContent();
     }
 
-    public static interface GetPrefix extends GetName {
+    interface GetPrefix extends GetName {
         /**
          * Each of the prefix paths will be searched if the resource is not found with the exact
          * path given.
@@ -55,7 +54,7 @@ public interface NBPathsAPI {
         GetPrefix prefix(String... prefixPaths);
     }
 
-    public static interface GetName extends GetExtension {
+    interface GetName extends GetExtension {
         /**
          * Provide the names of the resources to be resolved. More than one resource may be provided.
          * @param name The name of the resource to load
@@ -64,7 +63,7 @@ public interface NBPathsAPI {
         GetExtension name(String... name);
     }
 
-    public static interface GetExtension extends DoSearch {
+    interface GetExtension extends DoSearch {
         /**
          * provide a list of optional file extensions which should be considered. If the content is
          * not found under the provided name, then each of the extensios is tried in order.
@@ -75,7 +74,7 @@ public interface NBPathsAPI {
 
     }
 
-    public static interface DoSearch {
+    interface DoSearch {
         /**
          * Return the result of resolving the resource.
          * @return an optional {@code Content<?>} element.
@@ -89,7 +88,20 @@ public interface NBPathsAPI {
          */
         List<List<Content<?>>> resolveEach();
 
+        /**
+         * Provide a list of all matching content that was matched by the search qualifers
+         * @return a list of content
+         */
         List<Content<?>> list();
+
+        /**
+         * Return a list of paths which are comprised of the relative part
+         * once the provided base has been removed from the front. This is done
+         * per content item within the direct filesystem the path belongs to.
+         * @param base The root path elements to remove
+         * @return Relative paths
+         */
+        List<Path> relativeTo(String... base);
 
         /**
          * Find exactly one source of content under the search parameters given.

@@ -19,25 +19,24 @@ import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.EnvironmentAccess;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.PolyglotAccess;
+import org.graalvm.polyglot.*;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,33 +48,57 @@ public class Scenario implements Callable<ScenarioResult> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
 
+    private State state = State.Scheduled;
+
+    public enum State {
+        Scheduled,
+        Running,
+        Errored,
+        Finished
+    }
+
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
-    private ProgressIndicator progressIndicator;
+    private ActivityProgressIndicator activityProgressIndicator;
     private String progressInterval = "console:1m";
     private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
-    private String name;
+    private final String scenarioName;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
+    private String scriptfile;
     private Engine engine = Engine.Graalvm;
+    private boolean wantsStackTraces=false;
+    private boolean wantsCompiledScript;
+    private long startedAtMillis = -1L;
+    private long endedAtMillis = -1L;
 
     public enum Engine {
         Nashorn,
         Graalvm
     }
 
-    public Scenario(String name, Engine engine, String progressInterval, boolean wantsGraaljsCompatMode) {
-        this.name = name;
+    public Scenario(
+            String scenarioName,
+            String scriptfile,
+            Engine engine,
+            String progressInterval,
+            boolean wantsGraaljsCompatMode,
+            boolean wantsStackTraces,
+            boolean wantsCompiledScript) {
+        this.scenarioName = scenarioName;
+        this.scriptfile = scriptfile;
         this.engine = engine;
         this.progressInterval = progressInterval;
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
+        this.wantsStackTraces = wantsStackTraces;
+        this.wantsCompiledScript = wantsCompiledScript;
     }
 
     public Scenario(String name, Engine engine) {
-        this.name = name;
+        this.scenarioName = name;
         this.engine = engine;
     }
 
@@ -95,7 +118,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 e.printStackTrace();
             }
             ByteBuffer bb = ByteBuffer.wrap(bytes);
-            Charset utf8 = Charset.forName("UTF8");
+            Charset utf8 = StandardCharsets.UTF_8;
             String scriptData = utf8.decode(bb).toString();
             addScriptText(scriptData);
         }
@@ -131,6 +154,7 @@ public class Scenario implements Callable<ScenarioResult> {
                     .option("js.ecmascript-version", "2020")
                     .option("js.nashorn-compat", "true");
 
+                // TODO: add in, out, err for this scenario
                 this.scriptEngine = GraalJSScriptEngine.create(null, contextSettings);
 
 //                try {
@@ -145,7 +169,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
         scenarioController = new ScenarioController();
         if (!progressInterval.equals("disabled")) {
-            progressIndicator = new ProgressIndicator(scenarioController, progressInterval);
+            activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
 
         scriptEnv = new ScenarioContext(scenarioController);
@@ -194,13 +218,15 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
-        init();
+        state=State.Running;
 
-        logger.debug("Running control script for " + getName() + ".");
+        startedAtMillis=System.currentTimeMillis();
+        init();
+        logger.debug("Running control script for " + getScenarioName() + ".");
         for (String script : scripts) {
             try {
                 Object result = null;
-                if (scriptEngine instanceof Compilable) {
+                if (scriptEngine instanceof Compilable && wantsCompiledScript) {
                     logger.debug("Using direct script compilation");
                     Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
@@ -208,9 +234,26 @@ public class Scenario implements Callable<ScenarioResult> {
                     result = compiled.eval();
                     logger.debug("<- scenario completed (compiled)");
                 } else {
-                    logger.debug("-> invoking main scenario script (interpreted)");
-                    result = scriptEngine.eval(script);
-                    logger.debug("<- scenario completed (interpreted)");
+                    if (scriptfile != null && !scriptfile.isEmpty()) {
+
+                        String filename = scriptfile.replace("_SESSIONNAME_", scenarioName);
+                        logger.debug("-> invoking main scenario script (" +
+                                "interpreted from " + filename +")");
+                        Path written = Files.write(
+                                Path.of(filename),
+                                script.getBytes(StandardCharsets.UTF_8),
+                                StandardOpenOption.TRUNCATE_EXISTING,
+                                StandardOpenOption.CREATE
+                        );
+                        BufferedReader reader = Files.newBufferedReader(written);
+                        scriptEngine.eval(reader);
+                        logger.debug("<- scenario completed (interpreted " +
+                                "from " + filename + ")");
+                    } else {
+                        logger.debug("-> invoking main scenario script (interpreted)");
+                        result = scriptEngine.eval(script);
+                        logger.debug("<- scenario completed (interpreted)");
+                    }
                 }
 
                 if (result != null) {
@@ -218,36 +261,35 @@ public class Scenario implements Callable<ScenarioResult> {
                 }
                 System.err.flush();
                 System.out.flush();
-            } catch (ScriptException e) {
-                String diagname = "diag_" + System.currentTimeMillis() + ".js";
-                try {
-                    Path diagFilePath = Paths.get(scenarioLogger.getLogDir(), diagname);
-                    Files.writeString(diagFilePath, script);
-                } catch (Exception ignored) {
-                }
-                String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;
-                e.printStackTrace();
-                logger.error(errorDesc, e);
-                scenarioController.forceStopScenario(5000);
-                throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
-            } catch (BasicError ue) {
-                logger.error(ue.getMessage());
-                scenarioController.forceStopScenario(5000);
-                throw ue;
-            } catch (Exception o) {
-                String errorDesc = "Non-Script error while running scenario:" + o.getMessage();
-                logger.error(errorDesc, o);
-                scenarioController.forceStopScenario(5000);
-                throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
+            } catch (Exception e) {
+                this.state = State.Errored;
+                logger.warn("Error in scenario, shutting down.");
+                this.scenarioController.forceStopScenario(5000, false);
+                throw new RuntimeException(e);
             } finally {
+                if (this.state==State.Running) {
+                    this.state = State.Finished;
+                }
                 System.out.flush();
                 System.err.flush();
+                endedAtMillis=System.currentTimeMillis();
             }
         }
         int awaitCompletionTime = 86400 * 365 * 1000;
         logger.debug("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
+        //TODO: Ensure control flow covers controller shutdown in event of internal error.
+
         logger.debug("scenario completed without errors");
+        endedAtMillis=System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+    }
+
+    public long getStartedAtMillis() {
+        return startedAtMillis;
+    }
+
+    public long getEndedAtMillis() {
+        return endedAtMillis;
     }
 
     public ScenarioResult call() {
@@ -261,16 +303,16 @@ public class Scenario implements Callable<ScenarioResult> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Scenario scenario = (Scenario) o;
-        return getName() != null ? getName().equals(scenario.getName()) : scenario.getName() == null;
+        return getScenarioName() != null ? getScenarioName().equals(scenario.getScenarioName()) : scenario.getScenarioName() == null;
     }
 
     @Override
     public int hashCode() {
-        return getName() != null ? getName().hashCode() : 0;
+        return getScenarioName() != null ? getScenarioName().hashCode() : 0;
     }
 
-    public String getName() {
-        return name;
+    public String getScenarioName() {
+        return scenarioName;
     }
 
     public ScenarioController getScenarioController() {
@@ -286,7 +328,7 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public String toString() {
-        return "name:'" + this.getName() + "'";
+        return "name:'" + this.getScenarioName() + "'";
     }
 
     public void setScenarioLogger(ScenarioLogger scenarioLogger) {
@@ -301,6 +343,10 @@ public class Scenario implements Callable<ScenarioResult> {
         addScenarioScriptParams(new ScriptParams() {{
             putAll(scriptParams);
         }});
+    }
+
+    public State getScenarioState() {
+        return state;
     }
 
     public void enableCharting() {

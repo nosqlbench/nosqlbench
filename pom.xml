@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.128-SNAPSHOT</version>
+        <version>3.12.145-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -26,16 +26,21 @@
         <module>nb-api</module>
         <module>nb-annotations</module>
 
-        <!-- ENGINE MODULES -->
+        <!-- engine modules -->
         <module>engine-api</module>
         <module>engine-core</module>
-        <module>engine-cli</module>
         <module>engine-extensions</module>
         <module>engine-docker</module>
         <module>engine-docs</module>
+        <module>engine-cli</module>
+        <module>engine-rest</module>
+
+        <module>drivers-api</module>
 
         <!-- a binary (appimage) build option for nb -->
         <module>nb</module>
+
+        <!-- driver modules -->
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
@@ -45,6 +50,7 @@
         <module>driver-web</module>
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
+        <module>driver-jmx</module>
 
         <!-- VIRTDATA MODULES -->
 
@@ -117,6 +123,18 @@
             <organizationUrl>http://nosqlbench.io/</organizationUrl>
         </developer>
     </developers>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <layout>default</layout>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <scm>
         <connection>scm:git:https://github.com/nosqlbench/nosqlbench.git

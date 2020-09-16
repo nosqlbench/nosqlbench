@@ -3,44 +3,36 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class BasicScriptBuffer implements ScriptBuffer {
 
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
-
+    private final List<Cmd> commands = new ArrayList<>();
     private final StringBuilder sb = new StringBuilder();
     private final Map<String, String> scriptParams = new HashMap<>();
-    private final String createPath;
 
 //    public BasicScriptBuffer() {
 //        this.createPath = null;
 //    }
 
     public BasicScriptBuffer() {
-        this.createPath =  "_scenario.js";
     }
 
-    public BasicScriptBuffer(String createPath) {
-        this.createPath = createPath;
+    @Override
+    public List<Cmd> getCommands() {
+        return this.commands;
     }
 
     public ScriptBuffer add(Cmd cmd) {
+        commands.add(cmd);
         Map<String, String> params = cmd.getParams();
 
         switch (cmd.getCmdType()) {
@@ -113,27 +105,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
     @Override
     public String getParsedScript() {
         String scripttext = sb.toString();
-
-        if (this.createPath != null && !this.createPath.isEmpty()) {
-            Path tocreate = Path.of(createPath);
-
-            if (Files.exists(tocreate) && !tocreate.getFileName().toString().startsWith("_")) {
-                throw new BasicError("Unable to overwrite file at " + tocreate.toString() + ". If you start the name " +
-                    "with _, it will always be overwritten.");
-            }
-            try {
-                if (!Files.exists(tocreate.getParent())) {
-                    Path directories = Files.createDirectories(tocreate.getParent());
-                    logger.debug("added directory for parsed script: " + directories);
-                }
-
-                String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
-                Files.writeString(tocreate, appended, StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
-                logger.debug("Wrote script to " + tocreate.toString());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        String appended = "//@ sourceURL="+tocreate.toString()+"\n\n" + scripttext;
         return scripttext;
     }
 

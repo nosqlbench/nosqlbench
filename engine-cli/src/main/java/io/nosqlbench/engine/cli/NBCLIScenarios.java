@@ -4,16 +4,15 @@ import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 
 import java.util.List;
-import java.util.Map;
 
 public class NBCLIScenarios {
     public static void printWorkloads(boolean includeScenarios,
                                       String... includes) {
         List<WorkloadDesc> workloads =
-            NBCLIScenarioParser.getWorkloadsWithScenarioScripts(includes);
+            NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
 
         for (WorkloadDesc workload : workloads) {
-            System.out.println(workload.toString(includeScenarios));
+            System.out.println(workload.toMarkdown(includeScenarios));
         }
 
         if (!includeScenarios) {

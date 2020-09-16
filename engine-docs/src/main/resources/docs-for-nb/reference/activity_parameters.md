@@ -88,6 +88,13 @@ _default value_ : For now, the default is simply *1*. Users must be
 aware of this setting and adjust it to a reasonable value for their
 workloads.
 
+`threads=auto` : When you set `threads=auto`, it will set the number of threads to 10x the number of cores
+in your system. There is no distinction here between full cores and hardware threads. This is generally
+a reasonable number of threads to tap into the procesing power of a client system.
+
+`threads=__x` : When you set `threads=5x` or `threads=10x`, you will set the number of threads to some multiplier
+of the logical CPUs in the local system.
+
 :::info
 The threads parameter will work slightly differently for activities using the async parameter. For example, when
 `async=500` is provided, then the number of async operations is split between all configured threads, and each thread
@@ -159,11 +166,17 @@ The stride is initialized to the calculated sequence length. The
 sequence length is simply the number of operations in the op sequence
 that is planned from your active statements and their ratios.
 
+You usually do not want to set the stride directly. If you do, make sure
+it is a multiple of what it would normally be set to if you need to ensure
+that sequences are not divided up differently. This can be important when
+simulating the access patterns of applications.
+
 :::info
 When simulating multi-op access patterns in non-async mode, the
 stride metric can tell you how long it took for a whole group of
 operations to complete.
 :::
+
 
 ## async
 
@@ -227,6 +240,10 @@ Examples:
   (use it or lose it, not usually desired)
 - `cyclerate=1000,1.5` - same as above, with burst rate set to 1.5 (aka
   50% burst allowed)
+
+Synonyms:
+- `rate`
+- `targetrate`
 
 ### burst ratio
 

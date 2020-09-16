@@ -8,23 +8,22 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Encapsulate Command parsing and structure for the NoSQLBench command line.
- * Commands always have a name, sometimes have a list of positional arguments,
- * and sometimes have a map of named parameters.
- * An example of a command tha thas both would look like {@code script test.js p1=v1}
+ * Encapsulate Command parsing and structure for the NoSQLBench command line. Commands always have a name, sometimes
+ * have a list of positional arguments, and sometimes have a map of named parameters. An example of a command tha thas
+ * both would look like {@code script test.js p1=v1}
  */
 public class Cmd {
 
     private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
 
     public enum CmdType {
-        script(Arg.of("script_path", s -> s)),
-        fragment(Arg.ofFreeform("script_fragment")),
-        start(),
         run(),
-        await(Arg.of("alias_name")),
+        start(),
         stop(Arg.of("alias_name")),
-        waitMillis(Arg.of("millis_to_wait", Long::parseLong));
+        script(Arg.of("script_path", s -> s)),
+        await(Arg.of("alias_name")),
+        waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
+        fragment(Arg.ofFreeform("script_fragment")),;
 
         private final Arg<?>[] positional;
 
@@ -72,13 +71,14 @@ public class Cmd {
         public static Arg<String> of(String name) {
             return new Arg<>(name, s -> s, false);
         }
+
         public static Arg<String> ofFreeform(String name) {
-            return new Arg<>(name, s->s, true);
+            return new Arg<>(name, s -> s, true);
         }
     }
 
 
-    private Map<String, String> cmdArgs;
+    private final Map<String, String> cmdArgs;
 
     public String getArg(String paramName) {
         return this.cmdArgs.get(paramName);
@@ -107,7 +107,10 @@ public class Cmd {
             sb.append(toJSONBlock(getParams(), false));
         } else {
             for (String value : getParams().values()) {
-                sb.append("'").append(value).append("'").append(",");
+                String trimmed = ((value.startsWith("'") && value.endsWith("'"))
+                        || (value.startsWith("\"")) && value.endsWith("\"")) ?
+                        value.substring(1, value.length() - 1) : value;
+                sb.append("'").append(trimmed).append("'").append(",");
             }
             sb.setLength(sb.length() - 1);
         }
@@ -128,18 +131,18 @@ public class Cmd {
 
             if (nextarg == null) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + " requires a value for " + arg.name
-                        + ", but there were no remaining arguments after it.");
+                        "command '" + cmdName + " requires a value for " + arg.name
+                                + ", but there were no remaining arguments after it.");
             } else if (arg.freeform) {
                 logger.debug("freeform parameter:" + nextarg);
             } else if (nextarg.contains("=")) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + "' requires a value for " + arg.name + "" +
-                        ", but a named parameter was found instead: " + nextarg);
-            } else if (NBCLIOptions.RESERVED_WORDS.contains(nextarg)) {
+                        "command '" + cmdName + "' requires a value for " + arg.name + "" +
+                                ", but a named parameter was found instead: " + nextarg);
+            } else if (NBCLICommandParser.RESERVED_WORDS.contains(nextarg)) {
                 throw new InvalidParameterException(
-                    "command '" + cmdName + "' requires a value for " + arg.name
-                        + ", but a reserved word was found instead: " + nextarg);
+                        "command '" + cmdName + "' requires a value for " + arg.name
+                                + ", but a reserved word was found instead: " + nextarg);
             }
 
             logger.debug("cmd name:" + cmdName + ", positional " + arg.name + ": " + nextarg);
@@ -147,8 +150,8 @@ public class Cmd {
         }
 
         while (arglist.size() > 0 &&
-            !NBCLIOptions.RESERVED_WORDS.contains(arglist.peekFirst())
-            && arglist.peekFirst().contains("=")) {
+                !NBCLICommandParser.RESERVED_WORDS.contains(arglist.peekFirst())
+                && arglist.peekFirst().contains("=")) {
             String arg = arglist.removeFirst();
             String[] assigned = arg.split("=", 2);
             String pname = assigned[0];
@@ -172,12 +175,27 @@ public class Cmd {
         int klen = map.keySet().stream().mapToInt(String::length).max().orElse(1);
         StringBuilder sb = new StringBuilder();
         List<String> l = new ArrayList<>();
-        map.forEach((k, v) -> l.add(
-            (oneline ? "" : "    ") + "'" + k + "'"
-                + ": " + (oneline ? "" : " ".repeat(klen - k.length())) +
-                "'" + v + "'"
-        ));
+        for (Map.Entry<String, String> entries : map.entrySet()) {
+            String key = entries.getKey();
+            String value = sanitizeQuotes(entries.getValue());
+            if (oneline) {
+                l.add("'" + key + "':'" + value + "'");
+            } else {
+                l.add("    '" + key + "': " + " ".repeat(klen - key.length()) + "'" + value + "'");
+            }
+        }
         return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
+    }
+
+    private static String sanitizeQuotes(String value) {
+        if (value.startsWith("'") && value.endsWith("'")) {
+            return value.substring(1, value.length() - 1);
+        }
+        if (value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+
     }
 
     public static String toJSONParams(String varname, Map<String, String> map, boolean oneline) {

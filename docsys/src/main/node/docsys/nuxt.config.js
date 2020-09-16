@@ -1,9 +1,10 @@
 import colors from 'vuetify/es5/util/colors'
 
-var glob = require('glob');
-var path = require('path');
+// var glob = require('glob');
+// var path = require('path');
 
 export default {
+    // target: 'static',
     mode: 'spa',
     /*
     ** Headers of the page
@@ -46,31 +47,34 @@ export default {
         '@nuxtjs/axios'
     ],
     axios: {
-        port: 12345
-
+        // port: 12345,
+        // browserBaseURL: 'http://localhost:12345/services/',
+        // baseURL: '/services/',
+        // browserBaseURL: '/services/',
+        progress: true
     },
     /*
     ** vuetify module configuration
     ** https://github.com/nuxt-community/vuetify-module
     */
     vuetify: {
-        theme: {
-            dark: false,
-            themes: {
-                light: {
-                    primary: '#51DDBD',
-                    secondary: '#2D4ADE',
-                    accent: '#FA7D2B',
-                    // primary: '#1976D2',
-                    // secondary: '#424242',
-                    // accent: '#82B1FF',
-                    error: '#FF5252',
-                    info: '#2196F3',
-                    success: '#4CAF50',
-                    warning: '#FFC107'
-                }
-            }
-        }
+        // theme: {
+        //     dark: false,
+        //     themes: {
+        //         light: {
+        //             primary: '#51DDBD',
+        //             secondary: '#2D4ADE',
+        //             accent: '#FA7D2B',
+        //             // primary: '#1976D2',
+        //             // secondary: '#424242',
+        //             // accent: '#82B1FF',
+        //             error: '#FF5252',
+        //             info: '#2196F3',
+        //             success: '#4CAF50',
+        //             warning: '#FFC107'
+        //         }
+        //     }
+        // }
     },
     router: {
         mode: 'hash'
@@ -97,37 +101,63 @@ export default {
     ** Build configuration
     */
     build: {
+        html: {
+          minify: {
+            collapseBooleanAttributes: false,
+            decodeEntities: false,
+            minifyCSS: false,
+            minifyJS: false,
+            processConditionalComments: false,
+            removeEmptyAttributes: false,
+            removeRedundantAttributes: false,
+            trimCustomFragments: false,
+            useShortDoctype: false
+          }
+        },
 //        analyze: {
 //            analyzerMode: 'static'
 //        },
         cssSourceMap: true,
         extractCSS: false,
 //        parallel: true,
+        optimization: {
+          minimize: false
+        },
         /*
         ** You can extend webpack config here
         */
         extend(config, ctx) {
             config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+            config.module.rules.push({
+              test: /.g4/, loader: 'antlr4-webpack-loader'
+            })
+            config.module.rules.push({
+                test: /\.ya?ml$/,
+                use: 'js-yaml-loader',
+            })
+            config.node = {
+                fs: 'empty'
+            }
+            config.optimization.minimize = false;
         }
     }
-    , generate: {
-        routes: dynamicRoutes
-    }
-
 }
+// , generate: {
+//     routes: dynamicRoutes
+// }
 
-var dynamicRoutes = getDynamicPaths({
-    '/docs': 'docs/*.md',
-    '/#/docs': '/#/docs/*.md'
-});
-
-function getDynamicPaths(urlFilepathTable) {
-    return [].concat(
-        ...Object.keys(urlFilepathTable).map(url => {
-            var filepathGlob = urlFilepathTable[url];
-            return glob
-                .sync(filepathGlob, {cwd: 'content'})
-                .map(filepath => `${url}/${path.basename(filepath, '.md')}`);
-        })
-    );
-}
+// var dynamicRoutes = getDynamicPaths({
+//     '/docs': 'docs/*.md',
+//     '/#/docs': '/#/docs/*.md'
+// });
+//
+// function getDynamicPaths(urlFilepathTable) {
+//     return [].concat(
+//         ...Object.keys(urlFilepathTable).map(url => {
+//             var filepathGlob = urlFilepathTable[url];
+//             return glob
+//                 .sync(filepathGlob, {cwd: 'content'})
+//                 .map(filepath => `${url}/${path.basename(filepath, '.md')}`);
+//         })
+//     );
+// }

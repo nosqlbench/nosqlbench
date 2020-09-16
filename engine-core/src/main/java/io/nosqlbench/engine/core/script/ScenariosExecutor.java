@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
-    private LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
+    private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 
     private final ExecutorService executor;
-    private String name;
+    private final String name;
     private RuntimeException stoppingException;
 
     public ScenariosExecutor(String name) {
@@ -40,7 +40,7 @@ public class ScenariosExecutor {
     }
 
     public ScenariosExecutor(String name, int threads) {
-        executor = new ThreadPoolExecutor(1, 1,
+        executor = new ThreadPoolExecutor(1, threads,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
@@ -53,8 +53,8 @@ public class ScenariosExecutor {
 
     public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
         scenario.setScenarioLogger(scenarioLogger);
-        if (submitted.get(scenario.getName()) != null) {
-            throw new BasicError("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
+        if (submitted.get(scenario.getScenarioName()) != null) {
+            throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
         Future<ScenarioResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
@@ -92,14 +92,14 @@ public class ScenariosExecutor {
         boolean isShutdown = false;
 
         while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-            long updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             long waitedAt = System.currentTimeMillis();
+            long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
             while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
 
                 while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
-                        long timeRemaining = timeoutAt - System.currentTimeMillis();
-                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MICROSECONDS);
+                        long timeRemaining = updateAt - System.currentTimeMillis();
+                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException ignored) {
                     }
                 }
@@ -196,10 +196,27 @@ public class ScenariosExecutor {
         return Optional.empty();
     }
 
-    public synchronized void cancelScenario(String scenarioName) {
+    public synchronized void stopScenario(String scenarioName) {
+        this.stopScenario(scenarioName,false);
+    }
+
+    public synchronized void stopScenario(String scenarioName, boolean rethrow) {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
-            pendingScenario.get().getScenarioController().forceStopScenario(0);
+            ScenarioController controller = pendingScenario.get().getScenarioController();
+            if (controller!=null) {
+                controller.forceStopScenario(0, rethrow);
+            }
+        } else {
+            throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
+        }
+    }
+
+    public synchronized void deleteScenario(String scenarioName) {
+        stopScenario(scenarioName, false);
+
+        Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
+        if (pendingScenario.isPresent()) {
             submitted.remove(scenarioName);
             logger.info("cancelled scenario " + scenarioName);
         } else {
@@ -212,8 +229,8 @@ public class ScenariosExecutor {
     }
 
     private static class SubmittedScenario {
-        private Scenario scenario;
-        private Future<ScenarioResult> resultFuture;
+        private final Scenario scenario;
+        private final Future<ScenarioResult> resultFuture;
 
         SubmittedScenario(Scenario scenario, Future<ScenarioResult> resultFuture) {
             this.scenario = scenario;
@@ -229,7 +246,7 @@ public class ScenariosExecutor {
         }
 
         public String getName() {
-            return scenario.getName();
+            return scenario.getScenarioName();
         }
     }
 

@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.128-SNAPSHOT</version>
+        <version>3.12.145-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -22,27 +22,26 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>3.12.128-SNAPSHOT</version>
+            <version>3.12.145-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>htmlunit-driver</artifactId>
             <version>2.39.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
             <version>3.141.59</version>
         </dependency>
-
-
-<!--        <dependency>-->
-<!--            <groupId>org.seleniumhq.selenium</groupId>-->
-<!--            <artifactId>selenium-json</artifactId>-->
-<!--            <version>4.0.0-alpha-5</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -72,45 +71,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.12</version>
-        </dependency>
-
-        <!--        <dependency>-->
-<!--            <groupId>org.seleniumhq.selenium</groupId>-->
-<!--            <artifactId>selenium-devtools</artifactId>-->
-<!--            <version>4.0.0-alpha-5</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.seleniumhq.selenium</groupId>-->
-<!--            <artifactId>selenium-htmlunit-driver</artifactId>-->
-<!--            <version>2.52.0</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.squareup.okhttp3</groupId>-->
-<!--            <artifactId>okhttp</artifactId>-->
-<!--            <version>4.5.0</version>-->
-<!--        </dependency>-->
-
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.seleniumhq.selenium</groupId>-->
-        <!--            <artifactId>selenium-htmlunit-driver</artifactId>-->
-        <!--            <version></version>-->
-        <!--        </dependency>-->
-
-        <!-- test scope only -->
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
