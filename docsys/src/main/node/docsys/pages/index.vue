@@ -1,26 +1,30 @@
 <template>
-  <!-- https://github.com/Microsoft/vscode-recipes/tree/master/vuejs-cli -->
-    <div class="container" style="justify-content: center; align-content: center; display: flex; width: 100%; margin-left: unset">
-<!--        <recursive-menu/>-->
-        <div style="justify-content: center" align="middle">
-            <logo align="middle" style="justify-content: center; align-content: center"></logo>
-            <h1 class="title">nosqlbench</h1>
-            <h2 class="subtitle">open source, pluggable, nosql benchmarking suite</h2>
-            <div class="links">
-                <nuxt-link to="/docs/" class="button--purple">Documentation</nuxt-link>
-                <a href="https://github.com/nosqlbench/nosqlbench" class="button--purple">Project Site</a>
-            </div>
-        </div>
-    </div>
+ <div></div>
+<!--  &lt;!&ndash; https://github.com/Microsoft/vscode-recipes/tree/master/vuejs-cli &ndash;&gt;-->
+<!--    <div class="container" style="justify-content: center; align-content: center; display: flex; width: 100%; margin-left: unset">-->
+<!--&lt;!&ndash;        <recursive-menu/>&ndash;&gt;-->
+<!--        <div style="justify-content: center" align="middle">-->
+<!--            <logo align="middle" style="justify-content: center; align-content: center"></logo>-->
+<!--            <h1 class="title">nosqlbench</h1>-->
+<!--            <h2 class="subtitle">open source, pluggable, nosql benchmarking suite</h2>-->
+<!--            <div class="links">-->
+<!--                <nuxt-link to="/docs/" class="button&#45;&#45;purple">Documentation</nuxt-link>-->
+<!--                <a href="https://github.com/nosqlbench/nosqlbench" class="button&#45;&#45;purple">Project Site</a>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 </template>
 
 <script>
-    import Logo from '~/components/Logo.vue'
+    // import Logo from '~/components/Logo.vue'
 
     export default {
-        components: {
-            Logo
+        middleware({ redirect }) {
+          return redirect('/docs/')
         }
+        // components: {
+        //     Logo
+        // }
     }
 </script>
 

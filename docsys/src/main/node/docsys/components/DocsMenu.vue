@@ -3,11 +3,11 @@
                        v-model="isDrawerOpen"
                        :permanent="isMenuLocked"
                        @transitionend="toggleDrawerOpened"
-  :title="drawerTitle">
+                       :title="drawerTitle">
 
     <div class="menu">
 
-<!--      active_category: {{ active_category.name }} active_topic: {{ active_topic.name }}-->
+      <!--      active_category: {{ active_category.name }} active_topic: {{ active_topic.name }}-->
       <!-- Use active_category and active_topic to select inactive -->
 
       <v-list nav dense>
@@ -21,12 +21,13 @@
           </v-list-item-action>
         </v-list-item>
 
+        <!--              link :to="category.path">{{ category.title }}-->
         <!-- by category -->
         <v-list-group v-for="(category,c) in categories" :key="c"
                       :value="active_category.title === category.title" active-class="isactive">
           <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title link :to="category.path">{{ category.title }}</v-list-item-title>
+            <v-list-item-content @click="$nuxt.$router.push({path: category.path})">
+              <v-list-item-title>{{ category.title }}</v-list-item-title>
             </v-list-item-content>
           </template>
 
@@ -59,7 +60,7 @@ export default {
     drawerTitle: {
       get() {
         return "category=" + this.active_category.name
-        +"\ntopic=" + this.active_topic.name
+            + "\ntopic=" + this.active_topic.name
       }
     },
     isMenuLocked: {

@@ -37,13 +37,15 @@ export default {
     getTopic(route, categories, active_category) {
         let active_topic = active_category.summary_topic;
 
-        if (!route.path) {
-            active_topic = active_category.topics[0]
-        } else {
-            let found_topic = active_category.topics.find(x => {return x.path === route.path})
-            if (found_topic) {
-                active_topic = found_topic;
-            }
+        if (route.path) {
+            let found_topic = active_category.topics.find(x => {
+                return x.path === route.path
+            })
+            let found_index = active_category.topics.find(x => {
+                return x.path.match(/\/index(.md)?/)
+            });
+            active_topic = found_topic ? found_topic : found_index ? found_index : active_topic;
+            console.log("active_topic=" + active_topic.path);
         }
         return active_topic;
 
