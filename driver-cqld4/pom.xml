@@ -29,7 +29,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-            <version>3.12.145-SNAPSHOT</version>
+            <version>3.12.146-SNAPSHOT</version>
         </dependency>
 
 

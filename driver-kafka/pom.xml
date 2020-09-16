@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.145-SNAPSHOT</version>
+        <version>3.12.146-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -21,31 +21,25 @@
 
         <!-- core dependencies -->
 
-      <dependency>
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka-clients</artifactId>
-        <version>2.0.0</version>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>2.0.0</version>
+        </dependency>
 
-      <dependency>
-        <groupId>io.nosqlbench</groupId>
-        <artifactId>engine-api</artifactId>
-        <version>3.12.145-SNAPSHOT</version>
-      </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>3.12.146-SNAPSHOT</version>
+        </dependency>
 
-      <dependency>
-        <groupId>io.nosqlbench</groupId>
-        <artifactId>drivers-api</artifactId>
-        <version>3.12.145-SNAPSHOT</version>
-      </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-stdout</artifactId>
+            <version>3.12.146-SNAPSHOT</version>
+        </dependency>
 
-      <dependency>
-        <groupId>io.nosqlbench</groupId>
-        <artifactId>driver-stdout</artifactId>
-        <version>3.12.145-SNAPSHOT</version>
-      </dependency>
-
-      <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
