@@ -1,13 +1,5 @@
-- 4a11f20f (HEAD -> main) merge fixup from release version bump
-- dc3002a8 merge http_finish fixes into main
-- ce4ae962 (http_finish) merge main into http_finish and fixup conflicts and http APIs
-- 32b11ff7 update dependency graph
-- 22e28539 stub in dedicated driver api module
-- efc7ee86 docs update
-- 101b37f9 import openapi doc model
-- 4e848169 minor reformatting
-- 003ba6c3 use 'appserver' instead of 'docserver' with backwards compatible
-- 60f7f551 document module deps
-- 5cab2e83 (HEAD -> main) typo fixes
+- 9769892d (HEAD -> main) start nbui design guide
+- c2cd041f (origin/main) docker fix release
+- 5cab2e83 typo fixes
 - 3a7775af disable async mode for http until feature complete
 - d93efe16 add nosqlbench root dir to docker image
