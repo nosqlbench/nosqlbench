@@ -2,22 +2,22 @@ package io.nosqlbench.engine.api.clireader.dsl;
 
 public interface CLIFacets {
 
-    public static interface WantsAnyOption
+    interface WantsAnyOption
         extends WantsGlobalOption {
     }
 
-    public static interface WantsParameterizedCommand {
-        public WantsAnyOption namedParams();
+    interface WantsParameterizedCommand {
+        WantsAnyOption namedParams();
     }
 
-    public static interface WantsGlobalOption {
-        public WantsOptionType global(String optionName);
+    interface WantsGlobalOption {
+        WantsOptionType global(String optionName);
     }
 
-    public static interface WantsOptionType {
-        public WantsAnyOption toggle();
-        public WantsAnyOption string();
-        public WantsAnyOption number();
+    interface WantsOptionType {
+        WantsAnyOption toggle();
+        WantsAnyOption string();
+        WantsAnyOption number();
     }
 
 }

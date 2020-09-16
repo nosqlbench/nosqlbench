@@ -34,7 +34,7 @@ public class NashornEvaluator<T> implements Evaluator<T> {
     private final ScriptEngine scriptEngine;
     private final SimpleBindings bindings = new SimpleBindings();
     private String script = "";
-    private Class<? extends T> resultType;
+    private final Class<? extends T> resultType;
     private CompiledScript compiled;
 
     /**

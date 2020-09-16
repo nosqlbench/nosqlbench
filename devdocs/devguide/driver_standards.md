@@ -2,6 +2,7 @@
 
 This is a work in progress...
 
+
 This is the document to read if you want to know if your NoSQLBench driver is complete.
 Within this document, the phrase `conformant` will be taken to mean that a driver or feature
 is implemented according to the design intent and standards of the NoSQLBench driver API.
@@ -12,6 +13,22 @@ reliable way for users from one driver to another.
 
 Over time, the standards in this guide will be programmatically enforced by the NoSQLBench
 driver API.
+
+## Op Templates
+
+The core building block of a NoSQLBench driver is the op template. This is the form of a
+statement or operation that users add to a yaml or workload editor to represent a single operation.
+
+For example, in the CQL driver, this is called a "statement template", but going forward, they will
+all be called Op Templates and internal API names will reflect that.
+
+It is the driver's responsibility to create a quick-draw version of an operation.
+
+## Op Sequencing
+
+A conformant driver should use the standard method of creating an operational sequence. This means
+that a driver simply has to provide a function to map an OpTemplate to a more ready to use form that
+is specific to the low level driver in question.
 
 ## Terms
 
@@ -120,7 +137,16 @@ The next exception handler `ignore` should also be called, but this is
 simply a named 'no-op' which is generally the last fall-through case in a
 switch statement.
 
+TBD
+
+## Result Validation
+
+## Diagnostic Mode
+
+
 ## Naming Conventions
+
+TBD
 
 ### Parameter naming
 
@@ -147,8 +173,13 @@ with the help command `nb help <name>`. For example, if a driver module
 contains `../src/main/resources/mydriver-specials.md`, then a user would
 be able to find this help by running `nb help mydriver-specials`.
 
+These sources of documentation can be wired into the main NoSQLBench documentation system with a set
+of content descriptors.
+
 ## Named Scenarios
 
+Conformant driver implementations should come with one or more examples of a workload under the
+activities directory path.
 Useful driver implementations should come with one or more examples of a
 workloads under the activities directory path. These examples should
 employ the "named scenarios" format as described in the main docs. By
@@ -176,6 +207,9 @@ named scenarios. Users can find these by using the `--include=examples`
 option in addition to the `--list-scenarios` command.
 
 ## Testing and Docs
+
+Complete driver implementations should also come with a set of examples under the examples
+directory path.
 
 Unit testing within the NB code base is necessary in many places, but not
 in others. Use your judgement about when to *not* add unit testing, but

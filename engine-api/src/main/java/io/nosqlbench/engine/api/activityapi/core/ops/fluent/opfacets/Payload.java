@@ -23,6 +23,6 @@ package io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets;
  * @param <D> The type of delegate needed for the implementing protocol
  */
 public interface Payload<D> {
-    D getData();
+    D getOpData();
     void setData(D data);
 }

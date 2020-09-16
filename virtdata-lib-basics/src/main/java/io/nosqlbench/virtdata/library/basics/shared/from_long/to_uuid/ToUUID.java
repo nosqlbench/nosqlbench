@@ -26,7 +26,7 @@ public class ToUUID implements LongFunction<UUID> {
     }
 
     public ToUUID(long msbs) {
-        this.msbs = (msbs & 0xFFFFFFFFFFFF0FFFL) | 0x0000000000004000L;;
+        this.msbs = (msbs & 0xFFFFFFFFFFFF0FFFL) | 0x0000000000004000L;
     }
 
     @Override

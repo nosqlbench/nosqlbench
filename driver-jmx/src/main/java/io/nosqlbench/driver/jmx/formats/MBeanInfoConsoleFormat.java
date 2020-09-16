@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class MBeanInfoConsoleFormat {
 
-    private static Map<Integer,String> MbeanOpImpacts = Map.of(
+    private static final Map<Integer,String> MbeanOpImpacts = Map.of(
             MBeanOperationInfo.ACTION,"ACTION",
             MBeanOperationInfo.ACTION_INFO,"ACTION_INFO",
             MBeanOperationInfo.UNKNOWN,"UNKNOWN",

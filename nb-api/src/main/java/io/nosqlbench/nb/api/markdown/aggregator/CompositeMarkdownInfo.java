@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CompositeMarkdownInfo implements MarkdownInfo {
-    private List<MarkdownInfo> elements = new LinkedList<>();
+    private final List<MarkdownInfo> elements = new LinkedList<>();
     private boolean isSorted=false;
 
     @Override

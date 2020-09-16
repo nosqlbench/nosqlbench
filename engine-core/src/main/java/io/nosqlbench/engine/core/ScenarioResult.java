@@ -32,7 +32,7 @@ public class ScenarioResult {
     private final static Logger logger = LoggerFactory.getLogger(ScenarioResult.class);
 
     private Exception exception;
-    private String iolog;
+    private final String iolog;
 
     public ScenarioResult(String iolog) {
         this.iolog = iolog;

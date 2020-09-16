@@ -92,7 +92,7 @@ import java.util.stream.Collectors;
  */
 public class TagFilter {
     public static TagFilter MATCH_ALL = new TagFilter("");
-    private Map<String, String> filter = new LinkedHashMap<>();
+    private final Map<String, String> filter = new LinkedHashMap<>();
     private Conjugate conjugate = Conjugate.all;
 
     private final static Pattern conjugateForm = Pattern.compile("^(?<conjugate>\\w+)\\((?<filter>.+)\\)$",Pattern.DOTALL|Pattern.MULTILINE);
@@ -217,8 +217,8 @@ public class TagFilter {
     }
 
     public static class Result {
-        private boolean matched;
-        private List<String> matchLog;
+        private final boolean matched;
+        private final List<String> matchLog;
 
         public Result(boolean matched, List<String> log) {
             this.matched = matched;

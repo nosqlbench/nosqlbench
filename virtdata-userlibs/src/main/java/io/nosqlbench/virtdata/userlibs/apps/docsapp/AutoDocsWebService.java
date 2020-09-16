@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class AutoDocsWebService implements WebServiceObject {
 
     private final static Logger logger = LogManager.getLogger(AutoDocsWebService.class);
-    private List<DocFuncData> _docs = VirtDataDocs.getAllDocs();
+    private final List<DocFuncData> _docs = VirtDataDocs.getAllDocs();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

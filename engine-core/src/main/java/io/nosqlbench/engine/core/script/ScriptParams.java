@@ -128,7 +128,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
 
     @Override
     public String toString() {
-        return gson.toJson(this, Map.class).toString();
+        return gson.toJson(this, Map.class);
     }
 
     private static String valueOf(Object o) {
@@ -172,10 +172,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
         if (super.containsKey(key)) {
             return true;
         }
-        if (key.equals("withOverrides") || key.equals("withDefaults")) {
-            return true;
-        }
-        return false;
+        return key.equals("withOverrides") || key.equals("withDefaults");
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class WorkspacesView {
 
-    private Path workspacesRoot;
+    private final Path workspacesRoot;
     public WorkspacesView(Path workspacesRoot) {
         this.workspacesRoot = workspacesRoot;
     }

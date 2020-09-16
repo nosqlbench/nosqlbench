@@ -151,8 +151,8 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
 
     @Override
     public void startOpCycle(TrackedOp<DiagOpData> opc) {
-        opc.getData().log("starting at " + System.nanoTime());
-        opc.getData().setSimulatedDelayNanos(delayFunc.applyAsLong(opc.getCycle()));
+        opc.getOpData().log("starting at " + System.nanoTime());
+        opc.getOpData().setSimulatedDelayNanos(delayFunc.applyAsLong(opc.getCycle()));
         StartedOp<DiagOpData> started = opc.start();
         opQueue.add(started);
     }
@@ -239,7 +239,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
                 try {
                     opc=queue.take();
 
-                    DiagOpData op = opc.getData();
+                    DiagOpData op = opc.getOpData();
                     long now = System.nanoTime();
                     long simulatedCompletionTime = opc.getStartedAtNanos() + op.getSimulatedDelayNanos();
 
@@ -269,7 +269,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
             logger.info("processing stride output for " + completedOps.get(0).getCycle());
             long start = completedOps.get(0).getCycle();
             long endPlus = completedOps.get(completedOps.size()-1).getCycle()+1;
-            String diagLog = completedOps.get(0).getData().getDiagLog().stream().collect(Collectors.joining("\n"));
+            String diagLog = completedOps.get(0).getOpData().getDiagLog().stream().collect(Collectors.joining("\n"));
             activity.getSequenceBlocker().awaitAndRun(start, endPlus, () -> logger.info(" => " + start + " -> " + endPlus + ": " + diagLog));
         }
     }

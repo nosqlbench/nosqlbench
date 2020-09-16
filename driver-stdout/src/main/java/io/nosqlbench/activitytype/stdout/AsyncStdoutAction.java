@@ -46,7 +46,7 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
         StartedOp<StdoutOpContext> started = opc.start();
         int result=0;
         try (Timer.Context executeTime = activity.executeTimer.time()) {
-            activity.write(opc.getData().statement);
+            activity.write(opc.getOpData().statement);
         } catch (Exception e) {
             result=1;
             started.fail(result);

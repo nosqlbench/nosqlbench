@@ -21,7 +21,7 @@ import java.util.List;
 
 public class RawStmtsDocList {
 
-    private List<RawStmtsDoc> rawStmtsDocList;
+    private final List<RawStmtsDoc> rawStmtsDocList;
 
     public RawStmtsDocList(List<RawStmtsDoc> rawStmtsDocList) {
         this.rawStmtsDocList = rawStmtsDocList;

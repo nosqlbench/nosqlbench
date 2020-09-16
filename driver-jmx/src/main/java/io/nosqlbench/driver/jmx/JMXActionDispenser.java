@@ -4,7 +4,7 @@ import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 
 public class JMXActionDispenser implements ActionDispenser {
-    private JMXActivity activity;
+    private final JMXActivity activity;
 
     public JMXActionDispenser(JMXActivity activity) {
         this.activity = activity;

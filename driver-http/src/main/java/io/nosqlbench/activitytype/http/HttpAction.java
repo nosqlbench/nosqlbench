@@ -1,18 +1,17 @@
 package io.nosqlbench.activitytype.http;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.activitytype.cmds.ReadyHttpRequest;
+import io.nosqlbench.activitytype.cmds.HttpOp;
+import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -20,8 +19,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class HttpAction implements SyncAction {
@@ -30,13 +27,14 @@ public class HttpAction implements SyncAction {
 
     private final HttpActivity httpActivity;
     private final int slot;
-    private int maxTries = 1;
+    private final int maxTries = 1;
     private boolean showstmts;
 
-    private OpSequence<ReadyHttpRequest> sequencer;
+    private OpSequence<ReadyHttpOp> sequencer;
     private HttpClient client;
-    private HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
-    private long timeoutMillis=30000L;
+
+    private final HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
+    private final long timeoutMillis=30000L;
 
 
     public HttpAction(ActivityDef activityDef, int slot, HttpActivity httpActivity) {
@@ -46,9 +44,12 @@ public class HttpAction implements SyncAction {
 
     @Override
     public void init() {
-        this.sequencer = httpActivity.getOpSequence();
-        this.client = HttpClient.newHttpClient();
+        this.sequencer = httpActivity.getSequencer();
+        this.client = initClient(httpActivity.getClientScope());
+    }
 
+    private HttpClient initClient(ClientScope clientScope) {
+        return httpActivity.getClient().apply(Thread.currentThread());
     }
 
     @Override
@@ -62,7 +63,7 @@ public class HttpAction implements SyncAction {
         // op construction
 
         // The request to be used must be constructed from the template each time.
-        HttpRequest request=null;
+        HttpOp httpOp=null;
 
         // A specifier for what makes a response ok. If this is provided, then it is
         // either a list of valid http status codes, or if non-numeric, a regex for the body
@@ -71,10 +72,19 @@ public class HttpAction implements SyncAction {
         String ok;
 
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            ReadyHttpRequest readyHttpRequest = httpActivity.getOpSequence().get(cycleValue);
-            request =readyHttpRequest.apply(cycleValue);
+            ReadyHttpOp readHTTPOperation = httpActivity.getSequencer().get(cycleValue);
+            httpOp =readHTTPOperation.apply(cycleValue);
         } catch (Exception e) {
-            throw new RuntimeException("while binding request in cycle " + cycleValue + ": ",e);
+            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(),e);
+        } finally {
+            if (httpActivity.isDiagnosticMode()) {
+                System.out.println("==== cycle " + cycleValue + " DIAGNOSTICS ====");
+                if (httpOp!=null) {
+                    httpActivity.console.summarizeRequest(httpOp.request,System.out,cycleValue);
+                } else {
+                    System.out.println("---- REQUEST was null");
+                }
+            }
         }
 
         int tries = 0;
@@ -83,17 +93,48 @@ public class HttpAction implements SyncAction {
 
             CompletableFuture<HttpResponse<String>> responseFuture;
             try (Timer.Context executeTime = httpActivity.executeTimer.time()) {
-                responseFuture = client.sendAsync(request, this.bodyreader);
+                responseFuture = client.sendAsync(httpOp.request, this.bodyreader);
             } catch (Exception e) {
                 throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }
 
-            HttpResponse<String> response;
-            try (Timer.Context resultTime = httpActivity.resultTimer.time()) {
-                response = responseFuture.get(httpActivity.getTimeoutMs(), TimeUnit.MILLISECONDS);
+            HttpResponse<String> response=null;
+            long startat = System.nanoTime();
+            Exception error = null;
+            try {
+                response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
+                if (httpOp.ok_status!=null) {
+                    if (!String.valueOf(response.statusCode()).matches(httpOp.ok_status)) {
+                        throw new InvalidStatusCodeException(cycleValue,httpOp.ok_status,response.statusCode());
+                    }
+                }
+                if (httpOp.ok_body!=null) {
+                    if (!response.body().matches(httpOp.ok_body)) {
+                        throw new InvalidResponseBodyException(cycleValue, httpOp.ok_body, response.body());
+                    }
+                }
             } catch (Exception e) {
-                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":", e);
+                error = new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
+            } finally {
+                long nanos = System.nanoTime() - startat;
+                httpActivity.resultTimer.update(nanos, TimeUnit.NANOSECONDS);
+                if (error==null) {
+                    httpActivity.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
+                }
+                if (httpActivity.isDiagnosticMode()) {
+                    if (response!=null) {
+                        httpActivity.console.summarizeResponse(response,System.out,cycleValue,nanos);
+                    } else {
+                        System.out.println("---- RESPONSE was null");
+                    }
+                    System.out.println();
+                }
+
+                if (error!=null) {
+                    // count and log exception types
+                }
             }
+
 
 //            if (ok == null) {
 //                if (response.statusCode() != 200) {

@@ -56,7 +56,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public Timer resultTimer;
     public Histogram triesHisto;
     private Writer pw;
-    private String fileName;
+    private final String fileName;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private int retry_delay = 0;
     private int retries;

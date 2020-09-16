@@ -55,7 +55,7 @@ public class NBWebServer implements Runnable {
     private String bindHost = "localhost";
     private int bindPort = 12345;
 
-    private Map<String,Object> contextParams = new LinkedHashMap<>();
+    private final Map<String,Object> contextParams = new LinkedHashMap<>();
 
     public NBWebServer withContextParams(Map<String,Object> cp) {
         this.contextParams.putAll(cp);

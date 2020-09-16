@@ -20,7 +20,7 @@ public class Save implements RowCycleOperator {
 
     ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 
-    private String[] varnames;
+    private final String[] varnames;
 
     public Save(String... varnames) {
         this.varnames = varnames;

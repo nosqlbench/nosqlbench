@@ -316,7 +316,7 @@ function find_max() {
             accepted_count++;
             highest_acceptable_iteration = highest_acceptable_of(results, highest_acceptable_iteration, iteration);
             printf(" ---> accepting iteration %d\n",iteration);
-            continue;
+
         } else {
             rejected_count++;
             printf(" !!!  rejecting iteration %d\n",iteration);

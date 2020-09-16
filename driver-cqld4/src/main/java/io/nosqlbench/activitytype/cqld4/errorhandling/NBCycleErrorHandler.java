@@ -43,8 +43,8 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
 
     private static final Logger logger = LoggerFactory.getLogger(NBCycleErrorHandler.class);
 
-    private ErrorResponse errorResponse;
-    private ExceptionCountMetrics exceptionCountMetrics;
+    private final ErrorResponse errorResponse;
+    private final ExceptionCountMetrics exceptionCountMetrics;
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private boolean throwExceptionOnStop=false;
 

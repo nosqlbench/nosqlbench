@@ -204,7 +204,7 @@ public class MarkdownDocs {
 
         private final int from;
         private final int to;
-        private T edgeProps;
+        private final T edgeProps;
 
         public Edge(int from, int to, Supplier<T> forT) {
             this.from = from;

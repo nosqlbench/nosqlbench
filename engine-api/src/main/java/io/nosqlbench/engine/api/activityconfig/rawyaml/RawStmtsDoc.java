@@ -33,7 +33,7 @@ import java.util.Map;
 public class RawStmtsDoc extends StatementsOwner {
 
     private RawScenarios scenarios = new RawScenarios();
-    private List<RawStmtsBlock> blocks = new ArrayList<>();
+    private final List<RawStmtsBlock> blocks = new ArrayList<>();
 
     // no-args ctor is required
     public RawStmtsDoc() {

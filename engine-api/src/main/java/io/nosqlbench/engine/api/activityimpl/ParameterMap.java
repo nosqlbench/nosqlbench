@@ -166,9 +166,9 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         markMutation();
     }
 
-    private static Pattern encodedParamsSquote = Pattern.compile("(?<param>\\w+?)='(?<value>[^']+?);");
-    private static Pattern encodedParamsDquote = Pattern.compile("(?<param>\\w+?)=\"(?<value>[^\"]+?);");
-    private static Pattern encodedParamsPattern = Pattern.compile("(?<param>\\w+?)=(?<value>.+?);");
+    private static final Pattern encodedParamsSquote = Pattern.compile("(?<param>\\w+?)='(?<value>[^']+?);");
+    private static final Pattern encodedParamsDquote = Pattern.compile("(?<param>\\w+?)=\"(?<value>[^\"]+?);");
+    private static final Pattern encodedParamsPattern = Pattern.compile("(?<param>\\w+?)=(?<value>.+?);");
 
     @Override
     public Object put(String name, Object value) {
@@ -345,7 +345,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 //        return parameterMap;
 //    }
 
-    public static interface Listener {
+    public interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);
     }
 

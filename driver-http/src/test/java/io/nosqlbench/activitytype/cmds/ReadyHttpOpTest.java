@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ReadyHttpRequestTest {
+public class ReadyHttpOpTest {
 
     @Test
     public void testOnelineSpec() {
@@ -19,8 +19,8 @@ public class ReadyHttpRequestTest {
                 " - s1: method=get uri=http://localhost/\n");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        ReadyHttpRequest readyReq = new ReadyHttpRequest(stmtDef);
-        HttpRequest staticReq = readyReq.apply(3);
+        ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
+        HttpOp staticReq = readyReq.apply(3);
     }
 
     @Test
@@ -30,8 +30,8 @@ public class ReadyHttpRequestTest {
                 " - s1: get http://localhost/");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        ReadyHttpRequest readyReq = new ReadyHttpRequest(stmtDef);
-        HttpRequest staticReq = readyReq.apply(3);
+        ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
+        HttpOp staticReq = readyReq.apply(3);
     }
 
     @Test
@@ -41,8 +41,8 @@ public class ReadyHttpRequestTest {
                 " - s1: get http://localhost/ HTTP/1.1");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        ReadyHttpRequest readyReq = new ReadyHttpRequest(stmtDef);
-        HttpRequest staticReq = readyReq.apply(3);
+        ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
+        HttpOp staticReq = readyReq.apply(3);
     }
 
     @Test
@@ -55,8 +55,8 @@ public class ReadyHttpRequestTest {
                 "");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        ReadyHttpRequest readyReq = new ReadyHttpRequest(stmtDef);
-        HttpRequest staticReq = readyReq.apply(3);
+        ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
+        HttpOp staticReq = readyReq.apply(3);
     }
 
     @Test
@@ -69,8 +69,8 @@ public class ReadyHttpRequestTest {
                 "    body1");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        ReadyHttpRequest readyReq = new ReadyHttpRequest(stmtDef);
-        HttpRequest staticReq = readyReq.apply(3);
+        ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
+        HttpOp staticReq = readyReq.apply(3);
     }
 
     @Test
