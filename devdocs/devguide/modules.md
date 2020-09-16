@@ -34,27 +34,27 @@ digraph Test {
    engine_cli[label="engine-cli"];
    engine_rest[label="engine-rest"];
    engine_docker[label="engine-docker"];
+   engine_api[label="engine-api"];
+   docsys[label="docsys"];
   }
 
+  engine_api -> drivers_api;
 //  subgraph cluster2 {
 //   label="APIs"
-   engine_api[label="engine-api"];
-   virtdata_api[label="virtdata-api"];
    nb_api[label="nb-api"];
-   nb_annotations[label="nb-annotations"];
-   virtdata_lang[label="virtdata-lang"];
+   nb_annotations[label="nb-annotations",tooltip="sdf"];
    nb_api -> nb_annotations;
   //}
-   docsys[label="docsys"];
 
   subgraph cluster3 {
-   label="virtdata"
+   label="virtdata-userlibs"
    virtdata_lib_curves4[label="virtdata-lib-curves4"];
    virtdata_lib_realer[label="virtdata-lib-realer"];
-   virtdata_userlibs[label="virtdata-userlibs"];
    virtdata_lib_random[label="virtdata-lib-random"];
    virtdata_realdata[label="virtdata-realdata"];
    virtdata_lib_basics[label="virtdata-lib-basics"];
+   virtdata_api[label="virtdata-api"];
+   virtdata_lang[label="virtdata-lang"];
   }
 
   docsys -> nb_api;
@@ -62,12 +62,14 @@ digraph Test {
 
   engine_api -> nb_api;
   engine_api -> nb_annotations;
-  engine_api -> virtdata_userlibs;
+  engine_api -> virtdata_lib_basics[lhead="cluster3"];
   engine_core -> engine_api [ltail="cluster0"];
   engine_docs -> docsys;
   engine_cli -> engine_core;
   engine_cli -> engine_docker;
   engine_rest -> engine_cli;
+
+
 
   /**
   nb[label="nb"];
@@ -105,12 +107,14 @@ digraph Test {
 
    virtdata_lib_realer -> virtdata_lib_basics;
 
-
+  /**
   virtdata_userlibs -> virtdata_realdata;
   virtdata_userlibs -> virtdata_lib_realer;
   virtdata_userlibs -> virtdata_lib_random;
   virtdata_userlibs -> virtdata_lib_basics;
   virtdata_userlibs -> virtdata_lib_curves4;
   virtdata_userlibs -> docsys;
+  **/
+
 }
 ```
