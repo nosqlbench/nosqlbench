@@ -6,7 +6,7 @@
         :active_topic="active_topic"
         :categories="categories"
         @change="menuChanged()"
-    @select="menuChanged()"></docs-menu>
+        @select="menuChanged()"></docs-menu>
 
     <v-app-bar app collapse-on-scroll dense>
       <v-app-bar-nav-icon @click.stop="toggleDrawer"/>
@@ -77,13 +77,21 @@ export default {
       async set(val) {
         await this.$store.dispatch("docs/setActiveTopic")
       }
+    },
+    isDrawerOpen: {
+      get() {
+        return this.$store.getters["docs/getIsDrawerOpen"]
+      },
+      set(val) {
+        this.$store.dispatch("docs/setIsDrawerOpen", val)
+      }
     }
   },
   async asyncData({params, route, store}) {
     await store.dispatch("docs/loadCategories")
     let categories = await store.getters["docs/getCategories"]
-    let active_category =docpaths.getCategory(route,categories);
-    let active_topic = docpaths.getTopic(route,categories, active_category);
+    let active_category = docpaths.getCategory(route, categories);
+    let active_topic = docpaths.getTopic(route, categories, active_category);
 
     return {
       active_category,
@@ -93,7 +101,9 @@ export default {
   },
   methods: {
     async toggleDrawer() {
-      await this.$store.dispatch("docs/setIsDrawerOpen", this.$store.getters["docs/getIsDrawerOpen"])
+      this.isDrawerOpen=!this.isDrawerOpen;
+      // await this.$store.dispatch("docs/setIsDrawerOpen", this.$store.getters["docs/getIsDrawerOpen"])
+      console.log("toggled drawer, now " + this.isDrawerOpen)
     },
     menuChanged(evt) {
       console.log("menu changed:" + JSON.stringify(evt, null, 2))

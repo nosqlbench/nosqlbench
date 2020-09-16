@@ -2,10 +2,10 @@
   <v-navigation-drawer app
                        v-model="isDrawerOpen"
                        :permanent="isMenuLocked"
-                       @transitionend="toggleDrawerOpened"
+                       @transitionend="afterMenuTransition"
                        :title="drawerTitle">
 
-    <div class="menu">
+    <div class="menu" >
 
       <!--      active_category: {{ active_category.name }} active_topic: {{ active_topic.name }}-->
       <!-- Use active_category and active_topic to select inactive -->
@@ -17,7 +17,7 @@
           <!--          <v-list-item v-if="$vuetify.breakpoint.mdAndDown">-->
           <v-list-item-action>
             <v-switch inset v-model="isMenuLocked" label="keep open"
-                      @change="toggleMenuLocked"></v-switch>
+                      @click="toggleMenuLocked"></v-switch>
           </v-list-item-action>
         </v-list-item>
 
@@ -87,14 +87,13 @@ export default {
       this.$store.dispatch("docs/setActiveTopic", topic)
       this.$nuxt.$router.push({path: topic.path})
     },
-    toggleDrawerOpened() {
+    afterMenuTransition() {
       this.drawer = !this.drawer;
+      console.log("drawer now " + (this.drawer ? "true" : "false"))
     },
     toggleMenuLocked() {
       this.$store.dispatch("docs/setIsMenuLocked", !this.$store.getters["docs/getIsMenuLocked"])
-    },
-    setIsDrawerOpen() {
-      this.$store.commit('docs/setIsDrawerOpen', this.drawer);
+
     }
   },
   async created() {
