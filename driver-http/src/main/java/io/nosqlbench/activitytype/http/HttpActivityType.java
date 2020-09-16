@@ -19,6 +19,9 @@ public class HttpActivityType implements ActivityType<HttpActivity> {
 
     @Override
     public ActionDispenser getActionDispenser(HttpActivity activity) {
+        if (activity.getParams().getOptionalString("async").isPresent()) {
+            throw new RuntimeException("The async http driver is not online yet.");
+        }
         return new HttpActionDispenser(activity);
     }
 
