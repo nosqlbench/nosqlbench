@@ -13,8 +13,9 @@
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>
-        The driver API for nosqlbench;
-        Provides the interfaces needed to build drivers that can be loaded by nosqlbench core
+        The engine API for nosqlbench;
+        Provides the interfaces needed to build internal modules for the
+        nosqlbench core engine
     </description>
 
     <dependencies>
@@ -22,6 +23,12 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
             <version>3.12.145-SNAPSHOT</version>
         </dependency>
 

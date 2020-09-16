@@ -35,6 +35,8 @@
         <module>engine-cli</module>
         <module>engine-rest</module>
 
+        <module>drivers-api</module>
+
         <!-- a binary (appimage) build option for nb -->
         <module>nb</module>
 

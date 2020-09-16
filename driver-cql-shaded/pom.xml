@@ -27,6 +27,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>
         </dependency>

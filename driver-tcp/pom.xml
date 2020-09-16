@@ -21,17 +21,23 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.145-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-api</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-stdout</artifactId>
-            <version>3.12.145-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>drivers-api</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>driver-stdout</artifactId>
+        <version>3.12.145-SNAPSHOT</version>
+      </dependency>
 
     </dependencies>
 

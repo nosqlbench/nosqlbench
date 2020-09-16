@@ -26,6 +26,12 @@
             <version>3.12.141-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
+            <version>3.12.145-SNAPSHOT</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.datastax.oss</groupId>
@@ -69,47 +75,6 @@
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-<!--            <version>4.1.36.Final</version>-->
-<!--            <classifier>linux-x86_64</classifier>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.yaml</groupId>-->
-<!--            <artifactId>snakeyaml</artifactId>-->
-<!--            <version>1.23</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-lang3</artifactId>-->
-<!--            <version>3.7</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-api</artifactId>-->
-<!--            <version>1.7.25</version>-->
-<!--        </dependency>-->
-
-        <!-- test only scope -->
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.141-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.141-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>
