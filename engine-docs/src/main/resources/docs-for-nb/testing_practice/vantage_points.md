@@ -11,7 +11,7 @@ also determines what you measure.
 
 Consider the following diagram:
 
-![Layers](layers.png)
+![Layers](layers.svg =600x)
 
 This diagram illustrates a prototypical set of services and their inner service dependencies. This view only shows synchronous calls to keep the diagram simple.
 
