@@ -174,8 +174,8 @@ export const actions = {
                             let weight = ((mdMeta.attributes.weight) ? mdMeta.attributes.weight : 0)
                             let title = ((mdMeta.attributes.title) ? mdMeta.attributes.title : basename)
                             let path = "/docs/" + entry.path
-                            let baseurl = endpoints.url(document, context, "/services/docs/" + path);
-                            console.log("baseurl for doc:" + baseurl);
+                            let baseurl = endpoints.url(document, context, '/services' + path);
+                            // console.log("baseurl for doc:" + baseurl);
                             let body = endpoints.localize(mdMeta.body, baseurl)
                             // console.log("path:" + entry.path)
                             return {
@@ -185,7 +185,7 @@ export const actions = {
                                 categories,
                                 weight,
                                 title,
-                                content: mdMeta.body
+                                content: body
                             }
                         })
                     }
