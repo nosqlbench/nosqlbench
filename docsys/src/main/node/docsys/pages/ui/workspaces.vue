@@ -111,14 +111,13 @@ export default {
       return name;
     },
     purgeWorkspace: function (ws) {
-      console.log("purging " + ws);
+      // console.log("purging " + ws);
       this.$store.dispatch('workspaces/purgeWorkspace', ws);
       // this.$store.dispatch("workspaces/setWorkspace")
       this.$forceUpdate();
     },
   },
   created() {
-    console.log("created component...");
     this.$store.dispatch('workspaces/initWorkspaces', "workspace panel load");
   }
 }

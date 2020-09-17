@@ -45,7 +45,7 @@ export default {
                 return x.path.match(/\/index(.md)?/)
             });
             active_topic = found_topic ? found_topic : found_index ? found_index : active_topic;
-            console.log("active_topic=" + active_topic.path);
+            // console.log("active_topic=" + active_topic.path);
         }
         return active_topic;
 

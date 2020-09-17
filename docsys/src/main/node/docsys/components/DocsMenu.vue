@@ -89,7 +89,7 @@ export default {
     },
     afterMenuTransition() {
       this.drawer = !this.drawer;
-      console.log("drawer now " + (this.drawer ? "true" : "false"))
+      // console.log("drawer now " + (this.drawer ? "true" : "false"))
     },
     toggleMenuLocked() {
       this.$store.dispatch("docs/setIsMenuLocked", !this.$store.getters["docs/getIsMenuLocked"])

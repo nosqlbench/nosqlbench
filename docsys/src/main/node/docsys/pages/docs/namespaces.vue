@@ -44,7 +44,7 @@
         },
         methods: {
             changeTestVal(data) {
-                console.log("data:" + data);
+                // console.log("data:" + data);
                 this.testval = !this.testval;
             }
         }

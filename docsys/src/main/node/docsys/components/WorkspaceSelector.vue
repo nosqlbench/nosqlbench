@@ -85,7 +85,7 @@ export default {
     }
   },
   created() {
-    console.log("created component...");
+    // console.log("created component...");
     this.$store.dispatch('workspaces/initWorkspaces', "selector load");
   }
 }
