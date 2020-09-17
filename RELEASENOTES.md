@@ -1,6 +1,2 @@
-- 92e705f0 add dedicated markdown path fixups
-- bb9bbbc5 add image sizing support
-- a49b1bbf cleanup console logging
-- 58afb5a1 replace unmaintained markdown-it-vue with simpler markdown-it component
-- 366c4d44 update dependencies for direct markdown rendering
-- 5ddf423d update nuxt rendering property
+- a35042b3 updated docsys nuxt resources
+- 1a7dfcf8 updated guidebook static content
