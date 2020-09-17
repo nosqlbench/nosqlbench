@@ -1,5 +1,6 @@
-- 9769892d (HEAD -> main) start nbui design guide
-- c2cd041f (origin/main) docker fix release
-- 5cab2e83 typo fixes
-- 3a7775af disable async mode for http until feature complete
-- d93efe16 add nosqlbench root dir to docker image
+- 92e705f0 add dedicated markdown path fixups
+- bb9bbbc5 add image sizing support
+- a49b1bbf cleanup console logging
+- 58afb5a1 replace unmaintained markdown-it-vue with simpler markdown-it component
+- 366c4d44 update dependencies for direct markdown rendering
+- 5ddf423d update nuxt rendering property
