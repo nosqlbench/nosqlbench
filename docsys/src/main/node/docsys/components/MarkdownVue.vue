@@ -1,58 +1,31 @@
 <template>
-  <!--  <v-main fluid class="d-block">-->
-  <!--    <markdown-it-vue class="d-block" :content="mdcontent" :options="mdoptions"/>-->
-  <markdown-it-vue class="md-body" ref="myMarkdownItVue" :content="mdcontent" :options="options"/>
-  <!--  </v-main>-->
+  <div class="markdown-body" v-html="rendered"></div>
 </template>
 
 <script>
-import MarkdownItVue from 'markdown-it-vue'
-// https://www.npmjs.com/package/markdown-it-replace-link
-// https://www.npmjs.com/package/markdown-it-relativelink
-// import 'markdown-it-link-attributes'
-// import 'markdown-it-relativelink'
-// let mireli = require('markdown-it-relativelink')({prefix: 'http://example.com/'})
-
-import 'markdown-it-replace-link'
-
-let mireplink = require('markdown-it-replace-link')
+import "markdown-it"
+import "markdown-it-imsize"
+let mdit = require('markdown-it')({
+  html: true,
+  linkify: true,
+  typography: true
+}).use(require('markdown-it-imsize'))
 
 export default {
   name: "MarkdownVue",
-  components: {MarkdownItVue},
-  mounted() {
-      let mmd = this.$refs.myMarkdownItVue;
-    mmd.use(mireplink);
-
-    // mmd.use(mirl)
-    // console.log("typeof(mmd):" + typeof (mmd))
-
-  },
-  // data() {
-  //   let options = {
-  //     markdownIt: {
-  //       linkify: true
-  //     },
-  //     linkAttributes: {
-  //       attrs: {
-  //         target: '_blank',
-  //         rel: 'noopener'
-  //       }
-  //     },
-  //     replaceLink: function(link, env) {
-  //       return "LINK:" + link;
-  //     }
-  //   }
-  //   return {options}
-  // },
   props: {
-    mdcontent: String,
-    options: {
-      testing: "one two three"
+    mdcontent: String
+  },
+  computed: {
+    rendered() {
+      let rendered = mdit.render(this.mdcontent);
+      // console.log("got rendered:" + rendered.length + " characters")
+      return rendered
     }
   }
 }
 </script>
+
 <style>
 
 .v-application code {

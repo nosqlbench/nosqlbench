@@ -92,21 +92,23 @@ export default {
     let categories = await store.getters["docs/getCategories"]
     let active_category = docpaths.getCategory(route, categories);
     let active_topic = docpaths.getTopic(route, categories, active_category);
+    let markdown_body = active_topic.content;
 
+    // console.log("markdown_body is " + markdown_body.length + " characters")
     return {
       active_category,
       active_topic,
-      markdown_body: active_topic.content
+      markdown_body: markdown_body
     }
   },
   methods: {
     async toggleDrawer() {
       this.isDrawerOpen=!this.isDrawerOpen;
       // await this.$store.dispatch("docs/setIsDrawerOpen", this.$store.getters["docs/getIsDrawerOpen"])
-      console.log("toggled drawer, now " + this.isDrawerOpen)
+      // console.log("toggled drawer, now " + this.isDrawerOpen)
     },
     menuChanged(evt) {
-      console.log("menu changed:" + JSON.stringify(evt, null, 2))
+      // console.log("menu changed:" + JSON.stringify(evt, null, 2))
       this.$forceUpdate()
     }
   }
