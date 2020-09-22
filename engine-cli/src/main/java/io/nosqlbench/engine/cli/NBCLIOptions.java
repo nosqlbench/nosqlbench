@@ -167,6 +167,10 @@ public class NBCLIOptions {
                     String include = readWordOrThrow(arglist, "path to include");
                     wantsToIncludePaths.add(include);
                     break;
+                case REPORT_GRAPHITE_TO:
+                    arglist.removeFirst();
+                    reportGraphiteTo = arglist.removeFirst();
+                    break;
                 case METRICS_PREFIX:
                     arglist.removeFirst();
                     metricsPrefix = arglist.removeFirst();
@@ -315,10 +319,6 @@ public class NBCLIOptions {
                 case REPORT_CSV_TO:
                     arglist.removeFirst();
                     reportCsvTo = arglist.removeFirst();
-                    break;
-                case REPORT_GRAPHITE_TO:
-                    arglist.removeFirst();
-                    reportGraphiteTo = arglist.removeFirst();
                     break;
                 case LIST_DRIVERS:
                 case LIST_ACTIVITY_TYPES:
