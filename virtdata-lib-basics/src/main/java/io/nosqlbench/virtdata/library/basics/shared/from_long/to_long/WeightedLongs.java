@@ -39,6 +39,7 @@ public class WeightedLongs implements LongFunction<Long> {
 
         String[] fragments = new String[pairs.length];
         List<Double> parsedWeights = new ArrayList<>();
+        values = new long[pairs.length];
         for (int i = 0; i < pairs.length; i++) {
             String[] pair = pairs[i].split(":", 2);
             if (pair.length == 2) {
