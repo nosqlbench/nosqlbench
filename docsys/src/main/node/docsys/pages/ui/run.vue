@@ -28,12 +28,10 @@
 
             <v-btn-toggle v-model="toggle_builtins" @change="validateAndSearch()">
               <v-btn :disabled="this.toggle_workspaces===undefined">
-                <v-container fluid class="d-flex">
                   <v-icon title="include built-in workloads">mdi-folder-open</v-icon>
                   <div class="ma-2">bundled</div>
                   <v-icon v-if="this.toggle_builtins===0">mdi-check</v-icon>
 
-                </v-container>
               </v-btn>
             </v-btn-toggle>
 

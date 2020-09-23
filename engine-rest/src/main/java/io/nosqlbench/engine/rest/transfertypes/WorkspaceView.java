@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 public class WorkspaceView {
 
@@ -24,6 +25,9 @@ public class WorkspaceView {
 
     private final Path workspaceRoot;
     private Summary summary;
+
+    @JsonProperty("ls")
+    private List<WorkspaceItemView> listing = null;
 
     public WorkspaceView(Path workspaceRoot) {
         this.workspaceRoot = workspaceRoot;
@@ -56,13 +60,17 @@ public class WorkspaceView {
         return this.summary;
     }
 
+    public void setListing(List<WorkspaceItemView> listing) {
+        this.listing = listing;
+    }
+
     public final static class Summary extends SimpleFileVisitor<Path> {
 
         private final Path root;
 
         public long total_bytes = 0L;
         public long total_files = 0L;
-        public long last_changed_epoch =Long.MIN_VALUE;
+        public long last_changed_epoch = Long.MIN_VALUE;
         public String last_changed_filename = "";
 
         public String getLast_changed_ago() {

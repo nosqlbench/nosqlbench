@@ -2,6 +2,8 @@
   <div class="markdown-body" v-html="rendered"></div>
 </template>
 
+<!--previously: https://github.com/ravenq/markdown-it-vue/blob/master/src/markdown-it-vue.vue-->
+
 <script>
 import "markdown-it"
 import "markdown-it-imsize"

@@ -9,8 +9,8 @@
                       v-model="new_workspace"
                       ref="new_workspace_input"
                       hint="workspace name"
-                      @blur="commitWorkspace(new_workspace)"
-                      @keydown.enter="commitWorkspace(new_workspace)"
+                      @blur="initializeWorkspace(new_workspace)"
+                      @keydown.enter="initializeWorkspace(new_workspace)"
                       @keydown.esc="cancelWorkspace()"
         ></v-text-field>
         <!--    label="workspace"-->
@@ -77,7 +77,7 @@ export default {
         this.$refs.new_workspace_input.focus();
       });
     },
-    commitWorkspace: function ({$store}) {
+    initializeWorkspace: function ({$store}) {
       // console.log("commit:" + JSON.stringify(this.new_workspace));
       this.$store.dispatch("workspaces/activateWorkspace", this.new_workspace);
       this.new_workspace = "";

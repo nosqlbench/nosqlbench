@@ -16,6 +16,7 @@ import javax.ws.rs.core.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/services/workspaces")
 @Singleton
@@ -79,7 +80,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
         return Response.ok().build();
     }
 
-    @POST
+    @PUT
     @Path("/{workspaceName}/{filepath:.+}")
     @Consumes(MediaType.WILDCARD)
     @Produces(MediaType.WILDCARD)
@@ -103,17 +104,20 @@ public class WorkspacesEndpoint implements WebServiceObject {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkspaceInfo(
         @PathParam("workspace") String workspace,
-        @QueryParam("ls") String ls
+        @QueryParam("ls") String ls,
+        @QueryParam("contains") String contains
     ) {
         try {
-            if (ls!=null && !ls.toLowerCase().equals("false")) {
-                WorkSpace ws = getSvc().getWorkspace(workspace);
+            WorkSpace ws = getSvc().getWorkspace(workspace);
+            WorkspaceView wsview = ws.getWorkspaceView();
+            if (ls != null && !ls.toLowerCase().equals("false")) {
                 List<WorkspaceItemView> listing = ws.getWorkspaceListingView("");
-                return Response.ok(listing).build();
-            } else {
-                WorkspaceView workpaceView = getSvc().getWorkspaceView(workspace);
-                return Response.ok(workpaceView).build();
+                if (contains != null) {
+                    listing = listing.stream().filter(i -> i.contains(contains)).collect(Collectors.toList());
+                }
+                wsview.setListing(listing);
             }
+            return Response.ok(wsview).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -128,7 +132,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
         @QueryParam("ls") String ls) {
 
         try {
-            if (ls!=null && !ls.toLowerCase().equals("false")) {
+            if (ls != null && !ls.toLowerCase().equals("false")) {
                 WorkSpace ws = getSvc().getWorkspace(workspace);
                 List<WorkspaceItemView> listing = ws.getWorkspaceListingView(filename);
                 return Response.ok(listing).build();
