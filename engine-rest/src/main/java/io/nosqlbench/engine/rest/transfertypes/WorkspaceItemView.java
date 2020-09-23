@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class WorkspaceItemView {
 
+    private final Path _path;
     private String type;
     private String perms;
     private String owner;
@@ -44,11 +45,13 @@ public class WorkspaceItemView {
             setSize(attrs.size());
             setMtimeMillis(attrs.lastModifiedTime().to(TimeUnit.MILLISECONDS));
             setName(wspath.relativize(path).toString());
+            this._path = path;
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     private void setOwner(FileOwnerAttributeView fileAttributeView) {
         try {
@@ -155,4 +158,15 @@ public class WorkspaceItemView {
 
     private String name;
 
+    public boolean contains(String content) {
+        if (!Files.isRegularFile(_path)) {
+            return false;
+        }
+        try {
+            String s = Files.readString(this._path);
+            return s.matches("(?s)" + content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

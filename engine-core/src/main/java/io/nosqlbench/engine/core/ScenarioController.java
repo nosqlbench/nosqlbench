@@ -414,11 +414,12 @@ public class ScenarioController {
         return activityMap;
     }
 
-    public Collection<ProgressAndStateMeter> getProgressMeters() {
+    public List<ProgressAndStateMeter> getProgressMeters() {
         List<ProgressAndStateMeter> indicators = new ArrayList<>();
         for (ActivityExecutor ae : activityExecutors.values()) {
             indicators.add(new ProgressAndStateMeter(ae.getProgressMeter(), ae.getActivity()));
         }
+        indicators.sort((o1, o2) -> Long.compare(o1.getStartedAtMillis(), o2.getStartedAtMillis()));
         return indicators;
     }
 }

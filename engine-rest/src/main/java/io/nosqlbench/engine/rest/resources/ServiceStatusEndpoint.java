@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -28,9 +29,16 @@ public class ServiceStatusEndpoint implements WebServiceObject {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response isEnabled() {
+
+    public Response isEnabled(@QueryParam("enabled") String overideEnabled) {
+        boolean enabled = false;
         try {
-            StatusEncoding status = new StatusEncoding(true, Map.of());
+            if (overideEnabled != null) {
+                enabled = Boolean.parseBoolean(overideEnabled);
+            }
+            StatusEncoding status = new StatusEncoding(true, Map.of(
+                "status", "ORIGIN/services/status"
+            ));
             return Response.ok(status).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
