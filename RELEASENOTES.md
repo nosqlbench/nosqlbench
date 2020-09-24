@@ -1,1 +1,6 @@
-- 75d64503 (HEAD -> main, origin/main) Fix for graphite reporter regression
+- b468b736 (HEAD -> main) folded bindings design ideas into issues
+- 03e29bfd refinements to endpoints for NBUI
+- 69dbd0a6 incremental work on NBUI
+- b6627943 sketch binding improvement ideas
+- d703b757 Revert "fix WeightedLongs function: member values not allocated"
+- 8a4673d7 fix WeightedLongs function: member values not allocated
