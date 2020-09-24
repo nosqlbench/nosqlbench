@@ -1,7 +1,5 @@
 package com.datastax.ebdrivers.kafkaproducer;
 
-import io.nosqlbench.activitytype.stdout.StdoutAction;
-import io.nosqlbench.activitytype.stdout.StdoutActivity;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
@@ -21,15 +19,15 @@ public class KafkaProducerActivityType implements ActivityType<KafkaProducerActi
     }
 
     private static class Dispenser implements ActionDispenser {
-        private StdoutActivity activity;
+        private KafkaProducerActivity activity;
 
-        private Dispenser(StdoutActivity activity) {
+        private Dispenser(KafkaProducerActivity activity) {
             this.activity = activity;
         }
 
         @Override
         public Action getAction(int slot) {
-            return new StdoutAction(slot,this.activity);
+            return new KafkaAction(this.activity, slot);
         }
     }
 
