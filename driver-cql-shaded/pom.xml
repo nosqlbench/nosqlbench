@@ -79,43 +79,50 @@
     <build>
         <plugins>
 
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.4.0</version>
-                <executions>
-                    <execution>
-                        <id>get-cql-lexer</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>
-                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlLexer.g4
-                            </url>
-                            <outputFileName>CqlLexer.g4</outputFileName>
-                            <outputDirectory>src/main/grammars/cql3/
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>get-cql-parser</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>
-                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlParser.g4
-                            </url>
-                            <outputFileName>CqlParser.g4</outputFileName>
-                            <outputDirectory>src/main/grammars/cql3/
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--
+            If this plugin is re-enabled, the local CQL grammar will
+            be overwritten. The grammar has some syntax issues, so
+            fixes will be made to it before it is submitted back.
+
+            (lack of composite key syntax, nested type syntax, etc)
+            -->
+            <!--            <plugin>-->
+            <!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
+            <!--                <artifactId>download-maven-plugin</artifactId>-->
+            <!--                <version>1.4.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>get-cql-lexer</id>-->
+            <!--                        <phase>generate-sources</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>wget</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <url>-->
+            <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlLexer.g4-->
+            <!--                            </url>-->
+            <!--                            <outputFileName>CqlLexer.g4</outputFileName>-->
+            <!--                            <outputDirectory>src/main/grammars/cql3/-->
+            <!--                            </outputDirectory>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                    <execution>-->
+            <!--                        <id>get-cql-parser</id>-->
+            <!--                        <phase>generate-sources</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>wget</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <url>-->
+            <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlParser.g4-->
+            <!--                            </url>-->
+            <!--                            <outputFileName>CqlParser.g4</outputFileName>-->
+            <!--                            <outputDirectory>src/main/grammars/cql3/-->
+            <!--                            </outputDirectory>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
 
             <plugin>
                 <groupId>org.antlr</groupId>

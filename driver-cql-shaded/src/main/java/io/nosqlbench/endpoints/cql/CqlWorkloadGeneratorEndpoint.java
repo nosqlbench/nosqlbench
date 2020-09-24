@@ -1,4 +1,4 @@
-package io.nosqlbench.activitytype.cql.endpoints;
+package io.nosqlbench.endpoints.cql;
 
 import io.nosqlbench.generators.cql.lang.CqlWorkloadGen;
 import io.nosqlbench.docsys.api.WebServiceObject;
