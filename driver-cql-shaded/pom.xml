@@ -58,18 +58,11 @@
             <artifactId>snappy-java</artifactId>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>io.netty</groupId>-->
-        <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-        <!--            <version>4.1.36.Final</version>-->
-        <!--            <classifier>linux-x86_64</classifier>-->
-        <!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.yaml</groupId>-->
-        <!--            <artifactId>snakeyaml</artifactId>-->
-        <!--            <version>1.23</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.8</version>
+        </dependency>
 
         <dependency>
             <groupId>io.netty</groupId>
@@ -85,6 +78,72 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>get-cql-lexer</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>
+                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlLexer.g4
+                            </url>
+                            <outputFileName>CqlLexer.g4</outputFileName>
+                            <outputDirectory>src/main/grammars/cql3/
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>get-cql-parser</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>
+                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlParser.g4
+                            </url>
+                            <outputFileName>CqlParser.g4</outputFileName>
+                            <outputDirectory>src/main/grammars/cql3/
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.8</version>
+                <configuration>
+                    <sourceDirectory>src/main/grammars/cql3
+                    </sourceDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>io.nosqlbench.generators.cql.generated
+                        </argument>
+                    </arguments>
+                    <outputDirectory>
+                        src/main/java/io/nosqlbench/generators/cql/generated
+                    </outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.3</version>
