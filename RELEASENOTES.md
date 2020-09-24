@@ -1,6 +1,8 @@
-- b468b736 (HEAD -> main) folded bindings design ideas into issues
-- 03e29bfd refinements to endpoints for NBUI
-- 69dbd0a6 incremental work on NBUI
-- b6627943 sketch binding improvement ideas
-- d703b757 Revert "fix WeightedLongs function: member values not allocated"
-- 8a4673d7 fix WeightedLongs function: member values not allocated
+- ffb0dbbb (HEAD -> main) add curl to docker image
+- e50f0478 partial work on cql workload gen
+- c73ca6dd move cql test statements to test scope
+- 4b47a697 add cql grammar fetcher and antlr4 execution
+- b15ddd67 add cql workload generator endpoint
+- 2694af32 add example files from grammar
+- 1403e8ff port working cql grammer into cql module
+- afc80728 re-enable epoll in cql
