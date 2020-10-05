@@ -103,27 +103,4 @@ public class StatementsLoader {
         return new StmtsDocList(list);
     }
 
-//    public static StmtsDocList load(Logger logger, String path, String... searchPaths) {
-//        Content<?> content = NBIO.all()
-//                .prefix(searchPaths)
-//                .name(path)
-//                .one();
-//        try {
-//            RawYamlStatementLoader loader = new RawYamlStatementLoader();
-//            RawStmtsDocList rawDocList = loader.loadString(logger, content.get());
-//            StmtsDocList layered = new StmtsDocList(rawDocList);
-//            return layered;
-//        } catch (Exception e) {
-//            throw new RuntimeException("error while reading file " + path, e);
-//        }
-//    }
-
-//    public static StmtsDocList load(Logger logger, String path, Function<String, String> transformer, String... searchPaths) {
-//        RawYamlStatementLoader loader = new RawYamlStatementLoader(transformer);
-//        RawStmtsDocList rawDocList = loader.load(logger, path, searchPaths);
-//        StmtsDocList layered = new StmtsDocList(rawDocList);
-//        return layered;
-//    }
-
-
 }
