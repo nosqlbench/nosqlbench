@@ -17,11 +17,16 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
+import io.nosqlbench.nb.api.errors.BasicError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RawStmtFields extends Tags {
+    private final static Logger logger = LoggerFactory.getLogger(RawStmtFields.class);
 
     private String name = "";
     private String desc = "";
@@ -98,8 +103,19 @@ public class RawStmtFields extends Tags {
         Object bindingsObject = propsmap.remove("bindings");
         if (bindingsObject!=null) {
             if (bindingsObject instanceof Map) {
-                Map<Object,Object> bindingsMap = (Map<Object,Object>) bindingsObject;
-                bindingsMap.forEach((ko,vo) -> bindings.put(ko.toString(), vo.toString()));
+                Map<Object, Object> bindingsMap = (Map<Object, Object>) bindingsObject;
+                if (bindingsMap != null) {
+                    for (Object bkey : bindingsMap.keySet()) {
+                        Object bval = bindingsMap.get(bkey);
+                        if (bval != null) {
+                            bindings.put(bkey.toString(), bval.toString());
+                        } else {
+                            logger.warn("empty bindings entry for " + bkey);
+                        }
+                    }
+                } else {
+                    throw new BasicError("Empty bindings map");
+                }
             } else {
               throw new RuntimeException("Invalid type for bindings object: " + bindingsObject.getClass().getCanonicalName());
             }
