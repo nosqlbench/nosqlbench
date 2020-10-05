@@ -34,11 +34,11 @@ public class NBCLIScenarioParser {
 
     public static boolean isFoundWorkload(String workload, String... includes) {
         Optional<Content<?>> found = NBIO.all()
-                .prefix("activities")
-                .prefix(includes)
-                .name(workload)
-                .extension("yaml")
-                .first();
+            .prefix("activities")
+            .prefix(includes)
+            .name(workload)
+            .extension("yaml")
+            .first();
         return found.isPresent();
     }
 
@@ -48,11 +48,11 @@ public class NBCLIScenarioParser {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
-                .prefix("activities")
-                .prefix(includes)
-                .name(workloadName)
-                .extension("yaml")
-                .first();
+            .prefix("activities")
+            .prefix(includes)
+            .name(workloadName)
+            .extension("yaml")
+            .first();
 //
         Content<?> workloadContent = found.orElseThrow();
 
@@ -62,9 +62,9 @@ public class NBCLIScenarioParser {
         // Buffer in CLI word from user, but only until the next command
         List<String> scenarioNames = new ArrayList<>();
         while (arglist.size() > 0
-                && !arglist.peekFirst().contains("=")
-                && !arglist.peekFirst().startsWith("-")
-                && !RESERVED_WORDS.contains(arglist.peekFirst())) {
+            && !arglist.peekFirst().contains("=")
+            && !arglist.peekFirst().startsWith("-")
+            && !RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.size() == 0) {
@@ -74,9 +74,9 @@ public class NBCLIScenarioParser {
         // Parse CLI command into keyed parameters, in order
         LinkedHashMap<String, String> userParams = new LinkedHashMap<>();
         while (arglist.size() > 0
-                && arglist.peekFirst().contains("=")
-                && !arglist.peekFirst().startsWith("-")) {
-            String[] arg = arglist.removeFirst().split("=",2);
+            && arglist.peekFirst().contains("=")
+            && !arglist.peekFirst().startsWith("-")) {
+            String[] arg = arglist.removeFirst().split("=", 2);
             arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userParams.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
@@ -93,11 +93,11 @@ public class NBCLIScenarioParser {
 
             // Load in named scenario
             Content<?> yamlWithNamedScenarios = NBIO.all()
-                    .prefix(SEARCH_IN)
-                    .prefix(includes)
-                    .name(workloadName)
-                    .extension("yaml")
-                    .one();
+                .prefix(SEARCH_IN)
+                .prefix(includes)
+                .name(workloadName)
+                .extension("yaml")
+                .one();
 
             StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userParams);
 
@@ -107,7 +107,9 @@ public class NBCLIScenarioParser {
 
             if (namedSteps == null) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                        + "', but you can pick from " + String.join(",", scenarios.getScenarioNames()));
+                    + "', but you can pick from the following:\n" +
+                    scenarios.getScenarioNames().stream()
+                        .map(s -> "- " + s).collect(Collectors.joining("\n")));
             }
 
             // each named command line step of the named scenario
@@ -136,16 +138,16 @@ public class NBCLIScenarioParser {
 
                 // Undefine any keys with a value of 'undef'
                 List<String> undefKeys = buildingCmd.entrySet()
-                        .stream()
-                        .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList());
+                    .stream()
+                    .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
                     String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
                     relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
-                            relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
+                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
                     buildingCmd.put("workload", "workload=" + relativeWorkloadPathFromRoot);
                 }
 
@@ -157,8 +159,8 @@ public class NBCLIScenarioParser {
                 for (String token : new String[]{"WORKLOAD", "SCENARIO", "STEP"}) {
                     if (!alias.contains(token)) {
                         logger.warn("Your alias template '" + alias + "' does not contain " + token + ", which will " +
-                                "cause your metrics to be combined under the same name. It is strongly advised that you " +
-                                "include them in a template like " + WORKLOAD_SCENARIO_STEP + ".");
+                            "cause your metrics to be combined under the same name. It is strongly advised that you " +
+                            "include them in a template like " + WORKLOAD_SCENARIO_STEP + ".");
                     }
                 }
 
@@ -181,8 +183,8 @@ public class NBCLIScenarioParser {
 
     public static String sanitize(String word) {
         String sanitized = word;
-        sanitized = sanitized.replaceAll("\\..+$","");
-        sanitized = sanitized.replaceAll("[^a-zA-Z0-9]+","");
+        sanitized = sanitized.replaceAll("\\..+$", "");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9]+", "");
         return sanitized;
     }
 
@@ -268,10 +270,10 @@ public class NBCLIScenarioParser {
             String referenced = yamlPath.toString();
 
             if (referenced.startsWith("/")) {
-                if (yamlPath.getFileSystem()==FileSystems.getDefault()) {
+                if (yamlPath.getFileSystem() == FileSystems.getDefault()) {
                     Path relative = Paths.get(System.getProperty("user.dir")).toAbsolutePath().relativize(yamlPath);
                     if (!relative.toString().contains("..")) {
-                        referenced=relative.toString();
+                        referenced = relative.toString();
                     }
                 }
 //                String alternate = referenced.startsWith("/") ? referenced.substring(1) : referenced;
