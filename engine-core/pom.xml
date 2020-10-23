@@ -77,19 +77,25 @@
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.graalvm.tools</groupId>
-            <artifactId>profiler</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.tools</groupId>
-            <artifactId>chromeinspector</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+      <dependency>
+        <groupId>org.graalvm.tools</groupId>
+        <artifactId>profiler</artifactId>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.graalvm.tools</groupId>
+        <artifactId>chromeinspector</artifactId>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-clients</artifactId>
+        <version>3.12.154-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
 
 
-        <!-- only compile scope -->
+      <!-- only compile scope -->
 
     </dependencies>
 
