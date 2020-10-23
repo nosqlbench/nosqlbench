@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,12 +19,26 @@ import java.util.stream.Collectors;
  */
 public class NBCLIOptions {
 
+    private final static String userHome = System.getProperty("user.home");
+    private final static Path defaultOptFile = Path.of(userHome, ".nosqlbench/options");
+
     private final static Logger logger = LoggerFactory.getLogger(NBCLIOptions.class);
 
     // Options which may contextualize other CLI options or commands.
     // These must be parsed first
+    private static final String ARGS_FILE = "-argsfile";
+    private static final String ARGS_FILE_DEFAULT = "$HOME/.nosqlbench/argsfile";
+    private static final String ARGS_PIN = "-pin";
+    private static final String ARGS_UNPIN = "-unpin";
+
     private static final String INCLUDE = "--include";
     private static final String METRICS_PREFIX = "--metrics-prefix";
+
+    //    private static final String ANNOTATE_TO_GRAFANA = "--grafana-baseurl";
+    private static final String ANNOTATE_EVENTS = "--annotate";
+    private static final String ANNOTATORS_CONFIG = "--annotators";
+    private static final String DEFAULT_ANNOTATORS = "all";
+
 
     // Discovery
     private static final String HELP = "--help";
@@ -68,6 +83,7 @@ public class NBCLIOptions {
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
+    private final static String DOCKER_METRICS_AT = "--docker-metrics-at";
 
     private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
@@ -118,6 +134,13 @@ public class NBCLIOptions {
     private boolean showStackTraces = false;
     private boolean compileScript = false;
     private String scriptFile = null;
+    private String[] annotateEvents = new String[]{"ALL"};
+    private String dockerMetricsHost;
+    private String annotatorsConfig = "";
+
+    public String getAnnotatorsConfig() {
+        return annotatorsConfig;
+    }
 
     public enum Mode {
         ParseGlobalsOnly,
@@ -125,7 +148,7 @@ public class NBCLIOptions {
     }
 
     public NBCLIOptions(String[] args) {
-        this(args,Mode.ParseAllOptions);
+        this(args, Mode.ParseAllOptions);
     }
 
     public NBCLIOptions(String[] args, Mode mode) {
@@ -140,6 +163,8 @@ public class NBCLIOptions {
     }
 
     private LinkedList<String> parseGlobalOptions(String[] args) {
+        ArgsFile argsfile = new ArgsFile(ARGS_FILE_DEFAULT);
+
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
         }};
@@ -162,6 +187,33 @@ public class NBCLIOptions {
             }
 
             switch (word) {
+                case ARGS_FILE:
+                    arglist.removeFirst();
+                    String argsfileSpec = readWordOrThrow(arglist, "argsfile");
+                    argsfile = new ArgsFile(argsfileSpec);
+                    arglist = argsfile.doArgsFile(argsfileSpec, arglist);
+                    break;
+                case ARGS_PIN:
+                    arglist.removeFirst();
+                    arglist = argsfile.pin(arglist);
+                    break;
+                case ARGS_UNPIN:
+                    arglist.removeFirst();
+                    arglist = argsfile.unpin(arglist);
+                    break;
+                case ANNOTATE_EVENTS:
+                    arglist.removeFirst();
+                    String toAnnotate = readWordOrThrow(arglist, "annotated events");
+                    annotateEvents = toAnnotate.split("\\\\s*,\\\\s*");
+                    break;
+//                case ANNOTATE_TO_GRAFANA:
+//                    arglist.removeFirst();
+//                    grafanaEndpoint = readWordOrThrow(arglist,"grafana API endpoint");
+//                    break;
+                case ANNOTATORS_CONFIG:
+                    arglist.removeFirst();
+                    this.annotatorsConfig = readWordOrThrow(arglist, "annotators config");
+                    break;
                 case INCLUDE:
                     arglist.removeFirst();
                     String include = readWordOrThrow(arglist, "path to include");
@@ -190,6 +242,10 @@ public class NBCLIOptions {
                 case VERSION_COORDS:
                     arglist.removeFirst();
                     wantsVersionCoords = true;
+                    break;
+                case DOCKER_METRICS_AT:
+                    arglist.removeFirst();
+                    dockerMetricsHost = readWordOrThrow(arglist, "docker metrics host");
                     break;
                 case DOCKER_METRICS:
                     arglist.removeFirst();
@@ -462,6 +518,10 @@ public class NBCLIOptions {
 
     public boolean wantsDockerMetrics() {
         return dockerMetrics;
+    }
+
+    public String wantsDockerMetricsAt() {
+        return dockerMetricsHost;
     }
 
     public int getReportInterval() {

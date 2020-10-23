@@ -9,12 +9,15 @@ import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.*;
+import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.metrics.GrafanaMetricsAnnotator;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.api.annotation.Annotator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -30,16 +33,16 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 public class NBCLI {
 
     private static final Logger logger = LoggerFactory.getLogger(NBCLI.class);
+    private static final Logger EVENTS = LoggerFactory.getLogger("EVENTS");
     private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
+
 
     private final String commandName;
 
@@ -52,8 +55,8 @@ public class NBCLI {
             NBCLI cli = new NBCLI("eb");
             cli.run(args);
         } catch (Exception e) {
-            String error = ScenarioErrorHandler.handle(e,true);
-            if (error!=null) {
+            String error = ScenarioErrorHandler.handle(e, true);
+            if (error != null) {
                 System.err.println(error);
             }
             System.err.flush();
@@ -64,8 +67,7 @@ public class NBCLI {
 
     public void run(String[] args) {
 
-        NBCLIOptions globalOptions = new NBCLIOptions(args,NBCLIOptions.Mode.ParseGlobalsOnly);
-
+        NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
 
         // Global only processing
 
@@ -84,12 +86,19 @@ public class NBCLI {
             logger.warn(warn);
             if (reportGraphiteTo != null) {
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                        " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                        "usually only one of the two is configured.",
-                    reportGraphiteTo));
+                                " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                                "usually only one of the two is configured.",
+                        reportGraphiteTo));
             } else {
                 logger.info("Setting graphite reporting to localhost");
                 reportGraphiteTo = "localhost:9109";
+            }
+
+            if (globalOptions.getAnnotatorsConfig() != null) {
+                logger.warn("Docker metrics and separate annotations" +
+                        "are configured (both --docker-metrics and --annotations).");
+            } else {
+                Annotators.init("grafana{http://localhost:3000/}");
             }
         }
 
@@ -109,7 +118,13 @@ public class NBCLI {
         NBCLIOptions options = new NBCLIOptions(args);
         NBIO.addGlobalIncludes(options.wantsIncludes());
 
+        String sessionName = new SessionNamer().format(options.getSessionName());
+
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
+
+        Annotators.init(options.getAnnotatorsConfig());
+        Annotators.recordAnnotation(sessionName, 0L, 0L,
+                Map.of(), Map.of());
 
         ActivityMetrics.setHdrDigits(options.getHdrDigits());
 
@@ -228,7 +243,10 @@ public class NBCLI {
             reporters.start(10, options.getReportInterval());
         }
 
-        String sessionName = new SessionNamer().format(options.getSessionName());
+        Annotators.recordAnnotation(sessionName,
+                Map.of("event", "command-line", "args", String.join(" ", args)),
+                Map.of()
+        );
 
         if (options.wantsEnableChart()) {
             logger.info("Charting enabled");
@@ -241,20 +259,25 @@ public class NBCLI {
             }
         }
 
-        for (NBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
+        for (
+                NBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         }
-        for (NBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
+        for (
+                NBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
-        for (NBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
+        for (
+                NBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
         }
 
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.wantsConsoleLogLevel());
 
-        if (options.getCommands().size() == 0) {
+        if (options.getCommands().
+
+                size() == 0) {
             System.out.println(loadHelpFile("commandline.md"));
             System.exit(0);
         }
@@ -295,6 +318,7 @@ public class NBCLI {
         if (scenarioLogLevel.toInt() > consoleLogLevel.toInt()) {
             logger.info("raising scenario logging level to accommodate console logging level");
         }
+
         Level maxLevel = Level.toLevel(Math.min(consoleLogLevel.toInt(), scenarioLogLevel.toInt()));
 
         scenario.addScriptText(scriptData);
@@ -330,13 +354,14 @@ public class NBCLI {
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();
 //            logger.warn(scenariosResults.getExecutionSummary());
-            ScenarioErrorHandler.handle(exception,options.wantsStackTraces());
+            ScenarioErrorHandler.handle(exception, options.wantsStackTraces());
             System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             System.exit(2);
         } else {
             logger.info(scenariosResults.getExecutionSummary());
             System.exit(0);
         }
+
     }
 
     private String loadHelpFile(String filename) {
