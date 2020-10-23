@@ -432,15 +432,19 @@ public class SimpleActivity implements Activity, ProgressCapable {
         }
 
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+        List<Long> ratios = new ArrayList<>(stmts.size());
+        for (int i = 0; i < stmts.size(); i++) {
+            long ratio = stmts.get(i).removeParamOrDefault("ratio", 1);
+            ratios.add(ratio);
+        }
 
         if (stmts.size() == 0) {
             throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
         }
 
-        for (OpTemplate optemplate : stmts) {
-            long ratio = optemplate.getParamOrDefault("ratio", 1);
-
-//            CommandTemplate cmd = new CommandTemplate(optemplate);
+        for (int i = 0; i < stmts.size(); i++) {
+            long ratio = ratios.get(i);
+            OpTemplate optemplate = stmts.get(i);
             O driverSpecificOp = opinit.apply(optemplate);
             planner.addOp(driverSpecificOp, ratio);
         }

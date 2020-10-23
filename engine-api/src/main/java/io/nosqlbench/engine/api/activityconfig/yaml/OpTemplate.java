@@ -12,11 +12,13 @@ public interface OpTemplate extends Tagged {
 
     String getStmt();
 
-    Map<String,String> getBindings();
+    Map<String, String> getBindings();
 
     Map<String, Object> getParams();
 
-    <T> Map<String,T> getParamsAsValueType(Class<? extends T> type);
+    <T> Map<String, T> getParamsAsValueType(Class<? extends T> type);
+
+    <V> V removeParamOrDefault(String name, V defaultValue);
 
     @SuppressWarnings("unchecked")
     <V> V getParamOrDefault(String name, V defaultValue);

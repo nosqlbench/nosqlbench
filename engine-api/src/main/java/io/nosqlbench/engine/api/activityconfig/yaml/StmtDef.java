@@ -29,7 +29,7 @@ import java.util.Optional;
 public class StmtDef implements OpTemplate {
 
     private final RawStmtDef rawStmtDef;
-    private StmtsBlock block;
+    private final StmtsBlock block;
 
     public StmtDef(StmtsBlock block, RawStmtDef rawStmtDef) {
         this.block = block;
@@ -47,7 +47,7 @@ public class StmtDef implements OpTemplate {
     }
 
     @Override
-    public Map<String,String> getBindings() {
+    public Map<String, String> getBindings() {
         return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
     }
 
@@ -65,10 +65,27 @@ public class StmtDef implements OpTemplate {
     }
 
     @Override
+    public <V> V removeParamOrDefault(String name, V defaultValue) {
+        Objects.requireNonNull(defaultValue);
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        if (!lookup.containsKey(name)) {
+            return defaultValue;
+        }
+
+        Object value = lookup.remove(name);
+
+        try {
+            return (V) defaultValue.getClass().cast(value);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to cast type " + value.getClass().getCanonicalName() + " to " + defaultValue.getClass().getCanonicalName(), e);
+        }
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <V> V getParamOrDefault(String name, V defaultValue) {
         Objects.requireNonNull(defaultValue);
-        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
 
         if (!lookup.containsKey(name)) {
             return defaultValue;
@@ -83,7 +100,7 @@ public class StmtDef implements OpTemplate {
 
     @Override
     public <V> V getParam(String name, Class<? extends V> type) {
-        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         Object object = lookup.get(name);
         V value = type.cast(object);
         return value;
@@ -96,10 +113,10 @@ public class StmtDef implements OpTemplate {
             throw new RuntimeException("Do not use primitive types for the target class here. For example, Boolean.class is accepted, but boolean.class is not.");
         }
         // TODO: add warning here if primitive types are not allowed
-        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         if (lookup.containsKey(name)) {
             Object object = lookup.get(name);
-            if (object==null) {
+            if (object == null) {
                 return Optional.empty();
             }
             try {
@@ -114,18 +131,18 @@ public class StmtDef implements OpTemplate {
 
     @Override
     public Optional<String> getOptionalStringParam(String name) {
-        return getOptionalStringParam(name,String.class);
+        return getOptionalStringParam(name, String.class);
     }
 
 
     @Override
-    public Map<String,String> getTags() {
+    public Map<String, String> getTags() {
         return new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags());
     }
 
     @Override
     public String toString() {
-        return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
+        return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() + "), bindings:(" + getBindings() + "))";
     }
 
     @Override
