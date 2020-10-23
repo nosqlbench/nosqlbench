@@ -35,7 +35,9 @@ statements:
  - s2: https://www.amazon.com/s?k={query}
    ratio: 2
 bindings:
- query: WeightedStrings('function generator;backup generator;static generator');
+ query: >
+  WeightedStrings('function generator;backup generator;static generator');
+  UrlEncode();
 ```
 
 You can even make a detailed request with custom headers and result verification conditions:
@@ -43,12 +45,13 @@ You can even make a detailed request with custom headers and result verification
 ```yaml
 # Require that the result be status code 200-299 match regex "OK, account id is .*" in the body
 statements:
-  - method: GET
-    uri: https://google.com/
-    version: HTTP/1.1
-    "Content-Type": "application/json"
-    ok-status: 2[0-9][0-9]
-    ok-body: ^(OK, account id is .*)$
+  - name: 'get-from-google'  
+    method: GET
+    uri: "https://google.com/"
+    version: "HTTP/1.1"
+    Content-Type: "application/json"
+    ok-status: "2[0-9][0-9]"
+    ok-body: "^(OK, account id is .*)$"
 ```
 
 For those familiar with what an HTTP request looks like on the wire, the format below may be
@@ -163,19 +166,53 @@ results. Support may be added for long-lived connections in a future release.
 - **client_scope** - default: activity - One of activity, or thread. This controls how many
   clients instances you use with an HTTP activity. By default, all threads will use the same
   client instance.
-- **follow_redirects** - default: normal - One of never, always, or normal. Normal redirects
+
+- **follow_redirects** - default: normal - One of never, always, or
+ normal. Normal redirects
   are those which do not redirect from HTTPS to HTTP.
-- **diagnostics** - default: none -
-  This setting is a selector for what level of verbosity you will get on console. If you set
-  this to true, you'll get every request and response logged to console. This is only for
-  verifying that a test is configured and to spot check services before running higher scale
+  
+- **diagnostics** - default: none - synonym: **diag**
+  example: `diag=brief,1000` - print diagnostics for every 1000th
+  cycle, including only brief details as explained below.
+  
+  This setting is a selector for what level of verbosity you will get
+  on the console. If you set this to true, you'll get every request
+  and response logged to console. This is only for verifying that a test 
+  is configured and to spot check services before running higher scale
   tests.
-  If you want finer control over how much information diagnostics provides, you can specify
-  a comma separated list of the below.
-  - all - Includes all of the below categories
-  - stats - Counts of redirects, headers, body length, etc
-  - headers - include header details
-  - content - include
-  - a number, like 3000 - causes the diagnostics to be reported only on this cycle modulo
+  
+  All of the data shown in diagnostics is post-hoc, directly from
+  the response provided by the internal HTTP client in the Java runtime.
+  
+  If you want finer control over how much information diagnostics
+  provides, you can specify a comma separated list of the below.
+    
+  - headers - show headers 
+  - stats - show basic stats of each request
+  - data10 - show only the first 10 characters of each response body
+  - data100 - show only the first 100 characters of each response body
+    this setting supersedes `data10`
+  - data1000 - show only the first 1000 characters of each response body
+    this setting supersedes `data100`
+  - data - show all of each response body
+     this setting supersedes `data1000`
+  - redirects - show details for interstitial request which are made
+    when the client follows a redirect directive like a `location` header.
+  - requests - show details for requests
+  - responses - show details for responses 
+  - brief - Show headers, stats, requests, responses, and 10 characters
+  - all - Show everything, including full payloads and redirects 
+  - a modulo - any number, like 3000 - causes the diagnostics to be
+   reported only on this cycle modulo. If you set `diag=300,brief` 
+   then you will get the brief diagnostic output for every 300th
+   response.  
+
+  The requests, responses, and redirects setting work intersectionally.
+  For example, if you specify responses, and redirect, but not requests,
+  then you will only see the response portion of all calls made by the
+  client.
+  
+  All of the diagnostic filters are incrementally added. 
+    
 - **timeout** - default: forever -
   Sets the timeout of each request in milliseconds.

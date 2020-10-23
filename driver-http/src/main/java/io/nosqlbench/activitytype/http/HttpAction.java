@@ -73,18 +73,18 @@ public class HttpAction implements SyncAction {
 
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
             ReadyHttpOp readHTTPOperation = httpActivity.getSequencer().get(cycleValue);
-            httpOp =readHTTPOperation.apply(cycleValue);
+            httpOp = readHTTPOperation.apply(cycleValue);
         } catch (Exception e) {
-            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(),e);
-        } finally {
             if (httpActivity.isDiagnosticMode()) {
-                System.out.println("==== cycle " + cycleValue + " DIAGNOSTICS ====");
-                if (httpOp!=null) {
-                    httpActivity.console.summarizeRequest(httpOp.request,System.out,cycleValue);
+                if (httpOp != null) {
+                    httpActivity.console.summarizeRequest("ERRORED REQUEST", e, httpOp.request, System.out, cycleValue,
+                            System.nanoTime());
                 } else {
                     System.out.println("---- REQUEST was null");
                 }
             }
+            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(), e);
+        } finally {
         }
 
         int tries = 0;
@@ -123,7 +123,7 @@ public class HttpAction implements SyncAction {
                 }
                 if (httpActivity.isDiagnosticMode()) {
                     if (response!=null) {
-                        httpActivity.console.summarizeResponse(response,System.out,cycleValue,nanos);
+                        httpActivity.console.summarizeResponseChain(null, response, System.out, cycleValue, nanos);
                     } else {
                         System.out.println("---- RESPONSE was null");
                     }

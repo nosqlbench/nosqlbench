@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.LongFunction;
 
 public class ReadyHttpOp implements LongFunction<HttpOp> {
@@ -69,27 +68,29 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
             builder.uri(uri);
         }
 
-        Set<String> headers = cmd.keySet();
-        for (String header : headers) {
-            if (header.charAt(0) >= 'A' && header.charAt(0) <= 'Z') {
-                builder.header(header, cmd.remove(header));
-            } else {
-                throw new BasicError("HTTP request parameter '" + header + "' was not recognized as a basic request parameter, and it is not capitalized to indicate that it is a header.");
-            }
-        }
-
         String ok_status = cmd.remove("ok-status");
         String ok_body = cmd.remove("ok-body");
 
         String timeoutStr = cmd.remove("timeout");
-        if (timeoutStr!=null) {
+        if (timeoutStr != null) {
             builder.timeout(Duration.of(Long.parseLong(timeoutStr), ChronoUnit.MILLIS));
         }
 
-        if (cmd.size()>0) {
-            throw new BasicError("Some provided request fields were not used: " + cmd.toString());
+        // At this point, the only things left in the list must be headers,
+        // but we check them for upper-case conventions as a sanity check for the user
+        for (String headerName : cmd.keySet()) {
+            if (headerName.charAt(0) >= 'A' && headerName.charAt(0) <= 'Z') {
+                String headerValue = cmd.get(headerName);
+                builder = builder.header(headerName, headerValue);
+            } else {
+                throw new BasicError("HTTP request parameter '" + headerName + "' was not recognized as a basic request parameter, and it is not capitalized to indicate that it is a header.");
+            }
         }
-
+//        cmd.clear();
+//        if (cmd.size()>0) {
+//            throw new BasicError("Some provided request fields were not used: " + cmd.toString());
+//        }
+//
         HttpRequest request = builder.build();
         return new HttpOp(request, ok_status, ok_body);
     }

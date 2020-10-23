@@ -14,9 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.http.HttpClient;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Function;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
@@ -45,7 +42,6 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         this.activityDef = activityDef;
     }
 
-
     @Override
     public void initActivity() {
         super.initActivity();
@@ -65,15 +61,18 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
-        String[] diag = getParams().getOptionalString("diag").orElse("").split(",");
-        Set<String> diags = new HashSet<String>(Arrays.asList(diag));
-        this.console = new HttpConsoleFormats(diags);
+
+        this.console = getParams().getOptionalString("diag")
+                .map(s -> HttpConsoleFormats.apply(s, this.console))
+                .orElseGet(() -> HttpConsoleFormats.apply(null, null));
+
         this.diagnosticsEnabled = console.isDiagnosticMode();
+
         this.timeout = getParams().getOptionalLong("timeout").orElse(Long.MAX_VALUE);
 
         getParams().getOptionalString("client_scope")
-            .map(ClientScope::valueOf)
-            .ifPresent(this::setClientScope);
+                .map(ClientScope::valueOf)
+                .ifPresent(this::setClientScope);
 
     }
 
@@ -104,14 +103,14 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
     public HttpClient newClient() {
         HttpClient.Builder builder = HttpClient.newBuilder();
-        getParams().getOptionalString("follow_redirects")
+        HttpClient.Redirect follow_redirects = getParams().getOptionalString("follow_redirects")
                 .map(String::toUpperCase)
                 .map(HttpClient.Redirect::valueOf)
                 .map(r -> {
                     logger.debug("follow_redirects=>" + r);
                     return r;
-                })
-                .ifPresent(builder::followRedirects);
+                }).orElse(HttpClient.Redirect.NORMAL);
+        builder = builder.followRedirects(follow_redirects);
         return builder.build();
     }
 

@@ -76,7 +76,9 @@ public class MultiMapLookup<V> implements Map<String, V> {
 
     @Override
     public V remove(Object key) {
-        throw immutable();
+        V result = get(key);
+        maps.stream().forEach(m -> m.remove(String.valueOf(key)));
+        return result;
     }
 
     @Override

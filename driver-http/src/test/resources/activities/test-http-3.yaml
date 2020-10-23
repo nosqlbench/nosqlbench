@@ -1,8 +1,10 @@
 # A list of named statements with variable fields and specific ratios:
 statements:
-  - s1: http://google.com/search?query={query}
+  - s1: "http://google.com/search?query={query}"
     ratio: 3
-  - s2: https://www.amazon.com/s?k={query}
+  - s2: "https://www.amazon.com/s?k={query}"
     ratio: 2
 bindings:
-  query: WeightedStrings('function generator;backup generator;static generator');
+  query: >
+    WeightedStrings('function generator;backup generator;static generator');
+    URLEncode();
