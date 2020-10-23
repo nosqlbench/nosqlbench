@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.core.bindings;
 
+import io.nosqlbench.nb.spi.Named;
 import io.nosqlbench.virtdata.lang.ast.Expression;
 import io.nosqlbench.virtdata.lang.ast.FunctionCall;
 import io.nosqlbench.virtdata.lang.parser.VirtDataDSL;
@@ -106,7 +107,7 @@ public interface VirtDataFunctionLibrary extends Named {
             case 0:
                 return Optional.empty();
             case 1:
-                return Optional.of(DataMapperFunctionMapper.<T>map(resolvedFunctions.get(0).getFunctionObject()));
+                return Optional.of(DataMapperFunctionMapper.map(resolvedFunctions.get(0).getFunctionObject()));
             default:
                 throw new RuntimeException(
                         "Found " + resolvedFunctions.size() +

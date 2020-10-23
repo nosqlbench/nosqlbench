@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.core.bindings;
+package io.nosqlbench.nb.spi;
 
 public interface Named {
     /**

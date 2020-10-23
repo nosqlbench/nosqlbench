@@ -18,15 +18,15 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.util.Named;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.util.SimpleServiceLoader;
+import io.nosqlbench.nb.spi.Named;
 
 import java.util.function.IntPredicate;
 
 public interface ExperimentalResultFilterType extends Named {
 
-    public static SimpleServiceLoader<ExperimentalResultFilterType> FINDER =
+    SimpleServiceLoader<ExperimentalResultFilterType> FINDER =
             new SimpleServiceLoader<>(ExperimentalResultFilterType.class);
 
     default IntPredicateDispenser getFilterDispenser(Activity activity) {
@@ -41,7 +41,7 @@ public interface ExperimentalResultFilterType extends Named {
 
     IntPredicate getIntPredicate(SimpleConfig conf);
 
-    public static class StaticDispenser implements IntPredicateDispenser {
+    class StaticDispenser implements IntPredicateDispenser {
 
         private final IntPredicate predicate;
 

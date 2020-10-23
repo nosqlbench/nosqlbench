@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
-import io.nosqlbench.engine.api.util.Named;
 import io.nosqlbench.engine.api.util.SimpleServiceLoader;
+import io.nosqlbench.nb.spi.Named;
 
 public interface ResultValueFilterType extends Named {
 
