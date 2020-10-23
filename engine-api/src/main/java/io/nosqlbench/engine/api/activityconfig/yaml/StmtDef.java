@@ -57,10 +57,21 @@ public class StmtDef implements OpTemplate {
     }
 
     @Override
-    public <T> Map<String,T> getParamsAsValueType(Class<? extends T> type) {
-        MultiMapLookup<Object> lookup =  new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
-        Map<String,T> map = new LinkedHashMap<>();
-        lookup.forEach((k,v)->map.put(k,type.cast(v)));
+    public <T> Map<String, T> getParamsAsValueType(Class<? extends T> type) {
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        Map<String, T> map = new LinkedHashMap<>();
+        //TODO put type guard around casting below
+        for (String pname : lookup.keySet()) {
+            Object object = lookup.get(pname);
+            if (type.isAssignableFrom(object.getClass())) {
+                map.put(pname, type.cast(object));
+            } else {
+                throw new RuntimeException("With param named '" + pname + "" +
+                        "' You can't assign an object of type '" + object.getClass().getSimpleName() + "" +
+                        "' to '" + type.getSimpleName() + "'");
+            }
+        }
+//        lookup.forEach((k,v)->map.put(k,type.cast(v)));
         return map;
     }
 
