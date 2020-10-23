@@ -4,19 +4,15 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.TupleType;
 import com.datastax.driver.core.TupleValue;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.core.config.ConfigAware;
-import io.nosqlbench.virtdata.core.config.ConfigModel;
-import io.nosqlbench.virtdata.core.config.MutableConfigModel;
+import io.nosqlbench.nb.api.config.ConfigAware;
+import io.nosqlbench.nb.api.config.ConfigModel;
+import io.nosqlbench.nb.api.config.MutableConfigModel;
 
-import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
-import java.util.regex.Pattern;
 
 /**
  * Temporary function to test a specific nested type. This should be replaced

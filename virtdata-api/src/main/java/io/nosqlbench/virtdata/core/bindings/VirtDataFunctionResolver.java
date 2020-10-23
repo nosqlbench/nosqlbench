@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core.bindings;
 
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.core.config.ConfigAware;
+import io.nosqlbench.nb.api.config.ConfigAware;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -64,10 +64,7 @@ public class VirtDataFunctionResolver {
                             return false;
                         }
                         Class<?> componentType = ctypes[ctypes.length - 1].getComponentType();
-                        if (parameterTypes.length >= ctypes.length && !ClassUtils.isAssignable(parameterTypes[ctypes.length - 1], componentType, true)) {
-                            return false;
-                        }
-                        return true;
+                        return parameterTypes.length < ctypes.length || ClassUtils.isAssignable(parameterTypes[ctypes.length - 1], componentType, true);
                     } else {
                         if (parameterTypes.length!=ctypes.length) {
                             return false;

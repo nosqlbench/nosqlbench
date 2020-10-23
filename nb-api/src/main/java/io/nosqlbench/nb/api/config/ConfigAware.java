@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.core.config;
+package io.nosqlbench.nb.api.config;
 
 import java.util.Map;
 

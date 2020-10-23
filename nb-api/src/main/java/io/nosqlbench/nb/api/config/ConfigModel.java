@@ -1,17 +1,17 @@
-package io.nosqlbench.virtdata.core.config;
+package io.nosqlbench.nb.api.config;
 
 import java.util.List;
 
 public interface ConfigModel {
     List<Element> getElements();
 
-    public static class Element {
+    class Element {
         public final String name;
         public final Class<?> type;
 
         public Element(String name, Class<?> type) {
             this.name = name;
-            this.type =type;
+            this.type = type;
         }
     }
 }
