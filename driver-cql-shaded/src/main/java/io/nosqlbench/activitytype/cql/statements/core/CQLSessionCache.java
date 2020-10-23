@@ -164,19 +164,6 @@ public class CQLSessionCache implements Shutdownable {
                 })
                 .map(CQLOptions::speculativeFor)
                 .ifPresent(builder::withSpeculativeExecutionPolicy);
-        } else {
-            logger.warn(
-                "The speculative behavior is changing:\n" +
-                    "If the cql speculative parameter is not provided, it uses a default " +
-                    "speculative\n" +
-                    "policy, as in speculative=default, rather than leaving speculative off.\n" +
-                    "If you want to keep this behavior or silence this warning, add one of\n" +
-                    "speculative=none OR speculative=default to your activity params.\n" +
-                    "This release, the default is speculative=default if the parameter is not specified.\n" +
-                    "After 10/01/2020, the default will be speculative=none if the parameter is not specified.\n" +
-                    "Note: speculative=default is the same as speculative=p99.0:5:15000\n" +
-                    "which is considered aggressive for some systems. This warning will go away after 10/01/2020.\n");
-            builder.withSpeculativeExecutionPolicy(CQLOptions.defaultSpeculativePolicy());
         }
 
         activityDef.getParams().getOptionalString("socketoptions")
