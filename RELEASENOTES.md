@@ -1,2 +1,19 @@
-- 754ef981 (HEAD -> main) completely disable fragile epoll in cql
-- 3998c8f0 bump epoll version to fix linking error
+- f702736f (HEAD -> main) flatten maps in OpTemplates to allow map consumers
+- 4a9fa81b pull Named service up
+- 574a89e7 pull ConfigAware api up
+- 71195d0a http release fixes
+- 3fa89ebc partial work for --args
+- 262df571 improved error messages
+- 453b1b2c extract ratio from optemplate before construction
+- dcf458c4 annotation progress
+- 7017b6cd add SplitLongs function
+- 0758670f add nb clients module
+- 1dbf36c4 add grafana annotation client
+- 120d9761 remove warning for speculative defaults
+- c78f1e92 typos and minor fixes
+- f3f1b8f4 add annotations design sketch
+- 394580d6 more idea sketches
+- 9e5972f5 comment cleanup
+- 06edfcc9 fix NPE when binding has undefined value
+- 510746b7 improve mismatched scenario name feedback
+- 735b32e1 add illustrative test for EpochMillisToJavaLocalDate
