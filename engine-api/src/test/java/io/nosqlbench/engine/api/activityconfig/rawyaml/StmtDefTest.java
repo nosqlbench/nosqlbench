@@ -18,18 +18,22 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.*;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RawStmtDefDefsTest {
+public class StmtDefTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(RawStmtDefDefsTest.class);
+    private final static Logger logger = LoggerFactory.getLogger(StmtDefTest.class);
 
     @Test
     public void testLayering() {
@@ -72,6 +76,21 @@ public class RawStmtDefDefsTest {
         OpTemplate sdef1 = assys.get(0);
         assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
         assertThat(assys.get(0).getStmt()).isEqualTo("s1");
+    }
+
+    @Test
+    public void testConsumableMapState() {
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        List<StmtsDoc> docs = all.getStmtDocs();
+        StmtsDoc block1 = docs.get(1);
+        List<OpTemplate> stmts = block1.getStmts();
+        OpTemplate stmt0 = stmts.get(0);
+        OpTemplate stmt1 = stmts.get(1);
+        assertThat(stmt0.getParams()).containsAllEntriesOf(Map.of("timeout", 23423, "foobar", "baz"));
+        assertThat(stmt1.getParams()).containsAllEntriesOf(Map.of("timeout", 23423, "foobar", "baz"));
+        stmt0.removeParamOrDefault("timeout", 23423);
+        assertThat(stmt0.getParams()).containsAllEntriesOf(Map.of("foobar", "baz"));
+        assertThat(stmt1.getParams()).containsAllEntriesOf(Map.of("timeout", 23423, "foobar", "baz"));
     }
 
 }

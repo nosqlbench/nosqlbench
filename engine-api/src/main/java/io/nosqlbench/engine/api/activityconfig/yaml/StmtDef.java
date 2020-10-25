@@ -30,10 +30,16 @@ public class StmtDef implements OpTemplate {
 
     private final RawStmtDef rawStmtDef;
     private final StmtsBlock block;
+    private final LinkedHashMap<String, Object> params;
+    private final LinkedHashMap<String, String> bindings;
+    private final LinkedHashMap<String, String> tags;
 
     public StmtDef(StmtsBlock block, RawStmtDef rawStmtDef) {
         this.block = block;
         this.rawStmtDef = rawStmtDef;
+        this.params = composeParams();
+        this.bindings = composeBindings();
+        this.tags = composeTags();
     }
 
     @Override
@@ -47,43 +53,52 @@ public class StmtDef implements OpTemplate {
     }
 
     @Override
-    public Map<String, String> getBindings() {
-        return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
+    public LinkedHashMap<String, String> getBindings() {
+        return bindings;
+//        return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
+    }
+
+    private LinkedHashMap<String, String> composeBindings() {
+        MultiMapLookup<String> lookup = new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
+        return new LinkedHashMap<>(lookup);
     }
 
     @Override
     public Map<String, Object> getParams() {
-        return new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        return params;
+    }
+
+    private LinkedHashMap<String, Object> composeParams() {
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        LinkedHashMap<String, Object> params = new LinkedHashMap<>(lookup);
+        return params;
     }
 
     @Override
     public <T> Map<String, T> getParamsAsValueType(Class<? extends T> type) {
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
         Map<String, T> map = new LinkedHashMap<>();
-        //TODO put type guard around casting below
-        for (String pname : lookup.keySet()) {
-            Object object = lookup.get(pname);
+        for (String pname : getParams().keySet()) {
+            Object object = getParams().get(pname);
             if (type.isAssignableFrom(object.getClass())) {
                 map.put(pname, type.cast(object));
             } else {
                 throw new RuntimeException("With param named '" + pname + "" +
                         "' You can't assign an object of type '" + object.getClass().getSimpleName() + "" +
-                        "' to '" + type.getSimpleName() + "'");
+                        "' to '" + type.getSimpleName() + "'. Maybe the YAML format is suggesting the wrong type.");
             }
         }
-//        lookup.forEach((k,v)->map.put(k,type.cast(v)));
         return map;
     }
 
     @Override
     public <V> V removeParamOrDefault(String name, V defaultValue) {
         Objects.requireNonNull(defaultValue);
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
-        if (!lookup.containsKey(name)) {
+
+        if (!getParams().containsKey(name)) {
             return defaultValue;
         }
 
-        Object value = lookup.remove(name);
+        Object value = getParams().remove(name);
 
         try {
             return (V) defaultValue.getClass().cast(value);
@@ -96,12 +111,11 @@ public class StmtDef implements OpTemplate {
     @SuppressWarnings("unchecked")
     public <V> V getParamOrDefault(String name, V defaultValue) {
         Objects.requireNonNull(defaultValue);
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
 
-        if (!lookup.containsKey(name)) {
+        if (!getParams().containsKey(name)) {
             return defaultValue;
         }
-        Object value = lookup.get(name);
+        Object value = getParams().get(name);
         try {
             return (V) defaultValue.getClass().cast(value);
         } catch (Exception e) {
@@ -111,10 +125,16 @@ public class StmtDef implements OpTemplate {
 
     @Override
     public <V> V getParam(String name, Class<? extends V> type) {
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
-        Object object = lookup.get(name);
-        V value = type.cast(object);
-        return value;
+        Object object = getParams().get(name);
+        if (object == null) {
+            return null;
+        }
+        if (type.isAssignableFrom(object.getClass())) {
+            V value = type.cast(object);
+            return value;
+        }
+        throw new RuntimeException("Unable to cast type " + object.getClass().getSimpleName() + " to" +
+                " " + type.getSimpleName() + ". Perhaps the yaml format is suggesting the wrong type.");
     }
 
     @Override
@@ -123,10 +143,8 @@ public class StmtDef implements OpTemplate {
         if (type.isPrimitive()) {
             throw new RuntimeException("Do not use primitive types for the target class here. For example, Boolean.class is accepted, but boolean.class is not.");
         }
-        // TODO: add warning here if primitive types are not allowed
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
-        if (lookup.containsKey(name)) {
-            Object object = lookup.get(name);
+        if (getParams().containsKey(name)) {
+            Object object = getParams().get(name);
             if (object == null) {
                 return Optional.empty();
             }
@@ -148,7 +166,11 @@ public class StmtDef implements OpTemplate {
 
     @Override
     public Map<String, String> getTags() {
-        return new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags());
+        return tags;
+    }
+
+    private LinkedHashMap<String, String> composeTags() {
+        return new LinkedHashMap<>(new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags()));
     }
 
     @Override
