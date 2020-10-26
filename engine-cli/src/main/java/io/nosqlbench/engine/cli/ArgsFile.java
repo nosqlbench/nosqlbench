@@ -19,19 +19,19 @@ import java.util.stream.Collectors;
  *
  * <H1>ArgsFile Selection</H1>
  *
- * During processing, any occurence of '-argsfile' selects the active argsfile and loads
- * it into the command line in place of the '-argsfile' argument. By default the args file
+ * During processing, any occurence of '--argsfile' selects the active argsfile and loads
+ * it into the command line in place of the '--argsfile' argument. By default the args file
  * will be loaded if it exists, and a warning will be given if it does not.
  *
- * The '-argsfile-required &lt;somepath&gt;' version will throw an error if the args file
+ * The '--argsfile-required &lt;somepath&gt;' version will throw an error if the args file
  * is not present, but it will not report any warnings or details otherwise.
  *
- * The `-argsfile-optional &lt;somepath&gt; version will not throw an error if the args
+ * The `--argsfile-optional &lt;somepath&gt; version will not throw an error if the args
  * file is not present, and it will not report any warnings or details otherwise.
  *
  * A prefix command line can be given to ArgsFile to pre-load any settings. In this way
  * it is possible to easily provide a default args file which will be loaded. For example,
- * A prefix command of '-argsfile-optional &lt;somepath&gt;' will load options if they are
+ * A prefix command of '--argsfile-optional &lt;somepath&gt;' will load options if they are
  * available in the specified file, but will otherwise provide no feedback to the user.
  *
  * <H1>ArgsFile Injection</H1>
@@ -92,29 +92,29 @@ public class ArgsFile {
         while (commandline.peekFirst() != null) {
             String arg = commandline.peekFirst();
             switch (arg) {
-                case "-argsfile":
+                case "--argsfile":
                     commandline.removeFirst();
                     String argspath = readWordOrThrow(commandline, "path to an args file");
                     setArgsFile(argspath, Selection.WarnIfMissing);
                     commandline = loadArgs(this.argsPath, Selection.WarnIfMissing, commandline);
                     break;
-                case "-argsfile-required":
+                case "--argsfile-required":
                     commandline.removeFirst();
                     String argspathRequired = readWordOrThrow(commandline, "path to an args file");
                     setArgsFile(argspathRequired, Selection.ErrorIfMissing);
                     commandline = loadArgs(this.argsPath, Selection.ErrorIfMissing, commandline);
                     break;
-                case "-argsfile-optional":
+                case "--argsfile-optional":
                     commandline.removeFirst();
                     String argspathOptional = readWordOrThrow(commandline, "path to an args file");
                     setArgsFile(argspathOptional, Selection.IgnoreIfMissing);
                     commandline = loadArgs(this.argsPath, Selection.IgnoreIfMissing, commandline);
                     break;
-                case "-pin":
+                case "--pin":
                     commandline.removeFirst();
                     commandline = pinArg(commandline);
                     break;
-                case "-unpin":
+                case "--unpin":
                     commandline.removeFirst();
                     commandline = unpinArg(commandline);
                     break;

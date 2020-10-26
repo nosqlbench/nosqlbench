@@ -26,10 +26,10 @@ public class NBCLIOptions {
 
     // Options which may contextualize other CLI options or commands.
     // These must be parsed first
-    private static final String ARGS_FILE = "-argsfile";
+    private static final String ARGS_FILE = "--argsfile";
     private static final String ARGS_FILE_DEFAULT = "$HOME/.nosqlbench/argsfile";
-    private static final String ARGS_PIN = "-pin";
-    private static final String ARGS_UNPIN = "-unpin";
+    private static final String ARGS_PIN = "--pin";
+    private static final String ARGS_UNPIN = "--unpin";
 
     private static final String INCLUDE = "--include";
     private static final String METRICS_PREFIX = "--metrics-prefix";
@@ -164,7 +164,7 @@ public class NBCLIOptions {
 
     private LinkedList<String> parseGlobalOptions(String[] args) {
         ArgsFile argsfile = new ArgsFile();
-        argsfile.preload("-argsfile-optional", ARGS_FILE_DEFAULT);
+        argsfile.preload("--argsfile-optional", ARGS_FILE_DEFAULT);
 
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
