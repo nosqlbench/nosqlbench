@@ -163,7 +163,8 @@ public class NBCLIOptions {
     }
 
     private LinkedList<String> parseGlobalOptions(String[] args) {
-        ArgsFile argsfile = new ArgsFile(ARGS_FILE_DEFAULT);
+        ArgsFile argsfile = new ArgsFile();
+        argsfile.preload("-argsfile-optional", ARGS_FILE_DEFAULT);
 
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
@@ -188,18 +189,9 @@ public class NBCLIOptions {
 
             switch (word) {
                 case ARGS_FILE:
-                    arglist.removeFirst();
-                    String argsfileSpec = readWordOrThrow(arglist, "argsfile");
-                    argsfile = new ArgsFile(argsfileSpec);
-                    arglist = argsfile.doArgsFile(argsfileSpec, arglist);
-                    break;
                 case ARGS_PIN:
-                    arglist.removeFirst();
-                    arglist = argsfile.pin(arglist);
-                    break;
                 case ARGS_UNPIN:
-                    arglist.removeFirst();
-                    arglist = argsfile.unpin(arglist);
+                    arglist = argsfile.process(arglist);
                     break;
                 case ANNOTATE_EVENTS:
                     arglist.removeFirst();
