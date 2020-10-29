@@ -157,7 +157,7 @@ public class DockerMetricsManager {
 
         logger.info("searching for graphite exporter container ip");
 
-        ContainerNetworkSettings settings = dh.searchContainer(name, null).getNetworkSettings();
+        ContainerNetworkSettings settings = dh.searchContainer(name, null, tag).getNetworkSettings();
         Map<String, ContainerNetwork> networks = settings.getNetworks();
         String ip = null;
         for (String key : networks.keySet()) {

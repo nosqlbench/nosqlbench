@@ -28,9 +28,9 @@ public class DockerHelper {
     private static final String DOCKER_HOST_ADDR = "unix:///var/run/docker.sock";
 //    private Client rsClient = ClientBuilder.newClient();
 
-    private DockerClientConfig config;
-    private DockerClient dockerClient;
-    private Logger logger = LoggerFactory.getLogger(DockerHelper.class);
+    private final DockerClientConfig config;
+    private final DockerClient dockerClient;
+    private final Logger logger = LoggerFactory.getLogger(DockerHelper.class);
 
     public DockerHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
@@ -56,7 +56,7 @@ public class DockerHelper {
         };
          */
 
-        Container containerId = searchContainer(name, reload);
+        Container containerId = searchContainer(name, reload, tag);
         if (containerId != null) {
             logger.debug("container is already up with the id: " + containerId.getId());
             return null;
@@ -65,15 +65,20 @@ public class DockerHelper {
         Info info = dockerClient.infoCmd().exec();
         dockerClient.buildImageCmd();
 
-        String term = IMG.split("/")[1];
+//        String term = IMG+":"+tag;
+
+//        String term = IMG.split("/")[1];
         //List<SearchItem> dockerSearch = dockerClient.searchImagesCmd(term).exec();
-        List<Image> dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+        List<Image> dockerList = dockerClient
+                .listImagesCmd()
+                .withImageNameFilter(IMG + ":" + tag)
+                .exec();
         if (dockerList.size() == 0) {
             dockerClient.pullImageCmd(IMG)
                     .withTag(tag)
                     .exec(new PullImageResultCallback()).awaitSuccess();
 
-            dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+            dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG + ":" + tag).exec();
             if (dockerList.size() == 0) {
                 logger.error(String.format("Image %s not found, unable to automatically pull image." +
                                 " Check `docker images`",
@@ -178,7 +183,7 @@ public class DockerHelper {
         return false;
     }
 
-    public Container searchContainer(String name, String reload) {
+    public Container searchContainer(String name, String reload, String tag) {
 
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("running"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
