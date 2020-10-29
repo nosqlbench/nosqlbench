@@ -4,11 +4,15 @@ import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,26 +23,22 @@ import java.util.stream.Collectors;
  */
 public class NBCLIOptions {
 
-    private final static String userHome = System.getProperty("user.home");
-    private final static Path defaultOptFile = Path.of(userHome, ".nosqlbench/options");
+    private final static Logger logger = LoggerFactory.getLogger("OPTIONS");
 
-    private final static Logger logger = LoggerFactory.getLogger(NBCLIOptions.class);
-
-    // Options which may contextualize other CLI options or commands.
-    // These must be parsed first
-    private static final String ARGS_FILE = "--argsfile";
-    private static final String ARGS_FILE_DEFAULT = "$HOME/.nosqlbench/argsfile";
-    private static final String ARGS_PIN = "--pin";
-    private static final String ARGS_UNPIN = "--unpin";
-
+    private final static String NB_STATE_DIR = "--statedir";
+    private final static String NB_STATEDIR_PATHS = "$NBSTATEDIR:$PWD/.nosqlbench:$HOME/.nosqlbench";
+    public static final String ARGS_FILE_DEFAULT = "$NBSTATEDIR/argsfile";
     private static final String INCLUDE = "--include";
+
+    private final static String userHome = System.getProperty("user.home");
+
+
     private static final String METRICS_PREFIX = "--metrics-prefix";
 
     //    private static final String ANNOTATE_TO_GRAFANA = "--grafana-baseurl";
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
     private static final String DEFAULT_ANNOTATORS = "all";
-
 
     // Discovery
     private static final String HELP = "--help";
@@ -91,6 +91,7 @@ public class NBCLIOptions {
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
 
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+    public static final String NBSTATEDIR = "NBSTATEDIR";
 
     private final LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
@@ -130,13 +131,16 @@ public class NBCLIOptions {
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
     private int hdr_digits = 4;
-    private String docker_grafana_tag = "7.0.1";
+    private String docker_grafana_tag = "7.2.2";
     private boolean showStackTraces = false;
     private boolean compileScript = false;
     private String scriptFile = null;
     private String[] annotateEvents = new String[]{"ALL"};
     private String dockerMetricsHost;
     private String annotatorsConfig = "";
+    private String statedirs = NB_STATEDIR_PATHS;
+    private Path statepath;
+    private List<String> statePathAccesses = new ArrayList<>();
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -163,8 +167,6 @@ public class NBCLIOptions {
     }
 
     private LinkedList<String> parseGlobalOptions(String[] args) {
-        ArgsFile argsfile = new ArgsFile();
-        argsfile.preload("--argsfile-optional", ARGS_FILE_DEFAULT);
 
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
@@ -175,7 +177,8 @@ public class NBCLIOptions {
             return arglist;
         }
 
-        // Preprocess --include regardless of position
+        // Process --include and --statedir, separately first
+        // regardless of position
         LinkedList<String> nonincludes = new LinkedList<>();
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
@@ -188,9 +191,53 @@ public class NBCLIOptions {
             }
 
             switch (word) {
-                case ARGS_FILE:
-                case ARGS_PIN:
-                case ARGS_UNPIN:
+                case NB_STATE_DIR:
+                    arglist.removeFirst();
+                    this.statedirs = readWordOrThrow(arglist, "nosqlbench global state directory");
+                    break;
+                case INCLUDE:
+                    arglist.removeFirst();
+                    String include = readWordOrThrow(arglist, "path to include");
+                    wantsToIncludePaths.add(include);
+                    break;
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+        this.statedirs = (this.statedirs != null ? this.statedirs : NB_STATEDIR_PATHS);
+        this.setStatePath();
+
+        arglist = nonincludes;
+        nonincludes = new LinkedList<>();
+
+        // Now that statdirs is settled, auto load argsfile if it is present
+        NBCLIArgsFile argsfile = new NBCLIArgsFile();
+        argsfile.reserved(NBCLICommandParser.RESERVED_WORDS);
+        argsfile.preload("--argsfile-optional", ARGS_FILE_DEFAULT);
+        arglist = argsfile.process(arglist);
+
+        // Parse all --argsfile... and other high level options
+
+        while (arglist.peekFirst() != null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+
+            switch (word) {
+                // These options modify other options. They should be processed early.
+                case NBCLIArgsFile.ARGS_FILE:
+                case NBCLIArgsFile.ARGS_FILE_OPTIONAL:
+                case NBCLIArgsFile.ARGS_FILE_REQUIRED:
+                case NBCLIArgsFile.ARGS_PIN:
+                case NBCLIArgsFile.ARGS_UNPIN:
+                    if (this.statepath == null) {
+                        setStatePath();
+                    }
                     arglist = argsfile.process(arglist);
                     break;
                 case ANNOTATE_EVENTS:
@@ -198,18 +245,9 @@ public class NBCLIOptions {
                     String toAnnotate = readWordOrThrow(arglist, "annotated events");
                     annotateEvents = toAnnotate.split("\\\\s*,\\\\s*");
                     break;
-//                case ANNOTATE_TO_GRAFANA:
-//                    arglist.removeFirst();
-//                    grafanaEndpoint = readWordOrThrow(arglist,"grafana API endpoint");
-//                    break;
                 case ANNOTATORS_CONFIG:
                     arglist.removeFirst();
                     this.annotatorsConfig = readWordOrThrow(arglist, "annotators config");
-                    break;
-                case INCLUDE:
-                    arglist.removeFirst();
-                    String include = readWordOrThrow(arglist, "path to include");
-                    wantsToIncludePaths.add(include);
                     break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -245,11 +283,55 @@ public class NBCLIOptions {
                     break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
-
             }
-
         }
+
         return nonincludes;
+    }
+
+    private Path setStatePath() {
+        if (statePathAccesses.size() > 0) {
+            throw new BasicError("The statedir must be set before it is used by other\n" +
+                    " options. If you want to change the statedir, be sure you do it before\n" +
+                    " dependent options. These parameters were called before this --statedir:\n" +
+                    statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
+        }
+        if (this.statepath != null) {
+            return this.statepath;
+        }
+
+        List<String> paths = Environment.INSTANCE.interpolate(":", statedirs);
+        Path selected = null;
+
+        for (String pathName : paths) {
+            Path path = Path.of(pathName);
+            if (Files.exists(path)) {
+                if (Files.isDirectory(path)) {
+                    selected = path;
+                    break;
+                } else {
+                    logger.warn("possible state dir path is not a directory: '" + path.toString() + "'");
+                }
+            }
+        }
+        if (selected == null) {
+            selected = Path.of(paths.get(0));
+        }
+
+        if (!Files.exists(selected)) {
+            try {
+                Files.createDirectories(
+                        selected,
+                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
+                );
+            } catch (IOException e) {
+                throw new BasicError("Could not create state directory at '" + selected.toString() + "': " + e.getMessage());
+            }
+        }
+
+        Environment.INSTANCE.put(NBSTATEDIR, selected.toString());
+
+        return selected;
     }
 
     private void parseAllOptions(String[] args) {
@@ -565,7 +647,7 @@ public class NBCLIOptions {
                 spec.indicatorMode = IndicatorMode.logonly;
             } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
                 logger.info("Command line includes script calls, so progress data on console is " +
-                    "suppressed.");
+                        "suppressed.");
                 spec.indicatorMode = IndicatorMode.logonly;
             }
         }
@@ -577,7 +659,7 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
             if (files.contains(s)) {
                 logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                    "in the first matching config. Reorder your options if you need to control this.");
+                        "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
@@ -688,8 +770,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                        LOG_HISTOGRAMS +
-                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                            LOG_HISTOGRAMS +
+                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -714,7 +796,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

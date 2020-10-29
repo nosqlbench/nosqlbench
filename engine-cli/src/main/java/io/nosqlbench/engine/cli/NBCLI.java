@@ -39,10 +39,10 @@ import java.util.stream.Collectors;
 
 public class NBCLI {
 
-    private static final Logger logger = LoggerFactory.getLogger(NBCLI.class);
+    private static final Logger logger = LoggerFactory.getLogger("NBCLI");
     private static final Logger EVENTS = LoggerFactory.getLogger("EVENTS");
-    private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
+    private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
     private final String commandName;
 
@@ -70,36 +70,43 @@ public class NBCLI {
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
 
         // Global only processing
+        if (args.length == 0) {
+            System.out.println(loadHelpFile("commandline.md"));
+            System.exit(0);
+        }
 
+        boolean dockerMetrics = globalOptions.wantsDockerMetrics();
+        String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
+        int mOpts = (dockerMetrics ? 1 : 0) + (dockerMetricsAt != null ? 1 : 0) + (reportGraphiteTo != null ? 1 : 0);
+        if (mOpts > 1) {
+            throw new BasicError("You have multiple conflicting options which attempt to set\n" +
+                    " the destination for metrics and annotations. Please select only one of\n" +
+                    " --docker-metrics, --docker-metrics-at <addr>, or --report-graphite-to <addr>\n" +
+                    " For more details, see run 'nb help docker-metrics'");
+        }
 
-        if (globalOptions.wantsDockerMetrics()) {
+        String metricsAddr = null;
+
+        if (dockerMetrics) {
+            // Setup docker stack for local docker metrics
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
             Map<String, String> dashboardOptions = Map.of(
-                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag()
+                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag()
             );
             dmh.startMetrics(dashboardOptions);
-
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             logger.warn(warn);
-            if (reportGraphiteTo != null) {
-                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
-                                " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                                "usually only one of the two is configured.",
-                        reportGraphiteTo));
-            } else {
-                logger.info("Setting graphite reporting to localhost");
-                reportGraphiteTo = "localhost:9109";
-            }
+            metricsAddr = "localhost";
+        } else if (dockerMetricsAt != null) {
+            metricsAddr = dockerMetricsAt;
+        }
 
-            if (globalOptions.getAnnotatorsConfig() != null) {
-                logger.warn("Docker metrics and separate annotations" +
-                        "are configured (both --docker-metrics and --annotations).");
-            } else {
-                Annotators.init("grafana{http://localhost:3000/}");
-            }
+        if (metricsAddr != null) {
+            reportGraphiteTo = metricsAddr + ":9109";
+            Annotators.init("{type:'grafana',url:'http://" + metricsAddr + ":3000/'}");
         }
 
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
@@ -275,13 +282,6 @@ public class NBCLI {
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.wantsConsoleLogLevel());
 
-        if (options.getCommands().
-
-                size() == 0) {
-            System.out.println(loadHelpFile("commandline.md"));
-            System.exit(0);
-        }
-
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(
@@ -311,8 +311,6 @@ public class NBCLI {
         }
 
 
-        // Execute Scenario!
-
         Level consoleLogLevel = options.wantsConsoleLogLevel();
         Level scenarioLogLevel = Level.toLevel(options.getLogsLevel());
         if (scenarioLogLevel.toInt() > consoleLogLevel.toInt()) {
@@ -320,6 +318,12 @@ public class NBCLI {
         }
 
         Level maxLevel = Level.toLevel(Math.min(consoleLogLevel.toInt(), scenarioLogLevel.toInt()));
+
+        // Execute Scenario!
+        if (options.getCommands().size() == 0) {
+            logger.info("No commands provided. Exiting before scenario.");
+            System.exit(0);
+        }
 
         scenario.addScriptText(scriptData);
         ScriptParams scriptParams = new ScriptParams();
