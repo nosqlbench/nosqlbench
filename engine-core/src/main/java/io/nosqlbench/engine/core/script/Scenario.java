@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
 

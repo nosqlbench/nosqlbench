@@ -35,10 +35,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MetricReporters implements Shutdownable {
     private final static Logger logger = LoggerFactory.getLogger(MetricReporters.class);
-    private static MetricReporters instance = new MetricReporters();
+    private static final MetricReporters instance = new MetricReporters();
 
-    private List<PrefixedRegistry> metricRegistries = new ArrayList<>();
-    private List<ScheduledReporter> scheduledReporters = new ArrayList<>();
+    private final List<PrefixedRegistry> metricRegistries = new ArrayList<>();
+    private final List<ScheduledReporter> scheduledReporters = new ArrayList<>();
 
     private MetricReporters() {
         ShutdownManager.register(this);
@@ -136,7 +136,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters start(int consoleIntervalSeconds, int remoteIntervalSeconds) {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
-            logger.info("starting reporter: " + scheduledReporter);
+            logger.info("starting reporter: " + scheduledReporter.getClass().getSimpleName());
             if (scheduledReporter instanceof ConsoleReporter) {
                 scheduledReporter.start(consoleIntervalSeconds, TimeUnit.SECONDS);
             } else {

@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * A default implementation of an Activity, suitable for building upon.
  */
 public class SimpleActivity implements Activity, ProgressCapable {
-    private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
+    private final static Logger logger = LoggerFactory.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
     private final List<AutoCloseable> closeables = new ArrayList<>();
