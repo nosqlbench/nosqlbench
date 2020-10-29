@@ -76,6 +76,12 @@
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
         </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>virtdata-lib-basics</artifactId>
+        <version>3.12.155-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
 
     </dependencies>
 

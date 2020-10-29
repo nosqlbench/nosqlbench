@@ -1,7 +1,6 @@
 package io.nosqlbench.activitytype.cqld4.statements.rowoperators;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
