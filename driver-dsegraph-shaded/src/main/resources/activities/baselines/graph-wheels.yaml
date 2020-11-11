@@ -1,0 +1,67 @@
+scenarios:
+  default:
+    creategraph: run driver=dsegraph graphname=graph_wheels tags=phase:graph-schema
+    schema: run driver=dsegraph graphname=graph_wheels tags=phase:graph-schema
+    main: run driver==dsegraph graphname=graph_wheels tags=name:main-add cycles=100000
+  devmode: run driver=dsegraph graphname=graph_wheels tags=name:dev-mode
+  prodmode: run driver=dsegraph graphname=graph_wheels tags=name:dev-mode
+
+bindings:
+  sessionid: ToEpochTimeUUID()->java.util.UUID; ToString();
+  deviceid: Add(200000); Div(<<sessons_per_device:10>>); ToEpochTimeUUID()->java.util.UUID; ToString();
+  type: WeightedStrings('phone:10;computer:10;')
+  os: WeightedStrings('android:6;ios:4;linux:2;osx:7;windows:3')
+  osversion: WeightedStrings('nougat:3;oreo:1;jellybean:2;4:1;4c:1;5:1;5c:1;trusty:1;xenial:1;yosemite:1;el capitan:2;sierra:3;high sierra:1;7:1;10:2')
+  ipaddress: Combinations('1;7;0-3;.;0-2;0-2;0-5;.;0-2;0-2;0-5')
+  createdtime: Add(1505256898)
+
+blocks:
+  - name: create-graph
+    tags:
+      phase: create-graph
+    statements:
+      - creategraph: >-
+          system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
+  - name: create-schema
+    tags:
+      phase: graph-schema
+    statements:
+      - graph-schema: >-
+          schema.propertyKey('sessionid').Uuid().ifNotExists().create();
+          schema.propertyKey('deviceid').Uuid().ifNotExists().create();
+          schema.propertyKey('ipaddress').Text().ifNotExists().create();
+          schema.propertyKey('createdtime').Bigint().ifNotExists().create();
+          schema.vertexLabel('session').partitionKey('sessionid').properties('ipaddress', 'deviceid', 'createdtime').ifNotExists().create();
+          schema.propertyKey('type').Text().ifNotExists().create();
+          schema.propertyKey('os').Text().ifNotExists().create();
+          schema.propertyKey('osversion').Text().ifNotExists().create();
+          schema.vertexLabel('device').partitionKey('deviceid').properties('type', 'os', 'osversion').ifNotExists().create();
+          schema.edgeLabel('using').single().connection('session','device').ifNotExists().create();
+        tags:
+          name: graph-schema
+  - name: dev-mode
+    tags:
+      phase: dev-mode
+    statements:
+      - dev-mode: >-
+          schema.config().option('graph.schema_mode').set('Development');
+        tags:
+          name: dev-mode
+  - name: prod-mode
+    tags:
+      phase: prod-mode
+    statements:
+      - prod-mode: >-
+          schema.config().option('graph.schema_mode').set('Production');
+        tags:
+          name: prod-mode
+  - name: main
+    tags:
+     phase: main
+    statements:
+      - main-add: >-
+           device = graph.addVertex(label, 'device','deviceid', {deviceid}, 'type', {type}, 'os', {os},  'osversion', {osversion});
+           session = graph.addVertex(label, 'session', 'sessionid', {sessionid}, 'ipaddress', {ipaddress}, 'deviceid', {deviceid}, 'createdtime', {createdtime});
+           session.addEdge('using', device);
+        tags:
+          name: main-add

@@ -46,6 +46,7 @@
         <module>driver-stdout</module>
         <module>driver-tcp</module>
         <module>driver-http</module>
+        <module>driver-dsegraph-shaded</module>
         <module>driver-cql-shaded</module>
         <module>driver-cqlverify</module>
         <module>driver-web</module>

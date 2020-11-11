@@ -101,6 +101,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-dsegraph-shaded</artifactId>
+            <version>3.12.155-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cql-shaded</artifactId>
             <version>3.12.155-SNAPSHOT</version>
         </dependency>
