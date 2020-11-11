@@ -1,0 +1,25 @@
+tags:
+ type: testtag
+ kind: somekind
+ oevure: bananas
+name: outerblock
+statements:
+  - some foo
+  - some bar
+bindings:
+  bar: set-the-bar
+
+blocks:
+  - name: block1
+    statements:
+      - some foo
+      - some bar
+      - some baz
+    bindings:
+      aleph: null
+    tags:
+      some: tag
+  - name: block2
+    statements:
+      - some baz
+      - some zab
