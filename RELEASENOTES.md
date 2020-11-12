@@ -17,3 +17,5 @@
 - 06edfcc9 fix NPE when binding has undefined value
 - 510746b7 improve mismatched scenario name feedback
 - 735b32e1 add illustrative test for EpochMillisToJavaLocalDate
+- 2390f253 Initial Migration of DSE Graph
+- 2275573c Update Readme
