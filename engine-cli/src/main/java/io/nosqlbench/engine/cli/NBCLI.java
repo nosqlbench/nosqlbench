@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.annotation.Annotator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import org.slf4j.Logger;

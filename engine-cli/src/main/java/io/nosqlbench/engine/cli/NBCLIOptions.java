@@ -108,7 +108,7 @@ public class NBCLIOptions {
     private String wantsMetricsForActivity;
     private String sessionName = "";
     private boolean showScript = false;
-    private Level consoleLevel = Level.WARN;
+    private NBLogLevel consoleLevel = NBLogLevel.WARN;
     private final List<String> histoLoggerConfigs = new ArrayList<>();
     private final List<String> statsLoggerConfigs = new ArrayList<>();
     private final List<String> classicHistoConfigs = new ArrayList<>();
@@ -120,8 +120,8 @@ public class NBCLIOptions {
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
-    private String logsLevel = "INFO";
-    private Map<String, Level> logLevelsOverrides = new HashMap<>();
+    private NBLogLevel logsLevel = NBLogLevel.INFO;
+    private Map<String, String> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
     private boolean wantsScenariosList = false;
@@ -393,7 +393,8 @@ public class NBCLIOptions {
                     break;
                 case LOGS_LEVEL:
                     arglist.removeFirst();
-                    logsLevel = readWordOrThrow(arglist, "a log level");
+                    String loglevel = readWordOrThrow(arglist, "a log level");
+                    this.logsLevel = NBLogLevel.valueOfName(loglevel);
                     break;
                 case LOG_LEVEL_OVERRIDE:
                     arglist.removeFirst();
@@ -464,15 +465,15 @@ public class NBCLIOptions {
                     wantsMarkerTypes = true;
                     break;
                 case DASH_V_INFO:
-                    consoleLevel = Level.INFO;
+                    consoleLevel = NBLogLevel.INFO;
                     arglist.removeFirst();
                     break;
                 case DASH_VV_DEBUG:
-                    consoleLevel = Level.DEBUG;
+                    consoleLevel = NBLogLevel.DEBUG;
                     arglist.removeFirst();
                     break;
                 case DASH_VVV_TRACE:
-                    consoleLevel = Level.TRACE;
+                    consoleLevel = NBLogLevel.TRACE;
                     arglist.removeFirst();
                     break;
                 case WITH_LOGGING_PATTERN:
@@ -508,14 +509,14 @@ public class NBCLIOptions {
         return wantsToIncludePaths.toArray(new String[0]);
     }
 
-    private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
-        Map<String, Level> levels = new HashMap<>();
+    private Map<String, String> parseLogLevelOverrides(String levelsSpec) {
+        Map<String, String> levels = new HashMap<>();
         Arrays.stream(levelsSpec.split("[,;]")).forEach(kp -> {
             String[] ll = kp.split(":");
             if (ll.length != 2) {
                 throw new RuntimeException("Log level must have name:level format");
             }
-            levels.put(ll[0], Level.toLevel(ll[1]));
+            levels.put(ll[0], ll[1]);
         });
         return levels;
     }
@@ -618,7 +619,7 @@ public class NBCLIOptions {
         return sessionName;
     }
 
-    public Level wantsConsoleLogLevel() {
+    public NBLogLevel wantsConsoleLogLevel() {
         return consoleLevel;
     }
 
@@ -642,7 +643,7 @@ public class NBCLIOptions {
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
         if (spec.indicatorMode == IndicatorMode.console) {
-            if (Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
+            if (NBLogLevel.INFO.isGreaterOrEqualTo(wantsConsoleLogLevel())) {
                 logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
                 spec.indicatorMode = IndicatorMode.logonly;
             } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
@@ -677,7 +678,7 @@ public class NBCLIOptions {
         return logsMax;
     }
 
-    public String getLogsLevel() {
+    public NBLogLevel getScenarioLogLevel() {
         return logsLevel;
     }
 
@@ -721,7 +722,7 @@ public class NBCLIOptions {
         return consoleLoggingPattern;
     }
 
-    public Map<String, Level> getLogLevelOverrides() {
+    public Map<String, String> getLogLevelOverrides() {
         return logLevelsOverrides;
     }
 
