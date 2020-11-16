@@ -15,11 +15,10 @@
  * /
  */
 
-package io.nosqlbench.engine.api.activityimpl.motor;
+package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.nb.api.config.Synonyms;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 
@@ -74,8 +73,12 @@ import java.util.*;
  *
  */
 public class ParamsParser {
-    private final static Logger logger = LoggerFactory.getLogger(ParamsParser.class);
+    private final static Logger logger = LogManager.getLogger(ParamsParser.class);
 
+
+    public static Map<String, String> parse(String input, boolean canonicalize) {
+        return parse(input, "=:", canonicalize);
+    }
 
     /**
      * Parse a string input as a loose-form param=value list, and be reasonable about formatting
@@ -86,7 +89,7 @@ public class ParamsParser {
      * @param canonicalize Whether or not to replace synonyms with modern forms and to warn when old forms are used
      * @return A map of extracted keys and values
      */
-    public static Map<String, String> parse(String input, boolean canonicalize) {
+    public static Map<String, String> parse(String input, String assignmentCharacters, boolean canonicalize) {
 
         ParseState s = ParseState.expectingName;
 
@@ -131,13 +134,13 @@ public class ParamsParser {
                         isEscaped = true;
                     } else if (c == ' ') {
                         String partial = parms.get(lastVarname);
-                        if (partial==null) {
+                        if (partial == null) {
                             throw new RuntimeException("space continuation while reading name or value, but no prior " +
-                                "for " + lastVarname + " exists");
+                                    "for " + lastVarname + " exists");
                         }
-                        parms.put(lastVarname,partial+" "+varname);
+                        parms.put(lastVarname, partial + " " + varname);
                         varname.setLength(0);
-                    } else if (c != '=') {
+                    } else if (assignmentCharacters.indexOf(c) == -1) {
                         varname.append(c);
                     } else {
                         s = ParseState.expectingVal;
