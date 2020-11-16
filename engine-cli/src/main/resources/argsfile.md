@@ -99,3 +99,9 @@ To simply set global defaults, you can run nosqlbench with a command
 line like this:
 
     ./nb --pin --docker-metrics-at metricsnode --pin --annotate all
+
+# Compatibility
+
+You should use the --pin and --unpin options to make any changes to the
+ argsfile when integrating or automating workflows. This ensures that
+ any changes to file format are handled for you by nb.
