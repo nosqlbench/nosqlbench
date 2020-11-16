@@ -18,6 +18,7 @@ public class VirtDataFunctions {
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class),
         IntUnaryOperator(java.util.function.IntUnaryOperator.class, int.class),
+        DoubleToIntFunction(java.util.function.DoubleToIntFunction.class, int.class),
         DoubleFunction(java.util.function.DoubleFunction.class, double.class),
         DoubleUnaryOperator(java.util.function.DoubleUnaryOperator.class, double.class),
         Function(java.util.function.Function.class, Object.class);
