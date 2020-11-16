@@ -40,8 +40,7 @@ import java.util.stream.Collectors;
 
 public class NBCLI {
 
-    private static final Logger logger = LoggerFactory.getLogger("NBCLI");
-    private static final Logger EVENTS = LoggerFactory.getLogger("EVENTS");
+    private static Logger logger;
 
     private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
@@ -67,6 +66,14 @@ public class NBCLI {
     }
 
     public void run(String[] args) {
+
+        // Initial logging config covers only command line parsing
+        // We don't want anything to go to console here unless it is a real problem
+        // as some integrations will depend on a stable and parsable program output
+        LoggerConfig loggerConfig = new LoggerConfig(NBLogLevel.ERROR, NBLogLevel.ERROR);
+
+        ConfigurationFactory.setConfigurationFactory(loggerConfig);
+        logger = LogManager.getLogger("NBCLI");
 
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
 
@@ -128,11 +135,10 @@ public class NBCLI {
 
         String sessionName = new SessionNamer().format(options.getSessionName());
 
-        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
-
-        Annotators.init(options.getAnnotatorsConfig());
-        Annotators.recordAnnotation(sessionName, 0L, 0L,
-                Map.of(), Map.of());
+        SessionLogConfig sessionLogConfig = new SessionLogConfig(sessionName);
+        sessionLogConfig.setConsolePattern(options.getConsoleLoggingPattern());
+        sessionLogConfig.setLevel(options.wantsConsoleLogLevel());
+        sessionLogConfig.start();
 
         ActivityMetrics.setHdrDigits(options.getHdrDigits());
 
@@ -312,13 +318,12 @@ public class NBCLI {
         }
 
 
-        Level consoleLogLevel = options.wantsConsoleLogLevel();
-        Level scenarioLogLevel = Level.toLevel(options.getLogsLevel());
-        if (scenarioLogLevel.toInt() > consoleLogLevel.toInt()) {
+        NBLogLevel consoleLogLevel = options.wantsConsoleLogLevel();
+        NBLogLevel scenarioLogLevel = options.getScenarioLogLevel();
+        if (scenarioLogLevel.isGreaterOrEqualTo(consoleLogLevel)) {
             logger.info("raising scenario logging level to accommodate console logging level");
         }
-
-        Level maxLevel = Level.toLevel(Math.min(consoleLogLevel.toInt(), scenarioLogLevel.toInt()));
+        NBLogLevel maxLevel = NBLogLevel.max(consoleLogLevel, scenarioLogLevel);
 
         // Execute Scenario!
         if (options.getCommands().size() == 0) {
@@ -330,7 +335,10 @@ public class NBCLI {
         ScriptParams scriptParams = new ScriptParams();
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
-        ScenarioLogger sl = new ScenarioLogger(scenario)
+
+        Path scenarioLogPath = SessionLogConfig.composeSessionLogName(options.getLogsDirectory(), scenario.getScenarioName());
+        logger.info("Configuring scenario log at " + scenarioLogPath.toString());
+        ScenarioLogger sl = new SessionLogConfig(scenario.getScenarioName())
                 .setLogDir(options.getLogsDirectory())
                 .setMaxLogs(options.getLogsMax())
                 .setLevel(maxLevel)

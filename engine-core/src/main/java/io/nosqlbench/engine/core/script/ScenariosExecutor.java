@@ -48,7 +48,11 @@ public class ScenariosExecutor {
     }
 
     public synchronized void execute(Scenario scenario) {
-        execute(scenario, new ScenarioLogger(scenario).setLogDir("logs").setMaxLogs(0));
+        ScenarioLogger logs = new SessionLogConfig(scenario.getScenarioName())
+                .setLogDir(Path.of("logs"))
+                .setMaxLogs(0)
+                .start();
+        execute(scenario, logs);
     }
 
     public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {

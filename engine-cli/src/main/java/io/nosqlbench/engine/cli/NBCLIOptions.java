@@ -90,7 +90,9 @@ public class NBCLIOptions {
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
 
-    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%7r %-5level [%t] %-12logger{0} %msg%n%throwable";
+
+    //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
     public static final String NBSTATEDIR = "NBSTATEDIR";
 
     private final LinkedList<Cmd> cmdList = new LinkedList<>();
@@ -670,8 +672,8 @@ public class NBCLIOptions {
         return reportCsvTo;
     }
 
-    public String getLogsDirectory() {
-        return logsDirectory;
+    public Path getLogsDirectory() {
+        return Path.of(logsDirectory);
     }
 
     public int getLogsMax() {

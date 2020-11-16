@@ -68,7 +68,10 @@ public class AsyncScriptIntegrationTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
+        ScenarioLogger scenarioLogger = new SessionLogConfig(scenarioName)
+                .setMaxLogs(0)
+                .setLogDir(Path.of("logs/test"))
+                .start();
         e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
