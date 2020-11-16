@@ -87,10 +87,11 @@ public class NBCLI {
         String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
         int mOpts = (dockerMetrics ? 1 : 0) + (dockerMetricsAt != null ? 1 : 0) + (reportGraphiteTo != null ? 1 : 0);
-        if (mOpts > 1) {
+        if (mOpts > 1 && (reportGraphiteTo == null || annotatorsConfig == null)) {
             throw new BasicError("You have multiple conflicting options which attempt to set\n" +
                     " the destination for metrics and annotations. Please select only one of\n" +
-                    " --docker-metrics, --docker-metrics-at <addr>, or --report-graphite-to <addr>\n" +
+                    " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
+                    " --report-graphite-to <addr> and --annotators <config>\n" +
                     " For more details, see run 'nb help docker-metrics'");
         }
 
@@ -114,7 +115,8 @@ public class NBCLI {
 
         if (metricsAddr != null) {
             reportGraphiteTo = metricsAddr + ":9109";
-            Annotators.init("{type:'grafana',url:'http://" + metricsAddr + ":3000/'}");
+            annotatorsConfig = "[{type:'log'},{type:'grafana',baseurl:'http://" + metricsAddr + ":3000/'," +
+                    "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
         }
 
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
