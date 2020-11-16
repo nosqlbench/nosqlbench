@@ -1,12 +1,13 @@
 package io.nosqlbench.engine.cli;
 
-import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class NBCLIOptions {
 
-    private final static Logger logger = LoggerFactory.getLogger("OPTIONS");
+    private final static Logger logger = LogManager.getLogger("OPTIONS");
 
     private final static String NB_STATE_DIR = "--statedir";
     private final static String NB_STATEDIR_PATHS = "$NBSTATEDIR:$PWD/.nosqlbench:$HOME/.nosqlbench";

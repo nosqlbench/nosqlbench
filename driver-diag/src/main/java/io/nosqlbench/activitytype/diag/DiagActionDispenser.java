@@ -16,14 +16,13 @@ package io.nosqlbench.activitytype.diag;
 
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import org.slf4j.Logger;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DiagActionDispenser implements ActionDispenser {
 
-    private final static Logger logger = getLogger(DiagActionDispenser.class);
-    private DiagActivity activity;
+    private final static Logger logger = LogManager.getLogger(DiagActionDispenser.class);
+    private final DiagActivity activity;
 
     public DiagActionDispenser(DiagActivity activity) {
         this.activity = activity;

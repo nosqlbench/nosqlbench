@@ -36,8 +36,8 @@ import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(StdoutActivity.class);
+    private final static Logger logger = LogManager.getLogger(StdoutActivity.class);
     private final Boolean showstmts;
     private final StmtsDocList stmtsDocList;
     public Timer bindTimer;

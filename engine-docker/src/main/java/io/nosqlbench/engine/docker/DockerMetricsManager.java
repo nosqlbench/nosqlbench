@@ -14,8 +14,8 @@ import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -34,7 +34,7 @@ public class DockerMetricsManager {
 
     String userHome = System.getProperty("user.home");
 
-    private final Logger logger = LoggerFactory.getLogger(DockerMetricsManager.class);
+    private final Logger logger = LogManager.getLogger(DockerMetricsManager.class);
 
     public DockerMetricsManager() {
         dh = new DockerHelper();

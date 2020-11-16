@@ -18,8 +18,8 @@
 package io.nosqlbench.engine.api.metrics;
 
 import org.HdrHistogram.Histogram;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 import java.util.Date;
@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class HistoStatsCSVWriter {
-    private final static Logger logger = LoggerFactory.getLogger(HistoStatsCSVWriter.class);
+    private final static Logger logger = LogManager.getLogger(HistoStatsCSVWriter.class);
     private final static String logFormatVersion = "1.0";
     private final File csvfile;
     //    FileWriter writer;

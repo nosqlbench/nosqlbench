@@ -19,17 +19,17 @@ package io.nosqlbench.engine.api.activityimpl.action;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * An action dispenser that returns a logging action.
  */
 public class CoreActionDispenser implements ActionDispenser {
 
-    private final static Logger logger = LoggerFactory.getLogger(CoreActionDispenser.class);
+    private final static Logger logger = LogManager.getLogger(CoreActionDispenser.class);
 
-    private Activity activity;
+    private final Activity activity;
 
     public CoreActionDispenser(Activity activity) {
         this.activity = activity;

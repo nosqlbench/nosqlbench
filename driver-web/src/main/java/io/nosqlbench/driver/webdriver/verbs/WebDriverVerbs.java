@@ -3,8 +3,8 @@ package io.nosqlbench.driver.webdriver.verbs;
 import io.nosqlbench.driver.webdriver.WebContext;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.Map;
@@ -19,7 +19,7 @@ import java.util.function.Function;
  *     The JUnit exporter command generator</a>
  */
 public class WebDriverVerbs {
-    private final static Logger logger = LoggerFactory.getLogger(WebDriverVerbs.class);
+    private final static Logger logger = LogManager.getLogger(WebDriverVerbs.class);
     public final static String COMMAND = "command";
 
     public enum Verb {

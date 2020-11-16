@@ -1,8 +1,8 @@
 package io.nosqlbench.driver.webdriver;
 
 import org.openqa.selenium.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,14 +10,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class WebContext {
-    private final static Logger logger = LoggerFactory.getLogger(WebContext.class);
+    private final static Logger logger = LogManager.getLogger(WebContext.class);
 
     private final WebDriver rootwindow;
     WebDriver focus;
 
     LinkedList<WebElement> elements = new LinkedList<>();
-    private LinkedList<Cookie> cookies = new LinkedList<>();
-    private HashMap<String,Object> vars = new HashMap<>();
+    private final LinkedList<Cookie> cookies = new LinkedList<>();
+    private final HashMap<String,Object> vars = new HashMap<>();
     private Alert alert;
 
     public WebContext(WebDriver initial) {

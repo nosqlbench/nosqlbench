@@ -4,7 +4,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.*;

@@ -1,8 +1,8 @@
 package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class PathFinder {
 
-    private final static Logger logger = LoggerFactory.getLogger(PathFinder.class);
+    private final static Logger logger = LogManager.getLogger(PathFinder.class);
 
     /**
      * Find exactly zero or one matching Paths, and return an {@link Optional} of {@link Path}.

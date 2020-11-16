@@ -17,14 +17,14 @@
 
 package io.nosqlbench.activitytype.diag;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SequenceBlocker {
-    private final static Logger logger = LoggerFactory.getLogger(SequenceBlocker.class);
+    private final static Logger logger = LogManager.getLogger(SequenceBlocker.class);
     private final AtomicLong sequence;
     private final AtomicLong waiting=new AtomicLong(0L);
     private final boolean errorsAreFatal;

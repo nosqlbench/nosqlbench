@@ -17,18 +17,24 @@
 
 package io.nosqlbench.engine.core.script;
 
+import io.nosqlbench.engine.core.IndexedThreadFactory;
+import io.nosqlbench.engine.core.ScenarioController;
+import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.logging.SessionLogConfig;
+import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.core.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ScenariosExecutor {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
+    private final static Logger logger = LogManager.getLogger(ScenariosExecutor.class);
     private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 
     private final ExecutorService executor;

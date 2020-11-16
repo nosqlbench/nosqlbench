@@ -1,8 +1,8 @@
 package io.nosqlbench.activitytype.cql.codecsupport;
 
 import com.datastax.driver.core.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public abstract class UserCodecProvider {
 
-    private final static Logger logger = LoggerFactory.getLogger(UserCodecProvider.class);
+    private final static Logger logger = LogManager.getLogger(UserCodecProvider.class);
 
     public List<UDTTransformCodec> registerCodecsForCluster(
             Session session,
@@ -131,7 +131,7 @@ public abstract class UserCodecProvider {
                 .orElseThrow(
                         () -> new RuntimeException("Unable to find UDTJavaType annotation for " + codecClass.getCanonicalName())
                 );
-        return (Class<?>) javaType;
+        return javaType;
     }
 
 

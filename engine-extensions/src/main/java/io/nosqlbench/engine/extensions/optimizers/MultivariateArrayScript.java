@@ -2,7 +2,7 @@ package io.nosqlbench.engine.extensions.optimizers;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
 public class MultivariateArrayScript implements MultivariateFunction {
     private final ScriptObjectMirror script;
     private final MVParams params;
-    private Logger logger;
+    private final Logger logger;
 
     public MultivariateArrayScript(Logger logger, MVParams params, ScriptObjectMirror script) {
         this.logger = logger;

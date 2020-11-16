@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.Optional;
@@ -27,14 +27,14 @@ import java.util.regex.Pattern;
 
 public class Unit {
 
-    private final static Logger logger = LoggerFactory.getLogger(Unit.class);
+    private final static Logger logger = LogManager.getLogger(Unit.class);
 
-    private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>(?<whole>[0-9]+)(?<fractional>\\.[0-9]+)?(?<to10power>E[0-9]+)?) *(?<unit>[^ ]+?)? *");
-    private static Pattern numberExponentPattern = Pattern.compile(" *(?<pre>.*?)?(?<number>([0-9]+)(\\.[0-9]+)?+)\\^(?<exponent>[0-9]+)(?<post>.*?)?");
+    private static final Pattern numberFmtPattern = Pattern.compile(" *(?<number>(?<whole>[0-9]+)(?<fractional>\\.[0-9]+)?(?<to10power>E[0-9]+)?) *(?<unit>[^ ]+?)? *");
+    private static final Pattern numberExponentPattern = Pattern.compile(" *(?<pre>.*?)?(?<number>([0-9]+)(\\.[0-9]+)?+)\\^(?<exponent>[0-9]+)(?<post>.*?)?");
 
-    private static long nanoPerSecond = 1000000000;
-    private static long bytesPerGB = 1000000000;
-    private static long BytesPerGiB = 1024 * 1024 * 1024;
+    private static final long nanoPerSecond = 1000000000;
+    private static final long bytesPerGB = 1000000000;
+    private static final long BytesPerGiB = 1024 * 1024 * 1024;
 
     public static Optional<Long> msFor(String duration) {
         return durationFor(Duration.MS, duration);
@@ -90,7 +90,7 @@ public class Unit {
             double base= Double.valueOf(e.group("number"));
             double exponent = Double.valueOf(e.group("exponent"));
             double value= Math.pow(base, exponent);
-            spec = e.group("pre")+ String.valueOf(value) + e.group("post");
+            spec = e.group("pre")+ value + e.group("post");
         }
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
@@ -181,7 +181,7 @@ public class Unit {
                     throw new InvalidParameterException("Exponent for powers of two must be 63 or less. It is " + exponent);
                 }
                 long value = 1L << exponent;
-                spec= exponentMatcher.group("pre") + String.valueOf(value) + exponentMatcher.group("post");
+                spec= exponentMatcher.group("pre") + value + exponentMatcher.group("post");
             } else {
                 spec= exponentMatcher.group("pre") + (long) Math.pow(number, exponent) + exponentMatcher.group("post");
             }
@@ -217,7 +217,7 @@ public class Unit {
 
     }
 
-    public static enum Count {
+    public enum Count {
         UNIT("U", "unit", 1.0),
         KILO("K", "kilo", 1000.0),
         MEGA("M", "mega", 1000000.0),
@@ -257,7 +257,7 @@ public class Unit {
         }
     }
 
-    public static enum Bytes {
+    public enum Bytes {
         BYTE("B", "byte", 1),
         KB("KB", "kilobyte", 1000),
         MB("MB", "megabyte", 1000000),
@@ -310,7 +310,7 @@ public class Unit {
         }
     }
 
-    public static enum Duration {
+    public enum Duration {
         SECOND("s", "seconds", nanoPerSecond),
         MS("ms", "milliseconds", 1000000),
         US("µs", "microseconds", 1000),

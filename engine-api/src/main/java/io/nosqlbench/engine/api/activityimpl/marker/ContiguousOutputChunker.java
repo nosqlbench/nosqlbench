@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,16 +53,16 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ContiguousOutputChunker implements Output {
 
-    private final static Logger logger = LoggerFactory.getLogger(ContiguousOutputChunker.class);
+    private final static Logger logger = LogManager.getLogger(ContiguousOutputChunker.class);
     private final int extentSize;
     private final int maxExtents;
-    private List<Output> readers = new ArrayList<>();
-    private AtomicLong min;
-    private AtomicLong nextMin;
-    private AtomicReference<ByteTrackerExtent> markingExtents = new AtomicReference<>();
-    private ReentrantLock lock = new ReentrantLock(false);
-    private Condition nowMarking = lock.newCondition();
-    private Semaphore mutex = new Semaphore(1, false);
+    private final List<Output> readers = new ArrayList<>();
+    private final AtomicLong min;
+    private final AtomicLong nextMin;
+    private final AtomicReference<ByteTrackerExtent> markingExtents = new AtomicReference<>();
+    private final ReentrantLock lock = new ReentrantLock(false);
+    private final Condition nowMarking = lock.newCondition();
+    private final Semaphore mutex = new Semaphore(1, false);
 
     public ContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
         this.min = new AtomicLong(min);

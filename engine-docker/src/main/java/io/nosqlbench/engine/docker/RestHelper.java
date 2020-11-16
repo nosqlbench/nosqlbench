@@ -1,9 +1,8 @@
 package io.nosqlbench.engine.docker;
 
-import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,7 +12,7 @@ import java.util.Base64;
 import java.util.function.Supplier;
 
 public class RestHelper {
-    private static Logger logger = LoggerFactory.getLogger(RestHelper.class);
+    private static final Logger logger = LogManager.getLogger(RestHelper.class);
 
     static HttpClient.Builder clientBuilder = HttpClient.newBuilder();
     static HttpClient httpClient = clientBuilder.build();

@@ -20,8 +20,8 @@ package io.nosqlbench.engine.core.script;
 import io.nosqlbench.cli.testing.ProcessInvoker;
 import io.nosqlbench.cli.testing.ProcessResult;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class NBCliIntegrationTests {
 
     private final static String JARNAME = "target/nb.jar";
-    private Logger logger = LoggerFactory.getLogger(NBCliIntegrationTests.class);
+    private final Logger logger = LogManager.getLogger(NBCliIntegrationTests.class);
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v+"/bin/java").orElse("java");
 

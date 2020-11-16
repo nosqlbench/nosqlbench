@@ -21,14 +21,14 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.nb.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @Service(OutputDispenser.class)
 public class LoggingMarkerDispenser implements OutputDispenser {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoggingMarkerDispenser.class);
-    private Activity activity;
+    private final static Logger logger = LogManager.getLogger(LoggingMarkerDispenser.class);
+    private final Activity activity;
 
     public LoggingMarkerDispenser(Activity activity) {
         this.activity = activity;

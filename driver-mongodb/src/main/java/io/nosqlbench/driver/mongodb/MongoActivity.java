@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
@@ -37,7 +37,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class MongoActivity extends SimpleActivity implements ActivityDefObserver {
 
-    private final static Logger logger = LoggerFactory.getLogger(MongoActivity.class);
+    private final static Logger logger = LogManager.getLogger(MongoActivity.class);
 
     private String yamlLoc;
     private String connectionString;

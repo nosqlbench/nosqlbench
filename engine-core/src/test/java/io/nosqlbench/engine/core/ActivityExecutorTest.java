@@ -12,8 +12,8 @@ import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   limitations under the License.
 */
 public class ActivityExecutorTest {
-    private static final Logger logger = LoggerFactory.getLogger(ActivityExecutorTest.class);
+    private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 
     @Test
     public void testRestart() {
@@ -148,7 +148,7 @@ public class ActivityExecutorTest {
     }
 
     private static class DelayedInitActivity extends SimpleActivity {
-        private static Logger logger = LoggerFactory.getLogger(DelayedInitActivity.class);
+        private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(ActivityDef activityDef) {
             super(activityDef);

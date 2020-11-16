@@ -24,8 +24,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.op_output.StrideOut
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> implements Thread.UncaughtExceptionHandler, StrideOutputConsumer<DiagOpData> {
 
-    private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
+    private final static Logger logger = LogManager.getLogger(AsyncDiagAction.class);
 
     private long lastUpdate;
     private long quantizedInterval;
@@ -213,8 +213,8 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
         private final AsyncDiagAction action;
         AsyncDiagAction mainContext;
         private volatile boolean running = true;
-        private Thread thread;
-        private String name;
+        private final Thread thread;
+        private final String name;
 
         public OpFinisher(String name, BlockingQueue<StartedOp<DiagOpData>> queue, AsyncDiagAction action) {
             this.queue = queue;

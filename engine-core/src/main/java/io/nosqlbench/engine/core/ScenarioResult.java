@@ -19,17 +19,17 @@
 package io.nosqlbench.engine.core;
 
 import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.Slf4jReporter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class ScenarioResult {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScenarioResult.class);
+    private final static Logger logger = LogManager.getLogger(ScenarioResult.class);
 
     private Exception exception;
     private final String iolog;
@@ -45,7 +45,7 @@ public class ScenarioResult {
 
     public void reportToLog() {
         logger.info("-- BEGIN METRICS DETAIL --");
-        Slf4jReporter reporter = Slf4jReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+        Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)

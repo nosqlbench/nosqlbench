@@ -31,8 +31,8 @@ import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SlotStateTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,9 +52,9 @@ import static io.nosqlbench.engine.api.activityapi.core.RunState.*;
  */
 public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
-    private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
+    private static final Logger logger = LogManager.getLogger(CoreMotor.class);
 
-    private long slotId;
+    private final long slotId;
 
     private Timer inputTimer;
 
@@ -71,11 +71,11 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
     private Input input;
     private Action action;
-    private Activity activity;
+    private final Activity activity;
     private Output output;
 
-    private SlotStateTracker slotStateTracker;
-    private AtomicReference<RunState> slotState;
+    private final SlotStateTracker slotStateTracker;
+    private final AtomicReference<RunState> slotState;
     private int stride = 1;
 
     private OpTracker<D> opTracker;
@@ -237,7 +237,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
 
                 @SuppressWarnings("unchecked")
-                AsyncAction<D> async = AsyncAction.class.cast(action);
+                AsyncAction<D> async = (AsyncAction) action;
 
                 opTracker = new OpTrackerImpl<>(activity, slotId);
                 opTracker.setCycleOpFunction(async.getOpInitFunction());

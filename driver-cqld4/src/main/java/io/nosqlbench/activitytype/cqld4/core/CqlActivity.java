@@ -45,8 +45,8 @@ import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,7 +57,7 @@ import java.util.*;
 @SuppressWarnings("Duplicates")
 public class CqlActivity extends SimpleActivity implements Activity, ActivityDefObserver {
 
-    private final static Logger logger = LoggerFactory.getLogger(CqlActivity.class);
+    private final static Logger logger = LogManager.getLogger(CqlActivity.class);
     private final ExceptionCountMetrics exceptionCountMetrics;
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private final ActivityDef activityDef;

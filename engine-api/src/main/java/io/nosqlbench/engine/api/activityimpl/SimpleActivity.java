@@ -20,8 +20,8 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * A default implementation of an Activity, suitable for building upon.
  */
 public class SimpleActivity implements Activity, ProgressCapable {
-    private final static Logger logger = LoggerFactory.getLogger("ACTIVITY");
+    private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
     private final List<AutoCloseable> closeables = new ArrayList<>();

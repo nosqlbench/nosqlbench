@@ -20,8 +20,8 @@ package io.nosqlbench.engine.api.activityconfig;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class ParsedStmt {
 
     private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
-    private final static Logger logger = LoggerFactory.getLogger(ParsedStmt.class);
+    private final static Logger logger = LogManager.getLogger(ParsedStmt.class);
     private ParsedTemplate template;
 
     private final StmtDef stmtDef;

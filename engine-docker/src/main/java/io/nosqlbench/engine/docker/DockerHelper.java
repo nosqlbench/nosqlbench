@@ -12,8 +12,8 @@ import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 import com.sun.security.auth.module.UnixSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public class DockerHelper {
 
     private final DockerClientConfig config;
     private final DockerClient dockerClient;
-    private final Logger logger = LoggerFactory.getLogger(DockerHelper.class);
+    private final Logger logger = LogManager.getLogger(DockerHelper.class);
 
     public DockerHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);

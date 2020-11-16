@@ -1,17 +1,16 @@
 package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.helpers.AttributesImpl;
 
 import java.security.InvalidParameterException;
 import java.util.Map;
 
 public class PolyglotScenarioController {
 
-    private static final Logger logger = LoggerFactory.getLogger("SCENARIO/POLYGLOT");
+    private static final Logger logger = LogManager.getLogger("SCENARIO/POLYGLOT");
 
     private final ScenarioController controller;
 

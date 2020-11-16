@@ -8,8 +8,8 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 import java.net.http.HttpClient;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpAction implements SyncAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(HttpAction.class);
+    private final static Logger logger = LogManager.getLogger(HttpAction.class);
 
     private final HttpActivity httpActivity;
     private final int slot;

@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.metrics.PeriodicRunnable;
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class ActivityProgressIndicator implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(ActivityProgressIndicator.class);
+    private final static Logger logger = LogManager.getLogger(ActivityProgressIndicator.class);
     private final String indicatorSpec;
     private final ScenarioController sc;
     private PeriodicRunnable<ActivityProgressIndicator> runnable;

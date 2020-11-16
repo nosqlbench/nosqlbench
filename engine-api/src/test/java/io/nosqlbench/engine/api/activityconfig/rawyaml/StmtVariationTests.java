@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StmtVariationTests {
 
-    private final static Logger logger = LoggerFactory.getLogger(StmtVariationTests.class);
+    private final static Logger logger = LogManager.getLogger(StmtVariationTests.class);
 
     @Test
     public void testListStmtsOnly() {

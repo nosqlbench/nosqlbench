@@ -19,15 +19,15 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ScenariosResults {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScenariosResults.class);
+    private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
 
     private final String scenariosExecutorName;
     private final Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();

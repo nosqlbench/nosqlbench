@@ -18,15 +18,15 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RawStmtFields extends Tags {
-    private final static Logger logger = LoggerFactory.getLogger(RawStmtFields.class);
+    private final static Logger logger = LogManager.getLogger(RawStmtFields.class);
 
     private String name = "";
     private String desc = "";

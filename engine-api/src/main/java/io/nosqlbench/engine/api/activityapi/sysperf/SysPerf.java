@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.sysperf;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -31,7 +31,7 @@ import java.nio.file.attribute.FileTime;
 import java.util.Optional;
 
 public class SysPerf {
-    public final static Logger logger = LoggerFactory.getLogger(SysPerf.class);
+    public final static Logger logger = LogManager.getLogger(SysPerf.class);
 
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static SysPerfData cachedData;

@@ -19,20 +19,20 @@ package io.nosqlbench.activitytype.stdout;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @SuppressWarnings("Duplicates")
 public class StdoutAction implements SyncAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(StdoutAction.class);
-    private int slot;
-    private StdoutActivity activity;
-    private int maxTries = 10;
+    private static final Logger logger = LogManager.getLogger(StdoutAction.class);
+    private final int slot;
+    private final StdoutActivity activity;
+    private final int maxTries = 10;
     private boolean showstmts;
-    private OpSequence<StringBindings> sequencer;
+    private OpSource<StringBindings> opsource;
 
     public StdoutAction(int slot, StdoutActivity activity) {
         this.slot = slot;
@@ -41,7 +41,7 @@ public class StdoutAction implements SyncAction {
 
     @Override
     public void init() {
-        this.sequencer = activity.getOpSequence();
+        this.opsource = activity.getOpSequence();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class StdoutAction implements SyncAction {
         StringBindings stringBindings;
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            stringBindings = sequencer.get(cycleValue);
+            stringBindings = opsource.get(cycleValue);
             statement = stringBindings.bind(cycleValue);
             showstmts = activity.getShowstmts();
             if (showstmts) {

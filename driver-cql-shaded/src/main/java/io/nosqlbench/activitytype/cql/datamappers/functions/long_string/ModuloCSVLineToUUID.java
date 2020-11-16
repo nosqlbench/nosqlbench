@@ -25,8 +25,8 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.ModuloLineToString;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +40,11 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 public class ModuloCSVLineToUUID implements LongFunction<UUID> {
-    private final static Logger logger = LoggerFactory.getLogger(ModuloLineToString.class);
+    private final static Logger logger = LogManager.getLogger(ModuloLineToString.class);
 
-    private List<String> lines = new ArrayList<>();
+    private final List<String> lines = new ArrayList<>();
 
-    private String filename;
+    private final String filename;
 
     @Example({"ModuloCSVLineToUUID('data/myfile.csv','lat')","load values for 'lat' from the CSV file myfile.csv."})
     public ModuloCSVLineToUUID(String filename, String fieldname) {

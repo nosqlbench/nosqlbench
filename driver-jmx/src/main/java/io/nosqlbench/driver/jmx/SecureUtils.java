@@ -1,16 +1,15 @@
 package io.nosqlbench.driver.jmx;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.Console;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SecureUtils {
-    private final static Logger logger = LoggerFactory.getLogger(SecureUtils.class);
+    private final static Logger logger = LogManager.getLogger(SecureUtils.class);
 
     public static String readSecret(String description, String source) {
         if (source==null) {

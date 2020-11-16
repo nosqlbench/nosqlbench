@@ -8,18 +8,18 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.RowVerificationEx
 import io.nosqlbench.engine.api.activityapi.errorhandling.CycleErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.HashedErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class HashedCQLErrorHandler extends HashedErrorHandler<Throwable, ErrorStatus> {
-    private static final Logger logger = LoggerFactory.getLogger(HashedCQLErrorHandler.class);
+    private static final Logger logger = LogManager.getLogger(HashedCQLErrorHandler.class);
 
 //    private static Set<Class<? extends Throwable>> UNVERIFIED_ERRORS = new HashSet<Class<? extends Throwable>>() {{
 //        add(RowVerificationException.class);
 //        add(ResultSetVerificationException.class);
 //    }};
-    private ExceptionCountMetrics exceptionCountMetrics;
-    private static ThreadLocal<Integer> tlResultCode = ThreadLocal.withInitial(() -> (0));
+    private final ExceptionCountMetrics exceptionCountMetrics;
+    private static final ThreadLocal<Integer> tlResultCode = ThreadLocal.withInitial(() -> (0));
 
     public HashedCQLErrorHandler(ExceptionCountMetrics exceptionCountMetrics) {
         this.exceptionCountMetrics = exceptionCountMetrics;

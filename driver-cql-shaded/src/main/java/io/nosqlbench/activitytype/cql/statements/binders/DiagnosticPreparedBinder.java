@@ -3,8 +3,8 @@ package io.nosqlbench.activitytype.cql.statements.binders;
 import com.datastax.driver.core.*;
 import io.nosqlbench.activitytype.cql.core.CQLBindHelper;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * order to explain in more detail what is happening for users.
  */
 public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedStatement, Statement> {
-    public static final Logger logger = LoggerFactory.getLogger(DiagnosticPreparedBinder.class);
+    public static final Logger logger = LogManager.getLogger(DiagnosticPreparedBinder.class);
     @Override
     public Statement bindValues(PreparedStatement prepared, Object[] values) {
         ColumnDefinitions columnDefinitions = prepared.getVariables();

@@ -1,18 +1,12 @@
 package io.nosqlbench.activitytype.cqld4.errorhandling;
 
-import com.datastax.dse.driver.api.core.servererrors.UnfitClientException;
-import com.datastax.oss.driver.api.core.*;
+import com.datastax.oss.driver.api.core.RequestThrottlingException;
 import com.datastax.oss.driver.api.core.connection.ClosedConnectionException;
-import com.datastax.oss.driver.api.core.connection.ConnectionInitException;
-import com.datastax.oss.driver.api.core.connection.FrameTooLongException;
-import com.datastax.oss.driver.api.core.connection.HeartbeatException;
 import com.datastax.oss.driver.api.core.servererrors.*;
-import com.datastax.oss.driver.internal.core.channel.ClusterNameMismatchException;
-import com.datastax.oss.driver.shaded.guava.common.collect.ComputationException;
 import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CqlGenericCycleException;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,10 +86,10 @@ public enum CQLExceptionEnum implements ResultReadable {
     RequestThrottlingException(RequestThrottlingException.class,57),
     CqlGenericCycleException(CqlGenericCycleException.class,58);
 
-    private final static Logger logger = LoggerFactory.getLogger(CQLExceptionEnum.class);
+    private final static Logger logger = LogManager.getLogger(CQLExceptionEnum.class);
 
     private static Map<String, Integer> codesByName = getCodesByName();
-    private static String[] namesByCode = getNamesByCode();
+    private static final String[] namesByCode = getNamesByCode();
 
     private final Class<? extends Exception> exceptionClass;
     private final int resultCode;

@@ -21,8 +21,8 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.api.activityapi.core.Startable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -78,7 +78,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class HybridRateLimiter implements Startable, RateLimiter {
 
-    private final static Logger logger = LoggerFactory.getLogger(HybridRateLimiter.class);
+    private final static Logger logger = LogManager.getLogger(HybridRateLimiter.class);
 
     private volatile TokenFiller filler;
     private volatile long starttime;
@@ -98,7 +98,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     // diagnostics
 
     // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't
-    private AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
+    private final AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
 
     protected HybridRateLimiter() {
     }

@@ -1,8 +1,8 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,15 +10,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
-    private final static Logger logger = LoggerFactory.getLogger(ClassicHistoListener.class);
+    private final static Logger logger = LogManager.getLogger(ClassicHistoListener.class);
 
     private final MetricRegistry metricsRegistry;
-    private String sessionName;
-    private String prefix;
-    private Pattern pattern;
-    private String interval;
-    private TimeUnit nanoseconds;
-    private Map<String, Attachment> histos = new HashMap<>();
+    private final String sessionName;
+    private final String prefix;
+    private final Pattern pattern;
+    private final String interval;
+    private final TimeUnit nanoseconds;
+    private final Map<String, Attachment> histos = new HashMap<>();
 
     public ClassicHistoListener(MetricRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
         this.metricsRegistry = metricRegistry;

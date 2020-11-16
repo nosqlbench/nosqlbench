@@ -18,8 +18,8 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.regex.Pattern;
 
@@ -31,10 +31,10 @@ import java.util.regex.Pattern;
  * @param <E> The type of the Enum which implements TristateFilter
  */
 public class EnumReadableMappingFilter<E extends Enum<E> & ResultReadable> implements TristateFilter<ResultReadable> {
-    private final static Logger logger = LoggerFactory.getLogger(EnumReadableMappingFilter.class);
+    private final static Logger logger = LogManager.getLogger(EnumReadableMappingFilter.class);
 
     private final E[] enumValues;
-    private ResultMappingArrayFilter arrayFilter = new ResultMappingArrayFilter();
+    private final ResultMappingArrayFilter arrayFilter = new ResultMappingArrayFilter();
 
     public EnumReadableMappingFilter(E[] enumValues, Policy defaultPolicy) {
         this.enumValues = enumValues;

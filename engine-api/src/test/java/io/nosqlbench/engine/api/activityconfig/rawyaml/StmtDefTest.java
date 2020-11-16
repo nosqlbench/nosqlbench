@@ -23,8 +23,8 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StmtDefTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(StmtDefTest.class);
+    private final static Logger logger = LogManager.getLogger(StmtDefTest.class);
 
     @Test
     public void testLayering() {

@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CQLStatementDefParser {
-    private final static Logger logger = LoggerFactory.getLogger(CQLStatementDefParser.class);
+    private final static Logger logger = LogManager.getLogger(CQLStatementDefParser.class);
     //    private final static Pattern templateToken = Pattern.compile("<<(\\w+(:(.+?))?)>>");
     private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
     private final static String UNSET_VALUE = "UNSET-VALUE";
@@ -93,9 +93,7 @@ public class CQLStatementDefParser {
             if (!namedBindings.contains(tokenName)) {
                 missingBindings.add(tokenName);
             } else {
-                if (missingAnchors.contains(tokenName)) {
-                    missingAnchors.remove(tokenName);
-                }
+                missingAnchors.remove(tokenName);
             }
 
         }
@@ -114,11 +112,11 @@ public class CQLStatementDefParser {
     }
 
     public static class ParseResult {
-        private Set<String> missingGenerators;
-        private Set<String> missingAnchors;
-        private String statement;
+        private final Set<String> missingGenerators;
+        private final Set<String> missingAnchors;
+        private final String statement;
         private Map<String,String> bindings;
-        private String name;
+        private final String name;
 
         public ParseResult(String stmt, String name, Map<String,String> bindings, Set<String> missingGenerators, Set<String> missingAnchors) {
             this.missingGenerators = missingGenerators;

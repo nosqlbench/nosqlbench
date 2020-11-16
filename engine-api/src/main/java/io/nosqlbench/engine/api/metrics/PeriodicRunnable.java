@@ -17,17 +17,17 @@
 
 package io.nosqlbench.engine.api.metrics;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * This is a simple and light way to run a periodic task
  */
 public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoCloseable {
-    private static Logger logger = LoggerFactory.getLogger(PeriodicRunnable.class);
+    private static final Logger logger = LogManager.getLogger(PeriodicRunnable.class);
 
-    private long intervalMillis;
-    private T action;
+    private final long intervalMillis;
+    private final T action;
     private Thread thread;
     private volatile boolean running = false;
 

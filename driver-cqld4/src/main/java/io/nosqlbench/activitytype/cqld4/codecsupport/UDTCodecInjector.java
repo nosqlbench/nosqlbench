@@ -2,17 +2,17 @@ package io.nosqlbench.activitytype.cqld4.codecsupport;
 
 import com.datastax.oss.driver.api.core.session.Session;
 import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
 public class UDTCodecInjector {
-    private final static Logger logger = LoggerFactory.getLogger(UDTCodecInjector.class);
+    private final static Logger logger = LogManager.getLogger(UDTCodecInjector.class);
 
-    private List<UserCodecProvider> codecProviders = new ArrayList<>();
+    private final List<UserCodecProvider> codecProviders = new ArrayList<>();
 
     public void injectUserProvidedCodecs(Session session, boolean allowAcrossKeyspaces) {
 

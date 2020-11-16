@@ -21,8 +21,8 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
  */
 public class ScenarioController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScenarioController.class);
-    private static final Logger scenariologger = LoggerFactory.getLogger("SCENARIO");
+    private static final Logger logger = LogManager.getLogger(ScenarioController.class);
+    private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final Map<String, ActivityExecutor> activityExecutors = new ConcurrentHashMap<>();
 

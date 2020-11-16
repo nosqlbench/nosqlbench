@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegmen
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
 public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable {
-    private final static Logger logger = LoggerFactory.getLogger(AtomicInput.class);
+    private final static Logger logger = LogManager.getLogger(AtomicInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
     private final AtomicLong min = new AtomicLong(0L);

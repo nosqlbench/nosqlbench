@@ -16,15 +16,15 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.bindings.ContextualBindingsArrayTemplate;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.Writer;
 import java.util.Map;
 
 public class ReadyCQLStatementTemplate {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReadyCQLStatementTemplate.class);
+    private final static Logger logger = LogManager.getLogger(ReadyCQLStatementTemplate.class);
     private final Session session;
     private final ContextualBindingsArrayTemplate<?, Statement<?>> template;
     private final long ratio;

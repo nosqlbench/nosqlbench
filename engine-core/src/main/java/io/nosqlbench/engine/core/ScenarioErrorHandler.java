@@ -2,8 +2,8 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.graalvm.polyglot.PolyglotException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.script.ScriptException;
 
@@ -26,7 +26,7 @@ import javax.script.ScriptException;
  */
 public class ScenarioErrorHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScenarioErrorHandler.class);
+    private final static Logger logger = LogManager.getLogger(ScenarioErrorHandler.class);
 
     public static String handle(Throwable t, boolean wantsStackTraces) {
         if (t instanceof ScriptException) {

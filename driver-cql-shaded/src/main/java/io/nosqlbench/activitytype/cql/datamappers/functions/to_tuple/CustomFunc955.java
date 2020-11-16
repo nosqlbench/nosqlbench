@@ -71,8 +71,8 @@ public class CustomFunc955 implements LongFunction<Map<?,?>>, ConfigAware {
     }
 
     @Override
-    public void applyConfig(Map<String, ?> elements) {
-        this.cluster = Optional.ofNullable(elements.get("cluster"))
+    public void applyConfig(Map<String, ?> providedConfig) {
+        this.cluster = Optional.ofNullable(providedConfig.get("cluster"))
             .map(Cluster.class::cast)
             .orElseThrow();
         this.tupleType = cluster.getMetadata().newTupleType(DataType.cint(), DataType.bigint());
@@ -80,8 +80,8 @@ public class CustomFunc955 implements LongFunction<Map<?,?>>, ConfigAware {
 
     @Override
     public ConfigModel getConfigModel() {
-        return new MutableConfigModel()
-            .add("<cluster>", Cluster.class)
+        return new MutableConfigModel(this)
+            .optional("<cluster>", Cluster.class)
             .asReadOnly();
     }
 }

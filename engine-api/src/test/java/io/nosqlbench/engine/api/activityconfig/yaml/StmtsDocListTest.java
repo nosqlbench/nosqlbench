@@ -20,8 +20,8 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import org.assertj.core.data.MapEntry;
 import org.junit.BeforeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
@@ -32,19 +32,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StmtsDocListTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(StmtsDocListTest.class);
+    private static final Logger logger = LogManager.getLogger(StmtsDocListTest.class);
     private static StmtsDocList doclist;
 
-    private LinkedHashMap<String, String> doc0bindings = new LinkedHashMap<String, String>() {{
+    private final LinkedHashMap<String, String> doc0bindings = new LinkedHashMap<String, String>() {{
         put("b2", "b2d");
         put("b1", "b1d");
     }};
 
-    private LinkedHashMap<String, String> doc0params = new LinkedHashMap<String,String>() {{
+    private final LinkedHashMap<String, String> doc0params = new LinkedHashMap<String,String>() {{
         put("param1","value1");
     }};
 
-    private LinkedHashMap<String, String> doc0tags = new LinkedHashMap<String,String>() {{
+    private final LinkedHashMap<String, String> doc0tags = new LinkedHashMap<String,String>() {{
         put("atagname","atagvalue");
     }};
 

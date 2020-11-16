@@ -20,8 +20,8 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.*;
 import org.junit.BeforeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.List;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StmtEscapingTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(StmtEscapingTest.class);
+    private final static Logger logger = LogManager.getLogger(StmtEscapingTest.class);
     private static List<OpTemplate> defs;
 
     @BeforeClass

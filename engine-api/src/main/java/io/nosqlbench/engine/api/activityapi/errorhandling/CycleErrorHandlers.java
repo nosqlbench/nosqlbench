@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class CycleErrorHandlers {
 
-    private final static Logger logger = LoggerFactory.getLogger(CycleErrorHandlers.class);
+    private final static Logger logger = LogManager.getLogger(CycleErrorHandlers.class);
 
     public static <T extends Throwable, R> CycleErrorHandler<T, R> log(R result) {
         return (cycle, error, errMsg) -> {

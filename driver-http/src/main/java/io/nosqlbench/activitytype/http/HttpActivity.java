@@ -10,14 +10,14 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.net.http.HttpClient;
 import java.util.function.Function;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(HttpActivity.class);
+    private final static Logger logger = LogManager.getLogger(HttpActivity.class);
     private final ActivityDef activityDef;
     public HttpConsoleFormats console;
 

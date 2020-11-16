@@ -1,7 +1,7 @@
 package io.nosqlbench.driver.jmx.ops;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -12,7 +12,7 @@ import javax.management.remote.JMXConnector;
  */
 public abstract class JmxOp {
 
-    protected final static Logger logger = LoggerFactory.getLogger(JmxOp.class);
+    protected final static Logger logger = LogManager.getLogger(JmxOp.class);
 
     protected JMXConnector connector;
     protected ObjectName objectName;

@@ -23,8 +23,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -36,10 +36,10 @@ import java.util.function.Predicate;
  */
 public class ReorderingConcurrentResultBuffer implements Output, CanFilterResultValue {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReorderingConcurrentResultBuffer.class);
+    private final static Logger logger = LogManager.getLogger(ReorderingConcurrentResultBuffer.class);
 
-    private LinkedList<CycleResultsSegment> segments = new LinkedList<>();
-    private Output downstream;
+    private final LinkedList<CycleResultsSegment> segments = new LinkedList<>();
+    private final Output downstream;
     private final int threshold;
     private int currentCount;
     private int segmentCount;

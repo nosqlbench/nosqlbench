@@ -17,9 +17,10 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.logging.SessionLogConfig;
+import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;
@@ -28,6 +29,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -62,7 +64,10 @@ public class ScriptIntegrationTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/sync/" + scriptname + ".js');");
-        ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
+        ScenarioLogger scenarioLogger = new SessionLogConfig(scenarioName)
+                .setMaxLogs(0)
+                .setLogDir(Path.of("logs/test"))
+                .start();
         e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();

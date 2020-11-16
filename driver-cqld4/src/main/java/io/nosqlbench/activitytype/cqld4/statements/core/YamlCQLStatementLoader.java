@@ -3,8 +3,8 @@ package io.nosqlbench.activitytype.cqld4.statements.core;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 @SuppressWarnings("ALL")
 public class YamlCQLStatementLoader {
 
-    private final static Logger logger = LoggerFactory.getLogger(YamlCQLStatementLoader.class);
+    private final static Logger logger = LogManager.getLogger(YamlCQLStatementLoader.class);
     List<Function<String, String>> transformers = new ArrayList<>();
 
     public YamlCQLStatementLoader() {

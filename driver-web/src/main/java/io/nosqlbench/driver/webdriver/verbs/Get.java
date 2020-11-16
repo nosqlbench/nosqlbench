@@ -1,11 +1,11 @@
 package io.nosqlbench.driver.webdriver.verbs;
 
 import io.nosqlbench.driver.webdriver.WebContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class Get implements WebDriverVerb {
-    private final static Logger logger = LoggerFactory.getLogger(Get.class);
+    private final static Logger logger = LogManager.getLogger(Get.class);
 
     private final String target;
 

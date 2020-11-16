@@ -1,6 +1,5 @@
 package io.nosqlbench.engine.cli;
 
-import ch.qos.logback.classic.Level;
 import io.nosqlbench.docsys.core.DocServerApp;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
@@ -10,7 +9,9 @@ import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.metrics.GrafanaMetricsAnnotator;
+import io.nosqlbench.engine.core.logging.LoggerConfig;
+import io.nosqlbench.engine.core.logging.SessionLogConfig;
+import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
@@ -24,8 +25,10 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import joptsimple.internal.Strings;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;

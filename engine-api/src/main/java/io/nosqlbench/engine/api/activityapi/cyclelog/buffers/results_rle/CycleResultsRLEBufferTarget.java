@@ -21,8 +21,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.nio.ByteBuffer;
 import java.util.function.Predicate;
@@ -40,7 +40,7 @@ import java.util.function.Predicate;
  * will be deemed invalid and will cause an exception to be thrown.
  */
 public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue {
-    private final static Logger logger = LoggerFactory.getLogger(CycleResultsRLEBufferTarget.class);
+    private final static Logger logger = LogManager.getLogger(CycleResultsRLEBufferTarget.class);
 
     public final static int BYTES = Long.BYTES + Long.BYTES + Byte.BYTES;
 
@@ -49,8 +49,8 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
     private long lastResult = Integer.MIN_VALUE;
     private long runlength = 0L;
     private boolean flushed = false;
-    private long count=0L;
-    private long min=Long.MAX_VALUE;
+    private final long count=0L;
+    private final long min=Long.MAX_VALUE;
     private Predicate<ResultReadable> filter;
 
     /**
@@ -147,7 +147,7 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
     }
 
     private static class ResultReadableWrapper implements ResultReadable {
-        private int result;
+        private final int result;
         ResultReadableWrapper(int result) {
             this.result = result;
         }

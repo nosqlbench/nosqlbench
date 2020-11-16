@@ -24,7 +24,7 @@ import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class BobyqaOptimizerInstance {
     private double initialTrustRegionRadius = Double.MAX_VALUE;
     private double stoppingTrustRegionRadius = 1.0D;
 
-    private MVParams params = new MVParams();
+    private final MVParams params = new MVParams();
 
     private MultivariateFunction objectiveFunctionFromScript;
     private SimpleBounds bounds;

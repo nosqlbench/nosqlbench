@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import static io.nosqlbench.engine.api.util.Colors.*;
 
@@ -44,7 +44,7 @@ import static io.nosqlbench.engine.api.util.Colors.*;
  */
 public class TokenPool {
 
-    private final static Logger logger = LoggerFactory.getLogger(TokenPool.class);
+    private final static Logger logger = LogManager.getLogger(TokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 2;
 

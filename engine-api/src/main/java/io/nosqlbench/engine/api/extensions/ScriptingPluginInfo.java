@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.api.extensions;
 
 import com.codahale.metrics.MetricRegistry;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 

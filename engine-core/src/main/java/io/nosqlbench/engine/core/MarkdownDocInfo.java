@@ -3,17 +3,13 @@ package io.nosqlbench.engine.core;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class MarkdownDocInfo {
-    private final static Logger logger = LoggerFactory.getLogger(MarkdownDocInfo.class);
+    private final static Logger logger = LogManager.getLogger(MarkdownDocInfo.class);
 
     public static Optional<String> forHelpTopic(String topic) {
         String help = null;

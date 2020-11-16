@@ -1,9 +1,10 @@
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.nb.api.Environment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import joptsimple.internal.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
  * will cause an error to be thrown.
  */
 public class NBCLIArgsFile {
-    private final static Logger logger = LoggerFactory.getLogger("ARGSFILE");
+    private final static Logger logger = LogManager.getLogger("ARGSFILE");
 
     // Options which may contextualize other CLI options or commands.
     // These must be parsed first

@@ -14,20 +14,33 @@
  */
 package io.nosqlbench.engine.core.script;
 
-import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import io.nosqlbench.engine.core.*;
-import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
+import io.nosqlbench.engine.core.ActivityProgressIndicator;
+import io.nosqlbench.engine.core.PolyglotScenarioController;
+import io.nosqlbench.engine.core.ScenarioController;
+import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.logging.ScenarioLogger;
+import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
+import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import io.nosqlbench.nb.api.Layer;
+import io.nosqlbench.nb.api.annotations.Annotation;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import org.graalvm.polyglot.*;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.PolyglotAccess;
 
-import javax.script.*;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,7 +59,7 @@ import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger("SCENARIO");
+    private static final Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
 
@@ -202,8 +215,8 @@ public class Scenario implements Callable<ScenarioResult> {
                 continue;
             }
 
-            org.slf4j.Logger extensionLogger =
-                LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+            Logger extensionLogger =
+                LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             Object extensionObject = extensionDescriptor.getExtensionObject(
                 extensionLogger,
                 metricRegistry,

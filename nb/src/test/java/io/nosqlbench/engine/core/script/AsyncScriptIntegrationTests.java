@@ -17,9 +17,10 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioLogger;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.logging.SessionLogConfig;
+import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;

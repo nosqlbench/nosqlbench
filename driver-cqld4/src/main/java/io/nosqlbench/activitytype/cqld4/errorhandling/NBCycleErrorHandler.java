@@ -5,8 +5,8 @@ import io.nosqlbench.activitytype.cqld4.errorhandling.exceptions.CQLCycleWithSta
 import io.nosqlbench.engine.api.activityapi.errorhandling.CycleErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * A contextualized error handler that can catch a cycle-specific error.
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("Duplicates")
 public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorStatus> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NBCycleErrorHandler.class);
+    private static final Logger logger = LogManager.getLogger(NBCycleErrorHandler.class);
 
     private final ErrorResponse errorResponse;
     private final ExceptionCountMetrics exceptionCountMetrics;

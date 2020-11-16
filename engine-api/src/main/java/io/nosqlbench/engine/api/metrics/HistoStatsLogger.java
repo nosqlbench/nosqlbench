@@ -19,8 +19,8 @@ package io.nosqlbench.engine.api.metrics;
 
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.util.List;
@@ -36,17 +36,17 @@ import java.util.regex.Pattern;
  */
 public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment>
         implements Runnable, MetricsCloseable  {
-    private final static Logger logger = LoggerFactory.getLogger(HistoStatsLogger.class);
+    private final static Logger logger = LogManager.getLogger(HistoStatsLogger.class);
 
     private final String sessionName;
     private final TimeUnit timeUnit;
     //    private final long intervalMillis;
-    private long intervalLength;
-    private File logfile;
+    private final long intervalLength;
+    private final File logfile;
     private HistoStatsCSVWriter writer;
-    private Pattern pattern;
+    private final Pattern pattern;
 
-    private List<WriterTarget> targets = new CopyOnWriteArrayList<>();
+    private final List<WriterTarget> targets = new CopyOnWriteArrayList<>();
     private PeriodicRunnable<HistoStatsLogger> executor;
     private long lastRunTime=0L;
 

@@ -20,8 +20,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
  * Find the metrics associated with an activity type by instantiating the activity in idle mode.
  */
 public class MetricsMapper {
-    private final static Logger logger = LoggerFactory.getLogger(MetricsMapper.class);
-    private static Set<Class<?>> metricsElements = new HashSet<>() {{
+    private final static Logger logger = LogManager.getLogger(MetricsMapper.class);
+    private static final Set<Class<?>> metricsElements = new HashSet<>() {{
         add(Meter.class);
         add(Counter.class);
         add(Timer.class);
@@ -43,12 +43,12 @@ public class MetricsMapper {
         add(Gauge.class);
         add(Snapshot.class);
     }};
-    private static Predicate<Method> isSimpleGetter = method ->
+    private static final Predicate<Method> isSimpleGetter = method ->
             method.getName().startsWith("get")
                     && method.getParameterCount() == 0
                     && !method.getName().equals("getClass");
 
-    private static Function<Method, String> getPropertyName = method ->
+    private static final Function<Method, String> getPropertyName = method ->
     {
         String mName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
         return mName;

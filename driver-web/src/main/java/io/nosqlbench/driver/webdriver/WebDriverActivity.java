@@ -10,7 +10,6 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -18,27 +17,29 @@ import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebDriverActivity extends SimpleActivity {
 
-    private final static Logger logger = LoggerFactory.getLogger(WebDriverActivity.class);
+    private final static Logger logger = LogManager.getLogger(WebDriverActivity.class);
 
     //    private final StmtsDocList stmtsDocList;
     private OpSequence<CommandTemplate> opSequence;
 
-    private ConcurrentHashMap<Integer,WebContext> contexts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer,WebContext> contexts = new ConcurrentHashMap<>();
 //    private static ThreadLocal<WebContext> TL_WebContext = new ThreadLocal<>();
 
     public WebDriverActivity(ActivityDef activityDef) {

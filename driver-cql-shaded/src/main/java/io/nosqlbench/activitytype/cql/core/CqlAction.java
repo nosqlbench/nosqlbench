@@ -19,8 +19,8 @@ import io.nosqlbench.engine.api.activityapi.core.MultiPhaseAction;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("Duplicates")
 public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObserver {
 
-    private final static Logger logger = LoggerFactory.getLogger(CqlAction.class);
+    private final static Logger logger = LogManager.getLogger(CqlAction.class);
     private final int slot;
     private final CqlActivity cqlActivity;
     private final ActivityDef activityDef;

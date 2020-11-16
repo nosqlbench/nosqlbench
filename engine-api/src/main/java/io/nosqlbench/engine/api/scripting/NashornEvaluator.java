@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.scripting;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.script.*;
 
@@ -28,7 +28,7 @@ import javax.script.*;
  * @param <T> generic parameter for return types from this evaluator
  */
 public class NashornEvaluator<T> implements Evaluator<T> {
-    private final static Logger logger = LoggerFactory.getLogger(NashornEvaluator.class);
+    private final static Logger logger = LogManager.getLogger(NashornEvaluator.class);
 
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final ScriptEngine scriptEngine;

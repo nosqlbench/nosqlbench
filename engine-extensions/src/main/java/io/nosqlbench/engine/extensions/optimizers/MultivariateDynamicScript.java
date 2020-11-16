@@ -2,7 +2,7 @@ package io.nosqlbench.engine.extensions.optimizers;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class MultivariateDynamicScript implements MultivariateFunction {
     private final ScriptObjectMirror script;
     private final int varcount;
-    private Logger logger;
+    private final Logger logger;
 
     public MultivariateDynamicScript(Logger logger, int varcount, ScriptObjectMirror script) {
         this.logger = logger;

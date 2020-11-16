@@ -20,19 +20,19 @@ package io.nosqlbench.engine.core.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.core.script.ReadOnlyBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class NashornMetricRegistryBindings extends ReadOnlyBindings implements MetricRegistryListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(NashornMetricRegistryBindings.class);
+    private final static Logger logger = LogManager.getLogger(NashornMetricRegistryBindings.class);
 
     private final MetricRegistry registry;
-    private MetricMap metricMap = new MetricMap("ROOT");
-    private boolean failfast = true;
+    private final MetricMap metricMap = new MetricMap("ROOT");
+    private final boolean failfast = true;
 
     public NashornMetricRegistryBindings(MetricRegistry registry) {
         this.registry = registry;

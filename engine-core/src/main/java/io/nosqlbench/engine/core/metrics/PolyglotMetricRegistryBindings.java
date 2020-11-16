@@ -17,22 +17,20 @@
 
 package io.nosqlbench.engine.core.metrics;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * A view of metrics objects as an object tree.
  */
 public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegistryListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(PolyglotMetricRegistryBindings.class);
+    private final static Logger logger = LogManager.getLogger(PolyglotMetricRegistryBindings.class);
 
     private final MetricRegistry registry;
     MetricMap metrics = new MetricMap("ROOT",null);

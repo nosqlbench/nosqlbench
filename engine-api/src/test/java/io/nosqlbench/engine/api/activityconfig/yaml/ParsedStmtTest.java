@@ -20,14 +20,14 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import org.junit.BeforeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedStmtTest {
-    private static final Logger logger = LoggerFactory.getLogger(ParsedStmtTest.class);
+    private static final Logger logger = LogManager.getLogger(ParsedStmtTest.class);
     private static StmtsDocList doclist;
 
     @BeforeClass

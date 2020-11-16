@@ -18,8 +18,8 @@ import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
 
 public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressCapable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
-    private static final Logger activitylogger = LoggerFactory.getLogger("ACTIVITY");
+    private static final Logger logger = LogManager.getLogger(ActivityExecutor.class);
+    private static final Logger activitylogger = LogManager.getLogger("ACTIVITY");
 
     private final List<Motor<?>> motors = new ArrayList<>();
     private final Activity activity;

@@ -1,14 +1,14 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
 import com.datastax.driver.core.ConsistencyLevel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CQLStatementDef {
-    private final static Logger logger = LoggerFactory.getLogger(CQLStatementDef.class);
+    private final static Logger logger = LogManager.getLogger(CQLStatementDef.class);
 
     private Map<String,String> params = new HashMap<>();
     private String name = "";

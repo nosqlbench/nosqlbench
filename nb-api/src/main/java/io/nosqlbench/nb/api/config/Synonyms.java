@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api.config;
 
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.BiConsumer;

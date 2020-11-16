@@ -20,14 +20,14 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class TokenFiller implements Runnable {
-    private final static Logger logger = LoggerFactory.getLogger(TokenFiller.class);
+    private final static Logger logger = LogManager.getLogger(TokenFiller.class);
 
     public final static double MIN_PER_SECOND = 10D;
     public final static double MAX_PER_SECOND = 1000D;
@@ -40,7 +40,7 @@ public class TokenFiller implements Runnable {
     private RateSpec rateSpec;
     private Thread thread;
     private volatile long lastRefillAt;
-    private Timer timer;
+    private final Timer timer;
 
     /**
      * A token filler adds tokens to a {@link TokenPool} at some rate.
