@@ -21,16 +21,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
         <!-- TODO: Move this down to virtdata if it is the only module group using it -->
         <dependency>
             <groupId>org.apache.commons</groupId>

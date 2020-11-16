@@ -43,21 +43,21 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.155-SNAPSHOT</version>
+          <artifactId>engine-api</artifactId>
+          <version>3.12.155-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-stdout</artifactId>
-            <version>3.12.155-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>driver-stdout</artifactId>
+        <version>3.12.155-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
+      <!--        <dependency>-->
+      <!--            <groupId>org.slf4j</groupId>-->
+      <!--            <artifactId>slf4j-api</artifactId>-->
+      <!--            <version>1.7.25</version>-->
+      <!--        </dependency>-->
 
     </dependencies>
     <repositories>
