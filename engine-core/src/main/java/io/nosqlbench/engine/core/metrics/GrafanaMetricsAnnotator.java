@@ -1,86 +1,97 @@
 package io.nosqlbench.engine.core.metrics;
 
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
-import io.nosqlbench.engine.clients.grafana.transfer.Annotation;
-import io.nosqlbench.nb.api.annotation.Annotator;
-import io.nosqlbench.nb.api.config.ConfigAware;
-import io.nosqlbench.nb.api.config.ConfigModel;
-import io.nosqlbench.nb.api.config.MutableConfigModel;
+import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
+import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
+import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.annotations.Annotator;
+import io.nosqlbench.nb.api.config.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+@Service(value = Annotator.class, selector = "grafana")
 public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
-    private final GrafanaClient client;
+    private final static Logger logger = LogManager.getLogger("ANNOTATORS");
+    private final static Logger annotationsLog = LogManager.getLogger("ANNOTATIONS");
+    private OnError onError = OnError.Warn;
 
-    public GrafanaMetricsAnnotator(String grafanaBaseUrl) {
-        this.client = new GrafanaClient(grafanaBaseUrl);
+    private GrafanaClient client;
+    private Map<String, String> tags = new LinkedHashMap<>();
+
+    public GrafanaMetricsAnnotator() {
     }
 
-
     @Override
-    public void recordAnnotation(String sessionName, long startEpochMillis, long endEpochMillis, Map<String, String> target, Map<String, String> details) {
+    public void recordAnnotation(Annotation annotation) {
+        try {
+            GrafanaAnnotation ga = new GrafanaAnnotation();
 
-        Annotation annotation = new Annotation();
+            ga.setTime(annotation.getStart());
+            ga.setTimeEnd(annotation.getEnd());
 
-        // Target
+            annotation.getLabels().forEach((k, v) -> {
+                ga.getTags().put(k, v);
+            });
+            ga.getTags().put("layer", annotation.getLayer().toString());
 
-        Optional.ofNullable(target.get("type"))
-                .ifPresent(annotation::setType);
+            Map<String, String> labels = annotation.getLabels();
 
-        long startAt = startEpochMillis > 0 ? startEpochMillis : System.currentTimeMillis();
-        annotation.setTime(startAt);
-        annotation.setTimeEnd(endEpochMillis > 0 ? endEpochMillis : startAt);
+            Optional.ofNullable(labels.get("alertId"))
+                    .map(Integer::parseInt).ifPresent(ga::setAlertId);
 
-        String eTime = target.get("timeEnd");
-        annotation.setTimeEnd((eTime != null) ? Long.valueOf(eTime) : null);
+            ga.setData(annotation.toString());
 
-        Optional.ofNullable(target.get("id")).map(Integer::valueOf)
-                .ifPresent(annotation::setId);
+            annotation.getSession();
 
-        Optional.ofNullable(target.get("alertId")).map(Integer::valueOf)
-                .ifPresent(annotation::setAlertId);
 
-        Optional.ofNullable(target.get("dashboardId")).map(Integer::valueOf)
-                .ifPresent(annotation::setDashboardId);
+            // Target
+            Optional.ofNullable(labels.get("type"))
+                    .ifPresent(ga::setType);
 
-        Optional.ofNullable(target.get("panelId")).map(Integer::valueOf)
-                .ifPresent(annotation::setPanelId);
+            Optional.ofNullable(labels.get("id")).map(Integer::valueOf)
+                    .ifPresent(ga::setId);
 
-        Optional.ofNullable(target.get("userId")).map(Integer::valueOf)
-                .ifPresent(annotation::setUserId);
+            Optional.ofNullable(labels.get("alertId")).map(Integer::valueOf)
+                    .ifPresent(ga::setAlertId);
 
-        Optional.ofNullable(target.get("userName"))
-                .ifPresent(annotation::setUserName);
+            Optional.ofNullable(labels.get("dashboardId")).map(Integer::valueOf)
+                    .ifPresent(ga::setDashboardId);
 
-        Optional.ofNullable(target.get("tags"))
-                .ifPresent(annotation::setTags);
+            Optional.ofNullable(labels.get("panelId")).map(Integer::valueOf)
+                    .ifPresent(ga::setPanelId);
 
-        Optional.ofNullable(details.get("metric"))
-                .ifPresent(annotation::setMetric);
+            Optional.ofNullable(labels.get("userId")).map(Integer::valueOf)
+                    .ifPresent(ga::setUserId);
 
-        // Details
+            Optional.ofNullable(labels.get("userName"))
+                    .ifPresent(ga::setUserName);
 
-        StringBuilder sb = new StringBuilder();
-        if (details.containsKey("text")) {
-            annotation.setText(details.get("text"));
-        } else {
-            for (String dkey : details.keySet()) {
-                sb.append(sb).append(": ").append(details.get(dkey)).append("\n");
+            Optional.ofNullable(labels.get("metric"))
+                    .ifPresent(ga::setMetric);
+
+            // Details
+
+            annotationsLog.info("ANNOTATION:" + ga.toString());
+            GrafanaAnnotation created = this.client.createAnnotation(ga);
+
+        } catch (Exception e) {
+            switch (onError) {
+                case Warn:
+                    logger.warn("Error while reporting annotation: " + e.getMessage(), e);
+                    break;
+                case Throw:
+                    throw e;
             }
-            annotation.setText(details.toString());
         }
 
-        Optional.ofNullable(details.get("data"))
-                .ifPresent(annotation::setData);
-
-        Optional.ofNullable(details.get("prevState"))
-                .ifPresent(annotation::setPrevState);
-        Optional.ofNullable(details.get("newState"))
-                .ifPresent(annotation::setNewState);
-
-        Annotation created = this.client.createAnnotation(annotation);
     }
 
     @Override
@@ -89,14 +100,91 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
     }
 
     @Override
-    public void applyConfig(Map<String, ?> element) {
+    public void applyConfig(Map<String, ?> providedConfig) {
         ConfigModel configModel = getConfigModel();
+        ConfigReader cfg = configModel.apply(providedConfig);
 
+        GrafanaClientConfig gc = new GrafanaClientConfig();
+        gc.setBaseUri(cfg.param("baseurl", String.class));
 
+        if (cfg.containsKey("tags")) {
+            this.tags = ParamsParser.parse(cfg.param("tags", String.class), false);
+        }
+
+        if (cfg.containsKey("apikeyfile")) {
+            String apikeyfile = cfg.paramEnv("apikeyfile", String.class);
+            AuthWrapper authHeaderSupplier = new AuthWrapper(
+                    "Authorization",
+                    new GrafanaKeyFileReader(apikeyfile),
+                    s -> "Bearer " + s + ";"
+            );
+            gc.addHeaderSource(authHeaderSupplier);
+        }
+
+        if (cfg.containsKey("apikey")) {
+            gc.addHeaderSource(() -> Map.of("Authorization", "Bearer " + cfg.param("apikey", String.class)));
+        }
+
+        if (cfg.containsKey("username")) {
+            if (cfg.containsKey("password")) {
+                gc.basicAuth(
+                        cfg.param("username", String.class),
+                        cfg.param("password", String.class)
+                );
+            } else {
+                gc.basicAuth(cfg.param("username", String.class), "");
+            }
+        }
+
+        this.onError = OnError.valueOfName(cfg.get("onerror").toString());
+
+        this.client = new GrafanaClient(gc);
     }
 
     @Override
     public ConfigModel getConfigModel() {
-        return new MutableConfigModel().add("baseurl", String.class).asReadOnly();
+        return new MutableConfigModel(this)
+                .required("baseurl", String.class,
+                        "The base url of the grafana node, like http://localhost:3000/")
+                .defaultto("apikeyfile", "$NBSTATEDIR/grafana_key",
+                        "The file that contains the api key, supersedes apikey")
+                .optional("apikey", String.class,
+                        "The api key to use, supersedes basic username and password")
+                .optional("username", String.class,
+                        "The username to use for basic auth")
+                .optional("password", String.class,
+                        "The password to use for basic auth")
+                .defaultto("tags", "source:nosqlbench",
+                        "The tags that identify the annotations, in k:v,... form")
+//                .defaultto("onerror", OnError.Warn)
+                .defaultto("onerror", "warn",
+                        "What to do when an error occurs while posting an annotation")
+                .defaultto("timeoutms", 5000,
+                        "connect and transport timeout for the HTTP client")
+                .asReadOnly();
+    }
+
+
+    public static class AuthWrapper implements Supplier<Map<String, String>> {
+
+        private final Function<String, String> valueMapper;
+        private final String headerName;
+        private final Supplier<String> valueSupplier;
+
+        public AuthWrapper(String headerName, Supplier<String> valueSupplier, Function<String, String> valueMapper) {
+            this.headerName = headerName;
+            this.valueSupplier = valueSupplier;
+            this.valueMapper = valueMapper;
+        }
+
+        @Override
+        public Map<String, String> get() {
+            String value = valueSupplier.get();
+            if (value != null) {
+                value = valueMapper.apply(value);
+                return Map.of(headerName, value);
+            }
+            return Map.of();
+        }
     }
 }

@@ -1,10 +1,8 @@
 package io.nosqlbench.engine.clients.grafana.transfer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-public class Annotation {
+public class GrafanaAnnotation {
 
     private Integer id;
     private Integer alertId;
@@ -19,7 +17,7 @@ public class Annotation {
     private String text;
     private String metric;
     private String type;
-    private List<String> tags = new ArrayList<String>();
+    private Map<String, String> tags = new LinkedHashMap<>();
     private Object data;
 
     public Integer getId() {
@@ -126,16 +124,12 @@ public class Annotation {
         this.type = type;
     }
 
-    public List<String> getTags() {
+    public Map<String, String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(Map<String, String> tags) {
         this.tags = tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = Arrays.asList(tags.split("\\\\s,\\\\s"));
     }
 
     public Object getData() {

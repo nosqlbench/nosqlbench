@@ -2,75 +2,32 @@ package io.nosqlbench.engine.clients.grafana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.clients.grafana.transfer.Annotation;
+import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
 import io.nosqlbench.engine.clients.grafana.transfer.Annotations;
+import io.nosqlbench.engine.clients.grafana.transfer.ApiTokenRequest;
 
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Base64;
 
 /**
  * @see <a href="https://grafana.com/docs/grafana/latest/http_api/annotations/">Grafana Annotations API Docs</a>
  */
 public class GrafanaClient {
 
-    private final URI baseuri;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    Authenticator auth = null;
-    private String username;
-    private String password;
+    private final GrafanaClientConfig config;
 
-    public GrafanaClient(String baseurl) {
-        this.baseuri = initURI(baseurl);
+    public GrafanaClient(GrafanaClientConfig config) {
+        this.config = config;
     }
 
-    public void basicAuth(String username, String password) {
-        this.username = username;
-        this.password = password;
-        this.auth = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password.toCharArray());
-            }
-        };
+    public GrafanaClient(String baseuri) {
+        this(new GrafanaClientConfig().setBaseUri(baseuri));
     }
 
-    private URI initURI(String baseurl) {
-        try {
-            URI uri = new URI(baseurl);
-            String userinfo = uri.getRawUserInfo();
-            if (userinfo != null) {
-                String[] unpw = userinfo.split(":");
-                this.username = unpw[0];
-                this.password = unpw[1];
-                uri = new URI(baseurl.replace(userinfo + "@", ""));
-            }
-            return uri;
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private HttpClient getClient() {
-        HttpClient.Builder cb = HttpClient.newBuilder();
-        if (this.auth != null) {
-            cb.authenticator(auth);
-        }
-        HttpClient client = cb.build();
-        return client;
-    }
-
-    private URI makeUri(String pathAndQuery) {
-        try {
-            return new URI(this.baseuri.toString() + pathAndQuery);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    public GrafanaClientConfig getConfig() {
+        return config;
     }
 
     /**
@@ -147,12 +104,11 @@ public class GrafanaClient {
     public Annotations findAnnotations(By... by) {
 
         String query = By.fields(by);
-        HttpRequest.Builder rqb = HttpRequest.newBuilder(makeUri("api/annotations?" + query));
-        rqb = addAuth(rqb);
+        HttpRequest.Builder rqb = config.newRequest("api/annotations?" + query);
         rqb.setHeader("Content-Type", "application/json");
         HttpRequest request = rqb.build();
 
-        HttpClient client = getClient();
+        HttpClient client = config.newClient();
         HttpResponse<String> response = null;
 
         try {
@@ -196,14 +152,12 @@ public class GrafanaClient {
      *
      * @return
      */
-    public Annotation createAnnotation(Annotation annotation) {
-        HttpClient client = getClient();
-        HttpRequest.Builder rqb = HttpRequest.newBuilder(makeUri("api/annotations"));
-        rqb = addAuth(rqb);
+    public GrafanaAnnotation createAnnotation(GrafanaAnnotation grafanaAnnotation) {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/annotations");
         rqb.setHeader("Content-Type", "application/json");
-        String rqBody = gson.toJson(annotation);
+        String rqBody = gson.toJson(grafanaAnnotation);
         rqb = rqb.POST(HttpRequest.BodyPublishers.ofString(rqBody));
-        addAuth(rqb);
 
         HttpResponse<String> response = null;
         try {
@@ -218,22 +172,11 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Creating annotation failed with status code " + response.statusCode() + " at " +
-                    "baseurl " + baseuri + ": " + response.body());
+                    "baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
-        Annotation savedAnnotation = gson.fromJson(body, Annotation.class);
-        return savedAnnotation;
-    }
-
-    private HttpRequest.Builder addAuth(HttpRequest.Builder rqb) {
-        if (this.username != null && this.password != null) {
-            rqb = rqb.setHeader("Authorization", encodeBasicAuth(username, password));
-        }
-        return rqb;
-    }
-
-    private static String encodeBasicAuth(String username, String password) {
-        return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+        GrafanaAnnotation savedGrafanaAnnotation = gson.fromJson(body, GrafanaAnnotation.class);
+        return savedGrafanaAnnotation;
     }
 
     /**
@@ -265,8 +208,8 @@ public class GrafanaClient {
      *
      * @return
      */
-    public Annotation createGraphiteAnnotation() {
-        return null;
+    public GrafanaAnnotation createGraphiteAnnotation() {
+        throw new RuntimeException("unimplemented");
     }
 
     /**
@@ -299,7 +242,7 @@ public class GrafanaClient {
      * }</pre>
      */
     public void updateAnnotation() {
-
+        throw new RuntimeException("unimplemented");
     }
 
     /**
@@ -332,7 +275,7 @@ public class GrafanaClient {
      * }</pre>
      */
     public void patchAnnotation() {
-
+        throw new RuntimeException("unimplemented");
     }
 
     /**
@@ -356,7 +299,36 @@ public class GrafanaClient {
      * @param id
      */
     public void deleteAnnotation(long id) {
-
+        throw new RuntimeException("unimplemented");
     }
 
+    public ApiToken createApiToken(String name, String role, long ttl) {
+        ApiTokenRequest r = new ApiTokenRequest(name, role, ttl);
+        ApiToken token = postToGrafana(r, ApiToken.class, "gen api token");
+        return token;
+    }
+
+    private <T> T postToGrafana(Object request, Class<? extends T> clazz, String desc) {
+        HttpRequest rq = config.newJsonPOST("api/auth/keys", request);
+        HttpClient client = config.newClient();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rq, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            if (e.getMessage().contains("WWW-Authenticate header missing")) {
+                throw new RuntimeException("Java HttpClient was not authorized, and it saw no WWW-Authenticate header" +
+                        " in the response, so this is probably Grafana telling you that the auth scheme failed. Normally " +
+                        "this error would be thrown by Java HttpClient:" + e.getMessage());
+            }
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Request to grafana failed with status code " + response.statusCode() + "\n" +
+                    " while trying to '" + desc + "'\n at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+        T result = gson.fromJson(body, clazz);
+        return result;
+    }
 }
