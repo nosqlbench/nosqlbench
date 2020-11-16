@@ -1,8 +1,8 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.nb.api;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * invalid in this API, except when provided as a default value.
  */
 public class Environment {
-    private final static Logger logger = LoggerFactory.getLogger(Environment.class);
+    private final static Logger logger = LogManager.getLogger("ENVIRONMENT");
 
     // package private for testing
     Environment() {

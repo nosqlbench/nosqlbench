@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.nb.api;
 
 import org.junit.Test;
 
