@@ -624,7 +624,7 @@ public class NBCLIOptions {
 
     private String readWordOrThrow(LinkedList<String> arglist, String required) {
         if (arglist.peekFirst() == null) {
-            throw new InvalidParameterException(required + " not found");
+            throw new InvalidParameterException(required + " is required after this option");
         }
         return arglist.removeFirst();
     }
