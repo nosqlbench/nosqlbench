@@ -20,6 +20,7 @@ package io.nosqlbench.virtdata.library.basics.shared.conversions.from_long;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.nio.ByteBuffer;
@@ -32,10 +33,27 @@ import java.util.function.LongFunction;
 @Categories({Category.conversion})
 public class ToByteBuffer implements LongFunction<ByteBuffer> {
 
+    private final int allocSize;
+    private final int bufSize;
+
+    public ToByteBuffer() {
+        this.allocSize = Long.BYTES;
+        this.bufSize = Long.BYTES;
+    }
+
+    @Example({"ToByteBuffer(13)", "Repeat the input long value to make a 13byte buffer"})
+    public ToByteBuffer(int size) {
+        this.bufSize = size;
+        this.allocSize = ((size + Long.BYTES - 1) / Long.BYTES) * Long.BYTES;
+    }
+
     @Override
     public ByteBuffer apply(long input) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(input);
+        ByteBuffer buffer = ByteBuffer.allocate(allocSize);
+        while (buffer.remaining() >= Long.BYTES) {
+            buffer.putLong(input);
+        }
+        buffer.position(this.bufSize);
         buffer.flip();
         return buffer;
     }
