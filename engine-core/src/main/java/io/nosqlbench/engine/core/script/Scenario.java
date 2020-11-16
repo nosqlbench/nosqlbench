@@ -231,9 +231,18 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
-        state=State.Running;
+        state = State.Running;
 
-        startedAtMillis=System.currentTimeMillis();
+        startedAtMillis = System.currentTimeMillis();
+        Annotators.recordAnnotation(
+                Annotation.newBuilder()
+                        .session(this.scenarioName)
+                        .now()
+                        .layer(Layer.Scenario)
+                        .label("scenario", getScenarioName())
+                        .detail("engine", this.engine.toString())
+                        .build()
+        );
         init();
         logger.debug("Running control script for " + getScenarioName() + ".");
         for (String script : scripts) {

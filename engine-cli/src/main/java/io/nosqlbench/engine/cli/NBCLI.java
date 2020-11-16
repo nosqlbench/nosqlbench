@@ -18,7 +18,8 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
-import io.nosqlbench.nb.api.annotation.Annotator;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.Layer;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -89,6 +90,8 @@ public class NBCLI {
         boolean dockerMetrics = globalOptions.wantsDockerMetrics();
         String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
+        String annotatorsConfig = globalOptions.getAnnotatorsConfig();
+
         int mOpts = (dockerMetrics ? 1 : 0) + (dockerMetricsAt != null ? 1 : 0) + (reportGraphiteTo != null ? 1 : 0);
         if (mOpts > 1 && (reportGraphiteTo == null || annotatorsConfig == null)) {
             throw new BasicError("You have multiple conflicting options which attempt to set\n" +
@@ -249,6 +252,16 @@ public class NBCLI {
             System.exit(0);
         }
 
+        Annotators.init(annotatorsConfig);
+        Annotators.recordAnnotation(
+                Annotation.newBuilder()
+                        .session(sessionName)
+                        .now()
+                        .layer(Layer.CLI)
+                        .detail("cli", Strings.join(args, "\n"))
+                        .build()
+        );
+
         if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {
             MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
@@ -261,11 +274,6 @@ public class NBCLI {
             }
             reporters.start(10, options.getReportInterval());
         }
-
-        Annotators.recordAnnotation(sessionName,
-                Map.of("event", "command-line", "args", String.join(" ", args)),
-                Map.of()
-        );
 
         if (options.wantsEnableChart()) {
             logger.info("Charting enabled");
