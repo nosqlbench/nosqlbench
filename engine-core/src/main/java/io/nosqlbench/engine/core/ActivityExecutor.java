@@ -108,12 +108,13 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public synchronized void stopActivity() {
         activitylogger.debug("STOP/before alias=(" + activity.getAlias() + ")");
 
-        activity.setRunState(RunState.Stopped);
+        activity.setRunState(RunState.Stopping);
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
         motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
         activity.shutdownActivity();
         activity.closeAutoCloseables();
+        activity.setRunState(RunState.Stopped);
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
         activitylogger.debug("STOP/after alias=(" + activity.getAlias() + ")");
 
@@ -181,7 +182,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public boolean requestStopExecutor(int secondsToWait) {
         activitylogger.debug("REQUEST STOP/before alias=(" + activity.getAlias() + ")");
 
-        activity.setRunState(RunState.Stopped);
 
         logger.info("Stopping executor for " + activity.getAlias() + " when work completes.");
 
@@ -200,6 +200,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             activity.shutdownActivity();
             logger.trace("closing auto-closeables");
             activity.closeAutoCloseables();
+            activity.setRunState(RunState.Stopped);
         }
         if (stoppingException != null) {
             logger.trace("an exception caused the activity to stop:" + stoppingException.getMessage());
