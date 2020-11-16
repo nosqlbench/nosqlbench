@@ -1,17 +1,13 @@
 package io.nosqlbench.nb.api.config;
 
-import java.util.List;
+import java.util.Map;
 
 public interface ConfigModel {
-    List<Element> getElements();
+    Map<String, ConfigElement> getElements();
 
-    class Element {
-        public final String name;
-        public final Class<?> type;
+    Class<?> getOf();
 
-        public Element(String name, Class<?> type) {
-            this.name = name;
-            this.type = type;
-        }
-    }
+    void assertValidConfig(Map<String, ?> config);
+
+    ConfigReader apply(Map<String, ?> config);
 }

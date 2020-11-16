@@ -42,15 +42,15 @@ public class LoadElement implements Function<Object,Object>, ConfigAware {
     }
 
     @Override
-    public void applyConfig(Map<String, ?> elements) {
-        Map<String,?> vars = (Map<String, ?>) elements.get(mapname);
-        if (vars!=null) {
+    public void applyConfig(Map<String, ?> providedConfig) {
+        Map<String, ?> vars = (Map<String, ?>) providedConfig.get(mapname);
+        if (vars != null) {
             this.vars = vars;
         }
     }
 
     @Override
     public ConfigModel getConfigModel() {
-        return new MutableConfigModel().add("<mapname>",Map.class);
+        return new MutableConfigModel(this).optional("<mapname>", Map.class);
     }
 }
