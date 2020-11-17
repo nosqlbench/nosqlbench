@@ -1,0 +1,268 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.nosqlbench</groupId>
+    <artifactId>mvn-defaults</artifactId>
+    <version>3.12.156-SNAPSHOT</version>
+    <relativePath>../mvn-defaults</relativePath>
+  </parent>
+
+  <artifactId>driver-dsegraph-shaded</artifactId>
+  <packaging>jar</packaging>
+  <name>${project.artifactId}</name>
+
+  <description>
+    A DSE Graph ActivityType driver for nosqlbench, based on http://nosqlbench.io/
+  </description>
+
+  <dependencies>
+
+    <!-- core dependencies -->
+
+    <dependency>
+      <groupId>io.nosqlbench</groupId>
+      <artifactId>engine-api</artifactId>
+      <version>3.12.156-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.nosqlbench</groupId>
+      <artifactId>drivers-api</artifactId>
+      <version>3.12.156-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.datastax.dse</groupId>
+      <artifactId>dse-java-driver-graph</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.datastax.dse</groupId>
+      <artifactId>dse-java-driver-core</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.datastax.dse</groupId>
+      <artifactId>dse-java-driver-extras</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.datastax.dse</groupId>
+      <artifactId>dse-java-driver-mapping</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+
+    <!-- For CQL compression option -->
+    <dependency>
+      <groupId>org.lz4</groupId>
+      <artifactId>lz4-java</artifactId>
+    </dependency>
+
+    <!-- For CQL compression option -->
+    <dependency>
+      <groupId>org.xerial.snappy</groupId>
+      <artifactId>snappy-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>4.8</version>
+    </dependency>
+
+    <!--        <dependency>-->
+    <!--            <groupId>io.netty</groupId>-->
+    <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
+    <!--            <version>4.1.47.Final</version>-->
+    <!--            <classifier>linux-x86_64</classifier>-->
+    <!--        </dependency>-->
+
+    <!-- test only scope -->
+
+    <!-- This is added as shaded to satisfy old jmx reporting dependencies-->
+
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>3.2.2</version>
+    </dependency>
+    <!--        <dependency>-->
+    <!--            <groupId>org.apache.commons</groupId>-->
+    <!--            <artifactId>commons-lang3</artifactId>-->
+    <!--            <version>3.7</version>-->
+    <!--        </dependency>-->
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+
+    <!-- test only scope -->
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.13.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core-java8</artifactId>
+      <version>1.0.0m1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- compile only scope -->
+
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.23</version>
+    </dependency>
+
+
+  </dependencies>
+
+
+  <build>
+    <plugins>
+
+      <!--
+      If this plugin is re-enabled, the local CQL grammar will
+      be overwritten. The grammar has some syntax issues, so
+      fixes will be made to it before it is submitted back.
+
+      (lack of composite key syntax, nested type syntax, etc)
+      -->
+      <!--            <plugin>-->
+      <!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
+      <!--                <artifactId>download-maven-plugin</artifactId>-->
+      <!--                <version>1.4.0</version>-->
+      <!--                <executions>-->
+      <!--                    <execution>-->
+      <!--                        <id>get-cql-lexer</id>-->
+      <!--                        <phase>generate-sources</phase>-->
+      <!--                        <goals>-->
+      <!--                            <goal>wget</goal>-->
+      <!--                        </goals>-->
+      <!--                        <configuration>-->
+      <!--                            <url>-->
+      <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlLexer.g4-->
+      <!--                            </url>-->
+      <!--                            <outputFileName>CqlLexer.g4</outputFileName>-->
+      <!--                            <outputDirectory>src/main/grammars/cql3/-->
+      <!--                            </outputDirectory>-->
+      <!--                        </configuration>-->
+      <!--                    </execution>-->
+      <!--                    <execution>-->
+      <!--                        <id>get-cql-parser</id>-->
+      <!--                        <phase>generate-sources</phase>-->
+      <!--                        <goals>-->
+      <!--                            <goal>wget</goal>-->
+      <!--                        </goals>-->
+      <!--                        <configuration>-->
+      <!--                            <url>-->
+      <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlParser.g4-->
+      <!--                            </url>-->
+      <!--                            <outputFileName>CqlParser.g4</outputFileName>-->
+      <!--                            <outputDirectory>src/main/grammars/cql3/-->
+      <!--                            </outputDirectory>-->
+      <!--                        </configuration>-->
+      <!--                    </execution>-->
+      <!--                </executions>-->
+      <!--            </plugin>-->
+
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>4.8</version>
+        <configuration>
+          <sourceDirectory>src/main/grammars/cql3
+          </sourceDirectory>
+          <arguments>
+            <argument>-package</argument>
+            <argument>io.nosqlbench.generators.cql.generated
+            </argument>
+          </arguments>
+          <outputDirectory>
+            src/main/java/io/nosqlbench/generators/cql/generated
+          </outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>antlr</id>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+            <phase>generate-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+          <createSourcesJar>true</createSourcesJar>
+          <!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
+          <!--          <shadedClassifierName>shaded</shadedClassifierName>-->
+          <relocations>
+            <relocation>
+              <pattern>com.google.common</pattern>
+              <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
+            </relocation>
+            <!--                        <relocation>-->
+            <!--                            <pattern>com.datastax</pattern>-->
+            <!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
+            <!--                        </relocation>-->
+            <!--                        <relocation>-->
+            <!--                            <pattern>io.netty</pattern>-->
+            <!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
+            <!--                        </relocation>-->
+          </relocations>
+          <artifactSet>
+            <includes>
+              <include>*:*</include>
+            </includes>
+          </artifactSet>
+          <transformers combine.children="append">
+            <transformer
+                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
+            </transformer>
+          </transformers>
+          <!--          <finalName>${project.artifactId}</finalName>-->
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

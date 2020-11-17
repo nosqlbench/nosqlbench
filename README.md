@@ -57,8 +57,8 @@ some missing docs!
 ### NoSQLBench Slack
 
 There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You
-can get that through
-[this simple form](https://docs.google.com/forms/d/e/1FAIpQLSdUOJ8iAPqyxsLfh1nBBsKShI53RAeuzYW4bKExmRMWjj4ufQ/viewform),
+can get that 
+[here](https://join.slack.com/t/nosqlbench/shared_invite/zt-hvavu1tu-CLX_w7plZrv_A8kDBCw_3A),
 which will send you an invite in email: Slack Invite. This is just a simple google form that automates the invite
 process.
 

@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.155-SNAPSHOT</version>
+        <version>3.12.156-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -37,20 +37,20 @@
         <!-- https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer -->
         <dependency>
             <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>5.5.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-          <artifactId>engine-api</artifactId>
-          <version>3.12.155-SNAPSHOT</version>
+          <artifactId>kafka-avro-serializer</artifactId>
+          <version>5.5.1</version>
         </dependency>
 
       <dependency>
         <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-api</artifactId>
+        <version>3.12.156-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
         <artifactId>driver-stdout</artifactId>
-        <version>3.12.155-SNAPSHOT</version>
+        <version>3.12.156-SNAPSHOT</version>
       </dependency>
 
       <!--        <dependency>-->
