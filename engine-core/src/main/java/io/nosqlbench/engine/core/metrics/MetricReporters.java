@@ -116,7 +116,7 @@ public class MetricReporters implements Shutdownable {
     }
 
     public MetricReporters addLogger() {
-        logger.debug("Adding slf4j reporter for metrics");
+        logger.debug("Adding log4j reporter for metrics");
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");
