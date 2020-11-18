@@ -11,15 +11,15 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 @SuppressWarnings("Duplicates")
 public class GraphAction implements SyncAction, ActivityDefObserver {
 
-    private static final Logger logger = LoggerFactory.getLogger(GraphAction.class);
+    private static final Logger logger = LogManager.getLogger(GraphAction.class);
     List<BindableGraphStatement> readyGraphStmts;
     private final int slot;
     private final GraphActivity activity;

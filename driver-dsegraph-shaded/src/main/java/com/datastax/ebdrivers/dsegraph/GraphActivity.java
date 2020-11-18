@@ -17,7 +17,6 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
@@ -27,8 +26,8 @@ import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
 import io.nosqlbench.engine.api.scripting.NashornEvaluator;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,12 +36,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @SuppressWarnings("Duplicates")
 public class GraphActivity extends SimpleActivity implements ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(GraphActivity.class);
+    private final static Logger logger = LogManager.getLogger(GraphActivity.class);
 
     public Timer bindTimer;
     public Timer executeTimer;

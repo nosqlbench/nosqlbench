@@ -3,14 +3,14 @@ package com.datastax.ebdrivers.dsegraph.errorhandling;
 import com.datastax.driver.core.exceptions.*;
 import com.datastax.driver.dse.graph.GraphStatement;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings("Duplicates")
 public class GraphErrorHandler {
-    private final static Logger logger = LoggerFactory.getLogger(GraphErrorHandler.class);
+    private final static Logger logger = LogManager.getLogger(GraphErrorHandler.class);
 
     private final ErrorResponse realErrorResponse;
     // private final ErrorResponse unappliedResponse;
