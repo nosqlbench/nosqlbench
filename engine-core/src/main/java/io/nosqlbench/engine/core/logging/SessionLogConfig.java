@@ -29,7 +29,7 @@ public class SessionLogConfig implements ScenarioLogger {
     private String consolePattern = DEFAULT_CONSOLE_PATTERN;
     //    private final Scenario scenario;
     private Path loggerDir = Path.of("logs");
-    private NBLogLevel logLevel;
+    private NBLogLevel logLevel = NBLogLevel.INFO;
     private int maxLogfiles = 100;
     private Map<String, String> logLevelOverrides = new LinkedHashMap<>();
 
