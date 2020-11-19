@@ -67,9 +67,11 @@ public class ScenariosResults {
 
             if (oresult != null) {
                 oresult.reportToLog();
+                oresult.reportToConsole();
             } else {
                 logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
             }
+
         }
     }
 

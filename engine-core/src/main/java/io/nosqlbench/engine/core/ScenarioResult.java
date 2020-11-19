@@ -18,6 +18,7 @@
 
 package io.nosqlbench.engine.core;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
@@ -44,6 +45,7 @@ public class ScenarioResult {
     }
 
     public void reportToLog() {
+
         logger.info("-- BEGIN METRICS DETAIL --");
         Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
@@ -56,13 +58,23 @@ public class ScenarioResult {
 
     }
 
+    public void reportToConsole() {
+        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+                .convertDurationsTo(TimeUnit.MICROSECONDS)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .filter(MetricFilter.ALL)
+                .outputTo(System.out)
+                .build();
+        consoleReporter.report();
+    }
+
 
     public Optional<Exception> getException() {
         return Optional.ofNullable(exception);
     }
 
     public void rethrowIfError() {
-        if (exception!=null) {
+        if (exception != null) {
             if (exception instanceof RuntimeException) {
                 throw ((RuntimeException) exception);
             } else {
@@ -74,4 +86,5 @@ public class ScenarioResult {
     public String getIOLog() {
         return this.iolog;
     }
+
 }
