@@ -30,7 +30,7 @@ import java.util.ArrayList;
  */
 public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegistryListener {
 
-    private final static Logger logger = LogManager.getLogger(PolyglotMetricRegistryBindings.class);
+    private final static Logger logger = LogManager.getLogger("METRICS");
 
     private final MetricRegistry registry;
     MetricMap metrics = new MetricMap("ROOT",null);
@@ -75,8 +75,8 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onGaugeAdded(String name, Gauge<?> gauge) {
-        metrics.add(name,gauge);
-        logger.info("gauge added: " + name +", " + gauge);
+        metrics.add(name, gauge);
+        logger.info("gauge added: " + name);
     }
 
     @Override

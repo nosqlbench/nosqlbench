@@ -4,7 +4,6 @@ import io.nosqlbench.nb.api.Environment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import joptsimple.internal.Strings;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,7 +55,8 @@ import java.util.stream.Collectors;
  * will cause an error to be thrown.
  */
 public class NBCLIArgsFile {
-    private final static Logger logger = LogManager.getLogger("ARGSFILE");
+    private Logger logger;
+//    = LogManager.getLogger("ARGSFILE");
 
     // Options which may contextualize other CLI options or commands.
     // These must be parsed first
@@ -176,10 +176,14 @@ public class NBCLIArgsFile {
         LinkedHashSet<String> extant = readArgsFile(this.argsPath, Selection.IgnoreIfMissing);
         LinkedHashSet<String> mergedPins = mergePins(this.argsToPin, this.argsToUnpin, extant);
         if (extant.equals(mergedPins)) {
-            logger.info("Pinning resulted in no changes to argsfile '" + this.argsPath.toString() + "'");
+            if (logger != null) {
+                logger.info("Pinning resulted in no changes to argsfile '" + this.argsPath.toString() + "'");
+            }
         } else {
-            logger.info("Writing updated argsfile '" + this.argsPath.toString() + "' with " +
-                    (this.argsToPin.size() + this.argsToUnpin.size()) + " changes");
+            if (logger != null) {
+                logger.info("Writing updated argsfile '" + this.argsPath.toString() + "' with " +
+                        (this.argsToPin.size() + this.argsToUnpin.size()) + " changes");
+            }
             writeArgsFile(mergedPins);
         }
 
@@ -212,19 +216,27 @@ public class NBCLIArgsFile {
 
         for (String toAdd : toPin) {
             if (merged.contains(toAdd)) {
-                logger.warn("Requested to pin argument again: '" + toAdd + "', ignoring");
+                if (logger != null) {
+                    logger.warn("Requested to pin argument again: '" + toAdd + "', ignoring");
+                }
             } else {
-                logger.info("Pinning option '" + toAdd + "' to '" + this.argsPath.toString() + "'");
+                if (logger != null) {
+                    logger.info("Pinning option '" + toAdd + "' to '" + this.argsPath.toString() + "'");
+                }
                 merged.add(toAdd);
             }
         }
 
         for (String toDel : toUnpin) {
             if (merged.contains(toDel)) {
-                logger.info("Unpinning '" + toDel + "' from '" + this.argsPath.toString() + "'");
+                if (logger != null) {
+                    logger.info("Unpinning '" + toDel + "' from '" + this.argsPath.toString() + "'");
+                }
                 merged.remove(toDel);
             } else {
-                logger.warn("Requested to unpin argument '" + toDel + "' which was not found in " + argsPath.toString());
+                if (logger != null) {
+                    logger.warn("Requested to unpin argument '" + toDel + "' which was not found in " + argsPath.toString());
+                }
             }
         }
 
@@ -244,7 +256,9 @@ public class NBCLIArgsFile {
                 .map(p -> {
                     String q = Environment.INSTANCE.interpolate(p).orElse(p);
                     if (!q.equals(p)) {
-                        logger.info("argsfile: '" + argsPath.toString() + "': loaded option '" + p + "' as '" + q + "'");
+                        if (logger != null) {
+                            logger.info("argsfile: '" + argsPath.toString() + "': loaded option '" + p + "' as '" + q + "'");
+                        }
                     }
                     return q;
                 })
@@ -360,7 +374,9 @@ public class NBCLIArgsFile {
                 case ErrorIfMissing:
                     throw new RuntimeException("A required argsfile was specified, but it does not exist: '" + argspath + "'");
                 case WarnIfMissing:
-                    logger.warn("An argsfile was specified, but it does not exist: '" + argspath + "'");
+                    if (logger != null) {
+                        logger.warn("An argsfile was specified, but it does not exist: '" + argspath + "'");
+                    }
                 case IgnoreIfMissing:
             }
             return false;
@@ -390,7 +406,9 @@ public class NBCLIArgsFile {
         }
 
         this.argsPath = selected;
-        logger.debug("argsfile path is now '" + this.argsPath.toString() + "'");
+        if (logger != null) {
+            logger.debug("argsfile path is now '" + this.argsPath.toString() + "'");
+        }
     }
 
     /**

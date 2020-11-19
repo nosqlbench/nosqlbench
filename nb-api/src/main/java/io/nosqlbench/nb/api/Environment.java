@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * invalid in this API, except when provided as a default value.
  */
 public class Environment {
-    private final static Logger logger = LogManager.getLogger("ENVIRONMENT");
+    private Logger logger;
 
     // package private for testing
     Environment() {
@@ -66,7 +66,9 @@ public class Environment {
         }
         if (references.containsKey(propname)) {
             if (references.get(propname).equals(value)) {
-                logger.warn("changing already referenced property '" + propname + "' to same value");
+                if (logger != null) {
+                    logger.warn("changing already referenced property '" + propname + "' to same value");
+                }
             } else {
                 throw new BasicError("Changing already referenced property '" + propname + "' from \n" +
                         "'" + references.get(propname) + "' to '" + value + "' is not supported.\n" +
@@ -108,7 +110,9 @@ public class Environment {
         }
         if (envToProp.containsKey(name.toUpperCase())) {
             String propName = envToProp.get(name.toUpperCase());
-            logger.debug("redirecting env var '" + name + "' to property '" + propName + "'");
+            if (logger != null) {
+                logger.debug("redirecting env var '" + name + "' to property '" + propName + "'");
+            }
             value = System.getProperty(propName);
             if (value != null) {
                 return value;
@@ -173,7 +177,9 @@ public class Environment {
             }
             String value = peek(envvar);
             if (value == null) {
-                logger.debug("no value found for '" + envvar + "', returning Optional.empty() for '" + word + "'");
+                if (logger != null) {
+                    logger.debug("no value found for '" + envvar + "', returning Optional.empty() for '" + word + "'");
+                }
                 return Optional.empty();
             } else {
                 value = reference(envvar, value);

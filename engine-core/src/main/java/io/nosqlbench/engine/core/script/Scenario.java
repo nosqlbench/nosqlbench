@@ -24,7 +24,6 @@ import io.nosqlbench.engine.core.PolyglotScenarioController;
 import io.nosqlbench.engine.core.ScenarioController;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.nb.api.Layer;
@@ -59,7 +58,7 @@ import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
 
-    private static final Logger logger = LogManager.getLogger("SCENARIO");
+    private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
 
@@ -79,7 +78,6 @@ public class Scenario implements Callable<ScenarioResult> {
     private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
     private final String scenarioName;
-    private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private String scriptfile;
     private Engine engine = Engine.Graalvm;
@@ -108,6 +106,15 @@ public class Scenario implements Callable<ScenarioResult> {
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
         this.wantsStackTraces = wantsStackTraces;
         this.wantsCompiledScript = wantsCompiledScript;
+    }
+
+    public Scenario setLogger(Logger logger) {
+        this.logger = logger;
+        return this;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 
     public Scenario(String name, Engine engine) {
@@ -351,10 +358,6 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public String toString() {
         return "name:'" + this.getScenarioName() + "'";
-    }
-
-    public void setScenarioLogger(ScenarioLogger scenarioLogger) {
-        this.scenarioLogger = scenarioLogger;
     }
 
     public void addScenarioScriptParams(ScriptParams scenarioScriptParams) {

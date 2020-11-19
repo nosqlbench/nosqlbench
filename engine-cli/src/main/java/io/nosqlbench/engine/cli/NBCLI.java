@@ -10,8 +10,6 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.*;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
-import io.nosqlbench.engine.core.logging.SessionLogConfig;
-import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.engine.core.script.MetricsMapper;
 import io.nosqlbench.engine.core.script.Scenario;
@@ -45,8 +43,12 @@ import java.util.stream.Collectors;
 public class NBCLI {
 
     private static Logger logger;
+    private static LoggerConfig loggerConfig;
 
-    private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
+    static {
+        loggerConfig = new LoggerConfig();
+        LoggerConfig.setConfigurationFactory(loggerConfig);
+    }
 
     private final String commandName;
 
@@ -74,12 +76,29 @@ public class NBCLI {
         // Initial logging config covers only command line parsing
         // We don't want anything to go to console here unless it is a real problem
         // as some integrations will depend on a stable and parsable program output
-        LoggerConfig loggerConfig = new LoggerConfig(NBLogLevel.ERROR, NBLogLevel.ERROR);
+//        new LoggerConfig()
+//                .setConsoleLevel(NBLogLevel.INFO.ERROR)
+//                .setLogfileLevel(NBLogLevel.ERROR)
+//                .activate();
+//        logger = LogManager.getLogger("NBCLI");
 
-        ConfigurationFactory.setConfigurationFactory(loggerConfig);
-        logger = LogManager.getLogger("NBCLI");
+        loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
 
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
+
+        loggerConfig
+                .setConsoleLevel(globalOptions.getConsoleLogLevel())
+                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+                .setLogfileLevel(globalOptions.getScenarioLogLevel())
+                .getLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+                .setMaxLogs(globalOptions.getLogsMax())
+                .setLogsDirectory(globalOptions.getLogsDirectory())
+                .activate();
+        ConfigurationFactory.setConfigurationFactory(loggerConfig);
+
+        logger = LogManager.getLogger("NBCLI");
+        loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
+        logger.info("Configured scenario log at " + loggerConfig.getLogfileLocation());
 
         // Global only processing
         if (args.length == 0) {
@@ -139,14 +158,10 @@ public class NBCLI {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
-        NBIO.addGlobalIncludes(options.wantsIncludes());
-
         String sessionName = new SessionNamer().format(options.getSessionName());
+        logger = LogManager.getLogger("NBCLI");
 
-        SessionLogConfig sessionLogConfig = new SessionLogConfig(sessionName);
-        sessionLogConfig.setConsolePattern(options.getConsoleLoggingPattern());
-        sessionLogConfig.setLevel(options.wantsConsoleLogLevel());
-        sessionLogConfig.start();
+        NBIO.addGlobalIncludes(options.wantsIncludes());
 
         ActivityMetrics.setHdrDigits(options.getHdrDigits());
 
@@ -280,27 +295,27 @@ public class NBCLI {
             if (options.getHistoLoggerConfigs().size() == 0) {
                 logger.info("Adding default histologger configs");
                 String pattern = ".*";
-                String file = CHART_HDR_LOG_NAME;
+                String file = options.getChartHdrFileName();
                 String interval = "1s";
                 options.setHistoLoggerConfigs(pattern, file, interval);
             }
         }
 
         for (
-                NBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
+                NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         }
         for (
-                NBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
+                NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
         for (
-                NBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
+                NBCLIOptions.LoggerConfigData classicConfigs : options.getClassicHistoConfigs()) {
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
         }
 
         // intentionally not shown for warn-only
-        logger.info("console logging level is " + options.wantsConsoleLogLevel());
+        logger.info("console logging level is " + options.getConsoleLogLevel());
 
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
@@ -331,13 +346,6 @@ public class NBCLI {
         }
 
 
-        NBLogLevel consoleLogLevel = options.wantsConsoleLogLevel();
-        NBLogLevel scenarioLogLevel = options.getScenarioLogLevel();
-        if (scenarioLogLevel.isGreaterOrEqualTo(consoleLogLevel)) {
-            logger.info("raising scenario logging level to accommodate console logging level");
-        }
-        NBLogLevel maxLevel = NBLogLevel.max(consoleLogLevel, scenarioLogLevel);
-
         // Execute Scenario!
         if (options.getCommands().size() == 0) {
             logger.info("No commands provided. Exiting before scenario.");
@@ -349,16 +357,7 @@ public class NBCLI {
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
 
-        Path scenarioLogPath = SessionLogConfig.composeSessionLogName(options.getLogsDirectory(), scenario.getScenarioName());
-        logger.info("Configuring scenario log at " + scenarioLogPath.toString());
-        ScenarioLogger sl = new SessionLogConfig(scenario.getScenarioName())
-                .setLogDir(options.getLogsDirectory())
-                .setMaxLogs(options.getLogsMax())
-                .setLevel(maxLevel)
-                .setLogLevelOverrides(options.getLogLevelOverrides())
-                .start();
-
-        executor.execute(scenario, sl);
+        executor.execute(scenario);
 
         while (true) {
             Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());

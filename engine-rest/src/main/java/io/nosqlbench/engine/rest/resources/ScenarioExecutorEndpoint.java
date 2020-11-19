@@ -6,8 +6,6 @@ import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.NBCLICommandParser;
 import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.core.logging.SessionLogConfig;
-import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.rest.services.WorkSpace;
@@ -115,11 +113,7 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
 
         scenario.addScriptText(buffer.getParsedScript());
 
-        ScenarioLogger logger = new SessionLogConfig(scenario.getScenarioName())
-                .setLogDir(workspace.getWorkspacePath().resolve("logs"))
-                .start();
-
-        executor.execute(scenario, logger);
+        executor.execute(scenario);
 
         return Response.created(UriBuilder.fromResource(ScenarioExecutorEndpoint.class).path(
                 "scenario/" + rq.getScenarioName()).build()).entity("started").build();

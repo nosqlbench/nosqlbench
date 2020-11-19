@@ -21,20 +21,17 @@ import io.nosqlbench.engine.core.IndexedThreadFactory;
 import io.nosqlbench.engine.core.ScenarioController;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.ScenariosResults;
-import io.nosqlbench.engine.core.logging.SessionLogConfig;
-import io.nosqlbench.engine.core.logging.ScenarioLogger;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ScenariosExecutor {
 
-    private final static Logger logger = LogManager.getLogger(ScenariosExecutor.class);
+    private final Logger logger = LogManager.getLogger("SCENARIOS");
     private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 
     private final ExecutorService executor;
@@ -54,15 +51,6 @@ public class ScenariosExecutor {
     }
 
     public synchronized void execute(Scenario scenario) {
-        ScenarioLogger logs = new SessionLogConfig(scenario.getScenarioName())
-                .setLogDir(Path.of("logs"))
-                .setMaxLogs(0)
-                .start();
-        execute(scenario, logs);
-    }
-
-    public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
-        scenario.setScenarioLogger(scenarioLogger);
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
