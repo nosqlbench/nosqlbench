@@ -23,19 +23,19 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NashornEvaluatorTest {
+public class GraalJsEvaluatorTest {
 
     @Test
     public void testBasicOperations() {
-        NashornEvaluator<Long> ne = new NashornEvaluator<>(Long.class);
-        ne.put("one",1L).put("two",2L);
+        GraalJsEvaluator<Long> ne = new GraalJsEvaluator<>(Long.class);
+        ne.put("one", 1L).put("two", 2L);
         Long sum = ne.script("one + two;").eval();
         assertThat(sum).isEqualTo(3L);
     }
 
     @Test
     public void testJavaReturnType() {
-        NashornEvaluator<Date> dateEval = new NashornEvaluator<>(Date.class);
+        GraalJsEvaluator<Date> dateEval = new GraalJsEvaluator<>(Date.class);
         dateEval.script("var d = new java.util.Date(234); d;");
         Date aDate = dateEval.eval();
         assertThat(aDate).isEqualTo(new Date(234));
@@ -43,7 +43,8 @@ public class NashornEvaluatorTest {
 
     @Test
     public void testOneLiner() {
-        String result = new NashornEvaluator<String>(String.class, "fname", "afirstname", "lname", "alastname")
+        String result = new GraalJsEvaluator<String>(String.class)
+                .put("fname", "afirstname", "lname", "alastname")
                 .script("fname + lname").eval();
         assertThat(result).isEqualTo("afirstnamealastname");
     }

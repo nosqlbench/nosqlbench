@@ -24,6 +24,7 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A view of metrics objects as an object tree.
@@ -124,7 +125,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onTimerAdded(String name, Timer timer) {
-        metrics.add(name,timer);
+        metrics.add(name, timer);
         logger.info("timer added: " + name);
     }
 
@@ -132,6 +133,10 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
     public void onTimerRemoved(String name) {
         metrics.findOwner(name).remove(name);
         logger.info("timer removed: " + name);
+    }
+
+    public Map<String, Metric> getMetrics() {
+        throw new RuntimeException("implement me");
     }
 
 //    @Override

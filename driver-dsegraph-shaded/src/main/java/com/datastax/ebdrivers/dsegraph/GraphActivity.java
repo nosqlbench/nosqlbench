@@ -23,7 +23,7 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
-import io.nosqlbench.engine.api.scripting.NashornEvaluator;
+import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import org.apache.logging.log4j.LogManager;
@@ -188,7 +188,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
         if (clusteropts.isPresent()) {
             try {
                 logger.info("applying cbopts:" + clusteropts.get());
-                NashornEvaluator<DseCluster.Builder> clusterEval = new NashornEvaluator<>(DseCluster.Builder.class);
+                GraalJsEvaluator<DseCluster.Builder> clusterEval = new GraalJsEvaluator<>(DseCluster.Builder.class);
                 clusterEval.put("builder", builder);
                 String importEnv =
                         "load(\"nashorn:mozilla_compat.js\");\n" +

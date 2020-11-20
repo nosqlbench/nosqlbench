@@ -37,19 +37,15 @@ then
   (cd cache && (
    if [ "$BUILD_OPENJ9" = "true" ]
    then
-    wget -c https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk14u-2020-04-27-07-27/OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
-    tar xf OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
-    mv jdk-14.0.1+7-jre jre
-    rm OpenJDK14U-jre_x64_linux_openj9_linuxXL_2020-04-27-07-27.tar.gz
+    wget -c wget -c https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2020-11-19-07-04/OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
+    tar -xf OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
+    mv jdk-15.0.1+9-jre jre
+    rm OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
    else
-    wget -c https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk14u-2020-04-27-07-27/OpenJDK14U-jre_x64_linux_hotspot_2020-04-27-07-27.tar.gz
-    tar xf OpenJDK14U-jre_x64_linux_hotspot_2020-04-27-07-27.tar.gz
-    mv jdk-14.0.1+7-jre jre
+    wget -c https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2020-11-19-07-04/OpenJDK15U-jre_x64_linux_hotspot_2020-11-19-07-04.tar.gz
+    tar xf OpenJDK15U-jre_x64_linux_hotspot_2020-11-19-07-04.tar.gz
+    mv jdk-15.0.1+9-jre jre
    fi
-   # wget -c https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
-   # tar xf OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
-   # mv jdk-12.0.2+10-jre jre
-   # rm OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
   ))
 fi
 

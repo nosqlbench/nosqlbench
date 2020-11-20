@@ -24,11 +24,9 @@ import io.nosqlbench.engine.core.PolyglotScenarioController;
 import io.nosqlbench.engine.core.ScenarioController;
 import io.nosqlbench.engine.core.ScenarioResult;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.nb.api.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
@@ -87,8 +85,8 @@ public class Scenario implements Callable<ScenarioResult> {
     private long endedAtMillis = -1L;
 
     public enum Engine {
-        Nashorn,
-        Graalvm
+        Graalvm,
+        Nashorn
     }
 
     public Scenario(
@@ -153,12 +151,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
         switch (engine) {
             case Nashorn:
-                NashornScriptEngineFactory f = new NashornScriptEngineFactory();
-                this.scriptEngine = f.getScriptEngine("--language=es6");
-
-                // engineManager.getEngineByName("nashorn");
-                // TODO: Figure out how to do this in engine bindings: --language=es-6
-                break;
+                throw new RuntimeException("The nashorn engine has been deprecated in this version of NoSQLBench.");
             case Graalvm:
                 Context.Builder contextSettings = Context.newBuilder("js")
                     .allowHostAccess(HostAccess.ALL)
@@ -201,7 +194,7 @@ public class Scenario implements Callable<ScenarioResult> {
             // https://github.com/graalvm/graaljs/blob/master/docs/user/JavaInterop.md
             if (wantsGraaljsCompatMode) {
                 scriptEngine.put("scenario", scenarioController);
-                scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
+                scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
                 scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
             } else {
                 scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
@@ -209,9 +202,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
             }
         } else if (engine == Engine.Nashorn) {
-            scriptEngine.put("scenario", scenarioController);
-            scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
-            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+            throw new RuntimeException("The Nashorn engine has been deprecated in this version of NoSQLBench.");
         } else {
             throw new RuntimeException("Unsupported engine: " + engine);
         }

@@ -19,7 +19,7 @@ import io.nosqlbench.activitytype.cqld4.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.scripting.NashornEvaluator;
+import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.graalvm.options.OptionMap;
@@ -170,7 +170,7 @@ public class CQLSessionCache implements Shutdownable {
         if (clusteropts.isPresent()) {
             try {
                 logger.info("applying cbopts:" + clusteropts.get());
-                NashornEvaluator<CqlSessionBuilder> clusterEval = new NashornEvaluator<>(CqlSessionBuilder.class);
+                GraalJsEvaluator<CqlSessionBuilder> clusterEval = new GraalJsEvaluator<>(CqlSessionBuilder.class);
                 clusterEval.put("builder", builder);
                 String importEnv =
                         "load(\"nashorn:mozilla_compat.js\");\n" +

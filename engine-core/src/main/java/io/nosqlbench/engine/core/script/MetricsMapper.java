@@ -19,13 +19,13 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.Timer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,7 +68,7 @@ public class MetricsMapper {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
         }
         Activity activity = activityType.get().getAssembledActivity(activityDef, new HashMap<>());
-        NashornMetricRegistryBindings nashornMetricRegistryBindings = new NashornMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
+        PolyglotMetricRegistryBindings nashornMetricRegistryBindings = new PolyglotMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenserDelegate().getInput(0);
         activity.getActionDispenserDelegate().getAction(0);

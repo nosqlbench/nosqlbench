@@ -18,7 +18,6 @@
 package io.nosqlbench.engine.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -96,19 +95,12 @@ public class BobyqaOptimizerInstance {
     }
 
     public BobyqaOptimizerInstance setObjectiveFunction(Object f) {
-        if (f instanceof ScriptObjectMirror) {
-            ScriptObjectMirror scriptObject = (ScriptObjectMirror) f;
-            if (!scriptObject.isFunction()) {
-                throw new RuntimeException("Unable to setFunction with a non-function object");
-            }
-            this.objectiveFunctionFromScript =
-                    new NashornMultivariateObjectScript(logger, params, scriptObject);
-        }
-
         if (f instanceof Function) {
 //            Function<Object[],Object> function = (Function<Object[],Object>)f;
             this.objectiveFunctionFromScript =
-                new PolyglotMultivariateObjectScript(logger, params, f);
+                    new PolyglotMultivariateObjectScript(logger, params, f);
+        } else {
+            throw new RuntimeException("The objective function must be recognizable as a polyglot Function");
         }
 
         return this;

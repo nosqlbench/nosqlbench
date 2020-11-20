@@ -9,7 +9,8 @@ The latest release of NoSQLBench is always available from github releases.
   - (be sure to `chmod +x nb` once you download it)
 - download [the latest release of nb.jar](https://github.com/nosqlbench/nosqlbench/releases/latest/download/nb.jar), a
   single-jar application.
-  - This requires java 14 or later, make sure your `java -version` command says that you are on Java 14 or later.
+  - This requires java 15 or later, make sure your `java -version
+  ` command says that you are on Java 15 or later.
 
 ## Docker
 

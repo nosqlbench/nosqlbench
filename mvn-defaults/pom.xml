@@ -71,7 +71,6 @@
     <resources.plugin.version>3.1.0</resources.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-    <graalvm.version>20.1.0</graalvm.version>
   </properties>
 
   <name>${project.artifactId}</name>
@@ -417,29 +416,29 @@
       <dependency>
         <groupId>org.graalvm.sdk</groupId>
         <artifactId>graal-sdk</artifactId>
-        <version>${graalvm.version}</version>
+        <version>20.3.0</version>
       </dependency>
       <dependency>
         <groupId>org.graalvm.js</groupId>
         <artifactId>js</artifactId>
-        <version>${graalvm.version}</version>
+        <version>20.3.0</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.graalvm.js</groupId>
         <artifactId>js-scriptengine</artifactId>
-        <version>${graalvm.version}</version>
+        <version>20.3.0</version>
       </dependency>
       <dependency>
         <groupId>org.graalvm.tools</groupId>
         <artifactId>profiler</artifactId>
-        <version>${graalvm.version}</version>
+        <version>20.3.0</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.graalvm.tools</groupId>
         <artifactId>chromeinspector</artifactId>
-        <version>${graalvm.version}</version>
+        <version>20.3.0</version>
         <scope>runtime</scope>
       </dependency>
 
@@ -507,8 +506,8 @@
         <configuration>
           <debug>true</debug>
           <!--                    <release>${java.target.version}</release>-->
-          <source>11</source>
-          <target>11</target>
+          <source>15</source>
+          <target>15</target>
           <!--                    <compilerArgs>-->
           <!--                        &#45;&#45;enable-preview-->
           <!--                    </compilerArgs>-->

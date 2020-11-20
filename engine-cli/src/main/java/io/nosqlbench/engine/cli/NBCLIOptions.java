@@ -403,9 +403,8 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     break;
                 case NASHORN_ENGINE:
-                    engine = Scenario.Engine.Nashorn;
-                    arglist.removeFirst();
-                    break;
+                    throw new RuntimeException("The nashorn engine has been deprecated in this major version of " +
+                            "NoSQLBench");
                 case COMPILE_SCRIPT:
                     arglist.removeFirst();
                     compileScript = true;

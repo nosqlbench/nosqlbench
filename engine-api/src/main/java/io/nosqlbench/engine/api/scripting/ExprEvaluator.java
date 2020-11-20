@@ -35,7 +35,7 @@ package io.nosqlbench.engine.api.scripting;
  *
  * @param <T> The return type that is needed by the caller
  */
-public interface Evaluator<T> {
+public interface ExprEvaluator<T> {
 
     /**
      * Evaluate the provided script, returning the value that it yields
@@ -45,17 +45,24 @@ public interface Evaluator<T> {
     T eval();
 
     /**
-     * @param scriptText Nashorn compatible script text
-     * @return this NahornEvaluator, for method chaining
+     * @param scriptText script text
+     * @return this ExprEvaluator<T>, for method chaining
      */
-    NashornEvaluator<T> script(String scriptText);
+    ExprEvaluator<T> script(String scriptText);
 
     /**
      * Set the variable environment of the evaluator
      *
      * @param varName the variable name to add to the environment
      * @param var     the object to bind to the varname
-     * @return this NashornEvaluator, for method chaining
+     * @return this ExprEvaluator<T>, for method chaining
      */
-    NashornEvaluator<T> put(String varName, Object var);
+    ExprEvaluator<T> put(String varName, Object var);
+
+    default ExprEvaluator<T> put(Object... vars) {
+        for (int i = 0; i < vars.length; i += 2) {
+            this.put(vars[i].toString(), vars[i + 1]);
+        }
+        return this;
+    }
 }
