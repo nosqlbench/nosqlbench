@@ -22,5 +22,5 @@ optimo.setObjectiveFunction(
 var result = optimo.optimize();
 
 print("optimized result was " + result);
-print("map of result was " + result.getVarMap());
+print("map of result was " + result.getMap());
 

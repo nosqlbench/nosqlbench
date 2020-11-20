@@ -18,13 +18,13 @@
 package io.nosqlbench.engine.core.metrics;
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A view of metrics objects as an object tree.
@@ -136,7 +136,22 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
     }
 
     public Map<String, Metric> getMetrics() {
-        throw new RuntimeException("implement me");
+        return getMetrics(new LinkedHashMap<String, Metric>(), "metrics", metrics);
+    }
+
+    private Map<String, Metric> getMetrics(Map<String, Metric> totalMap, String prefix, MetricMap map) {
+        for (String key : map.getKeys()) {
+            Object o = map.get(key);
+            String name = prefix + "." + key;
+            if (o instanceof Metric) {
+                totalMap.put(name, (Metric) o);
+            } else if (o instanceof MetricMap) {
+                getMetrics(totalMap, name, (MetricMap) o);
+            } else {
+                throw new RuntimeException("entry value must be either a Metric or a MetricMap");
+            }
+        }
+        return totalMap;
     }
 
 //    @Override
