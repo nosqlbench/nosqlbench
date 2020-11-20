@@ -30,27 +30,27 @@ fi
 rsync -av appimage/skel/ "${APPDIR}/"
 cp target/nb.jar "${APPDIR}/usr/bin/nb.jar"
 
-if [ ! -d "cache/jre" ]
+if [ ! -d "cache/jre15" ]
 then
-  printf "getting jre once into cache/jre\n";
+  printf "getting jre once into cache/jre15\n";
   mkdir -p cache
   (cd cache && (
    if [ "$BUILD_OPENJ9" = "true" ]
    then
     wget -c wget -c https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2020-11-19-07-04/OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
     tar -xf OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
-    mv jdk-15.0.1+9-jre jre
+    mv jdk-15.0.1+9-jre jre15
     rm OpenJDK15U-jre_x64_linux_openj9_linuxXL_2020-11-19-07-04.tar.gz
    else
     wget -c https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2020-11-19-07-04/OpenJDK15U-jre_x64_linux_hotspot_2020-11-19-07-04.tar.gz
     tar xf OpenJDK15U-jre_x64_linux_hotspot_2020-11-19-07-04.tar.gz
-    mv jdk-15.0.1+9-jre jre
+    mv jdk-15.0.1+9-jre jre15
    fi
   ))
 fi
 
 mkdir -p "${APPDIR}/usr/bin/jre"
-rsync -av cache/jre/ "${APPDIR}/usr/bin/jre/"
+rsync -av cache/jre15/ "${APPDIR}/usr/bin/jre/"
 
 if [ ! -f "${APPDIR}/AppRun" ]
   then
