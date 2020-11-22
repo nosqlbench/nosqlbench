@@ -12,7 +12,7 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 
@@ -22,8 +22,10 @@ import java.util.LinkedList;
  * A simple callback handler for shutting down things gracefully.
  */
 public class ShutdownManager {
-    private ShutdownManager() {}
-    private static ShutdownManager instance = new ShutdownManager();
+    private ShutdownManager() {
+    }
+
+    private static final ShutdownManager instance = new ShutdownManager();
 
     private final LinkedList<Shutdownable> managedInstances = new LinkedList<>();
 

@@ -73,12 +73,7 @@ public class MutableConfigModel implements ConfigModel {
                                 "while configuring a " + getOf().getSimpleName());
             }
             Object value = config.get(configkey);
-            if (!element.getType().isAssignableFrom(value.getClass())) {
-                throw new RuntimeException("Unable to assign provided configuration\n" +
-                        "of type '" + value.getClass().getSimpleName() + " to config\n" +
-                        "parameter of type '" + element.getType().getSimpleName() + "'\n" +
-                        "while configuring a " + getOf().getSimpleName());
-            }
+            Object testValue = convertValueTo(ofType.getSimpleName(), configkey, value, element.getType());
         }
         for (ConfigElement element : elements.values()) {
             if (element.isRequired() && element.getDefaultValue() == null) {
@@ -89,6 +84,42 @@ public class MutableConfigModel implements ConfigModel {
                 }
             }
         }
+    }
+
+    private Object convertValueTo(String configName, String paramName, Object value, Class<?> type) {
+        try {
+            if (type.isAssignableFrom(value.getClass())) {
+                return type.cast(value);
+            } else if (Number.class.isAssignableFrom(type)
+                    && Number.class.isAssignableFrom(value.getClass())) {
+                Number number = (Number) value;
+                if (type.equals(Float.class)) {
+                    return number.floatValue();
+                } else if (type.equals(Integer.class)) {
+                    return number.intValue();
+                } else if (type.equals(Double.class)) {
+                    return number.doubleValue();
+                } else if (type.equals(Long.class)) {
+                    return number.longValue();
+                } else if (type.equals(Byte.class)) {
+                    return number.byteValue();
+                } else if (type.equals(Short.class)) {
+                    return number.shortValue();
+                } else {
+                    throw new RuntimeException("Number type " + type.getSimpleName() + " could " +
+                            " not be converted from " + value.getClass().getSimpleName());
+                }
+            }
+
+        } catch (Exception e) {
+            throw e;
+        }
+
+        throw new RuntimeException(
+                "While configuring " + paramName + " for " + configName + ", " +
+                        "Unable to convert " + value.getClass() + " to " +
+                        type.getCanonicalName()
+        );
     }
 
     @Override
@@ -104,12 +135,8 @@ public class MutableConfigModel implements ConfigModel {
                 cval = v.getDefaultValue();
             }
             if (cval != null) {
-                if (type.isAssignableFrom(cval.getClass())) {
-                    validConfig.put(name, cval);
-                } else {
-                    throw new RuntimeException("Unable to assign a " + cval.getClass().getSimpleName() +
-                            " to a " + type.getSimpleName());
-                }
+                cval = convertValueTo(ofType.getSimpleName(), k, cval, type);
+                validConfig.put(name, cval);
             }
         });
 

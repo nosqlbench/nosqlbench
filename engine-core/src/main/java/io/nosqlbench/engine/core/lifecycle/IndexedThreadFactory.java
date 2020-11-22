@@ -16,7 +16,7 @@
  *
  */
 
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +29,7 @@ public class IndexedThreadFactory implements ThreadFactory {
 
     private final Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
     private String name = Thread.currentThread().getName() + "-factory";
-    private AtomicInteger threadIndexer = new AtomicInteger(0);
+    private final AtomicInteger threadIndexer = new AtomicInteger(0);
 
     public IndexedThreadFactory(String name, Thread.UncaughtExceptionHandler exceptionHandler) {
         this.name = name;
@@ -38,7 +38,7 @@ public class IndexedThreadFactory implements ThreadFactory {
 
     public class IndexedThread extends Thread {
 
-        private int threadIndex;
+        private final int threadIndex;
         private String metricName = "default-name-" + Thread.currentThread().getName();
 
         public IndexedThread(int threadIndex, Runnable r) {

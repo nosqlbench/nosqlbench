@@ -14,12 +14,12 @@
 */
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 
 public class ScenarioContext extends ScriptEnvBuffer {
 
-    private ScenarioController sc;
+    private final ScenarioController sc;
 
     public ScenarioContext(ScenarioController sc) {
         this.sc = sc;
