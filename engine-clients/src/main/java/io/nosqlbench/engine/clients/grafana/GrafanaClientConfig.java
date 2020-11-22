@@ -21,17 +21,28 @@ public class GrafanaClientConfig {
     @JsonProperty("baseuri")
     private URI baseUrl;
 
-    @JsonProperty("timeoutms")
+    @JsonProperty("timeoutms" )
     private int timeoutms;
 
     private final List<Authenticator> authenticators = new ArrayList<>();
-    //    private LinkedHashMap<String,String> headers = new LinkedHashMap<>();
     private final List<Supplier<Map<String, String>>> headerSources = new ArrayList<>();
 
     public GrafanaClientConfig() {
     }
 
-    public void basicAuth(String username, String pw) {
+    private GrafanaClientConfig(URI baseUrl, int timeoutms, List<Authenticator> authenticators,
+                                List<Supplier<Map<String, String>>> headerSources) {
+        this.baseUrl = baseUrl;
+        this.timeoutms = timeoutms;
+        this.authenticators.addAll(authenticators);
+        this.headerSources.addAll(headerSources);
+    }
+
+    public GrafanaClientConfig copy() {
+        return new GrafanaClientConfig(baseUrl, timeoutms, authenticators, headerSources);
+    }
+
+    public GrafanaClientConfig basicAuth(String username, String pw) {
         Objects.requireNonNull(username);
         String authPw = pw != null ? pw : "";
 
@@ -44,8 +55,8 @@ public class GrafanaClientConfig {
 
         addAuthenticator(basicAuth);
         addHeader("Authorization", encodeBasicAuth(username, authPw));
+        return this;
     }
-
 
     public GrafanaClientConfig addAuthenticator(Authenticator authenticator) {
         authenticators.add(authenticator);
@@ -87,7 +98,9 @@ public class GrafanaClientConfig {
 
     public HttpClient newClient() {
         HttpClient.Builder cb = HttpClient.newBuilder();
-        cb.connectTimeout(Duration.ofMillis(timeoutms));
+        if (timeoutms > 0) {
+            cb.connectTimeout(Duration.ofMillis(timeoutms));
+        }
         for (Authenticator authenticator : authenticators) {
             cb.authenticator(authenticator);
         }
@@ -106,8 +119,11 @@ public class GrafanaClientConfig {
     public HttpRequest.Builder newRequest(String path) {
         URI requestUri = makeUri(path);
         HttpRequest.Builder rqb = HttpRequest.newBuilder(requestUri);
-        rqb.timeout(Duration.ofMillis(timeoutms));
+        if (timeoutms > 0) {
+            rqb.timeout(Duration.ofMillis(timeoutms));
+        }
         getHeaders().forEach(rqb::setHeader);
+
         return rqb;
     }
 

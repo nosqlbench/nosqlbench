@@ -31,10 +31,18 @@ public class ConfigReader extends LinkedHashMap<String, Object> {
         Object o = get(name);
         ConfigElement<?> elem = configModel.getElements().get(name);
         if (elem == null) {
-            throw new RuntimeException("Invalid config element named '" + name + "'");
+            throw new RuntimeException("Invalid config element named '" + name + "'" );
         }
         Class<T> type = (Class<T>) elem.getType();
         T typeCastedValue = type.cast(o);
         return typeCastedValue;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.configModel.getOf().getSimpleName()).append(":" );
+        sb.append(this.configModel.toString());
+        return sb.toString();
+
     }
 }

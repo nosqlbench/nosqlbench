@@ -17,7 +17,8 @@ public class GrafanaAnnotation {
     private String text;
     private String metric;
     private String type;
-    private Map<String, String> tags = new LinkedHashMap<>();
+    private final List<String> tags = new ArrayList<>();
+    //    private Map<String, String> tags = new LinkedHashMap<>();
     private Object data;
 
     public Integer getId() {
@@ -124,12 +125,22 @@ public class GrafanaAnnotation {
         this.type = type;
     }
 
-    public Map<String, String> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
+    public void addTag(String tag) {
+        this.tags.add(tag);
+    }
+
+    public void setTags(List<String> tags) {
+        tags.forEach(this::addTag);
+    }
+
     public void setTags(Map<String, String> tags) {
-        this.tags = tags;
+        tags.forEach((k, v) -> {
+            this.addTag(k + ":" + v);
+        });
     }
 
     public Object getData() {
