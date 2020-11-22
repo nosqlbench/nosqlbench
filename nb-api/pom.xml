@@ -57,6 +57,11 @@
       <artifactId>gson</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.github.oshi</groupId>
+      <artifactId>oshi-core</artifactId>
+    </dependency>
+    
     <!-- perf testing -->
 
     <dependency>

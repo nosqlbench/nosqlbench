@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.core.bindings;
 
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 import io.nosqlbench.virtdata.lang.ast.Expression;
 import io.nosqlbench.virtdata.lang.ast.FunctionCall;
 import io.nosqlbench.virtdata.lang.parser.VirtDataDSL;

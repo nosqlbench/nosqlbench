@@ -106,11 +106,6 @@
             <artifactId>netty-handler</artifactId>
         </dependency>
 
-        <dependency>
-          <groupId>com.github.oshi</groupId>
-          <artifactId>oshi-core</artifactId>
-        </dependency>
-
         <!-- test scope only -->
 
 

@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.apache.logging.log4j.LogManager;

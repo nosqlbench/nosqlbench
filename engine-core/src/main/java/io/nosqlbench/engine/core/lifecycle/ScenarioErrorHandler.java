@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.graalvm.polyglot.PolyglotException;

@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.spi;
+package io.nosqlbench.nb.api.spi;
 
 public interface Named {
     /**

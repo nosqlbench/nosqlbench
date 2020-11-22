@@ -17,10 +17,10 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.IndexedThreadFactory;
-import io.nosqlbench.engine.core.ScenarioController;
-import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

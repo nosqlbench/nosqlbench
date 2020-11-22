@@ -14,7 +14,7 @@
 */
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import org.junit.Ignore;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core.metrics;
+package io.nosqlbench.nb.api;
 
 public enum OnError {
     Warn,

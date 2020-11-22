@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;

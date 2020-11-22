@@ -12,6 +12,7 @@ import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
+import io.nosqlbench.engine.core.lifecycle.ActivityExecutor;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.junit.Test;

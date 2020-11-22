@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api.annotations;
 
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 
 /**
  * An implementation of this type is responsible for taking annotation details and

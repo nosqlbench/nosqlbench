@@ -5,7 +5,7 @@ import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.NBCLICommandParser;
 import io.nosqlbench.engine.cli.ScriptBuffer;
-import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.rest.services.WorkSpace;

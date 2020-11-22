@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

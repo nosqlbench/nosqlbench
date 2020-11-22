@@ -15,7 +15,7 @@
  * /
  */
 
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler {
 

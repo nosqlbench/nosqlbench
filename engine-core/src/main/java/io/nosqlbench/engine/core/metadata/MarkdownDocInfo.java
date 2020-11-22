@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.metadata;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.nb.api.content.Content;

@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;

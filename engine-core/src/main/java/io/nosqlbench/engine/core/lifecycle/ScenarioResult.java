@@ -16,7 +16,7 @@
  *
  */
 
-package io.nosqlbench.engine.core;
+package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
