@@ -4,10 +4,8 @@ import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.nb.api.Environment;
-import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,7 +134,7 @@ public class NBCLIOptions {
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
-    private int hdr_digits = 4;
+    private int hdr_digits = 3;
     private String docker_grafana_tag = "7.2.2";
     private boolean showStackTraces = false;
     private boolean compileScript = false;
@@ -146,8 +144,8 @@ public class NBCLIOptions {
     private String annotatorsConfig = "";
     private String statedirs = NB_STATEDIR_PATHS;
     private Path statepath;
-    private List<String> statePathAccesses = new ArrayList<>();
-    private String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
+    private final List<String> statePathAccesses = new ArrayList<>();
+    private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
