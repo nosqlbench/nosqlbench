@@ -27,11 +27,6 @@ public class StdoutActivityType implements ActivityType<StdoutActivity> {
                 ".");
         }
 
-        // allow shortcut: yaml parameter provide the default alias name
-        if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
-            activityDef.getParams().set("alias",yaml.get());
-        }
-
         return new StdoutActivity(activityDef);
     }
 
