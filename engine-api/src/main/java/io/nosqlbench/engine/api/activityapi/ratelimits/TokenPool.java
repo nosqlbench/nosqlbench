@@ -17,8 +17,9 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static io.nosqlbench.engine.api.util.Colors.*;
 
@@ -57,10 +58,12 @@ public class TokenPool {
     private volatile long waitingPool;
     private RateSpec rateSpec;
     private long nanosPerOp;
-//    private long debugTrigger=0L;
+    //    private long debugTrigger=0L;
 //    private long debugRate=1000000000;
     private long blocks = 0L;
 
+    private TokenFiller filler;
+    private final ActivityDef activityDef;
 
     /**
      * This constructor tries to pick reasonable defaults for the token pool for
@@ -69,16 +72,11 @@ public class TokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public TokenPool(RateSpec rateSpec) {
+    public TokenPool(RateSpec rateSpec, ActivityDef activityDef) {
+        this.activityDef = activityDef;
         apply(rateSpec);
         logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
-    }
-
-    public TokenPool(long poolsize, double burstRatio) {
-        this.maxActivePool = poolsize;
-        this.burstRatio = burstRatio;
-        this.maxOverActivePool = (long) (maxActivePool * burstRatio);
-        this.burstPoolSize = maxOverActivePool - maxActivePool;
+//        filler.start();
     }
 
     /**
@@ -87,15 +85,17 @@ public class TokenPool {
      *
      * @param rateSpec The rate specifier.
      */
-    public synchronized void apply(RateSpec rateSpec) {
-        this.rateSpec=rateSpec;
+    public synchronized TokenPool apply(RateSpec rateSpec) {
+        this.rateSpec = rateSpec;
         this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp() * MIN_CONCURRENT_OPS));
         this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
         this.burstRatio = rateSpec.getBurstRatio();
 
         this.burstPoolSize = maxOverActivePool - maxActivePool;
         this.nanosPerOp = rateSpec.getNanosPerOp();
+        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, this, activityDef) : filler.apply(rateSpec);
         notifyAll();
+        return this;
     }
 
 
@@ -243,10 +243,14 @@ public class TokenPool {
     }
 
     public synchronized long restart() {
-        long wait=activePool+waitingPool;
-        activePool=0L;
-        waitingPool=0L;
+        long wait = activePool + waitingPool;
+        activePool = 0L;
+        waitingPool = 0L;
+        filler.restart();
         return wait;
+    }
 
+    public void start() {
+        filler.start();
     }
 }

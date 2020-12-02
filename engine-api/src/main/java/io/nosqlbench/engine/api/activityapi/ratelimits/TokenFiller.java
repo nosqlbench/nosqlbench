@@ -48,18 +48,16 @@ public class TokenFiller implements Runnable {
      * in the JVM.
      *
      * @param rateSpec A {@link RateSpec}
-     * @param def An {@link ActivityDef}
+     * @param def      An {@link ActivityDef}
      */
-    public TokenFiller(RateSpec rateSpec, ActivityDef def) {
+    public TokenFiller(RateSpec rateSpec, TokenPool tokenPool, ActivityDef def) {
         this.rateSpec = rateSpec;
-        this.tokenPool= new TokenPool(rateSpec);
-        this.tokenPool.refill(rateSpec.getNanosPerOp());
+        this.tokenPool = tokenPool;
         this.timer = ActivityMetrics.timer(def, "tokenfiller");
     }
 
     public TokenFiller apply(RateSpec rateSpec) {
         this.rateSpec = rateSpec;
-        this.tokenPool.apply(rateSpec);
         return this;
     }
 
@@ -99,6 +97,8 @@ public class TokenFiller implements Runnable {
     }
 
     public TokenFiller start() {
+        this.tokenPool.refill(rateSpec.getNanosPerOp());
+
         thread = new Thread(this);
         thread.setName(this.toString());
         thread.setPriority(Thread.MAX_PRIORITY);
