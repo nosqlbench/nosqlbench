@@ -21,8 +21,9 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.api.activityapi.core.Startable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,6 +77,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * overall workload is not saturating resources.
  * </p>
  */
+@Service(value = RateLimiter.class, selector = "hybrid")
 public class HybridRateLimiter implements Startable, RateLimiter {
 
     private final static Logger logger = LogManager.getLogger(HybridRateLimiter.class);
@@ -94,7 +96,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     private Gauge<Long> delayGauge;
     private Gauge<Double> avgRateGauge;
     private Gauge<Double> burstRateGauge;
-    private TokenPool tokens;
+    private ThreadDrivenTokenPool tokens;
     // diagnostics
 
     // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't
@@ -150,7 +152,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         }
 
         this.rateSpec = updatingRateSpec;
-        this.tokens = (this.tokens == null) ? new TokenPool(rateSpec, activityDef) : this.tokens.apply(rateSpec);
+        this.tokens = (this.tokens == null) ? new ThreadDrivenTokenPool(rateSpec, activityDef) : this.tokens.apply(rateSpec);
 //        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
 //        this.tokens = this.filler.getTokenPool();
 

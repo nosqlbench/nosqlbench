@@ -29,7 +29,7 @@ public class TokenPoolTest {
 
     @Test
     public void testBackfillFullRate() {
-        TokenPool p = new TokenPool(new RateSpec(10000000, 1.1), def);
+        ThreadDrivenTokenPool p = new ThreadDrivenTokenPool(new RateSpec(10000000, 1.1), def);
         assertThat(p.refill(1000000L)).isEqualTo(1000000L);
         assertThat(p.getWaitPool()).isEqualTo(0L);
         assertThat(p.refill(100L)).isEqualTo(1000100);
@@ -43,7 +43,7 @@ public class TokenPoolTest {
     }
     @Test
     public void testTakeRanges() {
-        TokenPool p = new TokenPool(new RateSpec(100, 10), def);
+        ThreadDrivenTokenPool p = new ThreadDrivenTokenPool(new RateSpec(100, 10), def);
         p.refill(100);
         assertThat(p.takeUpTo(99)).isEqualTo(99L);
         assertThat(p.takeUpTo(10)).isEqualTo(1L);
@@ -54,7 +54,7 @@ public class TokenPoolTest {
     public void testChangedParameters() {
 
         RateSpec s1 = new RateSpec(1000L, 1.10D);
-        TokenPool p = new TokenPool(s1, def);
+        ThreadDrivenTokenPool p = new ThreadDrivenTokenPool(s1, def);
         long r = p.refill(10000000);
         assertThat(r).isEqualTo(10000000L);
         assertThat(p.getWaitTime()).isEqualTo(10000000L);

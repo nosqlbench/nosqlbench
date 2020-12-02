@@ -35,7 +35,7 @@ public class TokenFiller implements Runnable {
 //    (false);
     private final long interval = (long) 1E6;
 
-    private final TokenPool tokenPool;
+    private final ThreadDrivenTokenPool tokenPool;
     private volatile boolean running = true;
     private RateSpec rateSpec;
     private Thread thread;
@@ -43,14 +43,14 @@ public class TokenFiller implements Runnable {
     private final Timer timer;
 
     /**
-     * A token filler adds tokens to a {@link TokenPool} at some rate.
+     * A token filler adds tokens to a {@link ThreadDrivenTokenPool} at some rate.
      * By default, this rate is at least every millisecond +- scheduling jitter
      * in the JVM.
      *
      * @param rateSpec A {@link RateSpec}
      * @param def      An {@link ActivityDef}
      */
-    public TokenFiller(RateSpec rateSpec, TokenPool tokenPool, ActivityDef def) {
+    public TokenFiller(RateSpec rateSpec, ThreadDrivenTokenPool tokenPool, ActivityDef def) {
         this.rateSpec = rateSpec;
         this.tokenPool = tokenPool;
         this.timer = ActivityMetrics.timer(def, "tokenfiller");
