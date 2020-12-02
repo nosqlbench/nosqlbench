@@ -3,7 +3,6 @@ package io.nosqlbench.activitytype.cqld4.core;
 
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.type.UserDefinedType;
-import io.nosqlbench.activitytype.cqld4.codecsupport.UDTJavaType;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -33,11 +32,6 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
         // sanity check that we have a yaml parameter, which contains our statements and bindings
         if (yaml.isEmpty()) {
             throw new RuntimeException("Currently, the cql activity type requires yaml/workload activity parameter.");
-        }
-
-        // allow shortcut: yaml parameter provide the default alias name
-        if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
-            activityDef.getParams().set("alias",yaml.get());
         }
 
         return new CqlActivity(activityDef);
