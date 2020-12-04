@@ -1,4 +1,4 @@
-- 3d2ff55f (origin/nb4-rc1, main) auto create apikey
+- 3d2ff55f (main) auto create apikey
 - cfa92eab package organization
 - 2ab118f4 package organization
 - a23808b3 update appimage build script for j15
