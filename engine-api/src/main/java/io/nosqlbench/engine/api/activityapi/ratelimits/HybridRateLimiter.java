@@ -96,7 +96,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     private Gauge<Long> delayGauge;
     private Gauge<Double> avgRateGauge;
     private Gauge<Double> burstRateGauge;
-    private ThreadDrivenTokenPool tokens;
+    private TokenPool tokens;
     // diagnostics
 
     // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't

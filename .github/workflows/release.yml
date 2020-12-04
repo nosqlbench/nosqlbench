@@ -110,6 +110,7 @@ jobs:
         pwd
         ls -l
         mkdir -p itlogs/nb
+        ls -l nb
         cp -R nb/logs itlogs/nb
 
     - name: upload integration test logs
