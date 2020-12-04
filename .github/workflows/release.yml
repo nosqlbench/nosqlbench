@@ -93,6 +93,7 @@ jobs:
       run: scripts/release-prepare.sh
       env:
        RELEASE_BRANCH_NAME: "main"
+       PRERELEASE_BRANCH_PATTERN: "-rc"
        GIT_RELEASE_BOT_NAME: "nb-droid"
        GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
        ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
@@ -167,6 +168,14 @@ jobs:
         name: guidebook
         path: guidebook
 
+    - name: select release type from branch name
+      run: |
+       current_branch=$(git rev-parse --abbrev-ref HEAD)
+       if [[ ${current_branch} == *"-rc"* ]]
+        then echo "PRERELEASE=true" >> $GITHUB_ENV
+        else echo "PRERELEASE=false" >> $GITHUB_ENV
+       fi
+
     - name: create release
       id: create_release
       uses: actions/create-release@v1
@@ -176,7 +185,7 @@ jobs:
         tag_name: ${{ env.RELEASE_TAGNAME }}
         release_name: Release ${{ env.RELEASE_TAGNAME }}
         draft: false
-        prerelease: false
+        prerelease: ${{ env.PRERELEASE }}
         body: ${{ steps.prepare_summary.outputs.release_summary }}
 
     - name: upload nb.jar
