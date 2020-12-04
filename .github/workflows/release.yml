@@ -108,9 +108,8 @@ jobs:
     - name: bundle integration test logs
       run: |
         pwd
-        ls -l
+        find nb
         mkdir -p itlogs/nb
-        ls -l nb
         cp -R nb/logs itlogs/nb
 
     - name: upload integration test logs
