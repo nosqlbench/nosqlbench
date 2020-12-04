@@ -2,7 +2,9 @@ package io.nosqlbench.nb.api.annotations;
 
 import io.nosqlbench.nb.api.Layer;
 
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
+import java.util.TimeZone;
 
 public class AnnotationBuilder implements BuilderFacets.All {
     private String session;
@@ -11,6 +13,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
     private final LinkedHashMap<String, String> labels = new LinkedHashMap<>();
     private final LinkedHashMap<String, String> details = new LinkedHashMap<>();
     private Layer layer;
+    private TimeZone timezone = TimeZone.getTimeZone(ZoneId.of("GMT"));
 
     @Override
     public AnnotationBuilder layer(Layer layer) {
@@ -50,6 +53,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
         return this;
     }
 
+
     @Override
     public AnnotationBuilder label(String name, String value) {
         this.labels.put(name, value);
@@ -64,7 +68,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
 
     @Override
     public Annotation build() {
-        return new MutableAnnotation(session, layer, start, end, labels, details).asReadOnly();
+        return new MutableAnnotation(timezone, session, layer, start, end, labels, details).asReadOnly();
 
     }
 

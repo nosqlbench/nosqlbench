@@ -25,7 +25,7 @@ public class AnnotationBuilderTest {
 
         String represented = an1.toString();
         assertThat(represented).isEqualTo("session: test-session\n" +
-                "[Sun Sep 13 07:26:40 CDT 2020]\n" +
+                "[2020-09-13T12:26:40Z[GMT]]\n" +
                 "details:\n" +
                 " detailk1: detailv1\n" +
                 " detailk2: \n" +

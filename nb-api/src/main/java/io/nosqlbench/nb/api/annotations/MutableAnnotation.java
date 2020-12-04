@@ -2,9 +2,10 @@ package io.nosqlbench.nb.api.annotations;
 
 import io.nosqlbench.nb.api.Layer;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 public class MutableAnnotation implements Annotation {
 
@@ -14,9 +15,16 @@ public class MutableAnnotation implements Annotation {
     private long end = 0L;
     private Map<String, String> labels = new LinkedHashMap<>();
     private Map<String, String> details = new LinkedHashMap<>();
+    private ZoneId zoneid = ZoneId.of("GMT");
 
-    public MutableAnnotation(String session, Layer layer, long start, long end, LinkedHashMap<String, String> labels,
-                             LinkedHashMap<String, String> details) {
+    public MutableAnnotation(
+            TimeZone timezone,
+            String session,
+            Layer layer,
+            long start,
+            long end,
+            LinkedHashMap<String, String> labels,
+            LinkedHashMap<String, String> details) {
         this.session = session;
         this.layer = layer;
         this.start = start;
@@ -85,9 +93,13 @@ public class MutableAnnotation implements Annotation {
         StringBuilder sb = new StringBuilder();
         sb.append("session: ").append(getSession()).append("\n");
 
-        sb.append("[").append(new Date(getStart()));
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+
+
+        sb.append("[").append(startTime);
         if (getStart() != getEnd()) {
-            sb.append(" - ").append(new Date(getEnd()));
+            sb.append(" - ").append(endTime);
         }
         sb.append("]\n");
         sb.append("details:\n");
