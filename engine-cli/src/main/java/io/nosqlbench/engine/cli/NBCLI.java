@@ -271,6 +271,7 @@ public class NBCLI {
             System.exit(0);
         }
 
+        logger.debug("initializing annotators with config:'" + annotatorsConfig + "'");
         Annotators.init(annotatorsConfig);
         Annotators.recordAnnotation(
                 Annotation.newBuilder()
