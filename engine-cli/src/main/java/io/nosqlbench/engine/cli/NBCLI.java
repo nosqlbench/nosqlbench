@@ -89,8 +89,10 @@ public class NBCLI {
         loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
 
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
+        String sessionName = new SessionNamer().format(globalOptions.getSessionName());
 
         loggerConfig
+                .setSessionName(sessionName)
                 .setConsoleLevel(globalOptions.getConsoleLogLevel())
                 .setConsolePattern(globalOptions.getConsoleLoggingPattern())
                 .setLogfileLevel(globalOptions.getScenarioLogLevel())
@@ -103,6 +105,7 @@ public class NBCLI {
         logger = LogManager.getLogger("NBCLI");
         loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
         logger.info("Configured scenario log at " + loggerConfig.getLogfileLocation());
+        logger.debug("Scenario log started");
 
         // Global only processing
         if (args.length == 0) {
@@ -162,7 +165,6 @@ public class NBCLI {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
-        String sessionName = new SessionNamer().format(options.getSessionName());
         logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());

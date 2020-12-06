@@ -13,12 +13,16 @@ import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.builder.api.*;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
+import java.nio.file.attribute.*;
+
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -202,6 +206,16 @@ public class LoggerConfig extends ConfigurationFactory {
     }
 
     public void activate() {
+        if (!Files.exists(loggerDir)) {
+            try {
+                FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(
+                        PosixFilePermissions.fromString("rwxrwx---")
+                );
+                Path directory = Files.createDirectory(loggerDir, attrs);
+            } catch (Exception e) {
+                throw new RuntimeException("Error while creating directory " + loggerDir.toString() + ": " + e.getMessage(), e);
+            }
+        }
         ConfigurationFactory.setConfigurationFactory(this);
     }
 
