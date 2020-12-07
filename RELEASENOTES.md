@@ -1,5 +1,7 @@
-
-- 3d2ff55f (main) auto create apikey
+- e4f325c4 (origin/main, main) disable test which is present in feature branch
+- 78463838 make main brain build cleanly again
+- 608d1f72 Update DOWNLOADS.md
+- 3d2ff55f auto create apikey
 - cfa92eab package organization
 - 2ab118f4 package organization
 - a23808b3 update appimage build script for j15
