@@ -96,7 +96,10 @@ public class Annotators {
     }
 
     public static synchronized void recordAnnotation(Annotation annotation) {
-        getAnnotators().forEach(a -> a.recordAnnotation(annotation));
+        for (Annotator annotator : getAnnotators()) {
+            logger.trace("calling annotator " + annotator.getName());
+            annotator.recordAnnotation(annotation);
+        }
     }
 
 //    public static synchronized void recordAnnotation(
