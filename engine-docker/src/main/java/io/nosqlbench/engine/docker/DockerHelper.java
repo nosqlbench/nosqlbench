@@ -45,7 +45,7 @@ public class DockerHelper {
     }
 
     public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
-        logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
+        logger.info("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
                 "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
         boolean existingContainer = removeExitedContainers(name);
