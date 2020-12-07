@@ -26,6 +26,7 @@ public class AnnotationBuilderTest {
         String represented = an1.toString();
         assertThat(represented).isEqualTo("session: test-session\n" +
                 "[2020-09-13T12:26:40Z[GMT]]\n" +
+                "span:instant\n" +
                 "details:\n" +
                 " detailk1: detailv1\n" +
                 " detailk2: \n" +
@@ -38,7 +39,10 @@ public class AnnotationBuilderTest {
                 "labels:\n" +
                 " layer: Scenario\n" +
                 " labelka: labelvb\n" +
-                " labelkc: labelvd\n");
+                " labelkc: labelvd\n" +
+                " session: test-session\n" +
+                " span: instant\n" +
+                " appname: nosqlbench\n");
 
     }
 

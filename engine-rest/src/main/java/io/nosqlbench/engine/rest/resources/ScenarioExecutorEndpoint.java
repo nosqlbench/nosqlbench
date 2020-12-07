@@ -108,8 +108,8 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
                 "disabled",
                 false,
                 true,
-                false
-        );
+                false,
+                cmdList.toString());
 
         scenario.addScriptText(buffer.getParsedScript());
 
