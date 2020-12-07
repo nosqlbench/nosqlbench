@@ -42,7 +42,7 @@
         }
       ]
     },
-    "description": "Dashboard for NoSQLBench 3",
+    "description": "Basic Dashboard with Annotations for NoSQLBench 4",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -59,224 +59,252 @@
           "y": 0
         },
         "id": 115,
-        "panels": [],
+        "panels": [
+          {
+            "datasource": null,
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 2,
+              "w": 24,
+              "x": 0,
+              "y": 1
+            },
+            "id": 128,
+            "options": {
+              "content": "The descriptions below are in the same position as the metric they desscribe.\nYou can collapse this row when you no longer need the descriptions.\nSome of the descriptions have additional details if you scroll with\nyour mouse wheel.\n\n\n",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 0,
+              "y": 3
+            },
+            "id": 117,
+            "options": {
+              "content": "These two metrics show the 1-minute averaged ops per second for all ops (successes and errors) and succesful ops (no errors during execution) separately.\n\nWhen there are no errors, these metrics should be the same. When there are errors, there will be a difference. In that case, you can look at the error metrics to learn more about what is happening.\n\nBy comparing these two metrics for any activity, you have a quick first-glance sanity check that your tests are configured properly and\nthat there are no serious configuration or resource issues. In addition, this is the primary throughput metric.\n\n\n\n\n\n",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Ops and Successful Ops",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 6,
+              "y": 3
+            },
+            "id": 118,
+            "options": {
+              "content": "When an exception is caught and counted in a scenario, a specially named metric is emited which includes a simplified name of the error type.\nEach of these metrics is created as needed in the NoSQLBench runtime.\n\nThese metrics are formated with a name pattern of `errorcounts.NAME` where NAME is the simple name\nof the exception class which was caught during the operation. For example, For an activity\nnamed foo (with alias=foo), you would expect an exception named 'FooTimeoutException' to be shown\nwith a metric name of ...`foo.errorcounts.FooTimeoutException`\n\n\n\n\n",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Error Counts",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 12,
+              "y": 3
+            },
+            "id": 119,
+            "options": {
+              "content": "The service time distribution is an HDR histogram that represents the time elapsed from when an operation is submitted for execution to when its result has been received.\n\nFrom the vantage point of the NoSQLBench runtime, this is a client-side metric. Thus, the service time captures the processing time that an application would see, including driver logic, wire time (transport), and server-side processing. \n\nThis metric does not include the waittime or the responsetime metrics. These metrics are only meaningful (and provided) when a `cyclerate=` is provided to an activity. When computing the responsetime metric, the servicetime is added to the waittime for a given operation.\n",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Service Time Distribution",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 18,
+              "y": 3
+            },
+            "id": 120,
+            "options": {
+              "content": "The tries distribution is an HDR histogram which represents how many times an operation was submitted. In a well balanced system,\ntries should be 1 across the board.\n\nEvery operation which is executed within NoSQLBench should have a `tries` metric. For example, with CQL, the number of times an operation is submitted\nbefore it is succesful is ideally 1. If you are overloading your target system, thus forcing resource contention, you may see operations timeout.\n\nBy default, NoSQLBench will try up to 10 times to submit operations before giving up and throwing an error for an operation.\n\nThe tries metric can be used as a low-noise indicator of system saturation. For example, if you are running a system marginally\nbeyond its capacity, the tries for operations will go above 1 at the higher percentiles such as P99. If you increase the load even further, more retries\nwill be needed and less work will be completed, thus showing higher retries at even lower percentiles, like P95, for example.\n\nAs such, you can use the tries metric as an indicator of relative saturation.",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Op Tries Distribution",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 0,
+              "y": 6
+            },
+            "id": 121,
+            "options": {
+              "content": "This panel shows the P75 service times for the internal stages of NoSQLBench processing. It provides a sanity check to ensure that the client processing time is low and predictable. \n\nIf there are spikes in this data, then you are likely trying to run your workloads on insufficient client hardware. In order to ensure high fidelity results in the other metrics, the client\nneeds to be capable of driving the workload without saturating or introducing signifcant local resource contention.\n\n- **read-input** - the time it takes for a worker thread to acquire a stride (range of cycles) for execution.\n- **bind** - the time it takes to convert a cycle value into a set of fields for us in an operation.\n- **execute** - the time it takes to submit work to a protocol-specific driver.",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "P75 NB Internals",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 6,
+              "y": 6
+            },
+            "id": 122,
+            "options": {
+              "content": "This panel shows the P99 service times for the internal stages of NoSQLBench processing. It provides a sanity check to ensure that the client processing time is low and predictable. \n\nIf there are spikes in this data, then you are likely trying to run your workloads on insufficient client hardware. In order to ensure high fidelity results in the other metrics, the client\nneeds to be capable of driving the workload without saturating or introducing signifcant local resource contention.\n\n- **read-input** - the time it takes for a worker thread to acquire a stride (range of cycles) for execution.\n- **bind** - the time it takes to convert a cycle value into a set of fields for us in an operation.\n- **execute** - the time it takes to submit work to a protocol-specific driver.",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "P99 NB Internals",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 12,
+              "y": 6
+            },
+            "id": 123,
+            "options": {
+              "content": "This panel simply breaks out the service time range in a simpler view. This is a good metric to look at when you want to know what the best and worse case value is for any given histogram interval.\n\nThese values come from a discrete HDR histogram reservoir. They are the actual best and worst service times, unaffected by time-decaying reservoir logic.\n",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Service Time Range",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "datasource": null,
+            "description": "",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {}
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 3,
+              "w": 6,
+              "x": 18,
+              "y": 6
+            },
+            "id": 124,
+            "options": {
+              "content": "This is a simple visual reference for the cycle count within each activity. This makes it easy to see the relative progress of an activity over time.",
+              "mode": "markdown"
+            },
+            "pluginVersion": "7.3.4",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Cycle Count",
+            "transparent": true,
+            "type": "text"
+          }
+        ],
         "title": "NoSQLBench Metrics Guide",
         "type": "row"
-      },
-      {
-        "content": "The descriptions below are in the same position as the metric they desscribe.\nYou can collapse this row when you no longer need the descriptions.\nSome of the descriptions have additional details if you scroll with\nyour mouse wheel.\n\n\n",
-        "datasource": null,
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 2,
-          "w": 24,
-          "x": 0,
-          "y": 1
-        },
-        "id": 128,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "These two metrics show the 1-minute averaged ops per second for all ops (successes and errors) and succesful ops (no errors during execution) separately.\n\nWhen there are no errors, these metrics should be the same. When there are errors, there will be a difference. In that case, you can look at the error metrics to learn more about what is happening.\n\nBy comparing these two metrics for any activity, you have a quick first-glance sanity check that your tests are configured properly and\nthat there are no serious configuration or resource issues. In addition, this is the primary throughput metric.\n\n\n\n\n\n",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 0,
-          "y": 3
-        },
-        "id": 117,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Ops and Successful Ops",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "When an exception is caught and counted in a scenario, a specially named metric is emited which includes a simplified name of the error type.\nEach of these metrics is created as needed in the NoSQLBench runtime.\n\nThese metrics are formated with a name pattern of `errorcounts.NAME` where NAME is the simple name\nof the exception class which was caught during the operation. For example, For an activity\nnamed foo (with alias=foo), you would expect an exception named 'FooTimeoutException' to be shown\nwith a metric name of ...`foo.errorcounts.FooTimeoutException`\n\n\n\n\n",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 6,
-          "y": 3
-        },
-        "id": 118,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Error Counts",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "The service time distribution is an HDR histogram that represents the time elapsed from when an operation is submitted for execution to when its result has been received.\n\nFrom the vantage point of the NoSQLBench runtime, this is a client-side metric. Thus, the service time captures the processing time that an application would see, including driver logic, wire time (transport), and server-side processing. \n\nThis metric does not include the waittime or the responsetime metrics. These metrics are only meaningful (and provided) when a `cyclerate=` is provided to an activity. When computing the responsetime metric, the servicetime is added to the waittime for a given operation.\n",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 12,
-          "y": 3
-        },
-        "id": 119,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Service Time Distribution",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "The tries distribution is an HDR histogram which represents how many times an operation was submitted. In a well balanced system,\ntries should be 1 across the board.\n\nEvery operation which is executed within NoSQLBench should have a `tries` metric. For example, with CQL, the number of times an operation is submitted\nbefore it is succesful is ideally 1. If you are overloading your target system, thus forcing resource contention, you may see operations timeout.\n\nBy default, NoSQLBench will try up to 10 times to submit operations before giving up and throwing an error for an operation.\n\nThe tries metric can be used as a low-noise indicator of system saturation. For example, if you are running a system marginally\nbeyond its capacity, the tries for operations will go above 1 at the higher percentiles such as P99. If you increase the load even further, more retries\nwill be needed and less work will be completed, thus showing higher retries at even lower percentiles, like P95, for example.\n\nAs such, you can use the tries metric as an indicator of relative saturation.",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 18,
-          "y": 3
-        },
-        "id": 120,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Op Tries Distribution",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "This panel shows the P75 service times for the internal stages of NoSQLBench processing. It provides a sanity check to ensure that the client processing time is low and predictable. \n\nIf there are spikes in this data, then you are likely trying to run your workloads on insufficient client hardware. In order to ensure high fidelity results in the other metrics, the client\nneeds to be capable of driving the workload without saturating or introducing signifcant local resource contention.\n\n- **read-input** - the time it takes for a worker thread to acquire a stride (range of cycles) for execution.\n- **bind** - the time it takes to convert a cycle value into a set of fields for us in an operation.\n- **execute** - the time it takes to submit work to a protocol-specific driver.",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 0,
-          "y": 6
-        },
-        "id": 121,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "P75 NB Internals",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "This panel shows the P99 service times for the internal stages of NoSQLBench processing. It provides a sanity check to ensure that the client processing time is low and predictable. \n\nIf there are spikes in this data, then you are likely trying to run your workloads on insufficient client hardware. In order to ensure high fidelity results in the other metrics, the client\nneeds to be capable of driving the workload without saturating or introducing signifcant local resource contention.\n\n- **read-input** - the time it takes for a worker thread to acquire a stride (range of cycles) for execution.\n- **bind** - the time it takes to convert a cycle value into a set of fields for us in an operation.\n- **execute** - the time it takes to submit work to a protocol-specific driver.",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 6,
-          "y": 6
-        },
-        "id": 122,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "P99 NB Internals",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "This panel simply breaks out the service time range in a simpler view. This is a good metric to look at when you want to know what the best and worse case value is for any given histogram interval.\n\nThese values come from a discrete HDR histogram reservoir. They are the actual best and worst service times, unaffected by time-decaying reservoir logic.\n",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 12,
-          "y": 6
-        },
-        "id": 123,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Service Time Range",
-        "transparent": true,
-        "type": "text"
-      },
-      {
-        "content": "This is a simple visual reference for the cycle count within each activity. This makes it easy to see the relative progress of an activity over time.",
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "custom": {}
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 6,
-          "x": 18,
-          "y": 6
-        },
-        "id": 124,
-        "mode": "markdown",
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Cycle Count",
-        "transparent": true,
-        "type": "text"
       },
       {
         "collapsed": false,
@@ -285,7 +313,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 9
+          "y": 1
         },
         "id": 91,
         "panels": [],
@@ -301,7 +329,8 @@
         "description": "",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -311,7 +340,7 @@
           "h": 6,
           "w": 6,
           "x": 0,
-          "y": 10
+          "y": 2
         },
         "hiddenSeries": false,
         "id": 95,
@@ -329,9 +358,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -403,7 +433,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -413,7 +444,7 @@
           "h": 6,
           "w": 6,
           "x": 6,
-          "y": 10
+          "y": 2
         },
         "hiddenSeries": false,
         "id": 93,
@@ -431,9 +462,10 @@
         "links": [],
         "nullPointMode": "connected",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -499,7 +531,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -509,7 +542,7 @@
           "h": 6,
           "w": 6,
           "x": 12,
-          "y": 10
+          "y": 2
         },
         "hiddenSeries": false,
         "id": 97,
@@ -528,9 +561,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -604,7 +638,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -614,7 +649,7 @@
           "h": 6,
           "w": 6,
           "x": 18,
-          "y": 10
+          "y": 2
         },
         "hiddenSeries": false,
         "id": 98,
@@ -632,9 +667,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -700,7 +736,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -710,7 +747,7 @@
           "h": 6,
           "w": 6,
           "x": 0,
-          "y": 16
+          "y": 8
         },
         "hiddenSeries": false,
         "id": 99,
@@ -728,9 +765,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 1,
         "points": true,
         "renderer": "flot",
@@ -797,7 +835,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -807,7 +846,7 @@
           "h": 6,
           "w": 6,
           "x": 6,
-          "y": 16
+          "y": 8
         },
         "hiddenSeries": false,
         "id": 111,
@@ -825,9 +864,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 1,
         "points": true,
         "renderer": "flot",
@@ -899,7 +939,8 @@
         "description": "",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -909,7 +950,7 @@
           "h": 6,
           "w": 6,
           "x": 12,
-          "y": 16
+          "y": 8
         },
         "hiddenSeries": false,
         "id": 109,
@@ -927,9 +968,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -1001,7 +1043,8 @@
         "datasource": "prometheus",
         "fieldConfig": {
           "defaults": {
-            "custom": {}
+            "custom": {},
+            "links": []
           },
           "overrides": []
         },
@@ -1011,7 +1054,7 @@
           "h": 6,
           "w": 6,
           "x": 18,
-          "y": 16
+          "y": 8
         },
         "hiddenSeries": false,
         "id": 113,
@@ -1029,9 +1072,10 @@
         "links": [],
         "nullPointMode": "null",
         "options": {
-          "dataLinks": []
+          "alertThreshold": true
         },
         "percentage": false,
+        "pluginVersion": "7.3.4",
         "pointradius": 5,
         "points": false,
         "renderer": "flot",
@@ -1091,13 +1135,64 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 25,
+    "schemaVersion": 26,
     "style": "dark",
     "tags": [
-      "dse"
+      "NoSQLBench"
     ],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "selected": false,
+            "text": "CLI",
+            "value": "CLI"
+          },
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": "Annotation Filter",
+          "multi": false,
+          "name": "Layer",
+          "options": [
+            {
+              "selected": false,
+              "text": "NONE",
+              "value": "NONE"
+            },
+            {
+              "selected": false,
+              "text": "CLI",
+              "value": "CLI"
+            },
+            {
+              "selected": false,
+              "text": "Scenario",
+              "value": "Scenario"
+            },
+            {
+              "selected": false,
+              "text": "Script",
+              "value": "Script"
+            },
+            {
+              "selected": true,
+              "text": "Activity",
+              "value": "Activity"
+            },
+            {
+              "selected": false,
+              "text": "Motor",
+              "value": "Motor"
+            }
+          ],
+          "query": "NONE,CLI,Scenario,Script,Activity,Motor",
+          "queryValue": "",
+          "skipUrlSync": false,
+          "type": "custom"
+        }
+      ]
     },
     "time": {
       "from": "now-5m",
@@ -1128,8 +1223,8 @@
       ]
     },
     "timezone": "",
-    "title": "NoSQLBench",
+    "title": "NB4 Dashboard",
     "uid": "aIIX1f6Wz",
-    "version": 3
+    "version": 6
   }
 }
