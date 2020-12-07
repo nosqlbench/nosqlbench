@@ -228,7 +228,7 @@ public class DockerMetricsManager {
             logger.error("failed to set permissions on prom backup " +
                     "directory " + userHome + "/.nosqlbench/prometheus)");
             e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException(e);
         }
 
         try (PrintWriter out = new PrintWriter(
@@ -238,11 +238,11 @@ public class DockerMetricsManager {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             logger.error("error writing prometheus yaml file to ~/.prometheus");
-            System.exit(1);
+            throw new RuntimeException(e);
         } catch (IOException e) {
             e.printStackTrace();
             logger.error("creating file in ~/.prometheus");
-            System.exit(1);
+            throw new RuntimeException(e);
         }
     }
 
@@ -302,7 +302,7 @@ public class DockerMetricsManager {
             logger.error("failed to set permissions on grafana directory " +
                     "directory " + userHome + "/.nosqlbench/grafana)");
             e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException(e);
         }
     }
 
@@ -348,6 +348,7 @@ public class DockerMetricsManager {
                     close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
         }
