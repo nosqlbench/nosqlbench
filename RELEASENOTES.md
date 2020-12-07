@@ -1,4 +1,6 @@
-- 3fa958c9 (HEAD -> main, origin/main) update docker actions and add sanity check
+- 2b17cdcc (HEAD -> main) fix broken autoformat
+- d00a50f1 (origin/main) test build scripts
+- 3fa958c9 update docker actions and add sanity check
 - d740078c fixing build
 - 82d5e021 fix workload typo
 - 2148a24c Stabilize NB3 builds
