@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
     private final static Logger logger = LogManager.getLogger("ANNOTATORS" );
-    private final static Logger annotationsLog = LogManager.getLogger("ANNOTATIONS" );
+    //private final static Logger annotationsLog = LogManager.getLogger("ANNOTATIONS" );
     private OnError onError = OnError.Warn;
 
     private GrafanaClient client;
@@ -45,9 +45,15 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
             });
             ga.getTags().add("layer:" + annotation.getLayer().toString());
 
+            if (annotation.getStart() == annotation.getEnd()) {
+                ga.getTags().add("span:instant");
+            } else {
+                ga.getTags().add("span:interval");
+            }
+
             Map<String, String> labels = annotation.getLabels();
 
-            Optional.ofNullable(labels.get("alertId" ))
+            Optional.ofNullable(labels.get("alertId"))
                     .map(Integer::parseInt).ifPresent(ga::setAlertId);
 
             ga.setText(annotation.toString());
@@ -82,7 +88,6 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
             // Details
 
-            annotationsLog.info("ANNOTATION:" + ga.toString());
             GrafanaAnnotation created = this.client.createAnnotation(ga);
 
         } catch (Exception e) {

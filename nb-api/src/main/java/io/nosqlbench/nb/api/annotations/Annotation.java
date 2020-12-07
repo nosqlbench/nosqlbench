@@ -73,4 +73,12 @@ public interface Annotation {
         return new AnnotationBuilder();
     }
 
+    /**
+     * This should return {@link Span#interval} if the span of time is not an instant, and
+     * {@link Span#instant}, otherwise.
+     */
+    Span getSpan();
+
+    String asJson();
+
 }
