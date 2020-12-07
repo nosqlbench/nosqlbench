@@ -1,5 +1,7 @@
-- 2b17cdcc (HEAD -> main) fix broken autoformat
-- d00a50f1 (origin/main) test build scripts
+- 6048be95 (HEAD -> main) fix broken autoformat
+- c119ec14 (origin/main) test build scripts
+- 2b17cdcc fix broken autoformat
+- d00a50f1 test build scripts
 - 3fa958c9 update docker actions and add sanity check
 - d740078c fixing build
 - 82d5e021 fix workload typo
