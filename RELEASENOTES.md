@@ -1,29 +1,54 @@
-- 1e958a7e (HEAD -> main) simplify logger naming for core systems
-- 1382d33d argsfiles and statedirs
-- b5901679 environment and sys prop support
-- fd74ccba move common topics to resources base
-- 6a8dfef1 qualify grafana docker with tag
-- 2830d070 simple workload improvements
-- b9607d07 make argsfiles use double dash
-- a9b0dc9d argsfile support
-- f702736f (HEAD -> main) flatten maps in OpTemplates to allow map consumers
-- 4a9fa81b pull Named service up
-- 574a89e7 pull ConfigAware api up
-- 71195d0a http release fixes
-- 3fa89ebc partial work for --args
-- 262df571 improved error messages
-- 453b1b2c extract ratio from optemplate before construction
-- dcf458c4 annotation progress
-- 7017b6cd add SplitLongs function
-- 0758670f add nb clients module
-- 1dbf36c4 add grafana annotation client
-- 120d9761 remove warning for speculative defaults
-- c78f1e92 typos and minor fixes
-- f3f1b8f4 add annotations design sketch
-- 394580d6 more idea sketches
-- 9e5972f5 comment cleanup
-- 06edfcc9 fix NPE when binding has undefined value
-- 510746b7 improve mismatched scenario name feedback
-- 735b32e1 add illustrative test for EpochMillisToJavaLocalDate
-- 2390f253 Initial Migration of DSE Graph
-- 2275573c Update Readme
+- 040db478 backport github actions breaking change fix
+- 3f4d1304 build NB3 with J14
+- 89c15d38 backport github breaking change fixes
+- 8cce0173 backport auto pre-release on -rc branches
+- daea786c leave source and targets at J11 and runtime at J14 for NB3
+- 2bfe24eb backport auto pre-releases on -rc branches
+- d089ff24 document Java version references in project
+- 70f22ad8 support J14 or J15 in appimage build
+- e4f325c4 disable test which is present in feature branch
+- 8a0b326f (origin/dependabot/maven/mvn-defaults/jetty.version-9.4.35.v20201120) Bump jetty.version in /mvn-defaults
+- 78463838 make main brain build cleanly again
+- 608d1f72 Update DOWNLOADS.md
+- 3d2ff55f auto create apikey
+- cfa92eab package organization
+- 2ab118f4 package organization
+- a23808b3 update appimage build script for j15
+- 7b0e37ab add metrics manifest to polyglot
+- 7e6aa1a2 bump source and target to Java 15
+- 2752fa50 bump major version to 4.0.0-SNAPSHOT
+- 7e880b91 experimental grammar
+- 3f65a054 console friendly metrics summary
+- 146686e0 simplify custom logging configuration
+- d0592454 typos, alignment, cruft
+- 45307081 backfill missing default
+- b7c24642 centralize log4j2 and slf4j stub config
+- 2215fc94 typos, alignment, cruft
+- 0ef26c82 update logger deps for dsegraph
+- 975ea40d merge fixups
+- ae419a26 logging annotator module
+- 6c0632fb grafana annotator module
+- 317ffab4 api for annotations
+- c2cec235 allow configurable delimiter in params parser
+- a09efbe9 consolidate to log4j2
+- 6a523dc4 remove slf4j
+- 67eefbbe fix activity run state bug
+- a88d0376 docker-metrics improvements
+- 667fbdba add log4j2 programmatic configuration
+- 60fa0529 add default log4j configs
+- a3e0739a add FixedValues for double
+- fa85704b add SPI impl selector field 'selector'
+- 4996d206 config API improvements
+- e0498ff2 docs updates
+- e9d2b489 environment API improvements
+- 897a8389 generalize log level to NB
+- a97db87f include JSON support in project API
+- 2c09b8ae typos, culling, and alignment
+- a3a51381 update inactive coords
+- 83136139 generalize op source
+- 089a29d8 grafana api tokens
+- e6e70f71 support DoubleToIntFunction in function matrix
+- 52b029f8 typos, culling, and alignment
+- 4d65dc62 update inactive coords
+- 55edec53 add ToByteBuffer binding function
+- 93e10e6a config model improvements
