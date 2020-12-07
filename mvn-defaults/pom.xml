@@ -506,8 +506,8 @@
         <configuration>
           <debug>true</debug>
           <!--                    <release>${java.target.version}</release>-->
-          <source>15</source>
-          <target>15</target>
+          <source>11</source>
+          <target>11</target>
           <!--                    <compilerArgs>-->
           <!--                        &#45;&#45;enable-preview-->
           <!--                    </compilerArgs>-->
