@@ -135,7 +135,7 @@ public class NBCLIOptions {
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
     private int hdr_digits = 3;
-    private String docker_grafana_tag = "7.2.2";
+    private String docker_grafana_tag = "7.3.4";
     private boolean showStackTraces = false;
     private boolean compileScript = false;
     private String scriptFile = null;
