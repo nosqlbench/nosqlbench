@@ -175,7 +175,7 @@ public class AsyncScriptIntegrationTests {
                 "logs/histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
-        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);
+        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(2);
     }
 
     @Test
