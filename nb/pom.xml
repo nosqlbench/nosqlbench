@@ -1,13 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
 
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
     <relativePath>../mvn-defaults</relativePath>
   </parent>
 
@@ -26,31 +24,31 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-rest</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-cli</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-docs</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-core</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-extensions</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <!--        <dependency>-->
@@ -62,67 +60,67 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-web</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-kafka</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-stdout</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-diag</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-tcp</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
       <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-http</artifactId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
       </dependency>
 
       <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-jmx</artifactId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
       </dependency>
 
       <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-dsegraph-shaded</artifactId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
       </dependency>
 
       <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-cql-shaded</artifactId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
       </dependency>
 
       <dependency>
           <groupId>io.nosqlbench</groupId>
       <artifactId>driver-cqlverify</artifactId>
-        <version>3.12.157-SNAPSHOT</version>
+        <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-mongodb</artifactId>
-      <version>3.12.157-SNAPSHOT</version>
+      <version>3.12.158-SNAPSHOT</version>
     </dependency>
 
     <!--        <dependency>-->
@@ -259,7 +257,7 @@
         <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-mongodb</artifactId>
-          <version>3.12.157-SNAPSHOT</version>
+          <version>3.12.158-SNAPSHOT</version>
         </dependency>
       </dependencies>
     </profile>
@@ -313,7 +311,7 @@
             <artifactId>maven-enforcer-plugin</artifactId>
             <configuration>
               <rules>
-                <dependencyConvergence/>
+                <dependencyConvergence />
               </rules>
             </configuration>
           </plugin>
