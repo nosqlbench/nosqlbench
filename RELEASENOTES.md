@@ -1,4 +1,6 @@
-- d865c03c (HEAD -> main, origin/main) make perf sensitive test less sensitive
+- f9e509dd correct pom version for NB3 branch
+- 3b4ecaca build testing
+- d865c03c make perf sensitive test less sensitive
 - 0fb043e3 build testing
 - e334e456 build testing
 - 17251bb6 build testing
