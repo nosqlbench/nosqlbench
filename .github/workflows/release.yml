@@ -183,7 +183,7 @@ jobs:
 
       - name: sanity check docker image
         run: |
-          docker run --rm -i -t nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }} --version
+          docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }} --version
 
       - name: docker push
         uses: docker/build-push-action@v2
