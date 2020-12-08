@@ -1,3 +1,5 @@
+- b2333858 (HEAD -> main) make docker test non-pty
+- 93e26759 (origin/main) reset version for nb3
 - f9e509dd correct pom version for NB3 branch
 - 3b4ecaca build testing
 - d865c03c make perf sensitive test less sensitive
