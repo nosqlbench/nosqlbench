@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.157</version>
+        <version>3.12.158-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-          <version>3.12.157</version>
+          <version>3.12.158-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
