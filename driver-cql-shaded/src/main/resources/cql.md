@@ -210,6 +210,13 @@ activity types.
     Examples:
     - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
     - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
+    Astra Example:
+    - `$ nb run driver=cql \
+    workload=cql-iot \
+    tags=phase:schema \
+    username=astra_user \
+    password=astra_password \
+    secureconnectbundle=/path/to/secure-connect-mydatabase.zip`
 - **insights** - Set to false to disable the driver from sending insights monitoring information
     - `insights=false`
 - **tickduration** - sets the tickDuration (milliseconds) of HashedWheelTimer of the
