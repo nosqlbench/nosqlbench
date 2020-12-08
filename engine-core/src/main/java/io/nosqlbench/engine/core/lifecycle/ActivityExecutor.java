@@ -61,12 +61,12 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     private final static int waitTime = 10000;
     private String sessionId = "";
     private long startedAt = 0L;
-    private final long stoppedAt = 0L;
+    private long stoppedAt = 0L;
     private String[] annotatedCommand;
 
 //    private RunState intendedState = RunState.Uninitialized;
 
-    public ActivityExecutor(Activity activity) {
+    public ActivityExecutor(Activity activity, String sessionId) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         executorService = new ThreadPoolExecutor(
@@ -77,6 +77,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         );
         activity.getActivityDef().getParams().addListener(this);
         activity.setActivityController(this);
+        this.sessionId = sessionId;
     }
 
     public void setSessionId(String sessionId) {
@@ -235,6 +236,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.trace("closing auto-closeables");
             activity.closeAutoCloseables();
             activity.setRunState(RunState.Stopped);
+            this.stoppedAt=System.currentTimeMillis();
         }
 
         if (stoppingException != null) {

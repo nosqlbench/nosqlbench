@@ -302,7 +302,8 @@ public class ScenarioController {
                 }
 
                 ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
-                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()));
+                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()),
+                        this.sessionId);
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;

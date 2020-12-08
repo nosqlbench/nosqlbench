@@ -52,7 +52,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
         ad.setThreads(1);
         ae.startActivity();
         ae.stopActivity();
@@ -76,7 +76,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-delayed-start");
         ad.setThreads(1);
         ae.startActivity();
         ae.awaitCompletion(15000);
@@ -101,7 +101,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-new-executor");
         ad.setThreads(5);
         ae.startActivity();
 
