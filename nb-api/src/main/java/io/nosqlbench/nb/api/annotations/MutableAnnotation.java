@@ -3,7 +3,6 @@ package io.nosqlbench.nb.api.annotations;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import io.nosqlbench.nb.api.Layer;
 
 import java.time.Instant;
 import java.time.ZoneId;

@@ -1,6 +1,5 @@
 package io.nosqlbench.nb.api.annotations;
 
-import io.nosqlbench.nb.api.Layer;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

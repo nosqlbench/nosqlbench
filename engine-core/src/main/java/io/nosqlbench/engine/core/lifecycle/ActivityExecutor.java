@@ -19,7 +19,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.nb.api.Layer;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -55,13 +55,13 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     private final List<Motor<?>> motors = new ArrayList<>();
     private final Activity activity;
     private final ActivityDef activityDef;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     private RuntimeException stoppingException;
 
     private final static int waitTime = 10000;
     private String sessionId = "";
     private long startedAt = 0L;
-    private long stoppedAt = 0L;
+    private final long stoppedAt = 0L;
     private String[] annotatedCommand;
 
 //    private RunState intendedState = RunState.Uninitialized;
@@ -255,7 +255,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public synchronized void handleParameterMapUpdate(ParameterMap parameterMap) {
 
         if (activity instanceof ActivityDefObserver) {
-            ((ActivityDefObserver) activity).onActivityDefUpdate(activityDef);
+            activity.onActivityDefUpdate(activityDef);
         }
 
         // An activity must be initialized before the motors and other components are

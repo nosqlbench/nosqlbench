@@ -1,7 +1,5 @@
 package io.nosqlbench.nb.api.annotations;
 
-import io.nosqlbench.nb.api.Layer;
-
 public interface BuilderFacets {
 
     interface All extends

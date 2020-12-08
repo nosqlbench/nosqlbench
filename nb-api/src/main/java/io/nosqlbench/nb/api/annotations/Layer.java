@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api;
+package io.nosqlbench.nb.api.annotations;
 
 public enum Layer {
 
@@ -10,13 +10,13 @@ public enum Layer {
 
     /**
      * Events which describe scenario execution, such as parameters,
-     * lifecycle events, and critical errors
+     * lifecycle events, interruptions, and critical errors
      */
     Scenario,
 
     /**
-     * Events which describe scripting details, such as extensions,
-     * sending programmatic annotations, or critical errors
+     * Events which describe scripting details, such as commands,
+     * extension usages, sending programmatic annotations, or critical errors
      */
     Script,
 

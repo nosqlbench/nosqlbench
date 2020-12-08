@@ -25,7 +25,7 @@ import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
-import io.nosqlbench.nb.api.Layer;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,7 +1,5 @@
 package io.nosqlbench.nb.api.annotations;
 
-import io.nosqlbench.nb.api.Layer;
-
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
@@ -13,7 +11,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
     private final LinkedHashMap<String, String> labels = new LinkedHashMap<>();
     private final LinkedHashMap<String, String> details = new LinkedHashMap<>();
     private Layer layer;
-    private TimeZone timezone = TimeZone.getTimeZone(ZoneId.of("GMT"));
+    private final TimeZone timezone = TimeZone.getTimeZone(ZoneId.of("GMT"));
 
     @Override
     public AnnotationBuilder layer(Layer layer) {

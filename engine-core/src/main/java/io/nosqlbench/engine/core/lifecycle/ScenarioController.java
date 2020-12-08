@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.nb.api.Layer;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
