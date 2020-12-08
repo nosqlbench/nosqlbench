@@ -1,45 +1,4 @@
-- e4f325c4 (origin/main, main) disable test which is present in feature branch
-- 78463838 make main brain build cleanly again
-- 608d1f72 Update DOWNLOADS.md
-- 3d2ff55f auto create apikey
-- cfa92eab package organization
-- 2ab118f4 package organization
-- a23808b3 update appimage build script for j15
-- 7b0e37ab add metrics manifest to polyglot
-- 7e6aa1a2 bump source and target to Java 15
-- 2752fa50 bump major version to 4.0.0-SNAPSHOT
-- 7e880b91 experimental grammar
-- 3f65a054 console friendly metrics summary
-- 146686e0 simplify custom logging configuration
-- d0592454 typos, alignment, cruft
-- 45307081 backfill missing default
-- b7c24642 centralize log4j2 and slf4j stub config
-- 2215fc94 typos, alignment, cruft
-- 0ef26c82 update logger deps for dsegraph
-- 975ea40d merge fixups
-- ae419a26 logging annotator module
-- 6c0632fb grafana annotator module
-- 317ffab4 api for annotations
-- c2cec235 allow configurable delimiter in params parser
-- a09efbe9 consolidate to log4j2
-- 6a523dc4 remove slf4j
-- 67eefbbe fix activity run state bug
-- a88d0376 docker-metrics improvements
-- 667fbdba add log4j2 programmatic configuration
-- 60fa0529 add default log4j configs
-- a3e0739a add FixedValues for double
-- fa85704b add SPI impl selector field 'selector'
-- 4996d206 config API improvements
-- e0498ff2 docs updates
-- e9d2b489 environment API improvements
-- 897a8389 generalize log level to NB
-- a97db87f include JSON support in project API
-- 2c09b8ae typos, culling, and alignment
-- a3a51381 update inactive coords
-- 83136139 generalize op source
-- 089a29d8 grafana api tokens
-- e6e70f71 support DoubleToIntFunction in function matrix
-- 52b029f8 typos, culling, and alignment
-- 4d65dc62 update inactive coords
-- 55edec53 add ToByteBuffer binding function
-- 93e10e6a config model improvements
+- 17ed4c1e (HEAD -> nb4-rc1) annotator and dashboard fixes
+- 4dab9b89 move annotations enums to package
+- 6d514cb6 bump middle version number to required java version '15'
+- fa78e27f set NB4 to Java 15
