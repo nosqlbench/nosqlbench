@@ -47,6 +47,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": null,
+    "iteration": 1607447891116,
     "links": [],
     "panels": [
       {
@@ -371,13 +372,13 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "result{type=\"avg_rate\",avg_of=\"1m\"}",
+            "expr": "result{type=\"avg_rate\",avg_of=\"1m\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-allops",
             "refId": "C"
           },
           {
-            "expr": "result_success{type=\"avg_rate\",avg_of=\"1m\"}",
+            "expr": "result_success{type=\"avg_rate\",avg_of=\"1m\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-okops",
             "refId": "A"
@@ -475,7 +476,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "{__name__=~\"errorcounts.*\"}",
+            "expr": "{__name__=~\"errorcounts.*\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-{{error}}",
             "refId": "B"
@@ -574,18 +575,18 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "result_success{type=\"pctile\"}",
+            "expr": "result_success{type=\"pctile\",alias=\"$Alias\"}",
             "hide": false,
             "interval": "",
             "legendFormat": "{{alias}}-p{{pctile}}",
             "refId": "B"
           },
           {
-            "expr": "cycles_servicetime{type=\"pctile\"}",
-            "hide": true,
+            "expr": "result_success{type=\"pctile\",alias=\"$Alias\"}",
+            "hide": false,
             "interval": "",
-            "legendFormat": "{{alias}}-{{pctile}}",
-            "refId": "A"
+            "legendFormat": "{{alias}}-p{{pctile}}",
+            "refId": "C"
           }
         ],
         "thresholds": [],
@@ -680,7 +681,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "tries{type=\"pctile\"}",
+            "expr": "tries{type=\"pctile\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-p{{pctile}}",
             "refId": "A"
@@ -778,7 +779,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "{__name__=~\"read_input|bind|execute\",type=\"pctile\",pctile=\"75\"}",
+            "expr": "{__name__=~\"read_input|bind|execute\",type=\"pctile\",pctile=\"75\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-{{__name__}}-p{{pctile}}",
             "refId": "A"
@@ -877,7 +878,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "{__name__=~\"read_input|bind|execute\",type=\"pctile\",pctile=\"99\"}",
+            "expr": "{__name__=~\"read_input|bind|execute\",type=\"pctile\",pctile=\"99\",alias=\"$Alias\"}",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -981,13 +982,13 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "result_success{type=\"pctile\",pctile=\"0\"}",
+            "expr": "result_success{type=\"pctile\",pctile=\"0\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-min",
             "refId": "B"
           },
           {
-            "expr": "result_success{type=\"pctile\",pctile=\"100\"}",
+            "expr": "result_success{type=\"pctile\",pctile=\"100\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-max",
             "refId": "A"
@@ -1085,7 +1086,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "cycles_servicetime{type=\"counter\"}",
+            "expr": "cycles_servicetime{type=\"counter\",alias=\"$Alias\"}",
             "interval": "",
             "legendFormat": "{{alias}}-count",
             "refId": "C"
@@ -1145,9 +1146,52 @@
         {
           "allValue": null,
           "current": {
-            "selected": false,
-            "text": "CLI",
-            "value": "CLI"
+            "selected": true,
+            "tags": [],
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "datasource": "prometheus",
+          "definition": "{appname=\"nosqlbench\"}",
+          "error": null,
+          "hide": 0,
+          "includeAll": true,
+          "label": "Alias",
+          "multi": true,
+          "name": "Alias",
+          "options": [
+            {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            {
+              "selected": false,
+              "text": "DIAG0",
+              "value": "DIAG0"
+            }
+          ],
+          "query": "{appname=\"nosqlbench\"}",
+          "refresh": 0,
+          "regex": "/.*alias=\"(\\w+)\".*/",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {
+            "selected": true,
+            "text": "Script",
+            "value": "Script"
           },
           "error": null,
           "hide": 0,
@@ -1172,12 +1216,12 @@
               "value": "Scenario"
             },
             {
-              "selected": false,
+              "selected": true,
               "text": "Script",
               "value": "Script"
             },
             {
-              "selected": true,
+              "selected": false,
               "text": "Activity",
               "value": "Activity"
             },
@@ -1225,6 +1269,6 @@
     "timezone": "",
     "title": "NB4 Dashboard",
     "uid": "aIIX1f6Wz",
-    "version": 6
+    "version": 10
   }
 }
