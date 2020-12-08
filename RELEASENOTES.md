@@ -1,4 +1,6 @@
-- 17ed4c1e (HEAD -> nb4-rc1) annotator and dashboard fixes
+- af87ef9c (HEAD -> nb4-rc1) relaxed requirement for finicky test
+- 3436ec61 (origin/nb4-rc1) trigger build
+- 17ed4c1e annotator and dashboard fixes
 - 4dab9b89 move annotations enums to package
 - 6d514cb6 bump middle version number to required java version '15'
 - fa78e27f set NB4 to Java 15
