@@ -35,7 +35,6 @@ public class NBCLIOptions {
 
     private static final String METRICS_PREFIX = "--metrics-prefix";
 
-    //    private static final String ANNOTATE_TO_GRAFANA = "--grafana-baseurl";
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
     private static final String DEFAULT_ANNOTATORS = "all";
@@ -86,11 +85,12 @@ public class NBCLIOptions {
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
     private final static String DOCKER_METRICS_AT = "--docker-metrics-at";
+    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
+    private static final String DOCKER_PROM_TAG = "--docker-prom-tag";
 
     private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
-    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
 
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%7r %-5level [%t] %-12logger{0} %msg%n%throwable";
 
@@ -136,6 +136,7 @@ public class NBCLIOptions {
     private boolean graaljs_compat = false;
     private int hdr_digits = 3;
     private String docker_grafana_tag = "7.3.4";
+    private String docker_prom_tag = "latest";
     private boolean showStackTraces = false;
     private boolean compileScript = false;
     private String scriptFile = null;
@@ -282,6 +283,10 @@ public class NBCLIOptions {
                 case WORKSPACES_DIR:
                     arglist.removeFirst();
                     workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
+                    break;
+                case DOCKER_PROM_TAG:
+                    arglist.removeFirst();
+                    docker_prom_tag = readWordOrThrow(arglist, "prometheus docker tag");
                     break;
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();
@@ -762,6 +767,10 @@ public class NBCLIOptions {
 
     public String getDockerGrafanaTag() {
         return docker_grafana_tag;
+    }
+
+    public String getDockerPromTag() {
+        return docker_prom_tag;
     }
 
     public static class LoggerConfigData {
