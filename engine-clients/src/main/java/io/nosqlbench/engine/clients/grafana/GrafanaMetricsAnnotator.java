@@ -11,9 +11,7 @@ import io.nosqlbench.nb.api.config.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -143,34 +141,38 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
             keyfilePath = apikeyLocation.map(Path::of).orElseThrow();
         }
 
-        if (!Files.exists(keyfilePath)) {
-            logger.info("Auto-configuring grafana apikey.");
-            GrafanaClientConfig apiClientConf = gc.copy().basicAuth("admin", "admin");
-            GrafanaClient apiClient = new GrafanaClient(apiClientConf);
-            try {
-                String nodeId = SystemId.getNodeId();
 
-                String keyName = "nosqlbench-" + nodeId + "-" + System.currentTimeMillis();
-                ApiToken apiToken = apiClient.createApiToken(keyName, "Admin", Long.MAX_VALUE);
-                Files.createDirectories(keyfilePath.getParent(),
-                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
-                Files.writeString(keyfilePath, apiToken.getKey());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        AuthWrapper authHeaderSupplier = new AuthWrapper(
-                "Authorization",
-                new GrafanaKeyFileReader(keyfilePath),
-                s -> "Bearer " + s
-        );
-        gc.addHeaderSource(authHeaderSupplier);
+//        if (!Files.exists(keyfilePath)) {
+//            logger.info("Auto-configuring grafana apikey.");
+//            GrafanaClientConfig apiClientConf = gc.copy().basicAuth("admin", "admin");
+//            GrafanaClient apiClient = new GrafanaClient(apiClientConf);
+//            try {
+//                String nodeId = SystemId.getNodeId();
+//
+//                String keyName = "nosqlbench-" + nodeId + "-" + System.currentTimeMillis();
+//                ApiToken apiToken = apiClient.createApiToken(keyName, "Admin", Long.MAX_VALUE);
+//                Files.createDirectories(keyfilePath.getParent(),
+//                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
+//                Files.writeString(keyfilePath, apiToken.getKey());
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//
+//        AuthWrapper authHeaderSupplier = new AuthWrapper(
+//                "Authorization",
+//                new GrafanaKeyFileReader(keyfilePath),
+//                s -> "Bearer " + s
+//        );
+//        gc.addHeaderSource(authHeaderSupplier);
 
         this.onError = OnError.valueOfName(cfg.get("onerror").toString());
 
         this.client = new GrafanaClient(gc);
 
+        String keyName = "nosqlbench-" + SystemId.getNodeId() + "-" + System.currentTimeMillis();
+        Supplier<String> namer = () -> "nosqlbench-" + SystemId.getNodeId() + "-" + System.currentTimeMillis();
+        this.client.cacheApiToken(namer, "Admin", Long.MAX_VALUE, keyfilePath, "admin", "admin");
 
     }
 
