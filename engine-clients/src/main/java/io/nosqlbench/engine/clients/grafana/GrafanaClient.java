@@ -2,13 +2,19 @@ package io.nosqlbench.engine.clients.grafana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
 import io.nosqlbench.engine.clients.grafana.transfer.Annotations;
 import io.nosqlbench.engine.clients.grafana.transfer.ApiTokenRequest;
+import io.nosqlbench.engine.clients.grafana.transfer.DashboardResponse;
+import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
 
+import java.io.File;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.function.Supplier;
 
 /**
  * @see <a href="https://grafana.com/docs/grafana/latest/http_api/annotations/">Grafana Annotations API Docs</a>
@@ -179,6 +185,27 @@ public class GrafanaClient {
         return savedGrafanaAnnotation;
     }
 
+    public DashboardResponse getDashboardByUid(String uid) {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/dashboards/uid/" + uid);
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Getting dashboard by uid (" + uid + ") failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+
+        DashboardResponse dashboardResponse = gson.fromJson(body, DashboardResponse.class);
+        return dashboardResponse;
+    }
+
     /**
      * <pre>{@code
      * POST /api/annotations/graphite
@@ -302,13 +329,52 @@ public class GrafanaClient {
         throw new RuntimeException("unimplemented");
     }
 
+    /**
+     * This can be called to create an api token and store it for later use as long as you
+     * have the admin credentials for basic auth. This is preferred to continuing to
+     * passing basic auth for admin privileges. The permissions can now be narrowed or managed
+     * in a modular way.
+     *
+     * @param namer       the principal name for the privelege
+     * @param role        the Grafana role
+     * @param ttl         Length of validity for the granted api token
+     * @param keyfilePath The path of the token. If it is present it will simply be used.
+     * @param un          The basic auth username for the Admin role
+     * @param pw          The basic auth password for the Admin role
+     */
+    public void cacheApiToken(Supplier<String> namer, String role, long ttl, Path keyfilePath, String un, String pw) {
+        if (!Files.exists(keyfilePath)) {
+            GrafanaClientConfig basicClientConfig = config.copy();
+            basicClientConfig = basicClientConfig.basicAuth(un, pw);
+            GrafanaClient apiClient = new GrafanaClient(basicClientConfig);
+            String keyName = namer.get();
+            ApiToken apiToken = apiClient.createApiToken(keyName, role, ttl);
+            try {
+                if (keyfilePath.toString().contains(File.separator)) {
+                    Files.createDirectories(keyfilePath.getParent(),
+                            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
+                }
+                Files.writeString(keyfilePath, apiToken.getKey());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        GrafanaMetricsAnnotator.AuthWrapper authHeaderSupplier = new GrafanaMetricsAnnotator.AuthWrapper(
+                "Authorization",
+                new GrafanaKeyFileReader(keyfilePath),
+                s -> "Bearer " + s
+        );
+        config.addHeaderSource(authHeaderSupplier);
+    }
+
     public ApiToken createApiToken(String name, String role, long ttl) {
         ApiTokenRequest r = new ApiTokenRequest(name, role, ttl);
-        ApiToken token = postToGrafana(r, ApiToken.class, "gen api token");
+        ApiToken token = postApiTokenRequest(r, ApiToken.class, "gen api token");
         return token;
     }
 
-    private <T> T postToGrafana(Object request, Class<? extends T> clazz, String desc) {
+    private <T> T postApiTokenRequest(Object request, Class<? extends T> clazz, String desc) {
         HttpRequest rq = config.newJsonPOST("api/auth/keys", request);
         HttpClient client = config.newClient();
 
@@ -331,4 +397,5 @@ public class GrafanaClient {
         T result = gson.fromJson(body, clazz);
         return result;
     }
+
 }

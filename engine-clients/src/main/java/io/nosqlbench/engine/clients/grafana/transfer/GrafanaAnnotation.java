@@ -171,4 +171,13 @@ public class GrafanaAnnotation {
                 ", data=" + data +
                 '}';
     }
+
+    public LinkedHashMap<String, String> getTagMap() {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        for (String tag : this.getTags()) {
+            String[] split = tag.split(":", 2);
+            map.put(split[0], (split.length == 2 ? split[1] : null));
+        }
+        return map;
+    }
 }
