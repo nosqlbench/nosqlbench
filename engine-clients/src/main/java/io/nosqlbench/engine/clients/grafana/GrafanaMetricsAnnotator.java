@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -151,6 +152,8 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
                 String keyName = "nosqlbench-" + nodeId + "-" + System.currentTimeMillis();
                 ApiToken apiToken = apiClient.createApiToken(keyName, "Admin", Long.MAX_VALUE);
+                Files.createDirectories(keyfilePath.getParent(),
+                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
                 Files.writeString(keyfilePath, apiToken.getKey());
             } catch (Exception e) {
                 throw new RuntimeException(e);
