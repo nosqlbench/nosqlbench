@@ -29,6 +29,7 @@ import static io.nosqlbench.engine.docker.RestHelper.post;
 public class DockerMetricsManager {
 
     public static final String GRAFANA_TAG = "grafana_tag";
+    public static final String PROM_TAG = "prom_tag";
 
     private final DockerHelper dh;
 
@@ -44,7 +45,7 @@ public class DockerMetricsManager {
 
         String ip = startGraphite();
 
-        startPrometheus(ip);
+        startPrometheus(ip, options.get(PROM_TAG));
 
         startGrafana(ip, options.get(GRAFANA_TAG));
 
@@ -71,9 +72,9 @@ public class DockerMetricsManager {
         );
         List<String> envList = Arrays.asList(
                 "GF_SECURITY_ADMIN_PASSWORD=admin",
-                "GF_AUTH_ANONYMOUS_ENABLED=\"true\"",
-                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_URL=https://assethub.datastax.com:3001",
-                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_NAME=\"Upload to DataStax\""
+                "GF_AUTH_ANONYMOUS_ENABLED=\"true\""
+//                , "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_URL=https://assethub.datastax.com:3001",
+//                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_NAME=\"Upload to DataStax\""
         );
 
         String reload = null;
@@ -93,12 +94,10 @@ public class DockerMetricsManager {
         }
     }
 
-    private void startPrometheus(String ip) {
+    private void startPrometheus(String ip, String tag) {
 
         logger.info("preparing to start docker metrics");
         String PROMETHEUS_IMG = "prom/prometheus";
-        String tag = "latest";
-//        String tag = "v2.20.1";
         String name = "prom";
         List<Integer> port = Arrays.asList(9090);
 
