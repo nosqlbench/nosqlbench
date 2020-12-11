@@ -50,43 +50,28 @@ public class DockerHelper {
 
         boolean existingContainer = removeExitedContainers(name);
 
-        /*
-        if(startStoppedContainer(name)){
-            return null;
-        };
-         */
-
         Container containerId = searchContainer(name, reload, tag);
         if (containerId != null) {
             logger.debug("container is already up with the id: " + containerId.getId());
             return null;
         }
 
-        Info info = dockerClient.infoCmd().exec();
-        dockerClient.buildImageCmd();
+        boolean found;
 
-//        String term = IMG+":"+tag;
-
-//        String term = IMG.split("/")[1];
-        //List<SearchItem> dockerSearch = dockerClient.searchImagesCmd(term).exec();
-        List<Image> dockerList = dockerClient
-                .listImagesCmd()
-                .withImageNameFilter(IMG + ":" + tag)
-                .exec();
-        if (dockerList.size() == 0) {
+        List<Image> images = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+        if (!found(images, IMG, List.of(tag))) {
             dockerClient.pullImageCmd(IMG)
                     .withTag(tag)
                     .exec(new PullImageResultCallback()).awaitSuccess();
 
-            dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG + ":" + tag).exec();
-            if (dockerList.size() == 0) {
+            images = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+            if (!found(images, IMG, List.of(tag))) {
                 logger.error(String.format("Image %s not found, unable to automatically pull image." +
                                 " Check `docker images`",
                         IMG));
                 System.exit(1);
             }
         }
-        logger.info("Search returned" + dockerList.toString());
 
 
         List<ExposedPort> tcpPorts = new ArrayList<>();
@@ -112,7 +97,7 @@ public class DockerHelper {
 
         List<Link> links = linkNames.stream().map(x -> new Link(x, x)).collect(Collectors.toList());
         CreateContainerCmd builder = dockerClient.createContainerCmd(IMG + ":" + tag);
-        if (cmdList!=null) {
+        if (cmdList != null) {
             builder = builder.withCmd(cmdList);
         }
 
@@ -124,7 +109,7 @@ public class DockerHelper {
                 .withBinds(volumeBindList));
         builder = builder.withName(name);
         builder = builder.withLinks(links);
-        if (envList!=null) {
+        if (envList != null) {
             builder = builder.withEnv(envList);
         }
         CreateContainerResponse containerResponse = builder.exec();
@@ -238,4 +223,20 @@ public class DockerHelper {
         }
 
     }
+
+    private boolean found(List<Image> images, String label, List<String> tags) {
+        List<String> validRepoTags = tags.stream().map(s -> label + ":" + s).collect(Collectors.toList());
+        for (Image image : images) {
+            String[] foundRepoTags = image.getRepoTags();
+            for (String foundRepoTag : foundRepoTags) {
+                for (String validRepoTag : validRepoTags) {
+                    if (foundRepoTag.equals(validRepoTag)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }
