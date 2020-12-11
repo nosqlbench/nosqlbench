@@ -1,7 +1,5 @@
 package io.nosqlbench.nb.api.annotations;
 
-import io.nosqlbench.nb.api.Layer;
-
 import java.util.Map;
 
 /**
@@ -72,5 +70,13 @@ public interface Annotation {
     static BuilderFacets.WantsSession newBuilder() {
         return new AnnotationBuilder();
     }
+
+    /**
+     * This should return {@link Span#interval} if the span of time is not an instant, and
+     * {@link Span#instant}, otherwise.
+     */
+    Span getSpan();
+
+    String asJson();
 
 }

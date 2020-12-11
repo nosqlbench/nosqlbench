@@ -34,11 +34,6 @@ public class CqlActivityType implements ActivityType<CqlActivity> {
             throw new RuntimeException("Currently, the cql activity type requires yaml/workload activity parameter.");
         }
 
-        // allow shortcut: yaml parameter provide the default alias name
-        if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
-            activityDef.getParams().set("alias",yaml.get());
-        }
-
         return new CqlActivity(activityDef);
     }
 

@@ -28,7 +28,8 @@ public class LoggingAnnotator implements Annotator, ConfigAware {
 
     @Override
     public void recordAnnotation(Annotation annotation) {
-        annotationsLog.log(level, annotation.toString());
+        String inlineForm = annotation.asJson();
+        annotationsLog.log(level, inlineForm);
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.clients.grafana;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class By {
@@ -57,8 +58,11 @@ public class By {
         return new By("type", "alert");
     }
 
-    public static By tags(String tag) {
-        return new By("tags", tag);
+    /**
+     * Add one tag at a time, in either "tag" or "tag:value" form.
+     */
+    public static By tag(String tag) {
+        return new By("tag", tag);
     }
 
     public static By id(int id) {
@@ -69,11 +73,12 @@ public class By {
         List<String> tags = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (By by : bys) {
-            if (by.key.equals("tags")) {
-                tags.add(by.value.toString());
+            if (by.key.equals("tag")) {
+                tags.addAll(Arrays.asList(by.value.toString().split(",")));
+            } else {
+                sb.append(by.key).append("=").append(by.value);
+                sb.append("&");
             }
-            sb.append(by.key).append("=").append(by.value);
-            sb.append("&");
         }
         for (String tag : tags) {
             sb.append("tags=").append(tag).append("&");

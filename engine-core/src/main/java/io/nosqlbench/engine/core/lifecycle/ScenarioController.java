@@ -20,6 +20,9 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.nb.api.annotations.Layer;
+import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +41,11 @@ public class ScenarioController {
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final Map<String, ActivityExecutor> activityExecutors = new ConcurrentHashMap<>();
+    private final String sessionId;
+
+    public ScenarioController(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     /**
      * Start an activity, given the activity definition for it. The activity will be known in the scenario
@@ -46,9 +54,20 @@ public class ScenarioController {
      * @param activityDef string in alias=value1;driver=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
+        Annotators.recordAnnotation(Annotation.newBuilder()
+                .session(sessionId)
+                .now()
+                .layer(Layer.Activity)
+                .label("alias", activityDef.getAlias())
+                .detail("command", "start")
+                .detail("params", activityDef.toString())
+                .build());
+
+
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
         scenariologger.debug("START " + activityDef.getAlias());
         activityExecutor.startActivity();
+
     }
 
     /**
@@ -84,6 +103,15 @@ public class ScenarioController {
      * @param activityDef A definition for an activity to run
      */
     public synchronized void run(int timeout, ActivityDef activityDef) {
+        Annotators.recordAnnotation(Annotation.newBuilder()
+                .session(sessionId)
+                .now()
+                .layer(Layer.Activity)
+                .label("alias", activityDef.getAlias())
+                .detail("command", "run")
+                .detail("params", activityDef.toString())
+                .build());
+
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
         scenariologger.debug("RUN alias=" + activityDef.getAlias());
         scenariologger.debug(" (RUN/START) alias=" + activityDef.getAlias());
@@ -135,6 +163,15 @@ public class ScenarioController {
      * @param activityDef An activity def, including at least the alias parameter.
      */
     public synchronized void stop(ActivityDef activityDef) {
+        Annotators.recordAnnotation(Annotation.newBuilder()
+                .session(sessionId)
+                .now()
+                .layer(Layer.Activity)
+                .label("alias", activityDef.getAlias())
+                .detail("command", "stop")
+                .detail("params", activityDef.toString())
+                .build());
+
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
         if (activityExecutor == null) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
@@ -179,7 +216,7 @@ public class ScenarioController {
         }
         ActivityExecutor activityExecutor = getActivityExecutor(alias);
         ParameterMap params = activityExecutor.getActivityDef().getParams();
-        scenariologger.debug("SET ("+alias+"/"+param + ")=(" + value + ")");
+        scenariologger.debug("SET (" + alias + "/" + param + ")=(" + value + ")");
         params.set(param, value);
     }
 
@@ -242,30 +279,31 @@ public class ScenarioController {
 
             if (executor == null && createIfMissing) {
 
-                String activityTypeName = activityDef.getParams().getOptionalString("driver","type").orElse(null);
+                String activityTypeName = activityDef.getParams().getOptionalString("driver", "type").orElse(null);
                 List<String> knownTypes = ActivityType.FINDER.getAll().stream().map(ActivityType::getName).collect(Collectors.toList());
 
                 // Infer the type from either alias or yaml if possible (exactly one matches)
-                if (activityTypeName==null) {
+                if (activityTypeName == null) {
                     List<String> matching = knownTypes.stream().filter(
                             n ->
                                     activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
                                             || activityDef.getParams().getOptionalString("yaml", "workload").orElse("").contains(n)
                     ).collect(Collectors.toList());
-                    if (matching.size()==1) {
-                        activityTypeName=matching.get(0);
+                    if (matching.size() == 1) {
+                        activityTypeName = matching.get(0);
                         logger.info("param 'type' was inferred as '" + activityTypeName + "' since it was seen in yaml or alias parameter.");
                     }
                 }
 
-                if (activityTypeName==null) {
+                if (activityTypeName == null) {
                     String errmsg = "You must provide a driver=<driver> parameter. Valid examples are:\n" +
-                            knownTypes.stream().map(t -> " driver="+t+"\n").collect(Collectors.joining());
+                            knownTypes.stream().map(t -> " driver=" + t + "\n").collect(Collectors.joining());
                     throw new BasicError(errmsg);
                 }
 
                 ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
-                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()));
+                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()),
+                        this.sessionId);
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
@@ -345,15 +383,33 @@ public class ScenarioController {
      * @return true, if all activities completed before the timer expired, false otherwise
      */
     public boolean awaitCompletion(int waitTimeMillis) {
-        boolean completed = false;
-        for (ActivityExecutor executor : activityExecutors.values()) {
-            if (!executor.awaitCompletion(waitTimeMillis)) {
-                logger.debug("awaiting completion signaled FALSE");
-                return false;
+        boolean completed = true;
+        long waitstart = System.currentTimeMillis();
+        long remaining = waitTimeMillis;
+
+        List<ActivityFinisher> finishers = new ArrayList<>();
+        for (ActivityExecutor ae : activityExecutors.values()) {
+            ActivityFinisher finisher = new ActivityFinisher(ae, (int) remaining);
+            finishers.add(finisher);
+            finisher.start();
+        }
+
+        for (ActivityFinisher finisher : finishers) {
+            try {
+                finisher.join(waitTimeMillis);
+            } catch (InterruptedException ignored) {
             }
         }
-        logger.debug("All activities awaiting completion signaled TRUE");
-        return true;
+
+        for (ActivityFinisher finisher : finishers) {
+            if (!finisher.getResult()) {
+                logger.debug("finisher for " + finisher.getName() + " did not signal TRUE");
+                completed = false;
+            }
+        }
+
+        return completed;
+
     }
 
     private ActivityDef aliasToDef(String alias) {
@@ -364,9 +420,10 @@ public class ScenarioController {
         }
     }
 
-    public boolean await(Map<String,String> activityDefMap) {
+    public boolean await(Map<String, String> activityDefMap) {
         return this.awaitActivity(activityDefMap);
     }
+
     public boolean awaitActivity(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         return awaitActivity(ad);
@@ -375,6 +432,7 @@ public class ScenarioController {
     public boolean await(String alias) {
         return this.awaitActivity(alias);
     }
+
     public boolean awaitActivity(String alias) {
         ActivityDef toAwait = aliasToDef(alias);
         return awaitActivity(toAwait);
@@ -383,6 +441,7 @@ public class ScenarioController {
     public boolean await(ActivityDef activityDef) {
         return this.awaitActivity(activityDef);
     }
+
     public boolean awaitActivity(ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
         if (activityExecutor == null) {

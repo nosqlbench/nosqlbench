@@ -1,4 +1,4 @@
-FROM openjdk:14-alpine
+FROM openjdk:15-alpine
 RUN apk --no-cache add curl
 
 COPY nb/target/nb.jar nb.jar

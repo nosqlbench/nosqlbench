@@ -3,7 +3,7 @@
 
   <groupId>io.nosqlbench</groupId>
   <artifactId>mvn-defaults</artifactId>
-  <version>3.12.160-SNAPSHOT</version>
+  <version>4.15.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -11,10 +11,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <javadoc.name>nosqlbench</javadoc.name>
 
-    <java.target.version>11</java.target.version>
-
     <!-- properties for package versions -->
-    <antlr4.version>4.8</antlr4.version>
     <ascii.data.version>1.2.0</ascii.data.version>
     <commons.codec.version>1.14</commons.codec.version>
     <commons.compress.version>1.20</commons.compress.version>
@@ -323,7 +320,7 @@
       <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
-        <version>${antlr4.version}</version>
+        <version>4.8</version>
       </dependency>
 
       <dependency>
@@ -504,8 +501,8 @@
         <configuration>
           <debug>true</debug>
           <!--                    <release>${java.target.version}</release>-->
-          <source>11</source>
-          <target>11</target>
+          <source>15</source>
+          <target>15</target>
           <!--                    <compilerArgs>-->
           <!--                        &#45;&#45;enable-preview-->
           <!--                    </compilerArgs>-->

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -52,9 +53,23 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
+    private int nameEnumerator = 0;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
+        if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
+            Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
+                    "workload",
+                    "yaml"
+            );
+            if (workloadOpt.isPresent()) {
+                activityDef.getParams().set("alias", workloadOpt.get());
+            } else {
+                activityDef.getParams().set("alias",
+                        activityDef.getActivityType().toUpperCase(Locale.ROOT)
+                                + String.valueOf(nameEnumerator++));
+            }
+        }
     }
 
     public SimpleActivity(String activityDefString) {

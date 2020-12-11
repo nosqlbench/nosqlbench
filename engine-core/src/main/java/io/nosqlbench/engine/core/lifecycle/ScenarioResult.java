@@ -31,23 +31,33 @@ import java.util.concurrent.TimeUnit;
 public class ScenarioResult {
 
     private final static Logger logger = LogManager.getLogger(ScenarioResult.class);
+    private final long startedAt;
+    private final long endedAt;
 
     private Exception exception;
     private final String iolog;
 
-    public ScenarioResult(String iolog) {
+    public ScenarioResult(String iolog, long startedAt, long endedAt) {
         this.iolog = iolog;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
     }
 
-    public ScenarioResult(Exception e) {
+    public ScenarioResult(Exception e, long startedAt, long endedAt) {
         this.iolog = e.getMessage();
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
         this.exception = e;
     }
 
-    public void reportToLog() {
+    public void reportElapsedMillis() {
+        logger.info("-- SCENARIO TOOK " + getElapsedMillis() + "ms --");
+    }
 
-        logger.info("-- BEGIN METRICS DETAIL --");
+    public void reportToLog() {
+        logger.debug("-- BEGIN METRICS DETAIL --");
         Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+                .withLoggingLevel(Log4JMetricsReporter.LoggingLevel.DEBUG)
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)
@@ -87,4 +97,7 @@ public class ScenarioResult {
         return this.iolog;
     }
 
+    public long getElapsedMillis() {
+        return endedAt - startedAt;
+    }
 }

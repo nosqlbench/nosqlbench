@@ -149,7 +149,8 @@ public class ScenariosExecutor {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
-                    oResult = Optional.of(new ScenarioResult(e));
+                    long now = System.currentTimeMillis();
+                    oResult = Optional.of(new ScenarioResult(e, now, now));
                 }
             }
 
@@ -182,27 +183,28 @@ public class ScenariosExecutor {
         if (resultFuture1 == null) {
             throw new BasicError("Unknown scenario name:" + scenarioName);
         }
+        long now = System.currentTimeMillis();
         if (resultFuture1.isDone()) {
             try {
                 return Optional.ofNullable(resultFuture1.get());
             } catch (Exception e) {
-                return Optional.of(new ScenarioResult(e));
+                return Optional.of(new ScenarioResult(e, now, now));
             }
         } else if (resultFuture1.isCancelled()) {
-            return Optional.of(new ScenarioResult(new Exception("result was cancelled.")));
+            return Optional.of(new ScenarioResult(new Exception("result was cancelled."), now, now));
         }
         return Optional.empty();
     }
 
     public synchronized void stopScenario(String scenarioName) {
-        this.stopScenario(scenarioName,false);
+        this.stopScenario(scenarioName, false);
     }
 
     public synchronized void stopScenario(String scenarioName, boolean rethrow) {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             ScenarioController controller = pendingScenario.get().getScenarioController();
-            if (controller!=null) {
+            if (controller != null) {
                 controller.forceStopScenario(0, rethrow);
             }
         } else {

@@ -21,7 +21,7 @@ import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.Layer;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -89,8 +89,10 @@ public class NBCLI {
         loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
 
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
+        String sessionName = new SessionNamer().format(globalOptions.getSessionName());
 
         loggerConfig
+                .setSessionName(sessionName)
                 .setConsoleLevel(globalOptions.getConsoleLogLevel())
                 .setConsolePattern(globalOptions.getConsoleLoggingPattern())
                 .setLogfileLevel(globalOptions.getScenarioLogLevel())
@@ -103,6 +105,7 @@ public class NBCLI {
         logger = LogManager.getLogger("NBCLI");
         loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
         logger.info("Configured scenario log at " + loggerConfig.getLogfileLocation());
+        logger.debug("Scenario log started");
 
         // Global only processing
         if (args.length == 0) {
@@ -131,7 +134,8 @@ public class NBCLI {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
             Map<String, String> dashboardOptions = Map.of(
-                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag()
+                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
+                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag()
             );
             dmh.startMetrics(dashboardOptions);
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
@@ -144,8 +148,11 @@ public class NBCLI {
 
         if (metricsAddr != null) {
             reportGraphiteTo = metricsAddr + ":9109";
-            annotatorsConfig = "[{type:'log'},{type:'grafana',baseurl:'http://" + metricsAddr + ":3000/'," +
+            annotatorsConfig = "[{type:'log',level:'info'},{type:'grafana',baseurl:'http://" + metricsAddr + ":3000" +
+                    "/'," +
                     "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
+        } else {
+            annotatorsConfig = "[{type:'log',level:'info'}]";
         }
 
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
@@ -162,7 +169,6 @@ public class NBCLI {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
-        String sessionName = new SessionNamer().format(options.getSessionName());
         logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
@@ -271,6 +277,7 @@ public class NBCLI {
             System.exit(0);
         }
 
+        logger.debug("initializing annotators with config:'" + annotatorsConfig + "'");
         Annotators.init(annotatorsConfig);
         Annotators.recordAnnotation(
                 Annotation.newBuilder()
@@ -330,7 +337,8 @@ public class NBCLI {
                 options.getProgressSpec(),
                 options.wantsGraaljsCompatMode(),
                 options.wantsStackTraces(),
-                options.wantsCompileScript()
+                options.wantsCompileScript(),
+                String.join("\n", args)
         );
         ScriptBuffer buffer = new BasicScriptBuffer()
                 .add(options.getCommands().toArray(new Cmd[0]));
@@ -378,7 +386,7 @@ public class NBCLI {
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
-        logger.info(scenariosResults.getExecutionSummary());
+//        logger.info(scenariosResults.getExecutionSummary());
 
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();

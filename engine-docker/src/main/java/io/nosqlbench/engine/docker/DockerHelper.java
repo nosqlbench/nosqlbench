@@ -45,7 +45,7 @@ public class DockerHelper {
     }
 
     public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
-        logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
+        logger.info("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
                 "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
         boolean existingContainer = removeExitedContainers(name);
@@ -155,7 +155,7 @@ public class DockerHelper {
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
             logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
-            System.exit(1);
+            throw e;
         }
 
         return false;
@@ -178,7 +178,7 @@ public class DockerHelper {
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
             logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
-            System.exit(1);
+            throw e;
         }
         return false;
     }
@@ -193,7 +193,7 @@ public class DockerHelper {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Unable to contact docker, make sure docker is up and try again.");
-            System.exit(1);
+            throw e;
         }
 
         if (runningContainers.size() >= 1) {
@@ -204,9 +204,10 @@ public class DockerHelper {
 
             if (reload != null) {
                 try {
-                    post(reload, null, false, "reloading config");
+                    post(reload, null, false, "reload config");
                 } catch (Exception e) {
                     logger.error(String.format("Unexpected config/state for docker container %s, consider removing the container", name));
+                    throw e;
                 }
             }
 
@@ -233,6 +234,7 @@ public class DockerHelper {
         } catch (InterruptedException e) {
             logger.error("Error getting docker log and detect start for containerId: " + containerId);
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }

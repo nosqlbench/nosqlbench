@@ -29,7 +29,7 @@ fi
 
 rsync -av appimage/skel/ "${APPDIR}/"
 cp target/nb.jar "${APPDIR}/usr/bin/nb.jar"
-JAVA_VERSION="14"
+JAVA_VERSION="15"
 
 mkdir -p "${APPDIR}/usr/bin/jre"
 
