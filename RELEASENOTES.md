@@ -1,8 +1,6 @@
-- 526d09cd (HEAD -> nb4-rc1) auto create dirs for grafana_apikey
-- b4ec4c9a (origin/nb4-rc1) trigger build
-- af87ef9c relaxed requirement for finicky test
-- 3436ec61 trigger build
-- 17ed4c1e annotator and dashboard fixes
-- 4dab9b89 move annotations enums to package
-- 6d514cb6 bump middle version number to required java version '15'
-- fa78e27f set NB4 to Java 15
+- 07800059 move grafana auto-key to grafana client
+- 12acd07f parameterize docker prom tag
+- 8052e64e make docker prom tag configurable
+- bb0884e2 grafana client improvements
+- c83f4d87 prototype metrics summarizer
+- 1d107d87 update nb4 dashboard def
