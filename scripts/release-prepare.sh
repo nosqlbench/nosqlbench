@@ -13,7 +13,8 @@ PRERELEASE_BRANCH_PATTERN=${PRERELEASE_BRANCH_PATTERN:?PRERELEASE_BRANCH_PATTERN
 # Filter the branch to execute the release on
 readonly local current_branch=$(git rev-parse --abbrev-ref HEAD)
 echo "Current branch: ${current_branch}"
-if [[ -n "$RELEASE_BRANCH_NAME" && "${current_branch}" = "$RELEASE_BRANCH_NAME" ]]; then
+
+if   [[ -n "${current_branch}" && "${current_branch}" == *"${RELEASE_BRANCH_PATTERN}"* ]]; then
     echo "Building for release branch $RELEASE_BRANCH_NAME"
 elif [[ -n "${current_branch}" && "${current_branch}" == *"${PRERELEASE_BRANCH_PATTERN}"* ]]; then
     echo "Building prerelease for branch $RELEASE_BRANCH_NAME"
