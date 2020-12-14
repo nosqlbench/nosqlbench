@@ -4,4 +4,3 @@
 - bb0884e2 grafana client improvements
 - c83f4d87 prototype metrics summarizer
 - 1d107d87 update nb4 dashboard def
-- release testing
