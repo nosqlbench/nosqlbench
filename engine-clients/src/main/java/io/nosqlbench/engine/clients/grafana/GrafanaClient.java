@@ -2,10 +2,7 @@ package io.nosqlbench.engine.clients.grafana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.clients.grafana.transfer.Annotations;
-import io.nosqlbench.engine.clients.grafana.transfer.ApiTokenRequest;
-import io.nosqlbench.engine.clients.grafana.transfer.DashboardResponse;
-import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
+import io.nosqlbench.engine.clients.grafana.transfer.*;
 
 import java.io.File;
 import java.net.http.HttpClient;
@@ -185,6 +182,7 @@ public class GrafanaClient {
         return savedGrafanaAnnotation;
     }
 
+
     public DashboardResponse getDashboardByUid(String uid) {
         HttpClient client = config.newClient();
         HttpRequest.Builder rqb = config.newRequest("api/dashboards/uid/" + uid);
@@ -204,6 +202,10 @@ public class GrafanaClient {
 
         DashboardResponse dashboardResponse = gson.fromJson(body, DashboardResponse.class);
         return dashboardResponse;
+    }
+
+    public DashboardSnapshot createSnapshot() {
+
     }
 
     /**
