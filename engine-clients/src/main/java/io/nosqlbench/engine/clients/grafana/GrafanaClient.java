@@ -205,7 +205,7 @@ public class GrafanaClient {
     }
 
     public DashboardSnapshot createSnapshot() {
-
+        return null;
     }
 
     /**
