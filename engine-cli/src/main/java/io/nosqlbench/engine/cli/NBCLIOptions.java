@@ -87,6 +87,7 @@ public class NBCLIOptions {
     private final static String DOCKER_METRICS_AT = "--docker-metrics-at";
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
     private static final String DOCKER_PROM_TAG = "--docker-prom-tag";
+    private static final String DOCKER_PROM_RETENTION_DAYS = "--docker-prom-retention-days";
 
     private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
@@ -147,6 +148,7 @@ public class NBCLIOptions {
     private Path statepath;
     private final List<String> statePathAccesses = new ArrayList<>();
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
+    private String dockerPromRetentionDays = "183d";
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -155,6 +157,10 @@ public class NBCLIOptions {
 
     public String getChartHdrFileName() {
         return hdrForChartFileName;
+    }
+
+    public String getDockerPromRetentionDays() {
+        return this.dockerPromRetentionDays;
     }
 
     public enum Mode {
@@ -287,6 +293,10 @@ public class NBCLIOptions {
                 case DOCKER_PROM_TAG:
                     arglist.removeFirst();
                     docker_prom_tag = readWordOrThrow(arglist, "prometheus docker tag");
+                    break;
+                case DOCKER_PROM_RETENTION_DAYS:
+                    arglist.removeFirst();
+                    dockerPromRetentionDays = Integer.parseInt(readWordOrThrow(arglist, "prometheus retention days"));
                     break;
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();

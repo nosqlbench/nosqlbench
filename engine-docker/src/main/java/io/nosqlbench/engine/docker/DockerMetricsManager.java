@@ -30,6 +30,7 @@ public class DockerMetricsManager {
 
     public static final String GRAFANA_TAG = "grafana_tag";
     public static final String PROM_TAG = "prom_tag";
+    public static final String TSDB_RETENTION = "tsdb_days";
 
     private final DockerHelper dh;
 
@@ -45,7 +46,7 @@ public class DockerMetricsManager {
 
         String ip = startGraphite();
 
-        startPrometheus(ip, options.get(PROM_TAG));
+        startPrometheus(ip, options.get(PROM_TAG), options.get(TSDB_RETENTION));
 
         startGrafana(ip, options.get(GRAFANA_TAG));
 
@@ -94,7 +95,7 @@ public class DockerMetricsManager {
         }
     }
 
-    private void startPrometheus(String ip, String tag) {
+    private void startPrometheus(String ip, String tag, String retention) {
 
         logger.info("preparing to start docker metrics");
         String PROMETHEUS_IMG = "prom/prometheus";
@@ -117,7 +118,7 @@ public class DockerMetricsManager {
         List<String> cmdList = Arrays.asList(
                 "--config.file=/etc/prometheus/prometheus.yml",
                 "--storage.tsdb.path=/prometheus",
-                "--storage.tsdb.retention=183d",
+                "--storage.tsdb.retention=" + retention,
                 "--web.enable-lifecycle"
 
         );

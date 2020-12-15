@@ -135,7 +135,8 @@ public class NBCLI {
             DockerMetricsManager dmh = new DockerMetricsManager();
             Map<String, String> dashboardOptions = Map.of(
                     DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
-                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag()
+                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
+                    DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays())
             );
             dmh.startMetrics(dashboardOptions);
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
