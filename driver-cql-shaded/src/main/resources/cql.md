@@ -210,6 +210,9 @@ activity types.
     Examples:
     - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
     - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
+    
+    Check out [Astra Documentation](https://docs.astra.datastax.com/docs/test-loading-data-with-nosqlbench) for samples 
+    
 - **insights** - Set to false to disable the driver from sending insights monitoring information
     - `insights=false`
 - **tickduration** - sets the tickDuration (milliseconds) of HashedWheelTimer of the
