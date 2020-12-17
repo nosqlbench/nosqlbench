@@ -296,7 +296,7 @@ public class NBCLIOptions {
                     break;
                 case DOCKER_PROM_RETENTION_DAYS:
                     arglist.removeFirst();
-                    dockerPromRetentionDays = Integer.parseInt(readWordOrThrow(arglist, "prometheus retention days"));
+                    dockerPromRetentionDays = readWordOrThrow(arglist, "prometheus retention (183d by default)");
                     break;
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();
