@@ -1,13 +1,13 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
+import io.nosqlbench.nb.api.config.ParamsParser;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.function.Function;
@@ -29,7 +29,7 @@ import java.util.function.Function;
  */
 public class CommandTemplate {
 
-    private final static Logger logger = LoggerFactory.getLogger(CommandTemplate.class);
+    private final static Logger logger = LogManager.getLogger(CommandTemplate.class);
 
     private final String name;
     private final Map<String, String> statics = new HashMap<>();

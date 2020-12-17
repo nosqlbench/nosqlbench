@@ -19,15 +19,15 @@ package io.nosqlbench.engine.extensions.histostatslogger;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
 public class HistoStatsPlugin {
 
-    private Logger logger;
-    private MetricRegistry metricRegistry;
-    private ScriptContext scriptContext;
+    private final Logger logger;
+    private final MetricRegistry metricRegistry;
+    private final ScriptContext scriptContext;
 
     public HistoStatsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;

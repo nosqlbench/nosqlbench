@@ -9,7 +9,8 @@ can be used by the documentation system.
 
 ## MarkdownDocs Service
 
-The primary markdown service that is meant to be consumed by the documetnation system is known simply as
+The primary markdown service that is meant to be consumed by the
+ documentation system is known simply as
 
     MarkdownDocs
 

@@ -3,25 +3,21 @@ package io.nosqlbench.activitytype.cql.statements.core;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("ALL")
 public class YamlCQLStatementLoader {
 
-    private final static Logger logger = LoggerFactory.getLogger(YamlCQLStatementLoader.class);
+    private final static Logger logger = LogManager.getLogger(YamlCQLStatementLoader.class);
     List<Function<String, String>> transformers = new ArrayList<>();
 
     public YamlCQLStatementLoader() {

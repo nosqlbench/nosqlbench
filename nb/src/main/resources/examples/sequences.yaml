@@ -5,6 +5,9 @@
 # eb run driver=stdout workload=examples/sequences cycles=20 seq=bucket
 # yields A B C D B C D C D D A B C D B C D C D D
 
+description: |
+  Demonstration of the different op sequencing strategies
+
 scenarios:
   concat: run driver===stdout seq===concat cycles=20
   bucket: run driver===stdout seq===bucket cycles=20

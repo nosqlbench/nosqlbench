@@ -23,19 +23,10 @@ import java.util.function.Function;
 /**
  * An OpSequence provides fast access to a set of operations in a specific
  * order.
+ *
  * @param <T> The type of element which is to be sequenced
  */
-public interface OpSequence<T> {
-
-    /**
-     * Get the next operation for the given long value. This is simply
-     * the offset indicated by the offset sequence array at a modulo
-     * position.
-     *
-     * @param selector the long value that determines the next op
-     * @return An op of type T
-     */
-    T get(long selector);
+public interface OpSequence<T> extends OpSource<T> {
 
     /**
      * Get the list of individual operations which could be returned by {@link #get(long)}.

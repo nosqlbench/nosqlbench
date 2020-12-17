@@ -26,7 +26,8 @@ downloading and executing nb, you get an error, please consult the
 :::
 
 This documentation assumes you are using the Linux binary initiating NoSqlBench commands with `./nb`. If you are using
-the jar, just replace `./nb` with `java -jar nb.jar` when running commands. If you are using the jar version, Java 14 is
+the jar, just replace `./nb` with `java -jar nb.jar` when running
+ commands. If you are using the jar version, Java 15 is
 recommended, and will be required soon.
 
 ## Run a cluster

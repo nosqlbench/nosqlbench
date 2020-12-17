@@ -19,8 +19,8 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * <H2>Rate Limiter Specifications</H2>
@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RateSpec {
 
-    private final static Logger logger = LoggerFactory.getLogger(RateSpec.class);
+    private final static Logger logger = LogManager.getLogger(RateSpec.class);
 
     public static final double DEFAULT_RATE_OPS_S = 1.0D;
     public static final double DEFAULT_BURST_RATIO = 1.1D;
@@ -114,7 +114,7 @@ public class RateSpec {
     public double burstRatio = DEFAULT_BURST_RATIO;
     public Verb verb = Verb.start;
 
-    public static enum Verb {
+    public enum Verb {
         /**
          * Specify that a rate limiter should only be configured without affecting its running state.
          * If the rate limiter is already running, then the configuration should take effect immediately.
@@ -223,8 +223,7 @@ public class RateSpec {
         RateSpec rateSpec = (RateSpec) o;
 
         if (Double.compare(rateSpec.opsPerSec, opsPerSec) != 0) return false;
-        if (Double.compare(rateSpec.burstRatio, burstRatio) != 0) return false;
-        return true;
+        return Double.compare(rateSpec.burstRatio, burstRatio) == 0;
     }
 
     @Override

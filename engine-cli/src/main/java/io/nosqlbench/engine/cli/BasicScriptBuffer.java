@@ -3,8 +3,8 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class BasicScriptBuffer implements ScriptBuffer {
 
-    private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
+    private final static Logger logger = LogManager.getLogger(Cmd.class);
     private final List<Cmd> commands = new ArrayList<>();
     private final StringBuilder sb = new StringBuilder();
     private final Map<String, String> scriptParams = new HashMap<>();

@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.SucceededOp
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.concurrent.CompletionStage;
@@ -33,7 +33,7 @@ import java.util.function.LongFunction;
 @SuppressWarnings("Duplicates")
 public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
-    private final static Logger logger = LoggerFactory.getLogger(CqlAsyncAction.class);
+    private final static Logger logger = LogManager.getLogger(CqlAsyncAction.class);
     private final ActivityDef activityDef;
 
     private List<RowCycleOperator> rowOps;
@@ -79,7 +79,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
     @Override
     public void startOpCycle(TrackedOp<CqlOpData> opc) {
-        CqlOpData cqlop = opc.getData();
+        CqlOpData cqlop = opc.getOpData();
         long cycle = opc.getCycle();
 
         // bind timer covers all statement selection and binding, skipping, transforming logic
@@ -123,7 +123,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
 
     public void onSuccess(StartedOp<CqlOpData> sop, AsyncResultSet resultSet) {
-        CqlOpData cqlop = sop.getData();
+        CqlOpData cqlop = sop.getOpData();
 
         HashedCQLErrorHandler.resetThreadStatusCode();
         if (cqlop.skipped) {
@@ -218,7 +218,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
     public void onFailure(StartedOp<CqlOpData> startedOp) {
 
-        CqlOpData cqlop = startedOp.getData();
+        CqlOpData cqlop = startedOp.getOpData();
         long serviceTime = startedOp.getCurrentServiceTimeNanos();
 
         // Even if this is retryable, we expose error events

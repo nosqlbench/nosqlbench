@@ -5,8 +5,7 @@ import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.NBCLICommandParser;
 import io.nosqlbench.engine.cli.ScriptBuffer;
-import io.nosqlbench.engine.core.ScenarioLogger;
-import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.rest.services.WorkSpace;
@@ -45,7 +44,7 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     public synchronized Response cancelScenario(@PathParam("scenario") String scenario) {
         try {
             executor.deleteScenario(scenario);
-            return Response.ok("canceled '" + scenario +"' and removed it").build();
+            return Response.ok("canceled '" + scenario + "' and removed it").build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -57,8 +56,8 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     @Produces(MediaType.APPLICATION_JSON)
     public synchronized Response stopScenario(@PathParam("scenario") String scenario) {
         try {
-            executor.stopScenario(scenario,false);
-            return Response.ok("stopped '" + scenario +"' without removing it").build();
+            executor.stopScenario(scenario, false);
+            return Response.ok("stopped '" + scenario + "' without removing it").build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -77,9 +76,9 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
             rq.setScenarioName("scenario" + System.currentTimeMillis());
         }
         org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyyMMddHHmmssSSS");
-        name=name.replaceAll("EPOCHMS", String.valueOf(System.currentTimeMillis()));
-        name=name.replaceAll("DATESTAMP", dtf.print(new DateTime()));
-        name=name.replaceAll("[:/ ]","");
+        name = name.replaceAll("EPOCHMS", String.valueOf(System.currentTimeMillis()));
+        name = name.replaceAll("DATESTAMP", dtf.print(new DateTime()));
+        name = name.replaceAll("[:/ ]", "");
         rq.setScenarioName(name);
 
         WorkSpace workspace = new WorkspaceFinder(config).getWorkspace(rq.getWorkspace());
@@ -103,24 +102,21 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         buffer.add(cmdList.toArray(new Cmd[0]));
 
         Scenario scenario = new Scenario(
-            rq.getScenarioName(),
-            "",
-            Scenario.Engine.Graalvm,
-            "disabled",
-            false,
-            true,
-            false
-        );
+                rq.getScenarioName(),
+                "",
+                Scenario.Engine.Graalvm,
+                "disabled",
+                false,
+                true,
+                false,
+                cmdList.toString());
 
         scenario.addScriptText(buffer.getParsedScript());
 
-        ScenarioLogger logger = new ScenarioLogger(scenario)
-            .setLogDir(workspace.getWorkspacePath().resolve("logs").toString());
-
-        executor.execute(scenario, logger);
+        executor.execute(scenario);
 
         return Response.created(UriBuilder.fromResource(ScenarioExecutorEndpoint.class).path(
-            "scenario/" + rq.getScenarioName()).build()).entity("started").build();
+                "scenario/" + rq.getScenarioName()).build()).entity("started").build();
 
     }
 

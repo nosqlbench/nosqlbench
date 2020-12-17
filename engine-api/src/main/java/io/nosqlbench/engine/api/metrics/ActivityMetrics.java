@@ -21,8 +21,8 @@ import com.codahale.metrics.*;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.script.ScriptContext;
 import java.io.File;
@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class ActivityMetrics {
 
-    private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
+    private final static Logger logger = LogManager.getLogger(ActivityMetrics.class);
 
     public static final String HDRDIGITS_PARAM = "hdr_digits";
     public static final int DEFAULT_HDRDIGITS= 4;
@@ -46,7 +46,7 @@ public class ActivityMetrics {
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
         return true;
     };
-    private static List<MetricsCloseable> metricsCloseables = new ArrayList<>();
+    private static final List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 
 
     public static int getHdrDigits() {
@@ -305,7 +305,7 @@ public class ActivityMetrics {
         }
     }
 
-    private static interface MetricProvider {
+    private interface MetricProvider {
         Metric getMetric();
     }
 

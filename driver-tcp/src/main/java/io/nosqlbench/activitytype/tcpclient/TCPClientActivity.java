@@ -20,8 +20,8 @@ package io.nosqlbench.activitytype.tcpclient;
 import io.nosqlbench.activitytype.stdout.StdoutActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class TCPClientActivity extends StdoutActivity {
-    private final static Logger logger = LoggerFactory.getLogger(TCPClientActivity.class);
+    private final static Logger logger = LogManager.getLogger(TCPClientActivity.class);
 
     public TCPClientActivity(ActivityDef activityDef) {
         super(activityDef);

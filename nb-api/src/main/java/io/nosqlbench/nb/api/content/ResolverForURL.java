@@ -1,22 +1,20 @@
 package io.nosqlbench.nb.api.content;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class ResolverForURL implements ContentResolver {
 
     public static final ContentResolver INSTANCE = new ResolverForURL();
-    private final static Logger logger = LoggerFactory.getLogger(ResolverForURL.class);
+    private final static Logger logger = LogManager.getLogger(ResolverForURL.class);
 
     @Override
     public List<Content<?>> resolve(URI uri) {

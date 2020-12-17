@@ -9,8 +9,8 @@ import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.content.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -28,7 +28,7 @@ public class NBCLIScenarioParser {
     public final static String VERBOSE_LOCKED = "===";
     public final static String UNLOCKED = "=";
 
-    private final static Logger logger = LoggerFactory.getLogger(NBCLIScenarioParser.class);
+    private final static Logger logger = LogManager.getLogger(NBCLIScenarioParser.class);
     private static final String SEARCH_IN = "activities";
     public static final String WORKLOAD_SCENARIO_STEP = "WORKLOAD_SCENARIO_STEP";
 

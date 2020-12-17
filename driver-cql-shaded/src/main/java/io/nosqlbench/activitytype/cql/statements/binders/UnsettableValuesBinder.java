@@ -3,14 +3,14 @@ package io.nosqlbench.activitytype.cql.statements.binders;
 import com.datastax.driver.core.*;
 import io.nosqlbench.virtdata.api.bindings.VALUE;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 
 public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement> {
-    private final static Logger logger = LoggerFactory.getLogger(UnsettableValuesBinder.class);
+    private final static Logger logger = LogManager.getLogger(UnsettableValuesBinder.class);
 
     private final Session session;
     private final CodecRegistry codecRegistry;

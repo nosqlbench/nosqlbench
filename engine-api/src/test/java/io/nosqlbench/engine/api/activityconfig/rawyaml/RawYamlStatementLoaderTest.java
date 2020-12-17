@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RawYamlStatementLoaderTest {
-    private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoaderTest.class);
+    private final static Logger logger = LogManager.getLogger(RawYamlStatementLoaderTest.class);
 
     @Test
     public void testLoadPropertiesBlock() {

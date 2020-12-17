@@ -2,9 +2,8 @@ package io.nosqlbench.engine.extensions.http;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
-import io.nosqlbench.engine.extensions.optimizers.BobyqaOptimizerPlugin;
 import io.nosqlbench.nb.annotations.Service;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 

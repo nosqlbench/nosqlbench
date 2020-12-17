@@ -19,11 +19,11 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class RateLimiters {
-    private final static Logger logger = LoggerFactory.getLogger(RateLimiters.class);
+    private final static Logger logger = LogManager.getLogger(RateLimiters.class);
 
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 

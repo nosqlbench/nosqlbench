@@ -17,9 +17,9 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.nb.spi.Named;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.nb.api.spi.Named;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class SimpleServiceLoader<T extends Named> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleServiceLoader.class);
+    private static final Logger logger = LogManager.getLogger(SimpleServiceLoader.class);
     private final Class<? extends T> serviceType;
     private static SimpleServiceLoader instance;
 

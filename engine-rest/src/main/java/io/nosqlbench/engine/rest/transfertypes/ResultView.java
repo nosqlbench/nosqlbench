@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
-import io.nosqlbench.engine.core.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 
 public class ResultView {
 

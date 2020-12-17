@@ -18,8 +18,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SlotStateTracker {
     private final AtomicReference<RunState> slotState = new AtomicReference<>(RunState.Uninitialized);
-    private final static Logger logger = LoggerFactory.getLogger(SlotStateTracker.class);
+    private final static Logger logger = LogManager.getLogger(SlotStateTracker.class);
     private final long slotId;
 
     public SlotStateTracker(long slotId) {

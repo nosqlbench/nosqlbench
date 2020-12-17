@@ -21,13 +21,13 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReada
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.function.Predicate;
 
 public class LoggingOutput implements Output,CanFilterResultValue {
-    private final static Logger logger = LoggerFactory.getLogger(LoggingOutput.class);
+    private final static Logger logger = LogManager.getLogger(LoggingOutput.class);
 
     private final ActivityDef def;
     private final long slot;
@@ -63,7 +63,7 @@ public class LoggingOutput implements Output,CanFilterResultValue {
     }
 
     private static class ResultReadableWrapper implements ResultReadable {
-        private int result;
+        private final int result;
         public ResultReadableWrapper(int result) {
             this.result = result;
         }

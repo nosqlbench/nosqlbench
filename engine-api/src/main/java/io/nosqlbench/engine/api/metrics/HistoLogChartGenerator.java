@@ -10,8 +10,8 @@ package io.nosqlbench.engine.api.metrics;
 import com.mitchtalmadge.asciidata.graph.ASCIIGraph;
 import org.HdrHistogram.HistogramLogReader;
 import org.HdrHistogram.Histogram;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,8 +29,8 @@ public class HistoLogChartGenerator {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    private static Map<String, ArrayList<Histogram>> histogramsOverTime = new HashMap<>();
-    private static Logger logger = LoggerFactory.getLogger(HistoLogChartGenerator.class);
+    private static final Map<String, ArrayList<Histogram>> histogramsOverTime = new HashMap<>();
+    private static final Logger logger = LogManager.getLogger(HistoLogChartGenerator.class);
 
     public static void generateChartFromHistoLog(HistoIntervalLogger histoIntervalLogger) {
         File logFile = histoIntervalLogger.getLogfile();

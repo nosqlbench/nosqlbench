@@ -23,8 +23,8 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.SucceededOp
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ import java.util.function.LongFunction;
 @SuppressWarnings("Duplicates")
 public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
-    private final static Logger logger = LoggerFactory.getLogger(CqlAsyncAction.class);
+    private final static Logger logger = LogManager.getLogger(CqlAsyncAction.class);
     private final ActivityDef activityDef;
 
     private List<RowCycleOperator> rowOps;

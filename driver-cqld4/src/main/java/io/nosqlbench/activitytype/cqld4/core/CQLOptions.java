@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cqld4.core;
 
 public class CQLOptions {
-//    private final static Logger logger = LoggerFactory.getLogger(CQLOptions.class);
+//    private final static Logger logger = LogManager.getLogger(CQLOptions.class);
 //
 //    private final static Pattern CORE_AND_MAX_RQ_PATTERN = Pattern.compile("(?<core>\\d+)(:(?<max>\\d+)(:(?<rq>\\d+))?)?(,(?<rcore>\\d+)(:(?<rmax>\\d+)(:(?<rrq>\\d+))?)?)?(,?heartbeat_interval_s:(?<heartbeatinterval>\\d+))?(,?idle_timeout_s:(?<idletimeout>\\d+))?(,?pool_timeout_ms:(?<pooltimeout>\\d+))?");
 //    private final static Pattern PERCENTILE_EAGER_PATTERN = Pattern.compile("^p(?<pctile>[^:]+)(:(?<executions>\\d+))?(:(?<tracked>\\d+)ms)?$");

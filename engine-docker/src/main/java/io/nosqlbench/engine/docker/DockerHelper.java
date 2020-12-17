@@ -12,8 +12,8 @@ import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.okhttp.OkHttpDockerCmdExecFactory;
 import com.sun.security.auth.module.UnixSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +28,9 @@ public class DockerHelper {
     private static final String DOCKER_HOST_ADDR = "unix:///var/run/docker.sock";
 //    private Client rsClient = ClientBuilder.newClient();
 
-    private DockerClientConfig config;
-    private DockerClient dockerClient;
-    private Logger logger = LoggerFactory.getLogger(DockerHelper.class);
+    private final DockerClientConfig config;
+    private final DockerClient dockerClient;
+    private final Logger logger = LogManager.getLogger(DockerHelper.class);
 
     public DockerHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
@@ -45,43 +45,33 @@ public class DockerHelper {
     }
 
     public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
-        logger.debug("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
+        logger.info("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
                 "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
         boolean existingContainer = removeExitedContainers(name);
 
-        /*
-        if(startStoppedContainer(name)){
-            return null;
-        };
-         */
-
-        Container containerId = searchContainer(name, reload);
+        Container containerId = searchContainer(name, reload, tag);
         if (containerId != null) {
             logger.debug("container is already up with the id: " + containerId.getId());
             return null;
         }
 
-        Info info = dockerClient.infoCmd().exec();
-        dockerClient.buildImageCmd();
+        boolean found;
 
-        String term = IMG.split("/")[1];
-        //List<SearchItem> dockerSearch = dockerClient.searchImagesCmd(term).exec();
-        List<Image> dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
-        if (dockerList.size() == 0) {
+        List<Image> images = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+        if (!found(images, IMG, List.of(tag))) {
             dockerClient.pullImageCmd(IMG)
                     .withTag(tag)
                     .exec(new PullImageResultCallback()).awaitSuccess();
 
-            dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
-            if (dockerList.size() == 0) {
+            images = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
+            if (!found(images, IMG, List.of(tag))) {
                 logger.error(String.format("Image %s not found, unable to automatically pull image." +
                                 " Check `docker images`",
                         IMG));
                 System.exit(1);
             }
         }
-        logger.info("Search returned" + dockerList.toString());
 
 
         List<ExposedPort> tcpPorts = new ArrayList<>();
@@ -107,7 +97,7 @@ public class DockerHelper {
 
         List<Link> links = linkNames.stream().map(x -> new Link(x, x)).collect(Collectors.toList());
         CreateContainerCmd builder = dockerClient.createContainerCmd(IMG + ":" + tag);
-        if (cmdList!=null) {
+        if (cmdList != null) {
             builder = builder.withCmd(cmdList);
         }
 
@@ -119,7 +109,7 @@ public class DockerHelper {
                 .withBinds(volumeBindList));
         builder = builder.withName(name);
         builder = builder.withLinks(links);
-        if (envList!=null) {
+        if (envList != null) {
             builder = builder.withEnv(envList);
         }
         CreateContainerResponse containerResponse = builder.exec();
@@ -150,7 +140,7 @@ public class DockerHelper {
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
             logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
-            System.exit(1);
+            throw e;
         }
 
         return false;
@@ -173,12 +163,12 @@ public class DockerHelper {
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
             logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
-            System.exit(1);
+            throw e;
         }
         return false;
     }
 
-    public Container searchContainer(String name, String reload) {
+    public Container searchContainer(String name, String reload, String tag) {
 
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("running"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
@@ -188,7 +178,7 @@ public class DockerHelper {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Unable to contact docker, make sure docker is up and try again.");
-            System.exit(1);
+            throw e;
         }
 
         if (runningContainers.size() >= 1) {
@@ -199,9 +189,10 @@ public class DockerHelper {
 
             if (reload != null) {
                 try {
-                    post(reload, null, false, "reloading config");
+                    post(reload, null, false, "reload config");
                 } catch (Exception e) {
                     logger.error(String.format("Unexpected config/state for docker container %s, consider removing the container", name));
+                    throw e;
                 }
             }
 
@@ -228,7 +219,24 @@ public class DockerHelper {
         } catch (InterruptedException e) {
             logger.error("Error getting docker log and detect start for containerId: " + containerId);
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }
+
+    private boolean found(List<Image> images, String label, List<String> tags) {
+        List<String> validRepoTags = tags.stream().map(s -> label + ":" + s).collect(Collectors.toList());
+        for (Image image : images) {
+            String[] foundRepoTags = image.getRepoTags();
+            for (String foundRepoTag : foundRepoTags) {
+                for (String validRepoTag : validRepoTags) {
+                    if (foundRepoTag.equals(validRepoTag)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }

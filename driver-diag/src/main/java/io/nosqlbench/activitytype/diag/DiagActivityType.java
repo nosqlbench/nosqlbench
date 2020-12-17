@@ -19,8 +19,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * The DiagActivity, aka "diag", is simply a diagnostic activity.
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @Service(ActivityType.class)
 public class DiagActivityType implements ActivityType<DiagActivity> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DiagActivityType.class);
+    private static final Logger logger = LogManager.getLogger(DiagActivityType.class);
 
     @Override
     public String getName() {

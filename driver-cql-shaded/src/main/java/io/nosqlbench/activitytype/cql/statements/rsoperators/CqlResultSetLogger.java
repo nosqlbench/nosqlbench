@@ -2,15 +2,15 @@ package io.nosqlbench.activitytype.cql.statements.rsoperators;
 
 import com.datastax.driver.core.*;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Logs a trace-level event for the result set, including
  * cycles, rows, fetched row count, and the statement.
  */
 public class CqlResultSetLogger implements ResultSetCycleOperator {
-    private final static Logger logger = LoggerFactory.getLogger(CqlResultSetLogger.class);
+    private final static Logger logger = LogManager.getLogger(CqlResultSetLogger.class);
 
     private static String getQueryString(Statement stmt) {
         if (stmt instanceof PreparedStatement) {

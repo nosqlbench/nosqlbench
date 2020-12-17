@@ -19,11 +19,11 @@ package io.nosqlbench.engine.api.activityimpl.action;
 
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class CoreAction implements SyncAction {
-    private final static Logger logger = LoggerFactory.getLogger(CoreAction.class);
+    private final static Logger logger = LogManager.getLogger(CoreAction.class);
 
     private final int interval;
     private final int slot;

@@ -9,8 +9,8 @@ import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +20,7 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 
 public class KafkaStatement {
-    private final static Logger logger = LoggerFactory.getLogger(KafkaStatement.class);
+    private final static Logger logger = LogManager.getLogger(KafkaStatement.class);
 
     private Producer<Object,Object> producer = null;
     private final StringBindings bindings;

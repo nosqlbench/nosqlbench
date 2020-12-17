@@ -4,8 +4,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Arrays;
 
@@ -20,7 +20,7 @@ import java.util.Arrays;
  * will become the default.
  */
 public class DirectArrayValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
-    public final static Logger logger = LoggerFactory.getLogger(DirectArrayValuesBinder.class);
+    public final static Logger logger = LogManager.getLogger(DirectArrayValuesBinder.class);
     private final CqlSession session;
 
     public DirectArrayValuesBinder(CqlSession session) {

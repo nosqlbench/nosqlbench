@@ -25,7 +25,7 @@ import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 
 import java.util.Map;
 import java.util.Optional;

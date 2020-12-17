@@ -21,8 +21,9 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.api.activityapi.core.Startable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.nb.annotations.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,11 +77,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * overall workload is not saturating resources.
  * </p>
  */
+@Service(value = RateLimiter.class, selector = "hybrid")
 public class HybridRateLimiter implements Startable, RateLimiter {
 
-    private final static Logger logger = LoggerFactory.getLogger(HybridRateLimiter.class);
+    private final static Logger logger = LogManager.getLogger(HybridRateLimiter.class);
 
-    private volatile TokenFiller filler;
+    //private volatile TokenFiller filler;
     private volatile long starttime;
 
     // rate controls
@@ -98,7 +100,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     // diagnostics
 
     // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't
-    private AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
+    private final AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
 
     protected HybridRateLimiter() {
     }
@@ -150,8 +152,9 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         }
 
         this.rateSpec = updatingRateSpec;
-        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
-        this.tokens = this.filler.getTokenPool();
+        this.tokens = (this.tokens == null) ? new ThreadDrivenTokenPool(rateSpec, activityDef) : this.tokens.apply(rateSpec);
+//        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
+//        this.tokens = this.filler.getTokenPool();
 
         if (this.state == State.Idle && updatingRateSpec.isAutoStart()) {
             this.start();
@@ -177,7 +180,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
             case Idle:
                 long nanos = getNanoClockTime();
                 this.starttime = nanos;
-                this.filler.start();
+                this.tokens.start();
                 state = State.Started;
                 break;
         }
@@ -191,7 +194,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
             case Started:
                 long accumulatedWaitSinceLastStart = cumulativeWaitTimeNanos.get();
                 cumulativeWaitTimeNanos.set(0L);
-                return this.filler.restart() + accumulatedWaitSinceLastStart;
+                return this.tokens.restart() + accumulatedWaitSinceLastStart;
             default:
                 return 0L;
         }
@@ -215,14 +218,14 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(HybridRateLimiter.class.getSimpleName());
-        if (this.getRateSpec()!=null) {
+        if (this.getRateSpec() != null) {
             sb.append(" spec=").append(this.getRateSpec().toString());
         }
-        if (this.state!=null) {
+        if (this.state != null) {
             sb.append(" state=").append(this.state);
         }
-        if (this.filler !=null) {
-            sb.append(" filler=").append(this.filler.toString());
+        if (this.tokens != null) {
+            sb.append(" tokens=").append(this.tokens.toString());
         }
         return sb.toString();
     }
@@ -245,7 +248,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
         @Override
         public Long getValue() {
-            TokenPool pool = rl.filler.getTokenPool();
+            TokenPool pool = rl.tokens;
             if (pool==null) {
                 return 0L;
             }

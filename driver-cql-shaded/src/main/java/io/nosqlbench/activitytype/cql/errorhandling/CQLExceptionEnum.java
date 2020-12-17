@@ -3,8 +3,8 @@ package io.nosqlbench.activitytype.cql.errorhandling;
 import com.datastax.driver.core.exceptions.*;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,10 +64,10 @@ public enum CQLExceptionEnum implements ResultReadable {
     EbdseCycleException(CqlGenericCycleException.class, 42),
     MaxTriesExhaustedException(io.nosqlbench.activitytype.cql.errorhandling.exceptions.MaxTriesExhaustedException.class,43);
 
-    private final static Logger logger = LoggerFactory.getLogger(CQLExceptionEnum.class);
+    private final static Logger logger = LogManager.getLogger(CQLExceptionEnum.class);
 
     private static Map<String, Integer> codesByName = getCodesByName();
-    private static String[] namesByCode = getNamesByCode();
+    private static final String[] namesByCode = getNamesByCode();
 
     private final Class<? extends Exception> exceptionClass;
     private final int resultCode;

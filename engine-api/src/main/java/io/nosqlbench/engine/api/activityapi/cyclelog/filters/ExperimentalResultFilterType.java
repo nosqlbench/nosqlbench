@@ -20,7 +20,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 
 import java.util.function.IntPredicate;
 

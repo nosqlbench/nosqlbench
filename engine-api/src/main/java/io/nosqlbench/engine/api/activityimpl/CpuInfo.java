@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -27,7 +27,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.Optional;
 
 public class CpuInfo {
-    private final static Logger logger = LoggerFactory.getLogger(CpuInfo.class);
+    private final static Logger logger = LogManager.getLogger(CpuInfo.class);
 
     final private static SystemInfo SYSTEM_INFO = new SystemInfo();
 

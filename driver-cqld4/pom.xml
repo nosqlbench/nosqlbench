@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>3.12.141-SNAPSHOT</version>
+        <version>3.12.157-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -23,13 +23,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>3.12.141-SNAPSHOT</version>
+            <version>3.12.157-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-            <version>3.12.146-SNAPSHOT</version>
+            <version>3.12.157-SNAPSHOT</version>
         </dependency>
 
 
@@ -45,25 +45,6 @@
             <version>4.7.2</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.dse</groupId>-->
-<!--            <artifactId>dse-java-driver-core</artifactId>-->
-<!--            <version>2.4.0</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.dse</groupId>-->
-<!--            <artifactId>dse-java-driver-core</artifactId>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.dse</groupId>-->
-<!--            <artifactId>dse-java-driver-extras</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.dse</groupId>-->
-<!--            <artifactId>dse-java-driver-mapping</artifactId>-->
-<!--        </dependency>-->
 
         <!-- For CQL compression option -->
         <dependency>
@@ -76,6 +57,13 @@
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
         </dependency>
+
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>virtdata-lib-basics</artifactId>
+          <version>3.12.157-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
 
     </dependencies>
 

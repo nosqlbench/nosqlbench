@@ -4,7 +4,6 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -12,22 +11,15 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.StringBindings;
-import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
-import org.apache.kafka.clients.producer.*;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class KafkaProducerActivity extends SimpleActivity {
-    private final static Logger logger = LoggerFactory.getLogger(KafkaProducerActivity.class);
+    private final static Logger logger = LogManager.getLogger(KafkaProducerActivity.class);
     private String yamlLoc;
     private String clientId;
     private String servers;

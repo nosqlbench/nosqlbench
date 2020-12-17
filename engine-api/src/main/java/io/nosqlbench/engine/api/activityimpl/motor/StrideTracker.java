@@ -24,15 +24,15 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.op_output.StrideOut
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class StrideTracker<D> extends Buffer<CompletedOp<D>> implements OpEvents<D>, CycleResultsSegment {
-    private final static Logger logger = LoggerFactory.getLogger(StrideTracker.class);
+    private final static Logger logger = LogManager.getLogger(StrideTracker.class);
 
     private final Timer strideServiceTimer;
     private final Timer strideResponseTimer;

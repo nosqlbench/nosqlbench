@@ -20,8 +20,8 @@ package io.nosqlbench.engine.api.activityapi.core;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  *
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @param <A> An type of of an Activity, a state holder for a runtime instance of an Activity
  */
 public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAction<D>, Stoppable, ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger("BaseAsyncAction");
+    private final static Logger logger = LogManager.getLogger("BaseAsyncAction");
 
     protected final A activity;
 

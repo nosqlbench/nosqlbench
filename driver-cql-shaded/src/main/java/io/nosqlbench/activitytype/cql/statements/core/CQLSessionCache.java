@@ -11,11 +11,12 @@ import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.scripting.NashornEvaluator;
+import io.nosqlbench.engine.api.scripting.ExprEvaluator;
+import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -28,7 +29,7 @@ import java.util.*;
 
 public class CQLSessionCache implements Shutdownable {
 
-    private final static Logger logger = LoggerFactory.getLogger(CQLSessionCache.class);
+    private final static Logger logger = LogManager.getLogger(CQLSessionCache.class);
     private final static String DEFAULT_SESSION_ID = "default";
     private static final CQLSessionCache instance = new CQLSessionCache();
     private final Map<String, Session> sessionCache = new HashMap<>();
@@ -129,7 +130,7 @@ public class CQLSessionCache implements Shutdownable {
         if (clusteropts.isPresent()) {
             try {
                 logger.info("applying cbopts:" + clusteropts.get());
-                NashornEvaluator<DseCluster.Builder> clusterEval = new NashornEvaluator<>(DseCluster.Builder.class);
+                ExprEvaluator<DseCluster.Builder> clusterEval = new GraalJsEvaluator<>(DseCluster.Builder.class);
                 clusterEval.put("builder", builder);
                 String importEnv =
                     "load(\"nashorn:mozilla_compat.js\");\n" +

@@ -17,22 +17,21 @@
 
 package io.nosqlbench.engine.core.metrics;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A view of metrics objects as an object tree.
  */
 public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegistryListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(PolyglotMetricRegistryBindings.class);
+    private final static Logger logger = LogManager.getLogger("METRICS");
 
     private final MetricRegistry registry;
     MetricMap metrics = new MetricMap("ROOT",null);
@@ -77,8 +76,8 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onGaugeAdded(String name, Gauge<?> gauge) {
-        metrics.add(name,gauge);
-        logger.info("gauge added: " + name +", " + gauge);
+        metrics.add(name, gauge);
+        logger.info("gauge added: " + name);
     }
 
     @Override
@@ -126,7 +125,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onTimerAdded(String name, Timer timer) {
-        metrics.add(name,timer);
+        metrics.add(name, timer);
         logger.info("timer added: " + name);
     }
 
@@ -134,6 +133,25 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
     public void onTimerRemoved(String name) {
         metrics.findOwner(name).remove(name);
         logger.info("timer removed: " + name);
+    }
+
+    public Map<String, Metric> getMetrics() {
+        return getMetrics(new LinkedHashMap<String, Metric>(), "metrics", metrics);
+    }
+
+    private Map<String, Metric> getMetrics(Map<String, Metric> totalMap, String prefix, MetricMap map) {
+        for (String key : map.getKeys()) {
+            Object o = map.get(key);
+            String name = prefix + "." + key;
+            if (o instanceof Metric) {
+                totalMap.put(name, (Metric) o);
+            } else if (o instanceof MetricMap) {
+                getMetrics(totalMap, name, (MetricMap) o);
+            } else {
+                throw new RuntimeException("entry value must be either a Metric or a MetricMap");
+            }
+        }
+        return totalMap;
     }
 
 //    @Override

@@ -15,13 +15,13 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.engine.api.activityimpl.motor.ParamsParser;
+import io.nosqlbench.nb.api.config.ParamsParser;
 import io.nosqlbench.engine.api.util.Unit;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.script.Bindings;
 import java.util.*;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * generic type is parameterized for Bindings support.</p>
  */
 public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings, ProxyObject {
-    private final static Logger logger = LoggerFactory.getLogger(ParameterMap.class);
+    private final static Logger logger = LogManager.getLogger(ParameterMap.class);
 
 
 //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);

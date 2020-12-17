@@ -4,12 +4,12 @@ import io.nosqlbench.driver.jmx.ops.JmxOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class JMXAction implements SyncAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(JMXAction.class);
+    private final static Logger logger = LogManager.getLogger(JMXAction.class);
 
     private final ActivityDef activityDef;
     private final int slot;

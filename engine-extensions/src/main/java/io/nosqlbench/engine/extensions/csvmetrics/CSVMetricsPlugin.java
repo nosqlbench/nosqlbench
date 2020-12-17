@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 import java.io.IOException;

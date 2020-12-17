@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityapi.input;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.spi.Named;
+import io.nosqlbench.nb.api.spi.Named;
 
 public interface InputType extends Named {
 

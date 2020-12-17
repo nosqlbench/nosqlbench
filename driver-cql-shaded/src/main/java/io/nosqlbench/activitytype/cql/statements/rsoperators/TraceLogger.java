@@ -7,8 +7,8 @@ import com.datastax.driver.core.Statement;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileDescriptor;
 import java.io.FileWriter;
@@ -18,9 +18,9 @@ import java.util.Date;
 
 public class TraceLogger implements ResultSetCycleOperator, StatementModifier {
 
-    private final static Logger logger = LoggerFactory.getLogger(TraceLogger.class);
+    private final static Logger logger = LogManager.getLogger(TraceLogger.class);
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
     private final long modulo;
     private final String filename;
     private final FileWriter writer;

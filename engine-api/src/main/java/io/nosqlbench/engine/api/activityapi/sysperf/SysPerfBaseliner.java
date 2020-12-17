@@ -21,8 +21,8 @@ import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class SysPerfBaseliner {
 
-    private final static Logger logger = LoggerFactory.getLogger(SysPerfBaseliner.class);
+    private final static Logger logger = LogManager.getLogger(SysPerfBaseliner.class);
 
     public static void main(String[] args) {
         try {

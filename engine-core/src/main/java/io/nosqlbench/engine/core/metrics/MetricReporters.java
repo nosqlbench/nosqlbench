@@ -22,9 +22,10 @@ import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.ShutdownManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.engine.core.lifecycle.ShutdownManager;
+import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.net.InetSocketAddress;
@@ -34,11 +35,11 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MetricReporters implements Shutdownable {
-    private final static Logger logger = LoggerFactory.getLogger(MetricReporters.class);
-    private static MetricReporters instance = new MetricReporters();
+    private final static Logger logger = LogManager.getLogger(MetricReporters.class);
+    private static final MetricReporters instance = new MetricReporters();
 
-    private List<PrefixedRegistry> metricRegistries = new ArrayList<>();
-    private List<ScheduledReporter> scheduledReporters = new ArrayList<>();
+    private final List<PrefixedRegistry> metricRegistries = new ArrayList<>();
+    private final List<ScheduledReporter> scheduledReporters = new ArrayList<>();
 
     private MetricReporters() {
         ShutdownManager.register(this);
@@ -115,7 +116,7 @@ public class MetricReporters implements Shutdownable {
     }
 
     public MetricReporters addLogger() {
-        logger.debug("Adding slf4j reporter for metrics");
+        logger.debug("Adding log4j reporter for metrics");
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");
@@ -123,20 +124,21 @@ public class MetricReporters implements Shutdownable {
 
         for (PrefixedRegistry prefixedRegistry : metricRegistries) {
 
-            Slf4jReporter loggerReporter = Slf4jReporter.forRegistry(prefixedRegistry.metricRegistry)
+            Log4JMetricsReporter reporter4j = Log4JMetricsReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .outputTo(logger)
                     .build();
-            scheduledReporters.add(loggerReporter);
+
+            scheduledReporters.add(reporter4j);
         }
         return this;
     }
 
     public MetricReporters start(int consoleIntervalSeconds, int remoteIntervalSeconds) {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
-            logger.info("starting reporter: " + scheduledReporter);
+            logger.info("starting reporter: " + scheduledReporter.getClass().getSimpleName());
             if (scheduledReporter instanceof ConsoleReporter) {
                 scheduledReporter.start(consoleIntervalSeconds, TimeUnit.SECONDS);
             } else {

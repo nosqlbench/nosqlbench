@@ -5,8 +5,8 @@ import io.nosqlbench.activitytype.cql.statements.rsoperators.AssertSingleRowResu
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class CqlVerifyActivity extends CqlActivity {
 
-    private final static Logger logger = LoggerFactory.getLogger(CqlVerifyActivity.class);
+    private final static Logger logger = LogManager.getLogger(CqlVerifyActivity.class);
     private BindingsTemplate expectedValuesTemplate;
     private VerificationMetrics verificationMetrics;
 

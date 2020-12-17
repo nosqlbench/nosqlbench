@@ -19,15 +19,15 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BindingEscapingTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(BindingEscapingTest.class);
+    private final static Logger logger = LogManager.getLogger(BindingEscapingTest.class);
 
     @Test
     public void testThatEscapesAreNotUnescapedInSingleQuotes() {

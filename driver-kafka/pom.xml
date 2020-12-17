@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>3.12.155-SNAPSHOT</version>
+        <version>4.15.6-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -37,27 +37,27 @@
         <!-- https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer -->
         <dependency>
             <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>5.5.1</version>
+          <artifactId>kafka-avro-serializer</artifactId>
+          <version>5.5.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>3.12.155-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-api</artifactId>
+        <version>4.15.6-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-stdout</artifactId>
-            <version>3.12.155-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>driver-stdout</artifactId>
+        <version>4.15.6-SNAPSHOT</version>
+      </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
+      <!--        <dependency>-->
+      <!--            <groupId>org.slf4j</groupId>-->
+      <!--            <artifactId>slf4j-api</artifactId>-->
+      <!--            <version>1.7.25</version>-->
+      <!--        </dependency>-->
 
     </dependencies>
     <repositories>

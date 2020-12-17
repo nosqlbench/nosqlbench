@@ -3,13 +3,13 @@ package io.nosqlbench.engine.core.metrics;
 import com.codahale.metrics.Metric;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.util.*;
 
 public class MetricMap implements ProxyObject {
 
-    private final static Logger logger = LoggerFactory.getLogger(MetricMap.class);
+    private final static Logger logger = LogManager.getLogger(MetricMap.class);
     private final String name;
     private final String parent_name;
     private final HashMap<String, Object> map = new HashMap<>();

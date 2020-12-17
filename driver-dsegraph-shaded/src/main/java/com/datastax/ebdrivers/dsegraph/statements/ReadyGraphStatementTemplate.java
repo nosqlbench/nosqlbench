@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class ReadyGraphStatementTemplate {
 
-    private ContextualBindingsTemplate<SimpleGraphStatement,SimpleGraphStatement> contextualBindingsTemplate;
-    private String name;
+    private final ContextualBindingsTemplate<SimpleGraphStatement, SimpleGraphStatement> contextualBindingsTemplate;
+    private final String name;
     private String[] fields;
 
     public ReadyGraphStatementTemplate(String name, String stmtTemplate, List<BindPoint> bindPoints, String[] fields) {
@@ -22,7 +22,7 @@ public class ReadyGraphStatementTemplate {
         SimpleGraphStatement simpleGraphStatement = new SimpleGraphStatement(stmtTemplate);
         BindingsTemplate bindingsTemplate = new BindingsTemplate(bindPoints);
         contextualBindingsTemplate = new ContextualBindingsTemplate<>(
-                simpleGraphStatement, bindingsTemplate ,
+                simpleGraphStatement, bindingsTemplate,
                 new ParameterizedGraphStatementValuesBinder(fields)
         );
     }
@@ -32,13 +32,13 @@ public class ReadyGraphStatementTemplate {
         SimpleGraphStatement simpleGraphStatement = new SimpleGraphStatement(stmtTemplate);
         BindingsTemplate bindingsTemplate = new BindingsTemplate(bindPoints);
 
-        contextualBindingsTemplate = new ContextualBindingsTemplate<>(simpleGraphStatement, bindingsTemplate , new ParameterizedIteratedGraphStatementValuesBinder(fields, repeat));
+        contextualBindingsTemplate = new ContextualBindingsTemplate<>(simpleGraphStatement, bindingsTemplate, new ParameterizedIteratedGraphStatementValuesBinder(fields, repeat));
     }
 
     public static class ParameterizedIteratedGraphStatementValuesBinder implements ValuesBinder<SimpleGraphStatement, SimpleGraphStatement> {
 
         private final String[] fields;
-        private int repeat;
+        private final int repeat;
 
         public ParameterizedIteratedGraphStatementValuesBinder(String[] fields, int repeat) {
             this.fields = fields;
@@ -58,13 +58,14 @@ public class ReadyGraphStatementTemplate {
         private final Map valuesMap = new HashMap();
         private final ThreadLocal<Map<String, Object>> mapTL;
 
-        public ParameterizedGraphStatementValuesBinder(String[] fields){
-           this.fields = fields;
+        public ParameterizedGraphStatementValuesBinder(String[] fields) {
+            this.fields = fields;
             for (String field : fields) {
                 valuesMap.put(field, null);
             }
             mapTL = ThreadLocal.withInitial(() -> new HashMap<String, Object>(valuesMap));
         }
+
         @Override
         public SimpleGraphStatement bindValues(SimpleGraphStatement context, Bindings bindings, long cycle) {
             bindings.updateMap(mapTL.get(), cycle);

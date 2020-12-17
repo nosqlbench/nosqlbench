@@ -5,8 +5,8 @@ import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.type.DataType;
 import io.nosqlbench.activitytype.cqld4.core.CQLBindHelper;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class DiagnosticPreparedBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
 
-    public static final Logger logger = LoggerFactory.getLogger(DiagnosticPreparedBinder.class);
+    public static final Logger logger = LogManager.getLogger(DiagnosticPreparedBinder.class);
     private final CqlSession session;
 
     public DiagnosticPreparedBinder(CqlSession session) {

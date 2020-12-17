@@ -17,10 +17,13 @@
 
 package io.nosqlbench.engine.core.script;
 
+import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.core.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class ScenariosExecutor {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
+    private final Logger logger = LogManager.getLogger("SCENARIOS");
     private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 
     private final ExecutorService executor;
@@ -48,11 +51,6 @@ public class ScenariosExecutor {
     }
 
     public synchronized void execute(Scenario scenario) {
-        execute(scenario, new ScenarioLogger(scenario).setLogDir("logs").setMaxLogs(0));
-    }
-
-    public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
-        scenario.setScenarioLogger(scenarioLogger);
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
@@ -151,7 +149,8 @@ public class ScenariosExecutor {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
-                    oResult = Optional.of(new ScenarioResult(e));
+                    long now = System.currentTimeMillis();
+                    oResult = Optional.of(new ScenarioResult(e, now, now));
                 }
             }
 
@@ -184,27 +183,28 @@ public class ScenariosExecutor {
         if (resultFuture1 == null) {
             throw new BasicError("Unknown scenario name:" + scenarioName);
         }
+        long now = System.currentTimeMillis();
         if (resultFuture1.isDone()) {
             try {
                 return Optional.ofNullable(resultFuture1.get());
             } catch (Exception e) {
-                return Optional.of(new ScenarioResult(e));
+                return Optional.of(new ScenarioResult(e, now, now));
             }
         } else if (resultFuture1.isCancelled()) {
-            return Optional.of(new ScenarioResult(new Exception("result was cancelled.")));
+            return Optional.of(new ScenarioResult(new Exception("result was cancelled."), now, now));
         }
         return Optional.empty();
     }
 
     public synchronized void stopScenario(String scenarioName) {
-        this.stopScenario(scenarioName,false);
+        this.stopScenario(scenarioName, false);
     }
 
     public synchronized void stopScenario(String scenarioName, boolean rethrow) {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             ScenarioController controller = pendingScenario.get().getScenarioController();
-            if (controller!=null) {
+            if (controller != null) {
                 controller.forceStopScenario(0, rethrow);
             }
         } else {

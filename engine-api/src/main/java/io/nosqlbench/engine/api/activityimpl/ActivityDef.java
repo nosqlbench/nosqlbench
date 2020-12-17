@@ -19,8 +19,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.util.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class ActivityDef {
     public static final String DEFAULT_ATYPE = "stdout  ";
     public static final String DEFAULT_CYCLES = "0";
     public static final int DEFAULT_THREADS = 1;
-    private final static Logger logger = LoggerFactory.getLogger(ActivityDef.class);
+    private final static Logger logger = LogManager.getLogger(ActivityDef.class);
     // an alias with which to control the activity while it is running
     private static final String FIELD_ALIAS = "alias";
     // a file or URL containing the activity: statements, generator bindings, ...
@@ -52,11 +52,11 @@ public class ActivityDef {
     private static final String FIELD_CYCLES = "cycles";
     // initial thread concurrency for this activity
     private static final String FIELD_THREADS = "threads";
-    private static String[] field_list = new String[]{
+    private static final String[] field_list = new String[]{
             FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
     };
     // parameter map has its own internal atomic map
-    private ParameterMap parameterMap;
+    private final ParameterMap parameterMap;
 
     public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;

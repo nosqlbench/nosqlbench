@@ -2,7 +2,7 @@ package io.nosqlbench.engine.extensions.optimizers;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;

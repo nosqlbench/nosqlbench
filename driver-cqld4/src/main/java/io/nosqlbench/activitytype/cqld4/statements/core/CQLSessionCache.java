@@ -19,12 +19,12 @@ import io.nosqlbench.activitytype.cqld4.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.scripting.NashornEvaluator;
+import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.graalvm.options.OptionMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,10 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CQLSessionCache implements Shutdownable {
 
-    private final static Logger logger = LoggerFactory.getLogger(CQLSessionCache.class);
+    private final static Logger logger = LogManager.getLogger(CQLSessionCache.class);
     private final static String DEFAULT_SESSION_ID = "default";
-    private static CQLSessionCache instance = new CQLSessionCache();
-    private Map<String, SessionConfig> sessionCache = new HashMap<>();
+    private static final CQLSessionCache instance = new CQLSessionCache();
+    private final Map<String, SessionConfig> sessionCache = new HashMap<>();
 
 
     public final static class SessionConfig extends ConcurrentHashMap<String,String> {
@@ -170,7 +170,7 @@ public class CQLSessionCache implements Shutdownable {
         if (clusteropts.isPresent()) {
             try {
                 logger.info("applying cbopts:" + clusteropts.get());
-                NashornEvaluator<CqlSessionBuilder> clusterEval = new NashornEvaluator<>(CqlSessionBuilder.class);
+                GraalJsEvaluator<CqlSessionBuilder> clusterEval = new GraalJsEvaluator<>(CqlSessionBuilder.class);
                 clusterEval.put("builder", builder);
                 String importEnv =
                         "load(\"nashorn:mozilla_compat.js\");\n" +

@@ -10,9 +10,10 @@ public class NosqlbenchMarkdownManifest implements DocsysDynamicManifest {
     @Override
     public DocsBinder getDocs() {
         return new Docs().namespace("docs-for-eb")
-                .addFirstFoundPath("engine-docs/src/main/resources/docs-for-nb/",
-                        "docs-for-nb/")
-                .setEnabledByDefault(true)
+                .addFirstFoundPath(
+                        "engine-docs/src/main/resources/docs-for-nb/",
+                        "docs-for-nb/"
+                ).setEnabledByDefault(true)
                 .asDocsBinder();
     }
 }

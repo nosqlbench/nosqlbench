@@ -24,8 +24,8 @@ import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.nb.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @Service(OutputType.class)
 public class CycleLogOutputType implements OutputType {
@@ -41,10 +41,10 @@ public class CycleLogOutputType implements OutputType {
     }
 
     public static class Dispenser implements OutputDispenser {
-        private final static Logger logger = LoggerFactory.getLogger(OutputDispenser.class);
+        private final static Logger logger = LogManager.getLogger(OutputDispenser.class);
 
         private final Output output;
-        private Activity activity;
+        private final Activity activity;
 
         public Dispenser(Activity activity) {
             this.activity = activity;

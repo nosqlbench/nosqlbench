@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.cli;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -14,7 +14,7 @@ import java.util.function.Function;
  */
 public class Cmd {
 
-    private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
+    private final static Logger logger = LogManager.getLogger(Cmd.class);
 
     public enum CmdType {
         run(),

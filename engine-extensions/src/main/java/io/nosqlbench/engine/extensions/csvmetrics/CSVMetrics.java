@@ -20,7 +20,7 @@ package io.nosqlbench.engine.extensions.csvmetrics;
 import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +90,7 @@ public class CSVMetrics {
         return this;
     }
 
-    private MetricInstanceFilter filter = new MetricInstanceFilter();
+    private final MetricInstanceFilter filter = new MetricInstanceFilter();
 
     public CSVMetrics stop() {
         reporter.stop();

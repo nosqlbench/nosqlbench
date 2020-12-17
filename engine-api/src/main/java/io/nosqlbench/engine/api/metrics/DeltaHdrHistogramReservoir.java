@@ -22,8 +22,8 @@ import com.codahale.metrics.Snapshot;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.Recorder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * A custom wrapping of snapshotting logic on the HdrHistogram. This histogram will always report the last histogram
@@ -36,14 +36,14 @@ import org.slf4j.LoggerFactory;
  *
  */
 public final class DeltaHdrHistogramReservoir implements Reservoir {
-    private final static Logger logger = LoggerFactory.getLogger(DeltaHdrHistogramReservoir.class);
+    private final static Logger logger = LogManager.getLogger(DeltaHdrHistogramReservoir.class);
 
     private final Recorder recorder;
     private Histogram lastHistogram;
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private String metricName;
+    private final String metricName;
     private HistogramLogWriter writer;
 
     /**

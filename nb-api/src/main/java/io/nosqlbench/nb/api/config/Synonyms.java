@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api.config;
 
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -18,11 +18,11 @@ public class Synonyms {
      * Each entry in this list is a list of synonyms in configuration.
      */
     public final static Map<String, Set<String>> PARAM_SYNONYMS = new HashMap<>() {{
-        put("hosts",Set.of("host"));
-        put("workload",Set.of("yaml"));
-        put("driver",Set.of("type"));
-        put("cyclerate", Set.of("targetrate", "rate"));
-        put("parameterized", Set.of("parametrized")); // mispelling safety net
+        put("hosts", Set.of("host" ));
+        put("workload", Set.of("yaml" ));
+        put("driver", Set.of("type" ));
+        put("rate", Set.of("targetrate", "cyclerate" ));
+        put("parameterized", Set.of("parametrized" )); // mispelling safety net
     }};
 
     /**

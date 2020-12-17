@@ -19,13 +19,13 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.Timer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
  * Find the metrics associated with an activity type by instantiating the activity in idle mode.
  */
 public class MetricsMapper {
-    private final static Logger logger = LoggerFactory.getLogger(MetricsMapper.class);
-    private static Set<Class<?>> metricsElements = new HashSet<>() {{
+    private final static Logger logger = LogManager.getLogger(MetricsMapper.class);
+    private static final Set<Class<?>> metricsElements = new HashSet<>() {{
         add(Meter.class);
         add(Counter.class);
         add(Timer.class);
@@ -43,12 +43,12 @@ public class MetricsMapper {
         add(Gauge.class);
         add(Snapshot.class);
     }};
-    private static Predicate<Method> isSimpleGetter = method ->
+    private static final Predicate<Method> isSimpleGetter = method ->
             method.getName().startsWith("get")
                     && method.getParameterCount() == 0
                     && !method.getName().equals("getClass");
 
-    private static Function<Method, String> getPropertyName = method ->
+    private static final Function<Method, String> getPropertyName = method ->
     {
         String mName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
         return mName;
@@ -68,7 +68,7 @@ public class MetricsMapper {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
         }
         Activity activity = activityType.get().getAssembledActivity(activityDef, new HashMap<>());
-        NashornMetricRegistryBindings nashornMetricRegistryBindings = new NashornMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
+        PolyglotMetricRegistryBindings nashornMetricRegistryBindings = new PolyglotMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenserDelegate().getInput(0);
         activity.getActionDispenserDelegate().getAction(0);

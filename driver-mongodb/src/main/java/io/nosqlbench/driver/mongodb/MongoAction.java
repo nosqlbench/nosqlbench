@@ -2,8 +2,8 @@ package io.nosqlbench.driver.mongodb;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
@@ -13,7 +13,7 @@ import org.bson.conversions.Bson;
 
 public class MongoAction implements SyncAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(MongoAction.class);
+    private final static Logger logger = LogManager.getLogger(MongoAction.class);
 
     private final MongoActivity activity;
     private final int slot;

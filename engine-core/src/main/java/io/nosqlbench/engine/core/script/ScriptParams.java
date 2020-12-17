@@ -17,20 +17,17 @@
 
 package io.nosqlbench.engine.core.script;
 
-import ch.qos.logback.classic.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.Proxy;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public class ScriptParams extends HashMap<String, String> implements ProxyObject {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(ScriptParams.class);
+    private static final Logger logger = LogManager.getLogger(ScriptParams.class);
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public ScriptParams withOverrides(Object overrides) {

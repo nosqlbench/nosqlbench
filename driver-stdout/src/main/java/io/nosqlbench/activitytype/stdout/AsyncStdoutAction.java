@@ -7,14 +7,14 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.function.LongFunction;
 
 @SuppressWarnings("Duplicates")
 public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutActivity> {
-    private final static Logger logger = LoggerFactory.getLogger(AsyncStdoutAction.class);
+    private final static Logger logger = LogManager.getLogger(AsyncStdoutAction.class);
 
     private OpSequence<StringBindings> sequencer;
 

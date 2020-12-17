@@ -5,16 +5,14 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import io.nosqlbench.nb.api.errors.BasicError;
-import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Holds the definition and tracking state for a web driver command.
  */
 public class WebDriverAction implements SyncAction, ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(WebDriverAction.class);
+    private final static Logger logger = LogManager.getLogger(WebDriverAction.class);
 
     private final WebDriverActivity activity;
     private final int slot;

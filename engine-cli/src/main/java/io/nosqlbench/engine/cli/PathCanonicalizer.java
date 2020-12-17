@@ -2,14 +2,14 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.nio.file.FileSystems;
 import java.util.Optional;
 
 public class PathCanonicalizer {
-    private final static Logger logger = LoggerFactory.getLogger(Cmd.class);
+    private final static Logger logger = LogManager.getLogger(Cmd.class);
 
     private final String[] includes;
 

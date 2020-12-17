@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,15 +59,15 @@ import java.util.stream.Collectors;
  * @param <R> The result type that will be produced by these error handlers.
  */
 public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHandler<T, R> {
-    private final static Logger logger = LoggerFactory.getLogger(HashedErrorHandler.class);
+    private final static Logger logger = LogManager.getLogger(HashedErrorHandler.class);
 
     private final CycleErrorHandler<T, R> DEFAULT_defaultHandler = (cycle, error, errMsg) -> {
         throw new RuntimeException("no handler defined for type " + error.getClass() + " in cycle " + cycle + ", " + errMsg);
     };
     private Class<? extends Throwable> upperBound = Throwable.class;
-    private Map<String, Set<Class<? extends T>>> errorGroups = new ConcurrentHashMap<>();
-    private Map<Class<? extends T>, CycleErrorHandler<T, R>> handlers = new ConcurrentHashMap<>();
-    private Set<Class<? extends T>> validClasses = new HashSet<>();
+    private final Map<String, Set<Class<? extends T>>> errorGroups = new ConcurrentHashMap<>();
+    private final Map<Class<? extends T>, CycleErrorHandler<T, R>> handlers = new ConcurrentHashMap<>();
+    private final Set<Class<? extends T>> validClasses = new HashSet<>();
     private CycleErrorHandler<T, R> defaultHandler = DEFAULT_defaultHandler;
 
     /**

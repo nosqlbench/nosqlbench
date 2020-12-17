@@ -1,12 +1,11 @@
 package io.nosqlbench.activitytype.cqld4.statements.rowoperators;
 
 import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
-import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.activitytype.cqld4.api.RowCycleOperator;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,11 +17,11 @@ import java.util.stream.StreamSupport;
  * Save specific variables to the thread local object map
  */
 public class Save implements RowCycleOperator {
-    private final static Logger logger = LoggerFactory.getLogger(Save.class);
+    private final static Logger logger = LogManager.getLogger(Save.class);
 
     ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 
-    private String[] varnames;
+    private final String[] varnames;
 
     public Save(String... varnames) {
         this.varnames = varnames;

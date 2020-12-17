@@ -17,9 +17,8 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.ScenarioLogger;
-import io.nosqlbench.engine.core.ScenarioResult;
-import io.nosqlbench.engine.core.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.BeforeClass;
@@ -67,8 +66,7 @@ public class AsyncScriptIntegrationTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
-        e.execute(s, scenarioLogger);
+        e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
         scenarioResult.reportToLog();
@@ -177,7 +175,7 @@ public class AsyncScriptIntegrationTests {
                 "logs/histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
-        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);
+        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(2);
     }
 
     @Test

@@ -26,8 +26,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleSp
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -51,13 +51,13 @@ import java.util.function.Predicate;
 public class CycleLogOutput implements Output, CanFilterResultValue {
 
     // For use in allocating file data, etc
-    private final static Logger logger = LoggerFactory.getLogger(CycleLogOutput.class);
+    private final static Logger logger = LogManager.getLogger(CycleLogOutput.class);
     private MappedByteBuffer mbb;
     private RandomAccessFile file;
     //    private FileBufferConfig config;
     private CycleResultsRLEBufferTarget targetBuffer;
-    private int extentSizeInSpans;
-    private File outputFile;
+    private final int extentSizeInSpans;
+    private final File outputFile;
     private Predicate<ResultReadable> filter;
 
     public CycleLogOutput(Activity activity) {

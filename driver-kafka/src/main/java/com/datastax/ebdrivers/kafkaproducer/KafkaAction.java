@@ -2,13 +2,13 @@ package com.datastax.ebdrivers.kafkaproducer;
 
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 public class KafkaAction implements SyncAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(KafkaAction.class);
+    private final static Logger logger = LogManager.getLogger(KafkaAction.class);
 
     private final KafkaProducerActivity activity;
     private final int slot;

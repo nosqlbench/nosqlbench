@@ -19,14 +19,14 @@ package io.nosqlbench.engine.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
 public class ScriptingMetrics {
-    private Logger logger;
-    private MetricRegistry metricRegistry;
-    private ScriptContext scriptContext;
+    private final Logger logger;
+    private final MetricRegistry metricRegistry;
+    private final ScriptContext scriptContext;
 
     public ScriptingMetrics(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
 

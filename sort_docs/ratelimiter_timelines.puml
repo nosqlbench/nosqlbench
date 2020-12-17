@@ -1,0 +1,47 @@
+@startuml
+scale 100 as 100 pixels
+
+Title Rate Limiter - **Timelines**
+
+robust "typical" as W1
+@W1
+0 is past
+100 is allocated #yellow
+200 is scheduled #lightgreen
+632 is now #lightblue
+W1@100 <-> @200: schedule\ndelay
+W1@200 <-> @632:
+
+robust "no waittime" as W2
+@W2
+0 is past
+200 is allocated #yellow
+200.000001 is scheduled #lightgreen
+632 is now #lightblue
+
+robust "caughtup" as W3
+@W3
+0 is past
+100 is allocated #yellow
+200.000001 is scheduled #lightgreen
+232 is now #lightblue
+
+robust "ahead" as W4
+@W4
+0 is past
+100 is allocated #yellow
+200.000001 is scheduled #lightgreen
+232 is now #lightblue
+
+concise "perfect ops" as O
+@O
+0 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
++100 is op
+@enduml

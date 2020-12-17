@@ -18,8 +18,8 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
@@ -40,7 +40,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class SSLKsFactory {
-    private final static Logger logger = LoggerFactory.getLogger(SSLKsFactory.class);
+    private final static Logger logger = LogManager.getLogger(SSLKsFactory.class);
 
     private static final SSLKsFactory instance = new SSLKsFactory();
 

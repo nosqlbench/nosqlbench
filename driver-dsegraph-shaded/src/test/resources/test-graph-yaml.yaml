@@ -1,7 +1,7 @@
 tags:
- type: testtag
- kind: somekind
- oevure: bananas
+  type: testtag
+  kind: somekind
+  oevure: bananas
 name: outerblock
 statements:
   - some foo

@@ -20,14 +20,14 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class TokenFiller implements Runnable {
-    private final static Logger logger = LoggerFactory.getLogger(TokenFiller.class);
+    private final static Logger logger = LogManager.getLogger(TokenFiller.class);
 
     public final static double MIN_PER_SECOND = 10D;
     public final static double MAX_PER_SECOND = 1000D;
@@ -35,31 +35,29 @@ public class TokenFiller implements Runnable {
 //    (false);
     private final long interval = (long) 1E6;
 
-    private final TokenPool tokenPool;
+    private final ThreadDrivenTokenPool tokenPool;
     private volatile boolean running = true;
     private RateSpec rateSpec;
     private Thread thread;
     private volatile long lastRefillAt;
-    private Timer timer;
+    private final Timer timer;
 
     /**
-     * A token filler adds tokens to a {@link TokenPool} at some rate.
+     * A token filler adds tokens to a {@link ThreadDrivenTokenPool} at some rate.
      * By default, this rate is at least every millisecond +- scheduling jitter
      * in the JVM.
      *
      * @param rateSpec A {@link RateSpec}
-     * @param def An {@link ActivityDef}
+     * @param def      An {@link ActivityDef}
      */
-    public TokenFiller(RateSpec rateSpec, ActivityDef def) {
+    public TokenFiller(RateSpec rateSpec, ThreadDrivenTokenPool tokenPool, ActivityDef def) {
         this.rateSpec = rateSpec;
-        this.tokenPool= new TokenPool(rateSpec);
-        this.tokenPool.refill(rateSpec.getNanosPerOp());
+        this.tokenPool = tokenPool;
         this.timer = ActivityMetrics.timer(def, "tokenfiller");
     }
 
     public TokenFiller apply(RateSpec rateSpec) {
         this.rateSpec = rateSpec;
-        this.tokenPool.apply(rateSpec);
         return this;
     }
 
@@ -99,6 +97,8 @@ public class TokenFiller implements Runnable {
     }
 
     public TokenFiller start() {
+        this.tokenPool.refill(rateSpec.getNanosPerOp());
+
         thread = new Thread(this);
         thread.setName(this.toString());
         thread.setPriority(Thread.MAX_PRIORITY);

@@ -5,7 +5,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 
 public class GraphActionDispenser implements ActionDispenser {
 
-    private GraphActivity activity;
+    private final GraphActivity activity;
 
     public GraphActionDispenser(GraphActivity activity) {
         this.activity = activity;

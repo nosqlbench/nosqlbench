@@ -1,6 +1,5 @@
 package io.nosqlbench.activitytype.cqld4.statements.binders;
 
-import com.datastax.driver.core.*;
 import com.datastax.oss.driver.api.core.ProtocolVersion;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.session.Session;
@@ -9,16 +8,15 @@ import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
 import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;
 import io.nosqlbench.virtdata.api.bindings.VALUE;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class UnsettableValuesBinder implements ValuesArrayBinder<PreparedStatement, Statement<?>> {
-    private final static Logger logger = LoggerFactory.getLogger(UnsettableValuesBinder.class);
+    private final static Logger logger = LogManager.getLogger(UnsettableValuesBinder.class);
 
     private final Session session;
     private final CodecRegistry codecRegistry;

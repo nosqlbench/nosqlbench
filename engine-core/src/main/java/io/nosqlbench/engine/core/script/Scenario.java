@@ -14,20 +14,30 @@
  */
 package io.nosqlbench.engine.core.script;
 
-import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import io.nosqlbench.engine.core.*;
-import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.metrics.NashornMetricRegistryBindings;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import org.graalvm.polyglot.*;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.engine.core.lifecycle.ActivityProgressIndicator;
+import io.nosqlbench.engine.core.lifecycle.PolyglotScenarioController;
+import io.nosqlbench.engine.core.lifecycle.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import io.nosqlbench.nb.api.annotations.Layer;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.PolyglotAccess;
 
-import javax.script.*;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,14 +56,19 @@ import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
+    private final String commandLine;
+    private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
+    private volatile ScenarioShutdownHook scenarioShutdownHook;
+    private Exception error;
+
 
     public enum State {
         Scheduled,
         Running,
         Errored,
+        Interrupted,
         Finished
     }
 
@@ -66,7 +81,6 @@ public class Scenario implements Callable<ScenarioResult> {
     private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
     private final String scenarioName;
-    private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
     private String scriptfile;
     private Engine engine = Engine.Graalvm;
@@ -76,8 +90,8 @@ public class Scenario implements Callable<ScenarioResult> {
     private long endedAtMillis = -1L;
 
     public enum Engine {
-        Nashorn,
-        Graalvm
+        Graalvm,
+        Nashorn
     }
 
     public Scenario(
@@ -87,7 +101,8 @@ public class Scenario implements Callable<ScenarioResult> {
             String progressInterval,
             boolean wantsGraaljsCompatMode,
             boolean wantsStackTraces,
-            boolean wantsCompiledScript) {
+            boolean wantsCompiledScript,
+            String commandLine) {
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
         this.engine = engine;
@@ -95,11 +110,22 @@ public class Scenario implements Callable<ScenarioResult> {
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
         this.wantsStackTraces = wantsStackTraces;
         this.wantsCompiledScript = wantsCompiledScript;
+        this.commandLine = commandLine;
+    }
+
+    public Scenario setLogger(Logger logger) {
+        this.logger = logger;
+        return this;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 
     public Scenario(String name, Engine engine) {
         this.scenarioName = name;
         this.engine = engine;
+        this.commandLine = "";
     }
 
     public Scenario addScriptText(String scriptText) {
@@ -133,12 +159,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
         switch (engine) {
             case Nashorn:
-                NashornScriptEngineFactory f = new NashornScriptEngineFactory();
-                this.scriptEngine = f.getScriptEngine("--language=es6");
-
-                // engineManager.getEngineByName("nashorn");
-                // TODO: Figure out how to do this in engine bindings: --language=es-6
-                break;
+                throw new RuntimeException("The nashorn engine has been deprecated in this version of NoSQLBench.");
             case Graalvm:
                 Context.Builder contextSettings = Context.newBuilder("js")
                     .allowHostAccess(HostAccess.ALL)
@@ -167,7 +188,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 break;
         }
 
-        scenarioController = new ScenarioController();
+        scenarioController = new ScenarioController(this.scenarioName);
         if (!progressInterval.equals("disabled")) {
             activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
@@ -181,7 +202,7 @@ public class Scenario implements Callable<ScenarioResult> {
             // https://github.com/graalvm/graaljs/blob/master/docs/user/JavaInterop.md
             if (wantsGraaljsCompatMode) {
                 scriptEngine.put("scenario", scenarioController);
-                scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
+                scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
                 scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
             } else {
                 scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
@@ -189,9 +210,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
             }
         } else if (engine == Engine.Nashorn) {
-            scriptEngine.put("scenario", scenarioController);
-            scriptEngine.put("metrics", new NashornMetricRegistryBindings(metricRegistry));
-            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+            throw new RuntimeException("The Nashorn engine has been deprecated in this version of NoSQLBench.");
         } else {
             throw new RuntimeException("Unsupported engine: " + engine);
         }
@@ -202,8 +221,8 @@ public class Scenario implements Callable<ScenarioResult> {
                 continue;
             }
 
-            org.slf4j.Logger extensionLogger =
-                LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+            Logger extensionLogger =
+                LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             Object extensionObject = extensionDescriptor.getExtensionObject(
                 extensionLogger,
                 metricRegistry,
@@ -218,9 +237,20 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
-        state=State.Running;
+        scenarioShutdownHook = new ScenarioShutdownHook(this);
+        Runtime.getRuntime().addShutdownHook(scenarioShutdownHook);
 
-        startedAtMillis=System.currentTimeMillis();
+        state = State.Running;
+
+        startedAtMillis = System.currentTimeMillis();
+        Annotators.recordAnnotation(
+                Annotation.newBuilder()
+                        .session(this.scenarioName)
+                        .now()
+                        .layer(Layer.Scenario)
+                        .detail("engine", this.engine.toString())
+                        .build()
+        );
         init();
         logger.debug("Running control script for " + getScenarioName() + ".");
         for (String script : scripts) {
@@ -265,14 +295,12 @@ public class Scenario implements Callable<ScenarioResult> {
                 this.state = State.Errored;
                 logger.warn("Error in scenario, shutting down.");
                 this.scenarioController.forceStopScenario(5000, false);
+                this.error = e;
                 throw new RuntimeException(e);
             } finally {
-                if (this.state==State.Running) {
-                    this.state = State.Finished;
-                }
                 System.out.flush();
                 System.err.flush();
-                endedAtMillis=System.currentTimeMillis();
+                endedAtMillis = System.currentTimeMillis();
             }
         }
         int awaitCompletionTime = 86400 * 365 * 1000;
@@ -280,8 +308,38 @@ public class Scenario implements Callable<ScenarioResult> {
         scenarioController.awaitCompletion(awaitCompletionTime);
         //TODO: Ensure control flow covers controller shutdown in event of internal error.
 
-        logger.debug("scenario completed without errors");
-        endedAtMillis=System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+        Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
+        scenarioShutdownHook = null;
+        finish();
+    }
+
+    public void finish() {
+        logger.debug("finishing scenario");
+        endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+        if (this.state == State.Running) {
+            this.state = State.Finished;
+        }
+
+        if (scenarioShutdownHook != null) {
+            // If this method was called while the shutdown hook is defined, then it means
+            // that the scenario was ended before the hook was uninstalled normally.
+            this.state = State.Interrupted;
+            logger.warn("Scenario was interrupted by process exit, shutting down");
+        }
+
+        logger.info("scenario state: " + this.state);
+
+        // We report the scenario state via annotation even for short runs
+        Annotation annotation = Annotation.newBuilder()
+                .session(this.scenarioName)
+                .interval(this.startedAtMillis, endedAtMillis)
+                .layer(Layer.Scenario)
+                .label("state", this.state.toString())
+                .detail("command_line", this.commandLine)
+                .build();
+
+        Annotators.recordAnnotation(annotation);
+
     }
 
     public long getStartedAtMillis() {
@@ -295,7 +353,7 @@ public class Scenario implements Callable<ScenarioResult> {
     public ScenarioResult call() {
         run();
         String iolog = scriptEnv.getTimedLog();
-        return new ScenarioResult(iolog);
+        return new ScenarioResult(iolog, this.startedAtMillis, this.endedAtMillis);
     }
 
     @Override
@@ -329,10 +387,6 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public String toString() {
         return "name:'" + this.getScenarioName() + "'";
-    }
-
-    public void setScenarioLogger(ScenarioLogger scenarioLogger) {
-        this.scenarioLogger = scenarioLogger;
     }
 
     public void addScenarioScriptParams(ScriptParams scenarioScriptParams) {

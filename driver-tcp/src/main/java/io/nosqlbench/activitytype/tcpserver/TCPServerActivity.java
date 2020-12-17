@@ -20,8 +20,8 @@ package io.nosqlbench.activitytype.tcpserver;
 import io.nosqlbench.activitytype.stdout.StdoutActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -41,11 +41,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TCPServerActivity extends StdoutActivity {
 
-    private final static Logger logger = LoggerFactory.getLogger(TCPServerActivity.class);
+    private final static Logger logger = LogManager.getLogger(TCPServerActivity.class);
     private final ServerSocketFactory socketFactory;
-    private LinkedBlockingQueue<String> queue;
+    private final LinkedBlockingQueue<String> queue;
     private ServerSocket listenerSocket;
-    private List<Shutdown> managedShutdown = new ArrayList<>();
+    private final List<Shutdown> managedShutdown = new ArrayList<>();
     private int capacity=10;
 
 
@@ -118,7 +118,7 @@ public class TCPServerActivity extends StdoutActivity {
 
     }
 
-    private static interface Shutdown {
+    private interface Shutdown {
         void shutdown();
     }
 

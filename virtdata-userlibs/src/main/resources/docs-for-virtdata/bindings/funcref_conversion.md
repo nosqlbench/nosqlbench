@@ -32,7 +32,8 @@ appropriate, to ensure that VirtData selects the right functions within the flow
 ## Format
 
 Apply the Java String.format method to an incoming object. @see
-[Java 14 String.format(...) javadoc](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/util/Formatter.html#syntax) Note:
+[Java 15 String.format(...) javadoc](https://docs.oracle.com/en/java
+/javase/14/docs/api/java.base/java/util/Formatter.html#syntax) Note:
 This function can often be quite slow, so more direct methods are generally preferrable.
 
 - java.lang.Object -> Format(java.lang.String: format) -> java.lang.String

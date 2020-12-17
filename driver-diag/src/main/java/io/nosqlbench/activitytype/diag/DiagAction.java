@@ -20,16 +20,16 @@ import io.nosqlbench.engine.api.activityapi.core.MultiPhaseAction;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(DiagAction.class);
+    private final static Logger logger = LogManager.getLogger(DiagAction.class);
     private final ActivityDef activityDef;
     private final DiagActivity diagActivity;
 
-    private int slot;
+    private final int slot;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;

@@ -57,11 +57,11 @@ blocks:
           name: prod-mode
   - name: main
     tags:
-     phase: main
+      phase: main
     statements:
       - main-add: >-
-           device = graph.addVertex(label, 'device','deviceid', {deviceid}, 'type', {type}, 'os', {os},  'osversion', {osversion});
-           session = graph.addVertex(label, 'session', 'sessionid', {sessionid}, 'ipaddress', {ipaddress}, 'deviceid', {deviceid}, 'createdtime', {createdtime});
-           session.addEdge('using', device);
+          device = graph.addVertex(label, 'device','deviceid', {deviceid}, 'type', {type}, 'os', {os},  'osversion', {osversion});
+          session = graph.addVertex(label, 'session', 'sessionid', {sessionid}, 'ipaddress', {ipaddress}, 'deviceid', {deviceid}, 'createdtime', {createdtime});
+          session.addEdge('using', device);
         tags:
           name: main-add

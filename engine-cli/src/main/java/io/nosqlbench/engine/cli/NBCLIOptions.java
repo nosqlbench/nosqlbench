@@ -1,14 +1,17 @@
 package io.nosqlbench.engine.cli;
 
-import ch.qos.logback.classic.Level;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,26 +22,24 @@ import java.util.stream.Collectors;
  */
 public class NBCLIOptions {
 
-    private final static String userHome = System.getProperty("user.home");
-    private final static Path defaultOptFile = Path.of(userHome, ".nosqlbench/options");
+//    private final static Logger logger = LogManager.getLogger("OPTIONS");
 
-    private final static Logger logger = LoggerFactory.getLogger(NBCLIOptions.class);
 
-    // Options which may contextualize other CLI options or commands.
-    // These must be parsed first
-    private static final String ARGS_FILE = "-argsfile";
-    private static final String ARGS_FILE_DEFAULT = "$HOME/.nosqlbench/argsfile";
-    private static final String ARGS_PIN = "-pin";
-    private static final String ARGS_UNPIN = "-unpin";
-
+    private final static String NB_STATE_DIR = "--statedir";
+    private final static String NB_STATEDIR_PATHS = "$NBSTATEDIR:$PWD/.nosqlbench:$HOME/.nosqlbench";
+    public static final String ARGS_FILE_DEFAULT = "$NBSTATEDIR/argsfile";
     private static final String INCLUDE = "--include";
+
+    private final static String userHome = System.getProperty("user.home");
+
+
     private static final String METRICS_PREFIX = "--metrics-prefix";
 
-    //    private static final String ANNOTATE_TO_GRAFANA = "--grafana-baseurl";
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
     private static final String DEFAULT_ANNOTATORS = "all";
 
+    private final static String DEFAULT_CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
     // Discovery
     private static final String HELP = "--help";
@@ -84,13 +85,17 @@ public class NBCLIOptions {
     private final static String ENABLE_CHART = "--enable-chart";
     private final static String DOCKER_METRICS = "--docker-metrics";
     private final static String DOCKER_METRICS_AT = "--docker-metrics-at";
+    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
+    private static final String DOCKER_PROM_TAG = "--docker-prom-tag";
 
     private static final String GRAALJS_ENGINE = "--graaljs";
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
-    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
 
-    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%7r %-5level [%t] %-12logger{0} %msg%n%throwable";
+
+    //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+    public static final String NBSTATEDIR = "NBSTATEDIR";
 
     private final LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
@@ -107,7 +112,7 @@ public class NBCLIOptions {
     private String wantsMetricsForActivity;
     private String sessionName = "";
     private boolean showScript = false;
-    private Level consoleLevel = Level.WARN;
+    private NBLogLevel consoleLevel = NBLogLevel.WARN;
     private final List<String> histoLoggerConfigs = new ArrayList<>();
     private final List<String> statsLoggerConfigs = new ArrayList<>();
     private final List<String> classicHistoConfigs = new ArrayList<>();
@@ -119,8 +124,8 @@ public class NBCLIOptions {
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
-    private String logsLevel = "INFO";
-    private Map<String, Level> logLevelsOverrides = new HashMap<>();
+    private NBLogLevel logsLevel = NBLogLevel.INFO;
+    private Map<String, String> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
     private boolean wantsScenariosList = false;
@@ -129,17 +134,27 @@ public class NBCLIOptions {
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
     private boolean graaljs_compat = false;
-    private int hdr_digits = 4;
-    private String docker_grafana_tag = "7.0.1";
+    private int hdr_digits = 3;
+    private String docker_grafana_tag = "7.3.4";
+    private String docker_prom_tag = "latest";
     private boolean showStackTraces = false;
     private boolean compileScript = false;
     private String scriptFile = null;
     private String[] annotateEvents = new String[]{"ALL"};
     private String dockerMetricsHost;
     private String annotatorsConfig = "";
+    private String statedirs = NB_STATEDIR_PATHS;
+    private Path statepath;
+    private final List<String> statePathAccesses = new ArrayList<>();
+    private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
+    }
+
+
+    public String getChartHdrFileName() {
+        return hdrForChartFileName;
     }
 
     public enum Mode {
@@ -163,7 +178,6 @@ public class NBCLIOptions {
     }
 
     private LinkedList<String> parseGlobalOptions(String[] args) {
-        ArgsFile argsfile = new ArgsFile(ARGS_FILE_DEFAULT);
 
         LinkedList<String> arglist = new LinkedList<>() {{
             addAll(Arrays.asList(args));
@@ -174,7 +188,8 @@ public class NBCLIOptions {
             return arglist;
         }
 
-        // Preprocess --include regardless of position
+        // Process --include and --statedir, separately first
+        // regardless of position
         LinkedList<String> nonincludes = new LinkedList<>();
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
@@ -187,37 +202,75 @@ public class NBCLIOptions {
             }
 
             switch (word) {
-                case ARGS_FILE:
+                case NB_STATE_DIR:
                     arglist.removeFirst();
-                    String argsfileSpec = readWordOrThrow(arglist, "argsfile");
-                    argsfile = new ArgsFile(argsfileSpec);
-                    arglist = argsfile.doArgsFile(argsfileSpec, arglist);
+                    this.statedirs = readWordOrThrow(arglist, "nosqlbench global state directory");
                     break;
-                case ARGS_PIN:
+                case INCLUDE:
                     arglist.removeFirst();
-                    arglist = argsfile.pin(arglist);
+                    String include = readWordOrThrow(arglist, "path to include");
+                    wantsToIncludePaths.add(include);
                     break;
-                case ARGS_UNPIN:
+                default:
+                    nonincludes.addLast(arglist.removeFirst());
+            }
+        }
+        this.statedirs = (this.statedirs != null ? this.statedirs : NB_STATEDIR_PATHS);
+        this.setStatePath();
+
+        arglist = nonincludes;
+        nonincludes = new LinkedList<>();
+
+        // Now that statdirs is settled, auto load argsfile if it is present
+        NBCLIArgsFile argsfile = new NBCLIArgsFile();
+        argsfile.reserved(NBCLICommandParser.RESERVED_WORDS);
+        argsfile.preload("--argsfile-optional", ARGS_FILE_DEFAULT);
+        arglist = argsfile.process(arglist);
+
+        // Parse all --argsfile... and other high level options
+
+        while (arglist.peekFirst() != null) {
+            String word = arglist.peekFirst();
+            if (word.startsWith("--") && word.contains("=")) {
+                String wordToSplit = arglist.removeFirst();
+                String[] split = wordToSplit.split("=", 2);
+                arglist.offerFirst(split[1]);
+                arglist.offerFirst(split[0]);
+                continue;
+            }
+
+            switch (word) {
+                // These options modify other options. They should be processed early.
+                case NBCLIArgsFile.ARGS_FILE:
+                case NBCLIArgsFile.ARGS_FILE_OPTIONAL:
+                case NBCLIArgsFile.ARGS_FILE_REQUIRED:
+                case NBCLIArgsFile.ARGS_PIN:
+                case NBCLIArgsFile.ARGS_UNPIN:
+                    if (this.statepath == null) {
+                        setStatePath();
+                    }
+                    arglist = argsfile.process(arglist);
+                    break;
+                case DASH_V_INFO:
+                    consoleLevel = NBLogLevel.INFO;
                     arglist.removeFirst();
-                    arglist = argsfile.unpin(arglist);
+                    break;
+                case DASH_VV_DEBUG:
+                    consoleLevel = NBLogLevel.DEBUG;
+                    arglist.removeFirst();
+                    break;
+                case DASH_VVV_TRACE:
+                    consoleLevel = NBLogLevel.TRACE;
+                    arglist.removeFirst();
                     break;
                 case ANNOTATE_EVENTS:
                     arglist.removeFirst();
                     String toAnnotate = readWordOrThrow(arglist, "annotated events");
                     annotateEvents = toAnnotate.split("\\\\s*,\\\\s*");
                     break;
-//                case ANNOTATE_TO_GRAFANA:
-//                    arglist.removeFirst();
-//                    grafanaEndpoint = readWordOrThrow(arglist,"grafana API endpoint");
-//                    break;
                 case ANNOTATORS_CONFIG:
                     arglist.removeFirst();
                     this.annotatorsConfig = readWordOrThrow(arglist, "annotators config");
-                    break;
-                case INCLUDE:
-                    arglist.removeFirst();
-                    String include = readWordOrThrow(arglist, "path to include");
-                    wantsToIncludePaths.add(include);
                     break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -230,6 +283,10 @@ public class NBCLIOptions {
                 case WORKSPACES_DIR:
                     arglist.removeFirst();
                     workspacesDirectory = readWordOrThrow(arglist, "a workspaces directory");
+                    break;
+                case DOCKER_PROM_TAG:
+                    arglist.removeFirst();
+                    docker_prom_tag = readWordOrThrow(arglist, "prometheus docker tag");
                     break;
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();
@@ -251,13 +308,82 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     dockerMetrics = true;
                     break;
+                case SESSION_NAME:
+                    arglist.removeFirst();
+                    sessionName = readWordOrThrow(arglist, "a session name");
+                    break;
+                case LOGS_DIR:
+                    arglist.removeFirst();
+                    logsDirectory = readWordOrThrow(arglist, "a log directory");
+                    break;
+                case LOGS_MAX:
+                    arglist.removeFirst();
+                    logsMax = Integer.parseInt(readWordOrThrow(arglist, "max logfiles to keep"));
+                    break;
+                case LOGS_LEVEL:
+                    arglist.removeFirst();
+                    String loglevel = readWordOrThrow(arglist, "a log level");
+                    this.logsLevel = NBLogLevel.valueOfName(loglevel);
+                    break;
+                case LOG_LEVEL_OVERRIDE:
+                    arglist.removeFirst();
+                    logLevelsOverrides = parseLogLevelOverrides(readWordOrThrow(arglist, "log levels in name:LEVEL,... format"));
+                    break;
+                case WITH_LOGGING_PATTERN:
+                    arglist.removeFirst();
+                    consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
-
             }
-
         }
+
         return nonincludes;
+    }
+
+    private Path setStatePath() {
+        if (statePathAccesses.size() > 0) {
+            throw new BasicError("The statedir must be set before it is used by other\n" +
+                    " options. If you want to change the statedir, be sure you do it before\n" +
+                    " dependent options. These parameters were called before this --statedir:\n" +
+                    statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
+        }
+        if (this.statepath != null) {
+            return this.statepath;
+        }
+
+        List<String> paths = Environment.INSTANCE.interpolate(":", statedirs);
+        Path selected = null;
+
+        for (String pathName : paths) {
+            Path path = Path.of(pathName);
+            if (Files.exists(path)) {
+                if (Files.isDirectory(path)) {
+                    selected = path;
+                    break;
+                } else {
+                    System.err.println("ERROR: possible state dir path is not a directory: '" + path.toString() + "'");
+                }
+            }
+        }
+        if (selected == null) {
+            selected = Path.of(paths.get(0));
+        }
+
+        if (!Files.exists(selected)) {
+            try {
+                Files.createDirectories(
+                        selected,
+                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
+                );
+            } catch (IOException e) {
+                throw new BasicError("Could not create state directory at '" + selected.toString() + "': " + e.getMessage());
+            }
+        }
+
+        Environment.INSTANCE.put(NBSTATEDIR, selected.toString());
+
+        return selected;
     }
 
     private void parseAllOptions(String[] args) {
@@ -280,9 +406,8 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     break;
                 case NASHORN_ENGINE:
-                    engine = Scenario.Engine.Nashorn;
-                    arglist.removeFirst();
-                    break;
+                    throw new RuntimeException("The nashorn engine has been deprecated in this major version of " +
+                            "NoSQLBench");
                 case COMPILE_SCRIPT:
                     arglist.removeFirst();
                     compileScript = true;
@@ -301,29 +426,9 @@ public class NBCLIOptions {
                     Cmd cmd = Cmd.parseArg(arglist, canonicalizer);
                     wantsMetricsForActivity = cmd.getArg("driver");
                     break;
-                case SESSION_NAME:
-                    arglist.removeFirst();
-                    sessionName = readWordOrThrow(arglist, "a session name");
-                    break;
-                case LOGS_DIR:
-                    arglist.removeFirst();
-                    logsDirectory = readWordOrThrow(arglist, "a log directory");
-                    break;
                 case HDR_DIGITS:
                     arglist.removeFirst();
                     hdr_digits = Integer.parseInt(readWordOrThrow(arglist, "significant digits"));
-                    break;
-                case LOGS_MAX:
-                    arglist.removeFirst();
-                    logsMax = Integer.parseInt(readWordOrThrow(arglist, "max logfiles to keep"));
-                    break;
-                case LOGS_LEVEL:
-                    arglist.removeFirst();
-                    logsLevel = readWordOrThrow(arglist, "a log level");
-                    break;
-                case LOG_LEVEL_OVERRIDE:
-                    arglist.removeFirst();
-                    logLevelsOverrides = parseLogLevelOverrides(readWordOrThrow(arglist, "log levels in name:LEVEL,... format"));
                     break;
                 case PROGRESS:
                     arglist.removeFirst();
@@ -339,7 +444,6 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     if (arglist.peekFirst() == null) {
                         wantsBasicHelp = true;
-                        logger.info("getting basic help");
                     } else {
                         wantsActivityHelp = true;
                         wantsActivityHelpFor = readWordOrThrow(arglist, "topic");
@@ -389,22 +493,6 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsMarkerTypes = true;
                     break;
-                case DASH_V_INFO:
-                    consoleLevel = Level.INFO;
-                    arglist.removeFirst();
-                    break;
-                case DASH_VV_DEBUG:
-                    consoleLevel = Level.DEBUG;
-                    arglist.removeFirst();
-                    break;
-                case DASH_VVV_TRACE:
-                    consoleLevel = Level.TRACE;
-                    arglist.removeFirst();
-                    break;
-                case WITH_LOGGING_PATTERN:
-                    arglist.removeFirst();
-                    consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
-                    break;
                 case LIST_SCENARIOS:
                     arglist.removeFirst();
                     wantsScenariosList = true;
@@ -434,14 +522,14 @@ public class NBCLIOptions {
         return wantsToIncludePaths.toArray(new String[0]);
     }
 
-    private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
-        Map<String, Level> levels = new HashMap<>();
+    private Map<String, String> parseLogLevelOverrides(String levelsSpec) {
+        Map<String, String> levels = new HashMap<>();
         Arrays.stream(levelsSpec.split("[,;]")).forEach(kp -> {
             String[] ll = kp.split(":");
             if (ll.length != 2) {
                 throw new RuntimeException("Log level must have name:level format");
             }
-            levels.put(ll[0], Level.toLevel(ll[1]));
+            levels.put(ll[0], ll[1]);
         });
         return levels;
     }
@@ -454,20 +542,23 @@ public class NBCLIOptions {
         return graaljs_compat;
     }
 
-    public List<LoggerConfig> getHistoLoggerConfigs() {
-        List<LoggerConfig> configs = histoLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+    public List<LoggerConfigData> getHistoLoggerConfigs() {
+        List<LoggerConfigData> configs =
+                histoLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         checkLoggerConfigs(configs, LOG_HISTOGRAMS);
         return configs;
     }
 
-    public List<LoggerConfig> getStatsLoggerConfigs() {
-        List<LoggerConfig> configs = statsLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+    public List<LoggerConfigData> getStatsLoggerConfigs() {
+        List<LoggerConfigData> configs =
+                statsLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         checkLoggerConfigs(configs, LOG_HISTOSTATS);
         return configs;
     }
 
-    public List<LoggerConfig> getClassicHistoConfigs() {
-        List<LoggerConfig> configs = classicHistoConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+    public List<LoggerConfigData> getClassicHistoConfigs() {
+        List<LoggerConfigData> configs =
+                classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         checkLoggerConfigs(configs, CLASSIC_HISTOGRAMS);
         return configs;
     }
@@ -544,13 +635,13 @@ public class NBCLIOptions {
         return sessionName;
     }
 
-    public Level wantsConsoleLogLevel() {
+    public NBLogLevel getConsoleLogLevel() {
         return consoleLevel;
     }
 
     private String readWordOrThrow(LinkedList<String> arglist, String required) {
         if (arglist.peekFirst() == null) {
-            throw new InvalidParameterException(required + " not found");
+            throw new InvalidParameterException(required + " is required after this option");
         }
         return arglist.removeFirst();
     }
@@ -568,24 +659,26 @@ public class NBCLIOptions {
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
         if (spec.indicatorMode == IndicatorMode.console) {
-            if (Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
-                logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
+            if (NBLogLevel.INFO.isGreaterOrEqualTo(getConsoleLogLevel())) {
+                System.err.println("Console is already logging info or more, so progress data on console is " +
+                        "suppressed.");
                 spec.indicatorMode = IndicatorMode.logonly;
             } else if (this.getCommands().stream().anyMatch(cmd -> cmd.getCmdType().equals(Cmd.CmdType.script))) {
-                logger.info("Command line includes script calls, so progress data on console is " +
-                    "suppressed.");
+                System.err.println("Command line includes script calls, so progress data on console is " +
+                        "suppressed.");
                 spec.indicatorMode = IndicatorMode.logonly;
             }
         }
         return spec.toString();
     }
 
-    private void checkLoggerConfigs(List<LoggerConfig> configs, String configName) {
+    private void checkLoggerConfigs(List<LoggerConfigData> configs, String configName) {
         Set<String> files = new HashSet<>();
-        configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
+        configs.stream().map(LoggerConfigData::getFilename).forEach(s -> {
             if (files.contains(s)) {
-                logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                    "in the first matching config. Reorder your options if you need to control this.");
+                System.err.println(s + " is included in " + configName + " more than once. It will only be " +
+                        "included " +
+                        "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
@@ -595,15 +688,15 @@ public class NBCLIOptions {
         return reportCsvTo;
     }
 
-    public String getLogsDirectory() {
-        return logsDirectory;
+    public Path getLogsDirectory() {
+        return Path.of(logsDirectory);
     }
 
     public int getLogsMax() {
         return logsMax;
     }
 
-    public String getLogsLevel() {
+    public NBLogLevel getScenarioLogLevel() {
         return logsLevel;
     }
 
@@ -647,7 +740,7 @@ public class NBCLIOptions {
         return consoleLoggingPattern;
     }
 
-    public Map<String, Level> getLogLevelOverrides() {
+    public Map<String, String> getLogLevelOverrides() {
         return logLevelsOverrides;
     }
 
@@ -676,12 +769,16 @@ public class NBCLIOptions {
         return docker_grafana_tag;
     }
 
-    public static class LoggerConfig {
+    public String getDockerPromTag() {
+        return docker_prom_tag;
+    }
+
+    public static class LoggerConfigData {
         public String file;
         public String pattern = ".*";
         public String interval = "30 seconds";
 
-        public LoggerConfig(String histoLoggerSpec) {
+        public LoggerConfigData(String histoLoggerSpec) {
             String[] words = histoLoggerSpec.split(":");
             switch (words.length) {
                 case 3:
@@ -696,8 +793,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                        LOG_HISTOGRAMS +
-                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                            LOG_HISTOGRAMS +
+                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -722,7 +819,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

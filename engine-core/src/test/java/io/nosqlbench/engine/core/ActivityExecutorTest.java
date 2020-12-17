@@ -12,8 +12,9 @@ import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nosqlbench.engine.core.lifecycle.ActivityExecutor;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   limitations under the License.
 */
 public class ActivityExecutorTest {
-    private static final Logger logger = LoggerFactory.getLogger(ActivityExecutorTest.class);
+    private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 
     @Test
     public void testRestart() {
@@ -51,7 +52,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
         ad.setThreads(1);
         ae.startActivity();
         ae.stopActivity();
@@ -75,7 +76,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-delayed-start");
         ad.setThreads(1);
         ae.startActivity();
         ae.awaitCompletion(15000);
@@ -100,7 +101,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a);
+        ActivityExecutor ae = new ActivityExecutor(a, "test-new-executor");
         ad.setThreads(5);
         ae.startActivity();
 
@@ -148,7 +149,7 @@ public class ActivityExecutorTest {
     }
 
     private static class DelayedInitActivity extends SimpleActivity {
-        private static Logger logger = LoggerFactory.getLogger(DelayedInitActivity.class);
+        private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(ActivityDef activityDef) {
             super(activityDef);

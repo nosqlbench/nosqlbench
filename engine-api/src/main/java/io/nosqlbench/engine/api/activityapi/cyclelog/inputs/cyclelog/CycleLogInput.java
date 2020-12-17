@@ -27,8 +27,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleRe
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 
 public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResultsSegment>, CanFilterResultValue {
-    private final static Logger logger = LoggerFactory.getLogger(CycleLogInput.class);
+    private final static Logger logger = LogManager.getLogger(CycleLogInput.class);
     private final Iterator<CycleResultsSegment> cycleResultSegmentIterator;
     private RandomAccessFile raf;
     private MappedByteBuffer mbb;

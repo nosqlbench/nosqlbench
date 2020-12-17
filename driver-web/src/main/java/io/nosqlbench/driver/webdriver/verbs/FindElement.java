@@ -1,15 +1,14 @@
 package io.nosqlbench.driver.webdriver.verbs;
 
 import io.nosqlbench.driver.webdriver.WebContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FindElement implements WebDriverVerb {
-    private final static Logger logger = LoggerFactory.getLogger(FindElement.class);
+    private final static Logger logger = LogManager.getLogger(FindElement.class);
 
     private final By by;
 

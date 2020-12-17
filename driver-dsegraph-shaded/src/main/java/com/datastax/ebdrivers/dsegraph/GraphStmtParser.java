@@ -17,10 +17,10 @@ public class GraphStmtParser {
         Matcher m = stmtToken.matcher(statement);
         while (m.find()) {
             String namedAnchor = m.group(1);
-            if (namedAnchor==null) {
-                namedAnchor=m.group(2);
-                if (namedAnchor==null) {
-                    throw new RuntimeException("Pattern '" + stmtToken.pattern() + "' failed to match '" + statement +"'");
+            if (namedAnchor == null) {
+                namedAnchor = m.group(2);
+                if (namedAnchor == null) {
+                    throw new RuntimeException("Pattern '" + stmtToken.pattern() + "' failed to match '" + statement + "'");
                 }
             }
             if (!bindings.containsKey(namedAnchor)) {

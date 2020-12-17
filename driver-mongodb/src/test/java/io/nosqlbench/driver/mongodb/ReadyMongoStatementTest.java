@@ -1,28 +1,26 @@
 package io.nosqlbench.driver.mongodb;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-
-import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.conversions.Bson;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReadyMongoStatementTest {
-    private final static Logger logger = LoggerFactory.getLogger(ReadyMongoStatementTest.class);
+    private final static Logger logger = LogManager.getLogger(ReadyMongoStatementTest.class);
 
     private ActivityDef activityDef;
     private StmtsDocList stmtsDocList;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BindableGraphStatementsTemplate {
-    private List<ReadyGraphStatementTemplate> templateList = new ArrayList<>();
+    private final List<ReadyGraphStatementTemplate> templateList = new ArrayList<>();
 
     public void addTemplate(ReadyGraphStatementTemplate template) {
         this.templateList.add(template);
