@@ -2,15 +2,20 @@ package io.nosqlbench.engine.clients.grafana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import io.nosqlbench.engine.clients.grafana.annotator.GrafanaMetricsAnnotator;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -104,7 +109,7 @@ public class GrafanaClient {
      * @param by
      * @return
      */
-    public Annotations findAnnotations(By... by) {
+    public List<GAnnotation> findAnnotations(By... by) {
 
         String query = By.fields(by);
         HttpRequest.Builder rqb = config.newRequest("api/annotations?" + query);
@@ -120,9 +125,13 @@ public class GrafanaClient {
             throw new RuntimeException(e);
         }
         String body = response.body();
-        Annotations annotations = gson.fromJson(body, Annotations.class);
+        Type gtype = new TypeToken<List<GAnnotation>>() {
+        }.getType();
+
+        List<GAnnotation> annotations = gson.fromJson(body, gtype);
         return annotations;
     }
+
 
     /**
      * <pre>{@code
@@ -155,11 +164,11 @@ public class GrafanaClient {
      *
      * @return
      */
-    public GrafanaAnnotation createAnnotation(GrafanaAnnotation grafanaAnnotation) {
+    public GAnnotation createAnnotation(GAnnotation gAnnotation) {
         HttpClient client = config.newClient();
         HttpRequest.Builder rqb = config.newRequest("api/annotations");
         rqb.setHeader("Content-Type", "application/json");
-        String rqBody = gson.toJson(grafanaAnnotation);
+        String rqBody = gson.toJson(gAnnotation);
         rqb = rqb.POST(HttpRequest.BodyPublishers.ofString(rqBody));
 
         HttpResponse<String> response = null;
@@ -178,12 +187,93 @@ public class GrafanaClient {
                     "baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
-        GrafanaAnnotation savedGrafanaAnnotation = gson.fromJson(body, GrafanaAnnotation.class);
-        return savedGrafanaAnnotation;
+        GAnnotation savedGAnnotation = gson.fromJson(body, GAnnotation.class);
+        return savedGAnnotation;
+    }
+
+    public List<GDashboardInfo> findDashboards() {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/search?type=dash-db");
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Getting list of dashboards failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+        Type dblist = new TypeToken<List<GDashboardInfo>>() {
+        }.getType();
+        List<GDashboardInfo> results = gson.fromJson(body, dblist);
+        return results;
+
+    }
+
+    public GSnapshot findSnapshotBykey(String snapshotKey) {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/snapshots/" + snapshotKey);
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Getting dashboard snapshot for key '" + snapshotKey + "' failed with status " +
+                    "code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+
+        String body = response.body();
+
+        GSnapshot snapshot = gson.fromJson(body, GSnapshot.class);
+        return snapshot;
+
+    }
+
+    public Optional<GSnapshot> findSnapshotBykeyOptionally(String snapshotKey) {
+        try {
+            GSnapshot snapshotBykey = findSnapshotBykey(snapshotKey);
+            return Optional.of(snapshotBykey);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    public List<GSnapshotInfo> findSnapshots() {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/dashboard/snapshots");
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Getting dashboard snapshots failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+
+        Type t = new TypeToken<List<GSnapshotInfo>>() {
+        }.getType();
+        List<GSnapshotInfo> snapshotsInfo = gson.fromJson(body, t);
+        return snapshotsInfo;
+
     }
 
 
-    public DashboardResponse getDashboardByUid(String uid) {
+    public GDashboardMeta getDashboardByUid(String uid) {
         HttpClient client = config.newClient();
         HttpRequest.Builder rqb = config.newRequest("api/dashboards/uid/" + uid);
         rqb = rqb.GET();
@@ -200,12 +290,33 @@ public class GrafanaClient {
         }
         String body = response.body();
 
-        DashboardResponse dashboardResponse = gson.fromJson(body, DashboardResponse.class);
-        return dashboardResponse;
+        GDashboardMeta dashboardMeta = gson.fromJson(body, GDashboardMeta.class);
+        return dashboardMeta;
     }
 
-    public DashboardSnapshot createSnapshot() {
-        return null;
+    public GSnapshotInfo createSnapshot(GDashboard dashboard, String snid) {
+
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/snapshots");
+        rqb = rqb.setHeader("Content-Type", "application/json");
+        String rqBody = gson.toJson(new CreateSnapshotRequest(dashboard, null, snid));
+        rqb = rqb.POST(HttpRequest.BodyPublishers.ofString(rqBody));
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Creating snapshot for snid (" + snid + ") failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+
+        GSnapshotInfo snapshotInfo = gson.fromJson(body, GSnapshotInfo.class);
+
+        return snapshotInfo;
     }
 
     /**
@@ -237,7 +348,7 @@ public class GrafanaClient {
      *
      * @return
      */
-    public GrafanaAnnotation createGraphiteAnnotation() {
+    public GAnnotation createGraphiteAnnotation() {
         throw new RuntimeException("unimplemented");
     }
 

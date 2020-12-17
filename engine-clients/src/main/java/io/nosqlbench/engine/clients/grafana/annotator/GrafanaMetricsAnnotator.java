@@ -1,6 +1,8 @@
-package io.nosqlbench.engine.clients.grafana;
+package io.nosqlbench.engine.clients.grafana.annotator;
 
-import io.nosqlbench.engine.clients.grafana.transfer.GrafanaAnnotation;
+import io.nosqlbench.engine.clients.grafana.GrafanaClient;
+import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
+import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.Environment;
 import io.nosqlbench.nb.api.OnError;
@@ -34,7 +36,7 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
     @Override
     public void recordAnnotation(Annotation annotation) {
         try {
-            GrafanaAnnotation ga = new GrafanaAnnotation();
+            GAnnotation ga = new GAnnotation();
 
             ga.setTime(annotation.getStart());
             ga.setTimeEnd(annotation.getEnd());
@@ -87,7 +89,7 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
             // Details
 
-            GrafanaAnnotation created = this.client.createAnnotation(ga);
+            GAnnotation created = this.client.createAnnotation(ga);
 
         } catch (Exception e) {
             switch (onError) {

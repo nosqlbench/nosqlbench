@@ -2,7 +2,7 @@ package io.nosqlbench.engine.clients.grafana.transfer;
 
 import java.util.*;
 
-public class GrafanaAnnotation {
+public class GAnnotation {
 
     private Integer id;
     private Integer alertId;
