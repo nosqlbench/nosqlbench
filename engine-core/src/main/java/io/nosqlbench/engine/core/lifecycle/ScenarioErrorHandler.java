@@ -47,7 +47,10 @@ public class ScenarioErrorHandler {
         }
 
         if (wantsStackTraces) {
-            logger.error(prefix + e.getMessage(),e);
+            logger.error(prefix + e.getMessage(), e);
+            if (e.getCause() != null) {
+                logger.error("cause (see stack trace for details):" + e.getCause().getMessage());
+            }
         } else {
             logger.error(e.getMessage());
             logger.error("for the full stack trace, run with --show-stacktraces");
