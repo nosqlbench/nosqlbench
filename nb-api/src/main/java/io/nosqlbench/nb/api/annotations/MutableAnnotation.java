@@ -7,12 +7,14 @@ import com.google.gson.annotations.Expose;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class MutableAnnotation implements Annotation {
 
     private final static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
     private String session = "SESSION_UNNAMED";
+    private final ZoneId GMT = ZoneId.of("GMT");
 
     @Expose
     private Layer layer;
@@ -117,10 +119,12 @@ public class MutableAnnotation implements Annotation {
         ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
         ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
 
-
-        sb.append("[").append(startTime);
+        sb.append("[");
+        ZonedDateTime zonedStartTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+        sb.append(zonedStartTime.format(DateTimeFormatter.ISO_INSTANT));
         if (getStart() != getEnd()) {
-            sb.append(" - ").append(endTime);
+            ZonedDateTime zonedEndTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getEnd()), zoneid);
+            sb.append(" - ").append(zonedEndTime.format(DateTimeFormatter.ISO_INSTANT));
         }
         sb.append("]\n");
 
