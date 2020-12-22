@@ -258,7 +258,6 @@ public class ThreadDrivenTokenPool implements TokenPool {
         long wait = activePool + waitingPool;
         activePool = 0L;
         waitingPool = 0L;
-        filler.restart();
         return wait;
     }
 
