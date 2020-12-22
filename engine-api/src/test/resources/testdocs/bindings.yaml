@@ -13,7 +13,3 @@ blocks:
     statements:
      - stmt1: "alpha-beta {alpha} {beta}"
      - stmt2: "alpha-alpha {alpha} {alpha}"
-  - name: using-question-marks
-    statements:
-     - stmt1: "alpha-beta ?alpha ?beta"
-     - stmt2: "alpha-alpha ?alpha ?alpha"

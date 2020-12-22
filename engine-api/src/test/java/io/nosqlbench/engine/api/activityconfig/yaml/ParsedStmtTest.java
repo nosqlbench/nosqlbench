@@ -67,20 +67,4 @@ public class ParsedStmtTest {
         assertThat(parsed1.hasError()).isFalse();
     }
 
-    @Test
-    public void testQuestionMarkAnchors() {
-        StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(3);
-
-        OpTemplate stmtDef0 = block2.getStmts().get(0);
-        ParsedStmt parsed0 = stmtDef0.getParsed();
-        assertThat(parsed0.getMissingBindings()).isEmpty();
-        assertThat(parsed0.hasError()).isFalse();
-
-        OpTemplate stmtDef1 = block2.getStmts().get(1);
-        ParsedStmt parsed1 = stmtDef1.getParsed();
-        assertThat(parsed1.getMissingBindings().isEmpty());
-        assertThat(parsed1.hasError()).isFalse();
-        assertThat(parsed1.getSpecificBindings()).containsOnlyKeys("alpha");
-    }
-
 }

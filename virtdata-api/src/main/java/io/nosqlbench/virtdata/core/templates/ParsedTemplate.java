@@ -66,28 +66,22 @@ import java.util.stream.StreamSupport;
 public class ParsedTemplate {
 
     /**
-     * The default patterns match one of two forms:
-     * <UL>
-     * <LI>an opening curly brace, followed by a word character, followed by any contiguous
+     * The canonical template pattern follows the pattern of an opening curly brace,
+     * followed by a word character, followed by any contiguous
      * combination of dashes, underscores, digits, words, and dots, followed by
      * a closing curly brace.</LI>
-     * <LI>A question mark, followed by a word character, followed by any contiguous
-     * combination of dashes, underscores, digits, word characters, or dots.</LI>
-     * </UL>
      *
      * <H2>Examples</H2>
      * <pre>
      * {var1}
      * {var2.var3__-var5}
-     * ?var6
-     * ?var7.__var8-var9
      * </pre>
      */
-    private final static Pattern[] DEFAULT_PATTERNS = new Pattern[]{
-            Pattern.compile("\\{(?<anchor>\\w+[-_\\d\\w.]*)}"),
-            Pattern.compile("\\?(?<anchor>\\w+[-_\\d\\w.]*)")
-    };
-    private final static Logger logger  = LogManager.getLogger(ParsedTemplate.class);
+
+    public final static Pattern STANDARD_ANCHOR = Pattern.compile("\\{(?<anchor>\\w+[-_\\d\\w.]*)}");
+    public final static Pattern EXTENDED_ANCHOR = Pattern.compile("\\{\\{(?<anchor>.*?)}}");
+
+    private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
     private final Pattern[] patterns;
     // Spans is an even-odd form of (literal, variable, ..., ..., literal)
     private final String rawtemplate;
@@ -105,7 +99,7 @@ public class ParsedTemplate {
      * @param providedBindings The bindings that are provided for the template to be parsed
      */
     public ParsedTemplate(String rawtemplate, Map<String, String> providedBindings) {
-        this(rawtemplate, providedBindings, DEFAULT_PATTERNS);
+        this(rawtemplate, providedBindings, STANDARD_ANCHOR, EXTENDED_ANCHOR);
     }
 
     /**
@@ -114,7 +108,7 @@ public class ParsedTemplate {
      *
      * <H4>Overriding Patterns</H4>
      * <P>
-     * If patterns are not provided then {@link ParsedTemplate#DEFAULT_PATTERNS} are used, which includes
+     * If patterns are not provided then {@link ParsedTemplate#STANDARD_ANCHOR} are used, which includes
      * the ability to match {var1} and ?var1 style anchors. If patterns are
      * provided, then they must be compatible with the {@link Matcher#find()} method, and must also
      * have a named group with the name 'anchor', as in (?&lt;anchor&gt;...)
@@ -196,37 +190,7 @@ public class ParsedTemplate {
         }
 
         return spans.toArray(new String[0]);
-//
-//        //Matcher m = stmtToken.matcher(statement);
-//        int lastMatch = 0;
-//        String remainder = "";
-//        while (m.find(lastMatch)) {
-//            String pre = statement.substring(lastMatch, m.start());
-//
-//            String form1 = m.group(1);
-//            String form2 = m.group(2);
-//            String tokenName = (form1 != null && !form1.isEmpty()) ? form1 : form2;
-//            lastMatch = m.end();
-//            spans.add(pre);
-//
-//            if (extraBindings.contains(tokenName)) {
-//                anchors.add(tokenName);
-//                bindspecs.add(stmtDef.getBindings().get(tokenName));
-//                usedAnchors.add(tokenName);
-////                specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
-//            } else {
-//                missingBindings.add(tokenName);
-//            }
-//        }
-//        usedAnchors.forEach(extraBindings::remove);
-//
-//        if (lastMatch >= 0) {
-//            spans.add(statement.substring(lastMatch));
-//        } else {
-//            spans.add(statement);
-//        }
-//
-//        return spans.toArray(new String[0]);
+
     }
 
     public String toString() {
