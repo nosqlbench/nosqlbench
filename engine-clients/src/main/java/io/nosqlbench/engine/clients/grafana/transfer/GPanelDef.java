@@ -12,7 +12,7 @@ public class GPanelDef {
     Map<String, Object> fieldConfig;
     Map<String, String> options;
     String pluginVersion;
-    List<Map<String, String>> targets;
+    List<GTarget> targets;
     String title;
     String type;
     String datasource;
@@ -82,11 +82,11 @@ public class GPanelDef {
         this.pluginVersion = pluginVersion;
     }
 
-    public List<Map<String, String>> getTargets() {
+    public List<GTarget> getTargets() {
         return targets;
     }
 
-    public void setTargets(List<Map<String, String>> targets) {
+    public void setTargets(List<GTarget> targets) {
         this.targets = targets;
     }
 
@@ -116,5 +116,74 @@ public class GPanelDef {
 
     public String toString() {
         return id + ":'" + title + "'";
+    }
+
+    public static class GTarget {
+        String queryType;
+        String refId;
+        String expr;
+        String interval;
+        String legendFormat;
+        boolean hide;
+
+        public String getQueryType() {
+            return queryType;
+        }
+
+        public void setQueryType(String queryType) {
+            this.queryType = queryType;
+        }
+
+        public String getRefId() {
+            return refId;
+        }
+
+        public void setRefId(String refId) {
+            this.refId = refId;
+        }
+
+        public String getExpr() {
+            return expr;
+        }
+
+        public void setExpr(String expr) {
+            this.expr = expr;
+        }
+
+        public String getInterval() {
+            return interval;
+        }
+
+        public void setInterval(String interval) {
+            this.interval = interval;
+        }
+
+        public String getLegendFormat() {
+            return legendFormat;
+        }
+
+        public void setLegendFormat(String legendFormat) {
+            this.legendFormat = legendFormat;
+        }
+
+        public boolean isHide() {
+            return hide;
+        }
+
+        public void setHide(boolean hide) {
+            this.hide = hide;
+        }
+
+        @Override
+        public String toString() {
+            return "GTarget{" +
+                    "queryType='" + queryType + '\'' +
+                    ", refId='" + refId + '\'' +
+                    ", expr='" + expr + '\'' +
+                    ", interval='" + interval + '\'' +
+                    ", legendFormat='" + legendFormat + '\'' +
+                    ", hide=" + hide +
+                    '}';
+        }
     }
 }

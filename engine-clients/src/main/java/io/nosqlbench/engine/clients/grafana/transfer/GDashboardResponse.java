@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.clients.grafana.transfer;
 
-public class GDashboardMeta {
+public class GDashboardResponse {
 
     GMeta meta;
     GDashboard dashboard;

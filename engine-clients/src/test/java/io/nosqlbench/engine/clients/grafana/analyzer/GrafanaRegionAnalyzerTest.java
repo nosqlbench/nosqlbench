@@ -9,9 +9,10 @@ public class GrafanaRegionAnalyzerTest {
     public void testGetQueries() {
         GrafanaRegionAnalyzer gra = new GrafanaRegionAnalyzer();
         gra.setBaseUrl("http://44.242.139.57:3000/");
-        GDashboard db = GDashboard.fromFile("examples/db.json");
 
-        gra.getQueries(db);
+        GDashboard db = gra.getDashboard("aIIX1f6Wz");
+        //GDashboard db = GDashboard.fromFile("examples/db.json");
+//        gra.getQueries(db);
 
     }
 

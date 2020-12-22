@@ -1,11 +1,10 @@
 package io.nosqlbench.engine.clients.grafana.analyzer;
 
+import io.nosqlbench.engine.clients.grafana.GRangeResult;
+import io.nosqlbench.engine.clients.grafana.GStitcher;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
-import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
-import io.nosqlbench.engine.clients.grafana.transfer.GDashboard;
-import io.nosqlbench.engine.clients.grafana.transfer.GPanelDef;
-import io.nosqlbench.engine.clients.grafana.transfer.GSnapshotInfo;
+import io.nosqlbench.engine.clients.grafana.transfer.*;
 import io.nosqlbench.nb.api.SystemId;
 
 import java.nio.file.Path;
@@ -14,6 +13,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -87,12 +88,55 @@ public class GrafanaRegionAnalyzer implements Runnable {
     }
 
     public void getQueries(GDashboard db) {
-        List<GPanelDef> graphs = db.getPanels().stream()
+
+        List<GDataSource> datasources = getClient().getDatasources();
+
+        List<GPanelDef> mainpanels = db.getPanels().stream()
                 .filter(p -> p.getType().equals("graph"))
                 .collect(Collectors.toList());
-        System.out.println(graphs.size() + " graphs...");
+
+        Map<String, Set<String>> tplValues = getClient().resolveAllTplValues(
+                db.getTemplating().getList(),
+                db.getTime().getFrom(),
+                db.getTime().getTo());
+        GStitcher stitcher = new GStitcher(tplValues);
+
+
+        for (GPanelDef mainpanel : mainpanels) {
+            long id = mainpanel.getId();
+            String title = mainpanel.getTitle();
+            String description = mainpanel.getDescription();
+
+            List<GPanelDef> panels = mainpanel.getPanels();
+            String datasource = mainpanel.getDatasource();
+            Map<String, Object> fieldConfig = mainpanel.getFieldConfig();
+            Map<String, String> options = mainpanel.getOptions();
+            List<GPanelDef.GTarget> targets = mainpanel.getTargets();
+            System.out.println("targets:\n" + targets);
+
+            for (GPanelDef.GTarget target : targets) {
+                String expr = target.getExpr();
+                expr = stitcher.stitchRegex(expr);
+//                expr = GStitcher.resolve(expr,tplValues,GStitcher.Regex);
+                System.out.println("expr now:" + expr);
+                GRangeResult result = getClient().doRangeQuery(mainpanel.getDatasource(), expr, db.getTime().getFrom(), db.getTime().getTo());
+//                GQueryResult gqr = getClient().doProxyQuery(mainpanel.getDatasource(), expr, new TypeToken<GQueryResult>() {});
+                System.out.println(result);
+            }
+
+            //System.out.println(mainpanel);
+        }
+        System.out.println(mainpanels.size() + " graphs...");
+
+        //http://44.242.139.57:3000/api/datasources/proxy/1/
+        // api/v1/query_range?query= result{
+        //  type="avg_rate",
+        //  avg_of="1m",
+        //  alias=~"(keyvalue_default_main|keyvalue_default_rampup|keyvalue_default_schema|keyvalue_main_001
+        // |keyvalue_rampup_001|keyvalue_schema_001)"}&start=1607996100&end=1608600900&step=300
 
     }
+
 
     @Override
     public void run() {
@@ -127,4 +171,7 @@ public class GrafanaRegionAnalyzer implements Runnable {
         System.out.println("end");
     }
 
+    public GDashboard getDashboard(String dbUid) {
+        return getClient().getDashboardByUid(dbUid).getDashboard();
+    }
 }

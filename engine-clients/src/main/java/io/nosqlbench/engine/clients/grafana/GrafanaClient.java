@@ -5,18 +5,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.engine.clients.grafana.annotator.GrafanaMetricsAnnotator;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
+import io.nosqlbench.engine.clients.prometheus.*;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @see <a href="https://grafana.com/docs/grafana/latest/http_api/annotations/">Grafana Annotations API Docs</a>
@@ -25,6 +29,7 @@ public class GrafanaClient {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final GrafanaClientConfig config;
+    private List<GDataSource> datasources;
 
     public GrafanaClient(GrafanaClientConfig config) {
         this.config = config;
@@ -273,7 +278,7 @@ public class GrafanaClient {
     }
 
 
-    public GDashboardMeta getDashboardByUid(String uid) {
+    public GDashboardResponse getDashboardByUid(String uid) {
         HttpClient client = config.newClient();
         HttpRequest.Builder rqb = config.newRequest("api/dashboards/uid/" + uid);
         rqb = rqb.GET();
@@ -290,7 +295,7 @@ public class GrafanaClient {
         }
         String body = response.body();
 
-        GDashboardMeta dashboardMeta = gson.fromJson(body, GDashboardMeta.class);
+        GDashboardResponse dashboardMeta = gson.fromJson(body, GDashboardResponse.class);
         return dashboardMeta;
     }
 
@@ -511,4 +516,174 @@ public class GrafanaClient {
         return result;
     }
 
+    public <T> T doProxyQuery(String dsname, String path, String query, TypeToken<? extends T> asType) {
+        GDataSource datasource = getCachedDatasource(dsname);
+        long dsid = datasource.getId();
+        String composedQuery = path;
+        if (query != null && !query.isBlank()) {
+            composedQuery = composedQuery + "?" + query;
+        }
+
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb =
+                config.newRequest("api/datasources/proxy/" + dsid + "/" + composedQuery);
+        rqb.setHeader("Accept", "application/json");
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Executing proxy query failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body() + " for datasource '" + dsid + "' and query '" + query + "'");
+        }
+        String body = response.body();
+        T result = gson.fromJson(body, asType.getType());
+        return result;
+    }
+
+    private GDataSource getCachedDatasource(String dsname) {
+        return getCachedDatasources().stream()
+                .filter(gd -> gd.getName().equals(dsname))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public Map<String, Set<String>> resolveAllTplValues(List<GTemplate> tpls, String timeStart, String timeEnd) {
+        Map<String, Set<String>> allTplValues = new HashMap<>();
+        for (GTemplate gTemplate : tpls) {
+            Set<String> strings = resolveTplValues(gTemplate, timeStart, timeEnd, getCachedDatasources());
+            allTplValues.put(gTemplate.getName(), strings);
+        }
+        return allTplValues;
+    }
+
+
+    public Set<String> resolveTplValues(GTemplate tpl, String timeStart, String timeEnd, List<GDataSource> dss) {
+        Set<String> resolved = new HashSet<>();
+
+        List<String> values = tpl.getCurrent().getValues();
+
+        if (values.size() == 1 && values.get(0).equals("$__all")) {
+            if (tpl.getAllValue() != null && !tpl.getAllValue().isBlank()) {
+                resolved.add(tpl.getAllValue());
+            } else {
+
+
+                String dsname = tpl.getDatasource();
+                Optional<GDataSource> dso = dss.stream().filter(n -> n.getName().equals(dsname)).findFirst();
+                GDataSource ds = dso.orElseThrow();
+
+                String query = tpl.getQuery();
+                String formatted = formatSeriesQuery(ds.getType(), query, timeStart, timeEnd);
+
+                if (ds.getType().equals("prometheus")) {
+                    long startSpec = GTimeUnit.epochSecondsFor(timeStart);
+                    long endSpec = GTimeUnit.epochSecondsFor(timeEnd);
+                    String q = "api/v1/series?match[]=" + URLEncoder.encode(tpl.getQuery()) +
+                            "&start=" + startSpec +
+                            "&end=" + endSpec;
+                    PromSeriesLookupResult psr = doProxyQuery("prometheus", "api/v1/series", q, new TypeToken<PromSeriesLookupResult>() {
+                    });
+                    for (PromSeriesLookupResult.Element elem : psr.getData()) {
+                        String elementSpec = elem.toString();
+                        String regex = tpl.getRegex();
+                        if (regex != null && !regex.isBlank()) {
+                            if (regex.startsWith("/")) {
+                                regex = regex.substring(1, regex.length() - 2);
+                            }
+                            Pattern p = Pattern.compile(regex);
+                            Matcher m = p.matcher(elementSpec);
+                            if (m.find()) {
+                                String group = m.group(1);
+                                resolved.add(group);
+                            }
+                        } else {
+                            resolved.add(elem.toString());
+                        }
+                    }
+
+                } else {
+                    throw new RuntimeException("datasource type not supported yet for template values: '" + ds.getType() + "'");
+                }
+            }
+        } else {
+            for (String value : tpl.getCurrent().getValues()) {
+                resolved.add(value);
+            }
+        }
+
+        return resolved;
+    }
+
+    private String formatSeriesQuery(String type, String query, String startTime, String endTime) {
+        if (type.equals("prometheus")) {
+            long startSpec = GTimeUnit.epochSecondsFor(startTime);
+            long endSpec = GTimeUnit.epochSecondsFor(endTime);
+            return "api/v1/series?match[]=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&start=" + startSpec +
+                    "&end=" + endSpec;
+        } else {
+            throw new RuntimeException("Unknown query target type '" + type + "'");
+        }
+    }
+
+    public List<GDataSource> getDatasources() {
+        HttpClient client = config.newClient();
+        HttpRequest.Builder rqb = config.newRequest("api/datasources");
+        rqb = rqb.GET();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new RuntimeException("Getting datasources failed with status code " + response.statusCode() +
+                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+        }
+        String body = response.body();
+
+        Type dsListType = new TypeToken<List<GDataSource>>() {
+        }.getType();
+        List<GDataSource> dataSourcesList = gson.fromJson(body, dsListType);
+        return dataSourcesList;
+    }
+
+    private List<GDataSource> getCachedDatasources() {
+        if (datasources == null) {
+            datasources = getDatasources();
+        }
+        return datasources;
+    }
+
+    public GRangeResult doRangeQuery(String datasource, String expr, String startSpec, String endSpec) {
+        GDataSource ds = getCachedDatasource(datasource);
+        if (ds.getType().equals("prometheus")) {
+            long start = GTimeUnit.epochSecondsFor(startSpec);
+            long end = GTimeUnit.epochSecondsFor(endSpec);
+            // http://44.242.139.57:3000/api/datasources/proxy/1/api/v1/query_range?query=result%7Btype%3D%22avg_rate%22%2Cavg_of%3D%221m%22%2Calias%3D~%22keyvalue_main_001%22%7D&start=1608534000&end=1608620400&step=300
+            // http://44.242.139.57:3000/api/datasources/proxy/1/api/v1/query_range?query=result%7Btype%3D%22avg_rate%22%2Cavg_of%3D%221m%22%2Calias%3D%7E%22%28.*%29%22%7D&start=1608611971&end=1608622771&step=300
+            String path = "api/v1/query_range?query=" +
+                    URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300";
+
+            PromQueryResult<PMatrixData> vectorData = doProxyQuery(
+                    datasource,
+                    "api/v1/query_range",
+                    "query=" + URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300",
+                    new TypeToken<PromQueryResult<PMatrixData>>() {
+                    });
+            System.out.println(vectorData);
+            return null;
+        } else {
+            throw new RuntimeException("data source " + datasource + " is not yet supported.");
+        }
+
+
+        // TODO: Distinguish between datasources named "prometheus" and  data source types "prometheus"
+        // TODO: Figure out how to set step equivalently
+    }
 }

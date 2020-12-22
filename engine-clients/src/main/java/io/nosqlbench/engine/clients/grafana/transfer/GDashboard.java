@@ -25,7 +25,7 @@ public class GDashboard {
     long schemaVersion;
     String style;
     List<Object> tags;
-    Map<String, Object> templating;
+    GTemplating templating;
     Time time;
     Map<String, List<String>> timepicker;
     String timezone;
@@ -129,11 +129,11 @@ public class GDashboard {
         this.tags = tags;
     }
 
-    public Map<String, Object> getTemplating() {
+    public GTemplating getTemplating() {
         return templating;
     }
 
-    public void setTemplating(Map<String, Object> templating) {
+    public void setTemplating(GTemplating templating) {
         this.templating = templating;
     }
 
@@ -185,6 +185,8 @@ public class GDashboard {
 //        URL resource = GDashboard.class.getClassLoader().getResource(path);
 
 
+        String json = null;
+
         try {
             URL url = GDashboard.class.getClassLoader().getResource(path);
             if (url == null) {
@@ -192,7 +194,7 @@ public class GDashboard {
             }
             Path found = Paths.get(url.toURI());
             byte[] bytes = Files.readAllBytes(found);
-            String json = new String(bytes, StandardCharsets.UTF_8);
+            json = new String(bytes, StandardCharsets.UTF_8);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             GDashboard db = gson.fromJson(json, GDashboard.class);
             return db;
