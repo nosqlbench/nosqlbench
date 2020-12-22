@@ -9,7 +9,7 @@ import io.nosqlbench.virtdata.core.bindings.Bindings;
 public class StringBindings implements Binder<String> {
 
     private final StringCompositor compositor;
-    private Bindings bindings;
+    private final Bindings bindings;
 
     public StringBindings(StringCompositor compositor, Bindings bindings) {
         this.compositor = compositor;
@@ -18,12 +18,21 @@ public class StringBindings implements Binder<String> {
 
     /**
      * Call the data mapper bindings, assigning the returned values positionally to the anchors in the string binding.
+     *
      * @param value a long input value
      * @return a new String containing the mapped values
      */
     @Override
     public String bind(long value) {
-        String s = compositor.bindValues(compositor,bindings,value);
+        String s = compositor.bindValues(compositor, bindings, value);
         return s;
+    }
+
+    @Override
+    public String toString() {
+        return "StringBindings{" +
+                "compositor=" + compositor +
+                ", bindings=" + bindings +
+                '}';
     }
 }

@@ -117,8 +117,15 @@ faster, since the request is fully built and cached at startup.
 At a minimum, a **URI** must be provided. These are enough to build a request with.
 All other request fields are optional and have reasonable defaults:
 
-- **uri** - This is the URI that you might put into the URL bar of your browser. There is no
-  default. Example: `https://en.wikipedia.org/wiki/Leonhard_Euler`
+- **uri** - This is the URI that you might put into the URL bar of your
+  browser. There is no default.
+  Example: `https://en.wikipedia.org/wiki/Leonhard_Euler`
+  If the uri contains a question mark '?' as a query delimiter, then all
+  characters after this are automatically URL encoded. This is done for
+  any literal part of the uri. If you use bindings in the uri as
+  in `https://en.wikipedia.org/wiki/{topic}`, then it is up to you to
+  ensure that the values are produced in a valid form for a URI. You can
+  use the `URLEncode()` binding function where needed to achieve this.
 - **method** - An optional request method. If not provided, "GET" is assumed. Any method name will
   work here, even custom ones that are specific to a given target system. No validation is done for
   standard method names, as there is no way to know what method names may be valid.

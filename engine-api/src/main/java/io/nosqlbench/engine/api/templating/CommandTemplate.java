@@ -175,4 +175,13 @@ public class CommandTemplate {
         return this.statics.keySet();
     }
 
+
+    @Override
+    public String toString() {
+        return "CommandTemplate{" +
+                "name='" + name + '\'' +
+                ", statics=" + statics +
+                ", dynamics=" + dynamics +
+                '}';
+    }
 }

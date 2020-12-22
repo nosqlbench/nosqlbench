@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.time.Duration;
@@ -28,11 +29,35 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
                 )
         );
 
+        sanityCheckUri();
         if (propertyTemplate.isStatic()) {
             cachedOp = apply(0);
         } else {
             cachedOp = null;
         }
+
+    }
+
+    // :/?#[]@ !$&'()*+,;=
+
+    /**
+     * Try to catch situations in which the user put invalid characters in some part of the URI.
+     * In this case, the only safe thing to try seems to be to automatically urldecode
+     */
+    private void sanityCheckUri() {
+        Map<String, String> command = propertyTemplate.getCommand(0L);
+        if (command.containsKey("uri")) {
+            String uriSpec = command.get("uri");
+            URI uri = null;
+            try {
+                uri = new URI(uriSpec);
+            } catch (URISyntaxException e) {
+                throw new BasicError(e.getMessage() + ", either use URLEncode in your bindings for values which could " +
+                        "contain invalid URI characters, or modify the static portions of your op template to use the" +
+                        " appropriate encodings.");
+            }
+        }
+
     }
 
     @Override
@@ -95,4 +120,11 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
         return new HttpOp(request, ok_status, ok_body);
     }
 
+    @Override
+    public String toString() {
+        return "ReadyHttpOp{" +
+                "template=" + propertyTemplate +
+                ", cachedOp=" + cachedOp +
+                '}';
+    }
 }

@@ -10,8 +10,8 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpClient;
 import java.util.function.Function;
@@ -54,6 +54,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
         this.sequencer = createOpSequence(ReadyHttpOp::new);
+
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
     }
@@ -97,7 +98,8 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
                     this.activityClient = newClient();
                 }
                 return t -> this.activityClient;
-            default: throw new RuntimeException("unable to recoginize client scope: " + getClientScope());
+            default:
+                throw new RuntimeException("unable to recoginize client scope: " + getClientScope());
         }
     }
 

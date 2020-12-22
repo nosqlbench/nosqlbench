@@ -63,4 +63,12 @@ public class SequencePlanner<T> {
         return new Sequence<>(sequencerType, elements, elementIndex);
     }
 
+    public List<T> getElements() {
+        return elements;
+    }
+
+    public List<Long> getRatios() {
+        return ratios;
+    }
+
 }
