@@ -1,7 +1,15 @@
-- 07800059 move grafana auto-key to grafana client
-- 12acd07f parameterize docker prom tag
-- 8052e64e make docker prom tag configurable
-- bb0884e2 grafana client improvements
-- c83f4d87 prototype metrics summarizer
-- 1d107d87 update nb4 dashboard def
-- trigger release
+- 6dc06d7f (HEAD -> main) fix for #245 with always-on URL encoding of literals
+- f0960c49 deprecate ambiguous binding anchor
+- 89841807 applied counter fix for vue
+- e561b4b8 (origin/main) partial work on dashboard capture
+- 4a8c4cf3 fixup test for ISO Instant formats in annotations
+- 340ccb84 prereleases from main until nb4 is happy
+- 0e1658a5 fix recursion bug after token pool refactoring
+- aaf3acdc use ISO Instant format in annotations
+- b0daae5d report cause of library error if provided
+- 4586627c test data
+- 2450729b allow prom retention to be specified
+- c68c3ce2 partial analyzer progress
+- b6675d6c typos and bug fixes
+- 8e61de61 Update cql.md
+- 0a6bb1fa allow --docker-prom-retention-days with default of 183d
