@@ -133,7 +133,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
             blocks++;
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
             try {
-                wait(maxActivePool / 1000000, (int) maxActivePool % 1000000);
+                wait(maxActivePool / 1000000, 0);
             } catch (InterruptedException ignored) {
             } catch (Exception e) {
                 throw new RuntimeException(e);
