@@ -8,12 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpFormatParser {
 
     public static Map<String, String> parseUrl(String uri) {
         if (uri.matches("http.+")) {
-            return Map.of("uri", rewriteUriWithStaticsEncoded(uri));
+            return Map.of("uri", rewriteExplicitSections(uri));
         }
         return null;
     }
@@ -54,14 +55,14 @@ public class HttpFormatParser {
             throw new BasicError("Request template must have at least a method and a uri: " + methodAndHeaders[0]);
         }
         props.put("method", methodLine[0]);
-        props.put("uri", rewriteUriWithStaticsEncoded(methodLine[1]));
+        props.put("uri", rewriteExplicitSections(methodLine[1]));
 
         if (methodLine.length == 3) {
             String actualVersion = methodLine[2];
             String symbolicVersion = actualVersion
                     .replaceAll("/1.1", "_1_1")
                     .replaceAll("/2.0", "_2")
-                    .replaceAll("/2", "_2");
+                .replaceAll("/2", "_2");
 
             props.put("version", symbolicVersion);
         }
@@ -69,27 +70,37 @@ public class HttpFormatParser {
         return props;
     }
 
-    private static String rewriteUriWithStaticsEncoded(String template) {
-        String[] parts = template.split("\\?", 2);
+    private final static Pattern DOENCODE = Pattern.compile("(URLENCODE|E)\\[\\[(?<data>.+?)\\]\\]");
 
-        if (parts.length == 2) {
-            StringBuilder sb = new StringBuilder();
-            String input = parts[1];
-            Matcher matcher = ParsedTemplate.STANDARD_ANCHOR.matcher(input);
-            int idx = 0;
-            while (matcher.find()) {
-                String pre = input.substring(0, matcher.start());
-                sb.append(URLEncoder.encode(pre, StandardCharsets.UTF_8));
-                sb.append(matcher.group());
-                idx = matcher.end();
-//                matcher.appendReplacement(sb, "test-value" + idx);
-            }
-            sb.append(URLEncoder.encode(input.substring(idx), StandardCharsets.UTF_8));
-            return parts[0] + "?" + sb.toString();
-        } else {
-            return template;
+    private static String rewriteExplicitSections(String template) {
+
+        StringBuilder sb = new StringBuilder();
+        Matcher matcher = DOENCODE.matcher(template);
+        while (matcher.find()) {
+            String rewrite = matcher.group("data");
+            String encoded = rewriteStaticsOnly(rewrite);
+            matcher.appendReplacement(sb, encoded);
         }
+        matcher.appendTail(sb);
+        return sb.toString();
 
+    }
+
+    private static String rewriteStaticsOnly(String template) {
+
+        StringBuilder sb = new StringBuilder();
+        String input = template;
+        Matcher matcher = ParsedTemplate.STANDARD_ANCHOR.matcher(input);
+        int idx = 0;
+        while (matcher.find()) {
+            String pre = input.substring(0, matcher.start());
+            sb.append(URLEncoder.encode(pre, StandardCharsets.UTF_8));
+            sb.append(matcher.group());
+            idx = matcher.end();
+//                matcher.appendReplacement(sb, "test-value" + idx);
+        }
+        sb.append(URLEncoder.encode(input.substring(idx), StandardCharsets.UTF_8));
+        return sb.toString();
     }
 
 }
