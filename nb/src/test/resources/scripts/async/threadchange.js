@@ -15,7 +15,7 @@
  * /
  */
 
-scenario.start('type=diag;alias=threadchange;cycles=0..100000000;threads=1;interval=2000;modulo=1000000;async=1000');
+scenario.start('type=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;modulo=1000000;async=1000;rate=1000');
 activities.threadchange.threads=1;
 print("threads now " + activities.threadchange.threads);
 print('waiting 500 ms');
