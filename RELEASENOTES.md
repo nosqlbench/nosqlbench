@@ -1,15 +1,4 @@
-- 6dc06d7f (HEAD -> main) fix for #245 with always-on URL encoding of literals
-- f0960c49 deprecate ambiguous binding anchor
-- 89841807 applied counter fix for vue
-- e561b4b8 (origin/main) partial work on dashboard capture
-- 4a8c4cf3 fixup test for ISO Instant formats in annotations
-- 340ccb84 prereleases from main until nb4 is happy
-- 0e1658a5 fix recursion bug after token pool refactoring
-- aaf3acdc use ISO Instant format in annotations
-- b0daae5d report cause of library error if provided
-- 4586627c test data
-- 2450729b allow prom retention to be specified
-- c68c3ce2 partial analyzer progress
-- b6675d6c typos and bug fixes
-- 8e61de61 Update cql.md
-- 0a6bb1fa allow --docker-prom-retention-days with default of 183d
+- 9d5c225c (HEAD -> main) explicit http url decoding support
+- f0223501 findmax enhancements and docs
+- 41adf588 ignore nanos component of token filler wait
+- 2a23e866 reduce runtime of cranky test
