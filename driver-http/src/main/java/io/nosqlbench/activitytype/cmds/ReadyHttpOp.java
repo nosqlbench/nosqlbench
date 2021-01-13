@@ -12,21 +12,25 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
+import java.util.regex.Pattern;
 
 public class ReadyHttpOp implements LongFunction<HttpOp> {
 
     private final CommandTemplate propertyTemplate;
+    public static final String DEFAULT_OK_BODY = ".+?";
+    public static final String DEFAULT_OK_STATUS = "2..";
 
     // only populated if there is no value which is an actual bindings template
     private final HttpOp cachedOp;
 
     public ReadyHttpOp(OpTemplate stmtDef) {
         propertyTemplate = new CommandTemplate(stmtDef,
-                List.of(
-                        HttpFormatParser::parseUrl,
-                        HttpFormatParser::parseInline
-                )
+            List.of(
+                HttpFormatParser::parseUrl,
+                HttpFormatParser::parseInline
+            )
         );
 
         sanityCheckUri();
@@ -83,7 +87,7 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
         if (cmd.containsKey("version")) {
             String versionName = cmd.remove("version")
                     .replaceAll("/1.1", "_1_1")
-                    .replaceAll("/2.0", "_2");
+                .replaceAll("/2.0", "_2");
             HttpClient.Version version = HttpClient.Version.valueOf(versionName);
             builder.version(version);
         }
@@ -93,8 +97,8 @@ public class ReadyHttpOp implements LongFunction<HttpOp> {
             builder.uri(uri);
         }
 
-        String ok_status = cmd.remove("ok-status");
-        String ok_body = cmd.remove("ok-body");
+        Pattern ok_status = Pattern.compile(Optional.ofNullable(cmd.remove("ok-status")).orElse(DEFAULT_OK_STATUS));
+        Pattern ok_body = Optional.ofNullable(cmd.remove("ok-body")).map(Pattern::compile).orElse(null);
 
         String timeoutStr = cmd.remove("timeout");
         if (timeoutStr != null) {

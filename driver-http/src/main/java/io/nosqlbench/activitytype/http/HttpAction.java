@@ -90,12 +90,12 @@ public class HttpAction implements SyncAction {
             try {
                 response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
                 if (httpOp.ok_status!=null) {
-                    if (!String.valueOf(response.statusCode()).matches(httpOp.ok_status)) {
-                        throw new InvalidStatusCodeException(cycleValue,httpOp.ok_status,response.statusCode());
+                    if (!httpOp.ok_status.matcher(String.valueOf(response.statusCode())).matches()) {
+                        throw new InvalidStatusCodeException(cycleValue, httpOp.ok_status, response.statusCode());
                     }
                 }
                 if (httpOp.ok_body!=null) {
-                    if (!response.body().matches(httpOp.ok_body)) {
+                    if (!httpOp.ok_body.matcher(response.body()).matches()) {
                         throw new InvalidResponseBodyException(cycleValue, httpOp.ok_body, response.body());
                     }
                 }
