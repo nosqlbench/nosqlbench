@@ -25,6 +25,9 @@ import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -54,28 +57,25 @@ public class ScenarioResult {
         logger.info("-- SCENARIO TOOK " + getElapsedMillis() + "ms --");
     }
 
-    public void reportToLog() {
-        logger.debug("-- BEGIN METRICS DETAIL --");
-        Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-                .withLoggingLevel(Log4JMetricsReporter.LoggingLevel.DEBUG)
-                .convertDurationsTo(TimeUnit.MICROSECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(MetricFilter.ALL)
-                .outputTo(logger)
-                .build();
-        reporter.report();
-        logger.info("-- END METRICS DETAIL --");
+    public String getSummaryReport() {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(os);
+        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+            .convertDurationsTo(TimeUnit.MICROSECONDS)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .filter(MetricFilter.ALL)
+            .outputTo(ps)
+            .build();
+        consoleReporter.report();
 
+        ps.flush();
+        String result = os.toString(StandardCharsets.UTF_8);
+        return result;
     }
 
     public void reportToConsole() {
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-                .convertDurationsTo(TimeUnit.MICROSECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(MetricFilter.ALL)
-                .outputTo(System.out)
-                .build();
-        consoleReporter.report();
+        String summaryReport = getSummaryReport();
+        System.out.println(summaryReport);
     }
 
 
@@ -99,5 +99,22 @@ public class ScenarioResult {
 
     public long getElapsedMillis() {
         return endedAt - startedAt;
+    }
+
+    public void reportTo(PrintStream out) {
+        out.println(getSummaryReport());
+    }
+
+    public void reportToLog() {
+        logger.debug("-- BEGIN METRICS DETAIL --");
+        Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+            .withLoggingLevel(Log4JMetricsReporter.LoggingLevel.DEBUG)
+            .convertDurationsTo(TimeUnit.MICROSECONDS)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .filter(MetricFilter.ALL)
+            .outputTo(logger)
+            .build();
+        reporter.report();
+        logger.info("-- END METRICS DETAIL --");
     }
 }

@@ -64,7 +64,6 @@ public class ScriptIntegrationTests {
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
-        scenarioResult.reportToLog();
         return scenarioResult;
     }
 

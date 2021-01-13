@@ -76,6 +76,7 @@ public class NBCLIOptions {
     private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String REPORT_CSV_TO = "--report-csv-to";
+    private static final String REPORT_SUMMARY_TO = "--report-summary-to";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOG_HISTOGRAMS = "--log-histograms";
@@ -149,6 +150,7 @@ public class NBCLIOptions {
     private final List<String> statePathAccesses = new ArrayList<>();
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
     private String dockerPromRetentionDays = "183d";
+    private String reportSummaryTo = "stdout:60";
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -161,6 +163,10 @@ public class NBCLIOptions {
 
     public String getDockerPromRetentionDays() {
         return this.dockerPromRetentionDays;
+    }
+
+    public String getReportSummaryTo() {
+        return reportSummaryTo;
     }
 
     public enum Mode {
@@ -489,6 +495,10 @@ public class NBCLIOptions {
                 case REPORT_CSV_TO:
                     arglist.removeFirst();
                     reportCsvTo = arglist.removeFirst();
+                    break;
+                case REPORT_SUMMARY_TO:
+                    arglist.removeFirst();
+                    reportSummaryTo = arglist.removeFirst();
                     break;
                 case LIST_DRIVERS:
                 case LIST_ACTIVITY_TYPES:
@@ -840,6 +850,5 @@ public class NBCLIOptions {
         }
         return progressSpec;
     }
-
 
 }

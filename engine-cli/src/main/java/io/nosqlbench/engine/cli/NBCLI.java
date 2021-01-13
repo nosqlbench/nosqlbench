@@ -29,8 +29,8 @@ import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import joptsimple.internal.Strings;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
 import java.io.BufferedReader;
@@ -40,7 +40,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
@@ -332,14 +334,15 @@ public class NBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(
-                sessionName,
-                options.getScriptFile(),
-                options.getScriptingEngine(),
-                options.getProgressSpec(),
-                options.wantsGraaljsCompatMode(),
-                options.wantsStackTraces(),
-                options.wantsCompileScript(),
-                String.join("\n", args)
+            sessionName,
+            options.getScriptFile(),
+            options.getScriptingEngine(),
+            options.getProgressSpec(),
+            options.wantsGraaljsCompatMode(),
+            options.wantsStackTraces(),
+            options.wantsCompileScript(),
+            options.getReportSummaryTo(),
+            String.join("\n", args)
         );
         ScriptBuffer buffer = new BasicScriptBuffer()
                 .add(options.getCommands().toArray(new Cmd[0]));

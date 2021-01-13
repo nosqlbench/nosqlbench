@@ -102,14 +102,15 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         buffer.add(cmdList.toArray(new Cmd[0]));
 
         Scenario scenario = new Scenario(
-                rq.getScenarioName(),
-                "",
-                Scenario.Engine.Graalvm,
-                "disabled",
-                false,
-                true,
-                false,
-                cmdList.toString());
+            rq.getScenarioName(),
+            "",
+            Scenario.Engine.Graalvm,
+            "disabled",
+            false,
+            true,
+            false,
+            "",
+            cmdList.toString());
 
         scenario.addScriptText(buffer.getParsedScript());
 

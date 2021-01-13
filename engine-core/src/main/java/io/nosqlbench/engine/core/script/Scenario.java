@@ -38,8 +38,7 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +56,7 @@ import java.util.stream.Collectors;
 public class Scenario implements Callable<ScenarioResult> {
 
     private final String commandLine;
+    private final String reportSummaryTo;
     private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
@@ -84,7 +84,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScriptParams scenarioScriptParams;
     private String scriptfile;
     private Engine engine = Engine.Graalvm;
-    private boolean wantsStackTraces=false;
+    private boolean wantsStackTraces = false;
     private boolean wantsCompiledScript;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;
@@ -95,14 +95,15 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public Scenario(
-            String scenarioName,
-            String scriptfile,
-            Engine engine,
-            String progressInterval,
-            boolean wantsGraaljsCompatMode,
-            boolean wantsStackTraces,
-            boolean wantsCompiledScript,
-            String commandLine) {
+        String scenarioName,
+        String scriptfile,
+        Engine engine,
+        String progressInterval,
+        boolean wantsGraaljsCompatMode,
+        boolean wantsStackTraces,
+        boolean wantsCompiledScript,
+        String reportSummaryTo,
+        String commandLine) {
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
         this.engine = engine;
@@ -110,6 +111,7 @@ public class Scenario implements Callable<ScenarioResult> {
         this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
         this.wantsStackTraces = wantsStackTraces;
         this.wantsCompiledScript = wantsCompiledScript;
+        this.reportSummaryTo = reportSummaryTo;
         this.commandLine = commandLine;
     }
 
@@ -124,6 +126,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public Scenario(String name, Engine engine) {
         this.scenarioName = name;
+        this.reportSummaryTo = "CONSOLE";
         this.engine = engine;
         this.commandLine = "";
     }
@@ -244,12 +247,12 @@ public class Scenario implements Callable<ScenarioResult> {
 
         startedAtMillis = System.currentTimeMillis();
         Annotators.recordAnnotation(
-                Annotation.newBuilder()
-                        .session(this.scenarioName)
-                        .now()
-                        .layer(Layer.Scenario)
-                        .detail("engine", this.engine.toString())
-                        .build()
+            Annotation.newBuilder()
+                .session(this.scenarioName)
+                .now()
+                .layer(Layer.Scenario)
+                .detail("engine", this.engine.toString())
+                .build()
         );
         init();
         logger.debug("Running control script for " + getScenarioName() + ".");
@@ -268,17 +271,17 @@ public class Scenario implements Callable<ScenarioResult> {
 
                         String filename = scriptfile.replace("_SESSIONNAME_", scenarioName);
                         logger.debug("-> invoking main scenario script (" +
-                                "interpreted from " + filename +")");
+                            "interpreted from " + filename + ")");
                         Path written = Files.write(
-                                Path.of(filename),
-                                script.getBytes(StandardCharsets.UTF_8),
-                                StandardOpenOption.TRUNCATE_EXISTING,
-                                StandardOpenOption.CREATE
+                            Path.of(filename),
+                            script.getBytes(StandardCharsets.UTF_8),
+                            StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.CREATE
                         );
                         BufferedReader reader = Files.newBufferedReader(written);
                         scriptEngine.eval(reader);
                         logger.debug("<- scenario completed (interpreted " +
-                                "from " + filename + ")");
+                            "from " + filename + ")");
                     } else {
                         logger.debug("-> invoking main scenario script (interpreted)");
                         result = scriptEngine.eval(script);
@@ -331,12 +334,12 @@ public class Scenario implements Callable<ScenarioResult> {
 
         // We report the scenario state via annotation even for short runs
         Annotation annotation = Annotation.newBuilder()
-                .session(this.scenarioName)
-                .interval(this.startedAtMillis, endedAtMillis)
-                .layer(Layer.Scenario)
-                .label("state", this.state.toString())
-                .detail("command_line", this.commandLine)
-                .build();
+            .session(this.scenarioName)
+            .interval(this.startedAtMillis, endedAtMillis)
+            .layer(Layer.Scenario)
+            .label("state", this.state.toString())
+            .detail("command_line", this.commandLine)
+            .build();
 
         Annotators.recordAnnotation(annotation);
 
@@ -353,7 +356,47 @@ public class Scenario implements Callable<ScenarioResult> {
     public ScenarioResult call() {
         run();
         String iolog = scriptEnv.getTimedLog();
-        return new ScenarioResult(iolog, this.startedAtMillis, this.endedAtMillis);
+        ScenarioResult result = new ScenarioResult(iolog, this.startedAtMillis, this.endedAtMillis);
+
+        result.reportToLog();
+
+        Optional.ofNullable(getSummaryDestination(reportSummaryTo, result.getElapsedMillis()))
+            .ifPresent(result::reportTo);
+
+        return result;
+    }
+
+    private PrintStream getSummaryDestination(String reportSummaryTo, long elapsedMillis) {
+        if (reportSummaryTo != null && !reportSummaryTo.isBlank()) {
+            String[] split = reportSummaryTo.split(":", 2);
+            String summaryTo = split[0];
+            long summaryWhen = split.length == 2 ? Long.parseLong(split[1]) * 1000L : 60000L;
+            if (elapsedMillis > summaryWhen) {
+                PrintStream out = null;
+                switch (summaryTo.toLowerCase()) {
+                    case "console":
+                    case "stdout":
+                        return System.out;
+                    case "stderr":
+                        return System.err;
+                    default:
+                        String outName = summaryTo
+                            .replaceAll("_session_", getScenarioName())
+                            .replaceAll("_scenario_", getScenarioName());
+                        try {
+                            out = new PrintStream(new FileOutputStream(outName));
+                            return out;
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                }
+            } else {
+                logger.info("Metrics suppressed because scenario was less than " + summaryWhen + "ms long.");
+                logger.info("Metrics data is not reliable for short sampling periods.");
+                logger.info("To get metrics on console, run a longer scenario.");
+            }
+        }
+        return null;
     }
 
     @Override
@@ -405,6 +448,10 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public void enableCharting() {
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+    }
+
+    public String getReportSummaryTo() {
+        return reportSummaryTo;
     }
 }
 

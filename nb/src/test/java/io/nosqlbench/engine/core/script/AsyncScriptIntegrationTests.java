@@ -69,7 +69,6 @@ public class AsyncScriptIntegrationTests {
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
-        scenarioResult.reportToLog();
         return scenarioResult;
     }
 
@@ -199,13 +198,11 @@ public class AsyncScriptIntegrationTests {
     @Test
     public void testAwaitFinished() {
         ScenarioResult scenarioResult = runScenario("awaitfinished");
-        scenarioResult.reportToLog();
     }
 
     @Test
     public void testStartStop() {
         ScenarioResult scenarioResult = runScenario("startstopdiag");
-        scenarioResult.reportToLog();
         int startedAt = scenarioResult.getIOLog().indexOf("starting activity teststartstopdiag");
         int stoppedAt = scenarioResult.getIOLog().indexOf("stopped activity teststartstopdiag");
         assertThat(startedAt).isGreaterThan(0);
