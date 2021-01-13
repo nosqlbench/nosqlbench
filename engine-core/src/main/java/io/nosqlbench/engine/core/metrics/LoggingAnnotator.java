@@ -17,8 +17,7 @@ import java.util.Map;
 @Service(value = Annotator.class, selector = "log")
 public class LoggingAnnotator implements Annotator, ConfigAware {
 
-    private final static Logger logger = LogManager.getLogger("ANNOTATORS");
-    private final static Logger annotationsLog = LogManager.getLogger("ANNOTATIONS");
+    private final static Logger annotatorLog = LogManager.getLogger("ANNOTATION");
     private Level level;
 
     private final Map<String, String> tags = new LinkedHashMap<>();
@@ -29,7 +28,7 @@ public class LoggingAnnotator implements Annotator, ConfigAware {
     @Override
     public void recordAnnotation(Annotation annotation) {
         String inlineForm = annotation.asJson();
-        annotationsLog.log(level, inlineForm);
+        annotatorLog.log(level, inlineForm);
     }
 
     /**
