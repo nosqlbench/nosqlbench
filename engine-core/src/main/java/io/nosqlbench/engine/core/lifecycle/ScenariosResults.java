@@ -43,7 +43,7 @@ public class ScenariosResults {
     }
 
     public String getExecutionSummary() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("executions: ");
         sb.append(scenarioResultMap.size()).append(" scenarios, ");
         sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isEmpty()).count()).append(" normal, ");
         sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isPresent()).count()).append(" errored");
@@ -67,13 +67,6 @@ public class ScenariosResults {
 
             if (oresult != null) {
                 oresult.reportElapsedMillis();
-                if (oresult.getElapsedMillis() >= 60_000) {
-                    oresult.reportToConsole();
-                } else {
-                    logger.info("Metrics suppressed because scenario was less than 1 minute long.");
-                    logger.info("Metrics data is not reliable for short sampling periods.");
-                    logger.info("To get metrics on console, run a longer scenario.");
-                }
             } else {
                 logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
             }
