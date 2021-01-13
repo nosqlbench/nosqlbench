@@ -146,7 +146,7 @@ schema, rampup, main, for example.
 
 - `schematags=phase:schema` - The tag filter for schema statements.
   Findmax will run a schema phase with 1 thread by default.
-- `maintas=phase:main` - The tag filter for the main workload. This is the
-  workload that is started and run in the background for all of the
+- `maintags=phase:main` - The tag filter for the main workload. This is
+  the workload that is started and run in the background for all of the
   sampling windows.
 

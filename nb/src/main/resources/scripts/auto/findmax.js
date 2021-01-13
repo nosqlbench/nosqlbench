@@ -28,7 +28,7 @@ var rate_base = 0;
 var rate_step = 100;
 var rate_incr = 2.0
 
-var min_stride = 100;
+var min_stride = 1000;
 var averageof = 2;
 
 var latency_cutoff = 50.0;
@@ -96,8 +96,8 @@ printf("    Set target rate to %d + %d  * ( %d ^iter) \n", rate_base, rate_step,
 printf("     for each iteration accepted in a row.\n");
 printf("    Schedule %s operations at a time per thread.\n", min_stride);
 printf("    Report the average result of running the findmax search algorithm %d times.\n",averageof);
-printf("    Reject iterations which fail to achieve %2.0f%% of the target rate.\n", testrate_cutoff*100);
-printf("    Reject iterations which fail to achieve %2.0f%% of the best rate.\n",bestrate_cutoff*100);
+printf("    Reject iterations which fail to achieve %2.0f%% of the target rate.\n", testrate_cutoff * 100);
+printf("    Reject iterations which fail to achieve %2.0f%% of the best rate.\n", bestrate_cutoff * 100);
 printf("    Reject iterations which fail to achieve better than %dms response\n", latency_cutoff);
 printf("     at percentile p%f\n", latency_pctile * 100);
 printf("```\n");
@@ -106,33 +106,38 @@ if (latency_pctile > 1.0) {
     latency_pctile = (latency_pctile * 0.01);
 }
 
-var reporter_rate_base = scriptingmetrics.newGauge("findmax.params.rate_base", rate_base + 0.0);
-var reporter_achieved_rate = scriptingmetrics.newGauge("findmax.sampling.achieved_rate", 0.0);
-var reporter_base_rate = scriptingmetrics.newGauge("findmax.target.rate_base", 0.0);
-var reporter_target_rate = scriptingmetrics.newGauge("findmax.target.rate", 0.0);
+var reporter_sampling_baserate = scriptingmetrics.newGauge("findmax.sampling.base_rate", rate_base + 0.0);
+var reporter_sampling_targetrate = scriptingmetrics.newGauge("findmax.sampling.target_rate", 0.0);
+var reporter_sampling_achievedrate = scriptingmetrics.newGauge("findmax.sampling.achieved_rate", 0.0);
+var reporter_sampling_minbound = scriptingmetrics.newGauge("findmax.sampling.lower_rate", 0.0);
+var reporter_sampling_maxbound = scriptingmetrics.newGauge("findmax.sampling.higher_rate", 0.0);
 
 
-var activity_type = "TEMPLATE(activity_type,cql)";
+var reporter_params_baserate = scriptingmetrics.newGauge("findmax.params.base_rate", 0.0);
+var reporter_params_targetrate = scriptingmetrics.newGauge("findmax.params.target_rate", 0.0);
+
+var driver = "TEMPLATE(driver,cql)";
 var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 
-//  CREATE SCHEMA
-schema_activitydef = params.withDefaults({
-    type: activity_type,
-    yaml: yaml_file
-});
-
-schema_activitydef.alias = "findmax_schema";
-schema_activitydef.threads = "1";
-schema_activitydef.tags = "TEMPLATE(schematags,phase:schema)";
-printf("Creating schema with schematags: %s\n",schema_activitydef.tags.toString());
-
-scenario.run(schema_activitydef);
+// //  CREATE SCHEMA
+// schema_activitydef = params.withDefaults({
+//     driver: driver,
+//     yaml: yaml_file
+// });
+//
+// schema_activitydef.alias = "findmax_schema";
+// schema_activitydef.threads = "1";
+// schema_activitydef.tags = "TEMPLATE(schematags,phase:schema)";
+// printf("Creating schema with schematags: %s\n",schema_activitydef.tags.toString());
+//
+// scenario.run(schema_activitydef);
 
 //  START ITERATING ACTIVITY
 activitydef = params.withDefaults({
-    type: activity_type,
+    driver: driver,
     yaml: yaml_file,
-    threads: "auto"
+    threads: "auto",
+    striderate: "10:1.1"
 });
 
 activitydef.alias = "findmax";
@@ -170,6 +175,10 @@ function as_pctile(val) {
 
 scenario.start(activitydef);
 raise_to_min_stride(activities.findmax, min_stride);
+let idlestride = 100.0 / activities.findmax.stride;
+printf("setting to idle speed %f\n", idlestride)
+activities.findmax.striderate = idlestride;
+
 
 // printf("\nwarming up client JIT for 10 seconds... \n");
 // activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
@@ -184,6 +193,7 @@ function raise_to_min_stride(params, min_stride) {
     params.stride = newstride.toFixed(0);
 }
 
+
 function testCycleFun(params) {
 
     var rate_summary = "targeting " + params.target_rate + " ops_s (" + params.base + "+" + params.step + ")";
@@ -195,17 +205,19 @@ function testCycleFun(params) {
 
     var result = {};
 
+    reporter_params_baserate.update(params.base)
+    reporter_params_targetrate.update(params.target_rate)
 
-    reporter_target_rate.update(params.target_rate)
     // printf(" target rate is " + params.target_rate + " ops_s");
     activities.findmax.striderate = "" + (params.target_rate / activities.findmax.stride) + ":1.1:restart";
 
-    if (params.iteration == 1) {
-        printf("\n settling load at base for %ds before active sampling.\n", sample_time);
-        scenario.waitMillis(sample_time * 1000);
-    }
+    // if (params.iteration == 1) {
+    //     printf("\n settling load at base for %ds before active sampling.\n", sample_time);
+    //     scenario.waitMillis(sample_time * 1000);
+    // }
 
     precount = metrics.findmax.cycles.servicetime.count;
+    printf("precount: %d\n", precount);
 
     var snapshot_reader = metrics.findmax.result.deltaReader;
     var old_data = snapshot_reader.getDeltaSnapshot(); // reset
@@ -214,10 +226,17 @@ function testCycleFun(params) {
     scenario.waitMillis(params.sample_seconds * 1000);
 
     postcount = metrics.findmax.cycles.servicetime.count;
+    printf("postcount: %d\n", postcount);
 
     var count = postcount - precount;
     var ops_per_second = count / params.sample_seconds;
-    reporter_achieved_rate.update(ops_per_second);
+
+    printf(" calculated rate from count=%f sample_seconds=%f\n", count, params.sample_seconds);
+
+    reporter_sampling_baserate.update(params.base);
+    reporter_sampling_targetrate.update(params.target_rate)
+    reporter_sampling_achievedrate.update(ops_per_second);
+
     var latency_snapshot = snapshot_reader.getDeltaSnapshot(10000);
 
     return {
@@ -257,7 +276,7 @@ function find_max() {
     var rejected_count = 0;
 
     var base = rate_base;
-    reporter_base_rate.update(base);
+    // reporter_base_rate.update(base);
     var step = rate_step;
 
     var accepted_count = 0;
@@ -278,6 +297,8 @@ function find_max() {
             sample_seconds: actual_sample_time
         };
 
+        reporter_sampling_maxbound.update(lowest_unacceptable_iteration != 0 ? results[lowest_unacceptable_iteration].target_rate : 0.0)
+
         step = step * rate_incr;
         var result = results[iteration] = testCycleFun(params);
         var failed_checks = 0;
@@ -285,7 +306,7 @@ function find_max() {
         // latency check
         printf(" LATENCY        ");
 
-        var latency_summary = result.latency_ms.toFixed(2)+"ms "+as_pctile(latency_pctile);
+        var latency_summary = result.latency_ms.toFixed(2) + "ms " + as_pctile(latency_pctile);
         if (result.latency_ms > latency_cutoff) {
             failed_checks++;
             printf(" FAIL(TOO HIGH) [ %s >", latency_summary)
@@ -333,6 +354,7 @@ function find_max() {
         if (failed_checks == 0) {
             accepted_count++;
             highest_acceptable_iteration = highest_acceptable_of(results, highest_acceptable_iteration, iteration);
+            reporter_sampling_minbound.update(results[highest_acceptable_iteration].target_rate)
             printf(" ---> accepting iteration %d (highest is now %d)\n", iteration, highest_acceptable_iteration);
         } else {
             rejected_count++;
@@ -350,12 +372,14 @@ function find_max() {
 
             highest_acceptable_iteration = highest_acceptable_iteration == 0 ? iteration : highest_acceptable_iteration;
 
+            reporter_sampling_maxbound.update(results[lowest_unacceptable_iteration].target_rate)
+
             var too_fast = results[lowest_unacceptable_iteration].target_rate;
 
 
             if (base + step >= too_fast && results[highest_acceptable_iteration].target_rate + rate_step < too_fast) {
                 base = results[highest_acceptable_iteration].target_rate;
-                reporter_base_rate.update(base);
+                // reporter_base_rate.update(base);
                 step = rate_step;
 
                 var search_summary = "[[ PASS " +
@@ -383,6 +407,9 @@ function find_max() {
 
             } else {
                 printf("\n search completed: selected iteration %d", highest_acceptable_iteration);
+                reporter_sampling_minbound.update(results[highest_acceptable_iteration].target_rate)
+                reporter_sampling_maxbound.update(results[highest_acceptable_iteration].target_rate)
+
                 printf(" with %s ops_s @ %sms %s latency\n",
                     ops_s(highest_acceptable_iteration, results).toFixed(2),
                     (p_ms(highest_acceptable_iteration, results, latency_pctile)).toFixed(2),
