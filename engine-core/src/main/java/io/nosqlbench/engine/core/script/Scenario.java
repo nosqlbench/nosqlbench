@@ -119,9 +119,9 @@ public class Scenario implements Callable<ScenarioResult> {
         this.logsPath = logsPath;
     }
 
-    public Scenario(String name, Engine engine) {
+    public Scenario(String name, Engine engine, String reportSummaryTo) {
         this.scenarioName = name;
-        this.reportSummaryTo = "CONSOLE";
+        this.reportSummaryTo = reportSummaryTo;
         this.engine = engine;
         this.commandLine = "";
         this.logsPath = Path.of("logs");

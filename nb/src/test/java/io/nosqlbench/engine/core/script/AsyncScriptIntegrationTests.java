@@ -52,7 +52,8 @@ public class AsyncScriptIntegrationTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
         ScenariosExecutor e = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
-        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm);
+        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300");
+
         s.addScenarioScriptParams(paramsMap);
 
         ClassLoader cl = AsyncScriptIntegrationTests.class.getClassLoader();

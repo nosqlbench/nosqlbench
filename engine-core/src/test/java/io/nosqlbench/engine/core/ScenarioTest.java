@@ -25,7 +25,7 @@ public class ScenarioTest {
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        Scenario env = new Scenario("testing", Scenario.Engine.Graalvm);
+        Scenario env = new Scenario("testing", Scenario.Engine.Graalvm, "stdout:300");
         env.addScriptText("print('loaded script environment...');\n");
         env.runScenario();
         assertThat(env.getIOLog().get().get(0)).contains("loaded script environment...");
