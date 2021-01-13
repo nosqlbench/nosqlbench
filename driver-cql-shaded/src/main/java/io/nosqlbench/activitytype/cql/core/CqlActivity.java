@@ -150,7 +150,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         // log tag filtering results
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         TagFilter tagFilter = new TagFilter(tagfilter);
-        unfiltered.getStmts().stream().map(tagFilter::matchesTaggedResult).forEach(r -> logger.info(r.getLog()));
+        unfiltered.getStmts().stream().map(tagFilter::matchesTaggedResult).forEach(r -> logger.debug(r.getLog()));
 
         stmts = unfiltered.getStmts(tagfilter);
 

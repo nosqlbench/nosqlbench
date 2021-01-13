@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * generic type is parameterized for Bindings support.</p>
  */
 public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings, ProxyObject {
-    private final static Logger logger = LogManager.getLogger(ParameterMap.class);
+    private final static Logger logger = LogManager.getLogger("PARAMS");
 
 
 //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
@@ -162,7 +162,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     public void set(String paramName, Object newValue) {
         super.put(paramName, String.valueOf(newValue));
-        logger.info("parameter " + paramName + " set to " + newValue);
+        logger.info("setting param " + paramName + "=" + newValue);
         markMutation();
     }
 
@@ -173,7 +173,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     @Override
     public Object put(String name, Object value) {
         Object oldVal = super.put(name, String.valueOf(value));
-        logger.info("parameter " + name + " put to " + value);
+        logger.info("putting param " + name + "=" + value);
 
         markMutation();
         return oldVal;
@@ -190,7 +190,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     @Override
     public Object remove(Object key) {
         Object removed = super.remove(key);
-        logger.info("parameter " + key + " removed");
+        logger.info("removing param: " + key);
 
         markMutation();
         return removed;
@@ -198,7 +198,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public void clear() {
-        logger.info("parameter map cleared:" + toString());
+        logger.debug("parameter map cleared:" + toString());
         super.clear();
 
         markMutation();
@@ -206,7 +206,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        logger.info("getting entry set for " + toString());
+        logger.debug("getting entry set for " + toString());
         return super.entrySet()
                 .stream()
                 .map(e -> new AbstractMap.SimpleEntry<String,Object>(e.getKey(), e.getValue()) {})
@@ -216,7 +216,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     private void markMutation() {
         changeCounter.incrementAndGet();
-        logger.debug("calling " + listeners.size() + " listeners.");
+        logger.trace("calling " + listeners.size() + " listeners.");
         callListeners();
     }
 
@@ -244,7 +244,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     private void callListeners() {
         for (Listener listener : listeners) {
-            logger.info("calling listener:" + listener);
+            logger.trace("calling listener:" + listener);
             listener.handleParameterMapUpdate(this);
         }
     }

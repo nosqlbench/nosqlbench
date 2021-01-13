@@ -115,6 +115,6 @@ public class ScenarioResult {
             .outputTo(logger)
             .build();
         reporter.report();
-        logger.info("-- END METRICS DETAIL --");
+        logger.debug("-- END METRICS DETAIL --");
     }
 }

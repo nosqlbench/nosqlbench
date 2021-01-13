@@ -66,7 +66,7 @@ public class SimpleServiceLoader<T extends Named> {
                 throw new RuntimeException(t);
             }
         }
-        logger.info("Loaded Types:" + types.keySet());
+        logger.debug("Loaded Types:" + types.keySet());
         return types;
     }
 

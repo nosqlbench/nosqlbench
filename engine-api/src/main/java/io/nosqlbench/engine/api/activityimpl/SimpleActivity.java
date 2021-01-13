@@ -358,7 +358,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 logger.info("setting threads to " + threads + " (" + multiplier + "x)");
                 activityDef.setThreads(threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
-                logger.info("setting threads to " + spec + "(direct)");
+                logger.info("setting threads to " + spec + " (direct)");
                 activityDef.setThreads(Integer.parseInt(spec));
             }
 

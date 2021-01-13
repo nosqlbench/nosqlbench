@@ -104,7 +104,7 @@ public class ScenariosExecutor {
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
-            logger.info("scenarios executor shutdownActivity after " + (System.currentTimeMillis() - waitedAt) + "ms.");
+            logger.debug("scenarios executor shutdown after " + (System.currentTimeMillis() - waitedAt) + "ms.");
         }
 
         if (!isShutdown) {
