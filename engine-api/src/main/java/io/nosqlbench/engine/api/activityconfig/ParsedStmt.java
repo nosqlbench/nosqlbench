@@ -18,6 +18,8 @@
 package io.nosqlbench.engine.api.activityconfig;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.Logger;
@@ -152,9 +154,17 @@ public class ParsedStmt {
 
     /**
      * @return the params from the enclosed {@link StmtDef}
+     * @deprecated You should use {@link #getParamReader()} instead.
      */
     public Map<String, Object> getParams() {
         return stmtDef.getParams();
+    }
+
+    /**
+     * @return a params reader from the enclosed {@link StmtDef} params map
+     */
+    public Element getParamReader() {
+        return NBParams.one(stmtDef.getParams());
     }
 
     public List<BindPoint> getBindPoints() {

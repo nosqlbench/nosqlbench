@@ -17,10 +17,13 @@
 
 package io.nosqlbench.nb.api.config;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -73,11 +76,24 @@ import java.util.*;
  *
  */
 public class ParamsParser {
+    public final static String ASSIGN_CHARS = "=:";
     private final static Logger logger = LogManager.getLogger(ParamsParser.class);
 
-
     public static Map<String, String> parse(String input, boolean canonicalize) {
-        return parse(input, "=:", canonicalize);
+        return parse(input, ASSIGN_CHARS, canonicalize);
+    }
+
+    public static boolean hasValues(String input) {
+        return hasValues(input, ASSIGN_CHARS);
+    }
+
+    public static boolean hasValues(String input, String assignChars) {
+        for (int i = 0; i < assignChars.length(); i++) {
+            if (input.contains(assignChars.substring(i, i + 1))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -123,7 +139,7 @@ public class ParamsParser {
                 case expectingName:
                     if (c =='\'' || c=='"') {
                         throw new RuntimeException("Unable to parse a name starting with character '" + c + "'. Names" +
-                            " must be literaal values.");
+                            " must be literal values.");
                     } else if (c != ' ' && c != ';') {
                         s = ParseState.readingName;
                         varname.append(c);
