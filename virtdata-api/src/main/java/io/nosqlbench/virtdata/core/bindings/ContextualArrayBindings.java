@@ -15,8 +15,8 @@ package io.nosqlbench.virtdata.core.bindings;
 public class ContextualArrayBindings<C, R> implements Binder<R> {
 
     private final C context;
-    private Bindings bindings;
-    private ValuesArrayBinder<C, R> valuesArrayBinder;
+    private final Bindings bindings;
+    private final ValuesArrayBinder<C, R> valuesArrayBinder;
 
     public ContextualArrayBindings(Bindings bindings, C context, ValuesArrayBinder<C, R> valuesArrayBinder) {
         this.bindings = bindings;
@@ -40,6 +40,9 @@ public class ContextualArrayBindings<C, R> implements Binder<R> {
         } catch (Exception e) {
             throw new RuntimeException("Binding error:" + bindings.getTemplate().toString(allGeneratedValues), e);
         }
+    }
 
+    public String toString() {
+        return "context: '" + this.context.toString() + "' bindings:'" + this.bindings.toString() + "'";
     }
 }

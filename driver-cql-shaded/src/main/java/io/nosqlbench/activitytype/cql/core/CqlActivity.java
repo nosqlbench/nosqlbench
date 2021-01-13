@@ -4,14 +4,13 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.*;
-import io.nosqlbench.activitytype.cql.codecsupport.UDTCodecInjector;
-import com.datastax.driver.core.TokenRangeStmtFilter;
 import io.nosqlbench.activitytype.cql.api.ErrorResponse;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.api.StatementFilter;
-import io.nosqlbench.activitytype.cql.errorhandling.NBCycleErrorHandler;
+import io.nosqlbench.activitytype.cql.codecsupport.UDTCodecInjector;
 import io.nosqlbench.activitytype.cql.errorhandling.HashedCQLErrorHandler;
+import io.nosqlbench.activitytype.cql.errorhandling.NBCycleErrorHandler;
 import io.nosqlbench.activitytype.cql.statements.binders.CqlBinderTypes;
 import io.nosqlbench.activitytype.cql.statements.core.*;
 import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
@@ -38,14 +37,16 @@ import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
-import io.nosqlbench.engine.api.util.SimpleConfig;
+import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -157,6 +158,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             throw new RuntimeException("There were no unfiltered statements found for this activity.");
         }
 
+        Set<String> timerStarts = new HashSet<>();
+        Set<String> timerStops = new HashSet<>();
+
         for (OpTemplate stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
@@ -182,18 +186,20 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             String logresultcsv_act = getParams().getOptionalString("logresultcsv").orElse("");
 
-            if (!logresultcsv_act.isEmpty() && !logresultcsv_act.toLowerCase().equals("true")) {
+            if (!logresultcsv_act.isEmpty() && !logresultcsv_act.equalsIgnoreCase("true")) {
                 throw new RuntimeException("At the activity level, only logresultcsv=true is allowed, no other values.");
             }
             logresultcsv = !logresultcsv.isEmpty() ? logresultcsv : logresultcsv_act;
-            logresultcsv = !logresultcsv.toLowerCase().equals("true") ? logresultcsv : stmtDef.getName() + "--results.csv";
+            logresultcsv = !logresultcsv.equalsIgnoreCase("true") ? logresultcsv : stmtDef.getName() + "--results.csv";
 
             logger.debug("readying statement[" + (prepared ? "" : "un") + "prepared]:" + parsed.getStmt());
 
             ReadyCQLStatementTemplate template;
             String stmtForDriver = parsed.getPositionalStatement(s -> "?");
+
+
             if (prepared) {
-                psummary.append(" prepared=>").append(prepared);
+                psummary.append(" prepared=>true");
                 PreparedStatement prepare = getSession().prepare(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
                     psummary.append(" consistency_level=>").append(conlvl);
@@ -229,16 +235,40 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                    parsed.getName(), parameterized);
+                    parsed.getName(), parameterized, null, null);
             }
 
+            Element params = parsed.getParamReader();
+
+            params.get("start-timers", String.class)
+                .map(s -> s.split(", *"))
+                .map(Arrays::asList)
+                .orElse(List.of())
+                .stream()
+                .forEach(name -> {
+                    ThreadLocalNamedTimers.addTimer(activityDef, name);
+                    template.addTimerStart(name);
+                    timerStarts.add(name);
+                });
+
+            params.get("stop-timers", String.class)
+                .map(s -> s.split(", *"))
+                .map(Arrays::asList)
+                .orElse(List.of())
+                .stream()
+                .forEach(name -> {
+                    template.addTimerStop(name);
+                    timerStops.add(name);
+                });
+
+
             stmtDef.getOptionalStringParam("save")
-                    .map(s -> s.split("[,: ]"))
-                    .map(Save::new)
-                    .ifPresent(save_op -> {
-                        psummary.append(" save=>").append(save_op.toString());
-                        template.addRowCycleOperators(save_op);
-                    });
+                .map(s -> s.split("[,: ]"))
+                .map(Save::new)
+                .ifPresent(save_op -> {
+                    psummary.append(" save=>").append(save_op.toString());
+                    template.addRowCycleOperators(save_op);
+                });
 
             stmtDef.getOptionalStringParam("rsoperators")
                     .map(s -> s.split(","))
@@ -261,7 +291,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             if (instrument) {
                 logger.info("Adding per-statement success and error and resultset-size timers to statement '" + parsed.getName() + "'");
                 template.instrument(this);
-                psummary.append(" instrument=>").append(instrument);
+                psummary.append(" instrument=>true");
             }
 
             if (!logresultcsv.isEmpty()) {
@@ -277,6 +307,11 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             }
 
             planner.addOp(template.resolve(), ratio);
+        }
+
+        if (!timerStarts.equals(timerStops)) {
+            throw new BasicError("The names for timer-starts and timer-stops must be matched up. " +
+                "timer-starts:" + timerStarts + ", timer-stops:" + timerStops);
         }
 
         opsequence = planner.resolve();

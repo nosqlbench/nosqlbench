@@ -15,10 +15,12 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.bindings.ContextualBindingsArrayTemplate;
 import io.nosqlbench.virtdata.core.bindings.ValuesArrayBinder;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ReadyCQLStatementTemplate {
@@ -36,6 +38,8 @@ public class ReadyCQLStatementTemplate {
     private Timer errorTimer;
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
+    private List<String> startTimers;
+    private List<String> stopTimers;
 
     public ReadyCQLStatementTemplate(Map<String, Object> fconfig, CqlBinderTypes binderType, Session session,
                                      PreparedStatement preparedStmt, long ratio, String name) {
@@ -45,14 +49,35 @@ public class ReadyCQLStatementTemplate {
         logger.trace("Using binder_type=>" + binder.toString());
 
         template = new ContextualBindingsArrayTemplate<>(
-                preparedStmt,
-                new BindingsTemplate(fconfig),
-                binder
+            preparedStmt,
+            new BindingsTemplate(fconfig),
+            binder
         );
         this.ratio = ratio;
     }
 
-    public ReadyCQLStatementTemplate(Map<String, Object> fconfig, Session session, SimpleStatement simpleStatement, long ratio, String name, boolean parameterized) {
+    public void addTimerStart(String name) {
+        if (startTimers == null) {
+            startTimers = new ArrayList<>();
+        }
+        startTimers.add(name);
+    }
+
+    public void addTimerStop(String name) {
+        if (stopTimers == null) {
+            stopTimers = new ArrayList<>();
+        }
+        stopTimers.add(name);
+    }
+
+    public ReadyCQLStatementTemplate(
+        Map<String, Object> fconfig,
+        Session session,
+        SimpleStatement simpleStatement,
+        long ratio, String name,
+        boolean parameterized,
+        List<String> startTimers,
+        List<String> stopTimers) {
         this.session = session;
         this.name = name;
         template = new ContextualBindingsArrayTemplate<>(
@@ -65,10 +90,12 @@ public class ReadyCQLStatementTemplate {
 
     public ReadyCQLStatement resolve() {
         return new ReadyCQLStatement(template.resolveBindings(), ratio, name)
-                .withMetrics(this.successTimer, this.errorTimer, this.rowsFetchedHisto)
-                .withResultSetCycleOperators(resultSetCycleOperators)
-                .withRowCycleOperators(rowCycleOperators)
-                .withResultCsvWriter(resultCsvWriter);
+            .withMetrics(this.successTimer, this.errorTimer, this.rowsFetchedHisto)
+            .withResultSetCycleOperators(resultSetCycleOperators)
+            .withRowCycleOperators(rowCycleOperators)
+            .withResultCsvWriter(resultCsvWriter)
+            .withStartTimers(startTimers)
+            .withStopTimers(stopTimers);
     }
 
     public ContextualBindingsArrayTemplate<?, Statement> getContextualBindings() {

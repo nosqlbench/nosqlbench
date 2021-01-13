@@ -200,28 +200,29 @@ activity types.
     default: 'driver.*clusterid*.'
     The clusterid specified is included so that separate cluster and session
     contexts can be reported independently for advanced tests.
-- **usercodecs** - enable the loading of user codec libraries
-    for more details see: com.datastax.codecs.framework.UDTCodecInjector in the nosqlbench
-    code base. This is for dynamic codec loading with user-provided codecs mapped
-    via the internal UDT APIs.
-    default: false
-- **secureconnectbundle** - used to connect to CaaS, accepts a path to the secure connect bundle
-    that is downloaded from the CaaS UI.
-    Examples:
+- **usercodecs** - enable the loading of user codec libraries for more
+  details see: com.datastax.codecs.framework.UDTCodecInjector in the
+  nosqlbench code base. This is for dynamic codec loading with
+  user-provided codecs mapped via the internal UDT APIs. default: false
+- **secureconnectbundle** - used to connect to CaaS, accepts a path to the
+  secure connect bundle that is downloaded from the CaaS UI. Examples:
     - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
     - `secureconnectbundle="/home/automaton/secure-connect-my_db.zip"`
-    
-    Check out [Astra Documentation](https://docs.astra.datastax.com/docs/test-loading-data-with-nosqlbench) for samples 
-    
-- **insights** - Set to false to disable the driver from sending insights monitoring information
+
+  Check
+  out [Astra Documentation](https://docs.astra.datastax.com/docs/test-loading-data-with-nosqlbench)
+  for samples
+
+- **insights** - Set to false to disable the driver from sending insights
+  monitoring information
     - `insights=false`
-- **tickduration** - sets the tickDuration (milliseconds) of HashedWheelTimer of the
-    java driver. This timer is used to schedule speculative requests.
-    Examples:
+- **tickduration** - sets the tickDuration (milliseconds) of
+  HashedWheelTimer of the java driver. This timer is used to schedule
+  speculative requests. Examples:
     - `tickduration=10`
     - `tickduration=100` (driver default value)
 - **compression** - sets the transport compression to use for this
-    activity. Valid values are 'LZ4' and 'SNAPPY'. Both types are bundled
+  activity. Valid values are 'LZ4' and 'SNAPPY'. Both types are bundled
     with EBDSE.
 - **showcql** - logs cql statements as INFO (to see INFO messages in stdout use -v or greater) Note: this is expensive
     and should only be done to troubleshoot workloads. Do not use `showcql` for your tests.
@@ -299,14 +300,48 @@ now **they are limited to a YAML params block**:
     #    applies to all statements, and the only value values
     #    there are true and false.
 
+    start-timers: timername1, timername2, ...
+    #
+    # If a statement has start-timers value set, then the named
+    # timers are started in the local thread before the
+    # statement is executed
+    #
+    # Together, with the stop-timers modifier, you can measure
+    # sequences of statements with specific named boundaries.
+    #
+    # The name of the timer is qualified with the activity alias
+    # just as all other metric names.
+    #
+    # This is generally only useful when the async= parameter is
+    # NOT used, since the scope of the timer is thread-local. When
+    # async is used, many operations may overlap each other in the
+    # same thread, breaking linearization guarantees which make
+    # thread local scoping helpful for tracking linearized operations.
+    #
+    # When a timer is started, a timer context is created and stored
+    # under this name in the thread. You must ensure that an
+    # associated stop-timers setting is applied to another statement
+    # in order to trigger the tally of these metrics.
+
+    stop-timers: timername1, timername2, ...
+    #
+    # If a statement has a stop-timers value set, then after the
+    # statement is finished, whether by error or by successful
+    # completion, the named timers are stopped and the resulting
+    # measurement is added to metrics.
+    #
+    # If you add stop-timers with names that do not have a matching
+    # start-timers name, or vice-versa then an error is thrown.
+
 ### Metrics
 
-- alias.result - A timer which tracks the performance of an op result only.
-    This is the async get on the future, broken out as a separate step.
-- alias.result-success - A timer that records rate and histograms of the time
-    it takes from submitting a query to completely reading the result
-    set that it returns, across all pages. This metric is only counted
-    for non-exceptional results, while the result metric above includes
+- alias.result - A timer which tracks the performance of an op result
+  only. This is the async get on the future, broken out as a separate
+  step.
+- alias.result-success - A timer that records rate and histograms of the
+  time it takes from submitting a query to completely reading the result
+  set that it returns, across all pages. This metric is only counted for
+  non-exceptional results, while the result metric above includes
     all operations.
 - alias.bind - A timer which tracks the performance of the statement
     binding logic, including the generation of data immediately prior

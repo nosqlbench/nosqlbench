@@ -7,10 +7,12 @@ import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
+import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.virtdata.core.bindings.ContextualArrayBindings;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,8 +21,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ReadyCQLStatement {
 
-    private String name;
-    private ContextualArrayBindings<?, Statement> contextualBindings;
+    private final String name;
+    private final ContextualArrayBindings<?, Statement> contextualBindings;
     private long ratio;
     private ResultSetCycleOperator[] resultSetOperators = null;
     private RowCycleOperator[] rowCycleOperators = null;
@@ -29,6 +31,8 @@ public class ReadyCQLStatement {
     private Timer errorTimer;
     private Histogram rowsFetchedHisto;
     private Writer resultCsvWriter;
+    private List<String> startTimers;
+    private List<String> stopTimers;
 
     public ReadyCQLStatement(ContextualArrayBindings<?, Statement> contextualBindings, long ratio, String name) {
         this.contextualBindings = contextualBindings;
@@ -98,26 +102,36 @@ public class ReadyCQLStatement {
         this.ratio = ratio;
     }
 
+    public void onStart() {
+        if (startTimers != null) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().start(startTimers);
+        }
+    }
+
     /**
      * This method should be called when an associated statement is executed successfully.
-     * @param cycleValue The cycle associated with the execution.
-     * @param nanoTime The nanoTime duration of the execution.
+     *
+     * @param cycleValue  The cycle associated with the execution.
+     * @param nanoTime    The nanoTime duration of the execution.
      * @param rowsFetched The number of rows fetched for this cycle
      */
     public void onSuccess(long cycleValue, long nanoTime, long rowsFetched) {
-        if (successTimer!=null) {
+        if (successTimer != null) {
             successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
         }
-        if (rowsFetchedHisto!=null) {
+        if (stopTimers != null) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(stopTimers);
+        }
+        if (rowsFetchedHisto != null) {
             rowsFetchedHisto.update(rowsFetched);
         }
-        if (resultCsvWriter!=null) {
+        if (resultCsvWriter != null) {
             try {
-                synchronized(resultCsvWriter) {
+                synchronized (resultCsvWriter) {
                     // <cycle>,(SUCCESS|FAILURE),<nanos>,<rowsfetched>,<errorname>\n
                     resultCsvWriter
-                            .append(String.valueOf(cycleValue)).append(",")
-                            .append("SUCCESS,")
+                        .append(String.valueOf(cycleValue)).append(",")
+                        .append("SUCCESS,")
                             .append(String.valueOf(nanoTime)).append(",")
                             .append(String.valueOf(rowsFetched))
                             .append(",NONE")
@@ -138,19 +152,22 @@ public class ReadyCQLStatement {
      * @param t The associated throwable
      */
     public void onError(long cycleValue, long resultNanos, Throwable t) {
-        if (errorTimer!=null) {
+        if (errorTimer != null) {
             errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
         }
-        if (resultCsvWriter!=null) {
+        if (stopTimers != null) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(stopTimers);
+        }
+        if (resultCsvWriter != null) {
             try {
-                synchronized(resultCsvWriter) {
+                synchronized (resultCsvWriter) {
                     // <cycle>,(SUCCESS|FAILURE),<nanos>,<rowsfetched>,<errorname>\n
                     resultCsvWriter
-                            .append(String.valueOf(cycleValue)).append(",")
-                            .append("FAILURE,")
-                            .append(String.valueOf(resultNanos)).append(",")
-                            .append("0,")
-                            .append(t.getClass().getSimpleName()).append(",")
+                        .append(String.valueOf(cycleValue)).append(",")
+                        .append("FAILURE,")
+                        .append(String.valueOf(resultNanos)).append(",")
+                        .append("0,")
+                        .append(t.getClass().getSimpleName()).append(",")
                             .append("\n");
                 }
             } catch (IOException e) {
@@ -178,5 +195,19 @@ public class ReadyCQLStatement {
     public ReadyCQLStatement withResultCsvWriter(Writer resultCsvWriter) {
         this.resultCsvWriter = resultCsvWriter;
         return this;
+    }
+
+    public ReadyCQLStatement withStartTimers(List<String> startTimers) {
+        this.startTimers = startTimers;
+        return this;
+    }
+
+    public ReadyCQLStatement withStopTimers(List<String> stopTimers) {
+        this.stopTimers = stopTimers;
+        return this;
+    }
+
+    public String toString() {
+        return "ReadyCQLStatement: " + contextualBindings.toString();
     }
 }

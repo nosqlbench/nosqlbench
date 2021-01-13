@@ -89,7 +89,10 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
 
             try (Timer.Context bindTime = cqlActivity.bindTimer.time()) {
                 readyCQLStatement = sequencer.get(cycleValue);
+                readyCQLStatement.onStart();
+
                 statement = readyCQLStatement.bind(cycleValue);
+
 
                 if (statementFilter != null) {
                     if (!statementFilter.matches(statement)) {
