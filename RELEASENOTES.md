@@ -1,4 +1,17 @@
-- 9d5c225c (HEAD -> main) explicit http url decoding support
+- 69747056 (HEAD -> main) provide better defaults for summary reporting
+- 1184fd77 make info less chatty by pushing some things to debug
+- 837501f8 make http ops verify status 2.. by default
+- 0a84f346 logging annotator should use dedicated log name
+- 290a2489 disambiguate runnable call
+- f1919426 delegate scenario summaries to scenario proper
+- e56444e2 allow setting of logdir for appserver
+- f4ec45a1 remove random installer script
+- bb787fd5 improvements to scenario log handling
+- ead06c0a improvements to generic configuration APIs
+- 0b886931 findmax improvements
+- 998439c8 add customizable timers to CQL driver
+- cb23fd92 http and findmax fixes
+- 9d5c225c explicit http url decoding support
 - f0223501 findmax enhancements and docs
 - 41adf588 ignore nanos component of token filler wait
 - 2a23e866 reduce runtime of cranky test
