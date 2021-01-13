@@ -110,7 +110,9 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
             true,
             false,
             "",
-            cmdList.toString());
+            cmdList.toString(),
+            (java.nio.file.Path) config.getProperties().get("logpath")
+        );
 
         scenario.addScriptText(buffer.getParsedScript());
 

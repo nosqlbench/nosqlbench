@@ -76,13 +76,15 @@ public class DocServerApp {
 
     private static void runServer(String[] serverArgs) {
         NBWebServer server = new NBWebServer();
+        server.withContextParam("logpath", Path.of("logs")); // default
+
         for (int i = 0; i < serverArgs.length; i++) {
             String arg = serverArgs[i];
             if (arg.matches(".*://.*")) {
                 if (!arg.toLowerCase().contains("http://")) {
                     String suggested = arg.toLowerCase().replaceAll("https", "http");
                     throw new RuntimeException("ERROR:\nIn this release, only 'http://' URLs are supported.\nTLS will be added in a future release.\nSee https://github.com/nosqlbench/nosqlbench/issues/35\n" +
-                            "Consider using " + suggested);
+                        "Consider using " + suggested);
                 }
                 server.withURL(arg);
             } else if (Files.exists(Path.of(arg))) {
@@ -105,6 +107,10 @@ public class DocServerApp {
                 String workspaces_root = serverArgs[i + 1];
                 logger.info("Setting workspace directory to workspace_dir");
                 server.withContextParam("workspaces_root", workspaces_root);
+            } else if (arg.matches("--logdir")) {
+                String logdir_path = serverArgs[i + 1];
+                logger.info("Setting docserver logdir to " + logdir_path);
+                server.withContextParam("logpath", Path.of(logdir_path));
             }
         }
 //
