@@ -163,6 +163,7 @@ with the default credentials admin/admin).
 
 
 ### Console Options ###
+
 Increase console logging levels: (Default console logging level is *warning*)
 
     -v         (info)
@@ -172,8 +173,41 @@ Increase console logging levels: (Default console logging level is *warning*)
     --progress console:1m (disables itself if -v options are used)
 
 These levels affect *only* the console output level. Other logging level
-parameters affect logging to the scenario log, stored by default in logs/...
+parameters affect logging to the scenario log, stored by default in
+logs/...
 
 Show version, long form, with artifact coordinates.
 
     --version
+
+### Summary Reporting
+
+The classic metrics logging format is used to report results into the
+logfile for every scenario. This format is not generally human-friendly,
+so a better summary report is provided by default to the console and/or a
+specified summary file by default.
+
+Examples:
+
+    # report to console if session ran more than 60 seconds
+    --report-summary-to stdout:60
+
+    # report to auto-named summary file for every session
+    --report-summary-to _LOGS_/_SESSION_.summary
+
+    # do both (the default)
+    --report-summary-to stdout:60,_LOGS_/_SESSION_.summary
+
+Values of `stdout` or `stderr` are send summaries directly to the console,
+and any other pattern is taken as a file name.
+
+You can use `_SESSION_` and `_LOGS_` to automatically name the file
+according to the current session name and log directory.
+
+The reason for the optional timing parameter is to allow for results of
+short scenario runs to be squelched. Metrics for short runs are not
+generally accurate nor meaningful. Spamming the console with boiler-plate
+in such cases is undesirable. If the minimum session length is not
+specified, it is assumed to be 0, meaning that a report will always show
+on that channel.
+

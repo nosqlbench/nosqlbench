@@ -57,6 +57,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
     private final String commandLine;
     private final String reportSummaryTo;
+    private final Path logsPath;
     private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
@@ -103,7 +104,9 @@ public class Scenario implements Callable<ScenarioResult> {
         boolean wantsStackTraces,
         boolean wantsCompiledScript,
         String reportSummaryTo,
-        String commandLine) {
+        String commandLine,
+        Path logsPath) {
+
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
         this.engine = engine;
@@ -113,6 +116,15 @@ public class Scenario implements Callable<ScenarioResult> {
         this.wantsCompiledScript = wantsCompiledScript;
         this.reportSummaryTo = reportSummaryTo;
         this.commandLine = commandLine;
+        this.logsPath = logsPath;
+    }
+
+    public Scenario(String name, Engine engine) {
+        this.scenarioName = name;
+        this.reportSummaryTo = "CONSOLE";
+        this.engine = engine;
+        this.commandLine = "";
+        this.logsPath = Path.of("logs");
     }
 
     public Scenario setLogger(Logger logger) {
@@ -122,13 +134,6 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public Logger getLogger() {
         return logger;
-    }
-
-    public Scenario(String name, Engine engine) {
-        this.scenarioName = name;
-        this.reportSummaryTo = "CONSOLE";
-        this.engine = engine;
-        this.commandLine = "";
     }
 
     public Scenario addScriptText(String scriptText) {
@@ -156,7 +161,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
     private void init() {
 
-        logger.info("Using engine " + engine.toString());
+        logger.debug("Using engine " + engine.toString());
 
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
@@ -239,7 +244,7 @@ public class Scenario implements Callable<ScenarioResult> {
 
     }
 
-    public void run() {
+    public void runScenario() {
         scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(scenarioShutdownHook);
 
@@ -269,7 +274,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 } else {
                     if (scriptfile != null && !scriptfile.isEmpty()) {
 
-                        String filename = scriptfile.replace("_SESSIONNAME_", scenarioName);
+                        String filename = scriptfile.replace("_SESSION_", scenarioName);
                         logger.debug("-> invoking main scenario script (" +
                             "interpreted from " + filename + ")");
                         Path written = Files.write(
@@ -354,49 +359,57 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public ScenarioResult call() {
-        run();
+        runScenario();
         String iolog = scriptEnv.getTimedLog();
         ScenarioResult result = new ScenarioResult(iolog, this.startedAtMillis, this.endedAtMillis);
 
         result.reportToLog();
 
-        Optional.ofNullable(getSummaryDestination(reportSummaryTo, result.getElapsedMillis()))
-            .ifPresent(result::reportTo);
+        getSummaryDestinations(reportSummaryTo, result.getElapsedMillis()).forEach(result::reportTo);
 
         return result;
     }
 
-    private PrintStream getSummaryDestination(String reportSummaryTo, long elapsedMillis) {
-        if (reportSummaryTo != null && !reportSummaryTo.isBlank()) {
-            String[] split = reportSummaryTo.split(":", 2);
-            String summaryTo = split[0];
-            long summaryWhen = split.length == 2 ? Long.parseLong(split[1]) * 1000L : 60000L;
-            if (elapsedMillis > summaryWhen) {
-                PrintStream out = null;
-                switch (summaryTo.toLowerCase()) {
-                    case "console":
-                    case "stdout":
-                        return System.out;
-                    case "stderr":
-                        return System.err;
-                    default:
-                        String outName = summaryTo
-                            .replaceAll("_session_", getScenarioName())
-                            .replaceAll("_scenario_", getScenarioName());
-                        try {
-                            out = new PrintStream(new FileOutputStream(outName));
-                            return out;
-                        } catch (FileNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
+    private List<PrintStream> getSummaryDestinations(String reportSummaryTo, long elapsedMillis) {
+        List<PrintStream> destinations = new ArrayList<>();
+
+
+        String[] destinationSpecs = reportSummaryTo.split(", *");
+
+        for (String spec : destinationSpecs) {
+            if (spec != null && !spec.isBlank()) {
+                String[] split = spec.split(":", 2);
+                String summaryTo = split[0];
+                long summaryWhen = split.length == 2 ? Long.parseLong(split[1]) * 1000L : 0;
+                if (elapsedMillis > summaryWhen) {
+                    PrintStream out = null;
+                    switch (summaryTo.toLowerCase()) {
+                        case "console":
+                        case "stdout":
+                            destinations.add(System.out);
+                            break;
+                        case "stderr":
+                            destinations.add(System.err);
+                            break;
+                        default:
+                            String outName = summaryTo
+                                .replaceAll("_SESSION_", getScenarioName())
+                                .replaceAll("_LOGS_", logsPath.toString());
+                            try {
+                                out = new PrintStream(new FileOutputStream(outName));
+                                destinations.add(out);
+                                break;
+                            } catch (FileNotFoundException e) {
+                                throw new RuntimeException(e);
+                            }
+                    }
+                } else {
+                    logger.debug("Suppressing metrics report to " + spec + " with scenario duration of " + summaryWhen + "ms");
                 }
-            } else {
-                logger.info("Metrics suppressed because scenario was less than " + summaryWhen + "ms long.");
-                logger.info("Metrics data is not reliable for short sampling periods.");
-                logger.info("To get metrics on console, run a longer scenario.");
             }
         }
-        return null;
+
+        return destinations;
     }
 
     @Override

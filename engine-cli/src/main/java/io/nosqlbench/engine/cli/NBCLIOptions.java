@@ -77,6 +77,7 @@ public class NBCLIOptions {
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
+    private final static String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION_.summary";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOG_HISTOGRAMS = "--log-histograms";
@@ -84,6 +85,7 @@ public class NBCLIOptions {
     private static final String CLASSIC_HISTOGRAMS = "--classic-histograms";
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private final static String ENABLE_CHART = "--enable-chart";
+
     private final static String DOCKER_METRICS = "--docker-metrics";
     private final static String DOCKER_METRICS_AT = "--docker-metrics-at";
     private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
@@ -150,7 +152,7 @@ public class NBCLIOptions {
     private final List<String> statePathAccesses = new ArrayList<>();
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
     private String dockerPromRetentionDays = "183d";
-    private String reportSummaryTo = "stdout:60";
+    private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -498,7 +500,7 @@ public class NBCLIOptions {
                     break;
                 case REPORT_SUMMARY_TO:
                     arglist.removeFirst();
-                    reportSummaryTo = arglist.removeFirst();
+                    reportSummaryTo = readWordOrThrow(arglist, "report summary file");
                     break;
                 case LIST_DRIVERS:
                 case LIST_ACTIVITY_TYPES:
@@ -726,7 +728,7 @@ public class NBCLIOptions {
 
     public String getScriptFile() {
         if (scriptFile == null) {
-            return logsDirectory + File.separator + "_SESSIONNAME_" + ".js";
+            return logsDirectory + File.separator + "_SESSION_" + ".js";
         }
 
         String expanded = scriptFile;

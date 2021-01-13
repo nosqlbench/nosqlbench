@@ -342,10 +342,13 @@ public class NBCLI {
             options.wantsStackTraces(),
             options.wantsCompileScript(),
             options.getReportSummaryTo(),
-            String.join("\n", args)
+            String.join("\n", args),
+            options.getLogsDirectory()
         );
+
         ScriptBuffer buffer = new BasicScriptBuffer()
-                .add(options.getCommands().toArray(new Cmd[0]));
+            .add(options.getCommands()
+                .toArray(new Cmd[0]));
         String scriptData = buffer.getParsedScript();
 
         if (options.wantsShowScript()) {
@@ -387,7 +390,7 @@ public class NBCLI {
         ScenariosResults scenariosResults = executor.awaitAllResults();
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
-        scenariosResults.reportToLog();
+        //scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
 //        logger.info(scenariosResults.getExecutionSummary());
