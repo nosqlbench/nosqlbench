@@ -37,30 +37,36 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class HashedFileExtractToString implements LongFunction<String> {
 
-    private final static Logger logger  = LogManager.getLogger(HashedFileExtractToString.class);
+    private final static Logger logger = LogManager.getLogger(HashedFileExtractToString.class);
 
-    private static CharBuffer fileDataImage =null;
+    private static CharBuffer fileDataImage = null;
     private final HashRange sizeRange;
     private final HashRange positionRange;
 
-    private int minsize, maxsize;
+    private final int minsize;
+    private final int maxsize;
     private final String fileName;
 
-    @Example({"HashedFileExtractToString('data/adventures.txt',100,200)","return a fragment from adventures.txt between 100 and 200 characters long"})
+    @Example({"HashedFileExtractToString('data/adventures.txt',100,200)", "return a fragment from adventures.txt between 100 and 200 characters long"})
     public HashedFileExtractToString(String fileName, int minsize, int maxsize) {
         this.fileName = fileName;
         this.minsize = minsize;
         this.maxsize = maxsize;
         loadData();
         this.sizeRange = new HashRange(minsize, maxsize);
-        this.positionRange = new HashRange(1, (fileDataImage.limit()-maxsize)-1);
+        this.positionRange = new HashRange(1, (fileDataImage.limit() - maxsize) - 1);
+    }
+
+    @Example({"HashedFileExtractToString('data/adventures.txt',100,.1)", "return a fragment between 90 and 110 characters long"})
+    public HashedFileExtractToString(String fileName, int avgsize, double percentVary) {
+        this(fileName, avgsize - (int) (percentVary * avgsize), avgsize + (int) (percentVary * avgsize));
     }
 
     private void loadData() {
         if (fileDataImage == null) {
             synchronized (HashedFileExtractToString.class) {
                 if (fileDataImage == null) {
-                    CharBuffer image= NBIO.readCharBuffer(fileName);
+                    CharBuffer image = NBIO.readCharBuffer(fileName);
                     fileDataImage = image;
                 }
             }
