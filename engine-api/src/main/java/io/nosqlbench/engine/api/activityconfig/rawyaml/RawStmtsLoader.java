@@ -22,12 +22,12 @@ public class RawStmtsLoader {
     public RawStmtsDocList loadString(Logger logger, String data) {
 
         try {
-            if (logger != null) logger.debug("Applying string transformer to yaml data:" + data);
+            if (logger != null) logger.trace("Applying string transformer to yaml data:" + data);
             for (Function<String, String> transformer : transformers) {
                 data = transformer.apply(data);
             }
         } catch (Exception e) {
-            RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
+            RuntimeException t = new ActivityInitializationError("Error applying string transforms to input", e);
             throw t;
         }
 
@@ -71,10 +71,10 @@ public class RawStmtsLoader {
     protected String applyTransforms(Logger logger, String data) {
         for (Function<String, String> xform : stringTransformers) {
             try {
-                if (logger != null) logger.debug("Applying string transformer to yaml data:" + xform);
+                if (logger != null) logger.trace("Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
-                RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
+                RuntimeException t = new ActivityInitializationError("Error applying string transforms to input", e);
                 throw t;
             }
         }
