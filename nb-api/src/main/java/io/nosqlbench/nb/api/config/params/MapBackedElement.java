@@ -1,6 +1,7 @@
 package io.nosqlbench.nb.api.config.params;
 
 import java.util.Map;
+import java.util.Set;
 
 public class MapBackedElement implements ElementData {
 
@@ -13,6 +14,11 @@ public class MapBackedElement implements ElementData {
     @Override
     public Object get(String name) {
         return map.get(name);
+    }
+
+    @Override
+    public Set<String> getKeys() {
+        return map.keySet();
     }
 
     @Override

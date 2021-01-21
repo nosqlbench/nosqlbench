@@ -20,29 +20,35 @@ package io.nosqlbench.engine.api.metrics;
 import com.codahale.metrics.Meter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Use this to provide exception metering in a uniform way.
  */
 public class ExceptionMeterMetrics {
-    private final ConcurrentHashMap<Class<? extends Exception>, Meter> meters = new ConcurrentHashMap<>();
-    private ActivityDef activityDef;
+    private final ConcurrentHashMap<Class<? extends Throwable>, Meter> meters = new ConcurrentHashMap<>();
+    private final ActivityDef activityDef;
 
     public ExceptionMeterMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void count(Exception e) {
-        Meter c = meters.get(e.getClass());
+    public void mark(Throwable t) {
+        Meter c = meters.get(t.getClass());
         if (c == null) {
             synchronized (meters) {
                 c = meters.computeIfAbsent(
-                        e.getClass(),
-                        k -> ActivityMetrics.meter(activityDef, "exceptions." + e.getClass().getSimpleName())
+                    t.getClass(),
+                    k -> ActivityMetrics.meter(activityDef, "exceptions." + t.getClass().getSimpleName())
                 );
             }
         }
         c.mark();
+    }
+
+    public List<Meter> getMeters() {
+        return new ArrayList<>(meters.values());
     }
 }

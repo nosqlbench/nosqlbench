@@ -4,6 +4,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.activitytype.cmds.HttpOp;
 import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -26,7 +27,7 @@ public class HttpAction implements SyncAction {
 
     private final HttpActivity httpActivity;
     private final int slot;
-    private final int maxTries = 1;
+    private int maxTries = 1;
 
     private OpSequence<ReadyHttpOp> sequencer;
     private HttpClient client;
@@ -42,6 +43,7 @@ public class HttpAction implements SyncAction {
     public void init() {
         this.sequencer = httpActivity.getSequencer();
         this.client = initClient(httpActivity.getClientScope());
+        this.maxTries = httpActivity.getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     private HttpClient initClient(ClientScope clientScope) {
@@ -50,6 +52,7 @@ public class HttpAction implements SyncAction {
 
     @Override
     public int runCycle(long cycleValue) {
+        int tries = 0;
 
         // The request to be used must be constructed from the template each time.
         HttpOp httpOp = null;
@@ -64,7 +67,7 @@ public class HttpAction implements SyncAction {
             if (httpActivity.isDiagnosticMode()) {
                 if (httpOp != null) {
                     httpActivity.console.summarizeRequest("ERRORED REQUEST", e, httpOp.request, System.out, cycleValue,
-                            System.nanoTime());
+                        System.nanoTime());
                 } else {
                     System.out.println("---- REQUEST was null");
                 }
@@ -73,7 +76,6 @@ public class HttpAction implements SyncAction {
         } finally {
         }
 
-        int tries = 0;
         while (tries < maxTries) {
             tries++;
 
@@ -84,31 +86,33 @@ public class HttpAction implements SyncAction {
                 throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             }
 
-            HttpResponse<String> response=null;
+            HttpResponse<String> response = null;
             long startat = System.nanoTime();
             Exception error = null;
             try {
                 response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
-                if (httpOp.ok_status!=null) {
+                if (httpOp.ok_status != null) {
                     if (!httpOp.ok_status.matcher(String.valueOf(response.statusCode())).matches()) {
                         throw new InvalidStatusCodeException(cycleValue, httpOp.ok_status, response.statusCode());
                     }
                 }
-                if (httpOp.ok_body!=null) {
+                if (httpOp.ok_body != null) {
                     if (!httpOp.ok_body.matcher(response.body()).matches()) {
                         throw new InvalidResponseBodyException(cycleValue, httpOp.ok_body, response.body());
                     }
                 }
             } catch (Exception e) {
-                error = new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
+                error = e;
+//                error = new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             } finally {
                 long nanos = System.nanoTime() - startat;
+                httpActivity.statusCodeHisto.update(response.statusCode());
                 httpActivity.resultTimer.update(nanos, TimeUnit.NANOSECONDS);
-                if (error==null) {
+                if (error == null) {
                     httpActivity.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                 }
                 if (httpActivity.isDiagnosticMode()) {
-                    if (response!=null) {
+                    if (response != null) {
                         httpActivity.console.summarizeResponseChain(null, response, System.out, cycleValue, nanos);
                     } else {
                         System.out.println("---- RESPONSE was null");
@@ -116,12 +120,22 @@ public class HttpAction implements SyncAction {
                     System.out.println();
                 }
 
-                if (error!=null) {
+                if (error == null) {
+                    break; // break out of the tries loop without retrying, because there was no error
+                } else {
                     // count and log exception types
+                    ErrorDetail detail = httpActivity.getErrorHandler().handleError(error, cycleValue, nanos);
+                    if (!detail.isRetryable()) {
+                        break; // break out of the tries loop without retrying, because the error handler said so
+                    }
+
                 }
             }
 
         }
+
+        httpActivity.triesHisto.update(tries);
+
         return 0;
     }
 

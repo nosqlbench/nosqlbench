@@ -1,8 +1,6 @@
 package io.nosqlbench.nb.api.config.params;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ElementImpl implements Element {
 
@@ -48,6 +46,19 @@ public class ElementImpl implements Element {
     public <T> T getOr(String name, T defaultValue) {
         Class<T> cls = (Class<T>) defaultValue.getClass();
         return get(name, cls).orElse(defaultValue);
+    }
+
+    @Override
+    public Map<String, Object> getMap() {
+        Set<String> keys = this.data.getKeys();
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        for (String key : keys) {
+            Object value = this.data.get(key);
+            map.put(key, value);
+        }
+
+        return map;
     }
 
 

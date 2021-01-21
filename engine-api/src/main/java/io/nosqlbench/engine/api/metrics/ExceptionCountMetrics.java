@@ -20,6 +20,8 @@ package io.nosqlbench.engine.api.metrics;
 import com.codahale.metrics.Counter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExceptionCountMetrics {
     private final ConcurrentHashMap<Class<? extends Throwable>, Counter> counters = new ConcurrentHashMap<>();
-    private ActivityDef activityDef;
+    private final ActivityDef activityDef;
 
     public ExceptionCountMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -38,11 +40,15 @@ public class ExceptionCountMetrics {
         if (c == null) {
             synchronized (counters) {
                 c = counters.computeIfAbsent(
-                        e.getClass(),
-                        k -> ActivityMetrics.counter(activityDef, "errorcounts." + e.getClass().getSimpleName())
+                    e.getClass(),
+                    k -> ActivityMetrics.counter(activityDef, "errorcounts." + e.getClass().getSimpleName())
                 );
             }
         }
         c.inc();
+    }
+
+    public List<Counter> getCounters() {
+        return new ArrayList<>(counters.values());
     }
 }

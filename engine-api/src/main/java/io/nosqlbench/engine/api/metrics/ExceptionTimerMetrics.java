@@ -17,41 +17,39 @@
 
 package io.nosqlbench.engine.api.metrics;
 
-import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Use this to provide exception histograms in a uniform way.
- * To use this, you need to have a way to get a meaningful magnitude
- * from each type of error you want to track.
+ * Use this to provide exception metering in a uniform way.
  */
-public class ExceptionHistoMetrics {
-    private final ConcurrentHashMap<Class<? extends Throwable>, Histogram> histos = new ConcurrentHashMap<>();
+public class ExceptionTimerMetrics {
+    private final ConcurrentHashMap<Class<? extends Throwable>, Timer> timers = new ConcurrentHashMap<>();
     private final ActivityDef activityDef;
 
-    public ExceptionHistoMetrics(ActivityDef activityDef) {
+    public ExceptionTimerMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void update(Throwable e, long magnitude) {
-        Histogram h = histos.get(e.getClass());
-        if (h == null) {
-            synchronized (histos) {
-                h = histos.computeIfAbsent(
-                    e.getClass(),
-                    k -> ActivityMetrics.histogram(activityDef, "errorhistos." + e.getClass().getSimpleName())
+    public void update(Throwable throwable, long nanosDuration) {
+        Timer timer = timers.get(throwable.getClass());
+        if (timer == null) {
+            synchronized (timers) {
+                timer = timers.computeIfAbsent(
+                    throwable.getClass(),
+                    k -> ActivityMetrics.timer(activityDef, "exceptions." + throwable.getClass().getSimpleName())
                 );
             }
         }
-        h.update(magnitude);
+        timer.update(nanosDuration, TimeUnit.NANOSECONDS);
     }
 
-
-    public List<Histogram> getHistograms() {
-        return new ArrayList<>(histos.values());
+    public List<Timer> getTimers() {
+        return new ArrayList<>(timers.values());
     }
 }

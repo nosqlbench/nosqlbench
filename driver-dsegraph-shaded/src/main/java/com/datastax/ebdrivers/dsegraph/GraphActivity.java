@@ -62,7 +62,6 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
     @Override
     public void initActivity() {
         logger.debug("initializing activity: " + this.activityDef.getAlias());
-        exceptionMeterMetrics = new ExceptionMeterMetrics(activityDef);
 
         stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
         cluster = createCluster();
@@ -266,10 +265,6 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
                 i -> options.setReadTimeoutMillis(i.intValue())
         );
 
-    }
-
-    public ExceptionMeterMetrics getExceptionCountMetrics() {
-        return exceptionMeterMetrics;
     }
 
     /**

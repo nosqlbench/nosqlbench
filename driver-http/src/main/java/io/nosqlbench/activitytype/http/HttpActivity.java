@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -32,10 +33,12 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Meter rowCounter;
     public Histogram skippedTokens;
     public Timer resultSuccessTimer;
+    public Histogram statusCodeHisto;
 
     private OpSequence<ReadyHttpOp> sequencer;
     private boolean diagnosticsEnabled;
     private long timeout = Long.MAX_VALUE;
+    private NBErrorHandler errorhandler;
 
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -51,12 +54,21 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         resultTimer = ActivityMetrics.timer(activityDef, "result");
         triesHisto = ActivityMetrics.histogram(activityDef, "tries");
         rowCounter = ActivityMetrics.meter(activityDef, "rows");
+        statusCodeHisto = ActivityMetrics.histogram(activityDef, "statuscode");
         skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
         this.sequencer = createOpSequence(ReadyHttpOp::new);
 
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
+        this.errorhandler = new NBErrorHandler(
+            () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
+            this::getExceptionMetrics
+        );
+    }
+
+    public NBErrorHandler getErrorHandler() {
+        return this.errorhandler;
     }
 
     @Override
@@ -64,8 +76,8 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         super.onActivityDefUpdate(activityDef);
 
         this.console = getParams().getOptionalString("diag")
-                .map(s -> HttpConsoleFormats.apply(s, this.console))
-                .orElseGet(() -> HttpConsoleFormats.apply(null, null));
+            .map(s -> HttpConsoleFormats.apply(s, this.console))
+            .orElseGet(() -> HttpConsoleFormats.apply(null, null));
 
         this.diagnosticsEnabled = console.isDiagnosticMode();
 

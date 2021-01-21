@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.config.params;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -17,4 +18,5 @@ public interface Element {
 
     <T> T getOr(String name, T defaultValue);
 
+    Map<String, Object> getMap();
 }

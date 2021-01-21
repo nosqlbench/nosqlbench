@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Set;
+
 public class JsonBackedConfigElement implements ElementData {
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -18,6 +20,11 @@ public class JsonBackedConfigElement implements ElementData {
     @Override
     public Object get(String name) {
         return jsonObject.get(name);
+    }
+
+    @Override
+    public Set<String> getKeys() {
+        return jsonObject.keySet();
     }
 
     @Override

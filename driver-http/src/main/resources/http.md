@@ -144,23 +144,34 @@ All other request fields are optional and have reasonable defaults:
   against the string form of a status code. If any characters other than digits spaces and commas
   are found in this value, then it is taken as a regex. If this is not provided, then any status
   code which is >=200 and <300 is considered valid.
-- **ok-body** - An optional regex pattern which will be applied to the body to verify that it is a
-  valid response. If this is not provided, then content bodies are read, but any content is
-  considered valid.
+- **ok-body** - An optional regex pattern which will be applied to the
+  body to verify that it is a valid response. If this is not provided,
+  then content bodies are read, but any content is considered valid.
 
-Any other statement parameter which is capitalized is taken as a request header. If additional
-fields are provided which are not included in the above list, or which are not capitalized, then an
-error is thrown.
+Any other statement parameter which is capitalized is taken as a request
+header. If additional fields are provided which are not included in the
+above list, or which are not capitalized, then an error is thrown.
 
 ## Error Handling & Retries
 
-Presently, no determination is made about whether or not an errored response *should* be retryable.
-More contextual error handling may be added in a future version.
+By default, a request which encounters an exception is retried up to 10
+times. If you want to change this, set another value to the
+`retries=` activity parameters.
+
+Presently, no determination is made about whether or not an errored
+response *should* be retryable, but it is possible to configure this if
+you have a specific exception type that indicates a retryable operation.
+
+The HTTP driver is the first NB driver to include a completely
+configurable error handler chain. This is explained in the
+`error-handling` topic. By default, the HTTP activity's error handler is
+wired to stop the activity for any error encountered. For more details see
+the `error-handling` topic.
 
 ## SSL Support
 
-SSL should work for any basic client request that doesn't need custom SSL configuration. If needed,
-more configurable SSL support will be added.
+SSL should work for any basic client request that doesn't need custom SSL
+configuration. If needed, more configurable SSL support will be added.
 
 ## Client Behavior
 

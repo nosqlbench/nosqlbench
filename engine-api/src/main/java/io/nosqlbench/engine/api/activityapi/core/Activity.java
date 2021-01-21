@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
+import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
@@ -196,4 +197,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     InputStream getConsoleIn();
 
     void setConsoleOut(PrintWriter writer);
+
+    ErrorMetrics getExceptionMetrics();
 }

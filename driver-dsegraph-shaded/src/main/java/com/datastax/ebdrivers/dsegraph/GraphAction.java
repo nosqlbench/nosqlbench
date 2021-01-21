@@ -112,9 +112,9 @@ public class GraphAction implements SyncAction, ActivityDefObserver {
             this.retryableResponse = ErrorResponse.valueOf(retryableSpec);
         }
         graphErrorHandler = new GraphErrorHandler(
-                realErrorResponse,
-                retryableResponse,
-                activity.getExceptionCountMetrics());
+            realErrorResponse,
+            retryableResponse,
+            activity.getExceptionMetrics().getExceptionMeterMetrics());
 
         this.opSequencer = activity.getOpSequence();
 

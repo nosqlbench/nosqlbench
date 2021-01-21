@@ -1,5 +1,7 @@
 package io.nosqlbench.nb.api.config.params;
 
+import java.util.Set;
+
 /**
  * A generic type-safe reader interface for parameters.
  * TODO: This should be consolidated with the design of ConfigLoader once the features of these two APIs are stabilized.
@@ -12,6 +14,8 @@ public interface ElementData {
     String NAME = "name";
 
     Object get(String name);
+
+    Set<String> getKeys();
 
     boolean containsKey(String name);
 

@@ -3,6 +3,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
+import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
@@ -16,12 +17,12 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.metrics.*;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -54,6 +55,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private PrintWriter console;
     private long startedAtMillis;
     private int nameEnumerator = 0;
+    private ErrorMetrics errorMetrics;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -279,14 +281,22 @@ public class SimpleActivity implements Activity, ProgressCapable {
     }
 
     @Override
+    public synchronized ErrorMetrics getExceptionMetrics() {
+        if (errorMetrics == null) {
+            errorMetrics = new ErrorMetrics(this.getActivityDef());
+        }
+        return errorMetrics;
+    }
+
+    @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
-                .map(RateSpec::new)
-                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
+            .map(RateSpec::new)
+            .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
-                .map(RateSpec::new).ifPresent(
+            .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
