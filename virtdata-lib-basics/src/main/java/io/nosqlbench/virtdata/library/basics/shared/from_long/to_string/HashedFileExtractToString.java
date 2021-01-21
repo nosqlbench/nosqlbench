@@ -57,10 +57,10 @@ public class HashedFileExtractToString implements LongFunction<String> {
         this.positionRange = new HashRange(1, (fileDataImage.limit() - maxsize) - 1);
     }
 
-    @Example({"HashedFileExtractToString('data/adventures.txt',100,.1)", "return a fragment between 90 and 110 characters long"})
-    public HashedFileExtractToString(String fileName, int avgsize, double percentVary) {
-        this(fileName, avgsize - (int) (percentVary * avgsize), avgsize + (int) (percentVary * avgsize));
-    }
+//    @Example({"HashedFileExtractToString('data/adventures.txt',100,.1)", "return a fragment between 90 and 110 characters long"})
+//    public HashedFileExtractToString(String fileName, int avgsize, double percentVary) {
+//        this(fileName, avgsize - (int) (percentVary * avgsize), avgsize + (int) (percentVary * avgsize));
+//    }
 
     private void loadData() {
         if (fileDataImage == null) {

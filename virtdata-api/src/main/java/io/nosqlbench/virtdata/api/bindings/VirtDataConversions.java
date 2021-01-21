@@ -57,6 +57,7 @@ public class VirtDataConversions {
      * Adapt a functional object into a different type of functional object.
      *
      * @param func            The original function object.
+     * @param functionType    The type of the function you need
      * @param <F>             The generic type of function being converted from
      * @param <T>             The generic type of function being converted to
      * @param resultSignature The signature of all output types, linearized for use after type-erasure.
