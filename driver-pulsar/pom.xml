@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>4.15.10-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>driver-pulsar</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <description>
+        A Pulsar driver for nosqlbench. This provides the ability to inject synthetic data
+        into a pulsar system.
+    </description>
+
+    <properties>
+        <pulsar.version>2.7.0</pulsar.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- core dependencies -->
+
+        <dependency>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-client</artifactId>
+            <version>${pulsar.version}</version>
+        </dependency>
+
+        <!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.avro/avro &ndash;&gt;-->
+        <!--    <dependency>-->
+        <!--      <groupId>org.apache.avro</groupId>-->
+        <!--      <artifactId>avro</artifactId>-->
+        <!--      <version>1.10.0</version>-->
+        <!--    </dependency>-->
+
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>4.15.10-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-stdout</artifactId>
+            <version>4.15.10-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
