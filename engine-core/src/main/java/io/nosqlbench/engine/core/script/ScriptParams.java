@@ -27,6 +27,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
         for (Entry<String, String> overrideEntry : map.entrySet()) {
             String oKey = overrideEntry.getKey();
             String oVal = overrideEntry.getValue();
-            if (oVal.toUpperCase().endsWith("UNDEF")) {
+            if (oVal.toUpperCase().endsWith("UNDEF") || oVal.toUpperCase(Locale.ROOT).endsWith("UNSET")) {
                 String removed = result.remove(oKey);
                 logger.trace("Removed key '" + oKey + "': '" + removed + "' from script params because it was " + oVal + " in overrides");
             } else {
