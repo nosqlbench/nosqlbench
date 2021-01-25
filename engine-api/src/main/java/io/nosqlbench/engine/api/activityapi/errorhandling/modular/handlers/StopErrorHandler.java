@@ -13,8 +13,9 @@ public class StopErrorHandler implements ErrorHandler {
 
     @Override
     public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        String durationSummary = String.format("%.3fS", ((double) durationInNanos / 1000000000.0));
         throw new RuntimeException(
-            "An error was rethrown in order to stop the activity in cycle " + cycle + ", duration" + durationInNanos + " msg:" +
+            "An error was rethrown in order to stop the activity in cycle:" + cycle + ", duration:" + durationSummary + " msg:" +
                 t.getMessage());
     }
 }

@@ -111,7 +111,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
                 }
                 return t -> this.activityClient;
             default:
-                throw new RuntimeException("unable to recoginize client scope: " + getClientScope());
+                throw new RuntimeException("unable to recognize client scope: " + getClientScope());
         }
     }
 

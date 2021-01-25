@@ -51,7 +51,7 @@ public class HttpAction implements SyncAction {
     }
 
     @Override
-    public int runCycle(long cycleValue) {
+    public int runCycle(long cycle) {
         int tries = 0;
 
         // The request to be used must be constructed from the template each time.
@@ -61,18 +61,18 @@ public class HttpAction implements SyncAction {
         // operation for execution, including data generation as well as
         // op construction
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            ReadyHttpOp readHTTPOperation = sequencer.get(cycleValue);
-            httpOp = readHTTPOperation.apply(cycleValue);
+            ReadyHttpOp readHTTPOperation = sequencer.get(cycle);
+            httpOp = readHTTPOperation.apply(cycle);
         } catch (Exception e) {
             if (httpActivity.isDiagnosticMode()) {
                 if (httpOp != null) {
-                    httpActivity.console.summarizeRequest("ERRORED REQUEST", e, httpOp.request, System.out, cycleValue,
+                    httpActivity.console.summarizeRequest("ERRORED REQUEST", e, httpOp.request, System.out, cycle,
                         System.nanoTime());
                 } else {
                     System.out.println("---- REQUEST was null");
                 }
             }
-            throw new RuntimeException("while binding request in cycle " + cycleValue + ": " + e.getMessage(), e);
+            throw new RuntimeException("while binding request in cycle " + cycle + ": " + e.getMessage(), e);
         } finally {
         }
 
@@ -83,7 +83,7 @@ public class HttpAction implements SyncAction {
             try (Timer.Context executeTime = httpActivity.executeTimer.time()) {
                 responseFuture = client.sendAsync(httpOp.request, this.bodyreader);
             } catch (Exception e) {
-                throw new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
+                throw new RuntimeException("while waiting for response in cycle " + cycle + ":" + e.getMessage(), e);
             }
 
             HttpResponse<String> response = null;
@@ -93,12 +93,12 @@ public class HttpAction implements SyncAction {
                 response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
                 if (httpOp.ok_status != null) {
                     if (!httpOp.ok_status.matcher(String.valueOf(response.statusCode())).matches()) {
-                        throw new InvalidStatusCodeException(cycleValue, httpOp.ok_status, response.statusCode());
+                        throw new InvalidStatusCodeException(cycle, httpOp.ok_status, response.statusCode());
                     }
                 }
                 if (httpOp.ok_body != null) {
                     if (!httpOp.ok_body.matcher(response.body()).matches()) {
-                        throw new InvalidResponseBodyException(cycleValue, httpOp.ok_body, response.body());
+                        throw new InvalidResponseBodyException(cycle, httpOp.ok_body, response.body());
                     }
                 }
             } catch (Exception e) {
@@ -113,7 +113,7 @@ public class HttpAction implements SyncAction {
                 }
                 if (httpActivity.isDiagnosticMode()) {
                     if (response != null) {
-                        httpActivity.console.summarizeResponseChain(null, response, System.out, cycleValue, nanos);
+                        httpActivity.console.summarizeResponseChain(null, response, System.out, cycle, nanos);
                     } else {
                         System.out.println("---- RESPONSE was null");
                     }
@@ -124,7 +124,7 @@ public class HttpAction implements SyncAction {
                     break; // break out of the tries loop without retrying, because there was no error
                 } else {
                     // count and log exception types
-                    ErrorDetail detail = httpActivity.getErrorHandler().handleError(error, cycleValue, nanos);
+                    ErrorDetail detail = httpActivity.getErrorHandler().handleError(error, cycle, nanos);
                     if (!detail.isRetryable()) {
                         break; // break out of the tries loop without retrying, because the error handler said so
                     }
