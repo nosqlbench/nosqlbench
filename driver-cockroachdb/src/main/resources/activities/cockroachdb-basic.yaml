@@ -1,0 +1,69 @@
+# java -jar nb.jar run driver=cockroachdb workload=cockroachdb-basic tags=phase:rampup cycles=10 serverName=localhost
+# java -jar nb.jar run driver=cockroachdb workload=cockroachdb-basic tags=phase:main cycles=10 serverName=localhost
+description: An example of a basic cockroach insert
+
+scenarios:
+  default:
+    - run driver=cockroachdb tags==phase:main threads==auto cycles===<<main-cycles:1000000>>
+  rampup:
+    - run driver=cockroachdb tags==phase:rampup threads==auto cycles===<<rampup-cycles:1000000>>
+  schema:
+    - run driver=cockroachdb tags==phase:schema threads==1 cycles===2
+    #- run driver=stdout tags==phase:schema threads==1 cycles===UNDEF
+
+bindings:
+  seq_key: Mod(<<keyCount:1000000>>L); ToInt()
+  seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToString() -> String
+  rw_key: <<keyDist:Uniform(0,1000000)->long>>; ToInt()
+  rw_value: <<valDist:Uniform(0,1000000000)->int>>; <<valueSizeDist:Hash()>>; ToString() -> String
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    params:
+    statements:
+      - create-database: |
+          CREATE DATABASE <<database:bank>>;
+        tags:
+          name: create-database
+      - create-table: |
+          CREATE TABLE IF NOT EXISTS <<database:bank>>.<<table:banktransaction>> (
+            code STRING PRIMARY KEY,
+            amount INTEGER
+          );
+        tags:
+          name: create-table
+  - name: rampup
+    tags:
+      phase: rampup
+    params:
+    statements:
+      - rampup-insert: insert into <<database:bank>>.<<table:banktransaction>> ( code, amount ) values ( '{seq_key}', {seq_value} );
+        params:
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:1>>
+    statements:
+      - main-find: |
+          SELECT code, amount FROM <<database:bank>>.<<table:banktransaction>> WHERE code = '{rw_key}' AND amount = {rw_value};
+        params:
+        tags:
+          name: main-find
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:1>>
+    statements:
+      - main-insert: |
+          UPDATE <<database:bank>>.<<table:banktransaction>> SET amount = {seq_value} WHERE code = '{seq_key}';
+        params:
+        tags:
+          name: main-insert

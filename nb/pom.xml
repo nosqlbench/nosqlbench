@@ -129,6 +129,12 @@
     <!--            <version>2.12.51-SNAPSHOT</version>-->
     <!--        </dependency>-->
 
+      <dependency>
+          <groupId>io.nosqlbench</groupId>
+          <artifactId>driver-cockroachdb</artifactId>
+          <version>4.15.8-SNAPSHOT</version>
+      </dependency>
+
     <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
