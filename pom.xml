@@ -53,6 +53,7 @@
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
         <module>driver-jmx</module>
+        <module>driver-jdbc</module>
 
         <!-- VIRTDATA MODULES -->
 
@@ -65,6 +66,7 @@
         <module>virtdata-lib-realer</module>
 
         <module>virtdata-userlibs</module>
+        <module>driver-cockroachdb</module>
 
     </modules>
 
