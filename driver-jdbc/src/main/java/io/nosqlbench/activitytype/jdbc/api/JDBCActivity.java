@@ -16,10 +16,10 @@ import org.apache.logging.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
+// This should not be exposed as as service directly unless it can
+// be used with a modular JDBC configuration.
 public abstract class JDBCActivity extends SimpleActivity {
     private final static Logger LOGGER = LogManager.getLogger(JDBCActivity.class);
     private Timer bindTimer;

@@ -132,7 +132,7 @@
       <dependency>
           <groupId>io.nosqlbench</groupId>
           <artifactId>driver-cockroachdb</artifactId>
-          <version>4.15.8-SNAPSHOT</version>
+          <version>4.15.10-SNAPSHOT</version>
       </dependency>
 
     <dependency>
