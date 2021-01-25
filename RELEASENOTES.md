@@ -12,3 +12,14 @@
 - ead06c0a improvements to generic configuration APIs
 - 0b886931 findmax improvements
 - 998439c8 add customizable timers to CQL driver
+- 76779d10 (HEAD -> main) post-merge fixups for cockroachdb driver
+  contribution
+- 5be890bf support both undef and unset in named scenarios
+- 5bbdc961 improve error handling
+- c423cf00 cycle naming for simplicity
+- 9a044522 Initial commit for cockroachdb driver
+- 34b7bfc0 experimental dashboard capture
+- 71c05903 add generalized error handling in http
+- fc42ff47 disable hashed file function for now
+- 83a40b01 provide additional signature for HashedFileExtract
+- cdf2bd59 make info less chatty by pushing some things to debug
