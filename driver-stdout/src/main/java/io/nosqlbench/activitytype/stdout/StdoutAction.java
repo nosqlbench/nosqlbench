@@ -45,15 +45,15 @@ public class StdoutAction implements SyncAction {
     }
 
     @Override
-    public int runCycle(long cycleValue) {
+    public int runCycle(long cycle) {
         StringBindings stringBindings;
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            stringBindings = opsource.get(cycleValue);
-            statement = stringBindings.bind(cycleValue);
+            stringBindings = opsource.get(cycle);
+            statement = stringBindings.bind(cycle);
             showstmts = activity.getShowstmts();
             if (showstmts) {
-                logger.info("STMT(cycle=" + cycleValue + "):\n" + statement);
+                logger.info("STMT(cycle=" + cycle + "):\n" + statement);
             }
         }
 

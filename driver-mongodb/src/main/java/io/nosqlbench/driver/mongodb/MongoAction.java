@@ -1,15 +1,14 @@
 package io.nosqlbench.driver.mongodb;
 
-import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+
+import java.util.concurrent.TimeUnit;
 
 public class MongoAction implements SyncAction {
 
@@ -31,16 +30,16 @@ public class MongoAction implements SyncAction {
     }
 
     @Override
-    public int runCycle(long cycleValue) {
+    public int runCycle(long cycle) {
         ReadyMongoStatement rms;
         Bson queryBson;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            rms = sequencer.get(cycleValue);
-            queryBson = rms.bind(cycleValue);
+            rms = sequencer.get(cycle);
+            queryBson = rms.bind(cycle);
 
             // Maybe show the query in log/console - only for diagnostic use
             if (activity.isShowQuery()) {
-                logger.info("Query(cycle={}):\n{}", cycleValue, queryBson);
+                logger.info("Query(cycle={}):\n{}", cycle, queryBson);
             }
         }
 
@@ -66,11 +65,11 @@ public class MongoAction implements SyncAction {
 
                 return ok == 1 ? 0 : 1;
             } catch (Exception e) {
-                logger.error("Failed to runCommand {} on cycle {}, tries {}", queryBson, cycleValue, i, e);
+                logger.error("Failed to runCommand {} on cycle {}, tries {}", queryBson, cycle, i, e);
             }
         }
 
         throw new RuntimeException(String.format("Exhausted max tries (%s) on cycle %s",
-                                                 activity.getMaxTries(), cycleValue));
+            activity.getMaxTries(), cycle));
     }
 }

@@ -24,11 +24,11 @@ public interface SyncAction extends Action {
      * The meaning of status codes is activity specific, however the values Integer.MIN_VALUE,
      * and Integer.MAX_VALUE are reserved.
      *
-     * @param value a long input
+     * @param cycle a long input
      * @return an int status
      */
-    default int runCycle(long value) {
-        return (int) value % 100;
+    default int runCycle(long cycle) {
+        return (int) cycle % 100;
     }
 
 }

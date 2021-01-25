@@ -43,15 +43,15 @@ public class WebDriverAction implements SyncAction, ActivityDefObserver {
     // As it is right now, all commands are resolved dynamically, which is still not going to be the limiting
     // factor.
     @Override
-    public int runCycle(long value) {
+    public int runCycle(long cycle) {
 
-        CommandTemplate commandTemplate = activity.getOpSequence().get(value);
+        CommandTemplate commandTemplate = activity.getOpSequence().get(cycle);
         try {
-            WebDriverVerbs.execute(value, commandTemplate, context, dryrun);
+            WebDriverVerbs.execute(cycle, commandTemplate, context, dryrun);
             return 0;
 
         } catch (Exception e) {
-            logger.error("Error with cycle(" + value + "), statement(" + commandTemplate.getName() + "): "+e.getMessage());
+            logger.error("Error with cycle(" + cycle + "), statement(" + commandTemplate.getName() + "): " + e.getMessage());
             if (errors.equals("stop")) {
                 throw e;
             }

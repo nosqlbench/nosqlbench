@@ -28,9 +28,9 @@ public class JMXAction implements SyncAction {
     }
 
     @Override
-    public int runCycle(long value) {
-        ReadyJmxOp readyJmxOp = sequencer.get(value);
-        JmxOp jmxOp = readyJmxOp.bind(value);
+    public int runCycle(long cycle) {
+        ReadyJmxOp readyJmxOp = sequencer.get(cycle);
+        JmxOp jmxOp = readyJmxOp.bind(cycle);
         jmxOp.execute();
         return 0;
     }

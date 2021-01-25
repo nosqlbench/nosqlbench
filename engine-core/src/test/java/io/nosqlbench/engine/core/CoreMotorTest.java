@@ -79,8 +79,8 @@ public class CoreMotorTest {
         return new SyncAction() {
             private int offset=0;
             @Override
-            public int runCycle(long value) {
-                ary.set(offset++,value);
+            public int runCycle(long cycle) {
+                ary.set(offset++, cycle);
                 return 0;
             }
         };
@@ -88,8 +88,8 @@ public class CoreMotorTest {
     private SyncAction getTestConsumer(final AtomicLong atomicLong) {
         return new SyncAction() {
             @Override
-            public int runCycle(long value) {
-                atomicLong.set(value);
+            public int runCycle(long cycle) {
+                atomicLong.set(cycle);
                 return 0;
             }
         };

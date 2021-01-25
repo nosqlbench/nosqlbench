@@ -41,7 +41,7 @@ public class GraphAction implements SyncAction, ActivityDefObserver {
     }
 
     @Override
-    public int runCycle(long cycleValue) {
+    public int runCycle(long cycle) {
 
         int tries = 0;
         BindableGraphStatement readyGraphStatement;
@@ -52,11 +52,11 @@ public class GraphAction implements SyncAction, ActivityDefObserver {
 
             try (Timer.Context bindTime = activity.bindTimer.time()) {
 
-                BindableGraphStatement bindableGraphStatement = opSequencer.get(cycleValue);
-                simpleGraphStatement = bindableGraphStatement.bind(cycleValue);
+                BindableGraphStatement bindableGraphStatement = opSequencer.get(cycle);
+                simpleGraphStatement = bindableGraphStatement.bind(cycle);
 
                 if (showstmts) {
-                    logger.info("GRAPH QUERY(cycle=" + cycleValue + "):\n" + simpleGraphStatement.getQueryString());
+                    logger.info("GRAPH QUERY(cycle=" + cycle + "):\n" + simpleGraphStatement.getQueryString());
                 }
             }
 
@@ -72,7 +72,7 @@ public class GraphAction implements SyncAction, ActivityDefObserver {
                     GraphResultSet resultSet = resultSetFuture.get();
                     break; // This is normal termination of this loop, when retries aren't needed
                 } catch (Exception e) {
-                    if (!graphErrorHandler.HandleError(e, simpleGraphStatement, cycleValue)) {
+                    if (!graphErrorHandler.HandleError(e, simpleGraphStatement, cycle)) {
                         e.printStackTrace();
                         logger.error(e.toString(), e);
                         break;

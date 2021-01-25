@@ -136,8 +136,8 @@ public class ActivityExecutorTest {
     private SyncAction motorActionDelay(final long delay) {
         SyncAction consumer = new SyncAction() {
             @Override
-            public int runCycle(long value) {
-                System.out.println("consuming " + value + ", delaying:" + delay);
+            public int runCycle(long cycle) {
+                System.out.println("consuming " + cycle + ", delaying:" + delay);
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {

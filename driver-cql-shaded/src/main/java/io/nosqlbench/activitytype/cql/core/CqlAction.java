@@ -66,11 +66,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
     }
 
     @Override
-    public int runCycle(long value) {
+    public int runCycle(long cycle) {
         // In this activity type, we use the same phase
         // logic for the initial phase (runCycle(...))
         // as well as subsequent phases.
-        return runPhase(value);
+        return runPhase(cycle);
     }
 
     public int runPhase(long cycleValue) {

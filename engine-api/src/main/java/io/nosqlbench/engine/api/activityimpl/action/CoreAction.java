@@ -36,11 +36,11 @@ public class CoreAction implements SyncAction {
     }
 
     @Override
-    public int runCycle(long value) {
-        if ((value % interval) == 0) {
-            logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
+    public int runCycle(long cycle) {
+        if ((cycle % interval) == 0) {
+            logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
         } else {
-            logger.trace(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
+            logger.trace(activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
         }
         return 0;
     }

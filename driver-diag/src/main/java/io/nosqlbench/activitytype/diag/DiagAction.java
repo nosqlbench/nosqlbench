@@ -124,10 +124,10 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
     }
 
     @Override
-    public int runCycle(long value) {
+    public int runCycle(long cycle) {
 
         if (logcycle) {
-            logger.trace("cycle " + value);
+            logger.trace("cycle " + cycle);
         }
 
         try (Timer.Context timerctx = resultTimer.time()) {
@@ -142,13 +142,13 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
 
             if ((now - lastUpdate) > quantizedInterval) {
                 long delay = ((now - lastUpdate) - quantizedInterval);
-                logger.info("diag action interval, input=" + value + ", phase=" + completedPhase + ", report delay=" + delay + "ms");
+                logger.info("diag action interval, input=" + cycle + ", phase=" + completedPhase + ", report delay=" + delay + "ms");
                 lastUpdate += quantizedInterval;
                 diagActivity.delayHistogram.update(delay);
             }
 
-            if ((value % reportModulo) == 0) {
-                logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+            if ((cycle % reportModulo) == 0) {
+                logger.info("diag action   modulo, input=" + cycle + ", phase=" + completedPhase);
             }
 
             completedPhase++;
@@ -156,7 +156,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
             int result = 0;
 
             if (resultmodulo >= 0) {
-                if ((value % resultmodulo) == 0) {
+                if ((cycle % resultmodulo) == 0) {
                     result = 1;
                 } else {
                     result = 0;
@@ -164,14 +164,14 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
             } else if (staticvalue >= 0) {
                 return staticvalue;
             } else {
-                result = (byte) (value % 128);
+                result = (byte) (cycle % 128);
             }
 
-            if (erroroncycle == value) {
+            if (erroroncycle == cycle) {
                 this.diagActivity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
             }
 
-            if (throwoncycle == value) {
+            if (throwoncycle == cycle) {
                 throw new DiagDummyError("Diag was asked to throw an error on cycle " + throwoncycle);
             }
 
