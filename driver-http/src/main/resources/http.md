@@ -45,7 +45,7 @@ You can even make a detailed request with custom headers and result verification
 ```yaml
 # Require that the result be status code 200-299 match regex "OK, account id is .*" in the body
 statements:
-  - name: 'get-from-google'
+  - get-from-google:
     method: GET
     uri: "https://google.com/"
     version: "HTTP/1.1"
