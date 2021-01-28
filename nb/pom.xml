@@ -56,7 +56,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-pulsar</artifactId>
-            <version>4.15.10-SNAPSHOT</version>
+            <version>4.15.11-SNAPSHOT</version>
         </dependency>
 
         <dependency>

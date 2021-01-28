@@ -168,6 +168,18 @@ public class CommandTemplate {
         return this.dynamics.size() == 0;
     }
 
+    public boolean isStatic(String keyname) {
+        return this.statics.containsKey(keyname);
+    }
+
+    public boolean isDynamic(String keyname) {
+        return this.dynamics.containsKey(keyname);
+    }
+
+    public boolean containsKey(String keyname) {
+        return this.statics.containsKey(keyname) || this.dynamics.containsKey(keyname);
+    }
+
     /**
      * The set of key names known by this command template.
      */
@@ -179,9 +191,20 @@ public class CommandTemplate {
     @Override
     public String toString() {
         return "CommandTemplate{" +
-                "name='" + name + '\'' +
-                ", statics=" + statics +
-                ", dynamics=" + dynamics +
-                '}';
+            "name='" + name + '\'' +
+            ", statics=" + statics +
+            ", dynamics=" + dynamics +
+            '}';
+    }
+
+    public String getStatic(String staticVar) {
+        return statics.get(staticVar);
+    }
+
+    public String getStaticOr(String staticVar, String defaultVal) {
+        if (statics.containsKey(staticVar)) {
+            return statics.get(staticVar);
+        }
+        return defaultVal;
     }
 }

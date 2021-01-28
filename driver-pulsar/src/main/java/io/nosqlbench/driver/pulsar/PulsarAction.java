@@ -1,6 +1,8 @@
 package io.nosqlbench.driver.pulsar;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.driver.pulsar.ops.PulsarOp;
+import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

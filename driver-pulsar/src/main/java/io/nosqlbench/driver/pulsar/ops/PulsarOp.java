@@ -1,8 +1,10 @@
-package io.nosqlbench.driver.pulsar;
+package io.nosqlbench.driver.pulsar.ops;
 
 /**
  * Base type of all Pulsar Operations including Producers and Consumers.
  */
 public interface PulsarOp extends Runnable {
 
+    default void run() {
+    }
 }

@@ -1,0 +1,43 @@
+package io.nosqlbench.engine.api.scoping;
+
+import java.util.function.Supplier;
+
+/**
+ * Helper class to consolidate the notions of scoping items over different
+ * NB layers of execution.
+ */
+public enum ScopedSupplier {
+
+    /**
+     * Once a supplier is instantiated for singleton scope, it should provide only one instance of
+     * the supplied element for that instance. Multiple instances (separately constructed)
+     * of the supplier can each provide their own distinct supplied instance.
+     */
+    singleton,
+    /**
+     * Once a supplier is instantiated for thread scope, it should provide a unique instance of
+     * the supplied element for each thread, according to the inner supplier's semantics.
+     */
+    thread,
+    /**
+     * When a supplier is instantiated for caller scope, each time the supplier is accessed,
+     * it returns a new instance according to the inner supplier's semantics.
+     */
+    caller;
+
+    public <T> Supplier<T> supplier(Supplier<T> supplier) {
+        return switch (this) {
+            case singleton -> {
+                T got = supplier.get();
+                yield () -> got;
+            }
+            case thread -> {
+                ThreadLocal<T> tlsupplier = ThreadLocal.withInitial(supplier);
+                yield () -> tlsupplier.get();
+            }
+            case caller -> supplier;
+        };
+    }
+
+
+}
