@@ -1,11 +1,38 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.net.ssl.SSLContext;
+
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.NettyOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.policies.*;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RetryPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.WhiteListPolicy;
 import com.datastax.driver.dse.DseCluster;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.haproxy.HAProxyCommand;
+import io.netty.handler.codec.haproxy.HAProxyMessage;
+import io.netty.handler.codec.haproxy.HAProxyProtocolVersion;
+import io.netty.handler.codec.haproxy.HAProxyProxiedProtocol;
 import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
@@ -17,15 +44,6 @@ import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.net.ssl.SSLContext;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -253,6 +271,48 @@ public class CQLSessionCache implements Shutdownable {
             LoadBalancingPolicy whitelistPolicy = new WhiteListPolicy(new RoundRobinPolicy(), whiteList);
             builder.withAddressTranslator(new ProxyTranslator(inetHost)).withLoadBalancingPolicy(whitelistPolicy);
         }
+
+        activityDef.getParams().getOptionalString("haproxy_source_ip").map(
+            ip -> {
+                return new NettyOptions()
+                {
+                    @Override
+                    public void afterChannelInitialized(SocketChannel channel) throws Exception
+                    {
+                        try
+                        {
+                            InetAddress sourceIp = InetAddress.getByName(ip);
+                            InetAddress destIp = activityDef.getParams().getOptionalString("haproxy_dest_ip").map(destip -> {
+                                        try
+                                        {
+                                            return InetAddress.getByName(destip);
+                                        }
+                                        catch (UnknownHostException e)
+                                        {
+                                            logger.warn("Invalid haproxy_dest_ip {}", destip);
+                                            return sourceIp;
+                                        }
+                                    }
+                            ).orElse(sourceIp);
+
+                            channel.pipeline().addFirst("proxyProtocol", new ProxyProtocolHander(
+                                    new HAProxyMessage(
+                                            HAProxyProtocolVersion.V1,
+                                            HAProxyCommand.PROXY,
+                                            sourceIp instanceof Inet6Address ? HAProxyProxiedProtocol.TCP6 : HAProxyProxiedProtocol.TCP4,
+                                            sourceIp.getHostAddress(),
+                                            destIp.getHostAddress(),
+                                            8000,
+                                            8000)));
+                        }
+                        catch (UnknownHostException e)
+                        {
+                            logger.warn("Invalid haproxy_source_ip {}", ip);
+                        }
+                    }
+                };
+            }
+        ).ifPresent(builder::withNettyOptions);
 
         Cluster cl = builder.build();
 

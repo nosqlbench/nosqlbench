@@ -64,6 +64,12 @@
             <version>4.8</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-haproxy</artifactId>
+            <version>4.1.54.Final</version>
+        </dependency>
+
 <!--        <dependency>-->
 <!--            <groupId>io.netty</groupId>-->
 <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
