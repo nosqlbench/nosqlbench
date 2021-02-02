@@ -1,30 +1,7 @@
-- 1adf2a92 (HEAD -> main) fix summary reporting in testing
-- bfd5d5b8 update nb4 rc
-- 69747056 provide better defaults for summary reporting
-- 1184fd77 make info less chatty by pushing some things to debug
-- 837501f8 make http ops verify status 2.. by default
-- 0a84f346 logging annotator should use dedicated log name
-- 290a2489 disambiguate runnable call
-- f1919426 delegate scenario summaries to scenario proper
-- e56444e2 allow setting of logdir for appserver
-- f4ec45a1 remove random installer script
-- bb787fd5 improvements to scenario log handling
-- ead06c0a improvements to generic configuration APIs
-- 0b886931 findmax improvements
-- 998439c8 add customizable timers to CQL driver
-- 76779d10 (HEAD -> main) post-merge fixups for cockroachdb driver
-  contribution
-- 5be890bf support both undef and unset in named scenarios
-- 5bbdc961 improve error handling
-- c423cf00 cycle naming for simplicity
-- 9a044522 Initial commit for cockroachdb driver
-- 34b7bfc0 experimental dashboard capture
-- 71c05903 add generalized error handling in http
-- fc42ff47 disable hashed file function for now
-- 83a40b01 provide additional signature for HashedFileExtract
-- cdf2bd59 make info less chatty by pushing some things to debug
-- 863f8f24 Add support for specifying an haproxy header for new cql connections
-- 6f56c134 Add ByteBufferSizedHashed
-- 4620f312 (origin/http-docs-nit) http docs
-- e5de8714 reorder build
-- cd86ea75 improve error handling
+- f81e4920 (HEAD -> main) pom updates for pulsar
+- fe254cb2 (pulsar) merge fixups
+- d78168de general enhancements to command template API
+- 70709d3d add initial implementation of pulsar ops
+- 0330c18a add rationale and ideas on scoping
+- 4ecd2fd9 add pulsar initial docs and design sketch
+- 2269c1b4 cleanup experimental files
