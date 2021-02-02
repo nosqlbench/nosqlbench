@@ -26,6 +26,7 @@ public enum ScopedSupplier {
     caller;
 
     public <T> Supplier<T> supplier(Supplier<T> supplier) {
+
         return switch (this) {
             case singleton -> {
                 T got = supplier.get();
@@ -38,6 +39,5 @@ public enum ScopedSupplier {
             case caller -> supplier;
         };
     }
-
 
 }
