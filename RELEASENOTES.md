@@ -23,3 +23,8 @@
 - fc42ff47 disable hashed file function for now
 - 83a40b01 provide additional signature for HashedFileExtract
 - cdf2bd59 make info less chatty by pushing some things to debug
+- 863f8f24 Add support for specifying an haproxy header for new cql connections
+- 6f56c134 Add ByteBufferSizedHashed
+- 4620f312 (origin/http-docs-nit) http docs
+- e5de8714 reorder build
+- cd86ea75 improve error handling
