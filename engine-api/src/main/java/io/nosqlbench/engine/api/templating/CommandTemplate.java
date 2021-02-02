@@ -34,6 +34,7 @@ public class CommandTemplate {
     private final String name;
     private final Map<String, String> statics = new HashMap<>();
     private final Map<String, StringBindings> dynamics = new HashMap<>();
+    private final int mapsize;
 
     /**
      * Create a CommandTemplate directly from an OpTemplate.
@@ -131,11 +132,11 @@ public class CommandTemplate {
                 BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
                 StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
                 dynamics.put(param, paramStringBindings);
-                statics.put(param, null);
             } else {
                 statics.put(param, value);
             }
         });
+        this.mapsize = statics.size() + dynamics.size();
     }
 
 
@@ -147,7 +148,9 @@ public class CommandTemplate {
      * @return A map of specific values
      */
     public Map<String, String> getCommand(long cycle) {
-        HashMap<String, String> map = new HashMap<>(statics);
+        HashMap<String, String> map = new HashMap<>(mapsize);
+        map.putAll(statics);
+
         dynamics.forEach((k, v) -> {
             map.put(k, v.bind(cycle));
         });
@@ -170,6 +173,24 @@ public class CommandTemplate {
 
     public boolean isStatic(String keyname) {
         return this.statics.containsKey(keyname);
+    }
+
+    public boolean isStaticSet(String... keynames) {
+        for (String keyname : keynames) {
+            if (!isStatic(keyname)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isDynamicSet(String... keynames) {
+        for (String keyname : keynames) {
+            if (!isDynamic(keyname)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isDynamic(String keyname) {
@@ -201,10 +222,65 @@ public class CommandTemplate {
         return statics.get(staticVar);
     }
 
+    public String getDynamic(String dynamicVar, long input) {
+        return dynamics.get(dynamicVar).bind(input);
+    }
+
+    public String get(String var, long input) {
+        if (statics.containsKey(var)) {
+            return statics.get(var);
+        }
+        if (dynamics.containsKey(var)) {
+            return dynamics.get(var).bind(input);
+        }
+        return null;
+    }
+
+    public String getOr(String var, long input, String defaultVal) {
+        if (statics.containsKey(var)) {
+            return statics.get(var);
+        }
+        if (dynamics.containsKey(var)) {
+            return dynamics.get(var).bind(input);
+        }
+        return defaultVal;
+    }
+
     public String getStaticOr(String staticVar, String defaultVal) {
         if (statics.containsKey(staticVar)) {
             return statics.get(staticVar);
         }
         return defaultVal;
     }
+
+    public String getDynamicOr(String dynamicVar, long input, String defaultVal) {
+        if (dynamics.containsKey(dynamicVar)) {
+            return getDynamic(dynamicVar, input);
+        } else {
+            return defaultVal;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandTemplate that = (CommandTemplate) o;
+        return Objects.equals(name, that.name) && Objects.equals(statics, that.statics) && Objects.equals(dynamics, that.dynamics);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, statics, dynamics);
+    }
+
+    public boolean containsAny(String... varNames) {
+        for (String varName : varNames) {
+            if (this.containsKey(varName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
