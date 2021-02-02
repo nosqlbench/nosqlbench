@@ -37,13 +37,12 @@ public class PulsarAction implements SyncAction {
             );
         }
 
-        int tries = 0;
-        int maxTries = 1;
-
-        while (tries < maxTries) {
-            tries++;
+        try (Timer.Context ctx = activity.getExecuteTimer().time()) {
+            pulsarOp.run();
         }
 
+        // TODO: add retries and use standard error handler
 
+        return 0;
     }
 }
