@@ -89,7 +89,8 @@ public interface NBPathsAPI {
         List<List<Content<?>>> resolveEach();
 
         /**
-         * Provide a list of all matching content that was matched by the search qualifers
+         * Provide a list of all matching content that was matched by the search qualifiers
+         *
          * @return a list of content
          */
         List<Content<?>> list();

@@ -39,6 +39,7 @@ public class GrafanaRegionAnalyzer implements Runnable {
             ccfg.setBaseUri(baseUrl);
             GrafanaClient newclient = new GrafanaClient(ccfg);
             Supplier<String> namer = () -> "nosqlbench-" + SystemId.getNodeId() + "-" + System.currentTimeMillis();
+
             newclient.cacheApiToken(namer, "Admin", Long.MAX_VALUE, Path.of("grafana_apikey"), "admin", "admin");
             this.gclient = newclient;
         }
