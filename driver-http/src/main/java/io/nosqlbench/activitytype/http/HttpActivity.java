@@ -3,6 +3,7 @@ package io.nosqlbench.activitytype.http;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.activitytype.cmds.HttpOp;
 import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpClient;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger(HttpActivity.class);
@@ -35,7 +37,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Timer resultSuccessTimer;
     public Histogram statusCodeHisto;
 
-    private OpSequence<ReadyHttpOp> sequencer;
+    private OpSequence<LongFunction<HttpOp>> sequencer;
     private boolean diagnosticsEnabled;
     private long timeout = Long.MAX_VALUE;
     private NBErrorHandler errorhandler;
@@ -58,7 +60,6 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
         this.sequencer = createOpSequence(ReadyHttpOp::new);
-
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
         this.errorhandler = new NBErrorHandler(
@@ -128,7 +129,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return builder.build();
     }
 
-    public OpSequence<ReadyHttpOp> getSequencer() {
+    public OpSequence<LongFunction<HttpOp>> getSequencer() {
         return sequencer;
     }
 

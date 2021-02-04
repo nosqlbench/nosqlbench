@@ -2,13 +2,12 @@ package io.nosqlbench.activitytype.http.async;
 
 import io.nosqlbench.activitytype.cmds.HttpAsyncOp;
 import io.nosqlbench.activitytype.cmds.HttpOp;
-import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.activitytype.http.HttpActivity;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -19,7 +18,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
 
     private final static Logger logger = LogManager.getLogger(HttpAsyncAction.class);
 
-    private OpSequence<ReadyHttpOp> sequencer;
+    private OpSequence<LongFunction<HttpOp>> sequencer;
     private HttpClient client;
 
     private CompletableFuture<HttpResponse<Void>> future;
@@ -46,7 +45,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
     @Override
     public LongFunction<HttpAsyncOp> getOpInitFunction() {
         return l -> {
-            ReadyHttpOp readyHttpOp = sequencer.get(l);
+            LongFunction<HttpOp> readyHttpOp = sequencer.get(l);
             return new HttpAsyncOp(this,readyHttpOp,l,client);
         };
     }

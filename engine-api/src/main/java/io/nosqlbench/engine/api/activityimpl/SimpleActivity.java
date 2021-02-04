@@ -17,7 +17,7 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
-import io.nosqlbench.engine.api.metrics.*;
+import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 /**
@@ -408,9 +409,9 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>
      * @return
      */
-    protected <O> OpSequence<O> createOpSequenceFromCommands(Function<CommandTemplate, O> opinit) {
+    protected <O> OpSequence<LongFunction<O>> createOpSequenceFromCommands(Function<CommandTemplate, LongFunction<O>> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
-        Function<OpTemplate, O> opTemplateOFunction = f.andThen(opinit);
+        Function<OpTemplate, LongFunction<O>> opTemplateOFunction = f.andThen(opinit);
 
         return createOpSequence(opTemplateOFunction);
     }
@@ -437,14 +438,14 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>    A holder for an executable operation for the native driver used by this activity.
      * @return The sequence of operations as determined by filtering and ratios
      */
-    protected <O> OpSequence<O> createOpSequence(Function<OpTemplate, O> opinit) {
+    protected <O> OpSequence<LongFunction<O>> createOpSequence(Function<OpTemplate, LongFunction<O>> opinit) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
             .getOptionalString("seq")
             .map(SequencerType::valueOf)
             .orElse(SequencerType.bucket);
-        SequencePlanner<O> planner = new SequencePlanner<>(sequencerType);
+        SequencePlanner<LongFunction<O>> planner = new SequencePlanner<>(sequencerType);
 
         StmtsDocList stmtsDocList = null;
 
@@ -470,8 +471,8 @@ public class SimpleActivity implements Activity, ProgressCapable {
         for (int i = 0; i < stmts.size(); i++) {
             long ratio = ratios.get(i);
             OpTemplate optemplate = stmts.get(i);
-            O driverSpecificOp = opinit.apply(optemplate);
-            planner.addOp(driverSpecificOp, ratio);
+            LongFunction<O> driverSpecificReadyOp = opinit.apply(optemplate);
+            planner.addOp(driverSpecificReadyOp, ratio);
         }
 
         return planner.resolve();

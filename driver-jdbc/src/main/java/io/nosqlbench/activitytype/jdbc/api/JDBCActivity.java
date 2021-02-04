@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.LongFunction;
 
 // This should not be exposed as as service directly unless it can
 // be used with a modular JDBC configuration.
@@ -30,7 +31,7 @@ public abstract class JDBCActivity extends SimpleActivity {
     private SQLExceptionCountMetrics sqlExceptionCount;
 
     protected DataSource dataSource;
-    protected OpSequence<ReadyJDBCOp> opSequence;
+    protected OpSequence<LongFunction<String>> opSequence;
 
     public JDBCActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -90,7 +91,7 @@ public abstract class JDBCActivity extends SimpleActivity {
         return dataSource;
     }
 
-    public OpSequence<ReadyJDBCOp> getOpSequence() {
+    public OpSequence<LongFunction<String>> getOpSequence() {
         return opSequence;
     }
 

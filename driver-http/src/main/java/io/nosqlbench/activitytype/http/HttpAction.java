@@ -2,7 +2,6 @@ package io.nosqlbench.activitytype.http;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.activitytype.cmds.HttpOp;
-import io.nosqlbench.activitytype.cmds.ReadyHttpOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -19,6 +18,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongFunction;
 
 
 public class HttpAction implements SyncAction {
@@ -29,7 +29,7 @@ public class HttpAction implements SyncAction {
     private final int slot;
     private int maxTries = 1;
 
-    private OpSequence<ReadyHttpOp> sequencer;
+    private OpSequence<LongFunction<HttpOp>> sequencer;
     private HttpClient client;
 
     private final HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
@@ -61,8 +61,8 @@ public class HttpAction implements SyncAction {
         // operation for execution, including data generation as well as
         // op construction
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            ReadyHttpOp readHTTPOperation = sequencer.get(cycle);
-            httpOp = readHTTPOperation.apply(cycle);
+            LongFunction<HttpOp> readyOp = sequencer.get(cycle);
+            httpOp = readyOp.apply(cycle);
         } catch (Exception e) {
             if (httpActivity.isDiagnosticMode()) {
                 if (httpOp != null) {
@@ -120,6 +120,7 @@ public class HttpAction implements SyncAction {
                     System.out.println();
                 }
 
+                // TODO: use this as a documented example for how to add error handling to a new activity
                 if (error == null) {
                     break; // break out of the tries loop without retrying, because there was no error
                 } else {

@@ -16,8 +16,9 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.LongFunction;
 
-public class ReadyJmxOp {
+public class ReadyJmxOp implements LongFunction<JmxOp> {
 
     private final CommandTemplate command;
 
@@ -25,7 +26,7 @@ public class ReadyJmxOp {
         this.command = command;
     }
 
-    public JmxOp bind(long value) {
+    public JmxOp apply(long value) {
         Map<String, String> cmdmap = command.getCommand(value);
         JMXConnector connector = bindConnector(cmdmap);
 
@@ -97,4 +98,5 @@ public class ReadyJmxOp {
         }
         return url;
     }
+
 }

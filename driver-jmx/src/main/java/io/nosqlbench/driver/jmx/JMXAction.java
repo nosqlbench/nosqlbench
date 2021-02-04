@@ -4,8 +4,10 @@ import io.nosqlbench.driver.jmx.ops.JmxOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.function.LongFunction;
 
 public class JMXAction implements SyncAction {
 
@@ -14,7 +16,7 @@ public class JMXAction implements SyncAction {
     private final ActivityDef activityDef;
     private final int slot;
     private final JMXActivity activity;
-    private OpSequence<ReadyJmxOp> sequencer;
+    private OpSequence<LongFunction<JmxOp>> sequencer;
 
     public JMXAction(ActivityDef activityDef, int slot, JMXActivity activity) {
         this.activityDef = activityDef;
@@ -29,8 +31,8 @@ public class JMXAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
-        ReadyJmxOp readyJmxOp = sequencer.get(cycle);
-        JmxOp jmxOp = readyJmxOp.bind(cycle);
+        LongFunction<JmxOp> readyJmxOp = sequencer.get(cycle);
+        JmxOp jmxOp = readyJmxOp.apply(cycle);
         jmxOp.execute();
         return 0;
     }
