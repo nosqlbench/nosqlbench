@@ -5,16 +5,20 @@ weight: 2
 
 # Grafana Metrics
 
-NoSQLBench comes with a built-in helper to get you up and running quickly with client-side testing metrics. This
-functionality is based on docker, and a built-in method for bringing up a docker stack, automated by NoSQLBench.
+NoSQLBench comes with a built-in helper to get you up and running quickly
+with client-side testing metrics. This functionality is based on docker,
+and a built-in method for bringing up a docker stack, automated by
+NoSQLBench.
 
-:::warning
-This feature requires that you have docker running on the local system and that your user is in a group that
-is allowed to manage docker. Using the `--docker-metrics` command *will* attempt to manage docker on your local system.
-:::
+**WARNING:**
+This feature requires that you have docker running on the local system and
+that your user is in a group that is allowed to manage docker. Using
+the `--docker-metrics` command *will* attempt to manage docker on your
+local system.
 
-To ask nosqlbench to stand up your metrics infrastructure using a local docker runtime, use this command line option
-with any other nosqlbench commands:
+To ask nosqlbench to stand up your metrics infrastructure using a local
+docker runtime, use this command line option with any other nosqlbench
+commands:
 
     --docker-metrics
 

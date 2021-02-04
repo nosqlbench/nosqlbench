@@ -43,19 +43,21 @@ category.
 
 ## Interpolated or Computed Samples
 
-When sampling from mathematical models of probability densities, performance between different densities can vary
-drastically. This means that you may end up perturbing the results of your test in an unexpected way simply by changing
-parameters of your testing distributions. Even worse, some densities have painful corner cases in performance, like
-'Zipf', which can make tests unbearably slow and flawed as they chew up CPU resources.
+When sampling from mathematical models of probability densities,
+performance between different densities can vary drastically. This means
+that you may end up perturbing the results of your test in an unexpected
+way simply by changing parameters of your testing distributions. Even
+worse, some densities have painful corner cases in performance, like
+'Zipf', which can make tests unbearably slow and flawed as they chew up
+CPU resources.
 
-::: info
-
-Functions like 'Zipf' can still take a long time to initialize for certain parameters. If you are seeing a workload that
-seems to hang while initializing, it might be computing complex integrals for large parameters of Zipf. We hope to
-pre-compute and cache these at a future time to avoid this type of impact. For now, just be aware that some parameters
-on some density curves can be expensive to compute _even during initialization_.
-
-:::
+**NOTE:**
+Functions like 'Zipf' can still take a long time to initialize for certain
+parameters. If you are seeing a workload that seems to hang while
+initializing, it might be computing complex integrals for large parameters
+of Zipf. We hope to pre-compute and cache these at a future time to avoid
+this type of impact. For now, just be aware that some parameters on some
+density curves can be expensive to compute _even during initialization_.
 
 ### Interpolated Samples
 

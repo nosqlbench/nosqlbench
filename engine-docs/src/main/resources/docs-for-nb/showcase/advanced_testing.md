@@ -5,10 +5,10 @@ weight: 13
 
 # Advanced Testing
 
-:::info
-Some of the features discussed here are only for advanced testing scenarios.
-:::
-
+**NOTE:**
+Some of the features discussed here are only for advanced testing
+scenarios. First-time users should become familiar with the basic options
+first.
 
 ## Hybrid Rate Limiting
 

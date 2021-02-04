@@ -53,18 +53,22 @@ Each activity metric for a given activity alias is available at this name. This 
 directly. Some metrics objects have also been enhanced with wrapper logic to provide simple getters and setters, like
 `.p99ms` or `.p99ns`, for example.
 
-Interaction with the nosqlbench runtime and the activities therein is made easy by the above variables and objects. When
-an assignment is made to any of these variables, the changes are propagated to internal listeners. For changes to
-_threads_, the thread pool responsible for the affected activity adjusts the number of active threads (AKA slots). Other
-changes are further propagated directly to the thread harnesses and components which implement the ActivityType.
+Interaction with the nosqlbench runtime and the activities therein is made
+easy by the above variables and objects. When an assignment is made to any
+of these variables, the changes are propagated to internal listeners. For
+changes to
+_threads_, the thread pool responsible for the affected activity adjusts
+the number of active threads (AKA slots). Other changes are further
+propagated directly to the thread harnesses and components which implement
+the ActivityType.
 
-:::warning
-Assignment to the _workload_ and _alias_ activity parameters has no special effect, as you can't change an activity to a
-different driver once it has been created.
-:::
+**WARNING:**
+Assignment to the _workload_ and _alias_ activity parameters has no
+special effect, as you can't change an activity to a different driver once
+it has been created.
 
-You can make use of more extensive Java or Javascript libraries as needed, mixing then with the runtime controls
-provided above.
+You can make use of more extensive Java or Javascript libraries as needed,
+mixing then with the runtime controls provided above.
 
 ## Enhanced Metrics for Scripting
 
