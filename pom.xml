@@ -19,14 +19,11 @@
 
     <modules>
 
-        <!-- project level defaults -->
+        <!-- CORE MODULES -->
         <module>mvn-defaults</module>
-        <!-- web apps and service hooks -->
-        <module>docsys</module>
+        <module>nb</module>
         <module>nb-api</module>
         <module>nb-annotations</module>
-
-        <!-- engine modules -->
         <module>engine-api</module>
         <module>engine-core</module>
         <module>engine-extensions</module>
@@ -35,11 +32,7 @@
         <module>engine-cli</module>
         <module>engine-rest</module>
         <module>engine-clients</module>
-
         <module>drivers-api</module>
-
-        <!-- a binary (appimage) build option for nb -->
-        <module>nb</module>
 
         <!-- driver modules -->
         <module>driver-diag</module>
@@ -68,6 +61,9 @@
         <module>virtdata-lib-realer</module>
 
         <module>virtdata-userlibs</module>
+
+        <!-- Documentation -->
+        <module>docsys</module>
 
     </modules>
 
