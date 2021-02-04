@@ -208,6 +208,11 @@ public class NBCLI {
             System.exit(0);
         }
 
+        if (options.wantsScriptList()) {
+            NBCLIScripts.printScripts(true, options.wantsIncludes());
+            System.exit(0);
+        }
+
         if (options.wantsToCopyResource()) {
             String resourceToCopy = options.wantsToCopyResourceNamed();
             logger.debug("user requests to copy out " + resourceToCopy);

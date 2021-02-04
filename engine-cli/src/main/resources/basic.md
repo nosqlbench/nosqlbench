@@ -13,6 +13,9 @@
 # To get a list of scenarios to run:
     ./nb --list-scenarios
 
+# To get a list of scripts to run:
+    ./nb --list-scripts
+
 # To provide your own contact points (comma separated), add the hosts= parameter
     ./nb cql-iot hosts=host1,host2
 

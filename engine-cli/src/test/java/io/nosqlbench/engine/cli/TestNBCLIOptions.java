@@ -178,6 +178,13 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsScenariosList());
     }
 
+    @Test
+    public void listScripts() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scripts"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(opts.wantsScriptList());
+    }
+
 
     @Test
     public void clTest() {

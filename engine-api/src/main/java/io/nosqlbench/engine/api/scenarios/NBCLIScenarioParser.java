@@ -350,6 +350,34 @@ public class NBCLIScenarioParser {
 
     }
 
+    public static List<String> getScripts(boolean defaultIncludes, String... includes) {
+
+        NBPathsAPI.GetPrefix searchin = NBIO.all();
+        if (defaultIncludes) {
+            searchin = searchin.prefix(SEARCH_IN);
+        }
+
+        List<Path> scriptPaths = searchin
+            .prefix("scripts/auto")
+            .prefix(includes)
+            .extension("js")
+            .list().stream().map(Content::asPath).collect(Collectors.toList());
+        ;
+
+        List<String> scriptNames = new ArrayList();
+
+        for (Path scriptPath : scriptPaths) {
+            String name = scriptPath.getFileName().toString();
+            name = name.substring(0, name.lastIndexOf('.'));
+
+            scriptNames.add(name);
+        }
+
+
+        return scriptNames;
+
+    }
+
     public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
         Matcher matcher = templatePattern.matcher(line);
 
