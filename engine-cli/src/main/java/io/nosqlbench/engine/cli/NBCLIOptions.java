@@ -46,6 +46,7 @@ public class NBCLIOptions {
     private static final String LIST_METRICS = "--list-metrics";
     private static final String LIST_DRIVERS = "--list-drivers";
     private static final String LIST_ACTIVITY_TYPES = "--list-activity-types";
+    private static final String LIST_SCRIPTS = "--list-scripts";
     private static final String LIST_WORKLOADS = "--list-workloads";
     private static final String LIST_SCENARIOS = "--list-scenarios";
     private static final String LIST_INPUT_TYPES = "--list-input-types";
@@ -133,6 +134,7 @@ public class NBCLIOptions {
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
     private boolean wantsScenariosList = false;
+    private boolean wantsScriptList = false;
     private String wantsToCopyWorkload = null;
     private boolean wantsWorkloadsList = false;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
@@ -519,6 +521,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsScenariosList = true;
                     break;
+                case LIST_SCRIPTS:
+                    arglist.removeFirst();
+                    wantsScriptList = true;
+                    break;
                 case LIST_WORKLOADS:
                     arglist.removeFirst();
                     wantsWorkloadsList = true;
@@ -773,6 +779,10 @@ public class NBCLIOptions {
 
     public boolean wantsScenariosList() {
         return wantsScenariosList;
+    }
+
+    public boolean wantsScriptList() {
+        return wantsScriptList;
     }
 
     public boolean wantsToCopyResource() {
