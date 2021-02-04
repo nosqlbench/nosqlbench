@@ -4,7 +4,7 @@ import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.OnError;
 import io.nosqlbench.nb.api.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
@@ -138,8 +138,8 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
         } else if (cfg.containsKey("apikey")) {
             gc.addHeaderSource(() -> Map.of("Authorization", "Bearer " + cfg.param("apikey", String.class)));
         } else {
-            Optional<String> apikeyLocation = Environment.INSTANCE
-                    .interpolate(cfg.paramEnv("apikeyfile", String.class));
+            Optional<String> apikeyLocation = NBEnvironment.INSTANCE
+                .interpolate(cfg.paramEnv("apikeyfile", String.class));
             keyfilePath = apikeyLocation.map(Path::of).orElseThrow();
         }
 

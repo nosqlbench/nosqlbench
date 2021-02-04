@@ -3,7 +3,7 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
-import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 
@@ -370,7 +370,7 @@ public class NBCLIOptions {
             return this.statepath;
         }
 
-        List<String> paths = Environment.INSTANCE.interpolate(":", statedirs);
+        List<String> paths = NBEnvironment.INSTANCE.interpolate(":", statedirs);
         Path selected = null;
 
         for (String pathName : paths) {
@@ -399,7 +399,7 @@ public class NBCLIOptions {
             }
         }
 
-        Environment.INSTANCE.put(NBSTATEDIR, selected.toString());
+        NBEnvironment.INSTANCE.put(NBSTATEDIR, selected.toString());
 
         return selected;
     }

@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.NBEnvironment;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public class ConfigReader extends LinkedHashMap<String, Object> {
     public <T> T paramEnv(String name, Class<? extends T> vclass) {
         T param = param(name, vclass);
         if (param instanceof String) {
-            Optional<String> interpolated = Environment.INSTANCE.interpolate(param.toString());
+            Optional<String> interpolated = NBEnvironment.INSTANCE.interpolate(param.toString());
             if (interpolated.isEmpty()) {
                 throw new RuntimeException("Unable to interpolate env and sys props in '" + param + "'");
             }

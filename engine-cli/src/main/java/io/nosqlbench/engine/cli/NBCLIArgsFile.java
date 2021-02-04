@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.nb.api.Environment;
+import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import joptsimple.internal.Strings;
 import org.apache.logging.log4j.Logger;
@@ -254,7 +254,7 @@ public class NBCLIArgsFile {
 
         List<String> interpolated = loaded.stream()
                 .map(p -> {
-                    String q = Environment.INSTANCE.interpolate(p).orElse(p);
+                    String q = NBEnvironment.INSTANCE.interpolate(p).orElse(p);
                     if (!q.equals(p)) {
                         if (logger != null) {
                             logger.info("argsfile: '" + argsPath.toString() + "': loaded option '" + p + "' as '" + q + "'");
@@ -388,7 +388,7 @@ public class NBCLIArgsFile {
         Path selected = null;
         String[] possibles = argspath.split(":");
         for (String possible : possibles) {
-            Optional<String> expanded = Environment.INSTANCE.interpolate(possible);
+            Optional<String> expanded = NBEnvironment.INSTANCE.interpolate(possible);
             if (expanded.isPresent()) {
                 Path possiblePath = Path.of(expanded.get());
                 if (Files.exists(possiblePath)) {
@@ -400,8 +400,8 @@ public class NBCLIArgsFile {
 
         if (selected == null) {
             String defaultFirst = possibles[0];
-            defaultFirst = Environment.INSTANCE.interpolate(defaultFirst)
-                    .orElseThrow(() -> new RuntimeException("Invalid default argsfile: '" + possibles[0] + "'"));
+            defaultFirst = NBEnvironment.INSTANCE.interpolate(defaultFirst)
+                .orElseThrow(() -> new RuntimeException("Invalid default argsfile: '" + possibles[0] + "'"));
             selected = Path.of(defaultFirst);
         }
 

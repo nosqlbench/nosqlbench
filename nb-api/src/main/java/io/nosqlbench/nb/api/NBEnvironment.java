@@ -2,7 +2,6 @@ package io.nosqlbench.nb.api;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -35,14 +34,14 @@ import java.util.regex.Pattern;
  * The first location to return a non-null value is used. Null values are considered
  * invalid in this API, except when provided as a default value.
  */
-public class Environment {
+public class NBEnvironment {
     private Logger logger;
 
     // package private for testing
-    Environment() {
+    NBEnvironment() {
     }
 
-    public final static Environment INSTANCE = new Environment();
+    public final static NBEnvironment INSTANCE = new NBEnvironment();
 
     private final LinkedHashMap<String, String> references = new LinkedHashMap<>();
 
@@ -54,7 +53,7 @@ public class Environment {
             "LOGNAME", "user.name" // *n*x
     );
 
-    public Environment resetRefs() {
+    public NBEnvironment resetRefs() {
         this.references.clear();
         return this;
     }
@@ -124,11 +123,7 @@ public class Environment {
         }
 
         value = System.getenv(name);
-        if (value != null) {
-            return value;
-        }
-
-        return null;
+        return value;
     }
 
     /**
