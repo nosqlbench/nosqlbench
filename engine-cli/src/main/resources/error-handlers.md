@@ -61,6 +61,10 @@ matching any of the error patterns against the exception name, that
 column (the handler list) is selected, and each handler in that list is
 applied in order to the error.
 
+Specifically, the Java class name of the exception type is matched against
+the error patterns going left to right. The first one that matches selects
+the error handler list to use.
+
 ## Error Handler Configuration
 
 The default setting of `errors=stop` uses a shorthand form for specifying

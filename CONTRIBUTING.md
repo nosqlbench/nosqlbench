@@ -18,13 +18,14 @@ Some quick how-to docs have been written for some of the subject-matter
 areas in NoSQLBench. If you need an onramp that is not listed, here let us
 know!
 
-[I am a developer and I want to contribute a driver.](devdocs/contributing_drivers.md)
+[I am a developer and I want to contribute a driver.]
+(devdocs/devguide/drivers/README.md)
 
-[I am a user and I want to improve the documentation.](devdocs/improving_documentation.md)
+[I am a user and I want to improve the documentation.](devdocs/devguide/nb_docs.md)
 
-[I am a user and I want to contribute built-in scenarios.](devdocs/contributing_builtins.md)
+[I am a user and I want to contribute built-in scenarios.](devdocs/devguide/adding_scenarios.md)
 
-[I am a UI developer and I want to improve the NoSQLBench UI (NBUI)](devdocs/developint_nbui.md)
+[I am a UI developer and I want to improve the NoSQLBench UI (NBUI)](devdocs/devguide/nbui/README.md)
 
 ## Contribution Ideas
 
