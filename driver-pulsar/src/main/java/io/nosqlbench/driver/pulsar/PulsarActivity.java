@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.pulsar;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.driver.pulsar.ops.PulsarOp;
 import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.PulsarClient;
 
+import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
@@ -24,7 +26,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     private NBErrorHandler errorhandler;
     private String pulsarUrl;
-    private OpSequence<ReadyPulsarOp> sequencer;
+    private OpSequence<LongFunction<PulsarOp>> sequencer;
     private PulsarClient activityClient;
 
     private Supplier<PulsarSpace> clientSupplier;
@@ -69,7 +71,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         }
     }
 
-    public OpSequence<ReadyPulsarOp> getSequencer() {
+    public OpSequence<LongFunction<PulsarOp>> getSequencer() {
         return sequencer;
     }
 

@@ -25,7 +25,7 @@ public class PulsarSpaceCache {
         this.clientFunc = newClient;
     }
 
-    public PulsarSpace getClientSpace(String name) {
+    public PulsarSpace getPulsarSpace(String name) {
         PulsarSpace cspace = clientScopes.computeIfAbsent(name, spaceName -> new PulsarSpace(spaceName, clientFunc));
         return cspace;
     }

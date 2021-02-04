@@ -3,16 +3,24 @@
 This driver allows you to produce and consume Apache Pulsar messages with
 NoSQLBench.
 
+## Issues Tracker
+
+If you have issues or new requirements for this driver, please add them at
+the
+[pulsar issues tracker](
+https://github.com/nosqlbench/nosqlbench/issues/new?labels=pulsar).
+
 ## Example Statements
 
 The simplest pulsar statement looks like this:
 
 ```yaml
-statement: send='{this is a test message}'
+statement: send='{"msg":"test message"}'
 ```
 
 In this example, the statement is sent by a producer with a default
-_topic_uri_ of `persistent://public/default/default`.
+_topic_uri_ of `persistent://public/default/default` at at the pulsar
+endpoint `pulsar://localhost:6650`
 
 A complete example which uses all the available fields:
 
@@ -70,6 +78,32 @@ format which allow for flexible yet intuitive instancing in the client
 runtime. This is enabled directly by using nominative variables for
 instance names where needed. When the instance names are not provided for
 an operation, defaults are used to emulate a simple configuration.
+
+Since this is a new capability in a NoSQLBench driver, how it works is
+explained below:
+
+When a pulsar cycles is executed, the operation is synthesized from the op
+template fields as explained below under _Op Fields_. This happens in a
+specific order:
+
+1. The client instance name is resolved. If a `client` field is provided,
+   this is taken as the client instance name. If not, it is set
+   to `default`.
+2. The named client instance is fetched from the cache, or created and
+   cached if it does not yet exist.
+3. The topic_uri is resolved. This is the value to be used with
+   `.topic(...)` calls in the API. The op fields below explain how to
+   control this value.
+4. For _send_ operations, a producer is named and created if needed. By
+   default, the producer is named after the topic_uri above. You can
+   override this by providing a value for `producer`.
+5. For _recv_ operations, a consumer is named and created if needed. By
+   default, the consumer is named after the topic_uri above. You can
+   override this by providing a value for `consumer`.
+
+The most important detail for understanding the instancing controls is
+that clients, producers, and consumers are all named and cached in the
+specific order above.
 
 ## Op Fields
 
@@ -138,6 +172,7 @@ for Apache Pulsar such as clients, producers, and consumers.
 ## Activity Parameters
 
 - **url** - The pulsar url to connect to.
+    - **default** - `url=pulsar://localhost:6650`
 - **maxcached** - A default value to be applied to `max_clients`,
   `max_producers`, `max_consumers`.
     - default: `max_cached=100`

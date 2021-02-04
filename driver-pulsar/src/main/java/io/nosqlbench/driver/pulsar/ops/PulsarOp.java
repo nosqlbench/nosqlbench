@@ -5,6 +5,4 @@ package io.nosqlbench.driver.pulsar.ops;
  */
 public interface PulsarOp extends Runnable {
 
-    default void run() {
-    }
 }

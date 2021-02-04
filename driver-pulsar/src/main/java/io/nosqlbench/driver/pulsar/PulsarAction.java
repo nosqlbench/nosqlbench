@@ -2,10 +2,11 @@ package io.nosqlbench.driver.pulsar;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.ops.PulsarOp;
-import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.function.LongFunction;
 
 public class PulsarAction implements SyncAction {
 
@@ -28,8 +29,8 @@ public class PulsarAction implements SyncAction {
 
         PulsarOp pulsarOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            ReadyPulsarOp readyPulsarOp = activity.getSequencer().get(cycle);
-            pulsarOp = readyPulsarOp.bind(cycle);
+            LongFunction<PulsarOp> readyPulsarOp = activity.getSequencer().get(cycle);
+            pulsarOp = readyPulsarOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
             throw new RuntimeException(

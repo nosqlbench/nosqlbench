@@ -19,13 +19,16 @@ public class PulsarSendMapper implements LongFunction<PulsarOp> {
     private final CommandTemplate cmdTpl;
     private final LongFunction<Producer<?>> producerFunc;
     private final LongFunction<String> payloadFunc;
+    private final LongFunction<String> keyFunc;
 
     public PulsarSendMapper(
         LongFunction<Producer<?>> producerFunc,
         LongFunction<String> msgFunc,
+        LongFunction<String> keyFunc,
         CommandTemplate cmdTpl) {
         this.producerFunc = producerFunc;
         this.payloadFunc = msgFunc;
+        this.keyFunc = keyFunc;
         this.cmdTpl = cmdTpl;
         // TODO: add schema support
     }
@@ -34,6 +37,7 @@ public class PulsarSendMapper implements LongFunction<PulsarOp> {
     public PulsarOp apply(long value) {
         Producer<?> producer = producerFunc.apply(value);
         String msg = payloadFunc.apply(value);
-        return new PulsarSendOp((Producer<byte[]>) producer, msg);
+        String key = keyFunc != null ? keyFunc.apply(value) : null;
+        return new PulsarSendOp(key, (Producer<byte[]>) producer, msg);
     }
 }

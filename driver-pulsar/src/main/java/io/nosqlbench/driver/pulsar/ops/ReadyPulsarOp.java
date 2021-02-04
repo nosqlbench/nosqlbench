@@ -11,11 +11,13 @@ import org.apache.pulsar.client.api.Producer;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class ReadyPulsarOp {
+public class ReadyPulsarOp implements LongFunction<PulsarOp> {
 
     private final CommandTemplate cmdTpl;
     private final LongFunction<PulsarOp> opFunc;
     private final PulsarSpaceCache pcache;
+
+    // TODO: Add docs for the command template with respect to the OpTemplate
 
     public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache) {
         this.cmdTpl = new CommandTemplate(opTemplate);
@@ -27,7 +29,6 @@ public class ReadyPulsarOp {
 
         ScopedSupplier scope = ScopedSupplier.valueOf(cmdTpl.getStaticOr("op_scope", "singleton"));
         Supplier<LongFunction<PulsarOp>> opSupplier = scope.supplier(this::resolve);
-
     }
 
     private LongFunction<PulsarOp> resolve() {
@@ -79,15 +80,16 @@ public class ReadyPulsarOp {
         if (cmdTpl.containsKey("client")) {
             if (cmdTpl.isStatic("client")) {
                 String client_name = cmdTpl.getStatic("client");
-                PulsarSpace clientSpace = pcache.getClientSpace(client_name);
+                PulsarSpace clientSpace = pcache.getPulsarSpace(client_name);
                 spaceFunc = l -> clientSpace;
             } else {
-                spaceFunc = l -> pcache.getClientSpace(cmdTpl.getDynamic("client", l));
+                spaceFunc = l -> pcache.getPulsarSpace(cmdTpl.getDynamic("client", l));
             }
         } else {
-            spaceFunc = l -> pcache.getClientSpace("default");
+            spaceFunc = l -> pcache.getPulsarSpace("default");
         }
 
+        // TODO: Add batch operation types to pulsar
         if (cmdTpl.containsKey("send")) {
             return resolveSend(spaceFunc, cmdTpl, topic_uri_func);
         } else if (cmdTpl.containsKey("recv")) {
@@ -129,6 +131,7 @@ public class ReadyPulsarOp {
         if (cmdTpl.isStatic("producer")) {
             String producerName = cmdTpl.getStatic("producer");
             producerFunc = (l) -> spaceFunc.apply(l).getProducer(producerName, topic_uri_func.apply(l));
+
         } else if (cmdTpl.isDynamic("producer")) {
             producerFunc = (l) -> spaceFunc.apply(l)
                 .getProducer(cmdTpl.getDynamic("producer", l), topic_uri_func.apply(l));
@@ -137,15 +140,22 @@ public class ReadyPulsarOp {
                 .getProducer(topic_uri_func.apply(l), topic_uri_func.apply(l));
         }
 
-        return new PulsarSendMapper(producerFunc, (l) -> cmdTpl.get("send", l), cmdTpl);
+        LongFunction<String> keyFunc;
+        if (cmdTpl.isStatic("key")) {
+            String keyName = cmdTpl.getStatic("key");
+            keyFunc = (l) -> keyName;
+        } else if (cmdTpl.isDynamic("key")) {
+            keyFunc = (l) -> cmdTpl.getDynamic("key", l);
+        } else {
+            keyFunc = null;
+        }
+
+        return new PulsarSendMapper(producerFunc, (l) -> cmdTpl.get("send", l), keyFunc, cmdTpl);
     }
 
-    // Create a pulsarOp which can be executed.
-    // The
-    public PulsarOp bind(long value) {
+    @Override
+    public PulsarOp apply(long value) {
         PulsarOp op = opFunc.apply(value);
         return op;
     }
-
-
 }
