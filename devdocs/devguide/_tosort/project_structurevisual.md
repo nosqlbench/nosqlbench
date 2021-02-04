@@ -1,5 +1,8 @@
 # NoSQLBench Module Dependencies
 
+This is viewable in Intellij markdown preview with the optional plugins
+enabled.
+
 ```plantuml
 
 digraph Test {

@@ -5,7 +5,7 @@ all of NoSQLBench and supported drivers.
 
 ## Scopes of Execution
 
-![Scopes](scopes.png)
+![Scopes](../_tosort/scopes.png)
 
 
 ### Process
@@ -15,13 +15,13 @@ in docserver or some other daemon mode.
 
 
 ### Scenario
-        
+
 When a NoSqlBench process runs, it can execute scenario scripts in ECMAScript.
 These are called scenarios. Each scenario runs independently of any others
 in the current process.
 
 Scenario scripts are completely unlimited in what they can do.
-             
+
 ###  Activity
 
 Scenario scripts may use the scripting API to start protocol specific activities which run over a
