@@ -27,17 +27,18 @@ public enum ScopedSupplier {
 
     public <T> Supplier<T> supplier(Supplier<T> supplier) {
 
-        return switch (this) {
-            case singleton -> {
+        switch (this) {
+            case singleton:
                 T got = supplier.get();
-                yield () -> got;
-            }
-            case thread -> {
+                return () -> got;
+            case thread:
                 ThreadLocal<T> tlsupplier = ThreadLocal.withInitial(supplier);
-                yield () -> tlsupplier.get();
-            }
-            case caller -> supplier;
-        };
+                return tlsupplier::get;
+            case caller:
+                return supplier;
+            default:
+                throw new RuntimeException("Unknown scope type:" + this);
+        }
     }
 
 }
