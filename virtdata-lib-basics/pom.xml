@@ -34,6 +34,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
         </dependency>
