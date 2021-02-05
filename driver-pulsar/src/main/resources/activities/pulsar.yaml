@@ -1,0 +1,38 @@
+description: |
+  Test workload for new pulsar driver.
+  There is no default scenario. You must specify one of the named scenarios
+  below like send100 or recv100.
+  You can specify the number of tenants like `tenants=100`. This is the default.
+
+scenarios:
+  send: run driver=pulsar cycles=1000 tags=type:send url=TEMPLATE(url,pulsar://localhost:6650)
+  recv: run driver=pulsar cycles=1000 tags=type:recv url=TEMPLATE(url,pulsar://localhost:6650)
+
+bindings:
+  cycle: ToString();
+  numbername: NumberNameToString();
+  clientinstance: Mod(1);
+  tenant: Mod(TEMPLATE(tenants,100)L);
+  #  tenant2: Template("tenant-{}",Mod(TEMPLATE(tenants,100)L)->String);
+  mykey: WeightedString('key1:5,key2:23');
+  namespace: Template("ns-{}",Mod(TEMPLATE(namespaces,3)L));
+
+blocks:
+  - name: send-block
+    tags:
+      type: send
+    statements:
+      - send-stuff:
+          send: |
+            {"number": {cycle}, "name": "{numbername}"}
+          tenant: "public"
+          namespace: "{namespace}"
+  #          tenant: "tenant-{tenant}"
+  - name: recv-block
+    tags:
+      type: recv
+    statements:
+      - recv-stuff:
+          recv: stuff
+
+
