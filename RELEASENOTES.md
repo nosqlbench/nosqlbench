@@ -1,4 +1,2 @@
-- 48dce825 (HEAD -> main) minor pulsar bugfixes
-- 6b6afdc2 disable high-centered test
-- 80321e38 (origin/main) update syntax to work with JLS 11
-- dcf1d506 op template visualization
+- 395d8bb4 add default pulsar.yaml with named scenarios
+- c6f09f3e add ReplaceAll, ReplaceRegex binding functions
