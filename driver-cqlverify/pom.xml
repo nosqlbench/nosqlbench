@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.15.13</version>
+    <version>4.15.14-SNAPSHOT</version>
     <relativePath>../mvn-defaults</relativePath>
   </parent>
 
@@ -24,13 +24,13 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-cql-shaded</artifactId>
-        <version>4.15.13</version>
+        <version>4.15.14-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>drivers-api</artifactId>
-        <version>4.15.13</version>
+        <version>4.15.14-SNAPSHOT</version>
     </dependency>
 
   </dependencies>
