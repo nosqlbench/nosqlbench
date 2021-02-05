@@ -1,1 +1,4 @@
-- 8acff68c add HTMLEntityDecode() and HTMLEntityEncode() functions
+- 48dce825 (HEAD -> main) minor pulsar bugfixes
+- 6b6afdc2 disable high-centered test
+- 80321e38 (origin/main) update syntax to work with JLS 11
+- dcf1d506 op template visualization
