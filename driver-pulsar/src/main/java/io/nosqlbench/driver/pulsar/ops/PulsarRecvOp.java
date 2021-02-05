@@ -21,7 +21,11 @@ public class PulsarRecvOp implements PulsarOp {
             Message<byte[]> msgbytes = consumer.receive();
             // TODO: Parameterize the actions taken on a received message
             // TODO: Properly parameterize all pulsar Op types as with Producer<T> and Consumer<T>
-            System.out.println("received:" + new String(msgbytes.getValue(), StandardCharsets.UTF_8));
+            String received = new String(msgbytes.getValue(), StandardCharsets.UTF_8);
+            System.out.print("received:" + received);
+            if (!received.endsWith("\n")) {
+                System.out.println("\n");
+            }
         } catch (PulsarClientException e) {
             throw new RuntimeException(e);
         }

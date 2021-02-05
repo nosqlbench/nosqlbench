@@ -20,6 +20,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     // TODO: Add docs for the command template with respect to the OpTemplate
 
     public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache) {
+        // TODO: Consider parsing map structures into equivalent binding representation
         this.cmdTpl = new CommandTemplate(opTemplate);
         this.pcache = pcache;
         if (cmdTpl.isDynamic("op_scope")) {
@@ -54,12 +55,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
             } else {
                 topic_uri_func = (l) -> cmdTpl.getDynamic("topic_uri", l);
             }
-        } else if (
-            !cmdTpl.isDynamic("persistence") // optimize topic around static piece-wise values
-                && !cmdTpl.isDynamic("tenant")
-                && !cmdTpl.isDynamic("namespace")
-                && !cmdTpl.isDynamic("topic")
-        ) {
+        } else if (cmdTpl.isStaticOrUnsetSet("persistence", "tenant", "namespace", "topic")) {
             String persistence = cmdTpl.getStaticOr("persistence", "persistent")
                 .replaceAll("true", "persistent");
             String tenant = cmdTpl.getStaticOr("tenant", "public");
@@ -69,10 +65,10 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
             topic_uri_func = (l) -> composited;
         } else { // some or all dynamic fields, composite into a single dynamic call
             topic_uri_func = (l) ->
-                cmdTpl.getDynamicOr("persistent", l, "persistent").replaceAll("true", "persistent")
-                    + "://" + cmdTpl.getDynamicOr("tenant", l, "public")
-                    + "/" + cmdTpl.getDynamicOr("namespace", l, "default")
-                    + "/" + cmdTpl.getDynamicOr("topic", l, "default");
+                cmdTpl.getOr("persistent", l, "persistent").replaceAll("true", "persistent")
+                    + "://" + cmdTpl.getOr("tenant", l, "public")
+                    + "/" + cmdTpl.getOr("namespace", l, "default")
+                    + "/" + cmdTpl.getOr("topic", l, "default");
         }
 
 

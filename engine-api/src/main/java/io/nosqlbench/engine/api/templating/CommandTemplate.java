@@ -283,4 +283,12 @@ public class CommandTemplate {
         return false;
     }
 
+    public boolean isStaticOrUnsetSet(String... varnames) {
+        for (String varname : varnames) {
+            if (isDynamic(varname)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
