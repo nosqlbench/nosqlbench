@@ -1,11 +1,1 @@
-- 6a915152 (HEAD -> main) post-merge fixups
-- 808a69ac use canonical canonical NB naming
-- 9526208a update wip devguide
-- 516aee2e update pulsar driver
-- 4d87e1c9 typo fixes
-- 4c726b03 reorg stale docs
-- 04c64861 minor pom cleanups
-- 9b445ef5 minor doc updates
-- f8fe99f8 consolidate op mapping to java functional types
-- ff05868f fix markdown highlights
-- 281e4f91 --list-scripts
+- 8acff68c add HTMLEntityDecode() and HTMLEntityEncode() functions
