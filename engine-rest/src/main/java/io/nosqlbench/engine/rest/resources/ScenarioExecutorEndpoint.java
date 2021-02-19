@@ -25,7 +25,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.*;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "scenario-executor")
 @Singleton
 @Path("/services/executor/")
 public class ScenarioExecutorEndpoint implements WebServiceObject {

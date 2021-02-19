@@ -14,7 +14,7 @@ import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "docserver-status")
 @Singleton
 @Path("_")
 public class DocServerStatusEndpoint implements WebServiceObject {

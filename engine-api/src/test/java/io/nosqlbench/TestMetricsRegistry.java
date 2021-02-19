@@ -24,10 +24,10 @@ import io.nosqlbench.nb.annotations.Service;
 /**
  * Provide a local MetricRegistryService for tests
  */
-@Service(MetricRegistryService.class)
+@Service(value = MetricRegistryService.class, selector = "test-registry")
 public class TestMetricsRegistry implements MetricRegistryService {
 
-    private MetricRegistry metricRegistry = new MetricRegistry();
+    private final MetricRegistry metricRegistry = new MetricRegistry();
 
     @Override
     public MetricRegistry getMetricRegistry() {

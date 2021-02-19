@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "autodocs")
 @Singleton
 @Path("/services/virtdata/functions/")
 public class AutoDocsWebService implements WebServiceObject {

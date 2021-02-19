@@ -18,13 +18,12 @@
 package io.nosqlbench.engine.api.activityapi.output;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.api.spi.Named;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
-public interface OutputType extends Named {
+public interface OutputType {
 
     SimpleServiceLoader<OutputType> FINDER =
-            new SimpleServiceLoader<>(OutputType.class);
+        new SimpleServiceLoader<>(OutputType.class);
 
     OutputDispenser getOutputDispenser(Activity activity);
 

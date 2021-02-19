@@ -5,7 +5,7 @@ import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;
 
-@Service(DocsysDynamicManifest.class)
+@Service(value = DocsysDynamicManifest.class, selector = "virtdata-docs")
 public class VirtdataMarkdownManifest implements DocsysDynamicManifest {
 
     public DocsBinder getDocs() {

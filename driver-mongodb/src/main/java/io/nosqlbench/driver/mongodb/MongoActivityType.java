@@ -6,13 +6,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "mongodb")
 public class MongoActivityType implements ActivityType<MongoActivity> {
-
-    @Override
-    public String getName() {
-        return "mongodb";
-    }
 
     @Override
     public MongoActivity getActivity(ActivityDef activityDef) {

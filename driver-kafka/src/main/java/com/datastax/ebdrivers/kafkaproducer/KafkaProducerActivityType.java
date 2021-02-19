@@ -6,12 +6,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "kafkaproducer")
 public class KafkaProducerActivityType implements ActivityType<KafkaProducerActivity> {
-    @Override
-    public String getName() {
-        return "kafkaproducer";
-    }
 
     @Override
     public KafkaProducerActivity getActivity(ActivityDef activityDef) {
@@ -19,7 +15,7 @@ public class KafkaProducerActivityType implements ActivityType<KafkaProducerActi
     }
 
     private static class Dispenser implements ActionDispenser {
-        private KafkaProducerActivity activity;
+        private final KafkaProducerActivity activity;
 
         private Dispenser(KafkaProducerActivity activity) {
             this.activity = activity;

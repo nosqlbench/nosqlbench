@@ -29,13 +29,8 @@ import java.util.function.IntPredicate;
  * array is used. When the type widens, this will need to use a native
  * int trie or something else that is time and space efficient.
  */
-@Service(ExperimentalResultFilterType.class)
+@Service(value = ExperimentalResultFilterType.class, selector = "include")
 public class IncludeCodesTypeExperimental implements ExperimentalResultFilterType {
-
-    @Override
-    public String getName() {
-        return "include";
-    }
 
     @Override
     public IntPredicate getIntPredicate(SimpleConfig conf) {

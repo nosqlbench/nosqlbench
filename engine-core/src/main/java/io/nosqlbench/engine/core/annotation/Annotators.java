@@ -47,6 +47,7 @@ public class Annotators {
                 Object typeObj = cmap.remove("type");
                 String typename = typeObj.toString();
                 ServiceLoader.Provider<Annotator> annotatorProvider = providers.get(typename);
+
                 if (annotatorProvider == null) {
                     throw new RuntimeException("Annotation provider with selector '" + typename + "' was not found.");
                 }
@@ -98,7 +99,7 @@ public class Annotators {
     public static synchronized void recordAnnotation(Annotation annotation) {
         for (Annotator annotator : getAnnotators()) {
             try {
-                logger.trace("calling annotator " + annotator.getName());
+                logger.trace("calling annotator " + annotator.getClass().getAnnotation(Service.class).selector());
                 annotator.recordAnnotation(annotation);
             } catch (Exception e) {
                 logger.error(e);

@@ -10,11 +10,6 @@ import io.nosqlbench.nb.annotations.Service;
 public class PulsarActivityType implements ActivityType<PulsarActivity> {
 
     @Override
-    public String getName() {
-        return "pulsar";
-    }
-
-    @Override
     public ActionDispenser getActionDispenser(PulsarActivity activity) {
         if (activity.getParams().getOptionalString("async").isPresent()) {
             throw new RuntimeException("The async pulsar driver is not implemented yet.");

@@ -7,15 +7,10 @@ import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "http")
 public class HttpActivityType implements ActivityType<HttpActivity> {
 
     private static final Logger logger = LogManager.getLogger(HttpActivityType.class);
-
-    @Override
-    public String getName() {
-        return "http";
-    }
 
     @Override
     public ActionDispenser getActionDispenser(HttpActivity activity) {

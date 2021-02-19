@@ -24,7 +24,7 @@ import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-@Service(OutputDispenser.class)
+@Service(value = OutputDispenser.class, selector = "logging-marker")
 public class LoggingMarkerDispenser implements OutputDispenser {
 
     private final static Logger logger = LogManager.getLogger(LoggingMarkerDispenser.class);

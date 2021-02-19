@@ -6,12 +6,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "cockroachdb")
 public class CockroachActivityType implements ActivityType<CockroachActivity> {
-    @Override
-    public String getName() {
-        return "cockroachdb";
-    }
 
     @Override
     public ActionDispenser getActionDispenser(CockroachActivity activity) {

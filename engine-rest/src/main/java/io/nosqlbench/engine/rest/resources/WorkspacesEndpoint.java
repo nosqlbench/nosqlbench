@@ -18,9 +18,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service(value = WebServiceObject.class, selector = "workspaces")
 @Path("/services/workspaces")
 @Singleton
-@Service(WebServiceObject.class)
 public class WorkspacesEndpoint implements WebServiceObject {
 
     private final static Logger logger = LogManager.getLogger(WorkspacesEndpoint.class);
@@ -110,7 +110,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
         try {
             WorkSpace ws = getSvc().getWorkspace(workspace);
             WorkspaceView wsview = ws.getWorkspaceView();
-            if (ls != null && !ls.toLowerCase().equals("false")) {
+            if (ls != null && !ls.equalsIgnoreCase("false")) {
                 List<WorkspaceItemView> listing = ws.getWorkspaceListingView("");
                 if (contains != null) {
                     listing = listing.stream().filter(i -> i.contains(contains)).collect(Collectors.toList());
@@ -132,7 +132,7 @@ public class WorkspacesEndpoint implements WebServiceObject {
         @QueryParam("ls") String ls) {
 
         try {
-            if (ls != null && !ls.toLowerCase().equals("false")) {
+            if (ls != null && !ls.equalsIgnoreCase("false")) {
                 WorkSpace ws = getSvc().getWorkspace(workspace);
                 List<WorkspaceItemView> listing = ws.getWorkspaceListingView(filename);
                 return Response.ok(listing).build();

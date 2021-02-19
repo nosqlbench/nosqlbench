@@ -24,8 +24,7 @@ import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.api.spi.Named;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,16 +37,9 @@ import java.util.Optional;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  */
-public interface ActivityType<A extends Activity> extends Named {
+public interface ActivityType<A extends Activity> {
 
-    SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<>(ActivityType.class);
-    /**
-     * Return the short name of this activity type. The fully qualified name of an activity type is
-     * this value, prefixed by the package of the implementing class.
-     *
-     * @return An activity type name, like "diag"
-     */
-    String getName();
+    SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class);
 
     /**
      * Create an instance of an activity from the activity type.

@@ -21,17 +21,17 @@ import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(MetricRegistryService.class)
+@Service(value = MetricRegistryService.class, selector = "metrics-context")
 public class MetricsContext implements MetricRegistryService {
 
     private static MetricsContext instance;
 
-    private MetricReporters metricReporters = MetricReporters.getInstance();
-    private MetricRegistry metrics = new NBMetricsRegistry();
+    private final MetricReporters metricReporters = MetricReporters.getInstance();
+    private final MetricRegistry metrics = new NBMetricsRegistry();
 
     public static MetricsContext getInstance() {
         synchronized (MetricsContext.class) {
-            if (instance==null) {
+            if (instance == null) {
                 instance = new MetricsContext();
             }
         }

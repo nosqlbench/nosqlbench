@@ -23,12 +23,8 @@ import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(InputType.class)
+@Service(value = InputType.class, selector = "cyclelog")
 public class CycleLogInputType implements InputType {
-    @Override
-    public String getName() {
-        return "cyclelog";
-    }
 
     @Override
     public InputDispenser getInputDispenser(Activity activity) {

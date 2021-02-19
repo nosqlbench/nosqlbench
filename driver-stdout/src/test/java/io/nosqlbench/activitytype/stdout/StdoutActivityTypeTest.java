@@ -22,8 +22,6 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Created by sebastianestevez on 5/5/17.
  */
@@ -32,8 +30,6 @@ public class StdoutActivityTypeTest {
     @Test
     public void testDiagActivity() {
         StdoutActivityType stdoutAt = new StdoutActivityType();
-        String atname = stdoutAt.getName();
-        assertThat(atname.equals("stdout"));
         ActivityDef ad = ActivityDef.parseActivityDef("driver=stdout; yaml=stdout-test;");
         StdoutActivity stdoutActivity = stdoutAt.getActivity(ad);
         ActionDispenser actionDispenser = stdoutAt.getActionDispenser(stdoutActivity);

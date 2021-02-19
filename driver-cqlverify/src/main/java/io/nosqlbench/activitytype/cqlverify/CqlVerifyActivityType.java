@@ -5,13 +5,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "cqlverify")
 public class CqlVerifyActivityType implements ActivityType<CqlVerifyActivity> {
-
-    @Override
-    public String getName() {
-        return "cqlverify";
-    }
 
     @Override
     public ActionDispenser getActionDispenser(CqlVerifyActivity activity) {

@@ -37,13 +37,8 @@ import java.util.function.Predicate;
  * clause. In the example above, the default policy would be "exclude",
  * given that the fist clause is "include".
  */
-@Service(ResultValueFilterType.class)
+@Service(value = ResultValueFilterType.class, selector = "core")
 public class CoreResultValueFilter implements ResultValueFilterType {
-
-    @Override
-    public String getName() {
-        return "core";
-    }
 
     @Override
     public ResultFilterDispenser getDispenser(String config) {

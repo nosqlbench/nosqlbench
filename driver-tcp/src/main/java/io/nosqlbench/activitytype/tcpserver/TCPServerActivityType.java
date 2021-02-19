@@ -25,13 +25,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "tcpserver")
 public class TCPServerActivityType implements ActivityType<TCPServerActivity> {
-
-    @Override
-    public String getName() {
-        return "tcpserver";
-    }
 
     @Override
     public TCPServerActivity getActivity(ActivityDef activityDef) {
@@ -44,7 +39,7 @@ public class TCPServerActivityType implements ActivityType<TCPServerActivity> {
     }
 
     private static class Dispenser implements ActionDispenser {
-        private StdoutActivity activity;
+        private final StdoutActivity activity;
 
         private Dispenser(StdoutActivity activity) {
             this.activity = activity;

@@ -104,11 +104,6 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
     }
 
     @Override
-    public String getName() {
-        return "grafana";
-    }
-
-    @Override
     public void applyConfig(Map<String, ?> providedConfig) {
         ConfigModel configModel = getConfigModel();
         ConfigReader cfg = configModel.apply(providedConfig);

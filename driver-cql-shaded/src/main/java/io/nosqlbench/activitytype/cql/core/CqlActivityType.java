@@ -17,12 +17,8 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "cql")
 public class CqlActivityType implements ActivityType<CqlActivity> {
-
-    public String getName() {
-        return "cql";
-    }
 
     @Override
     public CqlActivity getActivity(ActivityDef activityDef) {

@@ -18,13 +18,12 @@
 package io.nosqlbench.engine.api.activityapi.input;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.api.spi.Named;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
-public interface InputType extends Named {
+public interface InputType {
 
     SimpleServiceLoader<InputType> FINDER =
-            new SimpleServiceLoader<>(InputType.class);
+        new SimpleServiceLoader<>(InputType.class);
 
     InputDispenser getInputDispenser(Activity activity);
 }

@@ -31,16 +31,6 @@ public class LoggingAnnotator implements Annotator, ConfigAware {
         annotatorLog.log(level, inlineForm);
     }
 
-    /**
-     * @return The annotated selector of this implementation,
-     * ensuring that selector and name stay the same
-     */
-    @Override
-    public String getName() {
-        String selector = LoggingAnnotator.class.getAnnotation(Service.class).selector();
-        return selector;
-    }
-
     @Override
     public void applyConfig(Map<String, ?> providedConfig) {
         ConfigModel configModel = getConfigModel();

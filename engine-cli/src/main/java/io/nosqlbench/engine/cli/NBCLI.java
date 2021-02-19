@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.docsys.core.DocServerApp;
+import io.nosqlbench.docsys.core.NBWebServerApp;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
@@ -163,7 +163,7 @@ public class NBCLI {
             System.exit(0);
         }
         if (args.length > 0 && args[0].toLowerCase().matches("docserver|appserver")) {
-            DocServerApp.main(Arrays.copyOfRange(args, 1, args.length));
+            NBWebServerApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
         }
         if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
@@ -194,7 +194,7 @@ public class NBCLI {
         }
 
         if (options.wantsActivityTypes()) {
-            ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            ActivityType.FINDER.getAllSelectors().forEach(System.out::println);
             System.exit(0);
         }
 
@@ -251,12 +251,12 @@ public class NBCLI {
         }
 
         if (options.wantsInputTypes()) {
-            InputType.FINDER.getAll().stream().map(InputType::getName).forEach(System.out::println);
+            InputType.FINDER.getAllSelectors().forEach(System.out::println);
             System.exit(0);
         }
 
         if (options.wantsMarkerTypes()) {
-            OutputType.FINDER.getAll().stream().map(OutputType::getName).forEach(System.out::println);
+            OutputType.FINDER.getAllSelectors().forEach(System.out::println);
             System.exit(0);
         }
 

@@ -280,14 +280,15 @@ public class ScenarioController {
             if (executor == null && createIfMissing) {
 
                 String activityTypeName = activityDef.getParams().getOptionalString("driver", "type").orElse(null);
-                List<String> knownTypes = ActivityType.FINDER.getAll().stream().map(ActivityType::getName).collect(Collectors.toList());
+
+                List<String> knownTypes = ActivityType.FINDER.getAllSelectors();
 
                 // Infer the type from either alias or yaml if possible (exactly one matches)
                 if (activityTypeName == null) {
                     List<String> matching = knownTypes.stream().filter(
-                            n ->
-                                    activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
-                                            || activityDef.getParams().getOptionalString("yaml", "workload").orElse("").contains(n)
+                        n ->
+                            activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
+                                || activityDef.getParams().getOptionalString("yaml", "workload").orElse("").contains(n)
                     ).collect(Collectors.toList());
                     if (matching.size() == 1) {
                         activityTypeName = matching.get(0);

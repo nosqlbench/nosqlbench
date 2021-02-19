@@ -27,13 +27,8 @@ import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-@Service(OutputType.class)
+@Service(value = OutputType.class, selector = "cyclelog")
 public class CycleLogOutputType implements OutputType {
-
-    @Override
-    public String getName() {
-        return "cyclelog";
-    }
 
     @Override
     public OutputDispenser getOutputDispenser(Activity activity) {

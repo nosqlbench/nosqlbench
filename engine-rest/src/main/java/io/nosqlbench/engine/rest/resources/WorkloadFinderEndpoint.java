@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "workload-finder")
 @Singleton
 @Path("/services/workloads")
 public class WorkloadFinderEndpoint implements WebServiceObject {

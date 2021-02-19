@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//@Service(WebServiceObject.class)
+//@Service(value=WebServiceObject.class,selector="test")
 @Singleton
 @Path("test1")
 public class TestServlet1 implements WebServiceObject {

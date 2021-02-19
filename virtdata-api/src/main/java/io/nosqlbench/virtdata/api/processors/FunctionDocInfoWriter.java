@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 public class FunctionDocInfoWriter implements FuncEnumerator.Listener {
 
     private final String suffix;
-    private Filer filer;
-    private Messager messenger;
+    private final Filer filer;
+    private final Messager messenger;
 
     public FunctionDocInfoWriter(Filer filer, Messager messenger, String suffix) {
         this.filer = filer;
@@ -100,7 +100,7 @@ public class FunctionDocInfoWriter implements FuncEnumerator.Listener {
                 ctors.add("add(new $T<$T>() {{$>\n", ArrayList.class, String.class);
                 for (String s : example) {
                     Matcher m = Pattern.compile(Matcher.quoteReplacement("$")).matcher(s);
-                    s=m.replaceAll(m.quoteReplacement("$$"));
+                    s = m.replaceAll(Matcher.quoteReplacement("$$"));
                     ctors.add("add(\"" + s + "\");\n");
                 }
                 ctors.add("$<}});\n");
@@ -127,7 +127,8 @@ public class FunctionDocInfoWriter implements FuncEnumerator.Listener {
 
 
         AnnotationSpec serviceAnnotation = AnnotationSpec.builder(Service.class)
-                .addMember("value","$T.class",DocFuncData.class)
+            .addMember("value", "$T.class", DocFuncData.class)
+            .addMember("selector", "$S", doc.getPackageName() + "." + doc.getClassName())
                 .build();
 
         TypeSpec manifestType = TypeSpec.classBuilder(newClassName)

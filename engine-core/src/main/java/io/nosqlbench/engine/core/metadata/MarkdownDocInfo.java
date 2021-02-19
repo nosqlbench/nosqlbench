@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.core.metadata;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +45,8 @@ public class MarkdownDocInfo {
 
     public String forActivityInstance(String s) {
         ActivityType activityType = ActivityType.FINDER.getOrThrow(s);
-        return forResourceMarkdown(activityType.getName() + ".md", "docs/");
+        return forResourceMarkdown(activityType.getClass().getAnnotation(Service.class)
+            .selector() + ".md", "docs/");
     }
 
 }

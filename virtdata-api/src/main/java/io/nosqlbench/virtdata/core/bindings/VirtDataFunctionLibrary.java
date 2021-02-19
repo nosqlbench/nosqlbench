@@ -1,6 +1,5 @@
 package io.nosqlbench.virtdata.core.bindings;
 
-import io.nosqlbench.nb.api.spi.Named;
 import io.nosqlbench.virtdata.lang.ast.Expression;
 import io.nosqlbench.virtdata.lang.ast.FunctionCall;
 import io.nosqlbench.virtdata.lang.parser.VirtDataDSL;
@@ -12,7 +11,7 @@ import java.util.stream.Collectors;
  * A VirtDataFunctionLibrary is simply a way to ask for a set
  * of named function objects in a generic way.
  */
-public interface VirtDataFunctionLibrary extends Named {
+public interface VirtDataFunctionLibrary {
 
     /**
      * Given a signature for a unary function which takes an input

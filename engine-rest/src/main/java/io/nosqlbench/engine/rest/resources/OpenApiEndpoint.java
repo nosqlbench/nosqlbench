@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "openapi")
 @Singleton
 @Path("/openapi")
 public class OpenApiEndpoint implements WebServiceObject {

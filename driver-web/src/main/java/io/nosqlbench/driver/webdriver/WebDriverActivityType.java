@@ -7,13 +7,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "webdriver")
 public class WebDriverActivityType implements ActivityType<WebDriverActivity> {
-
-    @Override
-    public String getName() {
-        return "webdriver";
-    }
 
     @Override
     public WebDriverActivity getActivity(ActivityDef activityDef) {

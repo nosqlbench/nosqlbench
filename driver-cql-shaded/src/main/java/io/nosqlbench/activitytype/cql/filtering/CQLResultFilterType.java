@@ -11,13 +11,8 @@ import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Predicate;
 
-@Service(ResultValueFilterType.class)
+@Service(value = ResultValueFilterType.class, selector = "cql")
 public class CQLResultFilterType implements ResultValueFilterType {
-
-    @Override
-    public String getName() {
-        return "cql";
-    }
 
     @Override
     public ResultFilterDispenser getDispenser(String config) {

@@ -24,8 +24,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "histologger")
 public class HdrHistoLogPluginData implements ScriptingPluginInfo<HdrHistoLogPlugin> {
+
     @Override
     public String getDescription() {
         return "allows script control of HDR histogram interval logging";
@@ -35,10 +36,5 @@ public class HdrHistoLogPluginData implements ScriptingPluginInfo<HdrHistoLogPlu
     @Override
     public HdrHistoLogPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new HdrHistoLogPlugin(logger,metricRegistry,scriptContext);
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "histologger";
     }
 }

@@ -30,15 +30,10 @@ import org.apache.logging.log4j.LogManager;
  *
  * Diag serves as a basic template for implementing your own activity type.
  */
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "diag")
 public class DiagActivityType implements ActivityType<DiagActivity> {
 
     private static final Logger logger = LogManager.getLogger(DiagActivityType.class);
-
-    @Override
-    public String getName() {
-        return "diag";
-    }
 
     @Override
     public ActionDispenser getActionDispenser(DiagActivity activity) {

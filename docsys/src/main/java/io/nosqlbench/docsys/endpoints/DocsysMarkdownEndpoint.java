@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "docsys-markdown")
 @Singleton
 @Path("/services/docs/")
 public class DocsysMarkdownEndpoint implements WebServiceObject {

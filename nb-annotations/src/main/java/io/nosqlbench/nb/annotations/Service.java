@@ -31,5 +31,6 @@ import java.lang.annotation.Target;
 public @interface Service {
     Class<?> value();
 
-    String selector() default "";
+    String selector();
+
 }

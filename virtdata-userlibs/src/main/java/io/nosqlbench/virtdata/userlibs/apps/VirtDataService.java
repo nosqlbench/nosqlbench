@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-@Service(WebServiceObject.class)
+@Service(value = WebServiceObject.class, selector = "virtdata")
 @Singleton
 @Path("virtdata")
 public class VirtDataService implements WebServiceObject {

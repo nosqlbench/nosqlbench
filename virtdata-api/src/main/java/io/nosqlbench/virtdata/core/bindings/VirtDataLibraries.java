@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 public class VirtDataLibraries implements VirtDataFunctionLibrary  {
-    private final static Logger logger  = LogManager.getLogger(VirtDataLibraries.class);
-    private static VirtDataLibraries instance = new VirtDataLibraries();
-    private final Map<String,DataMapper<?>> threadSafeCache = new HashMap<>();
+    private final static Logger logger = LogManager.getLogger(VirtDataLibraries.class);
+    private static final VirtDataLibraries instance = new VirtDataLibraries();
+    private final Map<String, DataMapper<?>> threadSafeCache = new HashMap<>();
 
     private final VirtDataFunctionResolver resolver = new VirtDataFunctionResolver();
 
@@ -20,11 +20,6 @@ public class VirtDataLibraries implements VirtDataFunctionLibrary  {
     }
 
     private VirtDataLibraries() {
-    }
-    @Override
-
-    public String getName() {
-        return "ALL";
     }
 
     @Override

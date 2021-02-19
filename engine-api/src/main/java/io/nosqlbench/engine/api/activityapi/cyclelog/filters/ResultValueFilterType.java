@@ -17,10 +17,9 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
-import io.nosqlbench.engine.api.util.SimpleServiceLoader;
-import io.nosqlbench.nb.api.spi.Named;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
-public interface ResultValueFilterType extends Named {
+public interface ResultValueFilterType {
 
     SimpleServiceLoader<ResultValueFilterType> FINDER = new SimpleServiceLoader<>(ResultValueFilterType.class);
 

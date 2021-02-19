@@ -5,12 +5,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(ActivityType.class)
+@Service(value = ActivityType.class, selector = "jmx")
 public class JMXActivityType implements ActivityType<JMXActivity> {
-    @Override
-    public String getName() {
-        return "jmx";
-    }
 
     @Override
     public JMXActivity getActivity(ActivityDef activityDef) {
