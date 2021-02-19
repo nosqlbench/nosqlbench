@@ -11,8 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-public class DocServerApp {
-    private static final Logger logger = LogManager.getLogger(DocServerApp.class);
+public class NBWebServerApp {
+    private static final Logger logger = LogManager.getLogger(NBWebServerApp.class);
 
     public static void main(String[] args) {
         if (args.length > 0 && args[0].contains("help")) {
@@ -20,7 +20,7 @@ public class DocServerApp {
         } else if (args.length > 0 && args[0].contains("generate")) {
             try {
                 String[] genargs = Arrays.copyOfRange(args, 1, args.length);
-                logger.info("Generating with args ["+String.join("][",args)+"]");
+                logger.info("Generating with args [" + String.join("][", args) + "]");
                 generate(genargs);
             } catch (IOException e) {
                 logger.error("could not generate files with command " + String.join(" ", args));

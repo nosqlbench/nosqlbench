@@ -4,6 +4,9 @@ import io.nosqlbench.docsys.DocsysDefaultAppPath;
 import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.handlers.FavIconHandler;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.DefaultHandler;
@@ -22,8 +25,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.model.ResourceMethod;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletRegistration;
@@ -34,8 +35,9 @@ import java.net.URL;
 import java.nio.file.AccessMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -43,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public class NBWebServer implements Runnable {
 
-    private final static Logger logger  = LogManager.getLogger(NBWebServer.class);
+    private final static Logger logger = LogManager.getLogger(NBWebServer.class);
 
     private final List<Path> basePaths = new ArrayList<>();
     private final List<Class> servletClasses = new ArrayList<>();
@@ -55,9 +57,9 @@ public class NBWebServer implements Runnable {
     private String bindHost = "localhost";
     private int bindPort = 12345;
 
-    private final Map<String,Object> contextParams = new LinkedHashMap<>();
+    private final Map<String, Object> contextParams = new LinkedHashMap<>();
 
-    public NBWebServer withContextParams(Map<String,Object> cp) {
+    public NBWebServer withContextParams(Map<String, Object> cp) {
         this.contextParams.putAll(cp);
         return this;
     }
@@ -98,7 +100,7 @@ public class NBWebServer implements Runnable {
         return this;
     }
 
-    private void addWebObject(Class... objects) {
+    private void addWebObject(Class<?>... objects) {
         servletClasses.addAll(Arrays.asList(objects));
 //        String servletClasses = this.servletClasses
 //                .stream()
@@ -113,11 +115,22 @@ public class NBWebServer implements Runnable {
     }
 
     private void loadDynamicEndpoints() {
-        List<WebServiceObject> serviceObjects = WebObjectLoader.loadWebServiceObjects();
-        for (WebServiceObject serviceObject : serviceObjects) {
-            logger.info("Adding web service object: " + serviceObject.toString());
-            this.addWebObject(serviceObject.getClass());
+        List<Pattern> includeApps = List.of(Pattern.compile(".*"));
+        if (contextParams.containsKey("include-apps")) {
+            includeApps = Arrays.asList(contextParams.get("include-apps").toString().split(", *"))
+                .stream()
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
         }
+
+        SimpleServiceLoader<WebServiceObject> svcLoader = new SimpleServiceLoader<>(WebServiceObject.class);
+        svcLoader.getNamedProviders().values()
+            .forEach(p -> {
+                Class<? extends WebServiceObject> c = p.type();
+                logger.info("Adding web service object: " + c.getSimpleName());
+                this.addWebObject(c);
+            });
+
         logger.debug("Loaded " + this.servletClasses.size() + " root resources.");
 
     }
@@ -133,8 +146,8 @@ public class NBWebServer implements Runnable {
     private ServletHolder getServletHolder() {
         if (servletHolder == null) {
             servletHolder = getContextHandler().addServlet(
-                    ServletContainer.class,
-                    "/apps"
+                ServletContainer.class,
+                "/apps"
             );
             servletHolder.setInitOrder(0);
         }
@@ -234,9 +247,9 @@ public class NBWebServer implements Runnable {
         ServletContainer container = new ServletContainer(rc);
         ServletHolder servlets = new ServletHolder(container);
         String classnames = this.servletClasses
-                .stream()
-                .map(Class::getCanonicalName)
-                .collect(Collectors.joining(","));
+            .stream()
+            .map(Class::getCanonicalName)
+            .collect(Collectors.joining(","));
         rc.property(ServerProperties.PROVIDER_CLASSNAMES, classnames);
 //        servlets.setInitParameter(ServerProperties.PROVIDER_CLASSNAMES,
 //                classnames
@@ -260,7 +273,7 @@ public class NBWebServer implements Runnable {
         filterMapping.setPathSpec("/*");
         filterMapping.setServletName("cross-origin");
 
-        sch.addFilter(filter,"/*", EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
+        sch.addFilter(filter, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC));
 
         handlers.addHandler(sch);
 
@@ -270,7 +283,6 @@ public class NBWebServer implements Runnable {
         defaultHandler.setServeIcon(false);
 
         handlers.addHandler(defaultHandler);
-
 
 
 //        FilterMapping corsMapping = new FilterMapping();
@@ -297,7 +309,7 @@ public class NBWebServer implements Runnable {
                 connectors.add(sc);
             } else if (bindScheme.equals("https")) {
                 SslContextFactory.Server server1 = new SslContextFactory.Server();
-                ServerConnector sc = new ServerConnector(server,server1);
+                ServerConnector sc = new ServerConnector(server, server1);
                 sc.setPort(bindPort);
                 sc.setHost(bindHost);
 //                sc.setDefaultProtocol(bindScheme);
@@ -308,10 +320,10 @@ public class NBWebServer implements Runnable {
 
             server.start();
 
-            System.out.println("Started documentation server at "+ bindScheme + "://" + bindHost + ":" + bindPort + "/");
+            System.out.println("Started documentation server at " + bindScheme + "://" + bindHost + ":" + bindPort + "/");
 
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                System.out.println("Browsing to documentation server at "+ bindScheme + "://" + bindHost + ":" + bindPort + "/");
+                System.out.println("Browsing to documentation server at " + bindScheme + "://" + bindHost + ":" + bindPort + "/");
                 Desktop.getDesktop().browse(new URI(bindScheme + "://" + bindHost + ":" + bindPort + "/"));
                 System.out.println("If the docs app did not open automatically in your browser, open to the the url above.");
             }
@@ -357,16 +369,16 @@ public class NBWebServer implements Runnable {
         if (handler instanceof ResourceHandler) {
             ResourceHandler h = (ResourceHandler) handler;
             sb.append(" base resource: ").append(h.getBaseResource().toString())
-                    .append("\n");
+                .append("\n");
             sb.append(h.dump());
         } else if (handler instanceof ServletContextHandler) {
             ServletContextHandler h = (ServletContextHandler) handler;
             sb.append(h.dump()).append("\n");
             h.getServletContext().getServletRegistrations().forEach(
-                    (k, v) -> {
-                        sb.append("==> servlet type ").append(k).append("\n");
-                        sb.append(getServletSummary(v)).append("\n");
-                    }
+                (k, v) -> {
+                    sb.append("==> servlet type ").append(k).append("\n");
+                    sb.append(getServletSummary(v)).append("\n");
+                }
             );
             sb.append("context path:").append(h.getContextPath());
         } else if (handler instanceof DefaultHandler) {
@@ -378,6 +390,6 @@ public class NBWebServer implements Runnable {
 
     private String getServletSummary(ServletRegistration v) {
         return v.getClassName() + "('" + v.getName() + "')" + v.getInitParameters().keySet().stream().map(
-                k -> k + "=" + v.getInitParameters().get(k)).collect(Collectors.joining(","));
+            k -> k + "=" + v.getInitParameters().get(k)).collect(Collectors.joining(","));
     }
 }
