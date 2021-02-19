@@ -24,20 +24,17 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
-public class FileAccessPluginData implements ScriptingPluginInfo<FileAccessPluginData> {
+@Service(value = ScriptingPluginInfo.class, selector = "files")
+public class FileAccessPluginData implements ScriptingPluginInfo<FileAccess> {
+
     @Override
     public String getDescription() {
         return "Allows for convenient read access to local files";
     }
 
     @Override
-    public FileAccessPluginData getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public FileAccess getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new FileAccess();
     }
 
-    @Override
-    public String getBaseVariableName() {
-        return "files";
-    }
 }

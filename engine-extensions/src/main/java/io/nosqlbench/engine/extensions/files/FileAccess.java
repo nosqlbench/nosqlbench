@@ -19,7 +19,7 @@ package io.nosqlbench.engine.extensions.files;
 
 import io.nosqlbench.nb.api.content.NBIO;
 
-public class FileAccess extends FileAccessPluginData {
+public class FileAccess {
 
     public String read(String filepath) {
         return NBIO.readCharBuffer(filepath).toString();
