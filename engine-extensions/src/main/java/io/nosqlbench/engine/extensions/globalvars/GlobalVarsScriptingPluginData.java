@@ -9,8 +9,9 @@ import org.apache.logging.log4j.Logger;
 import javax.script.ScriptContext;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "globalvars")
 public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<ConcurrentHashMap<String, Object>> {
+
     @Override
     public String getDescription() {
         return "The global access map from shared state";
@@ -22,8 +23,4 @@ public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<Concur
         return map;
     }
 
-    @Override
-    public String getBaseVariableName() {
-        return "globalvars";
-    }
 }

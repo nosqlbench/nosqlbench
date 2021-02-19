@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "histostatslogger")
 public class HistoStatsPluginData implements ScriptingPluginInfo<HistoStatsPlugin> {
 
     @Override
@@ -35,10 +35,5 @@ public class HistoStatsPluginData implements ScriptingPluginInfo<HistoStatsPlugi
     @Override
     public HistoStatsPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new HistoStatsPlugin(logger,metricRegistry,scriptContext);
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "histostatslogger";
     }
 }

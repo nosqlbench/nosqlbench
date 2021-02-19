@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "adder")
 public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
 
     @Override
@@ -37,11 +37,6 @@ public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
     public ExamplePlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         logger.trace("creating a new ExampleSandboxExtension");
         return new ExamplePlugin();
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "adder";
     }
 
 }

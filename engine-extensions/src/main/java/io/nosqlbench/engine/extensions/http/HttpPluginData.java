@@ -7,8 +7,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "http")
 public class HttpPluginData implements ScriptingPluginInfo<HttpPlugin> {
+
     @Override
     public String getDescription() {
         return "use http get and post in scripts";
@@ -17,10 +18,5 @@ public class HttpPluginData implements ScriptingPluginInfo<HttpPlugin> {
     @Override
     public HttpPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new HttpPlugin();
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "http";
     }
 }

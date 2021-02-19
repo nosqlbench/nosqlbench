@@ -24,8 +24,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "scriptingmetrics")
 public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
+
     @Override
     public String getDescription() {
         return "Allows you to create and append metrics within your scenario scripts";
@@ -34,10 +35,5 @@ public class ScriptingMetricsPluginData implements ScriptingPluginInfo<Scripting
     @Override
     public ScriptingMetrics getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new ScriptingMetrics(logger,metricRegistry,scriptContext);
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "scriptingmetrics";
     }
 }

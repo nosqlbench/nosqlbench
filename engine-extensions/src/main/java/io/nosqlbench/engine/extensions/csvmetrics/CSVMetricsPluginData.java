@@ -24,8 +24,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "csvmetrics")
 public class CSVMetricsPluginData implements ScriptingPluginInfo<CSVMetricsPlugin> {
+
     @Override
     public String getDescription() {
         return "Allows a script to log some or all metrics to CSV files";
@@ -34,11 +35,6 @@ public class CSVMetricsPluginData implements ScriptingPluginInfo<CSVMetricsPlugi
     @Override
     public CSVMetricsPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         return new CSVMetricsPlugin(logger, metricRegistry, scriptContext);
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "csvmetrics";
     }
 
 }

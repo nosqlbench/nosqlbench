@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
+@Service(value = ScriptingPluginInfo.class, selector = "optimos")
 public class BobyqaOptimizerPluginData implements ScriptingPluginInfo<BobyqaOptimizerPlugin> {
 
     @Override
@@ -37,8 +37,4 @@ public class BobyqaOptimizerPluginData implements ScriptingPluginInfo<BobyqaOpti
         return new BobyqaOptimizerPlugin(logger, metricRegistry, scriptContext);
     }
 
-    @Override
-    public String getBaseVariableName() {
-        return "optimos";
-    }
 }
