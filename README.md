@@ -88,11 +88,15 @@ available, but more work is needed to support them fully. Here is what is suppor
 
 ## Thanks
 
-[![DataStax Logo](https://www.datastax.com/sites/default/files/content/graphics/logo/DS-logo-2019_1-25percent.png)](http://datastax.com/)
+<table cellspacing="0" cellpadding="0" align="left">
+  <tr>
+    <td><a href="https://datastax.com" target="_blank"><img src="https://www.datastax.com/sites/default/files/2020-12/datastax-logotype-positive.png" alt="DataStax" width="250"/></a></td>
+  </tr>
+</table>
 
-This project is sponsored by [DataStax](http://datastax.com/) -- The always-on, active everywhere, distributed hybrid
-cloud database built on Apache Cassandra™, and designed from the ground up to run anywhere, on any cloud, in any
-datacenter, and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
+This project is sponsored by [DataStax](https://www.datastax.com) -- The Open, Multi-Cloud Stack for Modern Data Apps built on
+Apache Cassandra™, Kubernetes *Based*, Developer *Ready* & Cloud *Delivered* and designed from the ground up to run anywhere,
+on any cloud, in any datacenter, and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
 
 ![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
 
