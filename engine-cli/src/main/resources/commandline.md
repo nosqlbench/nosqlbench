@@ -129,21 +129,24 @@ Log HDR histogram stats to a CSV file
     --log-histostats 'stats.csv:.*:1m'    # with 1-minute interval
     --log-histostats 'stats.csv:.*specialmetrics:10s'
 
-Adjust the progress reporting inverval
+Adjust the progress reporting interval
 
-    --progress console:10s
+    --progress console:1m
 
 or
 
     --progress logonly:5m
 
-If you want to add in classic time decaying histogram metrics
-for your histograms and timers, you may do so with this option:
+NOTE: The progress indicator on console is provided by default unless
+logging levels are turned up or there is a script invocation on the
+command line.
+
+If you want to add in classic time decaying histogram metrics for your
+histograms and timers, you may do so with this option:
 
     --classic-histograms prefix
     --classic-histograms 'prefix:.*'               # same as above
     --classic-histograms 'prefix:.*specialmetrics' # subset of names
-
 
 Name the current session, for logfile naming, etc
 By default, this will be "scenario-TIMESTAMP", and a logfile will be created
