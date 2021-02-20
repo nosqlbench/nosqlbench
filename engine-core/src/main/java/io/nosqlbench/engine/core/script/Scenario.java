@@ -365,13 +365,14 @@ public class Scenario implements Callable<ScenarioResult> {
 
         result.reportToLog();
 
-        getSummaryDestinations(reportSummaryTo, result.getElapsedMillis()).forEach(result::reportTo);
+        doReportSummaries(reportSummaryTo, result);
 
         return result;
     }
 
-    private List<PrintStream> getSummaryDestinations(String reportSummaryTo, long elapsedMillis) {
-        List<PrintStream> destinations = new ArrayList<>();
+    private void doReportSummaries(String reportSummaryTo, ScenarioResult result) {
+        List<PrintStream> fullChannels = new ArrayList<>();
+        List<PrintStream> briefChannels = new ArrayList<>();
 
 
         String[] destinationSpecs = reportSummaryTo.split(", *");
@@ -381,35 +382,39 @@ public class Scenario implements Callable<ScenarioResult> {
                 String[] split = spec.split(":", 2);
                 String summaryTo = split[0];
                 long summaryWhen = split.length == 2 ? Long.parseLong(split[1]) * 1000L : 0;
-                if (elapsedMillis > summaryWhen) {
-                    PrintStream out = null;
-                    switch (summaryTo.toLowerCase()) {
-                        case "console":
-                        case "stdout":
-                            destinations.add(System.out);
+
+                PrintStream out = null;
+                switch (summaryTo.toLowerCase()) {
+                    case "console":
+                    case "stdout":
+                        out = System.out;
+                        break;
+                    case "stderr":
+                        out = System.err;
+                        break;
+                    default:
+                        String outName = summaryTo
+                            .replaceAll("_SESSION_", getScenarioName())
+                            .replaceAll("_LOGS_", logsPath.toString());
+                        try {
+                            out = new PrintStream(new FileOutputStream(outName));
                             break;
-                        case "stderr":
-                            destinations.add(System.err);
-                            break;
-                        default:
-                            String outName = summaryTo
-                                .replaceAll("_SESSION_", getScenarioName())
-                                .replaceAll("_LOGS_", logsPath.toString());
-                            try {
-                                out = new PrintStream(new FileOutputStream(outName));
-                                destinations.add(out);
-                                break;
-                            } catch (FileNotFoundException e) {
-                                throw new RuntimeException(e);
-                            }
-                    }
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                }
+
+
+                if (result.getElapsedMillis() > summaryWhen) {
+                    fullChannels.add(out);
                 } else {
-                    logger.debug("Suppressing metrics report to " + spec + " with scenario duration of " + summaryWhen + "ms");
+                    logger.debug("Summarizing counting metrics only to " + spec + " with scenario duration of " + summaryWhen + "ms (<" + summaryWhen + ")");
+                    briefChannels.add(out);
                 }
             }
         }
-
-        return destinations;
+        fullChannels.forEach(result::reportTo);
+        briefChannels.forEach(result::reportCountsTo);
     }
 
     @Override
