@@ -1,4 +1,4 @@
-package io.nosqlbench.activitytype.cqlverify;
+package io.nosqlbench.activitytype.cql.statements.rowoperators.verification;
 
 import com.codahale.metrics.Counter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;

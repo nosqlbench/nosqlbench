@@ -18,10 +18,10 @@
 
 package io.nosqlbench.engine.core.lifecycle;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.*;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
+import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,5 +116,23 @@ public class ScenarioResult {
             .build();
         reporter.report();
         logger.debug("-- END METRICS DETAIL --");
+    }
+
+    public void reportCountsTo(PrintStream printStream) {
+        StringBuilder sb = new StringBuilder();
+
+        ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
+            if (v instanceof Counting) {
+                long count = ((Counting) v).getCount();
+                if (count > 0) {
+                    NBMetricsSummary.summarize(sb, k, v);
+                }
+            }
+        });
+
+        printStream.println("-- BEGIN NON-ZERO metric counts (run longer for full report):");
+        printStream.print(sb.toString());
+        printStream.println("-- END NON-ZERO metric counts:");
+
     }
 }

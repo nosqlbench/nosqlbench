@@ -1,4 +1,4 @@
-package io.nosqlbench.activitytype.cqlverify;
+package io.nosqlbench.activitytype.cql.statements.rowoperators.verification;
 
 import com.datastax.driver.core.*;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
@@ -295,7 +295,7 @@ public class RowDifferencer implements RowCycleOperator {
         private final VerificationMetrics metrics;
         private final Bindings bindings;
         private final DiffType diffType;
-        private ThreadLocal<RowDifferencer> tl;
+        private final ThreadLocal<RowDifferencer> tl;
 
         public ThreadLocalWrapper(VerificationMetrics metrics, Bindings bindings, DiffType diffType) {
             this.metrics = metrics;

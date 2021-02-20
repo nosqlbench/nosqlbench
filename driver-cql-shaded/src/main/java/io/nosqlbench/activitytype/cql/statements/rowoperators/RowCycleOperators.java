@@ -15,7 +15,6 @@ public enum RowCycleOperators {
         this.implClass = traceLoggerClass;
     }
 
-
     public Class<? extends RowCycleOperator> getImplementation() {
         return implClass;
     }

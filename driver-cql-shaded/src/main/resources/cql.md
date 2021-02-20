@@ -277,6 +277,21 @@ now **they are limited to a YAML params block**:
      # that statement for both successes and errors,
      # using the given statement name.
 
+    verify: *
+    compare: all
+    # Adds two operators to the operation:
+    # 1) verify that there is a single row result set in the response.
+    # 2) verify some or all of the field values by name and/or value.
+    # If this option is used on any statement, then the activity will
+    # provide verification metrics and exceptions, including details
+    # of verification in the log once the activity is completed.
+    # For full details on this field, see the docs on cqlverify.
+
+    /// Cross-verify all fields and field values between the reference data and
+    /// the actual data.
+    all(0x1|0x1<<1|0x1<<2);
+
+
     logresultcsv: true
     OR
     logresultcsv: myfilename.csv
