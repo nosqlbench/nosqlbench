@@ -91,6 +91,7 @@ public class HttpAction implements SyncAction {
             Exception error = null;
             try {
                 response = responseFuture.get(httpActivity.getTimeoutMillis(), TimeUnit.MILLISECONDS);
+                httpActivity.statusCodeHisto.update(response.statusCode());
                 if (httpOp.ok_status != null) {
                     if (!httpOp.ok_status.matcher(String.valueOf(response.statusCode())).matches()) {
                         throw new InvalidStatusCodeException(cycle, httpOp.ok_status, response.statusCode());
@@ -106,7 +107,6 @@ public class HttpAction implements SyncAction {
 //                error = new RuntimeException("while waiting for response in cycle " + cycleValue + ":" + e.getMessage(), e);
             } finally {
                 long nanos = System.nanoTime() - startat;
-                httpActivity.statusCodeHisto.update(response.statusCode());
                 httpActivity.resultTimer.update(nanos, TimeUnit.NANOSECONDS);
                 if (error == null) {
                     httpActivity.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
