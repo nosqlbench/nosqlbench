@@ -23,7 +23,6 @@
     <dse.driver.version>1.9.0</dse.driver.version>
     <flexmark.version>0.61.6</flexmark.version>
     <greenrobot.version>3.0.0-RC1</greenrobot.version>
-    <hdrhistogram.version>2.1.10</hdrhistogram.version>
     <jackson.jaxrs.version>2.9.8</jackson.jaxrs.version>
     <javapoet.version>1.11.1</javapoet.version>
     <javax.activation.version>1.1.1</javax.activation.version>
@@ -39,8 +38,7 @@
     <junit.jupiter.version>5.3.2</junit.jupiter.version>
 
     <lz4.version>1.4.1</lz4.version>
-    <metrics.reservoir.version>1.1.0</metrics.reservoir.version>
-    <metrics.version>4.0.7</metrics.version>
+<!--    <metrics.version>4.0.7</metrics.version>-->
     <mvel2.version>2.4.10.Final</mvel2.version>
     <!--        <netty.version>4.1.45.Final</netty.version>-->
     <netty.version>4.1.47.Final</netty.version>
@@ -113,25 +111,25 @@
       <dependency>
         <groupId>org.mpierce.metrics.reservoir</groupId>
         <artifactId>hdrhistogram-metrics-reservoir</artifactId>
-        <version>${metrics.reservoir.version}</version>
+          <version>1.1.0</version>
       </dependency>
 
       <dependency>
         <groupId>org.hdrhistogram</groupId>
         <artifactId>HdrHistogram</artifactId>
-        <version>${hdrhistogram.version}</version>
+          <version>2.1.11</version>
       </dependency>
 
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-graphite</artifactId>
-        <version>${metrics.version}</version>
+          <version>4.1.9</version>
       </dependency>
 
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
-        <version>${metrics.version}</version>
+          <version>4.1.9</version>
       </dependency>
 
       <dependency>
