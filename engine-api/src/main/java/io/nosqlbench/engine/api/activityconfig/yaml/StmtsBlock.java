@@ -30,8 +30,8 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
     private final static String NameToken = "name";
     private final static String StmtToken = "stmt";
     private final RawStmtsBlock rawStmtsBlock;
-    private StmtsDoc rawStmtsDoc;
-    private int blockIdx;
+    private final StmtsDoc rawStmtsDoc;
+    private final int blockIdx;
 
 
     public StmtsBlock(RawStmtsBlock rawStmtsBlock, StmtsDoc rawStmtsDoc, int blockIdx) {
@@ -40,14 +40,14 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
         this.blockIdx = blockIdx;
     }
 
-    public List<OpTemplate> getStmts() {
+    public List<OpTemplate> getOps() {
 
         List<OpTemplate> rawOpTemplates = new ArrayList<>();
         List<RawStmtDef> statements = rawStmtsBlock.getRawStmtDefs();
 
         for (int i = 0; i < statements.size(); i++) {
             rawOpTemplates.add(
-                    new StmtDef(this, statements.get(i))
+                new OpDef(this, statements.get(i))
             );
         }
         return rawOpTemplates;
@@ -106,6 +106,6 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
     @Override
     @NotNull
     public Iterator<OpTemplate> iterator() {
-        return getStmts().iterator();
+        return getOps().iterator();
     }
 }

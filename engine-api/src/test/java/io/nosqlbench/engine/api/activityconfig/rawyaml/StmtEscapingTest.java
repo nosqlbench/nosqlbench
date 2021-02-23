@@ -47,9 +47,9 @@ public class StmtEscapingTest {
         StmtsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getBindings()).hasSize(0);
         assertThat(block1.getTags()).hasSize(0);
-        assertThat(block1.getStmts()).hasSize(3);
+        assertThat(block1.getOps()).hasSize(3);
 
-        defs = block1.getStmts();
+        defs = block1.getOps();
     }
 
     @Test

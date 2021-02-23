@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class StmtDef implements OpTemplate {
+public class OpDef implements OpTemplate {
 
     private final RawStmtDef rawStmtDef;
     private final StmtsBlock block;
@@ -34,7 +34,7 @@ public class StmtDef implements OpTemplate {
     private final LinkedHashMap<String, String> bindings;
     private final LinkedHashMap<String, String> tags;
 
-    public StmtDef(StmtsBlock block, RawStmtDef rawStmtDef) {
+    public OpDef(StmtsBlock block, RawStmtDef rawStmtDef) {
         this.block = block;
         this.rawStmtDef = rawStmtDef;
         this.params = composeParams();
