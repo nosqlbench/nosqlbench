@@ -15,14 +15,14 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarRecvMapper implements LongFunction<PulsarOp> {
+public class PulsarConsumerMapper implements LongFunction<PulsarOp> {
     private final LongFunction<Consumer<?>> consumerFunc;
     private final LongFunction<String> recvInstructions;
     private final CommandTemplate cmdTpl;
 
-    public PulsarRecvMapper(LongFunction<Consumer<?>> consumerFunc,
-                            LongFunction<String> recvMsg,
-                            CommandTemplate cmdTpl) {
+    public PulsarConsumerMapper(LongFunction<Consumer<?>> consumerFunc,
+                                LongFunction<String> recvMsg,
+                                CommandTemplate cmdTpl) {
         this.consumerFunc = consumerFunc;
         this.recvInstructions = recvMsg;
         this.cmdTpl = cmdTpl;
@@ -31,6 +31,6 @@ public class PulsarRecvMapper implements LongFunction<PulsarOp> {
 
     @Override
     public PulsarOp apply(long value) {
-        return new PulsarRecvOp((Consumer<byte[]>) consumerFunc.apply(value), recvInstructions.apply(value));
+        return new PulsarConsumerOp((Consumer<byte[]>) consumerFunc.apply(value), recvInstructions.apply(value));
     }
 }

@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Producer;
 
@@ -15,29 +16,32 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarSendMapper implements LongFunction<PulsarOp> {
-    private final CommandTemplate cmdTpl;
+public class PulsarProducerMapper implements LongFunction<PulsarOp> {
     private final LongFunction<Producer<?>> producerFunc;
-    private final LongFunction<String> payloadFunc;
     private final LongFunction<String> keyFunc;
+    private final LongFunction<String> payloadFunc;
+    private final PulsarSpace clientSpace;
+    private final CommandTemplate cmdTpl;
 
-    public PulsarSendMapper(
+    public PulsarProducerMapper(
         LongFunction<Producer<?>> producerFunc,
-        LongFunction<String> msgFunc,
         LongFunction<String> keyFunc,
+        LongFunction<String> payloadFunc,
+        PulsarSpace clientSpace,
         CommandTemplate cmdTpl) {
         this.producerFunc = producerFunc;
-        this.payloadFunc = msgFunc;
         this.keyFunc = keyFunc;
+        this.payloadFunc = payloadFunc;
+        this.clientSpace = clientSpace;
         this.cmdTpl = cmdTpl;
-        // TODO: add schema support
     }
 
     @Override
     public PulsarOp apply(long value) {
         Producer<?> producer = producerFunc.apply(value);
-        String msg = payloadFunc.apply(value);
-        String key = keyFunc != null ? keyFunc.apply(value) : null;
-        return new PulsarSendOp(key, (Producer<byte[]>) producer, msg);
+        String msgKey = keyFunc != null ? keyFunc.apply(value) : null;
+        String msgPayload = payloadFunc.apply(value);
+
+        return new PulsarProducerOp(producer, clientSpace.getPulsarSchema(), msgKey, msgPayload);
     }
 }

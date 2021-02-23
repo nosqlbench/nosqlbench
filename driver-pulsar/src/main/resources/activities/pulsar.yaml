@@ -4,35 +4,66 @@ description: |
   below like send100 or recv100.
   You can specify the number of tenants like `tenants=100`. This is the default.
 
-scenarios:
-  send: run driver=pulsar cycles=1000 tags=type:send url=TEMPLATE(url,pulsar://localhost:6650)
-  recv: run driver=pulsar cycles=1000 tags=type:recv url=TEMPLATE(url,pulsar://localhost:6650)
-
 bindings:
-  cycle: ToString();
-  numbername: NumberNameToString();
-  clientinstance: Mod(1);
-  tenant: Mod(TEMPLATE(tenants,100)L);
-  #  tenant2: Template("tenant-{}",Mod(TEMPLATE(tenants,100)L)->String);
-  mykey: WeightedString('key1:5,key2:23');
-  namespace: Template("ns-{}",Mod(TEMPLATE(namespaces,3)L));
+  mykey: NumberNameToString();
+  sensor_id: ToUUID();ToString();
+#  sensor_type:
+  reading_time: ToDateTime();
+  reading_value: ToFloat(100);
+  topic: Template("topic-{}",Mod(TEMPLATE(tenants,10)L));
 
 blocks:
-  - name: send-block
+#  - create-tenant-namespace:
+#    tags:
+#      type: create-tenant-namespace
+#    statements:
+#      tenant: {tenant}
+#      namespace: {namespace}
+
+  - name: producer-block
     tags:
-      type: send
+      type: producer
     statements:
-      - send-stuff:
-          send: |
-            {"number": {cycle}, "name": "{numbername}"}
-          tenant: "public"
-          namespace: "{namespace}"
-  #          tenant: "tenant-{tenant}"
-  - name: recv-block
-    tags:
-      type: recv
-    statements:
-      - recv-stuff:
-          recv: stuff
+      - producer-stuff:
+          #######
+          # NOTE: tenant and namespace must be static and pre-exist in Pulsar first
+          # topic_uri: "[persistent|non-persistent]://<tenant>/<namespace>/<topic>"
+#          topic_uri: "persistent://public/default/{topic}"
+          topic_uri: "persistent://public/default/nbpulsar"
+          # producer-name:
+          msg-key: "{mykey}"
+          msg-value: |
+            {
+                "SensorID": "{sensor_id}",
+                "SensorType": "Temperature",
+                "ReadingTime": "{reading_time}",
+                "ReadingValue": {reading_value}
+            }
+
+#  - name: consumer-block
+#    tags:
+#      type: consumer
+#    statements:
+#      - consumer-stuff:
+#          subscription-name:
+#          subscription-type:
+#
+#  - reader:
+#    tags:
+#      type: reader
+#    statements:
+#      - reader-stuff:
+#
+#  - websocket-producer:
+#    tags:
+#      type: websocket-produer
+#    statements:
+#      - websocket-producer-stuff:
+#
+#  - managed-ledger:
+#    tags:
+#      type: managed-ledger
+#    statement:
+#      - managed-ledger-stuff:
 
 
