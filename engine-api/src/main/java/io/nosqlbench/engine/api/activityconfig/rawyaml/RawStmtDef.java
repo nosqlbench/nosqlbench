@@ -33,7 +33,6 @@ public class RawStmtDef extends RawStmtFields {
         this.statement = statement;
     }
 
-
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
 
@@ -63,18 +62,20 @@ public class RawStmtDef extends RawStmtFields {
                 Map values = (Map) firstEntry.getValue();
                 setFieldsByReflection(values);
                 map = values;
-            } else if (firstEntry.getValue() instanceof CharSequence){
+            } else if (firstEntry.getValue() instanceof CharSequence) {
                 setStmt(((CharSequence) firstEntry.getValue()).toString());
             }
-            map.remove(firstEntry.getKey());
             if (getName().isEmpty()) {
+                map.remove(firstEntry.getKey());
                 setName(firstEntry.getKey());
-            } else {
-                throw new RuntimeException("redefined-name-in-statement-tuple: Statement name has already been set by name parameter. Remove the name parameter for a statement definition map." +
-                        " For more details on this error see " +
-                        "the troubleshooting section in the " +
-                        "YAML format docs for redefined-name-statement-tuple");
             }
+            // TODO: Add explicit check condition for this error
+//            else {
+//                throw new RuntimeException("redefined-name-in-statement-tuple: Statement name has already been set by name parameter. Remove the name parameter for a statement definition map." +
+//                        " For more details on this error see " +
+//                        "the troubleshooting section in the " +
+//                        "YAML format docs for redefined-name-statement-tuple");
+//            }
         }
         if (getName().isEmpty()) {
             setName(defaultName);
@@ -90,7 +91,7 @@ public class RawStmtDef extends RawStmtFields {
     private void setStmt(String statement) {
         this.statement = statement;
     }
-    
+
     public String getName() {
         Object name = getParams().get("name");
         if (name!=null) {

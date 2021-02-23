@@ -31,9 +31,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StmtDefTest {
+public class OpDefTest {
 
-    private final static Logger logger = LogManager.getLogger(StmtDefTest.class);
+    private final static Logger logger = LogManager.getLogger(OpDefTest.class);
 
     @Test
     public void testLayering() {
@@ -71,7 +71,7 @@ public class StmtDefTest {
         StmtsDoc doc1 = all.getStmtDocs().get(0);
         StmtsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getName()).isEqualTo("doc1--block0");
-        List<OpTemplate> assys = block1.getStmts();
+        List<OpTemplate> assys = block1.getOps();
         assertThat(assys).hasSize(2);
         OpTemplate sdef1 = assys.get(0);
         assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
@@ -92,5 +92,57 @@ public class StmtDefTest {
         assertThat(stmt0.getParams()).containsAllEntriesOf(Map.of("foobar", "baz"));
         assertThat(stmt1.getParams()).containsAllEntriesOf(Map.of("timeout", 23423, "foobar", "baz"));
     }
+
+    @Test
+    public void testMapOfMaps() {
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        List<StmtsDoc> docs = all.getStmtDocs();
+        StmtsDoc doc0 = docs.get(0);
+        assertThat(doc0.getName()).isEqualTo("map-of-maps");
+        assertThat(doc0.getBlocks()).hasSize(1);
+        StmtsBlock block1 = doc0.getBlocks().get(0);
+        assertThat(block1.getName()).isEqualTo("map-of-maps--block0");
+        assertThat(block1.getOps()).hasSize(2);
+        OpTemplate op0 = block1.getOps().get(0);
+        assertThat(op0.getName()).isEqualTo("map-of-maps--block0--s3");
+        assertThat(op0.getParams()).hasSize(2);
+        assertThat(op0.getParams()).containsAllEntriesOf(Map.of("p1", "v7", "p2", "v8"));
+        OpTemplate op1 = block1.getOps().get(1);
+        assertThat(op1.getParams()).containsAllEntriesOf(Map.of());
+        assertThat(op1.getName()).isEqualTo("map-of-maps--block0--s2");
+        assertThat(op1.getStmt()).isEqualTo("statement2");
+    }
+
+    @Test
+    public void testBasicStringStmt() {
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        List<StmtsDoc> docs = all.getStmtDocs();
+        StmtsDoc doc1 = docs.get(1);
+        assertThat(doc1.getName()).isEqualTo("string-statement");
+        assertThat(doc1.getBlocks()).hasSize(1);
+        StmtsBlock block1 = doc1.getBlocks().get(0);
+        assertThat(block1.getName()).isEqualTo("string-statement--block0");
+        assertThat(block1.getOps()).hasSize(1);
+        OpTemplate op0 = block1.getOps().get(0);
+        assertThat(op0.getName()).isEqualTo("string-statement--block0--stmt1");
+        assertThat(op0.getStmt()).isEqualTo("test statement");
+    }
+
+    @Test
+    public void testListOfNamedMap() {
+        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        List<StmtsDoc> docs = all.getStmtDocs();
+        StmtsDoc doc2 = docs.get(2);
+        assertThat(doc2.getName()).isEqualTo("list-of-named-map");
+        assertThat(doc2.getBlocks()).hasSize(1);
+        StmtsBlock block1 = doc2.getBlocks().get(0);
+        assertThat(block1.getOps()).hasSize(1);
+        OpTemplate op0 = block1.getOps().get(0);
+        assertThat(op0.getName()).isEqualTo("list-of-named-map--block0--s1");
+        assertThat(op0.getStmt()).isNull();
+        assertThat(op0.getParams()).hasSize(3);
+        assertThat(op0.getParams()).containsExactlyEntriesOf(Map.of("p1", "v2", "p2", "v2", "p3", "v3"));
+    }
+
 
 }

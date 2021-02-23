@@ -1,0 +1,16 @@
+name: map-of-maps
+statements:
+  s3:
+    p1: v7
+    p2: v8
+  s2: statement2
+---
+name: string-statement
+statement: "test statement"
+---
+name: list-of-named-map
+statements:
+  - s1:
+      p1: v1
+      p2: v2
+    p3: v3
