@@ -23,7 +23,6 @@ public class PulsarActivityType implements ActivityType<PulsarActivity> {
     }
 
     private static class PulsarActionDispenser implements ActionDispenser {
-
         private final PulsarActivity activity;
         public PulsarActionDispenser(PulsarActivity activity) {
             this.activity = activity;
