@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
 import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * and <pre>{anchor}</pre> anchoring conventions. This type also includes
  * all of the properties from the enclosed StmtDef, in addition to a couple of
  * helpers. It should allow programmers to project this type directly from an
- * existing {@link StmtDef} as a substitute.
+ * existing {@link OpDef} as a substitute.
  */
 public class ParsedStmt {
 
@@ -44,17 +44,17 @@ public class ParsedStmt {
     private final static Logger logger = LogManager.getLogger(ParsedStmt.class);
     private ParsedTemplate template;
 
-    private final StmtDef stmtDef;
+    private final OpDef opDef;
     private final ParsedTemplate parsed;
 
     /**
      * Construct a new ParsedStatement from the provided stmtDef and anchor token.
      *
-     * @param stmtDef An existing statement def as read from the YAML API.
+     * @param opDef An existing statement def as read from the YAML API.
      */
-    public ParsedStmt(StmtDef stmtDef) {
-        this.stmtDef = stmtDef;
-        parsed = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
+    public ParsedStmt(OpDef opDef) {
+        this.opDef = opDef;
+        parsed = new ParsedTemplate(opDef.getStmt(), opDef.getBindings());
     }
 
     public ParsedStmt orError() {
@@ -125,46 +125,46 @@ public class ParsedStmt {
     }
 
     /**
-     * @return the statement name from the enclosed {@link StmtDef}
+     * @return the statement name from the enclosed {@link OpDef}
      */
     public String getName() {
-        return stmtDef.getName();
+        return opDef.getName();
     }
 
     /**
-     * @return the raw statement from the enclosed {@link StmtDef}
+     * @return the raw statement from the enclosed {@link OpDef}
      */
     public String getStmt() {
-        return stmtDef.getStmt();
+        return opDef.getStmt();
     }
 
     /**
-     * @return the tags from the enclosed {@link StmtDef}
+     * @return the tags from the enclosed {@link OpDef}
      */
     public Map<String, String> getTags() {
-        return stmtDef.getTags();
+        return opDef.getTags();
     }
 
     /**
-     * @return the bindings from the enclosed {@link StmtDef}
+     * @return the bindings from the enclosed {@link OpDef}
      */
     public Map<String, String> getBindings() {
-        return stmtDef.getBindings();
+        return opDef.getBindings();
     }
 
     /**
-     * @return the params from the enclosed {@link StmtDef}
+     * @return the params from the enclosed {@link OpDef}
      * @deprecated You should use {@link #getParamReader()} instead.
      */
     public Map<String, Object> getParams() {
-        return stmtDef.getParams();
+        return opDef.getParams();
     }
 
     /**
-     * @return a params reader from the enclosed {@link StmtDef} params map
+     * @return a params reader from the enclosed {@link OpDef} params map
      */
     public Element getParamReader() {
-        return NBParams.one(stmtDef.getParams());
+        return NBParams.one(opDef.getParams());
     }
 
     public List<BindPoint> getBindPoints() {

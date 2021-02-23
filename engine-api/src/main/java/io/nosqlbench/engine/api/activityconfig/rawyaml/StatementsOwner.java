@@ -35,6 +35,10 @@ public class StatementsOwner extends RawStmtFields {
     }
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
+        if (propsmap.containsKey("statement") && propsmap.containsKey("statements")) {
+            throw new RuntimeException("You can define either statement or statements, but not both.");
+        }
+
         Object statementsObject = propsmap.remove("statements");
 
         if (statementsObject == null) {
