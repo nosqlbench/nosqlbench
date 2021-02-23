@@ -1,9 +1,6 @@
 package io.nosqlbench.driver.pulsar;
 
-import org.apache.pulsar.client.api.PulsarClient;
-
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 /**
  * To enable flexibility in testing methods, each object graph which is used within
@@ -17,22 +14,18 @@ public class PulsarSpaceCache {
     // TODO: Implement variant cache eviction behaviors (halt, warn, LRU)
 
     private final PulsarActivity activity;
-    private final Supplier<PulsarClient> clientFunc;
     private final ConcurrentHashMap<String, PulsarSpace> clientScopes = new ConcurrentHashMap<>();
 
-    public PulsarSpaceCache(PulsarActivity pulsarActivity, Supplier<PulsarClient> newClient) {
+    public PulsarSpaceCache(PulsarActivity pulsarActivity) {
         this.activity = pulsarActivity;
-        this.clientFunc = newClient;
     }
 
     public PulsarSpace getPulsarSpace(String name) {
-        PulsarSpace cspace = clientScopes.computeIfAbsent(name, spaceName -> new PulsarSpace(spaceName, clientFunc));
+        PulsarSpace cspace = clientScopes.computeIfAbsent(name, spaceName -> new PulsarSpace(spaceName, activity.getPulsarConf()));
         return cspace;
     }
 
     public PulsarActivity getActivity() {
         return activity;
     }
-
-
 }

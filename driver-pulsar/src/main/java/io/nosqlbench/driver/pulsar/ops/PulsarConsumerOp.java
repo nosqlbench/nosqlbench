@@ -6,11 +6,11 @@ import org.apache.pulsar.client.api.PulsarClientException;
 
 import java.nio.charset.StandardCharsets;
 
-public class PulsarRecvOp implements PulsarOp {
+public class PulsarConsumerOp implements PulsarOp {
     private final Consumer<byte[]> consumer;
     private final String recvInstructions;
 
-    public PulsarRecvOp(Consumer<byte[]> consumer, String recvInstructions) {
+    public PulsarConsumerOp(Consumer<byte[]> consumer, String recvInstructions) {
         this.consumer = consumer;
         this.recvInstructions = recvInstructions;
     }
