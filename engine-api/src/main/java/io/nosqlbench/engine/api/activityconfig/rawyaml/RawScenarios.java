@@ -1,11 +1,13 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
+import io.nosqlbench.nb.api.errors.BasicError;
+
 import java.util.*;
 
 public class RawScenarios {
 
     public static String STEPNAME = "%03d";
-    private Map<String, Map<String, String>> scenarios = new LinkedHashMap<>();
+    private final Map<String, Map<String, String>> scenarios = new LinkedHashMap<>();
 
     public List<String> getScenarioNames() {
         return new ArrayList<>(scenarios.keySet());
@@ -20,6 +22,9 @@ public class RawScenarios {
             for (Map.Entry<String, Object> namedEntry : rawNamedScenarios.entrySet()) {
                 String scenarioName = namedEntry.getKey();
                 Object scenarioObj = namedEntry.getValue();
+                if (scenarioObj == null) {
+                    throw new BasicError("Unable to use a null value for scenario named " + scenarioName + " in yaml.");
+                }
                 if (scenarioObj instanceof CharSequence) {
                     scenarios.put(scenarioName, Map.of(String.format(STEPNAME, 1), scenarioObj.toString()));
                 } else if (scenarioObj instanceof List) {
