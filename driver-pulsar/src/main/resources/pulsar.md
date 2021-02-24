@@ -5,9 +5,11 @@
         - [1.3.1. Producer Statement block](#131-producer-statement-block)
         - [1.3.2. Consumer Statement block](#132-consumer-statement-block)
     - [1.4. Schema Support](#14-schema-support)
-- [2. Advanced Driver Features](#2-advanced-driver-features)
-    - [2.1. Activity Parameters](#21-activity-parameters)
-    - [2.2. TODO: Design Revisit](#22-todo-design-revisit)
+    - [1.5. Activity Parameters](#15-activity-parameters)
+- [2. Advanced Driver Features -- TODO: Design Revisit](#2-advanced-driver-features----todo-design-revisit)
+    - [2.1. Other Activity Parameters](#21-other-activity-parameters)
+    - [2.2. API Caching](#22-api-caching)
+        - [2.2.1. Instancing Controls](#221-instancing-controls)
 
 # 1. NoSQLBench (NB) Pulsar Driver Overview
 
@@ -161,9 +163,7 @@ For the previous Producer block statement example, the **msg-value** parameter h
 }
 ```
 
-# 2. Advanced Driver Features
-
-## 2.1. Activity Parameters
+## 1.5. Activity Parameters
 
 At the moment, the following Activity Parameter is supported:
 
@@ -171,7 +171,7 @@ At the moment, the following Activity Parameter is supported:
 
 ---
 
-## 2.2. TODO: Design Revisit
+# 2. Advanced Driver Features -- TODO: Design Revisit
 
 **NOTE**: The following text is based on the original multi-layer API caching design which is not fully implemented at the moment. We need to revisit the original design at some point in order to achieve maximum testing flexibility.
 
@@ -181,7 +181,7 @@ To summarize, the original caching design has the following key requirements:
 
 In the current implementation, only requirement 2 is implemented. Regarding requirement 1, the current implementation only supports one client space per NB Pulsar activity!
 
----
+## 2.1. Other Activity Parameters
 
 - **url** - The pulsar url to connect to.
     - **default** - `url=pulsar://localhost:6650`
@@ -200,7 +200,7 @@ In the current implementation, only requirement 2 is implemented. Regarding requ
   the number of consumer instances which are allowed to be cached per
   client instance.
 
-## API Caching
+## 2.2. API Caching
 
 This driver is tailored around the multi-tenancy and topic naming scheme
 that is part of Apache Pulsar. Specifically, you can create an arbitrary
@@ -212,7 +212,7 @@ Further, the topic URI is composed from the provided qualifiers of
 fully-composed value in the `persistence://tenant/namespace/topic`
 form.
 
-### Instancing Controls
+### 2.2.1. Instancing Controls
 
 Normative usage of the Apache Pulsar API follows a strictly enforced
 binding of topics to produces and consumers. As well, clients may be
