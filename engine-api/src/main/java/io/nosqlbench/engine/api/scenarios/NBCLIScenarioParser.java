@@ -188,7 +188,7 @@ public class NBCLIScenarioParser {
         return sanitized;
     }
 
-    private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
+    private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
     private static LinkedHashMap<String, CmdArg> parseStep(String cmd) {
         LinkedHashMap<String, CmdArg> parsedStep = new LinkedHashMap<>();
@@ -362,7 +362,6 @@ public class NBCLIScenarioParser {
             .prefix(includes)
             .extension("js")
             .list().stream().map(Content::asPath).collect(Collectors.toList());
-        ;
 
         List<String> scriptNames = new ArrayList();
 
