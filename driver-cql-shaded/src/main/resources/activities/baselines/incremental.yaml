@@ -1,0 +1,113 @@
+description:
+  This is a workload which creates an incrementally growing dataset over cycles.
+  Rows will be added incrementally in both rampup and main phases. However, during
+  the main phase, reads will also occur at the same rate, with the read patterns
+  selecting from the size of data written up to that point.
+
+scenarios:
+  default:
+    schema: run tags=phase:schema threads==1
+    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
+    main: run tags=phase:main cycles===TEMPLATE(main-cycles,100000) threads=auto
+  default-schema: run tags=phase:schema threads==1
+  default-rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
+  default-main: run tags=phase:main cycles===TEMPLATE(main-cycles,100000) threads=auto
+  astra:
+    schema: run tags=phase:astra-schema threads==1
+    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
+    main: run tags=phase:main cycles===TEMPLATE(main-cycles,100000) threads=auto
+
+params:
+  instrument: true
+
+bindings:
+  seq_key: ToString()
+  seq_value: Hash(); ToString();
+  read_key: HashRangeScaled(TEMPLATE(scalefactor,1.0d)); ToString();
+  read_value: HashRangeScaled(TEMPLATE(scalefactor,1.0d)); Hash(); ToString();
+  write_key: Hash(); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); ToString();
+  write_value: Hash(); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); Hash(); ToString();
+
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    statements:
+      - create-keyspace: |
+          create keyspace if not exists TEMPLATE(keyspace,baselines)
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+          AND durable_writes = true;
+        tags:
+          name: create-keyspace
+      - create-table: |
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+  - name: schema-astra
+    tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+      - create-table: |
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+        tags:
+          name: create-table-astra
+
+  - name: rampup
+    tags:
+      phase: rampup
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    statements:
+      - rampup-insert: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
+          (key, value)
+          values ({seq_key},{seq_value});
+        tags:
+          name: rampup-insert
+  - name: verify
+    tags:
+      phase: verify
+      type: read
+    params:
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    statements:
+      - verify-select: |
+          select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) where key={seq_key};
+        verify-fields: key->seq_key, value->seq_value
+        tags:
+          name: verify
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 1
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    statements:
+      - main-select: |
+          select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) where key={rw_key};
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 1
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    statements:
+      - main-insert: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
+          (key, value) values ({rw_key}, {rw_value});
+        tags:
+          name: main-insert
+
