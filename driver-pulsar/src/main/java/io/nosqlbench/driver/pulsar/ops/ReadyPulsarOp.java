@@ -24,7 +24,6 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     // TODO: Add docs for the command template with respect to the OpTemplate
 
     public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache) {
-        PulsarSpace clientSpace1;
         // TODO: Consider parsing map structures into equivalent binding representation
         this.cmdTpl = new CommandTemplate(opTemplate);
         if (cmdTpl.isDynamic("op_scope")) {
