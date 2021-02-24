@@ -6,6 +6,7 @@
         - [1.3.2. Consumer Statement block](#132-consumer-statement-block)
     - [1.4. Schema Support](#14-schema-support)
     - [1.5. Activity Parameters](#15-activity-parameters)
+    - [1.6. Pulsar NB Execution Example](#16-pulsar-nb-execution-example)
 - [2. Advanced Driver Features -- TODO: Design Revisit](#2-advanced-driver-features----todo-design-revisit)
     - [2.1. Other Activity Parameters](#21-other-activity-parameters)
     - [2.2. API Caching](#22-api-caching)
@@ -80,7 +81,7 @@ Just like other NB driver types, the actual Pulsar workload generation is determ
 
 ### 1.3.1. Producer Statement block
 
-A complete example of defining Pulsar **Producer** workload is as below:
+An example of defining Pulsar **Producer** workload is as below:
 
 ```yaml
 blocks:
@@ -168,6 +169,17 @@ For the previous Producer block statement example, the **msg-value** parameter h
 At the moment, the following Activity Parameter is supported:
 
 - * config=<file/path/to/global/configuration/properties/file>
+
+## 1.6. Pulsar NB Execution Example
+
+```
+<NB_Cmd> run type=pulsar -vv cycles=10 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+```
+
+**NOTE**:
+
+* An example of **config.properties** file is [here](activities/config.properties)
+* An example of **pulsar.yaml** file is [here](activities/pulsar.yaml)
 
 ---
 
