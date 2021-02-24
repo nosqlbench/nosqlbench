@@ -1,0 +1,117 @@
+# nb -v run driver=http yaml=http-iot tags=phase:schema stargate_host=my_stargate_host
+description: |
+  This workload emulates a time-series data model and access patterns.
+  This should be identical to the cql variant except for:
+  - We can't specify the write timestamp to make the write idempotent like we can with cql.
+  - The `time` binding has to have a StringDateWrapper to get the exact format that the REST API needs; See https://github.com/stargate/stargate/issues/532.
+  - We need to URLEncode the `data` binding because newlines can't be sent in REST calls.
+  - Schema creation is cql of the lack of being able to define compaction strategy in the REST API.
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+
+scenarios:
+  default:
+    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); StringDateWrapper("yyyy-MM-dd'T'hh:mm:ss'Z");
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); URLEncode();
+blocks:
+  - tags:
+      phase: schema
+    params:
+      prepared: false
+    statements:
+     - create-keyspace: |
+        create keyspace if not exists <<keyspace:baselines>>
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        AND durable_writes = true;
+       tags:
+         name: create-keyspace
+     - create-table : |
+        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
+        machine_id UUID,     // source machine
+        sensor_name text,    // sensor name
+        time timestamp,      // timestamp of collection
+        sensor_value double, //
+        station_id UUID,     // source location
+        data text,
+        PRIMARY KEY ((machine_id, sensor_name), time)
+        ) WITH CLUSTERING ORDER BY (time DESC)
+         AND compression = { 'sstable_compression' : '<<compression:LZ4Compressor>>' }
+         AND compaction = {
+         'class': 'TimeWindowCompactionStrategy',
+         'compaction_window_size': <<expiry_minutes:60>>,
+         'compaction_window_unit': 'MINUTES'
+        };
+       tags:
+         name: create-table
+     - truncate-table: |
+         truncate table <<keyspace:baselines>>.<<table:iot>>;
+       tags:
+         name: truncate-table
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "machine_id": "{machine_id}",
+            "sensor_name": "{sensor_name}",
+            "time": "{time}",
+            "sensor_value": "{sensor_value}",
+            "station_id": "{station_id}",
+            "data": "{data}"
+          }
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:1>>
+    statements:
+      - main-select: GET /v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=E[[{"machine_id":{"$eq":"{machine_id}"}},"sensor_name":{"$eq":"{sensor_name}"},"page-size":{"$eq":"<<limit:10>>"}}]]
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:9>>
+    statements:
+      - main-write: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "machine_id": "{machine_id}"
+            "sensor_name": "{sensor_name}",
+            "time": "{time}",
+            "sensor_value": "{sensor_value}",
+            "station_id": "{station_id}",
+            "data": "{data}"
+          }
+        tags:
+          name: main-write
