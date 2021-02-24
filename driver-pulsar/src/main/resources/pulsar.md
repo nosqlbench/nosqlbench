@@ -1,4 +1,15 @@
-# NoSQLBench (NB) Pulsar Driver Overview
+- [1. NoSQLBench (NB) Pulsar Driver Overview](#1-nosqlbench-nb-pulsar-driver-overview)
+    - [1.1. Issues Tracker](#11-issues-tracker)
+    - [1.2. Global Level Pulsar Configuration Settings](#12-global-level-pulsar-configuration-settings)
+    - [1.3. Pulsar Driver Yaml File: Statement Blocks](#13-pulsar-driver-yaml-file-statement-blocks)
+        - [1.3.1. Producer Statement block](#131-producer-statement-block)
+        - [1.3.2. Consumer Statement block](#132-consumer-statement-block)
+    - [1.4. Schema Support](#14-schema-support)
+- [2. Advanced Driver Features](#2-advanced-driver-features)
+    - [2.1. Activity Parameters](#21-activity-parameters)
+    - [2.2. TODO: Design Revisit](#22-todo-design-revisit)
+
+# 1. NoSQLBench (NB) Pulsar Driver Overview
 
 This driver allows you to simulate and run different types of workloads (as below) against a Pulsar cluster through NoSQLBench (NB).
 * Producer
@@ -9,11 +20,11 @@ This driver allows you to simulate and run different types of workloads (as belo
 
 **NOTE**: At the moment, only Producer workload type is fully supported in NB. The support for Consumer type is partially added but not completed yet; and the support for other types of workloads will be added in NB in future releases.
 
-## Issues Tracker
+## 1.1. Issues Tracker
 
 If you have issues or new requirements for this driver, please add them at the [pulsar issues tracker](https://github.com/nosqlbench/nosqlbench/issues/new?labels=pulsar).
 
-## Global Level Pulsar Configuration Settings
+## 1.2. Global Level Pulsar Configuration Settings
 
 The NB Pulsar driver relies on Pulsar's [Java Client API](https://pulsar.apache.org/docs/en/client-libraries-java/) to publish and consume messages from the Pulsar cluster. In order to do so, a [PulsarClient](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/PulsarClient) object needs to be created first in order to establish the connection to the Pulsar cluster; then a workload-specific object (e.g. [Producer](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/Producer) or [Consumer](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/Consumer)) is required in order to execute workload-specific actions (e.g. publishing or consuming messages).
 
@@ -41,31 +52,31 @@ producer.sendTimeoutMs =
 
 There are multiple sections in this file that correspond to different groups of configuration settings:
 * **NB pulsar driver related settings**:
-  * All settings under this section starts with **driver.** prefix.
-  * Right now there is only valid option under this section:
-    * *driver.client-type* determines what type of Pulsar workload to be simulated by NB.
+    * All settings under this section starts with **driver.** prefix.
+    * Right now there is only valid option under this section:
+        * *driver.client-type* determines what type of Pulsar workload to be simulated by NB.
 * **Schema related settings**:
-  * All settings under this section starts with **schema.** prefix.
-  * The NB Pulsar driver supports schema-based message publishing and consuming. This section defines configuration settings that are schema related.
-  * There are 2 valid options under this section.
-    * *shcema.type*: Pulsar message schema type. When unset or set as an empty string, Pulsar messages will be handled in raw *byte[]* format. The other valid option is **avro** which the Pulsar message will follow a specific Avro format.
-    * *schema.definition*: This only applies when an Avro schema type is specified and the value is the (full) file path that contains the Avro schema definition.
+    * All settings under this section starts with **schema.** prefix.
+    * The NB Pulsar driver supports schema-based message publishing and consuming. This section defines configuration settings that are schema related.
+    * There are 2 valid options under this section.
+        * *shcema.type*: Pulsar message schema type. When unset or set as an empty string, Pulsar messages will be handled in raw *byte[]* format. The other valid option is **avro** which the Pulsar message will follow a specific Avro format.
+        * *schema.definition*: This only applies when an Avro schema type is specified and the value is the (full) file path that contains the Avro schema definition.
 * **Pulsar Client related settings**:
-  * All settings under this section starts with **client.** prefix.
-  * This section defines all configuration settings that are related with defining a PulsarClient object.
-    * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#default-broker-urls-for-standalone-clusters)
+    * All settings under this section starts with **client.** prefix.
+    * This section defines all configuration settings that are related with defining a PulsarClient object.
+        * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#default-broker-urls-for-standalone-clusters)
 * **Pulsar Producer related settings**:
     * All settings under this section starts with **producer.** prefix.
     * This section defines all configuration settings that are related with defining a Pulsar Producer object.
-      * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer)
+        * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer)
 
 In the future, when the support for other types of Pulsar workloads is added in NB Pulsar driver, there will be corresponding configuration sections in this file as well.
 
-## Pulsar Driver Yaml File: Statement Blocks
+## 1.3. Pulsar Driver Yaml File: Statement Blocks
 
 Just like other NB driver types, the actual Pulsar workload generation is determined by the statement blocks in the NB driver Yaml file. Depending on the Pulsar workload type, the corresponding statement block may have different contents.
 
-### Producer Statement block
+### 1.3.1. Producer Statement block
 
 A complete example of defining Pulsar **Producer** workload is as below:
 
@@ -93,37 +104,37 @@ In the above statement block, there are 4 key statement parameters to provide va
 * **producer-name**: cycle-level Pulsar producer name (can be dynamically bound)
     * **Optional**
     * If not set, global level producer name in *config.properties* file will be used.
-      * Use a default producer name, "default", if it is neither set at global level.
+        * Use a default producer name, "default", if it is neither set at global level.
     * If set, cycle level producer name will take precedence over the global level setting
 
 * **topic_uri**: cycle-level Pulsar topic name (can be dynamically bound)
     * **Optional**
     * If not set, global level topic_uri in *config.properties* file will be used
-      * Throw a Runtime Error if it is neither set at global level
+        * Throw a Runtime Error if it is neither set at global level
     * If set, cycle level topic_uri will take precedence over the global level setting; and the provided value must follow several guidelines:
-      * It must be in valid Pulsar topic format as below:
-        ```
-        [persistent|non-persistent]://<tenant-name>/<namespace-name>/<short-topic-name>
-        ```
-      * At the moment, only **<short-topic-name>** part can be dynamically bound (e.g. through NB binding function). All other parts (e.g. <tenant-name> and <namespace-name>) must be static values and the corresponding tenants and namespaces must be created in the Pulsar cluster in advance.
+        * It must be in valid Pulsar topic format as below:
+          ```
+          [persistent|non-persistent]://<tenant-name>/<namespace-name>/<short-topic-name>
+          ```
+        * At the moment, only "**\<short-topic-name\>**" part can be dynamically bound (e.g. through NB binding function). All other parts must be static values and the corresponding tenants and namespaces must be created in the Pulsar cluster in advance.
 
-**TODO**: allow dynamic binding for <tenant-name> and <namespace-name> after first adding a phase for creating <tenant-name> and/or <namespace-name>, similar to C* CQL schema creation phase.!
+**TODO**: allow dynamic binding for "\<tenant-name\>" and "\<namespace-name\>" after adding a phase for creating "\<tenant-name\>" and/or "\<namespace-name\>", similar to C* CQL schema creation phase.!
 
 * **msg-key**: Pulsar message key
-  * **Optional**
-  * If not set, the generated Pulsar messages (to be published by the Producer) doesn't have **keys**.
+    * **Optional**
+    * If not set, the generated Pulsar messages (to be published by the Producer) doesn't have **keys**.
 
 * **msg-value**: Pulsar message payload
-  * **Mandatory**
-  * If not set, throw a Runtime Error.
+    * **Mandatory**
+    * If not set, throw a Runtime Error.
 
-### Consumer Statement block
+### 1.3.2. Consumer Statement block
 
 **TBD ...**
 
-## Schema Support
+## 1.4. Schema Support
 
-Pulsar has built-in schema support. Other than primitive types, Pulsar also supports complex types like **Avro**, and etc. At the moment, the NB Pulsar driver provides 2 schema support modes, via the global level schema related settings as below:
+Pulsar has built-in schema support. Other than primitive types, Pulsar also supports complex types like **Avro**, etc. At the moment, the NB Pulsar driver provides 2 schema support modes, via the global level schema related settings as below:
 * Avro schema:
   ```properties
   shcema.type: avro
@@ -150,9 +161,9 @@ For the previous Producer block statement example, the **msg-value** parameter h
 }
 ```
 
-# Advanced Driver Features
+# 2. Advanced Driver Features
 
-## Activity Parameters
+## 2.1. Activity Parameters
 
 At the moment, the following Activity Parameter is supported:
 
@@ -160,7 +171,7 @@ At the moment, the following Activity Parameter is supported:
 
 ---
 
-## TODO: Design Revisit
+## 2.2. TODO: Design Revisit
 
 **NOTE**: The following text is based on the original multi-layer API caching design which is not fully implemented at the moment. We need to revisit the original design at some point in order to achieve maximum testing flexibility.
 
