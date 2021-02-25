@@ -385,9 +385,12 @@ public class NBCLIScenarioParser {
 
             Matcher innerMatcher = innerTemplatePattern.matcher(match);
             String[] matchArray = match.split(",");
+//            if (matchArray.length!=2) {
+//                throw new BasicError("TEMPLATE form must have two arguments separated by a comma, like 'TEMPLATE(a,b), not '" + match +"'");
+//            }
             //TODO: support recursive matches
             if (innerMatcher.find()) {
-                String[] innerMatch = innerMatcher.group(1).split(",");
+                String[] innerMatch = innerMatcher.group(1).split("[,:]");
 
                 //We want the outer name with the inner default value
                 templates.put(matchArray[0], innerMatch[1]);
