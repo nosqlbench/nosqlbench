@@ -1,54 +1,218 @@
-# Pulsar driver
+- [1. NoSQLBench (NB) Pulsar Driver Overview](#1-nosqlbench-nb-pulsar-driver-overview)
+    - [1.1. Issues Tracker](#11-issues-tracker)
+    - [1.2. Global Level Pulsar Configuration Settings](#12-global-level-pulsar-configuration-settings)
+    - [1.3. Pulsar Driver Yaml File: Statement Blocks](#13-pulsar-driver-yaml-file-statement-blocks)
+        - [1.3.1. Producer Statement block](#131-producer-statement-block)
+        - [1.3.2. Consumer Statement block](#132-consumer-statement-block)
+    - [1.4. Schema Support](#14-schema-support)
+    - [1.5. Activity Parameters](#15-activity-parameters)
+    - [1.6. Pulsar NB Execution Example](#16-pulsar-nb-execution-example)
+- [2. Advanced Driver Features -- TODO: Design Revisit](#2-advanced-driver-features----todo-design-revisit)
+    - [2.1. Other Activity Parameters](#21-other-activity-parameters)
+    - [2.2. API Caching](#22-api-caching)
+        - [2.2.1. Instancing Controls](#221-instancing-controls)
 
-This driver allows you to produce and consume Apache Pulsar messages with
-NoSQLBench.
+# 1. NoSQLBench (NB) Pulsar Driver Overview
 
-## Issues Tracker
+This driver allows you to simulate and run different types of workloads (as below) against a Pulsar cluster through NoSQLBench (NB).
+* Producer
+* Consumer
+* (Future) Reader
+* (Future) WebSocket Producer
+* (Future) Managed Ledger
 
-If you have issues or new requirements for this driver, please add them at
-the
-[pulsar issues tracker](
-https://github.com/nosqlbench/nosqlbench/issues/new?labels=pulsar).
+**NOTE**: At the moment, only Producer workload type is fully supported in NB. The support for Consumer type is partially added but not completed yet; and the support for other types of workloads will be added in NB in future releases.
 
-## Example Statements
+## 1.1. Issues Tracker
 
-The simplest pulsar statement looks like this:
+If you have issues or new requirements for this driver, please add them at the [pulsar issues tracker](https://github.com/nosqlbench/nosqlbench/issues/new?labels=pulsar).
 
-```yaml
-statement: send='{"msg":"test message"}'
+## 1.2. Global Level Pulsar Configuration Settings
+
+The NB Pulsar driver relies on Pulsar's [Java Client API](https://pulsar.apache.org/docs/en/client-libraries-java/) to publish and consume messages from the Pulsar cluster. In order to do so, a [PulsarClient](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/PulsarClient) object needs to be created first in order to establish the connection to the Pulsar cluster; then a workload-specific object (e.g. [Producer](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/Producer) or [Consumer](https://pulsar.incubator.apache.org/api/client/2.7.0-SNAPSHOT/org/apache/pulsar/client/api/Consumer)) is required in order to execute workload-specific actions (e.g. publishing or consuming messages).
+
+When creating these objects (e.g. PulsarClient, Producer), there are different configuration options that can be used. For example, [this document](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer) lists all possible configuration options when creating a Pulsar Producer object.
+
+The NB pulsar driver supports these options via a global properties file (e.g. **config.properties**). An example of this file is as below:
+
+```properties
+### NB Pulsar driver related configuration - driver.xxx
+driver.client-type = producer
+
+### Schema related configurations - schema.xxx
+schema.type = avro
+schema.definition = file:///<path/to/avro/schema/definition/file>
+
+### Pulsar client related configurations - client.xxx
+client.serviceUrl = pulsar://<pulsar_broker_ip>:6650
+client.connectionTimeoutMs = 5000
+
+### Producer related configurations (global) - producer.xxx
+producer.topicName = persistent://public/default/mynbtest
+producer.producerName =
+producer.sendTimeoutMs =
 ```
 
-In this example, the statement is sent by a producer with a default
-_topic_uri_ of `persistent://public/default/default` at at the pulsar
-endpoint `pulsar://localhost:6650`
+There are multiple sections in this file that correspond to different groups of configuration settings:
+* **NB pulsar driver related settings**:
+    * All settings under this section starts with **driver.** prefix.
+    * Right now there is only valid option under this section:
+        * *driver.client-type* determines what type of Pulsar workload to be simulated by NB.
+* **Schema related settings**:
+    * All settings under this section starts with **schema.** prefix.
+    * The NB Pulsar driver supports schema-based message publishing and consuming. This section defines configuration settings that are schema related.
+    * There are 2 valid options under this section.
+        * *shcema.type*: Pulsar message schema type. When unset or set as an empty string, Pulsar messages will be handled in raw *byte[]* format. The other valid option is **avro** which the Pulsar message will follow a specific Avro format.
+        * *schema.definition*: This only applies when an Avro schema type is specified and the value is the (full) file path that contains the Avro schema definition.
+* **Pulsar Client related settings**:
+    * All settings under this section starts with **client.** prefix.
+    * This section defines all configuration settings that are related with defining a PulsarClient object.
+        * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#default-broker-urls-for-standalone-clusters)
+* **Pulsar Producer related settings**:
+    * All settings under this section starts with **producer.** prefix.
+    * This section defines all configuration settings that are related with defining a Pulsar Producer object.
+        * See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer)
 
-A complete example which uses all the available fields:
+In the future, when the support for other types of Pulsar workloads is added in NB Pulsar driver, there will be corresponding configuration sections in this file as well.
+
+## 1.3. Pulsar Driver Yaml File: Statement Blocks
+
+Just like other NB driver types, the actual Pulsar workload generation is determined by the statement blocks in the NB driver Yaml file. Depending on the Pulsar workload type, the corresponding statement block may have different contents.
+
+### 1.3.1. Producer Statement block
+
+An example of defining Pulsar **Producer** workload is as below:
 
 ```yaml
-statements:
-    - name1:
-        send: "Payload test with number {numbername}"
-        persistent: true
-        tenant: {test_tenant}
-        namespace: {test_namespace}
-        topic: {test_topic}
-        client: {clientid}
-        producer: {producerid}
+blocks:
+- name: producer-block
+  tags:
+    type: producer
+  statements:
+    - producer-stuff:
+          # producer-name:
+          # topic_uri: "persistent://public/default/{topic}"
+          topic_uri: "persistent://public/default/nbpulsar"
+          msg-key: "{mykey}"
+          msg-value: |
+            {
+                "SensorID": "{sensor_id}",
+                "SensorType": "Temperature",
+                "ReadingTime": "{reading_time}",
+                "ReadingValue": {reading_value}
+            }
 ```
 
-In this example, we define a producer send operation, identified as
-`name1` in metrics. The full topic_uri is constructed piece-wise by the
-provided values of `persistent`, `tenant`, `namespace`, and
-`topic`. The client instance used by NoSQLBench is controlled by the name
-of the `client` field. The instance of the producer used to send messages
-with that client is controlled by the `producer` property.
+In the above statement block, there are 4 key statement parameters to provide values:
+* **producer-name**: cycle-level Pulsar producer name (can be dynamically bound)
+    * **Optional**
+    * If not set, global level producer name in *config.properties* file will be used.
+        * Use a default producer name, "default", if it is neither set at global level.
+    * If set, cycle level producer name will take precedence over the global level setting
 
-Details on object instancing are provided below under __Instancing
-Controls__
+* **topic_uri**: cycle-level Pulsar topic name (can be dynamically bound)
+    * **Optional**
+    * If not set, global level topic_uri in *config.properties* file will be used
+        * Throw a Runtime Error if it is neither set at global level
+    * If set, cycle level topic_uri will take precedence over the global level setting; and the provided value must follow several guidelines:
+        * It must be in valid Pulsar topic format as below:
+          ```
+          [persistent|non-persistent]://<tenant-name>/<namespace-name>/<short-topic-name>
+          ```
+        * At the moment, only "**\<short-topic-name\>**" part can be dynamically bound (e.g. through NB binding function). All other parts must be static values and the corresponding tenants and namespaces must be created in the Pulsar cluster in advance.
 
-## Driver Features
+**TODO**: allow dynamic binding for "\<tenant-name\>" and "\<namespace-name\>" after adding a phase for creating "\<tenant-name\>" and/or "\<namespace-name\>", similar to C* CQL schema creation phase.!
 
-### API Caching
+* **msg-key**: Pulsar message key
+    * **Optional**
+    * If not set, the generated Pulsar messages (to be published by the Producer) doesn't have **keys**.
+
+* **msg-value**: Pulsar message payload
+    * **Mandatory**
+    * If not set, throw a Runtime Error.
+
+### 1.3.2. Consumer Statement block
+
+**TBD ...**
+
+## 1.4. Schema Support
+
+Pulsar has built-in schema support. Other than primitive types, Pulsar also supports complex types like **Avro**, etc. At the moment, the NB Pulsar driver provides 2 schema support modes, via the global level schema related settings as below:
+* Avro schema:
+  ```properties
+  shcema.type: avro
+  schema.definition: file:///<file/path/to/the/definition/file>
+  ```
+* Default byte[] schema:
+  ```properties
+  shcema.type:
+  schema.definition:
+  ```
+
+For the previous Producer block statement example, the **msg-value** parameter has the value of a JSON string that follows the following Avro schema definition (e.g. from a file **iot-example.asvc**)
+```json
+{
+  "type": "record",
+  "name": "IotSensor",
+  "namespace": "TestNS",
+  "fields" : [
+    {"name": "SensorID", "type": "string"},
+    {"name": "SensorType", "type": "string"},
+    {"name": "ReadingTime", "type": "string"},
+    {"name": "ReadingValue", "type": "float"}
+  ]
+}
+```
+
+## 1.5. Activity Parameters
+
+At the moment, the following Activity Parameter is supported:
+
+- * config=<file/path/to/global/configuration/properties/file>
+
+## 1.6. Pulsar NB Execution Example
+
+```
+<NB_Cmd> run type=pulsar -vv cycles=10 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+```
+
+**NOTE**:
+
+* An example of **config.properties** file is [here](activities/config.properties)
+* An example of **pulsar.yaml** file is [here](activities/pulsar.yaml)
+
+---
+
+# 2. Advanced Driver Features -- TODO: Design Revisit
+
+**NOTE**: The following text is based on the original multi-layer API caching design which is not fully implemented at the moment. We need to revisit the original design at some point in order to achieve maximum testing flexibility.
+
+To summarize, the original caching design has the following key requirements:
+* **Requirement 1**: Each NB Pulsar activity is able to launch and cache multiple **client spaces**
+* **Requirement 2**:Each client space can launch and cache multiple Pulsar operators of the same type (producer, consumer, etc.)
+
+In the current implementation, only requirement 2 is implemented. Regarding requirement 1, the current implementation only supports one client space per NB Pulsar activity!
+
+## 2.1. Other Activity Parameters
+
+- **url** - The pulsar url to connect to.
+    - **default** - `url=pulsar://localhost:6650`
+- **maxcached** - A default value to be applied to `max_clients`,
+  `max_producers`, `max_consumers`.
+    - default: `max_cached=100`
+- **max_clients** - Clients cache size. This is the number of client
+  instances which are allowed to be cached in the NoSQLBench client
+  runtime. The clients cache automatically maintains a cache of unique
+  client instances internally. default: _maxcached_
+
+- **max_producers** - Producers cache size (per client instance). Limits
+  the number of producer instances which are allowed to be cached per
+  client instance. default: _maxcached_
+- **max_consumers** - Consumers cache size (per client instance). Limits
+  the number of consumer instances which are allowed to be cached per
+  client instance.
+
+## 2.2. API Caching
 
 This driver is tailored around the multi-tenancy and topic naming scheme
 that is part of Apache Pulsar. Specifically, you can create an arbitrary
@@ -60,11 +224,7 @@ Further, the topic URI is composed from the provided qualifiers of
 fully-composed value in the `persistence://tenant/namespace/topic`
 form.
 
-### Schema Support
-
-Schema support will be added after the initial version is working.
-
-### Instancing Controls
+### 2.2.1. Instancing Controls
 
 Normative usage of the Apache Pulsar API follows a strictly enforced
 binding of topics to produces and consumers. As well, clients may be
@@ -104,101 +264,3 @@ specific order:
 The most important detail for understanding the instancing controls is
 that clients, producers, and consumers are all named and cached in the
 specific order above.
-
-## Op Fields
-
-Thees fields are used to define of a single pulsar client operation. These
-fields, taken together, are called the _op template_, and each one is
-called an _op template field_, or simply _template field_. You may specify
-them as `literal values` or as `{binding_anchors}` to be qualified at
-runtime for each and every cycle. When necessary, the appropriate API
-scaffolding is created automatically and cached by the NoSQLBench driver
-for Apache Pulsar such as clients, producers, and consumers.
-
-- **send** - If this op field is provided, then its value is used as the
-  payload for a send operation. The value may be static or dynamic as in
-  a `{binding_anchor}`.
-    - default: _undefined_
-- **producer** - If provided, the string value of this field determines
-  the name of the producer to use in the operation. The named producer
-  will be created (if needed) and cached under the designated client
-  instance. Because producers are bound to a topic at initialization, the
-  default behavior is to create a separate producer per topic_uri per
-  client. The producer field is only consulted if the _send_ field is
-  defined.
-    - default: `{topic_uri}`
-
-- **recv** - If this op field is provided, then its value is used to
-  control how a message is received. Special handling of received data is
-  possible but will be added in a future version. For now, the default
-  behavior of a recv operation is simply to receive a single message.
-    - default: _undefined_
-- **consumer** - If provided, the string value of this field determines
-  the name of the consumer to use in the operation. The named consumer
-  will be created (if needed) and cached under the designated client
-  instance. Because consumers are bound to a topic at instantiation, the
-  default behavior is to create a separate consumer per topic_uri per
-  client. The _consumer_ field is only consulted if the _recv_ field is
-  defined.
-    - default: `{topic_uri}`
-
-- **topic_uri** - The fully defined topic URI for a producer or consumer (
-  for a send or recv operation). The format is
-  `{persistent|non-persistent}://tenant/namespace/topic` as explained
-  at [Topics](https://pulsar.apache.org/docs/en/concepts-messaging/#topics)
-  . You may provide the full topic_uri in any valid op template form -- A
-  full or partial binding, or a static string. However, it is an error to
-  provide this field when any of `topic`, `tenant`, `namespace`, or
-  `persistence` are provided, as these fields are used to build the
-  _topic_uri_ piece-wise. On the contrary, it is not an error to leave all
-  of these fields undefined, as there are defaults that will fill in the
-  missing pieces.
-- **persistence** - Whether or not the topic should be persistent. This
-  value can any one of (boolean) true or false, "true", "false",
-  "persistent" or "non-persistent".
-    - default: `persistent`
-- **tenant** - Defines the name of the tenant to use for the operation.
-    - default: `public`
-- **namespace** - Defines the namespace to use for the operation.
-    - default: `default`
-- **topic** - Defines the topic to be used for the operation, and thus the
-  topic to be used for the producer or consumer of the operation.
-  -default: `default`
-- **client** - If this op field is provided, then the value is used to
-  name a client instance. If this client instance is not already cached,
-  it will be created and used for this operation.
-    - default: `default`
-
-## Activity Parameters
-
-- **url** - The pulsar url to connect to.
-    - **default** - `url=pulsar://localhost:6650`
-- **maxcached** - A default value to be applied to `max_clients`,
-  `max_producers`, `max_consumers`.
-    - default: `max_cached=100`
-- **max_clients** - Clients cache size. This is the number of client
-  instances which are allowed to be cached in the NoSQLBench client
-  runtime. The clients cache automatically maintains a cache of unique
-  client instances internally. default: _maxcached_
-- **max_producers** - Producers cache size (per client instance). Limits
-  the number of producer instances which are allowed to be cached per
-  client instance. default: _maxcached_
-- **max_consumers** - Consumers cache size (per client instance). Limits
-  the number of consumer instances which are allowed to be cached per
-  client instance.
-
-## Metrics
-
-- clients
-- avg_producers
-- avg_consumers
-- standard metrics ... TBD
-
-.. this need to be configurable
-
-- sent-{tenant}-{namespace}-{topic}
-- recv-{tenant}-{namespace}-{topic}
-- sent-{tenant}-{topic}
-- recv-{tenant}-{topic}
-- sent-{namespace}-{topic}
--

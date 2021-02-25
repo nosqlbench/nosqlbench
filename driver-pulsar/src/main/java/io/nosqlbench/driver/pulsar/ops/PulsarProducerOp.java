@@ -25,13 +25,16 @@ public class PulsarProducerOp implements PulsarOp {
     @Override
     public void run() {
         try {
-            SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
+            if ( (msgPayload == null) || msgPayload.isEmpty() ) {
+                throw new RuntimeException("Message payload (\"msg-value\" can't be empty!");
+            }
 
             TypedMessageBuilder typedMessageBuilder = producer.newMessage(pulsarSchema);
             if ( (msgKey != null) && (!msgKey.isEmpty()) ) {
                 typedMessageBuilder = typedMessageBuilder.key(msgKey);
             }
 
+            SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
             if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
                 String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
                 org.apache.avro.generic.GenericRecord avroGenericRecord =

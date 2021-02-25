@@ -67,51 +67,45 @@ public class PulsarSpace {
         }
     }
 
-    public PulsarClient getPulsarClient() {
-        return pulsarClient;
-    }
+    public PulsarClient getPulsarClient() { return pulsarClient; }
 
     public PulsarNBClientConf getPulsarClientConf() {
         return pulsarNBClientConf;
     }
 
-    public Schema<?> getPulsarSchema() {
-        return pulsarSchema;
-    }
+    public Schema<?> getPulsarSchema() { return pulsarSchema; }
 
     // Producer name is NOT mandatory
     // - It can be set at either global level or cycle level
     // - If set at both levels, cycle level setting takes precedence
     private String getEffectiveProducerName(String cycleProducerName) {
-        // TODO: Maybe using NB run specific string as the producer name?
-        String producerName = "default";
+        if ((cycleProducerName != null) && (!cycleProducerName.isEmpty())) {
+            return cycleProducerName;
+        }
 
         String globalProducerName = pulsarNBClientConf.getProducerName();
         if ((globalProducerName != null) && (!globalProducerName.isEmpty())) {
-            producerName = globalProducerName;
-        }
-        if ((cycleProducerName != null) && (!cycleProducerName.isEmpty())) {
-            producerName = cycleProducerName;
+            return globalProducerName;
         }
 
-        return producerName;
+        // Default Producer name when it is not set at either cycle or global level
+        return "default";
     }
 
     // Topic name is mandatory
     // - It must be set at either global level or cycle level
     // - If set at both levels, cycle level setting takes precedence
     private String getEffectiveTopicName(String cycleTopicName) {
-        String globalTopicName = pulsarNBClientConf.getTopicName();
-        String topicName = globalTopicName;
-
-        if ( ((globalTopicName == null) || (globalTopicName.isEmpty())) &&
-            ((cycleTopicName == null) || (cycleTopicName.isEmpty())) ) {
-            throw new RuntimeException("Topic name must be set at either global level or cycle level!");
-        } else if ((cycleTopicName != null) && (!cycleTopicName.isEmpty())) {
-            topicName = cycleTopicName;
+        if ((cycleTopicName != null) && (!cycleTopicName.isEmpty())) {
+            return cycleTopicName;
         }
 
-        return topicName;
+        String globalTopicName = pulsarNBClientConf.getTopicName();
+        if ( (globalTopicName == null) || (globalTopicName.isEmpty()) ) {
+            throw new RuntimeException("Topic name must be set at either global level or cycle level!");
+        }
+
+        return globalTopicName;
     }
 
     private Producer createPulsarProducer(String cycleTopicName, String cycleProducerName) {
@@ -124,9 +118,7 @@ public class PulsarSpace {
         // Get other possible producer settings that are set at global level
         Map<String, Object> producerConf = pulsarNBClientConf.getProducerConfMap();
         producerConf.put("topicName", topicName);
-        if ((producerName != null) && (!producerName.isEmpty())) {
-            producerConf.put("producerName", producerName);
-        }
+        producerConf.put("producerName", producerName);
 
         try {
             producer = pulsarClient.newProducer(pulsarSchema).loadConf(producerConf).create();
@@ -140,14 +132,11 @@ public class PulsarSpace {
 
     public Producer<?> getProducer(String cycleProducerName, String cycleTopicName) {
         String producerName = getEffectiveProducerName(cycleProducerName);
-        String topicName = getEffectiveTopicName(cycleTopicName);
-
-        String identifierStr = producerName.toLowerCase() + "::" + topicName.toLowerCase();
-        Producer producer = producers.get(identifierStr);
+        Producer producer = producers.get(producerName);
 
         if (producer == null) {
             producer = createPulsarProducer(cycleTopicName, cycleProducerName);
-            producers.put(identifierStr, producer);
+            producers.put(producerName, producer);
         }
 
         return producer;

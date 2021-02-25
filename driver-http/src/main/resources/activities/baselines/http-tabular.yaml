@@ -1,0 +1,127 @@
+# nb -v http-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host
+description: |
+  This workload emulates a time-series data model and access patterns.
+  This should be identical to the cql variant except for:
+  - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+
+scenarios:
+  default:
+    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+  # for ramp-up and verify
+  part_layout: Div(<<partsize:1000000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  # for write
+  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    statements:
+      - create-keyspace: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "name": "<<keyspace:baselines>>"
+          }
+        tags:
+          name: create-keyspace
+      - create-table: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "name": "<<table:tabular>>",
+            "columnDefinitions":
+              [
+                {
+                  "name": "part",
+                  "typeDefinition": "text"
+                },
+                {
+                  "name": "clust",
+                  "typeDefinition": "text"
+                },
+                {
+                  "name": "data",
+                  "typeDefinition": "text"
+                }
+              ],
+            "primaryKey":
+            {
+              "partitionKey": ["part"],
+              "clusteringKey": ["clust"]
+            }
+          }
+        tags:
+          name: create-table
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "part": "{part_layout}",
+            "clust": "{clust_layout}",
+            "data": "{data}"
+          }
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 5
+    statements:
+    - main-select: GET /v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>?where=E[[{"part":{"$eq":"{part_layout}"}},"page-size":{"$eq":"{limit}"}}]]
+      Accept: "application/json"
+      X-Cassandra-Request-Id: "{request_id}"
+      X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+      Content-Type: "application/json"
+      tags:
+        name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 5
+    statements:
+    - main-write: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+      Accept: "application/json"
+      X-Cassandra-Request-Id: "{request_id}"
+      X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+      Content-Type: "application/json"
+      body: |
+        {
+          "part": "{part_write}"
+          "clust": "{clust_write}",
+          "data": "{data_write}"
+        }
+      tags:
+        name: main-write
