@@ -1,6 +1,7 @@
 package io.nosqlbench.activitytype.cmds;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 
@@ -13,10 +14,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.LongFunction;
 import java.util.regex.Pattern;
 
-public class ReadyHttpOp implements LongFunction<HttpOp> {
+public class ReadyHttpOp implements OpDispenser<HttpOp> {
 
     private final CommandTemplate propertyTemplate;
     public static final String DEFAULT_OK_BODY = ".+?";

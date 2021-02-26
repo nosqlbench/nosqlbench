@@ -8,12 +8,12 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
@@ -28,7 +28,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     private PulsarNBClientConf clientConf;
 
-    private OpSequence<LongFunction<PulsarOp>> sequencer;
+    private OpSequence<OpDispenser<PulsarOp>> sequencer;
     // private PulsarClient activityClient;
 
     private Supplier<PulsarSpace> clientSupplier;
@@ -65,7 +65,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         super.onActivityDefUpdate(activityDef);
     }
 
-    public OpSequence<LongFunction<PulsarOp>> getSequencer() {
+    public OpSequence<OpDispenser<PulsarOp>> getSequencer() {
         return sequencer;
     }
 

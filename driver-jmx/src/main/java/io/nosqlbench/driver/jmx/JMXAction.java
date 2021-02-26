@@ -4,6 +4,7 @@ import io.nosqlbench.driver.jmx.ops.JmxOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,7 @@ public class JMXAction implements SyncAction {
     private final ActivityDef activityDef;
     private final int slot;
     private final JMXActivity activity;
-    private OpSequence<LongFunction<JmxOp>> sequencer;
+    private OpSequence<OpDispenser<JmxOp>> sequencer;
 
     public JMXAction(ActivityDef activityDef, int slot, JMXActivity activity) {
         this.activityDef = activityDef;

@@ -4,6 +4,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.activitytype.jdbc.api.JDBCActivity;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +18,7 @@ public class JDBCAction implements SyncAction {
     private static final Logger LOGGER = LogManager.getLogger(JDBCAction.class);
 
     private final JDBCActivity activity;
-    private OpSequence<LongFunction<String>> sequencer;
+    private OpSequence<OpDispenser<String>> sequencer;
 
     public JDBCAction(JDBCActivity a, int slot) {
         activity = a;

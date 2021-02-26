@@ -4,15 +4,15 @@ import io.nosqlbench.driver.jmx.ops.JmxOp;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 
 import javax.net.ssl.SSLContext;
-import java.util.function.LongFunction;
 
 public class JMXActivity extends SimpleActivity implements Activity {
 
-    private OpSequence<LongFunction<JmxOp>> sequence;
+    private OpSequence<OpDispenser<JmxOp>> sequence;
     private SSLContext sslContext;
 
     public JMXActivity(ActivityDef activityDef) {
@@ -37,7 +37,7 @@ public class JMXActivity extends SimpleActivity implements Activity {
         return sslContext;
     }
 
-    public OpSequence<LongFunction<JmxOp>> getSequencer() {
+    public OpSequence<OpDispenser<JmxOp>> getSequencer() {
         return sequence;
     }
 }

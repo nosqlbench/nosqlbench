@@ -409,9 +409,9 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>
      * @return
      */
-    protected <O> OpSequence<LongFunction<O>> createOpSequenceFromCommands(Function<CommandTemplate, LongFunction<O>> opinit) {
+    protected <O> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
-        Function<OpTemplate, LongFunction<O>> opTemplateOFunction = f.andThen(opinit);
+        Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
 
         return createOpSequence(opTemplateOFunction);
     }
@@ -438,14 +438,14 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>    A holder for an executable operation for the native driver used by this activity.
      * @return The sequence of operations as determined by filtering and ratios
      */
-    protected <O> OpSequence<LongFunction<O>> createOpSequence(Function<OpTemplate, LongFunction<O>> opinit) {
+    protected <O> OpSequence<OpDispenser<O>> createOpSequence(Function<OpTemplate, OpDispenser<O>> opinit) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
             .getOptionalString("seq")
             .map(SequencerType::valueOf)
             .orElse(SequencerType.bucket);
-        SequencePlanner<LongFunction<O>> planner = new SequencePlanner<>(sequencerType);
+        SequencePlanner<OpDispenser<O>> planner = new SequencePlanner<>(sequencerType);
 
         StmtsDocList stmtsDocList = null;
 
@@ -471,7 +471,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
         for (int i = 0; i < stmts.size(); i++) {
             long ratio = ratios.get(i);
             OpTemplate optemplate = stmts.get(i);
-            LongFunction<O> driverSpecificReadyOp = opinit.apply(optemplate);
+            OpDispenser<O> driverSpecificReadyOp = opinit.apply(optemplate);
             planner.addOp(driverSpecificReadyOp, ratio);
         }
 

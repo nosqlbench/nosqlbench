@@ -1,10 +1,10 @@
 package io.nosqlbench.driver.pulsar.ops;
 
-import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.driver.pulsar.PulsarSpaceCache;
-import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
+import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.scoping.ScopedSupplier;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Producer;
@@ -13,7 +13,7 @@ import org.apache.pulsar.client.api.Schema;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class ReadyPulsarOp implements LongFunction<PulsarOp> {
+public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
     private final CommandTemplate cmdTpl;
     private final PulsarSpace clientSpace;

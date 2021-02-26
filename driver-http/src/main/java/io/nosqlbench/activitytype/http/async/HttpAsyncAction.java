@@ -6,6 +6,7 @@ import io.nosqlbench.activitytype.http.HttpActivity;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +19,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
 
     private final static Logger logger = LogManager.getLogger(HttpAsyncAction.class);
 
-    private OpSequence<LongFunction<HttpOp>> sequencer;
+    private OpSequence<OpDispenser<HttpOp>> sequencer;
     private HttpClient client;
 
     private CompletableFuture<HttpResponse<Void>> future;

@@ -4,6 +4,7 @@ import io.nosqlbench.driver.jmx.ops.JMXExplainOperation;
 import io.nosqlbench.driver.jmx.ops.JMXPrintOperation;
 import io.nosqlbench.driver.jmx.ops.JMXReadOperation;
 import io.nosqlbench.driver.jmx.ops.JmxOp;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 
 import javax.management.MalformedObjectNameException;
@@ -16,9 +17,8 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.LongFunction;
 
-public class ReadyJmxOp implements LongFunction<JmxOp> {
+public class ReadyJmxOp implements OpDispenser<JmxOp> {
 
     private final CommandTemplate command;
 

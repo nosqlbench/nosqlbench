@@ -6,6 +6,7 @@ import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +30,7 @@ public class HttpAction implements SyncAction {
     private final int slot;
     private int maxTries = 1;
 
-    private OpSequence<LongFunction<HttpOp>> sequencer;
+    private OpSequence<OpDispenser<HttpOp>> sequencer;
     private HttpClient client;
 
     private final HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();

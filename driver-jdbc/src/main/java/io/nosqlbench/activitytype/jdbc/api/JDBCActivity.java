@@ -8,6 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.nosqlbench.activitytype.jdbc.impl.ReadyJDBCOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.LongFunction;
 
 // This should not be exposed as as service directly unless it can
 // be used with a modular JDBC configuration.
@@ -31,7 +31,7 @@ public abstract class JDBCActivity extends SimpleActivity {
     private SQLExceptionCountMetrics sqlExceptionCount;
 
     protected DataSource dataSource;
-    protected OpSequence<LongFunction<String>> opSequence;
+    protected OpSequence<OpDispenser<String>> opSequence;
 
     public JDBCActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -91,7 +91,7 @@ public abstract class JDBCActivity extends SimpleActivity {
         return dataSource;
     }
 
-    public OpSequence<LongFunction<String>> getOpSequence() {
+    public OpSequence<OpDispenser<String>> getOpSequence() {
         return opSequence;
     }
 

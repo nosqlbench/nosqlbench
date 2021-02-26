@@ -10,6 +10,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.http.HttpClient;
 import java.util.function.Function;
-import java.util.function.LongFunction;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger(HttpActivity.class);
@@ -37,7 +37,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Timer resultSuccessTimer;
     public Histogram statusCodeHisto;
 
-    private OpSequence<LongFunction<HttpOp>> sequencer;
+    private OpSequence<OpDispenser<HttpOp>> sequencer;
     private boolean diagnosticsEnabled;
     private long timeout = Long.MAX_VALUE;
     private NBErrorHandler errorhandler;
@@ -129,7 +129,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return builder.build();
     }
 
-    public OpSequence<LongFunction<HttpOp>> getSequencer() {
+    public OpSequence<OpDispenser<HttpOp>> getSequencer() {
         return sequencer;
     }
 

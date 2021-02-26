@@ -1,14 +1,13 @@
 package io.nosqlbench.activitytype.jdbc.impl;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 
-import java.util.function.LongFunction;
-
-public class ReadyJDBCOp implements LongFunction<String> {
+public class ReadyJDBCOp implements OpDispenser<String> {
     private final StringBindings bindings;
 
     public ReadyJDBCOp(OpTemplate stmtDef) {
