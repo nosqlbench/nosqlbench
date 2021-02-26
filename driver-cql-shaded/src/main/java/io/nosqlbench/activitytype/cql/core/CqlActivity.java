@@ -193,10 +193,6 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
             ParsedStmt parsed = stmtDef.getParsed(this::canonicalizeBindings).orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
-            if (stmtDef.getOptionalStringParam("parametrized").isPresent()) {
-                throw new RuntimeException("Please use 'parameterized' instead of 'parametrized'. This was recently " +
-                    "corrected. This warning will be removed in the future.");
-            }
             boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
