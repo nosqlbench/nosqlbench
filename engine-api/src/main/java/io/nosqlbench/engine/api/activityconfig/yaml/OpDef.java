@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class OpDef implements OpTemplate {
 
@@ -179,9 +180,10 @@ public class OpDef implements OpTemplate {
     }
 
     @Override
-    public ParsedStmt getParsed() {
-        return new ParsedStmt(this);
+    public ParsedStmt getParsed(Function<String, String>... transforms) {
+        return new ParsedStmt(this, transforms);
     }
+
 
     @Override
     public String getDesc() {

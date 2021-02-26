@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.util.Tagged;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * <p>The OpTemplate is the developer's view of the operational templates that users
@@ -152,7 +153,7 @@ public interface OpTemplate extends Tagged {
      *
      * @return a new {@link ParsedStmt}
      */
-    ParsedStmt getParsed();
+    ParsedStmt getParsed(Function<String, String>... transforms);
 
     String getDesc();
 }

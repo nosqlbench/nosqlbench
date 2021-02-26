@@ -18,18 +18,15 @@
 package io.nosqlbench.engine.api.activityconfig;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
-import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.nb.api.config.params.Element;
+import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * Allow for uniform statement anchor parsing, using the <pre>?anchor</pre>
@@ -40,10 +37,6 @@ import java.util.regex.Pattern;
  */
 public class ParsedStmt {
 
-    private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
-    private final static Logger logger = LogManager.getLogger(ParsedStmt.class);
-    private ParsedTemplate template;
-
     private final OpDef opDef;
     private final ParsedTemplate parsed;
 
@@ -52,9 +45,13 @@ public class ParsedStmt {
      *
      * @param opDef An existing statement def as read from the YAML API.
      */
-    public ParsedStmt(OpDef opDef) {
+    public ParsedStmt(OpDef opDef, Function<String, String>... transforms) {
         this.opDef = opDef;
-        parsed = new ParsedTemplate(opDef.getStmt(), opDef.getBindings());
+        String transformed = opDef.getStmt();
+        for (Function<String, String> transform : transforms) {
+            transformed = transform.apply(transformed);
+        }
+        parsed = new ParsedTemplate(transformed, opDef.getBindings());
     }
 
     public ParsedStmt orError() {
@@ -170,4 +167,5 @@ public class ParsedStmt {
     public List<BindPoint> getBindPoints() {
         return parsed.getBindPoints();
     }
+
 }

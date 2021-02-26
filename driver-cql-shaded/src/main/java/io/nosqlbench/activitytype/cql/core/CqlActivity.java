@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("Duplicates")
 public class CqlActivity extends SimpleActivity implements Activity, ActivityDefObserver {
@@ -142,6 +144,25 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         return session;
     }
 
+    private String canonicalizeBindings(String input) {
+        StringBuilder sb = new StringBuilder();
+        Pattern questionPattern = Pattern.compile("\\?(?<arg>\\w+)");
+        Matcher matcher = questionPattern.matcher(input);
+        int count = 0;
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, matcher.group("arg"));
+            count++;
+        }
+        matcher.appendTail(sb);
+        if (count > 0) {
+            logger.warn("You are using a deprecated data binding syntax in '" + input + "'. This is supported in the classic CQL driver," +
+                " but it is not recognized by other workloads. Please change to the {standard} binding syntax. The canonical" +
+                " syntax for CQL is rendered automatically.");
+        }
+        return sb.toString();
+
+    }
+
     private void initSequencer() {
 
         Session session = getSession();
@@ -170,7 +191,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmt parsed = stmtDef.getParsed().orError();
+            ParsedStmt parsed = stmtDef.getParsed(this::canonicalizeBindings).orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
             if (stmtDef.getOptionalStringParam("parametrized").isPresent()) {
                 throw new RuntimeException("Please use 'parameterized' instead of 'parametrized'. This was recently " +
@@ -179,6 +200,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
 
+            //parsed.applyStmtTransform(this::canonicalizeBindings);
             Optional<ConsistencyLevel> cl = stmtDef.getOptionalStringParam("cl", String.class).map(ConsistencyLevel::valueOf);
             Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalStringParam("serial_cl").map(ConsistencyLevel::valueOf);
             Optional<Boolean> idempotent = stmtDef.getOptionalStringParam("idempotent", Boolean.class);
