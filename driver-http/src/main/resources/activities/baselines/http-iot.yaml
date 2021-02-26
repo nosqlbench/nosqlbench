@@ -27,8 +27,6 @@ bindings:
 blocks:
   - tags:
       phase: schema
-    params:
-      prepared: false
     statements:
      - create-keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
