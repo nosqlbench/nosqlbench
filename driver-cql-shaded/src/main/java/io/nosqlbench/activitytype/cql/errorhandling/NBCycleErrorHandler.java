@@ -82,6 +82,7 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
             case histogram:
                 exceptionHistoMetrics.update(error,cce.getDurationNanos());
             case count:
+            case counter:
                 exceptionCountMetrics.count(error);
             case ignore:
             default:

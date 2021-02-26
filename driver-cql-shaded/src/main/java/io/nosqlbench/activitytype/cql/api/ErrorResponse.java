@@ -13,9 +13,10 @@ public enum ErrorResponse {
     retry("R"),     // resubmit this operation up to the available tries
     histogram("H"),     // record this metric in a histogram
     count("C"),     // count this metric separately
+    counter("C"),
     ignore("I");    // do nothing
 
-    private String symbol;
+    private final String symbol;
 
     ErrorResponse(String symbol) {
         this.symbol = symbol;
