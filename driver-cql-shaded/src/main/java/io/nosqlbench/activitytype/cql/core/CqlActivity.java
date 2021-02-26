@@ -400,10 +400,19 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         switch (yamlVersion) {
             case "1":
                 doclist = getVersion1StmtsDoc(interp, yaml_loc);
-                logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
-                    "This will be deprecated in a future release.");
-                logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                    "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                if (activityDef.getParams().getOptionalBoolean("ignore_important_warnings").orElse(false)) {
+                    logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
+                        "This will be deprecated in a future release.");
+                    logger.warn("DEPRECATED-FORMAT: Please refer to " +
+                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                } else {
+                    throw new BasicError("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
+                        "This has been deprecated for a long time now. You should use the modern yaml format, which is easy" +
+                        "to convert to. If you want to ignore this and kick the issue" +
+                        " down the road to someone else, then you can add ignore_important_warnings=true. " +
+                        "Please refer to " +
+                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                }
                 break;
             case "2":
                 doclist = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
