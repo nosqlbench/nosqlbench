@@ -2,11 +2,11 @@ package io.nosqlbench.driver.pulsar;
 
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
+import org.apache.commons.lang.StringUtils;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 
-import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,12 +22,12 @@ public class PulsarProducerSpace extends  PulsarSpace{
     // - It can be set at either global level or cycle level
     // - If set at both levels, cycle level setting takes precedence
     private String getEffectiveProducerName(String cycleProducerName) {
-        if ((cycleProducerName != null) && (!cycleProducerName.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleProducerName) ) {
             return cycleProducerName;
         }
 
         String globalProducerName = pulsarNBClientConf.getProducerName();
-        if ((globalProducerName != null) && (!globalProducerName.isEmpty())) {
+        if ( !StringUtils.isBlank(globalProducerName) ) {
             return globalProducerName;
         }
 
@@ -39,12 +39,12 @@ public class PulsarProducerSpace extends  PulsarSpace{
     // - It must be set at either global level or cycle level
     // - If set at both levels, cycle level setting takes precedence
     private String getEffectiveTopicName(String cycleTopicName) {
-        if ((cycleTopicName != null) && (!cycleTopicName.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleTopicName) ) {
             return cycleTopicName;
         }
 
         String globalTopicName = pulsarNBClientConf.getProducerTopicName();
-        if ( (globalTopicName == null) || (globalTopicName.isEmpty()) ) {
+        if ( !StringUtils.isBlank(globalTopicName) ) {
             throw new RuntimeException("Topic name must be set at either global level or cycle level!");
         }
 
@@ -63,8 +63,8 @@ public class PulsarProducerSpace extends  PulsarSpace{
 
             // Get other possible producer settings that are set at global level
             Map<String, Object> producerConf = pulsarNBClientConf.getProducerConfMap();
-            producerConf.put(PulsarActivityUtil.PRODUCER_CONF_KEY.topicName.toString(), topicName);
-            producerConf.put(PulsarActivityUtil.PRODUCER_CONF_KEY.producerName.toString(), producerName);
+            producerConf.put(PulsarActivityUtil.PRODUCER_CONF_STD_KEY.topicName.label, topicName);
+            producerConf.put(PulsarActivityUtil.PRODUCER_CONF_STD_KEY.producerName.label, producerName);
 
             try {
                 producer = pulsarClient.newProducer(pulsarSchema).loadConf(producerConf).create();

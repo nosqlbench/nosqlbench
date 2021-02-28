@@ -7,6 +7,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,12 +23,12 @@ public class PulsarNBClientConf {
 
     private String canonicalFilePath = "";
 
-    private static final String DRIVER_CONF_PREFIX = "driver";
-    private static final String SCHEMA_CONF_PREFIX = "schema";
-    private static final String CLIENT_CONF_PREFIX = "client";
-    private static final String PRODUCER_CONF_PREFIX = "producer";
-    private static final String CONSUMER_CONF_PREFIX = "consumer";
-    private static final String READER_CONF_PREFIX = "reader";
+    public static final String DRIVER_CONF_PREFIX = "driver";
+    public static final String SCHEMA_CONF_PREFIX = "schema";
+    public static final String CLIENT_CONF_PREFIX = "client";
+    public static final String PRODUCER_CONF_PREFIX = "producer";
+    public static final String CONSUMER_CONF_PREFIX = "consumer";
+    public static final String READER_CONF_PREFIX = "reader";
     private HashMap<String, Object> driverConfMap = new HashMap<>();
     private HashMap<String, Object> schemaConfMap = new HashMap<>();
     private HashMap<String, Object> clientConfMap = new HashMap<>();
@@ -56,7 +57,7 @@ public class PulsarNBClientConf {
             for (Iterator<String> it = config.getKeys(DRIVER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     driverConfMap.put(confKey.substring(DRIVER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
@@ -64,7 +65,7 @@ public class PulsarNBClientConf {
             for (Iterator<String> it = config.getKeys(SCHEMA_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     schemaConfMap.put(confKey.substring(SCHEMA_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
@@ -72,7 +73,7 @@ public class PulsarNBClientConf {
             for (Iterator<String> it = config.getKeys(CLIENT_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
@@ -80,23 +81,23 @@ public class PulsarNBClientConf {
             for (Iterator<String> it = config.getKeys(PRODUCER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
-            // Get producer specific configuration settings
+            // Get consumer specific configuration settings
             for (Iterator<String> it = config.getKeys(CONSUMER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     consumerConfMap.put(confKey.substring(CONSUMER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
-            // Get producer specific configuration settings
+            // Get reader specific configuration settings
             for (Iterator<String> it = config.getKeys(READER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if ( (confVal != null) && !confVal.isEmpty() )
+                if ( !StringUtils.isBlank(confVal) )
                     readerConfMap.put(confKey.substring(READER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
         }
@@ -321,4 +322,25 @@ public class PulsarNBClientConf {
             readerConfMap.put(key, value);
     }
     // Other consumer helper functions ...
+    public String getReaderTopicName() {
+        Object confValue = getReaderConfValue("reader.topicName");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getReaderName() {
+        Object confValue = getReaderConfValue("reader.readerName");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getStartMsgPosStr() {
+        Object confValue = getReaderConfValue("reader.startMessagePos");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
 }

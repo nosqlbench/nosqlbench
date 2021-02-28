@@ -58,13 +58,13 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
         // TODO: Complete implementation for reader, websocket-producer and managed-ledger
         if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString()) ) {
             assert clientSpace instanceof PulsarProducerSpace;
-            return resolveProducer((PulsarProducerSpace) clientSpace, cmdTpl);
+            return resolveProducer((PulsarProducerSpace) clientSpace);
         } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.CONSUMER.toString()) ) {
             assert clientSpace instanceof PulsarConsumerSpace;
-            return resolveConsumer((PulsarConsumerSpace)clientSpace, cmdTpl); /*
+            return resolveConsumer((PulsarConsumerSpace)clientSpace);
         } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.READER.toString()) ) {
             assert clientSpace instanceof PulsarReaderSpace;
-            return resolveReader((PulsarReaderSpace)clientSpace, cmdTpl);
+            return resolveReader((PulsarReaderSpace)clientSpace); /*
         } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.WSOKT_PRODUCER.toString()) ) {
         } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.MANAGED_LEDGER.toString()) ) {
         */
@@ -74,8 +74,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     }
 
     private LongFunction<PulsarOp> resolveProducer(
-        PulsarProducerSpace clientSpace,
-        CommandTemplate cmdTpl
+        PulsarProducerSpace clientSpace
     ) {
         if (cmdTpl.containsKey("topic_url")) {
             throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
@@ -152,8 +151,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     }
 
     private LongFunction<PulsarOp> resolveConsumer(
-        PulsarConsumerSpace clientSpace,
-        CommandTemplate cmdTpl
+        PulsarConsumerSpace clientSpace
     ) {
         LongFunction<String> topic_names_func;
         if (cmdTpl.isStatic("topic-names")) {
@@ -213,11 +211,43 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     }
 
     private LongFunction<PulsarOp> resolveReader(
-        PulsarReaderSpace pulsarSpace,
-        CommandTemplate cmdTpl
+        PulsarReaderSpace clientSpace
     ) {
-        //TODO: to be completed
-        return null;
+        LongFunction<String> topic_name_func;
+        if (cmdTpl.isStatic("topic-name")) {
+            topic_name_func = (l) -> cmdTpl.getStatic("topic-name");
+        } else if (cmdTpl.isDynamic("topic-name")) {
+            topic_name_func = (l) -> cmdTpl.getDynamic("topic-name", l);
+        } else {
+            topic_name_func = (l) -> null;
+        }
+
+        LongFunction<String> reader_name_func;
+        if (cmdTpl.isStatic("reader-name")) {
+            reader_name_func = (l) -> cmdTpl.getStatic("reader-name");
+        } else if (cmdTpl.isDynamic("reader-name")) {
+            reader_name_func = (l) -> cmdTpl.getDynamic("reader-name", l);
+        } else {
+            reader_name_func = (l) -> null;
+        }
+
+        LongFunction<String> start_msg_pos_str_func;
+        if (cmdTpl.isStatic("start-msg-position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getStatic("start-msg-position");
+        } else if (cmdTpl.isDynamic("start-msg-position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getDynamic("start-msg-position", l);
+        } else {
+            start_msg_pos_str_func = (l) -> null;
+        }
+
+        LongFunction<Reader<?>> readerFunc = (l) ->
+            clientSpace.getReader(
+                topic_name_func.apply(l),
+                reader_name_func.apply(l),
+                start_msg_pos_str_func.apply(l)
+            );
+
+        return new PulsarReaderMapper(cmdTpl, pulsarSchema, readerFunc);
     }
 
     @Override

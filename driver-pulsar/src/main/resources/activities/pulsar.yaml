@@ -46,17 +46,17 @@ blocks:
     statements:
       - consumer-stuff:
           topic-names: "persistent://public/default/nbpulsar, persistent://public/default/mynbtest"
-#          topics-pattern: "public/default/.*"
-#          subscription-name:
-#          subscription-type:
-#          consumer-name:
+          topics-pattern: "public/default/.*"
+          subscription-name:
+          subscription-type:
+          consumer-name:
 
-#  - reader:
-#    tags:
-#      type: reader
-#    statements:
-#      - reader-stuff:
-#
+  - reader:
+    tags:
+      op-type: reader
+    statements:
+      - reader-stuff:
+
 #  - websocket-producer:
 #    tags:
 #      type: websocket-produer

@@ -2,6 +2,7 @@ package io.nosqlbench.driver.pulsar;
 
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
@@ -19,12 +20,12 @@ public class PulsarConsumerSpace extends PulsarSpace {
     public PulsarConsumerSpace(String name, PulsarNBClientConf pulsarClientConf) { super(name, pulsarClientConf); }
 
     private String getEffectiveTopicNamesStr(String cycleTopicNames) {
-        if ((cycleTopicNames != null) && (!cycleTopicNames.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleTopicNames) ) {
             return cycleTopicNames;
         }
 
         String globalTopicNames = pulsarNBClientConf.getConsumerTopicNames();
-        if ((globalTopicNames != null) && (!globalTopicNames.isEmpty())) {
+        if ( !StringUtils.isBlank(globalTopicNames) ) {
             return globalTopicNames;
         }
 
@@ -37,7 +38,7 @@ public class PulsarConsumerSpace extends PulsarSpace {
         ArrayList<String> effectiveTopicNameList = new ArrayList<>();
 
         for (String name : names) {
-            if ( !name.isEmpty() )
+            if ( !StringUtils.isBlank(name) )
                 effectiveTopicNameList.add(name.trim());
         }
 
@@ -46,22 +47,25 @@ public class PulsarConsumerSpace extends PulsarSpace {
     }
 
     private String getEffectiveTopicPatternStr(String cycleTopicsPattern) {
-        if ((cycleTopicsPattern != null) && (!cycleTopicsPattern.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleTopicsPattern) ) {
             return cycleTopicsPattern;
         }
 
         String globalTopicsPattern = pulsarNBClientConf.getConsumerTopicPattern();
-        if ((globalTopicsPattern != null) && (!globalTopicsPattern.isEmpty())) {
+        if ( !StringUtils.isBlank(globalTopicsPattern) ) {
             return globalTopicsPattern;
         }
 
         return "";
     }
     private Pattern getEffectiveTopicPattern(String cycleTopicsPattern) {
-        String effecitveTopicsPatternStr = getEffectiveTopicPatternStr(cycleTopicsPattern);
+        String effectiveTopicsPatternStr = getEffectiveTopicPatternStr(cycleTopicsPattern);
         Pattern topicsPattern;
         try {
-            topicsPattern = Pattern.compile(effecitveTopicsPatternStr);
+            if ( !StringUtils.isBlank(effectiveTopicsPatternStr) )
+                topicsPattern = Pattern.compile(effectiveTopicsPatternStr);
+            else
+                topicsPattern = null;
         }
         catch (PatternSyntaxException pse) {
             topicsPattern = null;
@@ -70,12 +74,12 @@ public class PulsarConsumerSpace extends PulsarSpace {
     }
 
     private String getEffectiveSubscriptionName(String cycleSubscriptionName) {
-        if ((cycleSubscriptionName != null) && (!cycleSubscriptionName.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleSubscriptionName) ) {
             return cycleSubscriptionName;
         }
 
         String globalSubscriptionName = pulsarNBClientConf.getConsumerSubscriptionName();
-        if ((globalSubscriptionName != null) && (!globalSubscriptionName.isEmpty())) {
+        if ( !StringUtils.isBlank(globalSubscriptionName) ) {
             return globalSubscriptionName;
         }
 
@@ -83,12 +87,12 @@ public class PulsarConsumerSpace extends PulsarSpace {
     }
 
     private String getEffectiveSubscriptionTypeStr(String cycleSubscriptionType) {
-        if ((cycleSubscriptionType != null) && (!cycleSubscriptionType.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleSubscriptionType) ) {
             return cycleSubscriptionType;
         }
 
         String globalSubscriptionType = pulsarNBClientConf.getConsumerSubscriptionType();
-        if ((globalSubscriptionType != null) && (!globalSubscriptionType.isEmpty())) {
+        if ( !StringUtils.isBlank(globalSubscriptionType) ) {
             return globalSubscriptionType;
         }
 
@@ -109,12 +113,12 @@ public class PulsarConsumerSpace extends PulsarSpace {
     }
 
     private String getEffectiveConsumerName(String cycleConsumerName) {
-        if ((cycleConsumerName != null) && (!cycleConsumerName.isEmpty())) {
+        if ( !StringUtils.isBlank(cycleConsumerName) ) {
             return cycleConsumerName;
         }
 
         String globalConsumerName = pulsarNBClientConf.getConsumerName();
-        if ((globalConsumerName != null) && (!globalConsumerName.isEmpty())) {
+        if ( !StringUtils.isBlank(globalConsumerName) ) {
             return globalConsumerName;
         }
 
@@ -130,12 +134,28 @@ public class PulsarConsumerSpace extends PulsarSpace {
         String topicNamesStr = getEffectiveTopicNamesStr(cycleTopicNames);
         List<String> topicNames = getEffectiveTopicNames(cycleTopicNames);
         String topicsPatternStr = getEffectiveTopicPatternStr(cycleTopicsPattern);
+        Pattern topicsPattern = getEffectiveTopicPattern(cycleTopicsPattern);
         String subscriptionName = getEffectiveSubscriptionName(cycleSubscriptionName);
         SubscriptionType subscriptionType = getEffectiveSubscriptionType(cycleSubscriptionType);
         String consumerName = getEffectiveConsumerName(cycleConsumerName);
 
-        String encodedStr = PulsarActivityUtil.encode(
-            consumerName, subscriptionName, topicNamesStr, topicsPatternStr);
+        if ( topicNames.isEmpty() && (topicsPattern == null) ) {
+            throw new RuntimeException("\"topicName\" and \"topicsPattern\" can't be empty/invalid at the same time!");
+        }
+
+        String encodedStr;
+        if ( !topicNames.isEmpty() ) {
+            encodedStr = PulsarActivityUtil.encode(
+                consumerName,
+                subscriptionName,
+                StringUtils.join(topicNames, "|") );
+        }
+        else {
+            encodedStr = PulsarActivityUtil.encode(
+                consumerName,
+                subscriptionName,
+                topicsPatternStr );
+        }
         Consumer<?> consumer = consumers.get(encodedStr);
 
         if (consumer == null) {
@@ -146,23 +166,19 @@ public class PulsarConsumerSpace extends PulsarSpace {
 
             // Explicit topic names will take precedence over topics pattern
             if ( !topicNames.isEmpty() ) {
-                consumerConf.remove(PulsarActivityUtil.CONSUMER_CONF_KEY.topicsPattern.toString());
-                consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_KEY.topicNames.toString(), topicNames);
+                consumerConf.remove(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
+                consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicNames.toString(), topicNames);
             }
             else {
-                consumerConf.remove(PulsarActivityUtil.CONSUMER_CONF_KEY.topicNames.toString());
-                if ( !topicsPatternStr.isEmpty() )
-                    consumerConf.put(
-                        PulsarActivityUtil.CONSUMER_CONF_KEY.topicsPattern.toString(),
-                        getEffectiveTopicPattern(cycleTopicsPattern));
-                else {
-                    throw new RuntimeException("\"topicName\" and \"topicsPattern\" can't be empty/invalid at the same time!");
-                }
+                consumerConf.remove(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
+                consumerConf.put(
+                    PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
+                    getEffectiveTopicPattern(cycleTopicsPattern));
             }
 
-            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_KEY.subscriptionName.toString(), subscriptionName);
-            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_KEY.subscriptionType.toString(), subscriptionType);
-            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_KEY.consumerName.toString(), consumerName);
+            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label, subscriptionName);
+            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label, subscriptionType);
+            consumerConf.put(PulsarActivityUtil.CONSUMER_CONF_STD_KEY.consumerName.label, consumerName);
 
             try {
                 consumer = pulsarClient.newConsumer(pulsarSchema).loadConf(consumerConf).subscribe();
