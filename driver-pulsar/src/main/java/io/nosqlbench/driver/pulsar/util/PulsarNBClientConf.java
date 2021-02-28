@@ -26,11 +26,15 @@ public class PulsarNBClientConf {
     private static final String SCHEMA_CONF_PREFIX = "schema";
     private static final String CLIENT_CONF_PREFIX = "client";
     private static final String PRODUCER_CONF_PREFIX = "producer";
+    private static final String CONSUMER_CONF_PREFIX = "consumer";
+    private static final String READER_CONF_PREFIX = "reader";
     private HashMap<String, Object> driverConfMap = new HashMap<>();
     private HashMap<String, Object> schemaConfMap = new HashMap<>();
     private HashMap<String, Object> clientConfMap = new HashMap<>();
     private HashMap<String, Object> producerConfMap = new HashMap<>();
-    // TODO: add support for other operation types: consumer, reader, websocket-producer, managed-ledger
+    private HashMap<String, Object> consumerConfMap = new HashMap<>();
+    private HashMap<String, Object> readerConfMap = new HashMap<>();
+    // TODO: add support for other operation types: websocket-producer, managed-ledger
 
     public PulsarNBClientConf(String fileName) {
         File file = new File(fileName);
@@ -51,25 +55,49 @@ public class PulsarNBClientConf {
             // Get driver specific configuration settings
             for (Iterator<String> it = config.getKeys(DRIVER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
-                driverConfMap.put(confKey.substring(DRIVER_CONF_PREFIX.length()+1), config.getProperty(confKey));
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    driverConfMap.put(confKey.substring(DRIVER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
             // Get schema specific configuration settings
             for (Iterator<String> it = config.getKeys(SCHEMA_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
-                schemaConfMap.put(confKey.substring(SCHEMA_CONF_PREFIX.length()+1), config.getProperty(confKey));
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    schemaConfMap.put(confKey.substring(SCHEMA_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
             // Get client connection specific configuration settings
             for (Iterator<String> it = config.getKeys(CLIENT_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
-                clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length()+1), config.getProperty(confKey));
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
 
             // Get producer specific configuration settings
             for (Iterator<String> it = config.getKeys(PRODUCER_CONF_PREFIX); it.hasNext(); ) {
                 String confKey = it.next();
-                producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length()+1), config.getProperty(confKey));
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length()+1), config.getProperty(confKey));
+            }
+
+            // Get producer specific configuration settings
+            for (Iterator<String> it = config.getKeys(CONSUMER_CONF_PREFIX); it.hasNext(); ) {
+                String confKey = it.next();
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    consumerConfMap.put(confKey.substring(CONSUMER_CONF_PREFIX.length()+1), config.getProperty(confKey));
+            }
+
+            // Get producer specific configuration settings
+            for (Iterator<String> it = config.getKeys(READER_CONF_PREFIX); it.hasNext(); ) {
+                String confKey = it.next();
+                String confVal = config.getProperty(confKey).toString();
+                if ( (confVal != null) && !confVal.isEmpty() )
+                    readerConfMap.put(confKey.substring(READER_CONF_PREFIX.length()+1), config.getProperty(confKey));
             }
         }
         catch (IOException ioe) {
@@ -82,6 +110,8 @@ public class PulsarNBClientConf {
         }
     }
 
+
+    //////////////////
     // Get NB Driver related config
     public Map<String, Object> getDriverConfMap() {
         return this.driverConfMap;
@@ -104,7 +134,19 @@ public class PulsarNBClientConf {
         else
             driverConfMap.put(key, value);
     }
+    // other driver helper functions ...
+    public String getPulsarClientType() {
+        Object confValue = getDriverConfValue("driver.client-type");
 
+        // If not explicitly specifying Pulsar client type, "producer" is the default type
+        if (confValue == null)
+            return PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString();
+        else
+            return confValue.toString();
+    }
+
+
+    //////////////////
     // Get Schema related config
     public Map<String, Object> getSchemaConfMap() {
         return this.schemaConfMap;
@@ -128,6 +170,8 @@ public class PulsarNBClientConf {
             schemaConfMap.put(key, value);
     }
 
+
+    //////////////////
     // Get Pulsar client related config
     public Map<String, Object> getClientConfMap() {
         return this.clientConfMap;
@@ -151,6 +195,8 @@ public class PulsarNBClientConf {
             clientConfMap.put(key, value);
     }
 
+
+    //////////////////
     // Get Pulsar producer related config
     public Map<String, Object> getProducerConfMap() {
         return this.producerConfMap;
@@ -173,34 +219,106 @@ public class PulsarNBClientConf {
         else
             producerConfMap.put(key, value);
     }
-
-    public String getPulsarClientType() {
-        Object confValue = getDriverConfValue("driver.client-type");
-
-        // If not explicitly specifying Pulsar client type, "producer" is the default type
-        if (confValue == null)
-            return PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString();
-        else
-            return confValue.toString();
-    }
-
+    // other producer helper functions ...
     public String getProducerName() {
         Object confValue = getProducerConfValue("producer.producerName");
-
-        // If not explicitly specifying Pulsar client type, "producer" is the default type
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
-
-    public String getTopicName() {
+    public String getProducerTopicName() {
         Object confValue = getProducerConfValue("producer.topicName");
-
-        // If not explicitly specifying Pulsar client type, "producer" is the default type
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
+
+
+    //////////////////
+    // Get Pulsar consumer related config
+    public Map<String, Object> getConsumerConfMap() {
+        return this.consumerConfMap;
+    }
+    public boolean hasConsumerConfKey(String key) {
+        if (key.contains(CONSUMER_CONF_PREFIX))
+            return consumerConfMap.containsKey(key.substring(CONSUMER_CONF_PREFIX.length()+1));
+        else
+            return consumerConfMap.containsKey(key);
+    }
+    public Object getConsumerConfValue(String key) {
+        if (key.contains(CONSUMER_CONF_PREFIX))
+            return consumerConfMap.get(key.substring(CONSUMER_CONF_PREFIX.length()+1));
+        else
+            return consumerConfMap.get(key);
+    }
+    public void setConsumerConfValue(String key, Object value) {
+        if (key.contains(CONSUMER_CONF_PREFIX))
+            consumerConfMap.put(key.substring(CONSUMER_CONF_PREFIX.length()+1), value);
+        else
+            consumerConfMap.put(key, value);
+    }
+    // Other consumer helper functions ...
+    public String getConsumerTopicNames() {
+        Object confValue = getConsumerConfValue("consumer.topicNames");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getConsumerTopicPattern() {
+        Object confValue = getConsumerConfValue("consumer.topicsPattern");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getConsumerSubscriptionName() {
+        Object confValue = getConsumerConfValue("consumer.subscriptionName");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getConsumerSubscriptionType() {
+        Object confValue = getConsumerConfValue("consumer.subscriptionType");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+    public String getConsumerName() {
+        Object confValue = getConsumerConfValue("consumer.consumerName");
+        if (confValue == null)
+            return "";
+        else
+            return confValue.toString();
+    }
+
+
+    //////////////////
+    // Get Pulsar reader related config
+    public Map<String, Object> getReaderConfMap() {
+        return this.readerConfMap;
+    }
+    public boolean hasReaderConfKey(String key) {
+        if (key.contains(READER_CONF_PREFIX))
+            return readerConfMap.containsKey(key.substring(READER_CONF_PREFIX.length()+1));
+        else
+            return readerConfMap.containsKey(key);
+    }
+    public Object getReaderConfValue(String key) {
+        if (key.contains(READER_CONF_PREFIX))
+            return readerConfMap.get(key.substring(READER_CONF_PREFIX.length()+1));
+        else
+            return readerConfMap.get(key);
+    }
+    public void setReaderConfValue(String key, Object value) {
+        if (key.contains(READER_CONF_PREFIX))
+            readerConfMap.put(key.substring(READER_CONF_PREFIX.length()+1), value);
+        else
+            readerConfMap.put(key, value);
+    }
+    // Other consumer helper functions ...
 }

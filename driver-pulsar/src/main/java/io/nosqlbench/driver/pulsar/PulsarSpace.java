@@ -17,15 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PulsarSpace {
 
     private final static Logger logger = LogManager.getLogger(PulsarSpace.class);
-
-    private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
     // TODO: add support for other client types: consumer, reader, websocket-producer, managed-ledger, etc.
 
-    private final String name;
-    private final PulsarNBClientConf pulsarNBClientConf;
+    protected final String name;
+    protected final PulsarNBClientConf pulsarNBClientConf;
 
-    private PulsarClient pulsarClient = null;
-    private Schema<?> pulsarSchema = null;
+    protected PulsarClient pulsarClient = null;
+    protected Schema<?> pulsarSchema = null;
 
     public PulsarSpace( String name, PulsarNBClientConf pulsarClientConf ) {
         this.name = name;
@@ -35,7 +33,7 @@ public class PulsarSpace {
         createPulsarSchemaFromConf();
     }
 
-    private void createPulsarClientFromConf() {
+    protected void createPulsarClientFromConf() {
         ClientBuilder clientBuilder = PulsarClient.builder();
 
         String dftSvcUrl = "pulsar://localhost:6650";
@@ -53,11 +51,13 @@ public class PulsarSpace {
         }
     }
 
-    private void createPulsarSchemaFromConf() {
-        String schemaType = pulsarNBClientConf.getSchemaConfValue("schema.type").toString();
+    protected void createPulsarSchemaFromConf() {
+        Object value = pulsarNBClientConf.getSchemaConfValue("schema.type");
+        String schemaType = (value != null) ? value.toString() : "";
 
         if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType)) {
-            String schemaDefStr = pulsarNBClientConf.getSchemaConfValue("schema.definition").toString();
+            value = pulsarNBClientConf.getSchemaConfValue("schema.definition");
+            String schemaDefStr = (value != null) ? value.toString() : "";
             pulsarSchema = PulsarActivityUtil.getAvroSchema(schemaType, schemaDefStr);
         } else if (PulsarActivityUtil.isPrimitiveSchemaTypeStr(schemaType)) {
             pulsarSchema = PulsarActivityUtil.getPrimitiveTypeSchema((schemaType));
@@ -68,77 +68,8 @@ public class PulsarSpace {
     }
 
     public PulsarClient getPulsarClient() { return pulsarClient; }
-
     public PulsarNBClientConf getPulsarClientConf() {
         return pulsarNBClientConf;
     }
-
     public Schema<?> getPulsarSchema() { return pulsarSchema; }
-
-    // Producer name is NOT mandatory
-    // - It can be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveProducerName(String cycleProducerName) {
-        if ((cycleProducerName != null) && (!cycleProducerName.isEmpty())) {
-            return cycleProducerName;
-        }
-
-        String globalProducerName = pulsarNBClientConf.getProducerName();
-        if ((globalProducerName != null) && (!globalProducerName.isEmpty())) {
-            return globalProducerName;
-        }
-
-        // Default Producer name when it is not set at either cycle or global level
-        return "default";
-    }
-
-    // Topic name is mandatory
-    // - It must be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveTopicName(String cycleTopicName) {
-        if ((cycleTopicName != null) && (!cycleTopicName.isEmpty())) {
-            return cycleTopicName;
-        }
-
-        String globalTopicName = pulsarNBClientConf.getTopicName();
-        if ( (globalTopicName == null) || (globalTopicName.isEmpty()) ) {
-            throw new RuntimeException("Topic name must be set at either global level or cycle level!");
-        }
-
-        return globalTopicName;
-    }
-
-    private Producer createPulsarProducer(String cycleTopicName, String cycleProducerName) {
-        PulsarClient pulsarClient = getPulsarClient();
-        Producer producer = null;
-
-        String producerName = getEffectiveProducerName(cycleProducerName);
-        String topicName = getEffectiveTopicName(cycleTopicName);
-
-        // Get other possible producer settings that are set at global level
-        Map<String, Object> producerConf = pulsarNBClientConf.getProducerConfMap();
-        producerConf.put("topicName", topicName);
-        producerConf.put("producerName", producerName);
-
-        try {
-            producer = pulsarClient.newProducer(pulsarSchema).loadConf(producerConf).create();
-        }
-        catch (PulsarClientException ple) {
-            throw new RuntimeException("Unable to create a client to connect to the Pulsar cluster!");
-        }
-
-        return producer;
-    }
-
-    public Producer<?> getProducer(String cycleProducerName, String cycleTopicName) {
-        String producerName = getEffectiveProducerName(cycleProducerName);
-        Producer producer = producers.get(producerName);
-
-        if (producer == null) {
-            producer = createPulsarProducer(cycleTopicName, cycleProducerName);
-            producers.put(producerName, producer);
-        }
-
-        return producer;
-    }
 }

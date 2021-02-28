@@ -121,7 +121,7 @@ In the above statement block, there are 4 key statement parameters to provide va
           ```
         * At the moment, only "**\<short-topic-name\>**" part can be dynamically bound (e.g. through NB binding function). All other parts must be static values and the corresponding tenants and namespaces must be created in the Pulsar cluster in advance.
 
-**TODO**: allow dynamic binding for "\<tenant-name\>" and "\<namespace-name\>" after adding a phase for creating "\<tenant-name\>" and/or "\<namespace-name\>", similar to C* CQL schema creation phase.!
+**TODO**: allow dynamic binding for "\<tenant-name\>" and "\<namespace-name\>" after adding a phase for creating "\<tenant-name\>" and/or "\<namespace-name\>", similar to C* CQL schema creation phase!
 
 * **msg-key**: Pulsar message key
     * **Optional**
@@ -149,7 +149,7 @@ Pulsar has built-in schema support. Other than primitive types, Pulsar also supp
   schema.definition:
   ```
 
-For the previous Producer block statement example, the **msg-value** parameter has the value of a JSON string that follows the following Avro schema definition (e.g. from a file **iot-example.asvc**)
+For the previous Producer block statement example, the **msg-value** parameter has the value of a JSON string that follows the following Avro schema definition (e.g. as in the sample schema definition file: **[iot-example.asvc](activities/iot-example.avsc)**)
 ```json
 {
   "type": "record",
@@ -166,7 +166,7 @@ For the previous Producer block statement example, the **msg-value** parameter h
 
 ## 1.5. Activity Parameters
 
-At the moment, the following Activity Parameter is supported:
+At the moment, the following Pulsar driver specific Activity Parameter is supported:
 
 - * config=<file/path/to/global/configuration/properties/file>
 
@@ -189,7 +189,7 @@ At the moment, the following Activity Parameter is supported:
 
 To summarize, the original caching design has the following key requirements:
 * **Requirement 1**: Each NB Pulsar activity is able to launch and cache multiple **client spaces**
-* **Requirement 2**:Each client space can launch and cache multiple Pulsar operators of the same type (producer, consumer, etc.)
+* **Requirement 2**: Each client space can launch and cache multiple Pulsar operators of the same type (producer, consumer, etc.)
 
 In the current implementation, only requirement 2 is implemented. Regarding requirement 1, the current implementation only supports one client space per NB Pulsar activity!
 
