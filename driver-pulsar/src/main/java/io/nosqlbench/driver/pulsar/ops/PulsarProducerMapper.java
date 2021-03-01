@@ -18,23 +18,22 @@ import java.util.function.LongFunction;
  * For additional parameterization, the command template is also provided.
  */
 public class PulsarProducerMapper implements LongFunction<PulsarOp> {
+    private final CommandTemplate cmdTpl;
+    private final Schema<?> pulsarSchema;
     private final LongFunction<Producer<?>> producerFunc;
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> payloadFunc;
-    private final Schema pulsarSchema;
-    private final CommandTemplate cmdTpl;
 
-    public PulsarProducerMapper(
-        LongFunction<Producer<?>> producerFunc,
-        LongFunction<String> keyFunc,
-        LongFunction<String> payloadFunc,
-        Schema pulsarSchema,
-        CommandTemplate cmdTpl) {
+    public PulsarProducerMapper(CommandTemplate cmdTpl,
+                                Schema<?> pulsarSchema,
+                                LongFunction<Producer<?>> producerFunc,
+                                LongFunction<String> keyFunc,
+                                LongFunction<String> payloadFunc) {
+        this.cmdTpl = cmdTpl;
+        this.pulsarSchema = pulsarSchema;
         this.producerFunc = producerFunc;
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
-        this.pulsarSchema = pulsarSchema;
-        this.cmdTpl = cmdTpl;
     }
 
     @Override

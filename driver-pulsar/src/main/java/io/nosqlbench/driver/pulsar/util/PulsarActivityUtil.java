@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Schema;
@@ -11,10 +12,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 
 public class PulsarActivityUtil {
@@ -31,7 +32,7 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private CLIENT_TYPES(String label) {
+        CLIENT_TYPES(String label) {
             this.label = label;
         }
     }
@@ -48,7 +49,7 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private PERSISTENT_TYPES(String label) {
+        PERSISTENT_TYPES(String label) {
             this.label = label;
         }
     }
@@ -59,6 +60,7 @@ public class PulsarActivityUtil {
 
     ///////
     // Valid Pulsar client configuration (activity-level settings)
+    // - https://pulsar.apache.org/docs/en/client-libraries-java/#client
     public enum CLNT_CONF_KEY {
         serviceUrl("serviceUrl"),
         authPulginClassName("authPluginClassName"),
@@ -83,7 +85,7 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private CLNT_CONF_KEY(String label) {
+        CLNT_CONF_KEY(String label) {
             this.label = label;
         }
     }
@@ -92,13 +94,11 @@ public class PulsarActivityUtil {
     }
 
     ///////
-    // Valid producer configuration (activity-level settings)
-    public enum PRODUCER_CONF_KEY {
-        // NOTE:
-        //   For "topicName" and "producerName", they're ignore at activity-level.
-        //   Instead, op-level settings are respected
-        // topicName("topicName"),
-        // producerName("producerName"),
+    // Standard producer configuration (activity-level settings)
+    // - https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer
+    public enum PRODUCER_CONF_STD_KEY {
+        topicName("topicName"),
+        producerName("producerName"),
         sendTimeoutMs("sendTimeoutMs"),
         blockIfQueueFull("blockIfQueueFull"),
         maxPendingMessages("maxPendingMessages"),
@@ -113,36 +113,94 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private PRODUCER_CONF_KEY(String label) {
+        PRODUCER_CONF_STD_KEY(String label) {
             this.label = label;
         }
     }
-    public static boolean isValidProducerConfItem(String item) {
-        return Arrays.stream(PRODUCER_CONF_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
-    }
-
-    ///////
-    // Valid consumer configuration (activity-level settings)
-    // TODO: to be added
-    public enum CONSUMER_CONF_KEY {
-        ;
-
-        public final String label;
-        private CONSUMER_CONF_KEY(String label) {
-            this.label = label;
-        }
+    public static boolean isStandardProducerConfItem(String item) {
+        return Arrays.stream(PRODUCER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
     }
 
     ///////
-    // Valid reader configuration (activity-level settings)
-    // TODO: to be added
-    public enum READER_CONF_KEY {
+    // Standard consumer configuration (activity-level settings)
+    // - https://pulsar.apache.org/docs/en/client-libraries-java/#consumer
+    public enum CONSUMER_CONF_STD_KEY {
+        topicNames("topicNames"),
+        topicsPattern("topicsPattern"),
+        subscriptionName("subscriptionName"),
+        subscriptionType("subscriptionType"),
+        receiverQueueSize("receiverQueueSize"),
+        acknowledgementsGroupTimeMicros("acknowledgementsGroupTimeMicros"),
+        negativeAckRedeliveryDelayMicros("negativeAckRedeliveryDelayMicros"),
+        maxTotalReceiverQueueSizeAcrossPartitions("maxTotalReceiverQueueSizeAcrossPartitions"),
+        consumerName("consumerName"),
+        ackTimeoutMillis("ackTimeoutMillis"),
+        tickDurationMillis("tickDurationMillis"),
+        priorityLevel("priorityLevel"),
+        cryptoFailureAction("cryptoFailureAction"),
+        properties("properties"),
+        readCompacted("readCompacted"),
+        subscriptionInitialPosition("subscriptionInitialPosition"),
+        patternAutoDiscoveryPeriod("patternAutoDiscoveryPeriod"),
+        regexSubscriptionMode("regexSubscriptionMode"),
+        deadLetterPolicy("deadLetterPolicy"),
+        autoUpdatePartitions("autoUpdatePartitions"),
+        replicateSubscriptionState("replicateSubscriptionState")
         ;
 
         public final String label;
-        private READER_CONF_KEY(String label) {
+        CONSUMER_CONF_STD_KEY(String label) {
             this.label = label;
         }
+    }
+    public static boolean isStandardConsumerConfItem(String item) {
+        return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+    }
+
+    ///////
+    // Standard reader configuration (activity-level settings)
+    // - https://pulsar.apache.org/docs/en/client-libraries-java/#reader
+    public enum READER_CONF_STD_KEY {
+        topicName("topicName"),
+        receiverQueueSize("receiverQueueSize"),
+        readerListener("readerListener"),
+        readerName("readerName"),
+        subscriptionRolePrefix("subscriptionRolePrefix"),
+        cryptoKeyReader("cryptoKeyReader"),
+        cryptoFailureAction("cryptoFailureAction"),
+        readCompacted("readCompacted"),
+        resetIncludeHead("resetIncludeHead")
+        ;
+
+        public final String label;
+        READER_CONF_STD_KEY(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isStandardReaderConfItem(String item) {
+        return Arrays.stream(READER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+    }
+
+    public enum READER_CONF_CUSTOM_KEY {
+        startMessagePos("startMessagePos")
+        ;
+
+        public final String label;
+        READER_CONF_CUSTOM_KEY(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isCustomReaderConfItem(String item) {
+        return Arrays.stream(READER_CONF_CUSTOM_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+    }
+
+    public enum READER_MSG_POSITION_TYPE {
+        earliest("earliest"),
+        latest("latest"),
+        custom("custom");
+
+        public final String label;
+        READER_MSG_POSITION_TYPE(String label) { this.label = label; }
     }
 
     ///////
@@ -152,7 +210,7 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private WEBSKT_PRODUCER_CONF_KEY(String label) {
+        WEBSKT_PRODUCER_CONF_KEY(String label) {
             this.label = label;
         }
     }
@@ -164,7 +222,7 @@ public class PulsarActivityUtil {
         ;
 
         public final String label;
-        private MANAGED_LEDGER_CONF_KEY(String label) {
+        MANAGED_LEDGER_CONF_KEY(String label) {
             this.label = label;
         }
     }
@@ -175,25 +233,25 @@ public class PulsarActivityUtil {
         boolean isPrimitive = false;
 
         // Use "BYTES" as the default type if the type string is not explicitly specified
-        if ((typeStr == null) || typeStr.isEmpty()) {
+        if (StringUtils.isBlank(typeStr)) {
             typeStr = "BYTES";
         }
 
-        if ( typeStr.toUpperCase().equals("BOOLEAN") || typeStr.toUpperCase().equals("INT8") ||
-             typeStr.toUpperCase().equals("INT16") || typeStr.toUpperCase().equals("INT32") ||
-             typeStr.toUpperCase().equals("INT64") || typeStr.toUpperCase().equals("FLOAT") ||
-             typeStr.toUpperCase().equals("DOUBLE") || typeStr.toUpperCase().equals("BYTES") ||
-             typeStr.toUpperCase().equals("DATE") || typeStr.toUpperCase().equals("TIME") ||
-             typeStr.toUpperCase().equals("TIMESTAMP") || typeStr.toUpperCase().equals("INSTANT") ||
-             typeStr.toUpperCase().equals("LOCAL_DATE") || typeStr.toUpperCase().equals("LOCAL_TIME") ||
-             typeStr.toUpperCase().equals("LOCAL_DATE_TIME") ) {
+        if ( typeStr.equalsIgnoreCase("BOOLEAN") || typeStr.equalsIgnoreCase("INT8") ||
+             typeStr.equalsIgnoreCase("INT16") || typeStr.equalsIgnoreCase("INT32") ||
+             typeStr.equalsIgnoreCase("INT64") || typeStr.equalsIgnoreCase("FLOAT") ||
+             typeStr.equalsIgnoreCase("DOUBLE") || typeStr.equalsIgnoreCase("BYTES") ||
+             typeStr.equalsIgnoreCase("DATE") || typeStr.equalsIgnoreCase("TIME") ||
+             typeStr.equalsIgnoreCase("TIMESTAMP") || typeStr.equalsIgnoreCase("INSTANT") ||
+             typeStr.equalsIgnoreCase("LOCAL_DATE") || typeStr.equalsIgnoreCase("LOCAL_TIME") ||
+             typeStr.equalsIgnoreCase("LOCAL_DATE_TIME") ) {
             isPrimitive = true;
         }
 
         return isPrimitive;
     }
-    public static Schema getPrimitiveTypeSchema(String typeStr) {
-        Schema schema = null;
+    public static Schema<?> getPrimitiveTypeSchema(String typeStr) {
+        Schema<?> schema;
 
         switch (typeStr.toUpperCase()) {
             case "BOOLEAN":
@@ -240,7 +298,7 @@ public class PulsarActivityUtil {
                 break;
             // Use BYTES as the default schema type if the type string is not specified
             case "":
-            case "BTYES":
+            case "BYTES":
                 schema = Schema.BYTES;
                 break;
             // Report an error if non-valid, non-empty schema type string is provided
@@ -255,19 +313,19 @@ public class PulsarActivityUtil {
     // Complex strut type: Avro or Json
     public static boolean isAvroSchemaTypeStr(String typeStr) {
         boolean isAvroType = false;
-        if ( typeStr.toUpperCase().equals("AVRO") ) {
+        if ( typeStr.equalsIgnoreCase("AVRO") ) {
             isAvroType = true;
         }
         return isAvroType;
     }
-    public static Schema getAvroSchema(String typeStr, String definitionStr) {
+    public static Schema<?> getAvroSchema(String typeStr, String definitionStr) {
         String schemaDefinitionStr = definitionStr;
         String filePrefix = "file://";
-        Schema schema = null;
+        Schema<?> schema;
 
         // Check if payloadStr points to a file (e.g. "file:///path/to/a/file")
         if (isAvroSchemaTypeStr(typeStr)) {
-            if ( (schemaDefinitionStr == null) || schemaDefinitionStr.isEmpty()) {
+            if ( StringUtils.isBlank(schemaDefinitionStr) ) {
                 throw new RuntimeException("Schema definition must be provided for \"Avro\" schema type!");
             } else if (schemaDefinitionStr.startsWith(filePrefix)) {
                 try {
@@ -277,8 +335,6 @@ public class PulsarActivityUtil {
                     throw new RuntimeException("Error reading the specified \"Avro\" schema definition file: " + definitionStr);
                 }
             }
-
-            System.out.println(schemaDefinitionStr);
 
             SchemaInfo schemaInfo = SchemaInfo.builder()
                 .schema(schemaDefinitionStr.getBytes(StandardCharsets.UTF_8))
@@ -295,6 +351,19 @@ public class PulsarActivityUtil {
         }
 
         return schema;
+    }
+
+    public static String encode(String... strings) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str : strings) {
+            if ( !StringUtils.isBlank(str) )
+                stringBuilder.append(str).append("::");
+        }
+
+        String concatenatedStr =
+            StringUtils.substringAfterLast(stringBuilder.toString(), "::");
+
+        return Base64.getEncoder().encodeToString(concatenatedStr.getBytes());
     }
 }
 

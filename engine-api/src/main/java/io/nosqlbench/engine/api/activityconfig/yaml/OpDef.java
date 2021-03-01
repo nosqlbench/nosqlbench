@@ -79,12 +79,14 @@ public class OpDef implements OpTemplate {
         Map<String, T> map = new LinkedHashMap<>();
         for (String pname : getParams().keySet()) {
             Object object = getParams().get(pname);
-            if (type.isAssignableFrom(object.getClass())) {
-                map.put(pname, type.cast(object));
-            } else {
-                throw new RuntimeException("With param named '" + pname + "" +
+            if (object != null) {
+                if (type.isAssignableFrom(object.getClass())) {
+                    map.put(pname, type.cast(object));
+                } else {
+                    throw new RuntimeException("With param named '" + pname + "" +
                         "' You can't assign an object of type '" + object.getClass().getSimpleName() + "" +
                         "' to '" + type.getSimpleName() + "'. Maybe the YAML format is suggesting the wrong type.");
+                }
             }
         }
         return map;

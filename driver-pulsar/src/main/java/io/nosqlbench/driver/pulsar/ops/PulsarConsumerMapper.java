@@ -2,6 +2,7 @@ package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Consumer;
+import org.apache.pulsar.client.api.Schema;
 
 import java.util.function.LongFunction;
 
@@ -16,21 +17,21 @@ import java.util.function.LongFunction;
  * For additional parameterization, the command template is also provided.
  */
 public class PulsarConsumerMapper implements LongFunction<PulsarOp> {
-    private final LongFunction<Consumer<?>> consumerFunc;
-    private final LongFunction<String> recvInstructions;
     private final CommandTemplate cmdTpl;
+    private final Schema<?> pulsarSchema;
+    private final LongFunction<Consumer<?>> consumerFunc;
 
-    public PulsarConsumerMapper(LongFunction<Consumer<?>> consumerFunc,
-                                LongFunction<String> recvMsg,
-                                CommandTemplate cmdTpl) {
-        this.consumerFunc = consumerFunc;
-        this.recvInstructions = recvMsg;
+    public PulsarConsumerMapper(CommandTemplate cmdTpl,
+                                Schema<?> pulsarSchema,
+                                LongFunction<Consumer<?>> consumerFunc) {
         this.cmdTpl = cmdTpl;
-        // TODO add schema support
+        this.pulsarSchema = pulsarSchema;
+        this.consumerFunc = consumerFunc;
     }
 
     @Override
     public PulsarOp apply(long value) {
-        return new PulsarConsumerOp((Consumer<byte[]>) consumerFunc.apply(value), recvInstructions.apply(value));
+        Consumer<?> consumer = consumerFunc.apply(value);
+        return new PulsarConsumerOp(consumer, pulsarSchema);
     }
 }
