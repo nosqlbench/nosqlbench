@@ -18,8 +18,7 @@ Some quick how-to docs have been written for some of the subject-matter
 areas in NoSQLBench. If you need an onramp that is not listed, here let us
 know!
 
-[I am a developer and I want to contribute a driver.]
-(devdocs/devguide/drivers/README.md)
+[I am a developer and I want to contribute a driver.](devdocs/devguide/drivers/README.md)
 
 [I am a user and I want to improve the documentation.](devdocs/devguide/nb_docs.md)
 

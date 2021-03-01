@@ -2,7 +2,7 @@ package io.nosqlbench.activitytype.cql.core;
 
 import com.datastax.driver.core.*;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
 
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -129,13 +129,13 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(StmtDef stmtDef, ParsedStmt parsed) {
+    public static Map<String, String> parseAndGetSpecificBindings(OpDef opDef, ParsedStmt parsed) {
         List<String> spans = new ArrayList<>();
 
-        String statement = stmtDef.getStmt();
+        String statement = opDef.getStmt();
 
         Set<String> extraBindings = new HashSet<>();
-        extraBindings.addAll(stmtDef.getBindings().keySet());
+        extraBindings.addAll(opDef.getBindings().keySet());
         Map<String, String> specificBindings = new LinkedHashMap<>();
 
         Matcher m = stmtToken.matcher(statement);
@@ -153,9 +153,9 @@ public class CQLBindHelper {
             if (extraBindings.contains(tokenName)) {
                 if (specificBindings.get(tokenName) != null){
                     String postfix = UUID.randomUUID().toString();
-                    specificBindings.put(tokenName+postfix, stmtDef.getBindings().get(tokenName));
+                    specificBindings.put(tokenName + postfix, opDef.getBindings().get(tokenName));
                 }else {
-                    specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
+                    specificBindings.put(tokenName, opDef.getBindings().get(tokenName));
                 }
             }
         }

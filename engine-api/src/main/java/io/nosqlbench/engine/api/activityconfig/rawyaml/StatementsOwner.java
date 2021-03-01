@@ -35,15 +35,20 @@ public class StatementsOwner extends RawStmtFields {
     }
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
+        if (propsmap.containsKey("statement") && propsmap.containsKey("statements")) {
+            throw new RuntimeException("You can define either statement or statements, but not both.");
+        }
+
         Object statementsObject = propsmap.remove("statements");
 
-        if (statementsObject==null) {
+        if (statementsObject == null) {
             statementsObject = propsmap.remove("statement");
         }
 
-        if (statementsObject!=null) {
-            setStatementsFieldByObjectType(statementsObject);
+        if (statementsObject != null) {
+            setStatementsFieldByType(statementsObject);
         }
+
 //        if (statementsObject!=null) {
 //            if (statementsObject instanceof List) {
 //                setByObject(statementsObject);
@@ -55,17 +60,17 @@ public class StatementsOwner extends RawStmtFields {
     }
 
     @SuppressWarnings("unchecked")
-    public void setStatementsFieldByObjectType(Object object) {
+    public void setStatementsFieldByType(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
             List<RawStmtDef> defs = new ArrayList<>(stmtList.size());
             for (int i = 0; i < stmtList.size(); i++) {
-                String defaultName = "stmt"+(i+1);
+                String defaultName = "stmt" + (i + 1);
                 Object o = stmtList.get(i);
                 if (o instanceof String) {
-                    defs.add(new RawStmtDef(defaultName,(String)o));
+                    defs.add(new RawStmtDef(defaultName, (String) o));
                 } else if (o instanceof Map) {
-                    defs.add(new RawStmtDef(defaultName,(Map<String,Object>)o));
+                    defs.add(new RawStmtDef(defaultName, (Map<String, Object>) o));
                 } else {
                     throw new RuntimeException("Can not construct stmt def from object type:" + o.getClass());
                 }
@@ -76,12 +81,16 @@ public class StatementsOwner extends RawStmtFields {
             List<Map<String,Object>> itemizedMaps = new ArrayList<>();
             for (Map.Entry<String, Object> entries : map.entrySet()) {
                 Object value = entries.getValue();
-                if (value instanceof Map) {
-                    Map<String,Object> valueMap = ((Map<String,Object>)value);
-                    valueMap.put("name", entries.getKey());
-                    itemizedMaps.add(valueMap);
+                if (value instanceof LinkedHashMap) {
+                    // reset order to favor naming first
+                    LinkedHashMap<String, Object> vmap = (LinkedHashMap<String, Object>) value;
+                    LinkedHashMap<String, Object> cp = new LinkedHashMap<>(vmap);
+                    vmap.clear();
+                    vmap.put("name", entries.getKey());
+                    vmap.putAll(cp);
+                    itemizedMaps.add(vmap);
                 } else if (value instanceof String) {
-                    Map<String,Object> stmtDetails = new HashMap<>() {{
+                    Map<String, Object> stmtDetails = new HashMap<>() {{
                         put("name", entries.getKey());
                         put("stmt", entries.getValue());
                     }};
@@ -90,9 +99,9 @@ public class StatementsOwner extends RawStmtFields {
                     throw new RuntimeException("Unknown inner value type on map-based statement definition.");
                 }
             }
-            setStatementsFieldByObjectType(itemizedMaps);
+            setStatementsFieldByType(itemizedMaps);
         } else if (object instanceof String) {
-            setStatementsFieldByObjectType(Map.of("stmt1",(String)object));
+            setStatementsFieldByType(Map.of("stmt1", (String) object));
         } else {
             throw new RuntimeException("Unknown object type: " + object.getClass());
         }

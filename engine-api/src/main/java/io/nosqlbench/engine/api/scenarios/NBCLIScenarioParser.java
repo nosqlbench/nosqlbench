@@ -188,7 +188,7 @@ public class NBCLIScenarioParser {
         return sanitized;
     }
 
-    private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w+)((?<oper>=+)(?<val>.+))?");
+    private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
     private static LinkedHashMap<String, CmdArg> parseStep(String cmd) {
         LinkedHashMap<String, CmdArg> parsedStep = new LinkedHashMap<>();
@@ -362,7 +362,6 @@ public class NBCLIScenarioParser {
             .prefix(includes)
             .extension("js")
             .list().stream().map(Content::asPath).collect(Collectors.toList());
-        ;
 
         List<String> scriptNames = new ArrayList();
 
@@ -386,9 +385,12 @@ public class NBCLIScenarioParser {
 
             Matcher innerMatcher = innerTemplatePattern.matcher(match);
             String[] matchArray = match.split(",");
+//            if (matchArray.length!=2) {
+//                throw new BasicError("TEMPLATE form must have two arguments separated by a comma, like 'TEMPLATE(a,b), not '" + match +"'");
+//            }
             //TODO: support recursive matches
             if (innerMatcher.find()) {
-                String[] innerMatch = innerMatcher.group(1).split(",");
+                String[] innerMatch = innerMatcher.group(1).split("[,:]");
 
                 //We want the outer name with the inner default value
                 templates.put(matchArray[0], innerMatch[1]);

@@ -77,7 +77,7 @@ public class StmtsDocListTest {
     @Test
     public void testStmtInheritsBlockData() {
         StmtsDoc doc0 = doclist.getStmtDocs().get(0);
-        List<OpTemplate> stmts1 = doc0.getBlocks().get(0).getStmts();
+        List<OpTemplate> stmts1 = doc0.getBlocks().get(0).getOps();
         assertThat(stmts1).hasSize(2);
 
         StmtsBlock block0 = doc0.getBlocks().get(0);

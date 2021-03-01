@@ -95,7 +95,7 @@ public class CommandTemplate {
         this.name = name;
         Map<String, String> cmd = new HashMap<>();
 
-        // Only parse and inject the oneline form if it is defined.
+        // Only parse and inject the one-line form if it is defined.
         // The first parser to match and return a map will be the last one tried.
         // If none of the supplemental parsers work, the default params parser is used
         if (oneline != null) {

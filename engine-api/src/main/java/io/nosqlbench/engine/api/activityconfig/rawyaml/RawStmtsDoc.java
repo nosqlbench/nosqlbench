@@ -41,7 +41,7 @@ public class RawStmtsDoc extends StatementsOwner {
 
     public static RawStmtsDoc forSingleStatement(String statement) {
         RawStmtsDoc rawStmtsDoc = new RawStmtsDoc();
-        rawStmtsDoc.setStatementsFieldByObjectType(statement);
+        rawStmtsDoc.setStatementsFieldByType(statement);
         return rawStmtsDoc;
     }
 

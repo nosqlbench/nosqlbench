@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
 
-    private RawStmtsDoc rawStmtsDoc;
+    private final RawStmtsDoc rawStmtsDoc;
 
     public StmtsDoc(RawStmtsDoc rawStmtsDoc) {
         this.rawStmtsDoc = rawStmtsDoc;
@@ -91,7 +91,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
      * including the inherited and overridden values from the this doc and the parent block.
      */
     public List<OpTemplate> getStmts() {
-        return getBlocks().stream().flatMap(b -> b.getStmts().stream()).collect(Collectors.toList());
+        return getBlocks().stream().flatMap(b -> b.getOps().stream()).collect(Collectors.toList());
     }
 
     /**
