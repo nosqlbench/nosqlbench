@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.pulsar;
 
+import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -21,8 +23,20 @@ public class PulsarSpaceCache {
     }
 
     public PulsarSpace getPulsarSpace(String name) {
-        PulsarSpace cspace = clientScopes.computeIfAbsent(name, spaceName -> new PulsarSpace(spaceName, activity.getPulsarConf()));
-        return cspace;
+
+        String pulsarClientType = activity.getPulsarConf().getPulsarClientType();
+
+        if (pulsarClientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString())) {
+            return clientScopes.computeIfAbsent(name, spaceName -> new PulsarProducerSpace(spaceName, activity.getPulsarConf()));
+        } else if (pulsarClientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.CONSUMER.toString())) {
+            return clientScopes.computeIfAbsent(name, spaceName -> new PulsarConsumerSpace(spaceName, activity.getPulsarConf()));
+        } else if (pulsarClientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.READER.toString())) {
+            return clientScopes.computeIfAbsent(name, spaceName -> new PulsarReaderSpace(spaceName, activity.getPulsarConf()));
+        }
+        // TODO: add support for websocket-producer and managed-ledger
+        else {
+            throw new RuntimeException("Unsupported Pulsar client type: " + pulsarClientType);
+        }
     }
 
     public PulsarActivity getActivity() {

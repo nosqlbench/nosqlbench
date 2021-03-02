@@ -2,6 +2,7 @@ package io.nosqlbench.driver.pulsar.util;
 
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.JsonDecoder;
+import org.apache.avro.io.BinaryDecoder;
 import org.apache.pulsar.client.api.schema.Field;
 import org.apache.pulsar.client.api.schema.GenericRecord;
 import org.apache.pulsar.client.api.schema.GenericRecordBuilder;
@@ -17,6 +18,7 @@ public class AvroUtil {
     public static org.apache.avro.Schema GetSchema_ApacheAvro(String avroSchemDef) {
         return new org.apache.avro.Schema.Parser().parse(avroSchemDef);
     }
+
     public static org.apache.avro.generic.GenericRecord GetGenericRecord_ApacheAvro(String avroSchemDef, String jsonData)  {
         org.apache.avro.generic.GenericRecord record = null;
 
@@ -25,11 +27,30 @@ public class AvroUtil {
 
             org.apache.avro.generic.GenericDatumReader<org.apache.avro.generic.GenericData.Record> reader;
             reader = new org.apache.avro.generic.GenericDatumReader<>(schema);
+
             JsonDecoder decoder = DecoderFactory.get().jsonDecoder(schema, jsonData);
 
             record = reader.read(null, decoder);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
         }
-        catch (IOException ioe) {
+
+        return record;
+    }
+
+    public static org.apache.avro.generic.GenericRecord GetGenericRecord_ApacheAvro(String avroSchemDef, byte[] bytesData) {
+        org.apache.avro.generic.GenericRecord record = null;
+
+        try {
+            org.apache.avro.Schema schema = GetSchema_ApacheAvro(avroSchemDef);
+
+            org.apache.avro.generic.GenericDatumReader<org.apache.avro.generic.GenericData.Record> reader;
+            reader = new org.apache.avro.generic.GenericDatumReader<>(schema);
+
+            BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(bytesData, null);
+
+            record = reader.read(null, decoder);
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
 
