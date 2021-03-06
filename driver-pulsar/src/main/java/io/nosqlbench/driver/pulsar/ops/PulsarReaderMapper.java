@@ -1,27 +1,35 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Reader;
 import org.apache.pulsar.client.api.Schema;
 
 import java.util.function.LongFunction;
 
-public class PulsarReaderMapper implements LongFunction<PulsarOp> {
-    private final CommandTemplate cmdTpl;
-    private final Schema<?> pulsarSchema;
+public class PulsarReaderMapper extends PulsarOpMapper {
+
     private final LongFunction<Reader<?>> readerFunc;
+    private final LongFunction<Boolean> asyncApiFunc;
 
     public PulsarReaderMapper(CommandTemplate cmdTpl,
-                              Schema<?> pulsarSchema,
-                              LongFunction<Reader<?>> readerFunc) {
-        this.cmdTpl = cmdTpl;
-        this.pulsarSchema = pulsarSchema;
+                              PulsarSpace clientSpace,
+                              LongFunction<Reader<?>> readerFunc,
+                              LongFunction<Boolean> asyncApiFunc) {
+        super(cmdTpl, clientSpace);
         this.readerFunc = readerFunc;
+        this.asyncApiFunc = asyncApiFunc;
     }
 
     @Override
     public PulsarOp apply(long value) {
         Reader<?> reader = readerFunc.apply(value);
-        return new PulsarReaderOp(reader, pulsarSchema);
+        boolean asyncApi = asyncApiFunc.apply(value);
+
+        return new PulsarReaderOp(
+            reader,
+            clientSpace.getPulsarSchema(),
+            asyncApi
+        );
     }
 }

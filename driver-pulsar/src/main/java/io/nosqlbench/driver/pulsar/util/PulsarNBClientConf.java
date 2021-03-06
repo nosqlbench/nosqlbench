@@ -7,7 +7,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,13 +23,11 @@ public class PulsarNBClientConf {
 
     private String canonicalFilePath = "";
 
-    public static final String DRIVER_CONF_PREFIX = "driver";
     public static final String SCHEMA_CONF_PREFIX = "schema";
     public static final String CLIENT_CONF_PREFIX = "client";
     public static final String PRODUCER_CONF_PREFIX = "producer";
     public static final String CONSUMER_CONF_PREFIX = "consumer";
     public static final String READER_CONF_PREFIX = "reader";
-    private HashMap<String, Object> driverConfMap = new HashMap<>();
     private HashMap<String, Object> schemaConfMap = new HashMap<>();
     private HashMap<String, Object> clientConfMap = new HashMap<>();
     private HashMap<String, Object> producerConfMap = new HashMap<>();
@@ -52,14 +50,6 @@ public class PulsarNBClientConf {
                         .setListDelimiterHandler(new DefaultListDelimiterHandler(',')));
 
             Configuration config = builder.getConfiguration();
-
-            // Get driver specific configuration settings
-            for (Iterator<String> it = config.getKeys(DRIVER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if ( !StringUtils.isBlank(confVal) )
-                    driverConfMap.put(confKey.substring(DRIVER_CONF_PREFIX.length()+1), config.getProperty(confKey));
-            }
 
             // Get schema specific configuration settings
             for (Iterator<String> it = config.getKeys(SCHEMA_CONF_PREFIX); it.hasNext(); ) {
@@ -109,41 +99,6 @@ public class PulsarNBClientConf {
             logger.error("Error loading configuration items from the specified config properties file!");
             cex.printStackTrace();
         }
-    }
-
-
-    //////////////////
-    // Get NB Driver related config
-    public Map<String, Object> getDriverConfMap() {
-        return this.driverConfMap;
-    }
-    public boolean hasDriverConfKey(String key) {
-        if (key.contains(DRIVER_CONF_PREFIX))
-            return driverConfMap.containsKey(key.substring(DRIVER_CONF_PREFIX.length()+1));
-        else
-            return driverConfMap.containsKey(key);
-    }
-    public Object getDriverConfValue(String key) {
-        if (key.contains(DRIVER_CONF_PREFIX))
-            return driverConfMap.get(key.substring(DRIVER_CONF_PREFIX.length()+1));
-        else
-            return driverConfMap.get(key);
-    }
-    public void setDriverConfValue(String key, Object value) {
-        if (key.contains(DRIVER_CONF_PREFIX))
-            driverConfMap.put(key.substring(DRIVER_CONF_PREFIX.length()+1), value);
-        else
-            driverConfMap.put(key, value);
-    }
-    // other driver helper functions ...
-    public String getPulsarClientType() {
-        Object confValue = getDriverConfValue("driver.client-type");
-
-        // If not explicitly specifying Pulsar client type, "producer" is the default type
-        if (confValue == null)
-            return PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString();
-        else
-            return confValue.toString();
     }
 
 

@@ -5,6 +5,7 @@ import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.scoping.ScopedSupplier;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
@@ -19,7 +20,6 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
     private final CommandTemplate cmdTpl;
     private final PulsarSpace clientSpace;
     private final LongFunction<PulsarOp> opFunc;
-    private final Schema<?> pulsarSchema;
 
     // TODO: Add docs for the command template with respect to the OpTemplate
 
@@ -44,59 +44,36 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
             this.clientSpace = pcache.getPulsarSpace("default");
         }
 
-        this.pulsarSchema = clientSpace.getPulsarSchema();
-
         this.opFunc = resolve();
 
         ScopedSupplier scope = ScopedSupplier.valueOf(cmdTpl.getStaticOr("op_scope", "singleton"));
         Supplier<LongFunction<PulsarOp>> opSupplier = scope.supplier(this::resolve);
     }
 
-    private LongFunction<PulsarOp> resolve() {
-        String clientType = clientSpace.getPulsarClientConf().getPulsarClientType();
-
-        // TODO: Complete implementation for reader, websocket-producer and managed-ledger
-        if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.PRODUCER.toString()) ) {
-            assert clientSpace instanceof PulsarProducerSpace;
-            return resolveProducer((PulsarProducerSpace) clientSpace);
-        } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.CONSUMER.toString()) ) {
-            assert clientSpace instanceof PulsarConsumerSpace;
-            return resolveConsumer((PulsarConsumerSpace)clientSpace);
-        } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.READER.toString()) ) {
-            assert clientSpace instanceof PulsarReaderSpace;
-            return resolveReader((PulsarReaderSpace)clientSpace); /*
-        } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.WSOKT_PRODUCER.toString()) ) {
-        } else if ( clientType.equalsIgnoreCase(PulsarActivityUtil.CLIENT_TYPES.MANAGED_LEDGER.toString()) ) {
-        */
-        } else {
-            throw new RuntimeException("Unsupported Pulsar client: " + clientType);
-        }
+    @Override
+    public PulsarOp apply(long value) {
+        return opFunc.apply(value);
     }
 
-    private LongFunction<PulsarOp> resolveProducer(
-        PulsarProducerSpace clientSpace
-    ) {
+    private boolean IsBoolean (String str) {
+        return StringUtils.equalsAnyIgnoreCase(str, "yes", "true");
+    }
+
+    private LongFunction<PulsarOp> resolve() {
+
         if (cmdTpl.containsKey("topic_url")) {
             throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
         }
 
-        LongFunction<String> cycle_producer_name_func;
-        if (cmdTpl.isStatic("producer-name")) {
-            cycle_producer_name_func = (l) -> cmdTpl.getStatic("producer-name");
-        } else if (cmdTpl.isDynamic("producer-name")) {
-            cycle_producer_name_func = (l) -> cmdTpl.getDynamic("producer-name", l);
-        } else {
-            cycle_producer_name_func = (l) -> null;
-        }
-
-        LongFunction<String> topic_uri_func;
+        // Global parameter: topic_uri
+        LongFunction<String> topicUriFunc;
         if (cmdTpl.containsKey("topic_uri")) {
             if (cmdTpl.containsAny("tenant", "namespace", "topic", "persistent")) {
                 throw new RuntimeException("You may not specify topic_uri with any of the piece-wise components 'persistence','tenant','namespace','topic'.");
             } else if (cmdTpl.isStatic("topic_uri")) {
-                topic_uri_func = (l) -> cmdTpl.getStatic("topic_uri");
+                topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
             } else {
-                topic_uri_func = (l) -> cmdTpl.getDynamic("topic_uri", l);
+                topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
             }
         }
         else if (cmdTpl.containsKey("topic")) {
@@ -109,9 +86,9 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
                 String topic = cmdTpl.getStaticOr("topic", "");
 
                 String composited = persistence + "://" + tenant + "/" + namespace + "/" + topic;
-                topic_uri_func = (l) -> composited;
+                topicUriFunc = (l) -> composited;
             } else { // some or all dynamic fields, composite into a single dynamic call
-                topic_uri_func = (l) ->
+                topicUriFunc = (l) ->
                     cmdTpl.getOr("persistent", l, "persistent").replaceAll("true", "persistent")
                         + "://" + cmdTpl.getOr("tenant", l, "public")
                         + "/" + cmdTpl.getOr("namespace", l, "default")
@@ -119,40 +96,102 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
             }
         }
         else {
-            topic_uri_func = (l) -> null;
+            topicUriFunc = (l) -> null;
+        }
+
+        // Global parameter: async_api
+        LongFunction<Boolean> asyncApiFunc;
+        if ( cmdTpl.containsKey("async_api") ) {
+            if ( cmdTpl.isStatic("async_api") )
+                asyncApiFunc = (l) -> IsBoolean(cmdTpl.getStatic("async_api"));
+            else
+                throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
+        }
+        else {
+            asyncApiFunc = (l) -> false;
+        }
+
+        if ( !cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype") ) {
+            throw new RuntimeException("Statement parameter \"optype\" must have a valid value!");
+        }
+        String stmtOpType = cmdTpl.getStatic("optype");
+
+        // TODO: Complete implementation for websocket-producer and managed-ledger
+        if /*( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.CREATE_TENANT.label) ) {
+            return resolveCreateTenant(clientSpace);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.CREATE_NAMESPACE.label) ) {
+            return resolveCreateNameSpace(clientSpace);
+        } else if*/ ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label) ) {
+            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label) ) {
+            return resolveMsgConsume(clientSpace, topicUriFunc, asyncApiFunc);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label) ) {
+            return resolveMsgRead(clientSpace, topicUriFunc, asyncApiFunc);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label) ) {
+            return resolveMsgBatchSendStart(clientSpace, topicUriFunc);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label) ) {
+            return resolveMsgBatchSend(clientSpace);
+        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label) ) {
+            return resolveMsgBatchSendEnd(clientSpace);
+        } else {
+            throw new RuntimeException("Unsupported Pulsar operation type" );
+        }
+    }
+
+    private LongFunction<PulsarOp> resolveMsgSend(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_func,
+        LongFunction<Boolean> async_api_func
+    ) {
+        LongFunction<String> cycle_producer_name_func;
+        if (cmdTpl.isStatic("producer_name")) {
+            cycle_producer_name_func = (l) -> cmdTpl.getStatic("producer_name");
+        } else if (cmdTpl.isDynamic("producer_name")) {
+            cycle_producer_name_func = (l) -> cmdTpl.getDynamic("producer_name", l);
+        } else {
+            cycle_producer_name_func = (l) -> null;
         }
 
         LongFunction<Producer<?>> producerFunc =
-            (l) -> clientSpace.getProducer(cycle_producer_name_func.apply(l), topic_uri_func.apply(l));
+            (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_producer_name_func.apply(l));
 
         LongFunction<String> keyFunc;
-        if (cmdTpl.isStatic("msg-key")) {
-            keyFunc = (l) -> cmdTpl.getStatic("msg-key");
-        } else if (cmdTpl.isDynamic("msg-key")) {
-            keyFunc = (l) -> cmdTpl.getDynamic("msg-key", l);
+        if (cmdTpl.isStatic("msg_key")) {
+            keyFunc = (l) -> cmdTpl.getStatic("msg_key");
+        } else if (cmdTpl.isDynamic("msg_key")) {
+            keyFunc = (l) -> cmdTpl.getDynamic("msg_key", l);
         } else {
             keyFunc = (l) -> null;
         }
 
         LongFunction<String> valueFunc;
-        if (cmdTpl.containsKey("msg-value")) {
-            if (cmdTpl.isStatic("msg-value")) {
-                valueFunc = (l) -> cmdTpl.getStatic("msg-value");
-            } else if (cmdTpl.isDynamic("msg-value")) {
-                valueFunc = (l) -> cmdTpl.getDynamic("msg-value", l);
+        if (cmdTpl.containsKey("msg_value")) {
+            if (cmdTpl.isStatic("msg_value")) {
+                valueFunc = (l) -> cmdTpl.getStatic("msg_value");
+            } else if (cmdTpl.isDynamic("msg_value")) {
+                valueFunc = (l) -> cmdTpl.getDynamic("msg_value", l);
             } else {
                 valueFunc = (l) -> null;
             }
         } else {
-            throw new RuntimeException("\"msg-value\" field must be specified!");
+            throw new RuntimeException("Producer:: \"msg_value\" field must be specified!");
         }
 
-        return new PulsarProducerMapper(cmdTpl, pulsarSchema, producerFunc, keyFunc, valueFunc);
+        return new PulsarProducerMapper(
+            cmdTpl,
+            clientSpace,
+            producerFunc,
+            async_api_func,
+            keyFunc,
+            valueFunc);
     }
 
-    private LongFunction<PulsarOp> resolveConsumer(
-        PulsarConsumerSpace clientSpace
+    private LongFunction<PulsarOp> resolveMsgConsume(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_func,
+        LongFunction<Boolean> async_api_func
     ) {
+        // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
         if (cmdTpl.isStatic("topic-names")) {
             topic_names_func = (l) -> cmdTpl.getStatic("topic-names");
@@ -162,6 +201,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
             topic_names_func = (l) -> null;
         }
 
+        // Topic pattern (multi-topic)
         LongFunction<String> topics_pattern_func;
         if (cmdTpl.isStatic("topics-pattern")) {
             topics_pattern_func = (l) -> cmdTpl.getStatic("topics-pattern");
@@ -200,6 +240,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
 
         LongFunction<Consumer<?>> consumerFunc = (l) ->
             clientSpace.getConsumer(
+                topic_uri_func.apply(l),
                 topic_names_func.apply(l),
                 topics_pattern_func.apply(l),
                 subscription_name_func.apply(l),
@@ -207,21 +248,14 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
                 consumer_name_func.apply(l)
             );
 
-        return new PulsarConsumerMapper(cmdTpl, pulsarSchema, consumerFunc);
+        return new PulsarConsumerMapper(cmdTpl, clientSpace, consumerFunc, async_api_func);
     }
 
-    private LongFunction<PulsarOp> resolveReader(
-        PulsarReaderSpace clientSpace
+    private LongFunction<PulsarOp> resolveMsgRead(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_func,
+        LongFunction<Boolean> async_api_func
     ) {
-        LongFunction<String> topic_name_func;
-        if (cmdTpl.isStatic("topic-name")) {
-            topic_name_func = (l) -> cmdTpl.getStatic("topic-name");
-        } else if (cmdTpl.isDynamic("topic-name")) {
-            topic_name_func = (l) -> cmdTpl.getDynamic("topic-name", l);
-        } else {
-            topic_name_func = (l) -> null;
-        }
-
         LongFunction<String> reader_name_func;
         if (cmdTpl.isStatic("reader-name")) {
             reader_name_func = (l) -> cmdTpl.getStatic("reader-name");
@@ -242,16 +276,64 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
 
         LongFunction<Reader<?>> readerFunc = (l) ->
             clientSpace.getReader(
-                topic_name_func.apply(l),
+                topic_uri_func.apply(l),
                 reader_name_func.apply(l),
                 start_msg_pos_str_func.apply(l)
             );
 
-        return new PulsarReaderMapper(cmdTpl, pulsarSchema, readerFunc);
+        return new PulsarReaderMapper(cmdTpl, clientSpace, readerFunc, async_api_func);
     }
 
-    @Override
-    public PulsarOp apply(long value) {
-        return opFunc.apply(value);
+    private LongFunction<PulsarOp> resolveMsgBatchSendStart(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_func
+    ) {
+        LongFunction<String> cycle_batch_producer_name_func;
+        if (cmdTpl.isStatic("batch_producer_name")) {
+            cycle_batch_producer_name_func = (l) -> cmdTpl.getStatic("batch_producer_name");
+        } else if (cmdTpl.isDynamic("batch_producer_name")) {
+            cycle_batch_producer_name_func = (l) -> cmdTpl.getDynamic("batch_producer_name", l);
+        } else {
+            cycle_batch_producer_name_func = (l) -> null;
+        }
+
+        LongFunction<Producer<?>> batchProducerFunc =
+            (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_batch_producer_name_func.apply(l));
+
+        return new PulsarBatchProducerStartMapper(cmdTpl, clientSpace, batchProducerFunc);
+    }
+
+    private LongFunction<PulsarOp> resolveMsgBatchSend(PulsarSpace clientSpace) {
+        LongFunction<String> keyFunc;
+        if (cmdTpl.isStatic("msg_key")) {
+            keyFunc = (l) -> cmdTpl.getStatic("msg_key");
+        } else if (cmdTpl.isDynamic("msg_key")) {
+            keyFunc = (l) -> cmdTpl.getDynamic("msg_key", l);
+        } else {
+            keyFunc = (l) -> null;
+        }
+
+        LongFunction<String> valueFunc;
+        if (cmdTpl.containsKey("msg_value")) {
+            if (cmdTpl.isStatic("msg_value")) {
+                valueFunc = (l) -> cmdTpl.getStatic("msg_value");
+            } else if (cmdTpl.isDynamic("msg_value")) {
+                valueFunc = (l) -> cmdTpl.getDynamic("msg_value", l);
+            } else {
+                valueFunc = (l) -> null;
+            }
+        } else {
+            throw new RuntimeException("Batch Producer:: \"msg_value\" field must be specified!");
+        }
+
+        return new PulsarBatchProducerMapper(
+            cmdTpl,
+            clientSpace,
+            keyFunc,
+            valueFunc);
+    }
+
+    private LongFunction<PulsarOp> resolveMsgBatchSendEnd(PulsarSpace clientSpace) {
+        return new PulsarBatchProducerEndMapper(cmdTpl, clientSpace);
     }
 }

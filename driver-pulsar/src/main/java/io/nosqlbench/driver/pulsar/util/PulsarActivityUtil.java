@@ -23,21 +23,25 @@ public class PulsarActivityUtil {
     private final static Logger logger = LogManager.getLogger(PulsarActivityUtil.class);
 
     // Supported message operation types
-    public enum CLIENT_TYPES {
-        PRODUCER("producer"),
-        CONSUMER("consumer"),
-        READER("reader"),
-        WSOKT_PRODUCER("websocket-producer"),
-        MANAGED_LEDGER("managed-ledger")
+    // TODO: websocket-producer and managed-ledger
+    public enum OP_TYPES {
+        CREATE_TENANT("create-tenant"),
+        CREATE_NAMESPACE("create-namespace"),
+        BATCH_MSG_SEND_START("batch-msg-send-start"),
+        BATCH_MSG_SEND("batch-msg-send"),
+        BATCH_MSG_SEND_END("batch-msg-send-end"),
+        MSG_SEND("msg-send"),
+        MSG_CONSUME("msg-consume"),
+        MSG_READ("msg-read")
         ;
 
         public final String label;
-        CLIENT_TYPES(String label) {
+        OP_TYPES(String label) {
             this.label = label;
         }
     }
     public static boolean isValidClientType(String type) {
-        return Arrays.stream(CLIENT_TYPES.values()).anyMatch((t) -> t.name().equals(type.toLowerCase()));
+        return Arrays.stream(OP_TYPES.values()).anyMatch((t) -> t.name().equals(type.toLowerCase()));
     }
 
 
@@ -157,6 +161,19 @@ public class PulsarActivityUtil {
         return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
     }
 
+    public enum SUBSCRIPTION_TYPE {
+        exclusive("exclusive"),
+        failover("failover"),
+        shared("shared"),
+        key_shared("key_shared");
+
+        public final String label;
+        SUBSCRIPTION_TYPE(String label) { this.label = label; }
+    }
+    public static boolean isValidSubscriptionType(String item) {
+        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+    }
+
     ///////
     // Standard reader configuration (activity-level settings)
     // - https://pulsar.apache.org/docs/en/client-libraries-java/#reader
@@ -201,6 +218,9 @@ public class PulsarActivityUtil {
 
         public final String label;
         READER_MSG_POSITION_TYPE(String label) { this.label = label; }
+    }
+    public static boolean isValideReaderStartPosition(String item) {
+        return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
     }
 
     ///////
