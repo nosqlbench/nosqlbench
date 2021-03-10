@@ -76,9 +76,9 @@ blocks:
     statements:
       - name: s1
         optype: msg-consume
-        topic_names: "persistent://public/default/nbpulsar, persistent://public/default/mynbtest"
-        topics_pattern: "public/default/.*"
-        subscription_name:
+        topic_names:
+        topics_pattern:
+        subscription_name: "mynbsub_test"
         subscription_type:
         consumer_name:
 
