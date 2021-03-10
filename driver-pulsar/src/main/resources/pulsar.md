@@ -287,7 +287,7 @@ as below:
       - name: s1
         optype: batch-msg-send-start
         # For batch producer, "producer_name" should be associated with batch start
-        batch_producer_name: {batch_producer_name}
+        # batch_producer_name: {batch_producer_name}
         ratio: 1
       - name: s2
         optype: batch-msg-send
@@ -321,9 +321,9 @@ ratios: 1, <batch_num>, 1.
   and payload to be put in the batch.
     * (Mandatory) **optype (batch-msg-send)** is the statement identifier
       for this statement
-    * (Optional)  **msg-key**, when provided, specifies the key of the
+    * (Optional)  **msg_key**, when provided, specifies the key of the
       generated message
-    * (Mandatory) **msg-payload** specifies the payload of the generated
+    * (Mandatory) **msg_payload** specifies the payload of the generated
       message
     * (Optional)  **ratio**, when provided, specifies the batch size (how
       many messages to be put in one batch). If not provided, it is
@@ -365,9 +365,9 @@ This command block only has 1 statements (s1):
       this statement
     * (Optional)  **producer_name**, when provided, specifies the Pulsar
       producer name that is associated with the message production.
-    * (Optional)  **msg-key**, when provided, specifies the key of the
+    * (Optional)  **msg_key**, when provided, specifies the key of the
       generated message
-    * (Mandatory) **msg-payload** specifies the payload of the generated
+    * (Mandatory) **msg_payload** specifies the payload of the generated
       message
 
 ### 1.4.4. Consumer Command Block
@@ -397,8 +397,7 @@ This command block only has 1 statements (s1):
     * (Mandatory) **optype (msg-consume)** is the statement identifier for
       this statement
     * (Optional)  **topic_names**, when provided, specifies multiple topic
-      names from which to consume messages. Default to document level
-      parameter **topic_uri**.
+      names from which to consume messages for multi-topic message consumption.
     * (Optional)  **topics_pattern**, when provided, specifies pulsar
       topic regex pattern for multi-topic message consumption
     * (Mandatory) **subscription_name** specifies subscription name.
@@ -406,6 +405,10 @@ This command block only has 1 statements (s1):
       subscription type. Default to **exclusive** subscription type.
     * (Optional)  **consumer_name**, when provided, specifies the
       associated consumer name.
+
+**NOTE 1**: when both **topic_names** and **topics_pattern** are provided, **topic_names** takes precedence over **topics_pattern**.
+
+**NOTE 2**: if both **topic_names** and **topics_pattern** are not provided, consumer topic name is default to the document level parameter **topic_uri**.
 
 ### 1.4.5. Reader Command Block
 

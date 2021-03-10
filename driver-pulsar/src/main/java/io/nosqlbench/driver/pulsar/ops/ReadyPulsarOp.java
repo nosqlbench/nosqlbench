@@ -190,47 +190,47 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
-        if (cmdTpl.isStatic("topic-names")) {
-            topic_names_func = (l) -> cmdTpl.getStatic("topic-names");
-        } else if (cmdTpl.isDynamic("topic-names")) {
-            topic_names_func = (l) -> cmdTpl.getDynamic("topic-names", l);
+        if (cmdTpl.isStatic("topic_names")) {
+            topic_names_func = (l) -> cmdTpl.getStatic("topic_names");
+        } else if (cmdTpl.isDynamic("topic_names")) {
+            topic_names_func = (l) -> cmdTpl.getDynamic("topic_names", l);
         } else {
             topic_names_func = (l) -> null;
         }
 
         // Topic pattern (multi-topic)
         LongFunction<String> topics_pattern_func;
-        if (cmdTpl.isStatic("topics-pattern")) {
-            topics_pattern_func = (l) -> cmdTpl.getStatic("topics-pattern");
-        } else if (cmdTpl.isDynamic("topics-pattern")) {
-            topics_pattern_func = (l) -> cmdTpl.getDynamic("topics-pattern", l);
+        if (cmdTpl.isStatic("topics_pattern")) {
+            topics_pattern_func = (l) -> cmdTpl.getStatic("topics_pattern");
+        } else if (cmdTpl.isDynamic("topics_pattern")) {
+            topics_pattern_func = (l) -> cmdTpl.getDynamic("topics_pattern", l);
         } else {
             topics_pattern_func = (l) -> null;
         }
 
         LongFunction<String> subscription_name_func;
-        if (cmdTpl.isStatic("subscription-name")) {
-            subscription_name_func = (l) -> cmdTpl.getStatic("subscription-name");
-        } else if (cmdTpl.isDynamic("subscription-name")) {
-            subscription_name_func = (l) -> cmdTpl.getDynamic("subscription-name", l);
+        if (cmdTpl.isStatic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getStatic("subscription_name");
+        } else if (cmdTpl.isDynamic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getDynamic("subscription_name", l);
         } else {
             subscription_name_func = (l) -> null;
         }
 
         LongFunction<String> subscription_type_func;
-        if (cmdTpl.isStatic("subscription-type")) {
-            subscription_type_func = (l) -> cmdTpl.getStatic("subscription-type");
-        } else if (cmdTpl.isDynamic("subscription-type")) {
-            subscription_type_func = (l) -> cmdTpl.getDynamic("subscription-type", l);
+        if (cmdTpl.isStatic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getStatic("subscription_type");
+        } else if (cmdTpl.isDynamic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getDynamic("subscription_type", l);
         } else {
             subscription_type_func = (l) -> null;
         }
 
         LongFunction<String> consumer_name_func;
-        if (cmdTpl.isStatic("consumer-name")) {
-            consumer_name_func = (l) -> cmdTpl.getStatic("consumer-name");
-        } else if (cmdTpl.isDynamic("consumer-name")) {
-            consumer_name_func = (l) -> cmdTpl.getDynamic("consumer-name", l);
+        if (cmdTpl.isStatic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getStatic("consumer_name");
+        } else if (cmdTpl.isDynamic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getDynamic("consumer_name", l);
         } else {
             consumer_name_func = (l) -> null;
         }
@@ -254,19 +254,19 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> async_api_func
     ) {
         LongFunction<String> reader_name_func;
-        if (cmdTpl.isStatic("reader-name")) {
-            reader_name_func = (l) -> cmdTpl.getStatic("reader-name");
-        } else if (cmdTpl.isDynamic("reader-name")) {
-            reader_name_func = (l) -> cmdTpl.getDynamic("reader-name", l);
+        if (cmdTpl.isStatic("reader_name")) {
+            reader_name_func = (l) -> cmdTpl.getStatic("reader_name");
+        } else if (cmdTpl.isDynamic("reader_name")) {
+            reader_name_func = (l) -> cmdTpl.getDynamic("reader_name", l);
         } else {
             reader_name_func = (l) -> null;
         }
 
         LongFunction<String> start_msg_pos_str_func;
-        if (cmdTpl.isStatic("start-msg-position")) {
-            start_msg_pos_str_func = (l) -> cmdTpl.getStatic("start-msg-position");
-        } else if (cmdTpl.isDynamic("start-msg-position")) {
-            start_msg_pos_str_func = (l) -> cmdTpl.getDynamic("start-msg-position", l);
+        if (cmdTpl.isStatic("start_msg_position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getStatic("start_msg_position");
+        } else if (cmdTpl.isDynamic("start_msg_position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getDynamic("start_msg_position", l);
         } else {
             start_msg_pos_str_func = (l) -> null;
         }
