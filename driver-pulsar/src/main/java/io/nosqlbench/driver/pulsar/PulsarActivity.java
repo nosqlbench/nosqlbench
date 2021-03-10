@@ -3,17 +3,19 @@ package io.nosqlbench.driver.pulsar;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.ops.PulsarOp;
 import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
+import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
@@ -24,14 +26,13 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer executeTimer;
     private PulsarSpaceCache pulsarCache;
 
-    private NBErrorHandler errorhandler;
-
     private PulsarNBClientConf clientConf;
+    private String serviceUrl;
 
-    private OpSequence<OpDispenser<PulsarOp>> sequencer;
-    // private PulsarClient activityClient;
+    private NBErrorHandler errorhandler;
+    private OpSequence<LongFunction<PulsarOp>> sequencer;
 
-    private Supplier<PulsarSpace> clientSupplier;
+    // private Supplier<PulsarSpace> clientSupplier;
     // private ThreadLocal<Supplier<PulsarClient>> tlClientSupplier;
 
     public PulsarActivity(ActivityDef activityDef) {
@@ -47,6 +48,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
         String pulsarClntConfFile = activityDef.getParams().getOptionalString("config").orElse("config.properties");
         clientConf = new PulsarNBClientConf(pulsarClntConfFile);
+
+        serviceUrl = activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
 
         pulsarCache = new PulsarSpaceCache(this);
 
@@ -65,12 +68,16 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         super.onActivityDefUpdate(activityDef);
     }
 
-    public OpSequence<OpDispenser<PulsarOp>> getSequencer() {
+    public OpSequence<LongFunction<PulsarOp>> getSequencer() {
         return sequencer;
     }
 
     public PulsarNBClientConf getPulsarConf() {
         return clientConf;
+    }
+
+    public String getPulsarServiceUrl() {
+        return serviceUrl;
     }
 
     public Timer getBindTimer() {

@@ -11,14 +11,15 @@ import org.apache.pulsar.common.schema.SchemaType;
 public class PulsarReaderOp implements PulsarOp {
     private final Reader<?> reader;
     private final Schema<?> pulsarSchema;
+    private final boolean asyncPulsarOp;
 
-    public PulsarReaderOp(Reader<?> reader, Schema<?> schema) {
+    public PulsarReaderOp(Reader<?> reader, Schema<?> schema, boolean asyncPulsarOp) {
         this.reader = reader;
         this.pulsarSchema = schema;
+        this.asyncPulsarOp = asyncPulsarOp;
     }
 
-    @Override
-    public void run() {
+    public void syncRead() {
         try {
             SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
             String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
@@ -39,5 +40,17 @@ public class PulsarReaderOp implements PulsarOp {
         } catch (PulsarClientException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void asyncRead() {
+        //TODO: add support for async read
+    }
+
+    @Override
+    public void run() {
+        if (!asyncPulsarOp)
+            syncRead();
+        else
+            asyncRead();
     }
 }

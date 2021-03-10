@@ -17,21 +17,21 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarProducerMapper implements LongFunction<PulsarOp> {
-    private final CommandTemplate cmdTpl;
-    private final Schema<?> pulsarSchema;
+public class PulsarProducerMapper extends PulsarOpMapper {
     private final LongFunction<Producer<?>> producerFunc;
+    private final LongFunction<Boolean> asyncApiFunc;
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> payloadFunc;
 
     public PulsarProducerMapper(CommandTemplate cmdTpl,
-                                Schema<?> pulsarSchema,
+                                PulsarSpace clientSpace,
                                 LongFunction<Producer<?>> producerFunc,
+                                LongFunction<Boolean> asyncApiFunc,
                                 LongFunction<String> keyFunc,
                                 LongFunction<String> payloadFunc) {
-        this.cmdTpl = cmdTpl;
-        this.pulsarSchema = pulsarSchema;
+        super(cmdTpl, clientSpace);
         this.producerFunc = producerFunc;
+        this.asyncApiFunc = asyncApiFunc;
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
     }
@@ -39,9 +39,15 @@ public class PulsarProducerMapper implements LongFunction<PulsarOp> {
     @Override
     public PulsarOp apply(long value) {
         Producer<?> producer = producerFunc.apply(value);
+        boolean asyncApi = asyncApiFunc.apply(value);
         String msgKey = keyFunc.apply(value);
         String msgPayload = payloadFunc.apply(value);
 
-        return new PulsarProducerOp(producer, pulsarSchema, msgKey, msgPayload);
+        return new PulsarProducerOp(
+            producer,
+            clientSpace.getPulsarSchema(),
+            asyncApi,
+            msgKey,
+            msgPayload);
     }
 }
