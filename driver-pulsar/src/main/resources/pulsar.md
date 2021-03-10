@@ -12,7 +12,7 @@
     - [1.5. Schema Support](#15-schema-support)
     - [1.6. NB Activity Execution Parameters](#16-nb-activity-execution-parameters)
     - [1.7. NB Pulsar Driver Execution Example](#17-nb-pulsar-driver-execution-example)
-    - [1.8. Appendix A. Template Global Setting File (config.properties)](#18-appendix-a-template-global-setting-file-configproperties)
+    - [Appendix A. Template Global Setting File (config.properties)](#18-appendix-a-template-global-setting-file-configproperties)
 - [2. TODO : Design Revisit -- Advanced Driver Features](#2-todo--design-revisit----advanced-driver-features)
     - [2.1. Other Activity Parameters](#21-other-activity-parameters)
     - [2.2. API Caching](#22-api-caching)
@@ -177,7 +177,7 @@ One key difference between setting a parameter at the global level vs. at the cy
 
 Because of this, setting these parameters at the NB cycle level allows us to run Pulsar testing against multiple topics and/or multiple producers/consumers/readers/etc all at once within one NB activity. This makes the testing more flexible and effective.
 
-**NOTE**, when a configuration is set at both the global level and the cycle level, **the ycle level setting will take priority!**
+**NOTE**: when a configuration is set at both the global level and the cycle level, **the ycle level setting will take priority!**
 
 ## 1.4. Pulsar Driver Yaml File - Command Block Details
 
@@ -355,7 +355,7 @@ Pulsar has built-in schema support. Other than primitive types, Pulsar also supp
   schema.definition:
   ```
 
-Take the previous Producer command block as an example, the **msg-value** parameter has the value of a JSON string that follows the following Avro schema definition (e.g. as in the sample schema definition file: **[iot-example.asvc](activities/iot-example.avsc)**)
+Take the previous Producer command block as an example, the **msg-value** parameter has the value of a JSON string that follows the following Avro schema definition:
 ```json
 {
   "type": "record",
@@ -405,7 +405,7 @@ Some other common NB activity parameters are listed as below. Please reference t
 ```
 
 
-## 1.8. Appendix A. Template Global Setting File (config.properties)
+## Appendix A. Template Global Setting File (config.properties)
 ```properties
 schema.type =
 schema.definition =
