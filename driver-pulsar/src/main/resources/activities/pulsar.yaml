@@ -12,7 +12,7 @@ bindings:
   reading_value: ToFloat(100);
   topic: Template("topic-{}",Mod(TEMPLATE(tenants,10)L));
 
-# global parameters that apply to all Pulsar client types:
+# document level parameters that apply to all Pulsar client types:
 params:
   #topic_uri: "persistent://public/default/{topic}"
   topic_uri: "persistent://public/default/nbpulsar"
@@ -49,7 +49,7 @@ blocks:
               "ReadingTime": "{reading_time}",
               "ReadingValue": {reading_value}
           }
-        ratio: 5
+        ratio: 100
       - name: s3
         optype: batch-msg-send-end
         ratio: 1
@@ -59,8 +59,8 @@ blocks:
       phase: producer
     statements:
       - name: s1
-        # producer_name: {producer_name}
         optype: msg-send
+        # producer_name: {producer_name}
         msg_key: "{mykey}"
         msg_value: |
           {
@@ -82,12 +82,13 @@ blocks:
         subscription_type:
         consumer_name:
 
-  - reader:
+  - name: reader-block
     tags:
       phase: reader
     statements:
       - name: s1
         optype: msg-read
+        reader_name:
 
 #  - websocket-producer:
 #    tags:
