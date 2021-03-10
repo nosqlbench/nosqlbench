@@ -1,21 +1,26 @@
-- 41b10016 add starting point for incremental test
-- 1607eaf3 revert parser fix, a better solution is needed
-- b76c7234 Adding initial http driver baseline activities for use with Stargate.
-- a987a4f2 - Minor update of pulsar.md file
-- 15cf07ae - Minor update of pulsar.md file
-- feb430ff - Minor update of pulsar.md file
-- ecf6fa17 - Update pulsar.md - Code changes based on review comments from Shooky
-- f78a9e92 - Update pulsar.md - Code changes based on review comments from Shooky
-- 0ff6e8a6 disable broken test
-- 3ea80fbf initial incremental
-- df6b3d3b allow reasonable characters in property names
-- c3910d69 add hash range scaled with scale factor parameter
-- 3746037b add warning for null value in named scenarios
-- a1c39f7d sanity warning for statement and statements
-- dba0f94c opdef named maps
-- 30be470b rename StmtDef to OpDef
-- 6ba95e7f test fixes
-- f4076dc5 formatting & typos
-- ddc7544b Pulsar driver for producer with schema support - primitive types and Avro schema
-- 9f234a8d fix broken link in docs
-- 2c0daf77 Update logo
+- dbdbf6e8 (HEAD -> main, origin/main) merge fixes
+- 7ba0ca14 adapt pulsar driver to updated API naming
+- 154876a3 resolve split version break after jetty security fix
+- 304cba2f jetty security update
+- 22ab5841 Minor document correction for clarification.
+- 5639a544 post-merge fixups
+- af4452be include block naming in opdef test
+- ea8702c9 basic doc updates and cleanups
+- 345877c0 allow both count and counter in old and new versions of error handler
+- 63158fcd support mapped blocks
+- f1a15230 Minor code change - change method name from IsBoolean() to isBoolean()
+- 3ad3cc6b Minor document update
+- 58a93bd7 Document update
+- adf1ea03 Pulsar Batch API, Async API (partial), yaml file structure,
+- 27856703 update cqld4 pom versions
+- ada7aaad minor opdef fix
+- 0880f0cd pulsar merge fixes
+- 8b0f4615 cqld4 partial progress
+- b3084fdd Pulsar Reader API with Avro schema support
+- b0da4a14 Pulsar Consumer API with Avro schema support
+- 3543dd8b support counter error handler name for cross-compatibility
+- d59f3f0d remove temporary typo warning
+- c3f01b12 make deprecation warning for v1 yaml format stronger
+- eb784a13 backport question anchors with deprecation warning
+- 50c03632 document op dispenser as OpDispenser type
+- a27ea6cd reset cqld4 for reinit
