@@ -29,14 +29,6 @@ public class RawStmtsBlock extends StatementsOwner {
     public RawStmtsBlock() {}
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
-//        Object stmtValues = propsmap.remove("statements");
-//        if (stmtValues!=null) {
-//            if (stmtValues instanceof List) {
-//                setByObject(stmtValues);
-//            } else {
-//                throw new RuntimeException("Invalid type for statements property: " + stmtValues.getClass().getCanonicalName());
-//            }
-//        }
         super.setFieldsByReflection(propsmap);
     }
 

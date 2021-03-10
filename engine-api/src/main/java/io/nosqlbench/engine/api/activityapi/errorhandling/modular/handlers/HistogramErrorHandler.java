@@ -8,6 +8,11 @@ import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Supplier;
 
+/**
+ * The histogram error handler will create, if needed, a histogram metrics
+ * object for the named {@code "errorhistos.simplename" + e.getClass().getSimpleName()},
+ * and then add the current session time to it.
+ */
 @Service(value = ErrorHandler.class, selector = "histogram")
 public class HistogramErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
     private ExceptionHistoMetrics exceptionHistoMetrics;
