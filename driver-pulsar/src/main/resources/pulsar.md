@@ -458,12 +458,12 @@ Pulsar driver provides 2 schema support modes, via the global level schema
 related settings as below:
 * Avro schema:
   ```properties
-  shcema.type= avro
+  schema.type= avro
   schema.definition= file:///<file/path/to/the/definition/file>
   ```
 * Default byte[] schema:
   ```properties
-  shcema.type=
+  schema.type=
   schema.definition=
   ```
 
