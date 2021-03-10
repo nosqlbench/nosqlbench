@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
-import org.apache.pulsar.client.api.Schema;
 
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
@@ -55,7 +54,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
         return opFunc.apply(value);
     }
 
-    private boolean IsBoolean (String str) {
+    private boolean isBoolean(String str) {
         return StringUtils.equalsAnyIgnoreCase(str, "yes", "true");
     }
 
@@ -103,7 +102,7 @@ public class ReadyPulsarOp implements LongFunction<PulsarOp> {
         LongFunction<Boolean> asyncApiFunc;
         if ( cmdTpl.containsKey("async_api") ) {
             if ( cmdTpl.isStatic("async_api") )
-                asyncApiFunc = (l) -> IsBoolean(cmdTpl.getStatic("async_api"));
+                asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
             else
                 throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
         }
