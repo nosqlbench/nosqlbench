@@ -126,7 +126,7 @@ blocks:
       ...
 ```
 
-Each time when you execute the NB command, you can only choose one command block to execute. This is achieved by applying a filtering condition against **phase** tag, as below:
+Each time when you execute the NB command, you can choose one command block to execute by applying a filtering condition against **phase** tag, as below.
 ```bash
 <nb_cmd> driver=pulsar tags=phase:<command_bock_filtering_identifier> ...
 ```
@@ -139,6 +139,8 @@ An example of executing Pulsar producer/consumer API using NB is like this:
 # consumer
 <nb_cmd> driver=pulsar tags=phase:consumer ...
 ```
+
+Technically speaking, NB is able to execute multiple command blocks. In the context of Pulsar driver, this means we're able to use NB to test multiple Pulsar operations in one run! But if we want to focus the testing on one particular operation, we can use the tag to filter the command block as listed above!
 
 ### 1.3.1. NB Cycle Level Parameters vs. Global Level Parameters
 
@@ -388,20 +390,22 @@ Some other common NB activity parameters are listed as below. Please reference t
 
 ## 1.7. NB Pulsar Driver Execution Example
 
+**NOTE**: in the following examples, the Pulsar service URL is **pulsar://localhost:6650**, please change it accordingly for your own Pulsar environment.
+
 1. Run Pulsar producer API to produce 100K messages using 100 NB threads
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
 2. Run Pulsar producer batch API to produce 1M messages with 2 NB threads; put NB execution metrics in a specified metrics folder
 
 ```bash
-<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
+<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
 ```
 
 3. Run Pulsar consumer API to consume (and acknowledge) 100 messages using one single NB thread.
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
 
