@@ -59,6 +59,24 @@ public class RawStmtsDoc extends StatementsOwner {
                     throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
                 }
             }
+        } else if (blocksObjects instanceof Map) {
+            Map<String, Object> blockDataAsMap = (Map<String, Object>) blocksObjects;
+            for (Map.Entry<String, Object> entry : blockDataAsMap.entrySet()) {
+                String blockName = entry.getKey();
+                Object blockData = entry.getValue();
+                if (blockData instanceof Map) {
+                    Map<String, Object> blockDataMap = (Map<String, Object>) blockData;
+                    RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
+                    rawStmtsBlock.setName(blockName);
+                    rawStmtsBlock.setFieldsByReflection(blockDataMap);
+                    blocks.add(rawStmtsBlock);
+                } else {
+                    throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
+                }
+
+            }
+        } else if (blocksObjects != null) {
+            throw new RuntimeException("Type of blocks interior data type not recognized:" + blocksObjects.getClass().getCanonicalName());
         }
 
         Object scenariosData = properties.remove("scenarios");
