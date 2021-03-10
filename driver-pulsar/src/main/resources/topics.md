@@ -1,3 +1,0 @@
-# pulsar help topics
-
-- pulsar

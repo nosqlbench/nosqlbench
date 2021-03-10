@@ -12,50 +12,83 @@ bindings:
   reading_value: ToFloat(100);
   topic: Template("topic-{}",Mod(TEMPLATE(tenants,10)L));
 
+# document level parameters that apply to all Pulsar client types:
+params:
+  #topic_uri: "persistent://public/default/{topic}"
+  topic_uri: "persistent://public/default/nbpulsar"
+  async_api: "false"
+
 blocks:
-#  - create-tenant-namespace:
-#    tags:
-#      type: create-tenant-namespace
-#    statements:
-#      tenant: {tenant}
-#      namespace: {namespace}
+  - name: admin-block
+    tags:
+      phase: create-tenant-namespace
+    statements:
+      - name: s1
+        optype: create-tenant
+        tenant: "{tenant}"
+      - name: s2
+        optype: create-namespace
+        namespace: "{namespace}"
+
+  - name: batch-producer-block
+    tags:
+      phase: batch-producer
+    statements:
+      - name: s1
+        optype: batch-msg-send-start
+        # For batch producer, "producer_name" should be associated with batch start
+        # batch_producer_name: {batch_producer_name}
+        ratio: 1
+      - name: s2
+        optype: batch-msg-send
+        msg_key: "{mykey}"
+        msg_value: |
+          {
+              "SensorID": "{sensor_id}",
+              "SensorType": "Temperature",
+              "ReadingTime": "{reading_time}",
+              "ReadingValue": {reading_value}
+          }
+        ratio: 100
+      - name: s3
+        optype: batch-msg-send-end
+        ratio: 1
 
   - name: producer-block
     tags:
-      op-type: producer
+      phase: producer
     statements:
-      - producer-stuff:
-          #######
-          # NOTE: tenant and namespace must be static and pre-exist in Pulsar first
-          # topic_uri: "[persistent|non-persistent]://<tenant>/<namespace>/<topic>"
-#          topic_uri: "persistent://public/default/{topic}"
-          topic_uri: "persistent://public/default/nbpulsar"
-          # producer-name:
-          msg-key: "{mykey}"
-          msg-value: |
-            {
-                "SensorID": "{sensor_id}",
-                "SensorType": "Temperature",
-                "ReadingTime": "{reading_time}",
-                "ReadingValue": {reading_value}
-            }
+      - name: s1
+        optype: msg-send
+        # producer_name: {producer_name}
+        msg_key: "{mykey}"
+        msg_value: |
+          {
+              "SensorID": "{sensor_id}",
+              "SensorType": "Temperature",
+              "ReadingTime": "{reading_time}",
+              "ReadingValue": {reading_value}
+          }
 
   - name: consumer-block
     tags:
-      op-type: consumer
+      phase: consumer
     statements:
-      - consumer-stuff:
-          topic-names: "persistent://public/default/nbpulsar, persistent://public/default/mynbtest"
-          topics-pattern: "public/default/.*"
-          subscription-name:
-          subscription-type:
-          consumer-name:
+      - name: s1
+        optype: msg-consume
+        topic_names: "persistent://public/default/nbpulsar, persistent://public/default/mynbtest"
+        topics_pattern: "public/default/.*"
+        subscription_name:
+        subscription_type:
+        consumer_name:
 
-  - reader:
+  - name: reader-block
     tags:
-      op-type: reader
+      phase: reader
     statements:
-      - reader-stuff:
+      - name: s1
+        optype: msg-read
+        reader_name:
 
 #  - websocket-producer:
 #    tags:
@@ -68,5 +101,3 @@ blocks:
 #      type: managed-ledger
 #    statement:
 #      - managed-ledger-stuff:
-
-
