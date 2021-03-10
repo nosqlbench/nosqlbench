@@ -56,7 +56,9 @@ producer.sendTimeoutMs =
 There are multiple sections in this file that correspond to different groups of configuration settings:
 * **Schema related settings**:
     * All settings under this section starts with **schema.** prefix.
-    * The NB Pulsar driver supports schema-based message publishing and consuming. This section defines configuration settings that are schema related.
+    * The NB Pulsar driver supports schema-based message publishing and
+      consuming. This section defines configuration settings that are
+      schema related.
     * There are 2 valid options under this section.
         * *shcema.type*: Pulsar message schema type. When unset or set as
           an empty string, Pulsar messages will be handled in raw *byte[]*
@@ -154,10 +156,9 @@ blocks:
       ...
 ```
 
-Each time when you execute the NB command, you can only choose one command
-block to execute. This is achieved by applying a filtering condition
-against **phase** tag, as below:
-
+Each time when you execute the NB command, you can choose one command
+block to execute by applying a filtering condition against **phase** tag,
+as below.
 ```bash
 <nb_cmd> driver=pulsar tags=phase:<command_bock_filtering_identifier> ...
 ```
@@ -172,6 +173,12 @@ this:
 # consumer
 <nb_cmd> driver=pulsar tags=phase:consumer ...
 ```
+
+Technically speaking, NB is able to execute multiple command blocks. In
+the context of Pulsar driver, this means we're able to use NB to test
+multiple Pulsar operations in one run! But if we want to focus the testing
+on one particular operation, we can use the tag to filter the command
+block as listed above!
 
 ### 1.3.1. NB Cycle Level Parameters vs. Global Level Parameters
 
@@ -194,7 +201,6 @@ for maximum flexibility. But practically speaking (and also for simplicity
 purposes), only the following parameters are made to be configurable at
 both levels, listed by cycle level setting names with their corresponding
 global level setting names:
-
 * topic_uri (Mandatory)
     * producer.topicName
     * consumer.topicNames
@@ -428,12 +434,10 @@ This command block only has 1 statements (s1):
 
 **TBD**: at the moment, the NB Pulsar driver Reader API only supports
 reading from the following positions:
-
 * MessageId.earliest
 * MessageId.latest (default)
 
 A customized reader starting position, as below, is NOT supported yet!
-
 ```java
 byte[] msgIdBytes = // Some message ID byte array
 MessageId id = MessageId.fromByteArray(msgIdBytes);
@@ -449,7 +453,6 @@ Pulsar has built-in schema support. Other than primitive types, Pulsar
 also supports complex types like **Avro**, etc. At the moment, the NB
 Pulsar driver provides 2 schema support modes, via the global level schema
 related settings as below:
-
 * Avro schema:
   ```properties
   shcema.type= avro
@@ -498,28 +501,31 @@ reference to NB documentation for more parameters
 
 ## 1.7. NB Pulsar Driver Execution Example
 
+**NOTE**: in the following examples, the Pulsar service URL is **pulsar:
+//localhost:6650**, please change it accordingly for your own Pulsar
+environment.
+
 1. Run Pulsar producer API to produce 100K messages using 100 NB threads
 
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
 2. Run Pulsar producer batch API to produce 1M messages with 2 NB threads;
    put NB execution metrics in a specified metrics folder
 
 ```bash
-<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
+<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
 ```
 
 3. Run Pulsar consumer API to consume (and acknowledge) 100 messages using
    one single NB thread.
-
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
-## Appendix A. Template Global Setting File (config.properties)
 
+## Appendix A. Template Global Setting File (config.properties)
 ```properties
 schema.type =
 schema.definition =
