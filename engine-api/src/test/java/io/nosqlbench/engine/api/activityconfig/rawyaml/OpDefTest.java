@@ -138,8 +138,11 @@ public class OpDefTest {
         StmtsBlock block1 = doc2.getBlocks().get(0);
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
-        assertThat(op0.getName()).isEqualTo("list-of-named-map--block0--s1");
+        System.out.println(op0.getParams());
+
+        assertThat(op0.getName()).isEqualTo("list-of-named-map--block1--s1");
         assertThat(op0.getStmt()).isNull();
+//        System.out.println("here");
         // TODO: This needs to be clarified and the logic made less ambiguous
 //        assertThat(op0.getParams()).hasSize(1);
 //        assertThat(op0.getParams()).containsExactlyEntriesOf(Map.of("p1", "v2", "p2", "v2", "p3", "v3"));

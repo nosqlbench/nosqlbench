@@ -9,8 +9,29 @@ name: string-statement
 statement: "test statement"
 ---
 name: list-of-named-map
+params:
+  global: value
+  topic_uri: "My topic URI"
+blocks:
+  - statements:
+      - s1:
+          p1: v1
+          p2: v2
+        p3: v3
+---
+name: list-of-named-map-canonical
 statements:
   - s1:
       p1: v1
       p2: v2
-    p3: v3
+    params:
+      p3: v3
+---
+blocks:
+  block1:
+    s1:
+      p1: v2
+  block2:
+    s2:
+      p3: v4
+
