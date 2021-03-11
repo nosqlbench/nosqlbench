@@ -70,11 +70,10 @@ activity types.
 
 - **protocol_version** default: unset, defaults to driver default behavior
   - Set the CQL protocol version. Valid values are V1, V2, V3, V4, V5,
-  DSE_V1, DSE_V2. Protocol is usually auto-negotiated, however, the
-  initial connection may use a lower protocol to ensure connectivity to
-  older server versions. If you know you are running on a newer server
-  version, you can set this to higher than the default for the initial
-  control connection, which is V2.
+    DSE_V1, DSE_V2. Protocol is usually auto-negotiated, however, the
+    initial connection may use a lower protocol to ensure connectivity to
+    older server versions. If you know you are running on a newer server
+    version, you can set this to match.
 
 - **pooling** default: none - Applies the connection pooling options to
   the policy. Examples:
