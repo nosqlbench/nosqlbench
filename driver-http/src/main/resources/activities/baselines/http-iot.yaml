@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-iot tags=phase:schema stargate_host=my_stargate_host
+# nb -v run driver=http yaml=http-iot tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
@@ -85,7 +85,7 @@ blocks:
     params:
       ratio: <<read_ratio:1>>
     statements:
-      - main-select: GET /v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=E[[{"machine_id":{"$eq":"{machine_id}"}},"sensor_name":{"$eq":"{sensor_name}"},"page-size":{"$eq":"<<limit:10>>"}}]]
+      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=E[[{"machine_id":{"$eq":"{machine_id}"},"sensor_name":{"$eq":"{sensor_name}"}}]]&page-size=<<limit:10>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -106,7 +106,7 @@ blocks:
         Content-Type: "application/json"
         body: |
           {
-            "machine_id": "{machine_id}"
+            "machine_id": "{machine_id}",
             "sensor_name": "{sensor_name}",
             "time": "{time}",
             "sensor_value": "{sensor_value}",
