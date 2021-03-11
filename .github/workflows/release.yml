@@ -98,11 +98,11 @@ jobs:
           current_branch=$(git rev-parse --abbrev-ref HEAD)
           if [[ ${current_branch} == *"main"* ]]
            then
+            echo "PRERELEASE=false" >> $GITHUB_ENV
+            echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest,nosqlbench/nosqlbench:4x,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
+           else
             echo "PRERELEASE=true" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
-           #else
-           # echo "PRERELEASE=false" >> $GITHUB_ENV
-           # echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
+            echo "DOCKER_TAGS=nosqlbench/nosqlbench:nb4preview,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
           fi
 
       - name: prepare Maven release
