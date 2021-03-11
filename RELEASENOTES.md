@@ -1,3 +1,5 @@
-- b0fa50cc NB4 released, on docker as 4x and latest
-- 2b546b91 promote nb4 main branch to release builds
-- 9ec7dbd5 add protocol_version to cql driver
+- 806f5380 log client hardware specs at startup
+- e6d43858 Fixed some typos with http-keyvalue and http-iot to make them work.
+- fd8744de Update the http tabular test to use the partition lookup instead of the where clause.
+- feac6a94 Fixed a couple of issues with http-tabular.
+- f50ac419 doc fix
