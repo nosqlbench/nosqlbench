@@ -1,4 +1,4 @@
-# nb -v http-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host
+# nb -v http-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
@@ -98,13 +98,13 @@ blocks:
     params:
       ratio: 5
     statements:
-    - main-select: GET /v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>?where=E[[{"part":{"$eq":"{part_layout}"}},"page-size":{"$eq":"{limit}"}}]]
-      Accept: "application/json"
-      X-Cassandra-Request-Id: "{request_id}"
-      X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-      Content-Type: "application/json"
-      tags:
-        name: main-select
+      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-select
   - name: main-write
     tags:
       phase: main
@@ -112,16 +112,16 @@ blocks:
     params:
       ratio: 5
     statements:
-    - main-write: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
-      Accept: "application/json"
-      X-Cassandra-Request-Id: "{request_id}"
-      X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-      Content-Type: "application/json"
-      body: |
-        {
-          "part": "{part_write}"
-          "clust": "{clust_write}",
-          "data": "{data_write}"
-        }
-      tags:
-        name: main-write
+      - main-write: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "part": "{part_write}",
+            "clust": "{clust_write}",
+            "data": "{data_write}"
+          }
+        tags:
+          name: main-write
