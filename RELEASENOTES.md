@@ -1,26 +1,4 @@
-- dbdbf6e8 (HEAD -> main, origin/main) merge fixes
-- 7ba0ca14 adapt pulsar driver to updated API naming
-- 154876a3 resolve split version break after jetty security fix
-- 304cba2f jetty security update
-- 22ab5841 Minor document correction for clarification.
-- 5639a544 post-merge fixups
-- af4452be include block naming in opdef test
-- ea8702c9 basic doc updates and cleanups
-- 345877c0 allow both count and counter in old and new versions of error handler
-- 63158fcd support mapped blocks
-- f1a15230 Minor code change - change method name from IsBoolean() to isBoolean()
-- 3ad3cc6b Minor document update
-- 58a93bd7 Document update
-- adf1ea03 Pulsar Batch API, Async API (partial), yaml file structure,
-- 27856703 update cqld4 pom versions
-- ada7aaad minor opdef fix
-- 0880f0cd pulsar merge fixes
-- 8b0f4615 cqld4 partial progress
-- b3084fdd Pulsar Reader API with Avro schema support
-- b0da4a14 Pulsar Consumer API with Avro schema support
-- 3543dd8b support counter error handler name for cross-compatibility
-- d59f3f0d remove temporary typo warning
-- c3f01b12 make deprecation warning for v1 yaml format stronger
-- eb784a13 backport question anchors with deprecation warning
-- 50c03632 document op dispenser as OpDispenser type
-- a27ea6cd reset cqld4 for reinit
+- dbc7c226 (HEAD -> main) base web services on modern jakarta
+- 6ab1dbf6 fix ranging bug in http activity URL encoder
+- b6419d3b update stale coordinates
+- af0dfcea init metrics objects first
