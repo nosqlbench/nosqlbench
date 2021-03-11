@@ -1,4 +1,7 @@
-- dbc7c226 (HEAD -> main) base web services on modern jakarta
+- 2b546b91 (HEAD -> main) promote nb4 main branch to release builds
+- 9ec7dbd5 add protocol_version to cql driver
+- 3f14047a (origin/main) bugfix release
+- dbc7c226 base web services on modern jakarta
 - 6ab1dbf6 fix ranging bug in http activity URL encoder
 - b6419d3b update stale coordinates
 - af0dfcea init metrics objects first
