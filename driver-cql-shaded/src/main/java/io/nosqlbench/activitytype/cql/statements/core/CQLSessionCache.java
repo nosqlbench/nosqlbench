@@ -1,32 +1,7 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.net.ssl.SSLContext;
-
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.NettyOptions;
-import com.datastax.driver.core.ProtocolOptions;
-import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.policies.DefaultRetryPolicy;
-import com.datastax.driver.core.policies.LoadBalancingPolicy;
-import com.datastax.driver.core.policies.LoggingRetryPolicy;
-import com.datastax.driver.core.policies.RetryPolicy;
-import com.datastax.driver.core.policies.RoundRobinPolicy;
-import com.datastax.driver.core.policies.WhiteListPolicy;
+import com.datastax.driver.core.*;
+import com.datastax.driver.core.policies.*;
 import com.datastax.driver.dse.DseCluster;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.haproxy.HAProxyCommand;
@@ -44,6 +19,18 @@ import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javax.net.ssl.SSLContext;
+import java.io.File;
+import java.io.IOException;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -81,8 +68,8 @@ public class CQLSessionCache implements Shutdownable {
         String driverType = activityDef.getParams().getOptionalString("cqldriver").orElse("dse");
 
         Cluster.Builder builder =
-            driverType.toLowerCase().equals("dse") ? DseCluster.builder() :
-                driverType.toLowerCase().equals("oss") ? Cluster.builder() : null;
+            driverType.equalsIgnoreCase("dse") ? DseCluster.builder() :
+                driverType.equalsIgnoreCase("oss") ? Cluster.builder() : null;
 
         if (builder == null) {
             throw new RuntimeException("The driver type '" + driverType + "' is not recognized");
@@ -184,6 +171,15 @@ public class CQLSessionCache implements Shutdownable {
                 .map(CQLOptions::speculativeFor)
                 .ifPresent(builder::withSpeculativeExecutionPolicy);
         }
+
+        activityDef.getParams().getOptionalString("protocol_version")
+            .map(String::toUpperCase)
+            .map(ProtocolVersion::valueOf)
+            .map(pv -> {
+                logger.info("protocol_version=>" + pv);
+                return pv;
+            })
+            .ifPresent(builder::withProtocolVersion);
 
         activityDef.getParams().getOptionalString("socketoptions")
             .map(sockopts -> {
