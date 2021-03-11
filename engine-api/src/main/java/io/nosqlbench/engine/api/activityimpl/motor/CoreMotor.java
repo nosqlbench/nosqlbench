@@ -190,16 +190,14 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     public void run() {
 
         try {
-            strideRateLimiter = activity.getStrideLimiter();
-            cycleRateLimiter = activity.getCycleLimiter();
-            phaseRateLimiter = activity.getPhaseLimiter();
-
+            inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
             stridesServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
             stridesResponseTimer = activity.getInstrumentation().getStridesResponseTimerOrNull();
             optrackerBlockCounter = activity.getInstrumentation().getOrCreateOpTrackerBlockedCounter();
 
-
-            inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
+            strideRateLimiter = activity.getStrideLimiter();
+            cycleRateLimiter = activity.getCycleLimiter();
+            phaseRateLimiter = activity.getPhaseLimiter();
 
 
             if (slotState.get() == Finished) {
