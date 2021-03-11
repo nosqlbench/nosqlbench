@@ -98,7 +98,7 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>?where=E[[{"part":{"$eq":"{part_layout}"}}]]&page-size={limit}
+      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
