@@ -51,12 +51,6 @@
             <version>4.15.20-SNAPSHOT</version>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>driver-web</artifactId>-->
-        <!--            <version>3.12.83-SNAPSHOT</version>-->
-        <!--        </dependency>-->
-
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-web</artifactId>
@@ -129,37 +123,11 @@
             <version>4.15.20-SNAPSHOT</version>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>nb-runtime</artifactId>-->
-        <!--            <version>2.12.51-SNAPSHOT</version>-->
-        <!--        </dependency>-->
-
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cockroachdb</artifactId>
             <version>4.15.20-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.docker-java</groupId>-->
-        <!--            <artifactId>docker-java-api</artifactId>-->
-        <!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.docker-java</groupId>-->
-        <!--            <artifactId>docker-java-core</artifactId>-->
-        <!--        </dependency>-->
 
     </dependencies>
 
@@ -199,17 +167,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--            <filters>-->
-            <!--                <filter>-->
-            <!--                    <artifact>*:*</artifact>-->
-            <!--                    <excludes>-->
-            <!--                        <exclude>META-INF/*.SF</exclude>-->
-            <!--                        <exclude>META-INF/*.DSA</exclude>-->
-            <!--                        <exclude>META-INF/*.RSA</exclude>-->
-            <!--                    </excludes>-->
-            <!--                </filter>-->
-            <!--            </filters>-->
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

@@ -2,19 +2,19 @@ package io.nosqlbench.virtdata.userlibs.apps.docsapp;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
-import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
 import io.nosqlbench.docsys.api.WebServiceObject;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.api.processors.DocFuncData;
+import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.inject.Singleton;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.stream.Collectors;
 

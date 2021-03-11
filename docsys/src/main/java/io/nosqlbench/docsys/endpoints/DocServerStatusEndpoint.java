@@ -1,18 +1,17 @@
 package io.nosqlbench.docsys.endpoints;
 
+import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.core.NBWebServer;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.docsys.api.WebServiceObject;
-import org.apache.logging.log4j.Logger;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Configuration;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
-
-import javax.inject.Singleton;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
+import org.apache.logging.log4j.Logger;
 
 @Service(value = WebServiceObject.class, selector = "docserver-status")
 @Singleton

@@ -1,11 +1,11 @@
 package io.nosqlbench.engine.rest.services;
 
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
+import jakarta.ws.rs.core.Configuration;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
