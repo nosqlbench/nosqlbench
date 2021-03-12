@@ -1,5 +1,4 @@
-- 806f5380 log client hardware specs at startup
-- e6d43858 Fixed some typos with http-keyvalue and http-iot to make them work.
-- fd8744de Update the http tabular test to use the partition lookup instead of the where clause.
-- feac6a94 Fixed a couple of issues with http-tabular.
-- f50ac419 doc fix
+- f4abdff2 (HEAD -> main) minor debug enhancement
+- 3a542ec3 replace slack links with discord links
+- 10dd0cb0 fix for the cql anchor fix to actually add curly braces
+- d43c6c19 Changed the schema creation to cql to be consistent with cql baselines.
