@@ -35,4 +35,11 @@ public class RawStmtsDocList {
     public List<RawStmtsDoc> getStmtsDocs() {
         return rawStmtsDocList;
     }
+
+    public String toString() {
+        int docs = rawStmtsDocList.size();
+        int blocks = rawStmtsDocList.stream().map(RawStmtsDoc::getBlocks).mapToInt(List::size).sum();
+        long optemplates = rawStmtsDocList.stream().flatMap(d -> d.getBlocks().stream()).flatMap(s -> s.getRawStmtDefs().stream()).count();
+        return "docs:" + docs + " blocks:" + blocks + " optemplates:" + optemplates;
+    }
 }
