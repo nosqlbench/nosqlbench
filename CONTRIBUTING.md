@@ -113,7 +113,8 @@ are eager to get it into the hands of users who need it.
   contributors alike. This takes on many forms. It is essential that we
   keep looking for ways to connect the NoSQLBench community, doing more of
   what works and less of what doesn't. If you want to help with community
-  development, please join our slack channel and raise your hand!
+  development, please join our [discord server](https://discord.
+  gg/dBHRakusMN) and raise your hand!
 
 
 

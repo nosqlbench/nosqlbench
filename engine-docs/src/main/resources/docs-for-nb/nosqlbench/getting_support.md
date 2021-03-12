@@ -1,19 +1,20 @@
 ---
-title: Getting Support
-weight: 10
+title: Getting Support weight: 10
 ---
 
 # Getting Support
 
-In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of
-armor, so that they feel capable of doing most things without having to ask for help. Please keep this in mind when
-looking for personal support form our community, and help us find those places where the docs are lacking. Maybe you can
-help us by adding some missing docs!
+In general, our goals with NoSQLBench are to make the help systems and
+examples wrap around the users like a suit of armor, so that they feel
+capable of doing most things without having to ask for help. Please keep
+this in mind when looking for personal support form our community, and
+help us find those places where the docs are lacking. Maybe you can help
+us by adding some missing docs!
 
 ## Built-In Docs
 
-The documentation for NoSQLBench is quite thorough. On the command line, you can see a list of built-in docs with the
-command:
+The documentation for NoSQLBench is quite thorough. On the command line,
+you can see a list of built-in docs with the command:
 
     nb help topics
 
@@ -21,37 +22,43 @@ To read any topic, simply use the command:
 
     nb help <topic>
 
-The documentation system you are looking at right now includes the same docs you can find above already and more. They
-are automatically included when NoSQLBench is built.
+The documentation system you are looking at right now includes the same
+docs you can find above already and more. They are automatically included
+when NoSQLBench is built.
 
-## NoSQLBench Slack
+## NoSQLBench Discord Server
 
-Please click the
-[Invite Link for nosqlbench.slack.com](https://join.slack.com/t/nosqlbench/shared_invite/zt-grrg64g3-6SeVi2jaum0cxp51WnvOVA)
-to join us.
-
-Please join it if you are a new or existing NoSQLBench user and help us get it going!
+We have a discord server. This is where users and developers can discuss
+anything about NoSQLBench and support each other.
+Please [join us](https://discord. gg/dBHRakusMN) there if you are a new
+user of NoSQLBench!
 
 ## General Feedback
 
 These guidelines are mirrored at the
-[Submitting Feedback](https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback) wiki page at the nosqlbench
-project site, which is also where any `[Submit Feedback]` links should will take you.
+[Submitting Feedback](https://github.com/nosqlbench/nosqlbench/wiki/Submitting-Feedback)
+wiki page at the nosqlbench project site, which is also where
+any `[Submit Feedback]` links should will take you.
 
 ## Bug Fixes
 
 If you think you have found a bug, please
-[file a bug report](https://github.com/nosqlbench/nosqlbench/issues/new?labels=bug). nosqlbench is actively used within
-DataStax, and verified bugs will get attention as resources permit. Bugs reports which are more detailed, or bug reports
-which include steps to reproduce will get attention first.
+[file a bug report](https://github.com/nosqlbench/nosqlbench/issues/new?labels=bug)
+. nosqlbench is actively used within DataStax, and verified bugs will get
+attention as resources permit. Bugs reports which are more detailed, or
+bug reports which include steps to reproduce will get attention first.
 
 ## Feature Requests
 
-If you would like to see something in nosqlbench that is not there yet,please
-[submit a feature request](https://github.com/nosqlbench/nosqlbench/issues/new?labels=feature).
+If you would like to see something in nosqlbench that is not there
+yet,please
+[submit a feature request](https://github.com/nosqlbench/nosqlbench/issues/new?labels=feature)
+.
 
 ## Documentation Requests
 
-If you would like to see a specific nosqlbench or testing topic added to the guidebook, please
-[request docs content](https://github.com/nosqlbench/nosqlbench/issues/new?labels=docs).
+If you would like to see a specific nosqlbench or testing topic added to
+the guidebook, please
+[request docs content](https://github.com/nosqlbench/nosqlbench/issues/new?labels=docs)
+.
 
