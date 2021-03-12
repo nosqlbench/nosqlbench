@@ -1,4 +1,4 @@
-# nb -v http-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v http-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
@@ -8,7 +8,7 @@ description: |
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
     - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
@@ -31,47 +31,22 @@ blocks:
   - name: schema
     tags:
       phase: schema
+    params:
+      prepared: false
     statements:
-      - create-keyspace: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<keyspace:baselines>>"
-          }
+      - create-keyspace: |
+          create keyspace if not exists <<keyspace:baselines>>
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+          AND durable_writes = true;
         tags:
           name: create-keyspace
-      - create-table: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<table:tabular>>",
-            "columnDefinitions":
-              [
-                {
-                  "name": "part",
-                  "typeDefinition": "text"
-                },
-                {
-                  "name": "clust",
-                  "typeDefinition": "text"
-                },
-                {
-                  "name": "data",
-                  "typeDefinition": "text"
-                }
-              ],
-            "primaryKey":
-            {
-              "partitionKey": ["part"],
-              "clusteringKey": ["clust"]
-            }
-          }
+      - create-table: |
+          create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
+           part text,
+           clust text,
+           data text,
+           PRIMARY KEY (part,clust)
+          );
         tags:
           name: create-table
   - name: rampup
