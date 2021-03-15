@@ -228,6 +228,13 @@ public class PulsarNBClientConf {
         else
             return confValue.toString();
     }
+    public int getConsumerTimeoutSeconds() {
+        Object confValue = getConsumerConfValue("consumer.timeout");
+        if (confValue == null)
+            return 0; // infinite
+        else
+            return Integer.parseInt(confValue.toString());
+    }
     public String getConsumerSubscriptionName() {
         Object confValue = getConsumerConfValue("consumer.subscriptionName");
         if (confValue == null)
