@@ -58,7 +58,7 @@ some missing docs!
 
 We have a discord server. This is where users and developers can discuss
 anything about NoSQLBench and support each other.
-Please [join us](https://discord. gg/dBHRakusMN) there if you are a new
+Please [join us](https://discord.gg/dBHRakusMN) there if you are a new
 user of NoSQLBench!
 
 ## Contributing
