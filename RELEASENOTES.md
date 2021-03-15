@@ -1,5 +1,1 @@
-- a7c9191d (HEAD -> main, origin/main) fix release 
-- f4abdff2 minor debug enhancement
-- 3a542ec3 replace slack links with discord links
-- 10dd0cb0 fix for the cql anchor fix to actually add curly braces
-- d43c6c19 Changed the schema creation to cql to be consistent with cql baselines.
+- 42c1b48f fix broken discord links
