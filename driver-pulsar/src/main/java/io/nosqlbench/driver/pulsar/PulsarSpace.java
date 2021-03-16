@@ -2,13 +2,10 @@ package io.nosqlbench.driver.pulsar;
 
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
-import org.apache.pulsar.client.impl.BatchMessageContainerBase;
-import org.apache.pulsar.client.impl.DefaultBatcherBuilder;
-import org.apache.pulsar.client.impl.ProducerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
