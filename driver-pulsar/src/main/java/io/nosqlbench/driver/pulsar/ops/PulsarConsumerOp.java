@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.SchemaType;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class PulsarConsumerOp implements PulsarOp {
@@ -27,9 +28,16 @@ public class PulsarConsumerOp implements PulsarOp {
 
     public void syncConsume() {
         try {
-            Message<?> message = consumer.receive(timeoutSeconds, TimeUnit.SECONDS);
-            if (message == null) {
-                throw new RuntimeException("Did not receive a message within "+timeoutSeconds+" seconds");
+            Message<?> message;
+            if (timeoutSeconds <= 0) {
+                // wait forever
+                message = consumer.receive();
+            } else {
+                // we cannot use Consumer#receive(timeout, timeunit) due to
+                // https://github.com/apache/pulsar/issues/9921
+                message = consumer
+                    .receiveAsync()
+                    .get(timeoutSeconds, TimeUnit.SECONDS);
             }
 
             SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
@@ -48,7 +56,7 @@ public class PulsarConsumerOp implements PulsarOp {
             }
 
             consumer.acknowledge(message.getMessageId());
-        } catch (PulsarClientException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

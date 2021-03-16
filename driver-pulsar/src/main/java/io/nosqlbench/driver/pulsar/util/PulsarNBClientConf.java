@@ -231,7 +231,7 @@ public class PulsarNBClientConf {
     public int getConsumerTimeoutSeconds() {
         Object confValue = getConsumerConfValue("consumer.timeout");
         if (confValue == null)
-            return 0; // infinite
+            return -1; // infinite
         else
             return Integer.parseInt(confValue.toString());
     }
