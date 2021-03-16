@@ -38,7 +38,8 @@ public class PulsarConsumerMapper extends PulsarOpMapper {
         return new PulsarConsumerOp(
             consumer,
             clientSpace.getPulsarSchema(),
-            asyncApi
+            asyncApi,
+            clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds()
         );
     }
 }

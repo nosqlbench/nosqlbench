@@ -20,6 +20,7 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.api.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
@@ -285,15 +286,19 @@ public class NBCLI {
             System.exit(0);
         }
 
+        logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
+
+        logger.info("client-hardware: " + SystemId.getHostSummary());
+
         logger.debug("initializing annotators with config:'" + annotatorsConfig + "'");
         Annotators.init(annotatorsConfig);
         Annotators.recordAnnotation(
-                Annotation.newBuilder()
-                        .session(sessionName)
-                        .now()
-                        .layer(Layer.CLI)
-                        .detail("cli", Strings.join(args, "\n"))
-                        .build()
+            Annotation.newBuilder()
+                .session(sessionName)
+                .now()
+                .layer(Layer.CLI)
+                .detail("cli", Strings.join(args, "\n"))
+                .build()
         );
 
         if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {

@@ -72,7 +72,7 @@ public class HttpFormatParser {
 
     private final static Pattern DOENCODE = Pattern.compile("(URLENCODE|E)\\[\\[(?<data>.+?)\\]\\]");
 
-    private static String rewriteExplicitSections(String template) {
+    public static String rewriteExplicitSections(String template) {
 
         StringBuilder sb = new StringBuilder();
         Matcher matcher = DOENCODE.matcher(template);
@@ -86,14 +86,14 @@ public class HttpFormatParser {
 
     }
 
-    private static String rewriteStaticsOnly(String template) {
+    public static String rewriteStaticsOnly(String template) {
 
         StringBuilder sb = new StringBuilder();
         String input = template;
         Matcher matcher = ParsedTemplate.STANDARD_ANCHOR.matcher(input);
         int idx = 0;
         while (matcher.find()) {
-            String pre = input.substring(0, matcher.start());
+            String pre = input.substring(idx, matcher.start());
             sb.append(URLEncoder.encode(pre, StandardCharsets.UTF_8));
             sb.append(matcher.group());
             idx = matcher.end();

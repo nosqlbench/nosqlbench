@@ -54,15 +54,12 @@ armor, so that they feel capable of doing most things autonomously. Please keep 
 support form our community, and help us find those places where the docs are lacking. Maybe you can help us by adding
 some missing docs!
 
-### NoSQLBench Slack
+### NoSQLBench Discord Server
 
-There is a new slack channel at nosqlbench.slack.com. In order to access the slack channel, you'll need an invite. You
-can get that 
-[here](https://join.slack.com/t/nosqlbench/shared_invite/zt-hvavu1tu-CLX_w7plZrv_A8kDBCw_3A),
-which will send you an invite in email: Slack Invite. This is just a simple google form that automates the invite
-process.
-
-Please join it if you are a new or existing NoSQLBench user and help us get it going!
+We have a discord server. This is where users and developers can discuss
+anything about NoSQLBench and support each other.
+Please [join us](https://discord.gg/dBHRakusMN) there if you are a new
+user of NoSQLBench!
 
 ## Contributing
 

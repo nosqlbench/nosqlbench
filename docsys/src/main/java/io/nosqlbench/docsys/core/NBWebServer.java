@@ -5,6 +5,8 @@ import io.nosqlbench.docsys.api.Docs;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.handlers.FavIconHandler;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletRegistration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
@@ -26,8 +28,6 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.model.ResourceMethod;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletRegistration;
 import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URI;

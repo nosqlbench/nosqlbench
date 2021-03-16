@@ -7,13 +7,13 @@ import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.core.DocsysPathLoader;
 import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.nb.annotations.Service;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -128,13 +128,6 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
         return list;
     }
 
-//    @GET
-//    @Path("file")
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public String getFileByPath(@QueryParam("path") String pathspec) {
-//        return getFile(pathspec);
-//    }
-//
     /**
      * @param pathspec the path as known to the manifest
      * @return The contents of a file
@@ -152,25 +145,6 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
-
-//    private String getFile(String pathspec) {
-//        pathspec = URLDecoder.decode(pathspec, StandardCharsets.UTF_8);
-//        for (java.nio.file.Path path : enabled.getPaths()) {
-//            java.nio.file.Path resolved = path.resolve(pathspec);
-//            if (Files.isDirectory(resolved)) {
-//                throw new RuntimeException("Path is a directory: '" + pathspec + "'");
-//            }
-//            if (Files.exists(resolved)) {
-//                try {
-//                    String content = Files.readString(resolved, StandardCharsets.UTF_8);
-//                    return content;
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        }
-//        throw new RuntimeException("Unable to find any valid file at '" + pathspec + "'");
-//    }
 
     public java.nio.file.Path findPath(String pathspec) {
         pathspec = URLDecoder.decode(pathspec, StandardCharsets.UTF_8);

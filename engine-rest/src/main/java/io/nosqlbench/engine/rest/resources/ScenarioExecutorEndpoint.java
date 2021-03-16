@@ -13,14 +13,14 @@ import io.nosqlbench.engine.rest.services.WorkspaceFinder;
 import io.nosqlbench.engine.rest.transfertypes.LiveScenarioView;
 import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.nb.annotations.Service;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.*;

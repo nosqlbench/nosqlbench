@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-keyvalue tags=phase:schema stargate_host=my_stargate_host
+# nb -v run driver=http yaml=http-keyvalue tags=phase:schema stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a key-value data model and access patterns.
   This should be identical to the cql variant except for:
@@ -7,7 +7,7 @@ description: |
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
     - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
@@ -23,42 +23,21 @@ blocks:
   - name: schema
     tags:
       phase: schema
+    params:
+      prepared: false
     statements:
-      - create-keyspace: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<keyspace:baselines>>"
-          }
+      - create-keyspace: |
+          create keyspace if not exists <<keyspace:baselines>>
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+          AND durable_writes = true;
         tags:
           name: create-keyspace
-      - create-table: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<table:keyvalue>>",
-            "columnDefinitions":
-              [
-                {
-                  "name": "key",
-                  "typeDefinition": "text"
-                },
-                {
-                  "name": "value",
-                  "typeDefinition": "text"
-                }
-              ],
-            "primaryKey":
-            {
-              "partitionKey": ["key"]
-            }
-          }
+      - create-table: |
+          create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
         tags:
           name: create-table
   - name: rampup
@@ -84,7 +63,7 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-select: GET /v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>?where=E[[{"key":{"$eq":"{rw_key}"}}}]]
+      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -105,7 +84,7 @@ blocks:
         Content-Type: "application/json"
         body: |
           {
-            "key": "{rw_key}"
+            "key": "{rw_key}",
             "value": "{rw_value}"
           }
         tags:

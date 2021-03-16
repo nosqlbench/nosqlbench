@@ -6,13 +6,13 @@ import io.nosqlbench.engine.rest.services.WorkspaceFinder;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceItemView;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
 import io.nosqlbench.nb.annotations.Service;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.List;

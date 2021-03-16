@@ -8,11 +8,11 @@ import io.nosqlbench.nb.annotations.Service;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.parser.v2.SwaggerConverter;
 import io.swagger.util.Json;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.Map;
 
 @Service(value = WebServiceObject.class, selector = "openapi")
