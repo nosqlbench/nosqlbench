@@ -59,6 +59,10 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         );
     }
 
+    public NBErrorHandler getErrorhandler() {
+        return errorhandler;
+    }
+
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
