@@ -13,13 +13,14 @@ public class PulsarAction implements SyncAction {
 
     private final static Logger logger = LogManager.getLogger(PulsarAction.class);
 
-    private static final int MAX_TRIALS = 100;
     private final int slot;
     private final PulsarActivity activity;
+    int maxTries = 1;
 
     public PulsarAction(PulsarActivity activity, int slot) {
         this.activity = activity;
         this.slot = slot;
+        this.maxTries = activity.getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class PulsarAction implements SyncAction {
             );
         }
 
-        for (int i = 0; i < MAX_TRIALS; i++) {
+        for (int i = 0; i < maxTries; i++) {
             try (Timer.Context ctx = activity.getExecuteTimer().time()) {
                 pulsarOp.run();
                 break;
