@@ -20,11 +20,13 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     private final CommandTemplate cmdTpl;
     private final PulsarSpace clientSpace;
     private final LongFunction<PulsarOp> opFunc;
+    private final PulsarActivity pulsarActivity;
 
     // TODO: Add docs for the command template with respect to the OpTemplate
 
-    public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache) {
+    public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache, PulsarActivity pulsarActivity) {
         // TODO: Consider parsing map structures into equivalent binding representation
+        this.pulsarActivity = pulsarActivity;
         this.opTpl = opTemplate;
         this.cmdTpl = new CommandTemplate(opTemplate);
 
@@ -180,7 +182,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             producerFunc,
             async_api_func,
             keyFunc,
-            valueFunc);
+            valueFunc,
+            pulsarActivity.getBytesCounter());
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(
