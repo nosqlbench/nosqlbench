@@ -249,7 +249,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 consumer_name_func.apply(l)
             );
 
-        return new PulsarConsumerMapper(cmdTpl, clientSpace, consumerFunc, async_api_func);
+        return new PulsarConsumerMapper(cmdTpl, clientSpace, consumerFunc, async_api_func,
+            pulsarActivity.getBytesCounter(), pulsarActivity.getMessagesizeHistogram());
     }
 
     private LongFunction<PulsarOp> resolveMsgRead(
