@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Producer;
@@ -22,18 +24,24 @@ public class PulsarProducerMapper extends PulsarOpMapper {
     private final LongFunction<Boolean> asyncApiFunc;
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> payloadFunc;
+    private final Counter bytesCounter;
+    private final Histogram messagesizeHistogram;
 
     public PulsarProducerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
                                 LongFunction<Producer<?>> producerFunc,
                                 LongFunction<Boolean> asyncApiFunc,
                                 LongFunction<String> keyFunc,
-                                LongFunction<String> payloadFunc) {
+                                LongFunction<String> payloadFunc,
+                                Counter bytesCounter,
+                                Histogram messagesizeHistogram) {
         super(cmdTpl, clientSpace);
         this.producerFunc = producerFunc;
         this.asyncApiFunc = asyncApiFunc;
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
+        this.bytesCounter = bytesCounter;
+        this.messagesizeHistogram = messagesizeHistogram;
     }
 
     @Override
@@ -48,6 +56,8 @@ public class PulsarProducerMapper extends PulsarOpMapper {
             clientSpace.getPulsarSchema(),
             asyncApi,
             msgKey,
-            msgPayload);
+            msgPayload,
+            bytesCounter,
+            messagesizeHistogram);
     }
 }

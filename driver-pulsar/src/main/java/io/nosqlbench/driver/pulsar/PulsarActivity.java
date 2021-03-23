@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.pulsar;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.ops.PulsarOp;
 import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
@@ -20,6 +22,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public Timer bindTimer;
     public Timer executeTimer;
+    public Counter bytesCounter;
+    public Histogram messagesizeHistogram;
     private PulsarSpaceCache pulsarCache;
 
     private PulsarNBClientConf clientConf;
@@ -41,7 +45,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
-
+        bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
+        messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
         String pulsarClntConfFile = activityDef.getParams().getOptionalString("config").orElse("config.properties");
         clientConf = new PulsarNBClientConf(pulsarClntConfFile);
 
@@ -49,7 +54,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
         pulsarCache = new PulsarSpaceCache(this);
 
-        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache));
+        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this));
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
 
@@ -86,5 +91,13 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public Timer getExecuteTimer() {
         return this.executeTimer;
+    }
+
+    public Counter getBytesCounter() {
+        return bytesCounter;
+    }
+
+    public Histogram getMessagesizeHistogram() {
+        return messagesizeHistogram;
     }
 }
