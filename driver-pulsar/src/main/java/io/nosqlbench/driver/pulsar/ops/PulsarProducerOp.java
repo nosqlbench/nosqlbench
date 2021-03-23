@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
@@ -23,19 +24,22 @@ public class PulsarProducerOp implements PulsarOp {
     private final String msgPayload;
     private final boolean asyncPulsarOp;
     private final Counter bytesCounter;
+    private final Histogram messagesizeHistogram;
 
     public PulsarProducerOp(Producer<?> producer,
                             Schema<?> schema,
                             boolean asyncPulsarOp,
                             String key,
                             String payload,
-                            Counter bytesCounter) {
+                            Counter bytesCounter,
+                            Histogram messagesizeHistogram) {
         this.producer = producer;
         this.pulsarSchema = schema;
         this.msgKey = key;
         this.msgPayload = payload;
         this.asyncPulsarOp = asyncPulsarOp;
         this.bytesCounter = bytesCounter;
+        this.messagesizeHistogram = messagesizeHistogram;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class PulsarProducerOp implements PulsarOp {
         if ((msgKey != null) && (!msgKey.isEmpty())) {
             typedMessageBuilder = typedMessageBuilder.key(msgKey);
         }
-
+        int messagesize;
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
         if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
             GenericRecord payload = AvroUtil.GetGenericRecord_PulsarAvro(
@@ -58,12 +62,14 @@ public class PulsarProducerOp implements PulsarOp {
             );
             typedMessageBuilder = typedMessageBuilder.value(payload);
             // TODO: add a way to calculate the message size for AVRO messages
-            bytesCounter.inc(msgPayload.length());
+            messagesize = msgPayload.length();
         } else {
             byte[] array = msgPayload.getBytes(StandardCharsets.UTF_8);
             typedMessageBuilder = typedMessageBuilder.value(array);
-            bytesCounter.inc(array.length);
+            messagesize = array.length;
         }
+        messagesizeHistogram.update(messagesize);
+        bytesCounter.inc(messagesize);
 
         //TODO: add error handling with failed message production
         if (!asyncPulsarOp) {

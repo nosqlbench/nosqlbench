@@ -183,7 +183,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             async_api_func,
             keyFunc,
             valueFunc,
-            pulsarActivity.getBytesCounter());
+            pulsarActivity.getBytesCounter(),
+            pulsarActivity.getMessagesizeHistogram());
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(
