@@ -10,7 +10,7 @@ bindings:
   #  sensor_type:
   reading_time: ToDateTime();
   reading_value: ToFloat(100);
-  topic: Template("topic-{}",Mod(TEMPLATE(tenants,10)L));
+  # tenant:
 
 # document level parameters that apply to all Pulsar client types:
 params:
@@ -21,14 +21,14 @@ params:
 blocks:
   - name: admin-block
     tags:
-      phase: create-tenant-namespace
+      phase: admin-api
     statements:
       - name: s1
-        optype: create-tenant
+        optype: admin
+        admin_roles:
+        allowed_clusters:
         tenant: "{tenant}"
-      - name: s2
-        optype: create-namespace
-        namespace: "{namespace}"
+        namespace: "default"
 
   - name: batch-producer-block
     tags:

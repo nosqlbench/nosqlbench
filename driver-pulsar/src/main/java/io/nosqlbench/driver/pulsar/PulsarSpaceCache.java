@@ -1,8 +1,5 @@
 package io.nosqlbench.driver.pulsar;
 
-import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,7 +22,13 @@ public class PulsarSpaceCache {
 
     public PulsarSpace getPulsarSpace(String name) {
         return clientScopes.computeIfAbsent(name, spaceName ->
-            new PulsarSpace(spaceName, activity.getPulsarConf(), activity.getPulsarServiceUrl()));
+            new PulsarSpace(
+                spaceName,
+                activity.getPulsarConf(),
+                activity.getPulsarSvcUrl(),
+                activity.getWebSvcUrl(),
+                activity.getPulsarAdmin()
+            ));
     }
 
     public PulsarActivity getActivity() {

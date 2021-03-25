@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class PulsarActivityUtil {
 
@@ -25,8 +26,7 @@ public class PulsarActivityUtil {
     // Supported message operation types
     // TODO: websocket-producer and managed-ledger
     public enum OP_TYPES {
-        CREATE_TENANT("create-tenant"),
-        CREATE_NAMESPACE("create-namespace"),
+        ADMIN("admin"),
         BATCH_MSG_SEND_START("batch-msg-send-start"),
         BATCH_MSG_SEND("batch-msg-send"),
         BATCH_MSG_SEND_END("batch-msg-send-end"),
@@ -163,10 +163,10 @@ public class PulsarActivityUtil {
     }
 
     public enum SUBSCRIPTION_TYPE {
-        exclusive("exclusive"),
-        failover("failover"),
-        shared("shared"),
-        key_shared("key_shared");
+        Exclusive("Exclusive"),
+        Failover("Failover"),
+        Shared("Shared"),
+        Key_Shared("Key_Shared");
 
         public final String label;
 
@@ -176,7 +176,10 @@ public class PulsarActivityUtil {
     }
 
     public static boolean isValidSubscriptionType(String item) {
-        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch((t) -> t.name().equals(item));
+    }
+    public static String getValidSubscriptionTypeList() {
+        return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(Object::toString).collect(Collectors.joining(", "));
     }
 
     ///////

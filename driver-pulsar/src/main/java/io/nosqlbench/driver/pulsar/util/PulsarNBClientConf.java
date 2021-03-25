@@ -46,8 +46,7 @@ public class PulsarNBClientConf {
             FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
                 new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
                     .configure(params.properties()
-                        .setFileName(fileName)
-                        .setListDelimiterHandler(new DefaultListDelimiterHandler(',')));
+                        .setFileName(fileName));
 
             Configuration config = builder.getConfiguration();
 
