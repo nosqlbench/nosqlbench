@@ -12,6 +12,12 @@ scenarios:
     - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
   # for ramp-up and verify
@@ -53,7 +59,7 @@ blocks:
     tags:
       phase: rampup
     statements:
-      - rampup-insert: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -73,7 +79,7 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-select: GET http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
+      - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -87,7 +93,7 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-write: POST http://<<stargate_host:stargate>>:<<stargate_port:8082>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"

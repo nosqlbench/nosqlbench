@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
@@ -18,12 +20,18 @@ public class PulsarConsumerOp implements PulsarOp {
     private final Schema<?> pulsarSchema;
     private final boolean asyncPulsarOp;
     private final int timeoutSeconds;
+    private final Counter bytesCounter;
+    private final Histogram messagesizeHistogram;
 
-    public PulsarConsumerOp(Consumer<?> consumer, Schema<?> schema, boolean asyncPulsarOp, int timeoutSeconds) {
+    public PulsarConsumerOp(Consumer<?> consumer, Schema<?> schema, boolean asyncPulsarOp, int timeoutSeconds,
+                            Counter bytesCounter,
+                            Histogram messagesizeHistogram) {
         this.consumer = consumer;
         this.pulsarSchema = schema;
         this.asyncPulsarOp = asyncPulsarOp;
         this.timeoutSeconds = timeoutSeconds;
+        this.bytesCounter = bytesCounter;
+        this.messagesizeHistogram = messagesizeHistogram;
     }
 
     public void syncConsume() {
@@ -54,7 +62,9 @@ public class PulsarConsumerOp implements PulsarOp {
                     logger.debug("msg-key={}  msg-payload={}", message.getKey(), new String(message.getData()));
                 }
             }
-
+            int messagesize = message.getData().length;
+            bytesCounter.inc(messagesize);
+            messagesizeHistogram.update(messagesize);
             consumer.acknowledge(message.getMessageId());
         } catch (Exception e) {
             throw new RuntimeException(e);

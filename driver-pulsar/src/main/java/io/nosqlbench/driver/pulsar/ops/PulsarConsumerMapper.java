@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Consumer;
@@ -20,14 +22,20 @@ import java.util.function.LongFunction;
 public class PulsarConsumerMapper extends PulsarOpMapper {
     private final LongFunction<Consumer<?>> consumerFunc;
     private final LongFunction<Boolean> asyncApiFunc;
+    private final Counter bytesCounter;
+    private final Histogram messagesizeHistogram;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
                                 LongFunction<Consumer<?>> consumerFunc,
-                                LongFunction<Boolean> asyncApiFunc) {
+                                LongFunction<Boolean> asyncApiFunc,
+                                Counter bytesCounter,
+                                Histogram messagesizeHistogram) {
         super(cmdTpl, clientSpace);
         this.consumerFunc = consumerFunc;
         this.asyncApiFunc = asyncApiFunc;
+        this.bytesCounter = bytesCounter;
+        this.messagesizeHistogram = messagesizeHistogram;
     }
 
     @Override
@@ -39,7 +47,9 @@ public class PulsarConsumerMapper extends PulsarOpMapper {
             consumer,
             clientSpace.getPulsarSchema(),
             asyncApi,
-            clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds()
+            clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
+            bytesCounter,
+            messagesizeHistogram
         );
     }
 }

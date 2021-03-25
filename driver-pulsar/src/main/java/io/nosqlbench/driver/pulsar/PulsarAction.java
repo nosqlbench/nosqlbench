@@ -3,6 +3,7 @@ package io.nosqlbench.driver.pulsar;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.ops.PulsarOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,10 +15,12 @@ public class PulsarAction implements SyncAction {
 
     private final int slot;
     private final PulsarActivity activity;
+    int maxTries = 1;
 
     public PulsarAction(PulsarActivity activity, int slot) {
         this.activity = activity;
         this.slot = slot;
+        this.maxTries = activity.getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     @Override
@@ -26,6 +29,7 @@ public class PulsarAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
+        long start = System.nanoTime();
 
         PulsarOp pulsarOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
@@ -33,16 +37,25 @@ public class PulsarAction implements SyncAction {
             pulsarOp = readyPulsarOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
+            activity.getErrorhandler().handleError(bindException, cycle, 0);
             throw new RuntimeException(
                 "while binding request in cycle " + cycle + ": " + bindException.getMessage(), bindException
             );
         }
 
-        try (Timer.Context ctx = activity.getExecuteTimer().time()) {
-            pulsarOp.run();
+        for (int i = 0; i < maxTries; i++) {
+            try (Timer.Context ctx = activity.getExecuteTimer().time()) {
+                pulsarOp.run();
+                break;
+            } catch (RuntimeException err) {
+                ErrorDetail errorDetail = activity
+                    .getErrorhandler()
+                    .handleError(err, cycle, System.nanoTime() - start);
+                if (!errorDetail.isRetryable()) {
+                    break;
+                }
+            }
         }
-
-        // TODO: add retries and use standard error handler
 
         return 0;
     }

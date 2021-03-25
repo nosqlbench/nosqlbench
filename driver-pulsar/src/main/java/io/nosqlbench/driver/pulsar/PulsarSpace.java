@@ -11,6 +11,10 @@ import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.*;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -347,7 +351,8 @@ public class PulsarSpace {
             PulsarClient pulsarClient = getPulsarClient();
 
             // Get other possible producer settings that are set at global level
-            Map<String, Object> consumerConf = pulsarNBClientConf.getConsumerConfMap();
+            Map<String, Object> consumerConf = new HashMap<>(pulsarNBClientConf.getConsumerConfMap());
+            consumerConf.remove("timeout");
 
             // Explicit topic names will take precedence over topics pattern
             if (!topicNames.isEmpty()) {
