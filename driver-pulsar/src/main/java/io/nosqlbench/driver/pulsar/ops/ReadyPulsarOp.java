@@ -11,6 +11,9 @@ import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -63,64 +66,63 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
     private LongFunction<PulsarOp> resolve() {
 
-        if (cmdTpl.containsKey("topic_url")) {
-            throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
-        }
-
-        // Global parameter: topic_uri
-        LongFunction<String> topicUriFunc;
-        if (cmdTpl.containsKey("topic_uri")) {
-            if (cmdTpl.containsAny("tenant", "namespace", "topic", "persistent")) {
-                throw new RuntimeException("You may not specify topic_uri with any of the piece-wise components 'persistence','tenant','namespace','topic'.");
-            } else if (cmdTpl.isStatic("topic_uri")) {
-                topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
-            } else {
-                topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
-            }
-        } else if (cmdTpl.containsKey("topic")) {
-            if (cmdTpl.isStaticOrUnsetSet("persistence", "tenant", "namespace", "topic")) {
-                String persistence = cmdTpl.getStaticOr("persistence", "persistent")
-                    .replaceAll("true", "persistent");
-
-                String tenant = cmdTpl.getStaticOr("tenant", "public");
-                String namespace = cmdTpl.getStaticOr("namespace", "default");
-                String topic = cmdTpl.getStaticOr("topic", "");
-
-                String composited = persistence + "://" + tenant + "/" + namespace + "/" + topic;
-                topicUriFunc = (l) -> composited;
-            } else { // some or all dynamic fields, composite into a single dynamic call
-                topicUriFunc = (l) ->
-                    cmdTpl.getOr("persistent", l, "persistent").replaceAll("true", "persistent")
-                        + "://" + cmdTpl.getOr("tenant", l, "public")
-                        + "/" + cmdTpl.getOr("namespace", l, "default")
-                        + "/" + cmdTpl.getOr("topic", l, "");
-            }
-        } else {
-            topicUriFunc = (l) -> null;
-        }
-
-        // Global parameter: async_api
-        LongFunction<Boolean> asyncApiFunc;
-        if (cmdTpl.containsKey("async_api")) {
-            if (cmdTpl.isStatic("async_api"))
-                asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
-            else
-                throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
-        } else {
-            asyncApiFunc = (l) -> false;
-        }
-
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {
             throw new RuntimeException("Statement parameter \"optype\" must have a valid value!");
         }
         String stmtOpType = cmdTpl.getStatic("optype");
 
+        if (cmdTpl.containsKey("topic_url")) {
+            throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
+        }
+
+        // Global parameter: topic_uri (applies only to non-Admin API)
+        LongFunction<String> topicUriFunc = (l) -> null;
+        // Global parameter: async_api (applies only to non-Admin API)
+        LongFunction<Boolean> asyncApiFunc = (l) -> false;
+
+        if (!StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN.label)) {
+            if (cmdTpl.containsKey("topic_uri")) {
+                if (cmdTpl.containsAny("tenant", "namespace", "topic", "persistent")) {
+                    throw new RuntimeException("You may not specify topic_uri with any of the piece-wise components 'persistence','tenant','namespace','topic'.");
+                } else if (cmdTpl.isStatic("topic_uri")) {
+                    topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
+                } else {
+                    topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
+                }
+            } else if (cmdTpl.containsKey("topic")) {
+                if (cmdTpl.isStaticOrUnsetSet("persistence", "tenant", "namespace", "topic")) {
+                    String persistence = cmdTpl.getStaticOr("persistence", "persistent")
+                        .replaceAll("true", "persistent");
+
+                    String tenant = cmdTpl.getStaticOr("tenant", "public");
+                    String namespace = cmdTpl.getStaticOr("namespace", "default");
+                    String topic = cmdTpl.getStaticOr("topic", "");
+
+                    String composited = persistence + "://" + tenant + "/" + namespace + "/" + topic;
+                    topicUriFunc = (l) -> composited;
+                } else { // some or all dynamic fields, composite into a single dynamic call
+                    topicUriFunc = (l) ->
+                        cmdTpl.getOr("persistent", l, "persistent").replaceAll("true", "persistent")
+                            + "://" + cmdTpl.getOr("tenant", l, "public")
+                            + "/" + cmdTpl.getOr("namespace", l, "default")
+                            + "/" + cmdTpl.getOr("topic", l, "");
+                }
+            }
+
+            if (cmdTpl.containsKey("async_api")) {
+                if (cmdTpl.isStatic("async_api"))
+                    asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
+                else
+                    throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
+            } else {
+                asyncApiFunc = (l) -> false;
+            }
+        }
+
         // TODO: Complete implementation for websocket-producer and managed-ledger
-        if /*( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.CREATE_TENANT.label) ) {
-            return resolveCreateTenant(clientSpace);
-        } else if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.CREATE_NAMESPACE.label) ) {
-            return resolveCreateNameSpace(clientSpace);
-        } else if*/ (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
+        if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN.label) ) {
+            return resolveAdminRequest(clientSpace);
+        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
             return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
             return resolveMsgConsume(clientSpace, topicUriFunc, asyncApiFunc);
@@ -135,6 +137,63 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         } else {
             throw new RuntimeException("Unsupported Pulsar operation type");
         }
+    }
+
+    private LongFunction<PulsarOp> resolveAdminRequest(PulsarSpace clientSpace) {
+        if ( cmdTpl.isDynamic("admin_roles") ||
+             cmdTpl.isDynamic("allowed_clusters") ) {
+            throw new RuntimeException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
+        }
+
+        LongFunction<Set<String>> adminRolesFunc;
+        Set<String> roleSet = new HashSet<>();
+        if (cmdTpl.isStatic("admin_roles")) {
+            // "admin_roles" includes comma-separated admin roles:
+            // e.g. role1, role2
+            String adminRolesStr = cmdTpl.getStatic("admin_roles");
+            String[] roleArr = adminRolesStr.split(",");
+            Set<String> stringSet = new HashSet<>(Arrays.asList(roleArr));
+            roleSet.addAll(stringSet);
+        }
+        adminRolesFunc = (l) -> roleSet;
+
+        LongFunction<Set<String>> allowedClustersFunc;
+        Set<String> clusterSet = new HashSet<>();
+        if (cmdTpl.isStatic("allowed_clusters")) {
+            // "allowed_cluster" includes comma-separated cluster names:
+            // e.g. cluster1, cluster2
+            String allowedClustersStr = cmdTpl.getStatic("allowed_clusters");
+            String[] clusterArr = allowedClustersStr.split(",");
+            Set<String> stringSet = new HashSet<>(Arrays.asList(clusterArr));
+            clusterSet.addAll(stringSet);
+        }
+        allowedClustersFunc = (l) -> clusterSet;
+
+        LongFunction<String> tenantFunc;
+        if (cmdTpl.isStatic("tenant")) {
+            tenantFunc = (l) -> cmdTpl.getStatic("tenant");
+        } else if (cmdTpl.isDynamic("tenant")) {
+            tenantFunc = (l) -> cmdTpl.getDynamic("tenant", l);
+        } else {
+            tenantFunc = (l) -> null;
+        }
+
+        LongFunction<String> namespaceFunc;
+        if (cmdTpl.isStatic("namespace")) {
+            namespaceFunc = (l) -> cmdTpl.getStatic("namespace");
+        } else if (cmdTpl.isDynamic("namespace")) {
+            namespaceFunc = (l) -> cmdTpl.getDynamic("namespace", l);
+        } else {
+            namespaceFunc = (l) -> null;
+        }
+
+        return new PulsarAdminMapper(
+            cmdTpl,
+            clientSpace,
+            adminRolesFunc,
+            allowedClustersFunc,
+            tenantFunc,
+            namespaceFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgSend(
@@ -194,47 +253,47 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
-        if (cmdTpl.isStatic("topic-names")) {
-            topic_names_func = (l) -> cmdTpl.getStatic("topic-names");
-        } else if (cmdTpl.isDynamic("topic-names")) {
-            topic_names_func = (l) -> cmdTpl.getDynamic("topic-names", l);
+        if (cmdTpl.isStatic("topic_names")) {
+            topic_names_func = (l) -> cmdTpl.getStatic("topic_names");
+        } else if (cmdTpl.isDynamic("topic_names")) {
+            topic_names_func = (l) -> cmdTpl.getDynamic("topic_names", l);
         } else {
             topic_names_func = (l) -> null;
         }
 
         // Topic pattern (multi-topic)
         LongFunction<String> topics_pattern_func;
-        if (cmdTpl.isStatic("topics-pattern")) {
-            topics_pattern_func = (l) -> cmdTpl.getStatic("topics-pattern");
-        } else if (cmdTpl.isDynamic("topics-pattern")) {
-            topics_pattern_func = (l) -> cmdTpl.getDynamic("topics-pattern", l);
+        if (cmdTpl.isStatic("topics_pattern")) {
+            topics_pattern_func = (l) -> cmdTpl.getStatic("topics_pattern");
+        } else if (cmdTpl.isDynamic("topics_pattern")) {
+            topics_pattern_func = (l) -> cmdTpl.getDynamic("topics_pattern", l);
         } else {
             topics_pattern_func = (l) -> null;
         }
 
         LongFunction<String> subscription_name_func;
-        if (cmdTpl.isStatic("subscription-name")) {
-            subscription_name_func = (l) -> cmdTpl.getStatic("subscription-name");
-        } else if (cmdTpl.isDynamic("subscription-name")) {
-            subscription_name_func = (l) -> cmdTpl.getDynamic("subscription-name", l);
+        if (cmdTpl.isStatic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getStatic("subscription_name");
+        } else if (cmdTpl.isDynamic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getDynamic("subscription_name", l);
         } else {
             subscription_name_func = (l) -> null;
         }
 
         LongFunction<String> subscription_type_func;
-        if (cmdTpl.isStatic("subscription-type")) {
-            subscription_type_func = (l) -> cmdTpl.getStatic("subscription-type");
-        } else if (cmdTpl.isDynamic("subscription-type")) {
-            subscription_type_func = (l) -> cmdTpl.getDynamic("subscription-type", l);
+        if (cmdTpl.isStatic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getStatic("subscription_type");
+        } else if (cmdTpl.isDynamic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getDynamic("subscription_type", l);
         } else {
             subscription_type_func = (l) -> null;
         }
 
         LongFunction<String> consumer_name_func;
-        if (cmdTpl.isStatic("consumer-name")) {
-            consumer_name_func = (l) -> cmdTpl.getStatic("consumer-name");
-        } else if (cmdTpl.isDynamic("consumer-name")) {
-            consumer_name_func = (l) -> cmdTpl.getDynamic("consumer-name", l);
+        if (cmdTpl.isStatic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getStatic("consumer_name");
+        } else if (cmdTpl.isDynamic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getDynamic("consumer_name", l);
         } else {
             consumer_name_func = (l) -> null;
         }
@@ -259,19 +318,19 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> async_api_func
     ) {
         LongFunction<String> reader_name_func;
-        if (cmdTpl.isStatic("reader-name")) {
-            reader_name_func = (l) -> cmdTpl.getStatic("reader-name");
-        } else if (cmdTpl.isDynamic("reader-name")) {
-            reader_name_func = (l) -> cmdTpl.getDynamic("reader-name", l);
+        if (cmdTpl.isStatic("reader_name")) {
+            reader_name_func = (l) -> cmdTpl.getStatic("reader_name");
+        } else if (cmdTpl.isDynamic("reader_name")) {
+            reader_name_func = (l) -> cmdTpl.getDynamic("reader_name", l);
         } else {
             reader_name_func = (l) -> null;
         }
 
         LongFunction<String> start_msg_pos_str_func;
-        if (cmdTpl.isStatic("start-msg-position")) {
-            start_msg_pos_str_func = (l) -> cmdTpl.getStatic("start-msg-position");
-        } else if (cmdTpl.isDynamic("start-msg-position")) {
-            start_msg_pos_str_func = (l) -> cmdTpl.getDynamic("start-msg-position", l);
+        if (cmdTpl.isStatic("start_msg_position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getStatic("start_msg_position");
+        } else if (cmdTpl.isDynamic("start_msg_position")) {
+            start_msg_pos_str_func = (l) -> cmdTpl.getDynamic("start_msg_position", l);
         } else {
             start_msg_pos_str_func = (l) -> null;
         }

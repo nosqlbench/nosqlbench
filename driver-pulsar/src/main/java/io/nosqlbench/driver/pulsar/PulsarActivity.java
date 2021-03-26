@@ -5,6 +5,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.ops.PulsarOp;
 import io.nosqlbench.driver.pulsar.ops.ReadyPulsarOp;
+import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
@@ -13,8 +14,13 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.PulsarAdmin;
+import org.apache.pulsar.client.admin.PulsarAdminBuilder;
+import org.apache.pulsar.client.api.PulsarClientException;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
 
@@ -24,10 +30,15 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer executeTimer;
     public Counter bytesCounter;
     public Histogram messagesizeHistogram;
+
     private PulsarSpaceCache pulsarCache;
+    private PulsarAdmin pulsarAdmin;
 
     private PulsarNBClientConf clientConf;
-    private String serviceUrl;
+    // e.g. pulsar://localhost:6650
+    private String pulsarSvcUrl;
+    // e.g. http://localhost:8080
+    private String webSvcUrl;
 
     private NBErrorHandler errorhandler;
     private OpSequence<OpDispenser<PulsarOp>> sequencer;
@@ -39,6 +50,55 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         super(activityDef);
     }
 
+    private void initPulsarAdmin() {
+        PulsarAdminBuilder adminBuilder =
+            PulsarAdmin.builder()
+            .serviceHttpUrl(webSvcUrl);
+
+        try {
+            String authPluginClassName =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authPulginClassName.label);
+            String authParams =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authParams.label);
+
+            String useTlsStr =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.useTls.label);
+            boolean useTls = BooleanUtils.toBoolean(useTlsStr);
+
+            String tlsTrustCertsFilePath =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
+
+            String tlsAllowInsecureConnectionStr =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
+            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
+
+            String tlsHostnameVerificationEnableStr =
+                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
+            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
+
+            if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
+                adminBuilder = adminBuilder.authentication(authPluginClassName, authParams);
+            }
+
+            if ( useTls ) {
+                adminBuilder = adminBuilder
+                    .useKeyStoreTls(useTls)
+                    .allowTlsInsecureConnection(tlsAllowInsecureConnection)
+                    .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+                if (!StringUtils.isBlank(tlsTrustCertsFilePath))
+                    adminBuilder = adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+
+            }
+
+            pulsarAdmin = adminBuilder.build();
+
+        } catch (PulsarClientException e) {
+            logger.error("Fail to create PulsarAdmin from global configuration!");
+            throw new RuntimeException("Fail to create PulsarAdmin from global configuration!");
+        }
+    }
+
     @Override
     public void initActivity() {
         super.initActivity();
@@ -47,10 +107,17 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
         messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
-        String pulsarClntConfFile = activityDef.getParams().getOptionalString("config").orElse("config.properties");
+
+        String pulsarClntConfFile =
+            activityDef.getParams().getOptionalString("config").orElse("config.properties");
         clientConf = new PulsarNBClientConf(pulsarClntConfFile);
 
-        serviceUrl = activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
+        pulsarSvcUrl =
+            activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
+        webSvcUrl =
+            activityDef.getParams().getOptionalString("web_url").orElse("pulsar://localhost:8080");
+
+        initPulsarAdmin();
 
         pulsarCache = new PulsarSpaceCache(this);
 
@@ -81,9 +148,13 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         return clientConf;
     }
 
-    public String getPulsarServiceUrl() {
-        return serviceUrl;
+    public String getPulsarSvcUrl() {
+        return pulsarSvcUrl;
     }
+
+    public String getWebSvcUrl() { return webSvcUrl; }
+
+    public PulsarAdmin getPulsarAdmin() { return pulsarAdmin; }
 
     public Timer getBindTimer() {
         return bindTimer;

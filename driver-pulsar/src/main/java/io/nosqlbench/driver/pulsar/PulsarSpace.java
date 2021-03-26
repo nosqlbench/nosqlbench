@@ -2,14 +2,15 @@ package io.nosqlbench.driver.pulsar;
 
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.PulsarAdmin;
+import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.*;
-import org.apache.pulsar.client.impl.BatchMessageContainerBase;
-import org.apache.pulsar.client.impl.DefaultBatcherBuilder;
-import org.apache.pulsar.client.impl.ProducerImpl;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,23 +32,41 @@ public class PulsarSpace {
     private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
 
-    protected final String spaceName;
-    protected final PulsarNBClientConf pulsarNBClientConf;
-    protected final String pulsarSvcUrl;
+    private final String spaceName;
+    private final PulsarNBClientConf pulsarNBClientConf;
+    private final String pulsarSvcUrl;
+    private final String webSvcUrl;
+    private final PulsarAdmin pulsarAdmin;
 
-    protected PulsarClient pulsarClient = null;
-    protected Schema<?> pulsarSchema = null;
+    private final Set<String> pulsarClusterMetadata = new HashSet<>();
 
-    public PulsarSpace(String name, PulsarNBClientConf pulsarClientConf, String pulsarSvcUrl) {
+    private PulsarClient pulsarClient = null;
+    private Schema<?> pulsarSchema = null;
+
+    public PulsarSpace(String name,
+                       PulsarNBClientConf pulsarClientConf,
+                       String pulsarSvcUrl,
+                       String webSvcUrl,
+                       PulsarAdmin pulsarAdmin) {
         this.spaceName = name;
         this.pulsarNBClientConf = pulsarClientConf;
         this.pulsarSvcUrl = pulsarSvcUrl;
+        this.webSvcUrl = webSvcUrl;
+        this.pulsarAdmin = pulsarAdmin;
 
         createPulsarClientFromConf();
         createPulsarSchemaFromConf();
+
+        try {
+            List<String> stringList = pulsarAdmin.clusters().getClusters();
+            CollectionUtils.addAll(pulsarClusterMetadata, stringList.listIterator());
+
+        } catch (PulsarAdminException e) {
+            throw new RuntimeException("Failed to get Pulsar cluster metadata!");
+        }
     }
 
-    protected void createPulsarClientFromConf() {
+    private void createPulsarClientFromConf() {
         ClientBuilder clientBuilder = PulsarClient.builder();
 
         try {
@@ -65,7 +84,7 @@ public class PulsarSpace {
         }
     }
 
-    protected void createPulsarSchemaFromConf() {
+    private void createPulsarSchemaFromConf() {
         Object value = pulsarNBClientConf.getSchemaConfValue("schema.type");
         String schemaType = (value != null) ? value.toString() : "";
 
@@ -81,9 +100,7 @@ public class PulsarSpace {
         }
     }
 
-    public PulsarClient getPulsarClient() {
-        return pulsarClient;
-    }
+    public PulsarClient getPulsarClient() { return pulsarClient; }
 
     public PulsarNBClientConf getPulsarClientConf() {
         return pulsarNBClientConf;
@@ -93,6 +110,15 @@ public class PulsarSpace {
         return pulsarSchema;
     }
 
+    public PulsarAdmin getPulsarAdmin() { return pulsarAdmin; }
+
+    public String getPulsarSvcUrl() {
+        return pulsarSvcUrl;
+    }
+
+    public String getWebSvcUrl() { return webSvcUrl; }
+
+    public Set<String> getPulsarClusterMetadata() { return pulsarClusterMetadata; }
 
     //////////////////////////////////////
     // Producer Processing --> start
@@ -256,7 +282,8 @@ public class PulsarSpace {
 
         if (!StringUtils.isBlank(effectiveSubscriptionStr)) {
             if (!PulsarActivityUtil.isValidSubscriptionType(effectiveSubscriptionStr)) {
-                throw new RuntimeException("Consumer::Invalid subscription type: " + effectiveSubscriptionStr);
+                throw new RuntimeException("Consumer::Invalid subscription type (\"" +
+                    effectiveSubscriptionStr + "\"). \nValid subscription types: " + PulsarActivityUtil.getValidSubscriptionTypeList());
             } else {
                 subscriptionType = SubscriptionType.valueOf(effectiveSubscriptionStr);
             }
