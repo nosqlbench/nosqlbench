@@ -1,0 +1,123 @@
+# nb -v run driver=http yaml=http-graphql-tabular tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+
+# TODO 
+# - /graphqlv2 will change in future, adapt when needed
+# - do we need a truncate schema / namespace at the end
+# - rest uses limit as it queries only by a single primary key, we can not map this to GQL (also should data be clustering key)
+
+description: |
+  This workload emulates a time-series data model and access patterns.
+  This should be identical to the cql variant except for:
+  - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
+  - Schema creation GraphQL first, we don't use cql and thus can only create schema with limited options.
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+  Note that stargate_port should reflect the port where GraphQL API V2 is exposed (defaults to 8080). 
+
+scenarios:
+  default:
+    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  # for ramp-up and verify
+  part_layout: Div(<<partsize:1000000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  # for write
+  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/admin
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  createNamespace(name: \"<<keyspace:gqlsf_tabular>>\", replicas: <<rf:1>>) {\n    namespace {\n      name\n    }\n  }\n}\n"
+            }
+        tags:
+          name: create-keyspace
+      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/admin
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  deploySchema(namespace: \"<<keyspace:gqlsf_tabular>>\", schema: \"\"\"\n      type Tabular @cql_input {\n        part: String! @cql_column(partitionKey: true)\n        clust: String! @cql_column(partitionKey: true)\n        data: String! \n      }\n      type SelectTabularResult @cql_payload {\n    \t\tdata: [Tabular]\n    \t\tpagingState: String\n    }\n      type Query {\n        getTabulars(\n          part: String!,\n          clust: String!,\n          pagingState: String @cql_pagingState\n        ): SelectTabularResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertTabular(tabular: TabularInput): Tabular\n    }\n  \"\"\") {\n    version\n  }\n}\n"
+            }
+        tags:
+          name: create-gql-schema
+
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  insertTabular(tabular: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {\n    part\n    clust\n    data\n  }\n}\n"
+            }
+        tags:
+          name: rampup-insert
+
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:1>>
+    statements:
+      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"{\n  getTabulars(part: \"{part_read}\", clust: \"{clust_read}\") {\n    data {\n      part\n      clust\n      data\n    }\n    pagingState\n  }\n}\n"
+            }
+        tags:
+          name: main-select
+
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:9>>
+    statements:
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  insertTabular(tabular: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {\n    part\n    clust\n    data\n  }\n}\n"
+            }
+        tags:
+          name: main-write
