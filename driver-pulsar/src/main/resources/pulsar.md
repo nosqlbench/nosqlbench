@@ -141,10 +141,10 @@ params:
 blocks:
   - name: <command_block_1>
     tags:
-      phase: <command_bock_filtering_identifier>
+      phase: <command_bock_identifier>
     statements:
       - name: <statement_name_1>
-        optype: <statement_filtering_identifier>
+        optype: <statement_identifier>
         ... <statement_specific_parameters> ...
       - name: <statement_name_2>
         ... ...
@@ -242,36 +242,34 @@ cycle level, **the ycle level setting will take priority!**
 **NOTE**: this functionality is only partially implemented at the moment
 and doesn't function yet.
 
-Currently, the Pulsar Admin API Block is (planned) to only support
-creating Pulsar tenants and namespaces. It has the following format:
+Currently, the Pulsar Admin API Block is only supporting creating Pulsar tenants and namespaces. It has the following format:
 
 ```yaml
   - name: admin-block
     tags:
-        phase: create-tenant-namespace
+        phase: admin-api
     statements:
         - name: s1
-          optype: create-tenant
+          optype: admin
+          allowed_clusters:
+          admin_roles:
           tenant: "{tenant}"
-        - name: s2
-          optype: create-namespace
-          namespace: "{namespace}"
+          namespace: "default"
 ```
 
-In this command block, there are 2 statements (s1 and s2):
+In this command block, there is only 1 statement (s1):
 
-* Statement **s1** is used for creating a Pulsar tenant
-    * (Mandatory) **optype (create-tenant)** is the statement identifier
+* Statement **s1** is used for creating a Pulsar tenant and a namespace
+    * (Mandatory) **optype (admin)** is the statement identifier
       for this statement
-    * (Mandatory) **tenant** is the only statement parameter that
-      specifies the Pulsar tenant name which can either be dynamically
-      bound or statically assigned.
-* Statement **s2** is used for creating a Pulsar namespace
-    * (Mandatory) **optype (create-namespace)** is the statement
-      identifier for this statement
-    * (Mandatory) **namespace** is the only statement parameter that
-      specifies the Pulsar namespace under the tenant created by statement
-      s1. Its name can either be dynamically bound or statically assigned.
+    * (Optional) **allowed_clusters** must be statically bound and it
+      specifies the cluster list that is allowed for a tenant.
+    * (Optional) **admin_roles** must be statically bound and it specifies
+      the super user role that is associated with a tenant.
+    * (Mandatory) **tenant** is the Pulsar tenant name to be created. It
+      can either be dynamically or statically bound.
+    * (Mandatory) **namespace** is the Pulsar namespace name to be created
+      under the above tenant. It also can be dynamically or statically bound.
 
 ### 1.4.2. Batch Producer Command Block
 
