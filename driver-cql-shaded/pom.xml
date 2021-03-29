@@ -35,15 +35,24 @@
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>
+            <version>1.9.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-extras</artifactId>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-mapping</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datastax.dse</groupId>
+            <artifactId>dse-java-driver-graph</artifactId>
+            <version>1.9.0</version>
         </dependency>
 
         <!-- For CQL compression option -->
