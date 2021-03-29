@@ -171,4 +171,6 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Histogram getMessagesizeHistogram() {
         return messagesizeHistogram;
     }
+
+
 }

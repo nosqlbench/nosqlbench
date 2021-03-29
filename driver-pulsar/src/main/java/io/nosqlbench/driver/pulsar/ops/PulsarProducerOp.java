@@ -82,15 +82,12 @@ public class PulsarProducerOp implements PulsarOp {
             }
         } else {
             try {
+                // we rely on blockIfQueueIsFull in order to throttle the request in this case
                 CompletableFuture<MessageId> future = typedMessageBuilder.sendAsync();
-                future.get();
-
-            /*.thenRun(() -> {
-//                System.out.println("Producing message succeeded: key - " + msgKey + "; payload - " + msgPayload);
-            }).exceptionally(ex -> {
-                System.out.println("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
-                return ex;
-            })*/
+                future.exceptionally(ex -> {
+                    logger.error("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
+                    return null;
+                });
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
