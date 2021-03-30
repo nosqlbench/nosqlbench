@@ -26,7 +26,8 @@ public class PulsarActivityUtil {
     // Supported message operation types
     // TODO: websocket-producer and managed-ledger
     public enum OP_TYPES {
-        ADMIN("admin"),
+        ADMIN_CRT_TENNAME("admin-crt-tennam"),
+        ADMIN_CRT_TOP("admin-crt-top"),
         BATCH_MSG_SEND_START("batch-msg-send-start"),
         BATCH_MSG_SEND("batch-msg-send"),
         BATCH_MSG_SEND_END("batch-msg-send-end"),
@@ -68,7 +69,7 @@ public class PulsarActivityUtil {
     public enum CLNT_CONF_KEY {
         serviceUrl("serviceUrl"),
         authPulginClassName("authPluginClassName"),
-        authParams("AuthParams"),
+        authParams("authParams"),
         pperationTimeoutMs("operationTimeoutMs"),
         statsIntervalSeconds("statsIntervalSeconds"),
         numIoThreads("numIoThreads"),

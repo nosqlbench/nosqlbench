@@ -4,15 +4,16 @@
     - [1.3. NB Pulsar Driver Yaml File - High Level Structure](#13-nb-pulsar-driver-yaml-file---high-level-structure)
         - [1.3.1. NB Cycle Level Parameters vs. Global Level Parameters](#131-nb-cycle-level-parameters-vs-global-level-parameters)
     - [1.4. Pulsar Driver Yaml File - Command Block Details](#14-pulsar-driver-yaml-file---command-block-details)
-        - [1.4.1. Pulsar Admin API Command Block](#141-pulsar-admin-api-command-block)
-        - [1.4.2. Batch Producer Command Block](#142-batch-producer-command-block)
-        - [1.4.3. Producer Command Block](#143-producer-command-block)
-        - [1.4.4. Consumer Command Block](#144-consumer-command-block)
-        - [1.4.5. Reader Command Block](#145-reader-command-block)
+        - [1.4.1. Pulsar Admin API Command Block - Create Tenant and Namespace](#141-pulsar-admin-api-command-block---create-tenant-and-namespace)
+        - [1.4.2. Pulsar Admin API Command Block - Create Topic (Partitioned or Regular)](#142-pulsar-admin-api-command-block---create-topic-partitioned-or-regular)
+        - [1.4.3. Batch Producer Command Block](#143-batch-producer-command-block)
+        - [1.4.4. Producer Command Block](#144-producer-command-block)
+        - [1.4.5. Consumer Command Block](#145-consumer-command-block)
+        - [1.4.6. Reader Command Block](#146-reader-command-block)
     - [1.5. Schema Support](#15-schema-support)
     - [1.6. NB Activity Execution Parameters](#16-nb-activity-execution-parameters)
     - [1.7. NB Pulsar Driver Execution Example](#17-nb-pulsar-driver-execution-example)
-    - [Appendix A. Template Global Setting File (config.properties)](#18-appendix-a-template-global-setting-file-configproperties)
+    - [1.8. Appendix A. Template Global Setting File (config.properties)](#18-appendix-a-template-global-setting-file-configproperties)
 - [2. TODO : Design Revisit -- Advanced Driver Features](#2-todo--design-revisit----advanced-driver-features)
     - [2.1. Other Activity Parameters](#21-other-activity-parameters)
     - [2.2. API Caching](#22-api-caching)
@@ -72,25 +73,25 @@ There are multiple sections in this file that correspond to different groups of 
     * This section defines all configuration settings that are related
       with defining a PulsarClient object.
         *
-        See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#default-broker-urls-for-standalone-clusters)
+      See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#default-broker-urls-for-standalone-clusters)
 * **Pulsar Producer related settings**:
     * All settings under this section starts with **producer** prefix.
     * This section defines all configuration settings that are related
       with defining a Pulsar Producer object.
         *
-        See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer)
+      See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#configure-producer)
 * **Pulsar Consumer related settings**:
     * All settings under this section starts with **consumer** prefix.
     * This section defines all configuration settings that are related
       with defining a Pulsar Consumer object.
         *
-        See [Pulsar Doc Reference](http://pulsar.apache.org/docs/en/client-libraries-java/#configure-consumer)
+      See [Pulsar Doc Reference](http://pulsar.apache.org/docs/en/client-libraries-java/#configure-consumer)
 * **Pulsar Reader related settings**:
     * All settings under this section starts with **reader** prefix.
     * This section defines all configuration settings that are related
       with defining a Pulsar Reader object.
         *
-        See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#reader)
+      See [Pulsar Doc Reference](https://pulsar.apache.org/docs/en/client-libraries-java/#reader)
 
 In the future, when the support for other types of Pulsar workloads is
 added in NB Pulsar driver, there will be corresponding configuration
@@ -237,22 +238,20 @@ cycle level, **the ycle level setting will take priority!**
 
 ## 1.4. Pulsar Driver Yaml File - Command Block Details
 
-### 1.4.1. Pulsar Admin API Command Block
+### 1.4.1. Pulsar Admin API Command Block - Create Tenant and Namespace
 
-**NOTE**: this functionality is only partially implemented at the moment
-and doesn't function yet.
-
-Currently, the Pulsar Admin API Block is only supporting creating Pulsar tenants and namespaces. It has the following format:
+This Pulsar Admin API Block is used to create Pulsar tenants and namespaces. It has the following format:
 
 ```yaml
-  - name: admin-block
+  - name: create-tennam-block
     tags:
-        phase: admin-api
+        phase: create-tenant-namespace
+        admin_task: true
     statements:
         - name: s1
-          optype: admin
-          allowed_clusters:
+          optype: admin-crt-tennam
           admin_roles:
+          allowed_clusters:
           tenant: "{tenant}"
           namespace: "default"
 ```
@@ -260,7 +259,7 @@ Currently, the Pulsar Admin API Block is only supporting creating Pulsar tenants
 In this command block, there is only 1 statement (s1):
 
 * Statement **s1** is used for creating a Pulsar tenant and a namespace
-    * (Mandatory) **optype (admin)** is the statement identifier
+    * (Mandatory) **optype (admin-crt-tennam)** is the statement identifier
       for this statement
     * (Optional) **allowed_clusters** must be statically bound and it
       specifies the cluster list that is allowed for a tenant.
@@ -271,7 +270,36 @@ In this command block, there is only 1 statement (s1):
     * (Mandatory) **namespace** is the Pulsar namespace name to be created
       under the above tenant. It also can be dynamically or statically bound.
 
-### 1.4.2. Batch Producer Command Block
+### 1.4.2. Pulsar Admin API Command Block - Create Topic (Partitioned or Regular)
+
+This Pulsar Admin API Block is used to create Pulsar topics. It has the following format:
+
+```yaml
+  - name: create-parttop-block
+    tags:
+        phase: create-topic
+        admin_task: true
+    statements:
+        - name: s1
+          optype: admin-crt-top
+          enable_partition: "true"
+          partition_num: "5"
+```
+
+In this command block, there is only 1 statement (s1):
+
+* Statement **s1** is used for creating a Pulsar tenant and a namespace
+    * (Mandatory) **optype (admin-crt-top)** is the statement identifier
+      for this statement
+    * (Mandatory) **enable_partition** specifies whether to create a
+      partitioned topic. It can either be dynamically or statically bound.
+    * (Mandatory) **partition_num** specifies the number of partitions if
+      a partitioned topic is to be created. It also can be dynamically or
+      statically bound.
+
+**NOTE**: The topic name is bounded by the document level parameter "topic_uri".
+
+### 1.4.3. Batch Producer Command Block
 
 Batch producer command block is used to produce a batch of messages all at
 once by one NB cycle execution. A typical format of this command block is
@@ -332,7 +360,7 @@ ratios: 1, <batch_num>, 1.
     * (Optional)  **ratio**, when provided, MUST be 1. If not provided, it
       is default to 1.
 
-### 1.4.3. Producer Command Block
+### 1.4.4. Producer Command Block
 
 This is the regular Pulsar producer command block that produces one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -368,7 +396,7 @@ This command block only has 1 statements (s1):
     * (Mandatory) **msg_payload** specifies the payload of the generated
       message
 
-### 1.4.4. Consumer Command Block
+### 1.4.5. Consumer Command Block
 
 This is the regular Pulsar consumer command block that consumes one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -408,7 +436,7 @@ This command block only has 1 statements (s1):
 
 **NOTE 2**: if both **topic_names** and **topics_pattern** are not provided, consumer topic name is default to the document level parameter **topic_uri**.
 
-### 1.4.5. Reader Command Block
+### 1.4.6. Reader Command Block
 
 This is the regular Pulsar reader command block that reads one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -526,7 +554,7 @@ environment.
 ```
 
 
-## Appendix A. Template Global Setting File (config.properties)
+## 1.8. Appendix A. Template Global Setting File (config.properties)
 ```properties
 schema.type =
 schema.definition =
