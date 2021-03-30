@@ -107,6 +107,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-cqld3-shaded</artifactId>
+            <version>4.15.30-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cqlverify</artifactId>
             <version>4.15.30-SNAPSHOT</version>
         </dependency>
