@@ -7,7 +7,8 @@ import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.admin.Topics;
 
-public class PulsarAdminCrtTopOp implements PulsarOp {
+
+public class PulsarAdminCrtTopOp extends SyncPulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarAdminCrtTopOp.class);
 
