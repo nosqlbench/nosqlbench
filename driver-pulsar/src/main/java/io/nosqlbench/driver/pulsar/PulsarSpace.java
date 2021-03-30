@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.Clusters;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.*;
@@ -58,11 +59,14 @@ public class PulsarSpace {
         createPulsarSchemaFromConf();
 
         try {
-            List<String> stringList = pulsarAdmin.clusters().getClusters();
+            Clusters clusters = pulsarAdmin.clusters();
+            List<String> stringList = clusters.getClusters();
             CollectionUtils.addAll(pulsarClusterMetadata, stringList.listIterator());
 
         } catch (PulsarAdminException e) {
-            throw new RuntimeException("Failed to get Pulsar cluster metadata!");
+            String errMsg = "Fail to create PulsarClient from global configuration: " + e.getMessage();
+            logger.error(errMsg);
+            throw new RuntimeException(errMsg);
         }
     }
 
@@ -79,8 +83,9 @@ public class PulsarSpace {
                 .serviceUrl(pulsarSvcUrl)
                 .build();
         } catch (PulsarClientException pce) {
-            logger.error("Fail to create PulsarClient from global configuration!");
-            throw new RuntimeException("Fail to create PulsarClient from global configuration!");
+            String errMsg = "Fail to create PulsarClient from global configuration: " + pce.getMessage();
+            logger.error(errMsg);
+            throw new RuntimeException(errMsg);
         }
     }
 
