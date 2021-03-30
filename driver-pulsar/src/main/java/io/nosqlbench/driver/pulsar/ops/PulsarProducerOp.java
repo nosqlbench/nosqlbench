@@ -2,6 +2,7 @@ package io.nosqlbench.driver.pulsar.ops;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
+import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
@@ -25,21 +26,22 @@ public class PulsarProducerOp implements PulsarOp {
     private final boolean asyncPulsarOp;
     private final Counter bytesCounter;
     private final Histogram messagesizeHistogram;
+    private final PulsarActivity pulsarActivity;
 
     public PulsarProducerOp(Producer<?> producer,
                             Schema<?> schema,
                             boolean asyncPulsarOp,
                             String key,
                             String payload,
-                            Counter bytesCounter,
-                            Histogram messagesizeHistogram) {
+                            PulsarActivity pulsarActivity) {
         this.producer = producer;
         this.pulsarSchema = schema;
         this.msgKey = key;
         this.msgPayload = payload;
         this.asyncPulsarOp = asyncPulsarOp;
-        this.bytesCounter = bytesCounter;
-        this.messagesizeHistogram = messagesizeHistogram;
+        this.pulsarActivity = pulsarActivity;
+        this.bytesCounter = pulsarActivity.getBytesCounter();
+        this.messagesizeHistogram = pulsarActivity.getMessagesizeHistogram();
     }
 
     @Override
@@ -89,6 +91,7 @@ public class PulsarProducerOp implements PulsarOp {
                   timeTracker.run();
                 }).exceptionally(ex -> {
                     logger.error("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
+                    pulsarActivity.asyncOperationFailed(ex);
                     return null;
                 });
             } catch (Exception e) {

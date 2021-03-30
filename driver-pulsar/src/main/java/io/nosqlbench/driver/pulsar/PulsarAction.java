@@ -29,6 +29,10 @@ public class PulsarAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
+
+        // let's fail the action if some async operation failed
+        activity.failOnAsyncOperationFailure();
+
         long start = System.nanoTime();
 
         PulsarOp pulsarOp;

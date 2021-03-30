@@ -7,7 +7,7 @@ import org.apache.pulsar.client.api.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarBatchProducerStartOp extends SimplePulsarOp {
+public class PulsarBatchProducerStartOp extends SyncPulsarOp {
 
     // TODO: ensure sane container lifecycle management
     public final static ThreadLocal<List<CompletableFuture<MessageId>>> threadLocalBatchMsgContainer = new ThreadLocal<>();

@@ -1,25 +1,16 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.PulsarSpace;
-import io.nosqlbench.driver.pulsar.util.AvroUtil;
-import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
-import org.apache.pulsar.client.api.*;
-import org.apache.pulsar.client.api.schema.GenericRecord;
-import org.apache.pulsar.client.impl.schema.generic.GenericAvroSchema;
 import org.apache.pulsar.common.policies.data.TenantInfo;
-import org.apache.pulsar.common.schema.SchemaType;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
-public class PulsarAdminOp extends SimplePulsarOp {
+public class PulsarAdminOp extends SyncPulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarAdminOp.class);
 
