@@ -1,7 +1,8 @@
-# nb -v run driver=http yaml=http-keyvalue tags=phase:schema stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v http-rest-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
-  This workload emulates a key-value data model and access patterns.
+  This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
+  - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
 
@@ -19,11 +20,18 @@ bindings:
   weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
-
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  # for ramp-up and verify
+  part_layout: Div(<<partsize:1000000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  # for write
+  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
 blocks:
   - name: schema
@@ -39,10 +47,11 @@ blocks:
         tags:
           name: create-keyspace
       - create-table: |
-          create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
-          key text,
-           value text,
-           PRIMARY KEY (key)
+          create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
+           part text,
+           clust text,
+           data text,
+           PRIMARY KEY (part,clust)
           );
         tags:
           name: create-table
@@ -50,15 +59,16 @@ blocks:
     tags:
       phase: rampup
     statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-            "key": "{seq_key}",
-            "value": "{seq_value}"
+            "part": "{part_layout}",
+            "clust": "{clust_layout}",
+            "data": "{data}"
           }
         tags:
           name: rampup-insert
@@ -69,7 +79,7 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>/{rw_key}
+      - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -83,15 +93,16 @@ blocks:
     params:
       ratio: 5
     statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-            "key": "{rw_key}",
-            "value": "{rw_value}"
+            "part": "{part_write}",
+            "clust": "{clust_write}",
+            "data": "{data_write}"
           }
         tags:
           name: main-write

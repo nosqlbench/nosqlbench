@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-iot tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v run driver=http yaml=http-rest-timeseries tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:

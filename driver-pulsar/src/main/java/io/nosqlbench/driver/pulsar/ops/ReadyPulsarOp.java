@@ -72,53 +72,32 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
         }
 
-        // Global parameter: topic_uri (applies only to non-Admin API)
+        // Global parameter: topic_uri
         LongFunction<String> topicUriFunc = (l) -> null;
-        // Global parameter: async_api (applies only to non-Admin API)
-        LongFunction<Boolean> asyncApiFunc = (l) -> false;
 
-        if (!StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN.label)) {
-            if (cmdTpl.containsKey("topic_uri")) {
-                if (cmdTpl.containsAny("tenant", "namespace", "topic", "persistent")) {
-                    throw new RuntimeException("You may not specify topic_uri with any of the piece-wise components 'persistence','tenant','namespace','topic'.");
-                } else if (cmdTpl.isStatic("topic_uri")) {
-                    topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
-                } else {
-                    topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
-                }
-            } else if (cmdTpl.containsKey("topic")) {
-                if (cmdTpl.isStaticOrUnsetSet("persistence", "tenant", "namespace", "topic")) {
-                    String persistence = cmdTpl.getStaticOr("persistence", "persistent")
-                        .replaceAll("true", "persistent");
-
-                    String tenant = cmdTpl.getStaticOr("tenant", "public");
-                    String namespace = cmdTpl.getStaticOr("namespace", "default");
-                    String topic = cmdTpl.getStaticOr("topic", "");
-
-                    String composited = persistence + "://" + tenant + "/" + namespace + "/" + topic;
-                    topicUriFunc = (l) -> composited;
-                } else { // some or all dynamic fields, composite into a single dynamic call
-                    topicUriFunc = (l) ->
-                        cmdTpl.getOr("persistent", l, "persistent").replaceAll("true", "persistent")
-                            + "://" + cmdTpl.getOr("tenant", l, "public")
-                            + "/" + cmdTpl.getOr("namespace", l, "default")
-                            + "/" + cmdTpl.getOr("topic", l, "");
-                }
-            }
-
-            if (cmdTpl.containsKey("async_api")) {
-                if (cmdTpl.isStatic("async_api"))
-                    asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
-                else
-                    throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
+        if (cmdTpl.containsKey("topic_uri")) {
+            if (cmdTpl.isStatic("topic_uri")) {
+                topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
             } else {
-                asyncApiFunc = (l) -> false;
+                topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
             }
         }
 
+        // Global parameter: async_api
+        LongFunction<Boolean> asyncApiFunc = (l) -> false;
+
+        if (cmdTpl.containsKey("async_api")) {
+            if (cmdTpl.isStatic("async_api"))
+                asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
+            else
+                throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
+        }
+
         // TODO: Complete implementation for websocket-producer and managed-ledger
-        if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN.label) ) {
-            return resolveAdminRequest(clientSpace);
+        if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_CRT_TENNAME.label) ) {
+            return resolveAdminCrtTenname(clientSpace);
+        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_CRT_TOP.label)) {
+            return resolveAdminCrtParttop(clientSpace, topicUriFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
             return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
@@ -136,7 +115,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         }
     }
 
-    private LongFunction<PulsarOp> resolveAdminRequest(PulsarSpace clientSpace) {
+    // Admin API: create tenant and namespace
+    private LongFunction<PulsarOp> resolveAdminCrtTenname(PulsarSpace clientSpace) {
         if ( cmdTpl.isDynamic("admin_roles") ||
              cmdTpl.isDynamic("allowed_clusters") ) {
             throw new RuntimeException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
@@ -184,13 +164,40 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             namespaceFunc = (l) -> null;
         }
 
-        return new PulsarAdminMapper(
+        return new PulsarAdminCrtTennamMapper(
             cmdTpl,
             clientSpace,
             adminRolesFunc,
             allowedClustersFunc,
             tenantFunc,
             namespaceFunc);
+    }
+
+    // Admin API: create partitioned topic
+    private LongFunction<PulsarOp> resolveAdminCrtParttop(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_fun
+    ) {
+        LongFunction<String> enablePartionFunc = (l) -> null;
+        if (cmdTpl.isStatic("enable_partition")) {
+            enablePartionFunc = (l) -> cmdTpl.getStatic("enable_partition");
+        } else if (cmdTpl.isDynamic("enable_partition")) {
+            enablePartionFunc = (l) -> cmdTpl.getDynamic("enable_partition", l);
+        }
+
+        LongFunction<String> partitionNumFunc = (l) -> null;
+        if (cmdTpl.isStatic("partition_num")) {
+            partitionNumFunc = (l) -> cmdTpl.getStatic("partition_num");
+        } else if (cmdTpl.isDynamic("partition_num")) {
+            partitionNumFunc = (l) -> cmdTpl.getDynamic("partition_num", l);
+        }
+
+        return new PulsarAdminCrtTopMapper(
+            cmdTpl,
+            clientSpace,
+            topic_uri_fun,
+            enablePartionFunc,
+            partitionNumFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgSend(
