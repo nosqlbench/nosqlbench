@@ -1,7 +1,13 @@
-- d7dfafaa Add bytes counter to consumer
-- c166b479 Add messagesize histogram
-- 0f53ea63 Pulsar: add bytes counter
-- 0ecf83f8 Making the hosts into a weighted string to allow for round robin and weighted host rotation with Stargate hosts.  Also parameterizing the protocol (http|https) and the path prefix so that this baseline can be run against Stargate directly or against Astra.
-- 84a9a4bf make tries configurable as in HttpAction
-- abbea4df Add ErrorHandler
-- 8aff79cb Handle correctly Pulsar Consumer configuration
+- 098708e0 Address merge conflict
+- e52abbf2 create cqld3 module
+- 5dfcc596 clean up
+- f10bd283 Return metrics in case of Async API
+- 4b46c7ef Minor merge conflict
+- c97b57a4 Add Pulsar Admin API support for creating topics (partitioned or not)
+- cfa0bd5a localize cqld3 deps to module
+- c70385e6 Allow Pulsar Producer to work at max speed
+- bc7dce5b Document update to reflect Admin API change
+- d3579bf4 adding graphql schema first scenarios
+- 04cf2f74 Name change to <protocol>-<api>-<workload>.
+- e7763543 Address merge conflict
+- 5fd0992e Add support for Pulsar Admin API, currently only supporting: - create tenant - create namespace
