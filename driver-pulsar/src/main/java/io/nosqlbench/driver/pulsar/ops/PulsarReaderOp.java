@@ -8,7 +8,7 @@ import org.apache.pulsar.client.api.Reader;
 import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.common.schema.SchemaType;
 
-public class PulsarReaderOp implements PulsarOp {
+public class PulsarReaderOp extends SyncPulsarOp {
     private final Reader<?> reader;
     private final Schema<?> pulsarSchema;
     private final boolean asyncPulsarOp;

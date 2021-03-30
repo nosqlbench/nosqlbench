@@ -10,7 +10,7 @@ import org.apache.pulsar.common.policies.data.TenantInfo;
 
 import java.util.Set;
 
-public class PulsarAdminCrtTennamOp implements PulsarOp {
+public class PulsarAdminCrtTennamOp extends SyncPulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarAdminCrtTennamOp.class);
 

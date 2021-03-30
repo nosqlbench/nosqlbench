@@ -50,9 +50,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         }
 
         this.opFunc = resolve();
-
-        ScopedSupplier scope = ScopedSupplier.valueOf(cmdTpl.getStaticOr("op_scope", "singleton"));
-        Supplier<LongFunction<PulsarOp>> opSupplier = scope.supplier(this::resolve);
     }
 
     @Override
@@ -249,8 +246,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             async_api_func,
             keyFunc,
             valueFunc,
-            pulsarActivity.getBytesCounter(),
-            pulsarActivity.getMessagesizeHistogram());
+            pulsarActivity);
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(

@@ -48,6 +48,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     private NBErrorHandler errorhandler;
     private OpSequence<OpDispenser<PulsarOp>> sequencer;
+    private volatile Throwable asyncOperationFailure;
 
     // private Supplier<PulsarSpace> clientSupplier;
     // private ThreadLocal<Supplier<PulsarClient>> tlClientSupplier;
@@ -186,5 +187,15 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public Histogram getMessagesizeHistogram() {
         return messagesizeHistogram;
+    }
+
+    public void failOnAsyncOperationFailure() {
+        if (asyncOperationFailure != null) {
+            throw new RuntimeException(asyncOperationFailure);
+        }
+    }
+
+    public void asyncOperationFailed(Throwable ex) {
+        this.asyncOperationFailure = asyncOperationFailure;
     }
 }

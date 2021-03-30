@@ -2,6 +2,7 @@ package io.nosqlbench.driver.pulsar.ops;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
+import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
@@ -25,25 +26,26 @@ public class PulsarProducerOp implements PulsarOp {
     private final boolean asyncPulsarOp;
     private final Counter bytesCounter;
     private final Histogram messagesizeHistogram;
+    private final PulsarActivity pulsarActivity;
 
     public PulsarProducerOp(Producer<?> producer,
                             Schema<?> schema,
                             boolean asyncPulsarOp,
                             String key,
                             String payload,
-                            Counter bytesCounter,
-                            Histogram messagesizeHistogram) {
+                            PulsarActivity pulsarActivity) {
         this.producer = producer;
         this.pulsarSchema = schema;
         this.msgKey = key;
         this.msgPayload = payload;
         this.asyncPulsarOp = asyncPulsarOp;
-        this.bytesCounter = bytesCounter;
-        this.messagesizeHistogram = messagesizeHistogram;
+        this.pulsarActivity = pulsarActivity;
+        this.bytesCounter = pulsarActivity.getBytesCounter();
+        this.messagesizeHistogram = pulsarActivity.getMessagesizeHistogram();
     }
 
     @Override
-    public void run() {
+    public void run(Runnable timeTracker) {
         if ((msgPayload == null) || msgPayload.isEmpty()) {
             throw new RuntimeException("Message payload (\"msg-value\") can't be empty!");
         }
@@ -80,17 +82,18 @@ public class PulsarProducerOp implements PulsarOp {
                 logger.trace("failed sending message");
                 throw new RuntimeException(pce);
             }
+            timeTracker.run();
         } else {
             try {
+                // we rely on blockIfQueueIsFull in order to throttle the request in this case
                 CompletableFuture<MessageId> future = typedMessageBuilder.sendAsync();
-                future.get();
-
-            /*.thenRun(() -> {
-//                System.out.println("Producing message succeeded: key - " + msgKey + "; payload - " + msgPayload);
-            }).exceptionally(ex -> {
-                System.out.println("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
-                return ex;
-            })*/
+                future.whenComplete((messageId, error) -> {
+                  timeTracker.run();
+                }).exceptionally(ex -> {
+                    logger.error("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
+                    pulsarActivity.asyncOperationFailed(ex);
+                    return null;
+                });
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
