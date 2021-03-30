@@ -29,6 +29,10 @@ public class PulsarAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
+
+        // let's fail the action if some async operation failed
+        activity.failOnAsyncOperationFailure();
+
         long start = System.nanoTime();
 
         PulsarOp pulsarOp;
@@ -44,8 +48,11 @@ public class PulsarAction implements SyncAction {
         }
 
         for (int i = 0; i < maxTries; i++) {
-            try (Timer.Context ctx = activity.getExecuteTimer().time()) {
-                pulsarOp.run();
+            Timer.Context ctx = activity.getExecuteTimer().time();
+            try {
+                // it is up to the pulsarOp to call Context#close when the activity is executed
+                // this allows us to track time for async operations
+                pulsarOp.run(ctx::close);
                 break;
             } catch (RuntimeException err) {
                 ErrorDetail errorDetail = activity

@@ -20,7 +20,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
+import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.shade.org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
 
@@ -42,6 +48,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     private NBErrorHandler errorhandler;
     private OpSequence<OpDispenser<PulsarOp>> sequencer;
+    private volatile Throwable asyncOperationFailure;
 
     // private Supplier<PulsarSpace> clientSupplier;
     // private ThreadLocal<Supplier<PulsarClient>> tlClientSupplier;
@@ -77,18 +84,28 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
 
             if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
-                adminBuilder = adminBuilder.authentication(authPluginClassName, authParams);
+//                String tokenFileName = StringUtils.removeStart(authParams, "file://");
+//                File tokenFile = new File(tokenFileName);
+//                String token;
+//                try {
+//                    token = FileUtils.readFileToString(tokenFile, StandardCharsets.UTF_8);
+//                    token = StringUtils.normalizeSpace(token);
+//                }
+//                catch (IOException ioe) {
+//                    throw new RuntimeException("Failed to read the specified (\"client.authParams\") token file: " + tokenFileName + "!");
+//                }
+//                adminBuilder.authentication(AuthenticationFactory.token(token));
+                adminBuilder.authentication(authPluginClassName, authParams);
             }
 
             if ( useTls ) {
-                adminBuilder = adminBuilder
+                adminBuilder
                     .useKeyStoreTls(useTls)
                     .allowTlsInsecureConnection(tlsAllowInsecureConnection)
                     .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
 
                 if (!StringUtils.isBlank(tlsTrustCertsFilePath))
-                    adminBuilder = adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
-
+                    adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
             }
 
             pulsarAdmin = adminBuilder.build();
@@ -170,5 +187,15 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public Histogram getMessagesizeHistogram() {
         return messagesizeHistogram;
+    }
+
+    public void failOnAsyncOperationFailure() {
+        if (asyncOperationFailure != null) {
+            throw new RuntimeException(asyncOperationFailure);
+        }
+    }
+
+    public void asyncOperationFailed(Throwable ex) {
+        this.asyncOperationFailure = asyncOperationFailure;
     }
 }

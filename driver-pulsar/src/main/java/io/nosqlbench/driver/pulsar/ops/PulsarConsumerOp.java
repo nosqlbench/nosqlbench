@@ -9,10 +9,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.SchemaType;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class PulsarConsumerOp implements PulsarOp {
+public class PulsarConsumerOp extends SyncPulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarConsumerOp.class);
 

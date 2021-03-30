@@ -1,17 +1,14 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.pulsar.client.api.BatchMessageContainer;
 import org.apache.pulsar.client.api.MessageId;
 import org.apache.pulsar.client.api.Producer;
-import org.apache.pulsar.client.impl.BatchMessageContainerBase;
-import org.apache.pulsar.client.impl.DefaultBatcherBuilder;
 import org.apache.pulsar.common.util.FutureUtil;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarBatchProducerEndOp implements PulsarOp {
+public class PulsarBatchProducerEndOp extends SyncPulsarOp {
     @Override
     public void run() {
         List<CompletableFuture<MessageId>> container = PulsarBatchProducerStartOp.threadLocalBatchMsgContainer.get();

@@ -2,7 +2,6 @@ package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import org.apache.pulsar.client.api.Producer;
 
 import java.util.Set;
 import java.util.function.LongFunction;
@@ -17,18 +16,18 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarAdminMapper extends PulsarOpMapper {
+public class PulsarAdminCrtTennamMapper extends PulsarOpMapper {
     private final LongFunction<Set<String>> adminRolesFunc;
     private final LongFunction<Set<String>> allowedClustersFunc;
     private final LongFunction<String> tenantFunc;
     private final LongFunction<String> namespaceFunc;
 
-    public PulsarAdminMapper(CommandTemplate cmdTpl,
-                             PulsarSpace clientSpace,
-                             LongFunction<Set<String>> adminRolesFunc,
-                             LongFunction<Set<String>> allowedClustersFunc,
-                             LongFunction<String> tenantFunc,
-                             LongFunction<String> namespaceFunc) {
+    public PulsarAdminCrtTennamMapper(CommandTemplate cmdTpl,
+                                      PulsarSpace clientSpace,
+                                      LongFunction<Set<String>> adminRolesFunc,
+                                      LongFunction<Set<String>> allowedClustersFunc,
+                                      LongFunction<String> tenantFunc,
+                                      LongFunction<String> namespaceFunc) {
         super(cmdTpl, clientSpace);
         this.adminRolesFunc = adminRolesFunc;
         this.allowedClustersFunc = allowedClustersFunc;
@@ -43,7 +42,7 @@ public class PulsarAdminMapper extends PulsarOpMapper {
         String tenant = tenantFunc.apply(value);
         String namespace = namespaceFunc.apply(value);
 
-        return new PulsarAdminOp(
+        return new PulsarAdminCrtTennamOp(
             clientSpace,
             adminRoleSet,
             allowedClusterSet,

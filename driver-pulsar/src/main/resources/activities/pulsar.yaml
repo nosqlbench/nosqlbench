@@ -19,20 +19,32 @@ params:
   async_api: "false"
 
 blocks:
-  - name: admin-block
+  - name: create-tennam-block
     tags:
-      phase: admin-api
+      phase: create-tenant-namespace
+      admin_task: true
     statements:
       - name: s1
-        optype: admin
+        optype: admin-crt-tennam
         admin_roles:
         allowed_clusters:
         tenant: "{tenant}"
         namespace: "default"
 
+  - name: create-parttop-block
+    tags:
+      phase: create-topic
+      admin_task: true
+    statements:
+      - name: s1
+        optype: admin-crt-top
+        enable_partition: "true"
+        partition_num: "5"
+
   - name: batch-producer-block
     tags:
       phase: batch-producer
+      admin_task: false
     statements:
       - name: s1
         optype: batch-msg-send-start
@@ -57,6 +69,7 @@ blocks:
   - name: producer-block
     tags:
       phase: producer
+      admin_task: false
     statements:
       - name: s1
         optype: msg-send
@@ -73,6 +86,7 @@ blocks:
   - name: consumer-block
     tags:
       phase: consumer
+      admin_task: false
     statements:
       - name: s1
         optype: msg-consume
@@ -85,6 +99,7 @@ blocks:
   - name: reader-block
     tags:
       phase: reader
+      admin_task: false
     statements:
       - name: s1
         optype: msg-read
