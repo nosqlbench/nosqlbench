@@ -11,7 +11,7 @@ import org.apache.pulsar.common.util.FutureUtil;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarBatchProducerEndOp implements PulsarOp {
+public class PulsarBatchProducerEndOp extends SimplePulsarOp {
     @Override
     public void run() {
         List<CompletableFuture<MessageId>> container = PulsarBatchProducerStartOp.threadLocalBatchMsgContainer.get();

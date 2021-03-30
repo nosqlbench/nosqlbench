@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarAdminOp implements PulsarOp {
+public class PulsarAdminOp extends SimplePulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarAdminOp.class);
 

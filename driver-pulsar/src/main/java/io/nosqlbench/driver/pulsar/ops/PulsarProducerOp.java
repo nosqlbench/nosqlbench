@@ -43,7 +43,7 @@ public class PulsarProducerOp implements PulsarOp {
     }
 
     @Override
-    public void run() {
+    public void run(Runnable timeTracker) {
         if ((msgPayload == null) || msgPayload.isEmpty()) {
             throw new RuntimeException("Message payload (\"msg-value\") can't be empty!");
         }
@@ -80,11 +80,14 @@ public class PulsarProducerOp implements PulsarOp {
                 logger.trace("failed sending message");
                 throw new RuntimeException(pce);
             }
+            timeTracker.run();
         } else {
             try {
                 // we rely on blockIfQueueIsFull in order to throttle the request in this case
                 CompletableFuture<MessageId> future = typedMessageBuilder.sendAsync();
-                future.exceptionally(ex -> {
+                future.whenComplete((messageId, error) -> {
+                  timeTracker.run();
+                }).exceptionally(ex -> {
                     logger.error("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
                     return null;
                 });

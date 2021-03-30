@@ -12,7 +12,7 @@ import org.apache.pulsar.common.schema.SchemaType;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class PulsarConsumerOp implements PulsarOp {
+public class PulsarConsumerOp extends SimplePulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarConsumerOp.class);
 

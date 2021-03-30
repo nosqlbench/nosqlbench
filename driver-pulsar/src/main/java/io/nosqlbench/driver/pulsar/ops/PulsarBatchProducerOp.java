@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarBatchProducerOp implements PulsarOp {
+public class PulsarBatchProducerOp extends SimplePulsarOp {
 
     private final Schema<?> pulsarSchema;
     private final String msgKey;
