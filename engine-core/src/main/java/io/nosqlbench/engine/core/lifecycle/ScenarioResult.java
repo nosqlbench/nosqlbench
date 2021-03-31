@@ -127,6 +127,14 @@ public class ScenarioResult {
                 if (count > 0) {
                     NBMetricsSummary.summarize(sb, k, v);
                 }
+            } else if (v instanceof Gauge) {
+                Object value = ((Gauge) v).getValue();
+                if (value != null && value instanceof Number) {
+                    Number n = (Number) value;
+                    if (n.doubleValue() != 0) {
+                        NBMetricsSummary.summarize(sb, k, v);
+                    }
+                }
             }
         });
 
