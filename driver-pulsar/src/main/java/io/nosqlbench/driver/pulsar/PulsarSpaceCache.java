@@ -27,7 +27,8 @@ public class PulsarSpaceCache {
                 activity.getPulsarConf(),
                 activity.getPulsarSvcUrl(),
                 activity.getWebSvcUrl(),
-                activity.getPulsarAdmin()
+                activity.getPulsarAdmin(),
+                activity.getActivityDef()
             ));
     }
 
