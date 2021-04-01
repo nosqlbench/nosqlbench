@@ -1,13 +1,8 @@
-- 098708e0 Address merge conflict
-- e52abbf2 create cqld3 module
-- 5dfcc596 clean up
-- f10bd283 Return metrics in case of Async API
-- 4b46c7ef Minor merge conflict
-- c97b57a4 Add Pulsar Admin API support for creating topics (partitioned or not)
-- cfa0bd5a localize cqld3 deps to module
-- c70385e6 Allow Pulsar Producer to work at max speed
-- bc7dce5b Document update to reflect Admin API change
-- d3579bf4 adding graphql schema first scenarios
-- 04cf2f74 Name change to <protocol>-<api>-<workload>.
-- e7763543 Address merge conflict
-- 5fd0992e Add support for Pulsar Admin API, currently only supporting: - create tenant - create namespace
+- 446bc417 (HEAD -> main, origin/main) square up build variables to RELEASE_BRANCH_PATTERN and PRERELEASE_BRANCH_PATTERn
+- a01ec80b use standard nb package layout for cqld4
+- 300deee6 use standard metrics API in cql drivers
+- a4d5110c group all standard activity metrics into one place
+- 50d9fc43 progress on cqld4
+- 43ef88f3 (origin/csv-parser-bug) Use CSVFormat.Default to handle rfc4180 CSVs
+- a130ffb8 Admin API update - check tenant/namespace/topic existence before creating it.
+- 9e04ef36 Expose interal Pulsar Producer metrics
