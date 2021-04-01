@@ -1,3 +1,5 @@
+package io.nosqlbench.driver.cqld4;
+
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 
