@@ -15,10 +15,10 @@ readonly local current_branch=$(git rev-parse --abbrev-ref HEAD)
 echo "Current branch: ${current_branch}"
 
 if   [[ -n "${current_branch}" && "${current_branch}" == *"${RELEASE_BRANCH_PATTERN}"* ]]; then
-    echo "Building for release branch $RELEASE_BRANCH_NAME"
+    echo "Building for release branch ${current_branch}"
 elif [[ -n "${current_branch}" && "${current_branch}" == *"${PRERELEASE_BRANCH_PATTERN}"* ]]; then
-    echo "Building prerelease for branch $RELEASE_BRANCH_NAME"
-else 
+    echo "Building prerelease for branch ${current_branch}"
+else
      echo "Skipping for ${current_branch} branch"
      exit 0
 fi
