@@ -162,6 +162,7 @@ jobs:
         run: scripts/release-perform.sh
         continue-on-error: true
         env:
+          RELEASE_BRANCH_PATTERN: "release"
           RELEASE_BRANCH_NAME: "main"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
