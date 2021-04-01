@@ -1,7 +1,9 @@
 package io.nosqlbench.activitytype.cql.core;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.*;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
 import io.nosqlbench.activitytype.cql.api.StatementFilter;
@@ -12,15 +14,14 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ChangeUnappliedCy
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.MaxTriesExhaustedException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cql.statements.core.ReadyCQLStatement;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.MultiPhaseAction;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +52,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
     private long retryDelay;
     private long maxRetryDelay;
     private boolean retryReplace;
+    private Timer bindTimer;
+    private Timer executeTimer;
+    private Timer resultTimer;
+    private Timer resultSuccessTimer;
+    private Histogram triesHisto;
 
     public CqlAction(ActivityDef activityDef, int slot, CqlActivity cqlActivity) {
         this.activityDef = activityDef;
@@ -63,6 +69,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
     public void init() {
         onActivityDefUpdate(activityDef);
         this.sequencer = cqlActivity.getOpSequencer();
+        this.bindTimer = cqlActivity.getInstrumentation().getOrCreateBindTimer();
+        this.executeTimer = cqlActivity.getInstrumentation().getOrCreateExecuteTimer();
+        this.resultTimer = cqlActivity.getInstrumentation().getOrCreateResultTimer();
+        this.resultSuccessTimer = cqlActivity.getInstrumentation().getOrCreateResultSuccessTimer();
+        this.triesHisto = cqlActivity.getInstrumentation().getOrCreateTriesHistogram();
     }
 
     @Override
@@ -87,7 +98,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
 
             int tries = 0;
 
-            try (Timer.Context bindTime = cqlActivity.bindTimer.time()) {
+            try (Timer.Context bindTime = bindTimer.time()) {
                 readyCQLStatement = sequencer.get(cycleValue);
                 readyCQLStatement.onStart();
 
@@ -127,11 +138,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     }
                 }
 
-                try (Timer.Context executeTime = cqlActivity.executeTimer.time()) {
+                try (Timer.Context executeTime = executeTimer.time()) {
                     resultSetFuture = cqlActivity.getSession().executeAsync(statement);
                 }
 
-                Timer.Context resultTime = cqlActivity.resultTimer.time();
+                Timer.Context resultTime = resultTimer.time();
                 try {
                     ResultSet resultSet = resultSetFuture.getUninterruptibly();
 
@@ -200,7 +211,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
 
                     if (resultSet.isFullyFetched()) {
                         long resultNanos = System.nanoTime() - nanoStartTime;
-                        cqlActivity.resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+                        resultSuccessTimer.update(resultNanos, TimeUnit.NANOSECONDS);
                         cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
                         readyCQLStatement.onSuccess(cycleValue, resultNanos, totalRowsFetchedForQuery);
                     } else {
@@ -228,7 +239,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     CQLCycleWithStatementException cqlCycleException = new CQLCycleWithStatementException(cycleValue, resultNanos, e, readyCQLStatement);
                     ErrorStatus errorStatus = ebdseErrorHandler.handleError(cycleValue, cqlCycleException);
                     if (!errorStatus.isRetryable()) {
-                        cqlActivity.triesHisto.update(tries);
+                        triesHisto.update(tries);
                         return errorStatus.getResultCode();
                     }
                 } finally {
@@ -237,7 +248,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     }
                 }
             }
-            cqlActivity.triesHisto.update(tries);
+            triesHisto.update(tries);
 
         } else {
 
@@ -252,11 +263,11 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                 ListenableFuture<ResultSet> pagingFuture;
 
                 try (Timer.Context pagingTime = cqlActivity.pagesTimer.time()) {
-                    try (Timer.Context executeTime = cqlActivity.executeTimer.time()) {
+                    try (Timer.Context executeTime = executeTimer.time()) {
                         pagingFuture = pagingResultSet.fetchMoreResults();
                     }
 
-                    Timer.Context resultTime = cqlActivity.resultTimer.time();
+                    Timer.Context resultTime = resultTimer.time();
                     try {
                         ResultSet resultSet = pagingFuture.get();
 
@@ -293,7 +304,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
 
                         if (resultSet.isFullyFetched()) {
                             long nanoTime = System.nanoTime() - nanoStartTime;
-                            cqlActivity.resultSuccessTimer.update(nanoTime, TimeUnit.NANOSECONDS);
+                            resultSuccessTimer.update(nanoTime, TimeUnit.NANOSECONDS);
                             cqlActivity.resultSetSizeHisto.update(totalRowsFetchedForQuery);
                             pagingReadyStatement.onSuccess(cycleValue, nanoTime, totalRowsFetchedForQuery);
                             pagingResultSet = null;
@@ -320,7 +331,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                         CQLCycleWithStatementException cqlCycleException = new CQLCycleWithStatementException(cycleValue, resultNanos, e, pagingReadyStatement);
                         ErrorStatus errorStatus = ebdseErrorHandler.handleError(cycleValue, cqlCycleException);
                         if (!errorStatus.isRetryable()) {
-                            cqlActivity.triesHisto.update(tries);
+                            triesHisto.update(tries);
                             return errorStatus.getResultCode();
                         }
                     } finally {
@@ -330,7 +341,7 @@ public class CqlAction implements SyncAction, MultiPhaseAction, ActivityDefObser
                     }
                 }
             }
-            cqlActivity.triesHisto.update(tries);
+            triesHisto.update(tries);
         }
         return 0;
     }

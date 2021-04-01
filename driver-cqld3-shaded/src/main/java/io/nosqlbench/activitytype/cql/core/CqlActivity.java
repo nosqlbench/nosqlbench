@@ -72,16 +72,12 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private final Map<String, Writer> namedWriters = new HashMap<>();
     protected List<OpTemplate> stmts;
     Timer retryDelayTimer;
-    Timer bindTimer;
-    Timer executeTimer;
-    Timer resultTimer;
-    Timer resultSuccessTimer;
     Timer pagesTimer;
-    Histogram triesHisto;
+    private Histogram triesHisto;
     Histogram skippedTokensHisto;
     Histogram resultSetSizeHisto;
-    int maxpages;
     Meter rowsCounter;
+    int maxpages;
     private HashedCQLErrorHandler errorHandler;
     private OpSequence<ReadyCQLStatement> opsequence;
     private Session session;
@@ -111,7 +107,6 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         injector.injectUserProvidedCodecs(session, true);
     }
 
-
     @Override
     public synchronized void initActivity() {
         logger.debug("initializing activity: " + this.activityDef.getAlias());
@@ -122,16 +117,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         }
         initSequencer();
         setDefaultsFromOpSequence(this.opsequence);
-
         retryDelayTimer = ActivityMetrics.timer(activityDef, "retry-delay");
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
-        resultTimer = ActivityMetrics.timer(activityDef, "result");
-        triesHisto = ActivityMetrics.histogram(activityDef, "tries");
         pagesTimer = ActivityMetrics.timer(activityDef, "pages");
         rowsCounter = ActivityMetrics.meter(activityDef, "rows");
         skippedTokensHisto = ActivityMetrics.histogram(activityDef, "skipped-tokens");
-        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
         resultSetSizeHisto = ActivityMetrics.histogram(activityDef, "resultset-size");
         onActivityDefUpdate(activityDef);
         logger.debug("activity fully initialized: " + this.activityDef.getAlias());

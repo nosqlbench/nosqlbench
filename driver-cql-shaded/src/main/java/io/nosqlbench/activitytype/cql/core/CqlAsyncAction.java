@@ -1,8 +1,11 @@
 package io.nosqlbench.activitytype.cql.core;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.activitytype.cql.api.ErrorResponse;
 import io.nosqlbench.activitytype.cql.api.ResultSetCycleOperator;
 import io.nosqlbench.activitytype.cql.api.RowCycleOperator;
@@ -13,8 +16,6 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLCycleWithState
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.activitytype.cql.errorhandling.exceptions.UnexpectedPagingException;
 import io.nosqlbench.activitytype.cql.statements.core.ReadyCQLStatement;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.activitytype.cql.statements.modifiers.StatementModifier;
 import io.nosqlbench.engine.api.activityapi.core.BaseAsyncAction;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.FailedOp;
@@ -23,8 +24,8 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.SucceededOp
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +54,11 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 //    private Statement pagingStatement;
 //    private ReadyCQLStatement pagingReadyStatement;
     private boolean showcql;
+    private Timer bindTimer;
+    private Timer executeTimer;
+    private Timer resultTimer;
+    private Timer resultSuccessTimer;
+    private Histogram triesHisto;
 //    private long opsInFlight = 0L;
 //    private long maxOpsInFlight = 1L;
 //    private long pendingResults = 0;
@@ -68,6 +74,11 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
     public void init() {
         onActivityDefUpdate(activityDef);
         this.sequencer = activity.getOpSequencer();
+        this.bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
+        this.executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();
+        this.resultTimer = activity.getInstrumentation().getOrCreateResultTimer();
+        this.resultSuccessTimer = activity.getInstrumentation().getOrCreateResultSuccessTimer();
+        this.triesHisto = activity.getInstrumentation().getOrCreateTriesHistogram();
     }
 
     @Override
@@ -83,7 +94,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         long cycle = opc.getCycle();
 
         // bind timer covers all statement selection and binding, skipping, transforming logic
-        try (Timer.Context bindTime = activity.bindTimer.time()) {
+        try (Timer.Context bindTime = bindTimer.time()) {
             cqlop.readyCQLStatement = sequencer.get(cycle);
             cqlop.statement = cqlop.readyCQLStatement.bind(cycle);
 
@@ -115,7 +126,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         cqlop.startedOp = startedOp;
 
         // The execute timer covers only the point at which EB hands the op to the driver to be executed
-        try (Timer.Context executeTime = activity.executeTimer.time()) {
+        try (Timer.Context executeTime = executeTimer.time()) {
             cqlop.future = activity.getSession().executeAsync(cqlop.statement);
             Futures.addCallback(cqlop.future, cqlop);
         }
@@ -185,11 +196,11 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
             SucceededOp<CqlOpData> success = sop.succeed(0);
             cqlop.readyCQLStatement.onSuccess(cqlop.cycle, success.getServiceTimeNanos(), cqlop.totalRowsFetchedForQuery);
 
-            activity.triesHisto.update(cqlop.triesAttempted);
+            resultTimer.update(success.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
+            resultSuccessTimer.update(success.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
+            triesHisto.update(cqlop.triesAttempted);
             activity.rowsCounter.mark(cqlop.totalRowsFetchedForQuery);
-            activity.resultSuccessTimer.update(success.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
             activity.resultSetSizeHisto.update(cqlop.totalRowsFetchedForQuery);
-            activity.resultTimer.update(success.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
 
         } catch (Exception e) {
             long currentServiceTime = sop.getCurrentServiceTimeNanos();
@@ -234,7 +245,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
         if (errorStatus.isRetryable() && cqlop.triesAttempted < maxTries) {
             startedOp.retry();
-            try (Timer.Context executeTime = activity.executeTimer.time()) {
+            try (Timer.Context executeTime = executeTimer.time()) {
                 cqlop.future = activity.getSession().executeAsync(cqlop.statement);
                 Futures.addCallback(cqlop.future, cqlop);
                 return;
@@ -242,8 +253,8 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
         }
 
         FailedOp<CqlOpData> failed = startedOp.fail(errorStatus.getResultCode());
-        activity.resultTimer.update(failed.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
-        activity.triesHisto.update(cqlop.triesAttempted);
+        resultTimer.update(failed.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
+        triesHisto.update(cqlop.triesAttempted);
 
 
     }
