@@ -65,7 +65,7 @@ public class NBIO implements NBPathsAPI.Facets {
 
     public static CSVParser readFileDelimCSV(String filename,char delim, String... searchPaths) {
         Reader reader = NBIO.readReader(filename, searchPaths);
-        CSVFormat format = CSVFormat.newFormat(delim).withFirstRecordAsHeader();
+        CSVFormat format = CSVFormat.DEFAULT.withDelimiter(delim).withFirstRecordAsHeader();
         try {
             CSVParser parser = new CSVParser(reader, format);
             return parser;

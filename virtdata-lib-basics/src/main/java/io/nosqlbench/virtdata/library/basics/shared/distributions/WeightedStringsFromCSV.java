@@ -80,7 +80,9 @@ public class WeightedStringsFromCSV implements LongFunction<String> {
                     String value = csvdatum.get(valueColumn);
                     values.add(value);
                     String weight = csvdatum.get(weightColumn);
-                    events.add(new EvProbD(values.size() - 1, Double.valueOf(weight)));
+                    if(!weight.isEmpty()) {
+                        events.add(new EvProbD(values.size() - 1, Double.valueOf(weight)));
+                    }
                 }
             }
         }
