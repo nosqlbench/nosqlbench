@@ -22,6 +22,8 @@
 # 1. NoSQLBench (NB) Pulsar Driver Overview
 
 This driver allows you to simulate and run different types of workloads (as below) against a Pulsar cluster through NoSQLBench (NB).
+* Admin API - create tenant and namespace
+* Admin API - create topic, partition or not
 * Producer
 * Consumer
 * Reader
@@ -61,7 +63,7 @@ There are multiple sections in this file that correspond to different groups of 
       consuming. This section defines configuration settings that are
       schema related.
     * There are 2 valid options under this section.
-        * *shcema.type*: Pulsar message schema type. When unset or set as
+        * *schema.type*: Pulsar message schema type. When unset or set as
           an empty string, Pulsar messages will be handled in raw *byte[]*
           format. The other valid option is **avro** which the Pulsar
           message will follow a specific Avro format.
@@ -234,7 +236,7 @@ producers/consumers/readers/etc all at once within one NB activity. This
 makes the testing more flexible and effective.
 
 **NOTE**: when a configuration is set at both the global level and the
-cycle level, **the ycle level setting will take priority!**
+cycle level, **the cycle level setting will take priority!**
 
 ## 1.4. Pulsar Driver Yaml File - Command Block Details
 
@@ -537,20 +539,20 @@ environment.
 1. Run Pulsar producer API to produce 100K messages using 100 NB threads
 
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
 2. Run Pulsar producer batch API to produce 1M messages with 2 NB threads;
    put NB execution metrics in a specified metrics folder
 
 ```bash
-<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
+<nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
 ```
 
 3. Run Pulsar consumer API to consume (and acknowledge) 100 messages using
    one single NB thread.
 ```bash
-<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
+<nb_cmd> run driver=pulsar tags=phase:consumer cycles=100 web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
 
@@ -640,7 +642,7 @@ form.
 ### 2.2.1. Instancing Controls
 
 Normative usage of the Apache Pulsar API follows a strictly enforced
-binding of topics to produces and consumers. As well, clients may be
+binding of topics to producers and consumers. As well, clients may be
 customized with different behavior for advanced testing scenarios. There
 is a significant variety of messaging and concurrency schemes seen in
 modern architectures. Thus, it is important that testing tools rise to the

@@ -1,11 +1,15 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.PulsarSpace;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.admin.Topics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class PulsarAdminCrtTopOp extends SyncPulsarOp {
@@ -16,6 +20,7 @@ public class PulsarAdminCrtTopOp extends SyncPulsarOp {
     private final String topicUri;
     private final boolean partitionTopic;
     private final int partitionNum;
+    private final String fullNsName;
 
     public PulsarAdminCrtTopOp(PulsarSpace clientSpace,
                                String topicUri,
@@ -25,6 +30,13 @@ public class PulsarAdminCrtTopOp extends SyncPulsarOp {
         this.topicUri = topicUri;
         this.partitionTopic = partitionTopic;
         this.partitionNum = partitionNum;
+
+        // Get tenant/namespace string
+        // - topicUri   : persistent://<tenant>/<namespace>/<topic>
+        // - tmpStr     : <tenant>/<namespace>/<topic>
+        // - fullNsName : <tenant>/<namespace>
+        String tmpStr = StringUtils.substringAfter(this.topicUri,"://");
+        this.fullNsName = StringUtils.substringBeforeLast(tmpStr, "/");
     }
 
     private void processPulsarAdminException(PulsarAdminException e, String finalErrMsg) {
@@ -41,21 +53,40 @@ public class PulsarAdminCrtTopOp extends SyncPulsarOp {
         PulsarAdmin pulsarAdmin = clientSpace.getPulsarAdmin();
 
         Topics topics = pulsarAdmin.topics();
+        List<String> topicListWorkingArea = new ArrayList<>();
 
         try {
             if (!partitionTopic) {
-                topics.createNonPartitionedTopic(topicUri);
+                topicListWorkingArea = topics.getList(fullNsName);
             }
             else {
-                topics.createPartitionedTopic(topicUri, partitionNum);
+                topicListWorkingArea = topics.getPartitionedTopicList(fullNsName);
             }
-        } catch (PulsarAdminException e) {
-            String errMsg = String.format("Failed to create pulsar topic: %s (partition topic: %b; partition number: %d",
-                topicUri,
-                partitionTopic,
-                partitionNum);
+        }
+        catch (PulsarAdminException.NotFoundException nfe) {
+            // do nothing
+        }
+        catch (PulsarAdminException e) {
+            processPulsarAdminException(e, "Failed to retrieve topic info.for pulsar namespace: " + fullNsName);
+        }
 
-            processPulsarAdminException(e, errMsg);
+        // If the topic doesn't exist, create it.
+        if (topicListWorkingArea.isEmpty() || !topicListWorkingArea.contains(topicUri)) {
+            try {
+                if (!partitionTopic) {
+                    topics.createNonPartitionedTopic(topicUri);
+                }
+                else {
+                    topics.createPartitionedTopic(topicUri, partitionNum);
+                }
+            } catch (PulsarAdminException e) {
+                String errMsg = String.format("Failed to create pulsar topic: %s (partition topic: %b; partition number: %d",
+                    topicUri,
+                    partitionTopic,
+                    partitionNum);
+
+                processPulsarAdminException(e, errMsg);
+            }
         }
     }
 }
