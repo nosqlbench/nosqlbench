@@ -4,10 +4,14 @@ import io.nosqlbench.driver.pulsar.PulsarSpace;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.Namespaces;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
+import org.apache.pulsar.client.admin.Tenants;
 import org.apache.pulsar.common.policies.data.TenantInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class PulsarAdminCrtTennamOp extends SyncPulsarOp {
@@ -49,28 +53,60 @@ public class PulsarAdminCrtTennamOp extends SyncPulsarOp {
 
         PulsarAdmin pulsarAdmin = clientSpace.getPulsarAdmin();
         if (!StringUtils.isBlank(tenant)) {
-            TenantInfo tenantInfo = new TenantInfo();
-            tenantInfo.setAdminRoles(adminRoleSet);
+            Tenants tenants = pulsarAdmin.tenants();
 
-            if ( !allowedClusterSet.isEmpty() ) {
-                tenantInfo.setAllowedClusters(allowedClusterSet);
-            }
-            else {
-                tenantInfo.setAllowedClusters(clientSpace.getPulsarClusterMetadata());
-            }
-
+            // Check if the tenant already exists
+            TenantInfo tenantInfo = null;
             try {
-                pulsarAdmin.tenants().createTenant(tenant, tenantInfo);
-            } catch (PulsarAdminException e) {
-                processPulsarAdminException(e, "Failed to create pulsar tenant: " + tenant);
+                tenantInfo = pulsarAdmin.tenants().getTenantInfo(tenant);
+            }
+            catch (PulsarAdminException.NotFoundException nfe) {
+                // do nothing
+            }
+            catch (PulsarAdminException e) {
+                processPulsarAdminException(e, "Failed to retrieve tenant info. for pulsar tenant: " + tenant);
+            }
+
+            if (tenantInfo == null) {
+                tenantInfo = new TenantInfo();
+                tenantInfo.setAdminRoles(adminRoleSet);
+
+                if ( !allowedClusterSet.isEmpty() ) {
+                    tenantInfo.setAllowedClusters(allowedClusterSet);
+                } else {
+                    tenantInfo.setAllowedClusters(clientSpace.getPulsarClusterMetadata());
+                }
+
+                try {
+                    tenants.createTenant(tenant, tenantInfo);
+                } catch (PulsarAdminException e) {
+                    processPulsarAdminException(e, "Failed to create pulsar tenant: " + tenant);
+                }
             }
         }
 
         if (!StringUtils.isBlank(namespace)) {
+            Namespaces namespaces = pulsarAdmin.namespaces();
+
+            List<String> nsListWorkingArea = new ArrayList<>();
             try {
-                pulsarAdmin.namespaces().createNamespace(tenant + "/" + namespace);
-            } catch (PulsarAdminException e) {
-                processPulsarAdminException(e, "Failed to create pulsar namespace: " + tenant + "/" + namespace);
+                nsListWorkingArea = namespaces.getNamespaces(tenant);
+            }
+            catch (PulsarAdminException.NotFoundException nfe) {
+                // do nothing
+            }
+            catch (PulsarAdminException e) {
+                processPulsarAdminException(e, "Failed to retrieve namespace info. for pulsar tenant: " + tenant);
+            }
+
+            // If te specified namespace doesn't exist yet, create it!
+            String fullNsName = tenant + "/" + namespace;
+            if (nsListWorkingArea.isEmpty() || !nsListWorkingArea.contains(fullNsName)) {
+                try {
+                    namespaces.createNamespace(fullNsName);
+                } catch (PulsarAdminException e) {
+                    processPulsarAdminException(e, "Failed to create pulsar namespace: " + fullNsName);
+                }
             }
         }
     }
