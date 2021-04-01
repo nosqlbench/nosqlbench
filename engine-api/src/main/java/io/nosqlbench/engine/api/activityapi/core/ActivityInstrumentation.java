@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 
 /**
@@ -89,4 +90,14 @@ public interface ActivityInstrumentation {
     Counter getOrCreatePendingOpCounter();
 
     Counter getOrCreateOpTrackerBlockedCounter();
+
+    Timer getOrCreateBindTimer();
+
+    Timer getOrCreateExecuteTimer();
+
+    Timer getOrCreateResultTimer();
+
+    Timer getOrCreateResultSuccessTimer();
+
+    Histogram getOrCreateTriesHistogram();
 }

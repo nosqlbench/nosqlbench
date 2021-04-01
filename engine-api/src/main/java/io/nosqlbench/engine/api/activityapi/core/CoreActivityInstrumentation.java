@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
@@ -106,4 +107,28 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
         return ActivityMetrics.counter(def, metricName);
     }
 
+    @Override
+    public synchronized Timer getOrCreateBindTimer() {
+        return ActivityMetrics.timer(def, "bind");
+    }
+
+    @Override
+    public synchronized Timer getOrCreateExecuteTimer() {
+        return ActivityMetrics.timer(def,"execute");
+    }
+
+    @Override
+    public synchronized Timer getOrCreateResultTimer() {
+        return ActivityMetrics.timer(def,"result");
+    }
+
+    @Override
+    public synchronized Timer getOrCreateResultSuccessTimer() {
+        return ActivityMetrics.timer(def,"result-success");
+    }
+
+    @Override
+    public synchronized Histogram getOrCreateTriesHistogram() {
+        return ActivityMetrics.histogram(def,"tries");
+    }
 }
