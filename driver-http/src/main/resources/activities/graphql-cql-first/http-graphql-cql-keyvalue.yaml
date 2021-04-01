@@ -1,0 +1,94 @@
+# nb -v run driver=http yaml=http-graphql-cql-keyvalue tags=phase:schema stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
+description: |
+  This workload emulates a key-value data model and access patterns.
+  This should be identical to the cql variant except for:
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+  Note that stargate_port should reflect the port where GraphQL API is exposed (defaults to 8080).
+
+scenarios:
+  default:
+    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    params:
+      prepared: false
+    statements:
+      - create-keyspace: |
+          create keyspace if not exists <<keyspace:gqlcf_keyvalue>>
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+          AND durable_writes = true;
+        tags:
+          name: create-keyspace
+      - create-table: |
+          create table if not exists <<keyspace:gqlcf_keyvalue>>.<<table:keyvalue>> (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+        tags:
+          name: create-table
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{seq_key}\", value: \"{seq_value}\",}) {value {key, value}}}"}
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 5
+    statements:
+      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"{<<table:keyvalue>>(value: {key: \"{rw_key}\"}) {values {key, value}}}"}
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 5
+    statements:
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{rw_key}\", value: \"{rw_value}\",}) {value {key, value}}}"}
+        tags:
+          name: main-write
