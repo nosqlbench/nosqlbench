@@ -1,0 +1,70 @@
+@startuml
+
+Participant Input as i
+Participant Thread as t
+Participant Action as a
+Participant Activity as at
+Participant "Native\nDriver" as d
+
+== acquire input ==
+
+group TIMER read-input
+ t -> i : get segment(stride)
+ activate i
+ t <- i : <cycle segment>[stride]
+ deactivate i
+end
+
+  group BLOCK striderate
+  t -> t: block until\nunthrottled
+  end
+
+group TIMER strides
+
+  loop over cycle values in segment
+
+    group BLOCK cyclerate
+     t -> t: block until\nunthrottled
+    end
+
+    group TIMER cycle
+      t -> a : runCycle(cycle)
+      activate a
+
+      group TIMER bind
+        a -> at: bind
+        activate at
+
+        at -> d: ... [if needed]
+        at <- d: ...
+        a <- at: op
+        deactivate at
+      end
+
+      group HISTOGRAM tries
+        loop over tries
+
+          group TIMER execute
+            a --> d: execute
+            activate d
+            a <-- d: future
+            deactivate d
+          end
+
+          group TIMERS result\n& result-success[result-success\nwhen no error]
+            a -> d: execute
+            activate d
+            a <- d: future
+            deactivate d
+          end
+
+        end
+
+        t <- a : result
+        deactivate a
+      end
+    end
+  end
+end # strides
+
+@enduml

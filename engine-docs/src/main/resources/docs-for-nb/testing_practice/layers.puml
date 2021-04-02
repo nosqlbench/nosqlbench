@@ -2,18 +2,18 @@
 header Layers of Messaging
 hide footbox
 
-box "User View" #clear
+box "User View" #white
 actor Alice as user
 collections "User\nAgent" as agent
 collections "Client\nSide\nApp" as capp
 end box
 
-box "WebApp View" #clear
+box "WebApp View" #white
 boundary "App Server\nor node, ..." as sapp
 boundary "Database\nDriver" as driver
 end box
 
-box "DB View" #clear
+box "DB View" #white
 database DB as db
 boundary "Storage\nService" as store
 entity "Storage\nDevice" as device
