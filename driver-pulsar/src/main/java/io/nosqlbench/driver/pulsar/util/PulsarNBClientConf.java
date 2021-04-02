@@ -93,7 +93,7 @@ public class PulsarNBClientConf {
             logger.error("Can't read the specified config properties file!");
             ioe.printStackTrace();
         } catch (ConfigurationException cex) {
-            logger.error("Error loading configuration items from the specified config properties file!");
+            logger.error("Error loading configuration items from the specified config properties file: " + canonicalFilePath);
             cex.printStackTrace();
         }
     }

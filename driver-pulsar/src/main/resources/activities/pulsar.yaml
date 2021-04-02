@@ -10,13 +10,13 @@ bindings:
   #  sensor_type:
   reading_time: ToDateTime();
   reading_value: ToFloat(100);
-  # tenant:
+  tenant: Mod(1000); Div(10L); ToString(); Prefix("tnt")
 
 # document level parameters that apply to all Pulsar client types:
 params:
   #topic_uri: "persistent://public/default/{topic}"
-  topic_uri: "persistent://public/default/nbpulsar"
-  async_api: "false"
+  topic_uri: "persistent://public/default/nbpulsar2"
+  async_api: "true"
 
 blocks:
   - name: create-tennam-block
@@ -38,7 +38,7 @@ blocks:
     statements:
       - name: s1
         optype: admin-crt-top
-        enable_partition: "true"
+        enable_partition: "false"
         partition_num: "5"
 
   - name: batch-producer-block
