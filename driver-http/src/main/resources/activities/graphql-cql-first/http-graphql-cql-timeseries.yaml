@@ -1,0 +1,113 @@
+# nb -v run driver=http yaml=http-graphql-cql-timeseries tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+description: |
+  This workload emulates a time-series data model and access patterns.
+  This should be identical to the cql variant except for:
+  - We can't specify the write timestamp to make the write idempotent like we can with cql.
+  - The `time` binding has to have a StringDateWrapper to get the exact format that the graphql API needs; See https://github.com/stargate/stargate/issues/532.
+  - We need to URLEncode the `data` binding because newlines can't be sent in graphql calls.
+  - Schema creation is cql of the lack of being able to define compaction strategy in the graphql API.
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+  Note that stargate_port should reflect the port where GraphQL API is exposed (defaults to 8080).
+
+scenarios:
+  default:
+    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); StringDateWrapper("yyyy-MM-dd'T'hh:mm:ss'Z");
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); URLEncode();
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    params:
+      prepared: false
+    statements:
+      - create-keyspace: |
+          create keyspace if not exists <<keyspace:gqlcf_iot>>
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+          AND durable_writes = true;
+        tags:
+          name: create-keyspace
+      - create-table : |
+          create table if not exists <<keyspace:gqlcf_iot>>.<<table:iot>> (
+          machine_id UUID,     // source machine
+          sensor_name text,    // sensor name
+          time timestamp,      // timestamp of collection
+          sensor_value double, //
+          station_id UUID,     // source location
+          data text,
+          PRIMARY KEY ((machine_id, sensor_name), time)
+          ) WITH CLUSTERING ORDER BY (time DESC)
+          AND compression = { 'sstable_compression' : '<<compression:LZ4Compressor>>' }
+          AND compaction = {
+          'class': 'TimeWindowCompactionStrategy',
+          'compaction_window_size': <<expiry_minutes:60>>,
+          'compaction_window_unit': 'MINUTES'
+          };
+        tags:
+          name: create-table
+      - truncate-table: |
+          truncate table <<keyspace:gqlcf_iot>>.<<table:iot>>;
+        tags:
+          name: truncate-table
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:1>>
+    statements:
+      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{machine_id}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:9>>
+    statements:
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
+        tags:
+          name: main-write
