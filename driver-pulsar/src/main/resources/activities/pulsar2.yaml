@@ -9,14 +9,14 @@ bindings:
   mykey: NumberNameToString()
   myvalue: AlphaNumericString(20)
   # Admin API - create tenant, namespace, and topic
-  tenant: Mod(1000); Div(10L); ToString(); Prefix("tenant_")
-  namespace: Mod(10); Div(5L); ToString(); Prefix("default_")
+  tenant: Mod(1000); Div(10L); ToString(); Prefix("tnt")
+  namespace: Mod(10); Div(5L); ToString(); Prefix("ns")
   core_topic_name: Mod(5); ToString(); Prefix("t")
 
 # document level parameters that apply to all Pulsar client types:
 params:
   topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
-  async_api: "false"
+  async_api: "true"
 
 blocks:
   - name: create-tennam-block
@@ -38,7 +38,7 @@ blocks:
     statements:
       - name: s1
         optype: admin-crt-top
-        enable_partition: "true"
+        enable_partition: "false"
         partition_num: "5"
 
   - name: batch-producer-block

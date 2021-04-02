@@ -84,29 +84,20 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
 
             if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
-//                String tokenFileName = StringUtils.removeStart(authParams, "file://");
-//                File tokenFile = new File(tokenFileName);
-//                String token;
-//                try {
-//                    token = FileUtils.readFileToString(tokenFile, StandardCharsets.UTF_8);
-//                    token = StringUtils.normalizeSpace(token);
-//                }
-//                catch (IOException ioe) {
-//                    throw new RuntimeException("Failed to read the specified (\"client.authParams\") token file: " + tokenFileName + "!");
-//                }
-//                adminBuilder.authentication(AuthenticationFactory.token(token));
                 adminBuilder.authentication(authPluginClassName, authParams);
             }
 
             if ( useTls ) {
                 adminBuilder
                     .useKeyStoreTls(useTls)
-                    .allowTlsInsecureConnection(tlsAllowInsecureConnection)
                     .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
 
                 if (!StringUtils.isBlank(tlsTrustCertsFilePath))
                     adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
             }
+
+            // Put this outside "if (useTls)" block for easier handling of "tlsAllowInsecureConnection"
+            adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
 
             pulsarAdmin = adminBuilder.build();
 

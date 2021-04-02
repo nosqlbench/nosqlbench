@@ -42,7 +42,7 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isValidClientType(String type) {
-        return Arrays.stream(OP_TYPES.values()).anyMatch((t) -> t.name().equals(type.toLowerCase()));
+        return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
 
 
@@ -59,7 +59,7 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isValidPersistenceType(String type) {
-        return Arrays.stream(PERSISTENT_TYPES.values()).anyMatch((t) -> t.name().equals(type.toLowerCase()));
+        return Arrays.stream(PERSISTENT_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
 
 
@@ -95,7 +95,7 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isValidClientConfItem(String item) {
-        return Arrays.stream(CLNT_CONF_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(CLNT_CONF_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -123,7 +123,7 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isStandardProducerConfItem(String item) {
-        return Arrays.stream(PRODUCER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(PRODUCER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -160,7 +160,7 @@ public class PulsarActivityUtil {
     }
 
     public static boolean isStandardConsumerConfItem(String item) {
-        return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     public enum SUBSCRIPTION_TYPE {
@@ -177,10 +177,10 @@ public class PulsarActivityUtil {
     }
 
     public static boolean isValidSubscriptionType(String item) {
-        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch((t) -> t.name().equals(item));
+        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch(t -> t.label.equals(item));
     }
     public static String getValidSubscriptionTypeList() {
-        return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(Object::toString).collect(Collectors.joining(", "));
+        return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
@@ -204,7 +204,7 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isStandardReaderConfItem(String item) {
-        return Arrays.stream(READER_CONF_STD_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(READER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     public enum READER_CONF_CUSTOM_KEY {
@@ -218,7 +218,7 @@ public class PulsarActivityUtil {
     }
 
     public static boolean isCustomReaderConfItem(String item) {
-        return Arrays.stream(READER_CONF_CUSTOM_KEY.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(READER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     public enum READER_MSG_POSITION_TYPE {
@@ -234,7 +234,7 @@ public class PulsarActivityUtil {
     }
 
     public static boolean isValideReaderStartPosition(String item) {
-        return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch((t) -> t.name().equals(item.toLowerCase()));
+        return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -395,7 +395,7 @@ public class PulsarActivityUtil {
         }
 
         String concatenatedStr =
-            StringUtils.substringAfterLast(stringBuilder.toString(), "::");
+            StringUtils.substringBeforeLast(stringBuilder.toString(), "::");
 
         return Base64.getEncoder().encodeToString(concatenatedStr.getBytes());
     }

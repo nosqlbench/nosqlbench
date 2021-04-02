@@ -6,6 +6,7 @@ import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,14 +83,50 @@ public class PulsarSpace {
 
         try {
             Map<String, Object> clientConf = pulsarNBClientConf.getClientConfMap();
-            // Override "client.serviceUrl" setting in config.properties
-            clientConf.remove("serviceUrl", pulsarSvcUrl);
 
-            pulsarClient = clientBuilder
-                .loadConf(clientConf)
-                .serviceUrl(pulsarSvcUrl)
-                .build();
-        } catch (PulsarClientException pce) {
+            // Override "client.serviceUrl" setting in config.properties
+            clientConf.remove("serviceUrl");
+            clientBuilder.loadConf(clientConf).serviceUrl(pulsarSvcUrl);
+
+            String authPluginClassName =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authPulginClassName.label);
+            String authParams =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authParams.label);
+
+            String useTlsStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.useTls.label);
+            boolean useTls = BooleanUtils.toBoolean(useTlsStr);
+
+            String tlsTrustCertsFilePath =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
+
+            String tlsAllowInsecureConnectionStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
+            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
+
+            String tlsHostnameVerificationEnableStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
+            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
+
+            if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
+                clientBuilder.authentication(authPluginClassName, authParams);
+            }
+
+            if ( useTls ) {
+                clientBuilder
+                    .useKeyStoreTls(useTls)
+                    .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+                if (!StringUtils.isBlank(tlsTrustCertsFilePath))
+                    clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+            }
+
+            // Put this outside "if (useTls)" block for easier handling of "tlsAllowInsecureConnection"
+            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
+
+            pulsarClient = clientBuilder.build();
+        }
+        catch (PulsarClientException pce) {
             String errMsg = "Fail to create PulsarClient from global configuration: " + pce.getMessage();
             logger.error(errMsg);
             throw new RuntimeException(errMsg);
@@ -176,14 +213,15 @@ public class PulsarSpace {
         }
 
         String encodedStr = PulsarActivityUtil.encode(producerName, topicName);
-        Producer<?> producer = producers.computeIfAbsent(encodedStr, (pn -> {
+        Producer<?> producer = producers.get(encodedStr);
 
-
+        if (producer == null) {
             PulsarClient pulsarClient = getPulsarClient();
 
             // Get other possible producer settings that are set at global level
             Map<String, Object> producerConf = pulsarNBClientConf.getProducerConfMap();
             producerConf.put(PulsarActivityUtil.PRODUCER_CONF_STD_KEY.topicName.label, topicName);
+
             String producerMetricsPrefix;
             if (!StringUtils.isBlank(producerName)) {
                 producerConf.put(PulsarActivityUtil.PRODUCER_CONF_STD_KEY.producerName.label, producerName);
@@ -195,7 +233,6 @@ public class PulsarSpace {
             }
 
             producerMetricsPrefix += topicName + "_";
-
             producerMetricsPrefix = producerMetricsPrefix
                 .replace("persistent://public/default/", "")  // default name for tests/demos (in all Pulsar examples) is persistent://public/default/test -> use just the topic name test
                 .replace("non-persistent://", "") // always remove topic type
@@ -203,19 +240,22 @@ public class PulsarSpace {
                 .replace("/","_"); // persistent://tenant/namespace/topicname -> tenant_namespace_topicname
 
             try {
-                Producer<?> newProducer = pulsarClient.newProducer(pulsarSchema).loadConf(producerConf).create();
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalbytessent",safeExtractMetric(newProducer, (s -> s.getTotalBytesSent() + s.getNumBytesSent())));
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalmsgssent", safeExtractMetric(newProducer, (s -> s.getTotalMsgsSent() + s.getNumMsgsSent())));
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalsendfailed", safeExtractMetric(newProducer, (s -> s.getTotalSendFailed() + s.getNumSendFailed())));
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalacksreceived", safeExtractMetric(newProducer,(s -> s.getTotalAcksReceived() + s.getNumAcksReceived())));
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "sendbytesrate", safeExtractMetric(newProducer, ProducerStats::getSendBytesRate));
-                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "sendmsgsrate", safeExtractMetric(newProducer, ProducerStats::getSendMsgsRate));
-                return newProducer;
-            } catch (PulsarClientException ple) {
+                ProducerBuilder producerBuilder = pulsarClient.newProducer(pulsarSchema);
+                producerBuilder.loadConf(producerConf);
+                producer = producerBuilder.create();
+                producers.put(encodedStr, producer);
+
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalbytessent", safeExtractMetric(producer, (s -> s.getTotalBytesSent() + s.getNumBytesSent())));
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalmsgssent", safeExtractMetric(producer, (s -> s.getTotalMsgsSent() + s.getNumMsgsSent())));
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalsendfailed", safeExtractMetric(producer, (s -> s.getTotalSendFailed() + s.getNumSendFailed())));
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalacksreceived", safeExtractMetric(producer,(s -> s.getTotalAcksReceived() + s.getNumAcksReceived())));
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "sendbytesrate", safeExtractMetric(producer, ProducerStats::getSendBytesRate));
+                ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "sendmsgsrate", safeExtractMetric(producer, ProducerStats::getSendMsgsRate));
+            }
+            catch (PulsarClientException ple) {
                 throw new RuntimeException("Unable to create a Pulsar producer!", ple);
             }
-
-        }));
+        }
 
         return producer;
     }
