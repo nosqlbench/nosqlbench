@@ -1,8 +1,5 @@
-- 446bc417 (HEAD -> main, origin/main) square up build variables to RELEASE_BRANCH_PATTERN and PRERELEASE_BRANCH_PATTERn
-- a01ec80b use standard nb package layout for cqld4
-- 300deee6 use standard metrics API in cql drivers
-- a4d5110c group all standard activity metrics into one place
-- 50d9fc43 progress on cqld4
-- 43ef88f3 (origin/csv-parser-bug) Use CSVFormat.Default to handle rfc4180 CSVs
-- a130ffb8 Admin API update - check tenant/namespace/topic existence before creating it.
-- 9e04ef36 Expose interal Pulsar Producer metrics
+- ececf649 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 5be14eed docs improvements
+- 61087a93 (origin/main) Merge pull request #297 from ivansenic/ise-gql-cql-first
+- 1a33f026 Merge pull request #296 from yabinmeng/main
+- d5cfdf13 - AuthN and AuthR for Client API - Pulsar client caching fix - Other minor fix

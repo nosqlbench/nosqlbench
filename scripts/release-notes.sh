@@ -17,6 +17,7 @@ do
   continue
  elif [[ $line =~ "Merge" ]]
   then
+  printf -- "- $line"
 #  printf "merge info, skipping: $line" 1>&2
   continue
  else
