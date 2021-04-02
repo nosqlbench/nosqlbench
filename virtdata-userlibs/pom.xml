@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.32-SNAPSHOT</version>
+        <version>4.15.32</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -18,36 +18,36 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-realdata</artifactId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-realer</artifactId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-random</artifactId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
             <artifactId>virtdata-lib-basics</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
             <artifactId>virtdata-lib-curves4</artifactId>
         </dependency>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
-            <version>4.15.32-SNAPSHOT</version>
+            <version>4.15.32</version>
         </dependency>
 
     </dependencies>
