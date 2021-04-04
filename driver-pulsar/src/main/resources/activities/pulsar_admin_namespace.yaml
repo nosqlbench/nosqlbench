@@ -7,8 +7,8 @@ params:
   # "true" - asynchronous Pulsar Admin API
   # "false" - synchronous Pulsar Admin API
   async_api: "true"
-  # "true" - delete tenant
-  # "false" - create tenant
+  # "true" - delete namespace
+  # "false" - create namespace
   admin_delop: "false"
 
 blocks:

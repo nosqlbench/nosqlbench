@@ -9,8 +9,8 @@ params:
   # "true" - asynchronous Pulsar Admin API
   # "false" - synchronous Pulsar Admin API
   async_api: "true"
-  # "true" - delete tenant
-  # "false" - create tenant
+  # "true" - delete topic
+  # "false" - create topic
   admin_delop: "false"
 
 blocks:
