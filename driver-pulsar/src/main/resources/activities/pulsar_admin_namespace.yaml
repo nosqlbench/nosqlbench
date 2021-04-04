@@ -1,0 +1,22 @@
+bindings:
+  # 20 namespaces: 10 tenants, 2 namespaces/tenant
+  tenant: Mod(20); Div(2L); ToString(); Prefix("tnt")
+  namespace: Mod(2); ToString(); Prefix("ns")
+
+params:
+  # "true" - asynchronous Pulsar Admin API
+  # "false" - synchronous Pulsar Admin API
+  async_api: "true"
+  # "true" - delete tenant
+  # "false" - create tenant
+  admin_delop: "false"
+
+blocks:
+  - name: create-namespace-block
+    tags:
+      phase: admin-namespace
+      admin_task: true
+    statements:
+      - name: s1
+        optype: admin-namespace
+        namespace: "{tenant}/{namespace}"

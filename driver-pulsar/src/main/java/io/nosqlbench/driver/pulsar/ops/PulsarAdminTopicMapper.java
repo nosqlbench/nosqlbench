@@ -17,17 +17,20 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarAdminCrtTopMapper extends PulsarOpMapper {
+public class PulsarAdminTopicMapper extends PulsarAdminMapper {
     private final LongFunction<String> topicUriFunc;
     private final LongFunction<String> enablePartionFunc;
     private final LongFunction<String> partitionNumFunc;
 
-    public PulsarAdminCrtTopMapper(CommandTemplate cmdTpl,
-                                   PulsarSpace clientSpace,
-                                   LongFunction<String> topicUriFunc,
-                                   LongFunction<String> enablePartionFunc,
-                                   LongFunction<String> partitionNumFunc) {
-        super(cmdTpl, clientSpace);
+    public PulsarAdminTopicMapper(CommandTemplate cmdTpl,
+                                  PulsarSpace clientSpace,
+                                  LongFunction<Boolean> asyncApiFunc,
+                                  LongFunction<Boolean> adminDelOpFunc,
+                                  LongFunction<String> topicUriFunc,
+                                  LongFunction<String> enablePartionFunc,
+                                  LongFunction<String> partitionNumFunc)
+    {
+        super(cmdTpl, clientSpace, asyncApiFunc, adminDelOpFunc);
         this.topicUriFunc = topicUriFunc;
         this.enablePartionFunc = enablePartionFunc;
         this.partitionNumFunc = partitionNumFunc;
@@ -38,6 +41,8 @@ public class PulsarAdminCrtTopMapper extends PulsarOpMapper {
         String topicUri = topicUriFunc.apply(value);
         String enablePartitionStr = enablePartionFunc.apply(value);
         String partitionNumStr = partitionNumFunc.apply(value);
+        boolean asyncApi = asyncApiFunc.apply(value);
+        boolean adminDelOp = adminDelOpFunc.apply(value);
 
         if ( StringUtils.isBlank(topicUri) ) {
             throw new RuntimeException("\"topic_uri\" parameter can't be empty when creating a Pulsar topic!");
@@ -50,17 +55,19 @@ public class PulsarAdminCrtTopMapper extends PulsarOpMapper {
         if ( StringUtils.isBlank(partitionNumStr) || !StringUtils.isNumeric(partitionNumStr) ) {
             invalidPartStr = true;
         } else {
-            partitionNum = Integer.valueOf(partitionNumStr);
+            partitionNum = Integer.parseInt(partitionNumStr);
             invalidPartStr = (partitionNum <= 0);
         }
         if (partitionTopic && invalidPartStr) {
             throw new RuntimeException("Invalid specified value for \"partition_num\" parameter when creating partitioned topic!");
         }
 
-        return new PulsarAdminCrtTopOp(
+        return new PulsarAdminTopicOp(
             clientSpace,
             topicUri,
             partitionTopic,
-            partitionNum);
+            partitionNum,
+            asyncApi,
+            adminDelOp);
     }
 }

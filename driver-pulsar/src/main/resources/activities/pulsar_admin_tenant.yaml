@@ -1,0 +1,23 @@
+bindings:
+  # 10 tenants
+  tenant: Mod(10); ToString(); Prefix("tnt")
+
+params:
+  # "true" - asynchronous Pulsar Admin API
+  # "false" - synchronous Pulsar Admin API
+  async_api: "true"
+  # "true" - delete tenant
+  # "false" - create tenant
+  admin_delop: "false"
+
+blocks:
+  - name: create-tenant-block
+    tags:
+      phase: admin-tenant
+      admin_task: true
+    statements:
+      - name: s1
+        optype: admin-tenant
+        admin_roles:
+        allowed_clusters:
+        tenant: "{tenant}"

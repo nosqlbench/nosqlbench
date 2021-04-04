@@ -22,21 +22,19 @@ import java.util.function.LongFunction;
  */
 public class PulsarProducerMapper extends PulsarOpMapper {
     private final LongFunction<Producer<?>> producerFunc;
-    private final LongFunction<Boolean> asyncApiFunc;
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> payloadFunc;
     private final PulsarActivity pulsarActivity;
 
     public PulsarProducerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
-                                LongFunction<Producer<?>> producerFunc,
                                 LongFunction<Boolean> asyncApiFunc,
+                                LongFunction<Producer<?>> producerFunc,
                                 LongFunction<String> keyFunc,
                                 LongFunction<String> payloadFunc,
                                 PulsarActivity pulsarActivity) {
-        super(cmdTpl, clientSpace);
+        super(cmdTpl, clientSpace, asyncApiFunc);
         this.producerFunc = producerFunc;
-        this.asyncApiFunc = asyncApiFunc;
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
         this.pulsarActivity = pulsarActivity;

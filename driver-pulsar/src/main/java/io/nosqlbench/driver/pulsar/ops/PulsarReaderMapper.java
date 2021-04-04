@@ -10,15 +10,14 @@ import java.util.function.LongFunction;
 public class PulsarReaderMapper extends PulsarOpMapper {
 
     private final LongFunction<Reader<?>> readerFunc;
-    private final LongFunction<Boolean> asyncApiFunc;
 
     public PulsarReaderMapper(CommandTemplate cmdTpl,
                               PulsarSpace clientSpace,
-                              LongFunction<Reader<?>> readerFunc,
-                              LongFunction<Boolean> asyncApiFunc) {
-        super(cmdTpl, clientSpace);
+                              LongFunction<Boolean> asyncApiFunc,
+                              LongFunction<Reader<?>> readerFunc)
+    {
+        super(cmdTpl, clientSpace, asyncApiFunc);
         this.readerFunc = readerFunc;
-        this.asyncApiFunc = asyncApiFunc;
     }
 
     @Override

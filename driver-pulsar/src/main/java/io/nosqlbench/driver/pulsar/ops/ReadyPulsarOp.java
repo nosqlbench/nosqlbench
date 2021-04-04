@@ -4,8 +4,8 @@ import io.nosqlbench.driver.pulsar.*;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.scoping.ScopedSupplier;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.LongFunction;
-import java.util.function.Supplier;
 
 public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
@@ -57,14 +56,10 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return opFunc.apply(value);
     }
 
-    private boolean isBoolean(String str) {
-        return StringUtils.equalsAnyIgnoreCase(str, "yes", "true");
-    }
-
     private LongFunction<PulsarOp> resolve() {
 
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {
-            throw new RuntimeException("Statement parameter \"optype\" must have a valid value!");
+            throw new RuntimeException("Statement parameter \"optype\" must be static and have a valid value!");
         }
         String stmtOpType = cmdTpl.getStatic("optype");
 
@@ -74,30 +69,39 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
         // Global parameter: topic_uri
         LongFunction<String> topicUriFunc = (l) -> null;
-
-        if (cmdTpl.containsKey("topic_uri")) {
-            if (cmdTpl.isStatic("topic_uri")) {
-                topicUriFunc = (l) -> cmdTpl.getStatic("topic_uri");
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label)) {
+                topicUriFunc = (l) -> cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label);
             } else {
-                topicUriFunc = (l) -> cmdTpl.getDynamic("topic_uri", l);
+                topicUriFunc = (l) -> cmdTpl.getDynamic(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label, l);
             }
         }
 
         // Global parameter: async_api
         LongFunction<Boolean> asyncApiFunc = (l) -> false;
-
-        if (cmdTpl.containsKey("async_api")) {
-            if (cmdTpl.isStatic("async_api"))
-                asyncApiFunc = (l) -> isBoolean(cmdTpl.getStatic("async_api"));
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label))
+                asyncApiFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic("PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label"));
             else
-                throw new RuntimeException("\"async_api\" parameter cannot be dynamic!");
+                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
+        }
+
+        // Global parameter: admin_delop
+        LongFunction<Boolean> adminDelOpFunc = (l) -> false;
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label))
+                adminDelOpFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label));
+            else
+                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label + "\" parameter cannot be dynamic!");
         }
 
         // TODO: Complete implementation for websocket-producer and managed-ledger
-        if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_CRT_TENNAME.label) ) {
-            return resolveAdminCrtTenname(clientSpace);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_CRT_TOP.label)) {
-            return resolveAdminCrtParttop(clientSpace, topicUriFunc);
+        if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TENANT.label) ) {
+            return resolveAdminTenant(clientSpace, asyncApiFunc, adminDelOpFunc);
+        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_NAMESPACE.label)) {
+            return resolveAdminNamespace(clientSpace, asyncApiFunc, adminDelOpFunc);
+        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TOPIC.label)) {
+            return resolveAdminTopic(clientSpace, topicUriFunc, asyncApiFunc, adminDelOpFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
             return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
@@ -105,18 +109,22 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
             return resolveMsgRead(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
-            return resolveMsgBatchSendStart(clientSpace, topicUriFunc);
+            return resolveMsgBatchSendStart(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label)) {
-            return resolveMsgBatchSend(clientSpace);
+            return resolveMsgBatchSend(clientSpace, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label)) {
-            return resolveMsgBatchSendEnd(clientSpace);
+            return resolveMsgBatchSendEnd(clientSpace, asyncApiFunc);
         } else {
             throw new RuntimeException("Unsupported Pulsar operation type");
         }
     }
 
-    // Admin API: create tenant and namespace
-    private LongFunction<PulsarOp> resolveAdminCrtTenname(PulsarSpace clientSpace) {
+    // Admin API: create tenant
+    private LongFunction<PulsarOp> resolveAdminTenant(
+        PulsarSpace clientSpace,
+        LongFunction<Boolean> asyncApiFunc,
+        LongFunction<Boolean> adminDelOpFunc)
+    {
         if ( cmdTpl.isDynamic("admin_roles") ||
              cmdTpl.isDynamic("allowed_clusters") ) {
             throw new RuntimeException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
@@ -155,6 +163,22 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             tenantFunc = (l) -> null;
         }
 
+        return new PulsarAdminTenantMapper(
+            cmdTpl,
+            clientSpace,
+            asyncApiFunc,
+            adminDelOpFunc,
+            adminRolesFunc,
+            allowedClustersFunc,
+            tenantFunc);
+    }
+
+    // Admin API: create tenant
+    private LongFunction<PulsarOp> resolveAdminNamespace(
+        PulsarSpace clientSpace,
+        LongFunction<Boolean> asyncApiFunc,
+        LongFunction<Boolean> adminDelOpFunc)
+    {
         LongFunction<String> namespaceFunc;
         if (cmdTpl.isStatic("namespace")) {
             namespaceFunc = (l) -> cmdTpl.getStatic("namespace");
@@ -164,19 +188,20 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             namespaceFunc = (l) -> null;
         }
 
-        return new PulsarAdminCrtTennamMapper(
+        return new PulsarAdminNamespaceMapper(
             cmdTpl,
             clientSpace,
-            adminRolesFunc,
-            allowedClustersFunc,
-            tenantFunc,
+            asyncApiFunc,
+            adminDelOpFunc,
             namespaceFunc);
     }
 
     // Admin API: create partitioned topic
-    private LongFunction<PulsarOp> resolveAdminCrtParttop(
+    private LongFunction<PulsarOp> resolveAdminTopic(
         PulsarSpace clientSpace,
-        LongFunction<String> topic_uri_fun
+        LongFunction<String> topic_uri_fun,
+        LongFunction<Boolean> asyncApiFunc,
+        LongFunction<Boolean> adminDelOpFunc
     ) {
         LongFunction<String> enablePartionFunc = (l) -> null;
         if (cmdTpl.isStatic("enable_partition")) {
@@ -192,9 +217,11 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             partitionNumFunc = (l) -> cmdTpl.getDynamic("partition_num", l);
         }
 
-        return new PulsarAdminCrtTopMapper(
+        return new PulsarAdminTopicMapper(
             cmdTpl,
             clientSpace,
+            asyncApiFunc,
+            adminDelOpFunc,
             topic_uri_fun,
             enablePartionFunc,
             partitionNumFunc);
@@ -242,8 +269,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return new PulsarProducerMapper(
             cmdTpl,
             clientSpace,
-            producerFunc,
             async_api_func,
+            producerFunc,
             keyFunc,
             valueFunc,
             pulsarActivity);
@@ -311,7 +338,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 consumer_name_func.apply(l)
             );
 
-        return new PulsarConsumerMapper(cmdTpl, clientSpace, consumerFunc, async_api_func,
+        return new PulsarConsumerMapper(cmdTpl, clientSpace, async_api_func, consumerFunc,
             pulsarActivity.getBytesCounter(), pulsarActivity.getMessagesizeHistogram());
     }
 
@@ -345,13 +372,14 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 start_msg_pos_str_func.apply(l)
             );
 
-        return new PulsarReaderMapper(cmdTpl, clientSpace, readerFunc, async_api_func);
+        return new PulsarReaderMapper(cmdTpl, clientSpace, async_api_func, readerFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgBatchSendStart(
         PulsarSpace clientSpace,
-        LongFunction<String> topic_uri_func
-    ) {
+        LongFunction<String> topic_uri_func,
+        LongFunction<Boolean> asyncApiFunc)
+    {
         LongFunction<String> cycle_batch_producer_name_func;
         if (cmdTpl.isStatic("batch_producer_name")) {
             cycle_batch_producer_name_func = (l) -> cmdTpl.getStatic("batch_producer_name");
@@ -364,10 +392,12 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Producer<?>> batchProducerFunc =
             (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_batch_producer_name_func.apply(l));
 
-        return new PulsarBatchProducerStartMapper(cmdTpl, clientSpace, batchProducerFunc);
+        return new PulsarBatchProducerStartMapper(cmdTpl, clientSpace, asyncApiFunc, batchProducerFunc);
     }
 
-    private LongFunction<PulsarOp> resolveMsgBatchSend(PulsarSpace clientSpace) {
+    private LongFunction<PulsarOp> resolveMsgBatchSend(PulsarSpace clientSpace,
+                                                       LongFunction<Boolean> asyncApiFunc)
+    {
         LongFunction<String> keyFunc;
         if (cmdTpl.isStatic("msg_key")) {
             keyFunc = (l) -> cmdTpl.getStatic("msg_key");
@@ -393,11 +423,14 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return new PulsarBatchProducerMapper(
             cmdTpl,
             clientSpace,
+            asyncApiFunc,
             keyFunc,
             valueFunc);
     }
 
-    private LongFunction<PulsarOp> resolveMsgBatchSendEnd(PulsarSpace clientSpace) {
-        return new PulsarBatchProducerEndMapper(cmdTpl, clientSpace);
+    private LongFunction<PulsarOp> resolveMsgBatchSendEnd(PulsarSpace clientSpace,
+                                                          LongFunction<Boolean> asyncApiFunc)
+    {
+        return new PulsarBatchProducerEndMapper(cmdTpl, clientSpace, asyncApiFunc);
     }
 }

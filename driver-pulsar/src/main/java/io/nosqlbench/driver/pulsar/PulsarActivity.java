@@ -20,13 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
-import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.PulsarClientException;
-import org.apache.pulsar.shade.org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
 
@@ -89,7 +84,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
             if ( useTls ) {
                 adminBuilder
-                    .useKeyStoreTls(useTls)
+                    .useKeyStoreTls(true)
                     .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
 
                 if (!StringUtils.isBlank(tlsTrustCertsFilePath))
@@ -98,8 +93,10 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
             // Put this outside "if (useTls)" block for easier handling of "tlsAllowInsecureConnection"
             adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
-
             pulsarAdmin = adminBuilder.build();
+
+            ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
+            logger.debug(configurationData.toString());
 
         } catch (PulsarClientException e) {
             logger.error("Fail to create PulsarAdmin from global configuration!");

@@ -1,15 +1,8 @@
-description: |
-  Test workload for new pulsar driver.
-  There is no default scenario. You must specify one of the named scenarios
-  below like send100 or recv100.
-  You can specify the number of tenants like `tenants=100`. This is the default.
-
 bindings:
   # message key and value
   mykey: NumberNameToString()
   myvalue: AlphaNumericString(20)
-  # Admin API - create tenant, namespace, and topic
-  tenant: Mod(1000); Div(10L); ToString(); Prefix("tnt")
+  tenant: Mod(10000); Div(10L); ToString(); Prefix("tnt")
   namespace: Mod(10); Div(5L); ToString(); Prefix("ns")
   core_topic_name: Mod(5); ToString(); Prefix("t")
 
@@ -19,28 +12,6 @@ params:
   async_api: "true"
 
 blocks:
-  - name: create-tennam-block
-    tags:
-      phase: create-tenant-namespace
-      admin_task: true
-    statements:
-      - name: s1
-        optype: admin-crt-tennam
-        admin_roles:
-        allowed_clusters:
-        tenant: "{tenant}"
-        namespace: "{namespace}"
-
-  - name: create-parttop-block
-    tags:
-      phase: create-topic
-      admin_task: true
-    statements:
-      - name: s1
-        optype: admin-crt-top
-        enable_partition: "false"
-        partition_num: "5"
-
   - name: batch-producer-block
     tags:
       phase: batch-producer
@@ -80,7 +51,7 @@ blocks:
         optype: msg-consume
         topic_names:
         topics_pattern:
-        subscription_name: "mynbsub_test"
+        subscription_name: "mysub"
         subscription_type:
         consumer_name:
 
