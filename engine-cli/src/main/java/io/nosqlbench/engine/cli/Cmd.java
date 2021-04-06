@@ -41,7 +41,7 @@ public class Cmd {
 
         public static CmdType valueOfAnyCase(String cmdname) {
             for (CmdType value : values()) {
-                if (cmdname.equals(value.toString()) || cmdname.toLowerCase().equals(value.toString().toLowerCase())) {
+                if (cmdname.equals(value.toString()) || cmdname.equalsIgnoreCase(value.toString())) {
                     return value;
                 }
             }
@@ -162,7 +162,8 @@ public class Cmd {
                 pval = fixer.canonicalizePath(pval);
             }
             if (params.containsKey(pname)) {
-                throw new InvalidParameterException("parameter '" + pname + "' is already set for " + cmdType);
+                throw new InvalidParameterException("parameter '" + pname + "' is already set for '" + cmdType +"' command. For each command," +
+                    " a named parameter may only be set once. Multiple occurrences are disallowed to avoid errors or ambiguity.");
             }
             params.put(pname, pval);
         }
