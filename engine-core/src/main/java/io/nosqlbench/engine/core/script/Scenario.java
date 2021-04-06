@@ -236,7 +236,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 metricRegistry,
                 scriptEnv
             );
-            logger.debug("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+            logger.trace("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                 " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
