@@ -1,4 +1,5 @@
 @startuml
+title: Metrics Types and Scopes in SyncAction
 
 Participant Input as i
 Participant Thread as t
@@ -43,19 +44,57 @@ group TIMER strides
 
       group HISTOGRAM tries
         loop over tries
+          == for blocking APIs ==
+
+          group TIMERS\nexecute\nresult\nresult-success[result-success\nwhen no error]
+            a -> d: execute
+            activate d
+            a <- d: result
+            deactivate d
+          end
+          note right
+           When the underlying native
+           driver does not expose an async
+           API, execute and result must be updated
+           with the same measurements.
+
+           result-success contains the
+           same measurements as result,
+           but ONLY for non-exceptional
+           native driver results.
+          end note
+
+
+          == for async APIs ==
 
           group TIMER execute
-            a --> d: execute
+            a -> d: execute
             activate d
-            a <-- d: future
+            d -> future **: create
+            a <- d: future
             deactivate d
           end
 
-          group TIMERS result\n& result-success[result-success\nwhen no error]
-            a -> d: execute
-            activate d
-            a <- d: future
-            deactivate d
+          note right
+           When the underlying native
+           driver DOES expose an async
+           API,  execute measures
+           submission of an op to the
+           native driver, while result
+           measures the completion
+           of the op.
+
+           result-success contains the
+           same measurements as result,
+           but ONLY for non-exceptional
+           native driver results.
+          end note
+
+          group TIMERS\nresult\nresult-success[result-success\nwhen no error]
+            a -> future: get
+            activate future
+            a <- future: result
+            deactivate future
           end
 
         end

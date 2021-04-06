@@ -1,4 +1,4 @@
-# nb -v http-graphql-cql-tabularrampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v http-graphql-cql-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
