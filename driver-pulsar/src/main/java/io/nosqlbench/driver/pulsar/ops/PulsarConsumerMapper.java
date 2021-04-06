@@ -21,19 +21,17 @@ import java.util.function.LongFunction;
  */
 public class PulsarConsumerMapper extends PulsarOpMapper {
     private final LongFunction<Consumer<?>> consumerFunc;
-    private final LongFunction<Boolean> asyncApiFunc;
     private final Counter bytesCounter;
     private final Histogram messagesizeHistogram;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
-                                LongFunction<Consumer<?>> consumerFunc,
                                 LongFunction<Boolean> asyncApiFunc,
+                                LongFunction<Consumer<?>> consumerFunc,
                                 Counter bytesCounter,
                                 Histogram messagesizeHistogram) {
-        super(cmdTpl, clientSpace);
+        super(cmdTpl, clientSpace, asyncApiFunc);
         this.consumerFunc = consumerFunc;
-        this.asyncApiFunc = asyncApiFunc;
         this.bytesCounter = bytesCounter;
         this.messagesizeHistogram = messagesizeHistogram;
     }

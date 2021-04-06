@@ -16,37 +16,39 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarAdminCrtTennamMapper extends PulsarOpMapper {
+public class PulsarAdminTenantMapper extends PulsarAdminMapper {
     private final LongFunction<Set<String>> adminRolesFunc;
     private final LongFunction<Set<String>> allowedClustersFunc;
     private final LongFunction<String> tenantFunc;
-    private final LongFunction<String> namespaceFunc;
 
-    public PulsarAdminCrtTennamMapper(CommandTemplate cmdTpl,
-                                      PulsarSpace clientSpace,
-                                      LongFunction<Set<String>> adminRolesFunc,
-                                      LongFunction<Set<String>> allowedClustersFunc,
-                                      LongFunction<String> tenantFunc,
-                                      LongFunction<String> namespaceFunc) {
-        super(cmdTpl, clientSpace);
+    public PulsarAdminTenantMapper(CommandTemplate cmdTpl,
+                                   PulsarSpace clientSpace,
+                                   LongFunction<Boolean> asyncApiFunc,
+                                   LongFunction<Boolean> adminDelOpFunc,
+                                   LongFunction<Set<String>> adminRolesFunc,
+                                   LongFunction<Set<String>> allowedClustersFunc,
+                                   LongFunction<String> tenantFunc)
+    {
+        super(cmdTpl, clientSpace, asyncApiFunc, adminDelOpFunc);
         this.adminRolesFunc = adminRolesFunc;
         this.allowedClustersFunc = allowedClustersFunc;
         this.tenantFunc = tenantFunc;
-        this.namespaceFunc = namespaceFunc;
     }
 
     @Override
     public PulsarOp apply(long value) {
+        boolean asyncApi = asyncApiFunc.apply(value);
+        boolean adminDelOp = adminDelOpFunc.apply(value);
         Set<String> adminRoleSet = adminRolesFunc.apply(value);
         Set<String> allowedClusterSet = allowedClustersFunc.apply(value);
         String tenant = tenantFunc.apply(value);
-        String namespace = namespaceFunc.apply(value);
 
-        return new PulsarAdminCrtTennamOp(
+        return new PulsarAdminTenantOp(
             clientSpace,
+            asyncApi,
+            adminDelOp,
             adminRoleSet,
             allowedClusterSet,
-            tenant,
-            namespace);
+            tenant);
     }
 }

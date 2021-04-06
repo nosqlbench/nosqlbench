@@ -54,6 +54,7 @@ public class PulsarProducerOp implements PulsarOp {
         if ((msgKey != null) && (!msgKey.isEmpty())) {
             typedMessageBuilder = typedMessageBuilder.key(msgKey);
         }
+
         int messagesize;
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
         if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
@@ -87,9 +88,7 @@ public class PulsarProducerOp implements PulsarOp {
             try {
                 // we rely on blockIfQueueIsFull in order to throttle the request in this case
                 CompletableFuture<MessageId> future = typedMessageBuilder.sendAsync();
-                future.whenComplete((messageId, error) -> {
-                  timeTracker.run();
-                }).exceptionally(ex -> {
+                future.whenComplete((messageId, error) -> timeTracker.run()).exceptionally(ex -> {
                     logger.error("Producing message failed: key - " + msgKey + "; payload - " + msgPayload);
                     pulsarActivity.asyncOperationFailed(ex);
                     return null;

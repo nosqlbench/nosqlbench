@@ -4,12 +4,13 @@
     - [1.3. NB Pulsar Driver Yaml File - High Level Structure](#13-nb-pulsar-driver-yaml-file---high-level-structure)
         - [1.3.1. NB Cycle Level Parameters vs. Global Level Parameters](#131-nb-cycle-level-parameters-vs-global-level-parameters)
     - [1.4. Pulsar Driver Yaml File - Command Block Details](#14-pulsar-driver-yaml-file---command-block-details)
-        - [1.4.1. Pulsar Admin API Command Block - Create Tenant and Namespace](#141-pulsar-admin-api-command-block---create-tenant-and-namespace)
-        - [1.4.2. Pulsar Admin API Command Block - Create Topic (Partitioned or Regular)](#142-pulsar-admin-api-command-block---create-topic-partitioned-or-regular)
-        - [1.4.3. Batch Producer Command Block](#143-batch-producer-command-block)
-        - [1.4.4. Producer Command Block](#144-producer-command-block)
-        - [1.4.5. Consumer Command Block](#145-consumer-command-block)
-        - [1.4.6. Reader Command Block](#146-reader-command-block)
+        - [1.4.1. Pulsar Admin API Command Block - Create Tenants](#141-pulsar-admin-api-command-block---create-tenants)
+        - [1.4.2. Pulsar Admin API Command Block - Create Namespaces](#142-pulsar-admin-api-command-block---create-namespaces)
+        - [1.4.3. Pulsar Admin API Command Block - Create Topics (Partitioned or Regular)](#143-pulsar-admin-api-command-block---create-topics-partitioned-or-regular)
+        - [1.4.4. Batch Producer Command Block](#144-batch-producer-command-block)
+        - [1.4.5. Producer Command Block](#145-producer-command-block)
+        - [1.4.6. Consumer Command Block](#146-consumer-command-block)
+        - [1.4.7. Reader Command Block](#147-reader-command-block)
     - [1.5. Schema Support](#15-schema-support)
     - [1.6. NB Activity Execution Parameters](#16-nb-activity-execution-parameters)
     - [1.7. NB Pulsar Driver Execution Example](#17-nb-pulsar-driver-execution-example)
@@ -22,8 +23,9 @@
 # 1. NoSQLBench (NB) Pulsar Driver Overview
 
 This driver allows you to simulate and run different types of workloads (as below) against a Pulsar cluster through NoSQLBench (NB).
-* Admin API - create tenant and namespace
-* Admin API - create topic, partition or not
+* Admin API - create tenants
+* Admin API - create namespaces
+* Admin API - create topics
 * Producer
 * Consumer
 * Reader
@@ -122,12 +124,13 @@ At high level, Pulsar driver yaml file has the following structure:
   Right now, the following command blocks are already supported or will be
   added in the near future. We'll go through each of these command blocks
   with more details in later sections.
-    * (future) **admin-block**: support for Pulsar Admin API, starting
-      with using NB to create tenants and namespaces.
-    * **batch-producer-block**: Pulsar batch producer
-    * **producer-block**: Pulsar producer
-    * **consumer-block**: Pulsar consumer
-    * **reader-block**: Pulsar reader
+    * (Pulsar Admin API)  **create-tenant-block**: create/delete tenants
+    * (Pulsar Admin API)  **create-namespace-block**: create/delete namespaces
+    * (Pulsar Admin API)  **create-topic-block**: create/delete topics
+    * (Pulsar Client API) **batch-producer-block**: batch producer
+    * (Pulsar Client API) **producer-block**: producer
+    * (Pulsar Client API) **consumer-block**: consumer
+    * (Pulsar Client API) **reader-block**: reader
 
 ```yaml
 description: |
@@ -136,10 +139,10 @@ description: |
 bindings:
   ... ...
 
-# global parameters that apply to all Pulsar client types:
 params:
   topic_uri: "<pulsar_topic_name>"
   async_api: "false"
+  admin_delop: "false"
 
 blocks:
   - name: <command_block_1>
@@ -240,28 +243,27 @@ cycle level, **the cycle level setting will take priority!**
 
 ## 1.4. Pulsar Driver Yaml File - Command Block Details
 
-### 1.4.1. Pulsar Admin API Command Block - Create Tenant and Namespace
+### 1.4.1. Pulsar Admin API Command Block - Create Tenants
 
-This Pulsar Admin API Block is used to create Pulsar tenants and namespaces. It has the following format:
+This Pulsar Admin API Block is used to create Pulsar tenants. It has the following format:
 
 ```yaml
-  - name: create-tennam-block
+  - name: create-tenant-block
     tags:
-        phase: create-tenant-namespace
+        phase: admin-tenant
         admin_task: true
     statements:
         - name: s1
-          optype: admin-crt-tennam
+          optype: admin-tenant
           admin_roles:
           allowed_clusters:
           tenant: "{tenant}"
-          namespace: "default"
 ```
 
 In this command block, there is only 1 statement (s1):
 
-* Statement **s1** is used for creating a Pulsar tenant and a namespace
-    * (Mandatory) **optype (admin-crt-tennam)** is the statement identifier
+* Statement **s1** is used for creating a Pulsar tenant
+    * (Mandatory) **optype (admin-tenant)** is the statement identifier
       for this statement
     * (Optional) **allowed_clusters** must be statically bound and it
       specifies the cluster list that is allowed for a tenant.
@@ -269,22 +271,43 @@ In this command block, there is only 1 statement (s1):
       the super user role that is associated with a tenant.
     * (Mandatory) **tenant** is the Pulsar tenant name to be created. It
       can either be dynamically or statically bound.
+
+### 1.4.2. Pulsar Admin API Command Block - Create Namespaces
+
+This Pulsar Admin API Block is used to create Pulsar namespaces. It has the following format:
+
+```yaml
+  - name: create-namespace-block
+    tags:
+        phase: admin-namespace
+        admin_task: true
+    statements:
+        - name: s1
+          optype: admin-namespace
+          namespace: "{tenant}/{namespace}"
+```
+
+In this command block, there is only 1 statement (s1):
+
+* Statement **s1** is used for creating a Pulsar namespace in format "<tenant>/<namespace>"
+    * (Mandatory) **optype (admin-namespace)** is the statement identifier
+      for this statement
     * (Mandatory) **namespace** is the Pulsar namespace name to be created
       under the above tenant. It also can be dynamically or statically bound.
 
-### 1.4.2. Pulsar Admin API Command Block - Create Topic (Partitioned or Regular)
+### 1.4.3. Pulsar Admin API Command Block - Create Topics (Partitioned or Regular)
 
 This Pulsar Admin API Block is used to create Pulsar topics. It has the following format:
 
 ```yaml
-  - name: create-parttop-block
+  - name: create-topic-block
     tags:
-        phase: create-topic
+        phase: admin-topic
         admin_task: true
     statements:
         - name: s1
-          optype: admin-crt-top
-          enable_partition: "true"
+          optype: admin-topic
+          enable_partition: "false"
           partition_num: "5"
 ```
 
@@ -301,7 +324,7 @@ In this command block, there is only 1 statement (s1):
 
 **NOTE**: The topic name is bounded by the document level parameter "topic_uri".
 
-### 1.4.3. Batch Producer Command Block
+### 1.4.4. Batch Producer Command Block
 
 Batch producer command block is used to produce a batch of messages all at
 once by one NB cycle execution. A typical format of this command block is
@@ -362,7 +385,7 @@ ratios: 1, <batch_num>, 1.
     * (Optional)  **ratio**, when provided, MUST be 1. If not provided, it
       is default to 1.
 
-### 1.4.4. Producer Command Block
+### 1.4.5. Producer Command Block
 
 This is the regular Pulsar producer command block that produces one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -398,7 +421,7 @@ This command block only has 1 statements (s1):
     * (Mandatory) **msg_payload** specifies the payload of the generated
       message
 
-### 1.4.5. Consumer Command Block
+### 1.4.6. Consumer Command Block
 
 This is the regular Pulsar consumer command block that consumes one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -438,7 +461,7 @@ This command block only has 1 statements (s1):
 
 **NOTE 2**: if both **topic_names** and **topics_pattern** are not provided, consumer topic name is default to the document level parameter **topic_uri**.
 
-### 1.4.6. Reader Command Block
+### 1.4.7. Reader Command Block
 
 This is the regular Pulsar reader command block that reads one Pulsar
 message per NB cycle execution. A typical format of this command block is
@@ -542,9 +565,8 @@ environment.
 <nb_cmd> run driver=pulsar tags=phase:producer threads=100 cycles=100K web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml
 ```
 
-2. Run Pulsar producer batch API to produce 1M messages with 2 NB threads;
-   put NB execution metrics in a specified metrics folder
-
+2. Run Pulsar producer batch API to produce 1M messages with 2 NB threads.
+**NOTE**: *seq=* must have **concat** value in order to make the batch API working properly!
 ```bash
 <nb_cmd> run driver=pulsar seq=concat tags=phase:batch-producer threads=2 cycles=1M web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=<dir>/config.properties yaml=<dir>/pulsar.yaml --report-csv-to <metrics_folder_path>
 ```

@@ -12,9 +12,10 @@ public class PulsarBatchProducerMapper extends PulsarOpMapper {
 
     public PulsarBatchProducerMapper(CommandTemplate cmdTpl,
                                      PulsarSpace clientSpace,
+                                     LongFunction<Boolean> asyncApiFunc,
                                      LongFunction<String> keyFunc,
                                      LongFunction<String> payloadFunc) {
-        super(cmdTpl, clientSpace);
+        super(cmdTpl, clientSpace, asyncApiFunc);
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
     }

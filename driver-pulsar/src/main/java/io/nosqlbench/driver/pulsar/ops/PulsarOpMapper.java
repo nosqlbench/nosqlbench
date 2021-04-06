@@ -10,10 +10,14 @@ import java.util.function.LongFunction;
 public abstract class PulsarOpMapper implements LongFunction<PulsarOp> {
     protected final CommandTemplate cmdTpl;
     protected final PulsarSpace clientSpace;
+    protected final LongFunction<Boolean> asyncApiFunc;
 
     public PulsarOpMapper(CommandTemplate cmdTpl,
-                          PulsarSpace clientSpace) {
+                          PulsarSpace clientSpace,
+                          LongFunction<Boolean> asyncApiFunc)
+    {
         this.cmdTpl = cmdTpl;
         this.clientSpace = clientSpace;
+        this.asyncApiFunc = asyncApiFunc;
     }
 }

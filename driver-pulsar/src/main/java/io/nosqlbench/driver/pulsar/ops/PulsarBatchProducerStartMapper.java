@@ -12,15 +12,15 @@ public class PulsarBatchProducerStartMapper extends PulsarOpMapper {
 
     public PulsarBatchProducerStartMapper(CommandTemplate cmdTpl,
                                           PulsarSpace clientSpace,
+                                          LongFunction<Boolean> asyncApiFunc,
                                           LongFunction<Producer<?>> batchProducerFunc) {
-        super(cmdTpl, clientSpace);
+        super(cmdTpl, clientSpace, asyncApiFunc);
         this.batchProducerFunc = batchProducerFunc;
     }
 
     @Override
     public PulsarOp apply(long value) {
         Producer<?> batchProducer = batchProducerFunc.apply(value);
-
         return new PulsarBatchProducerStartOp(batchProducer);
     }
 }

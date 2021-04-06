@@ -26,8 +26,9 @@ public class PulsarActivityUtil {
     // Supported message operation types
     // TODO: websocket-producer and managed-ledger
     public enum OP_TYPES {
-        ADMIN_CRT_TENNAME("admin-crt-tennam"),
-        ADMIN_CRT_TOP("admin-crt-top"),
+        ADMIN_TENANT("admin-tenant"),
+        ADMIN_NAMESPACE("admin-namespace"),
+        ADMIN_TOPIC("admin-topic"),
         BATCH_MSG_SEND_START("batch-msg-send-start"),
         BATCH_MSG_SEND("batch-msg-send"),
         BATCH_MSG_SEND_END("batch-msg-send-end"),
@@ -43,6 +44,21 @@ public class PulsarActivityUtil {
     }
     public static boolean isValidClientType(String type) {
         return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
+    }
+
+    public enum DOC_LEVEL_PARAMS {
+        TOPIC_URI("topic_uri"),
+        ASYNC_API("async_api"),
+        ADMIN_DELOP("admin_delop");
+
+        public final String label;
+
+        DOC_LEVEL_PARAMS(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidDocLevelParam(String param) {
+        return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(param));
     }
 
 
