@@ -57,6 +57,8 @@ public interface NBPathsAPI {
     interface GetName extends GetExtension {
         /**
          * Provide the names of the resources to be resolved. More than one resource may be provided.
+         * If no name is provided, then a wildcard search is assumed.
+         *
          * @param name The name of the resource to load
          * @return this builder
          */
@@ -66,7 +68,11 @@ public interface NBPathsAPI {
     interface GetExtension extends DoSearch {
         /**
          * provide a list of optional file extensions which should be considered. If the content is
-         * not found under the provided name, then each of the extensios is tried in order.
+         * not found under the provided name, then each of the extension is tried in order.
+         * Any provided names are combined with the extensions to create an expanded list of
+         * paths to search for. if extensions are provided without a name, then wildcards are created
+         * with the extensions as suffix patterns.
+         *
          * @param extensions The extension names to try
          * @return this builder
          */

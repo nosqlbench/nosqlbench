@@ -16,57 +16,57 @@ public class NBIOTest {
     @Test
     public void testFullyQualifiedNameSearches() {
         NBIO extensions = (NBIO) NBIO.all().name("foo.bar");
-        LinkedHashSet<String> searches = extensions.expandSearches();
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly("foo.bar");
     }
 
     @Test
     public void testExpandWildcardAndExtensionsOnly() {
         NBIO extensions = (NBIO) NBIO.all().name(".*").extension("foo","bar");
-        LinkedHashSet<String> searches = extensions.expandSearches();
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly(".*.foo",".*.bar");
     }
 
     @Test
     public void testExpandNameOnly() {
         NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension();
-        LinkedHashSet<String> searches = extensions.expandSearches();
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly("foo.bar");
     }
 
     @Test
     public void testExpandNamesAndExtensions() {
         NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension("baz","beez");
-        LinkedHashSet<String> searches = extensions.expandSearches();
-        assertThat(searches).containsExactly("foo.bar.baz","foo.bar.beez");
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
+        assertThat(searches).containsExactly("foo.bar","foo.bar.baz","foo.bar.beez");
 
     }
 
     @Test
     public void testExpandPrefixesAndFullName() {
         NBIO extensions = (NBIO) NBIO.all().prefix("act1","act2").name("foo.bar");
-        LinkedHashSet<String> searches = extensions.expandSearches();
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly("foo.bar");
     }
 
     @Test
     public void testExpandAddExtensionNotNeeded() {
         NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension("bar");
-        LinkedHashSet<String> searches = extensions.expandSearches();
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly("foo.bar");
         NBIO extensionsDot = (NBIO) NBIO.all().name("foo.bar").extension(".bar");
-        LinkedHashSet<String> searchesDot = extensionsDot.expandSearches();
+        LinkedHashSet<String> searchesDot = extensionsDot.expandNamesAndSuffixes();
         assertThat(searchesDot).containsExactly("foo.bar");
     }
 
     @Test
     public void testExpandAddExtensionNeeded() {
         NBIO extensions = (NBIO) NBIO.all().name("foo").extension("bar");
-        LinkedHashSet<String> searches = extensions.expandSearches();
-        assertThat(searches).containsExactly("foo.bar");
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
+        assertThat(searches).containsExactly("foo","foo.bar");
         NBIO extensionsDot = (NBIO) NBIO.all().name("foo").extension(".bar");
-        LinkedHashSet<String> searchesDot = extensionsDot.expandSearches();
-        assertThat(searchesDot).containsExactly("foo.bar");
+        LinkedHashSet<String> searchesDot = extensionsDot.expandNamesAndSuffixes();
+        assertThat(searchesDot).containsExactly("foo","foo.bar");
     }
 
     @Test
@@ -151,9 +151,43 @@ public class NBIOTest {
 //        assertThat(list).containsExactly(Paths.get("."));
 
         List<Path> relatives = NBIORelativizer.relativizePaths(Paths.get("target/test-classes/"), list);
-
         assertThat(relatives).hasSize(2);
-
     }
 
+    @Test
+    public void testLoadNamedFileAsYmlExtension() {
+        List<Content<?>> list = NBIO.classpath()
+            .name("nesteddir1/nesteddir2/testworkload1.yml")
+            .extension("abc")
+            .list();
+        assertThat(list).hasSize(1);
+
+        list = NBIO.classpath()
+            .name("nesteddir1/nesteddir2/testworkload1.yml")
+            .list();
+        assertThat(list).hasSize(1);
+
+        list = NBIO.classpath()
+            .name("nesteddir1/nesteddir2/testworkload1")
+            .extension("abc","yml")
+            .list();
+        assertThat(list).hasSize(1);
+    }
+
+    @Test
+    public void testLoadAllFilesUnderPath() {
+        List<Content<?>> list = null;
+
+        list = NBIO.classpath().prefix("./").list();
+        System.out.println("found " + list.size() + " entries for path '.'");
+        assertThat(list).hasSizeGreaterThan(0);
+
+        list = NBIO.fs().prefix("./").list();
+        System.out.println("found " + list.size() + " entries for path '.'");
+        assertThat(list).hasSizeGreaterThan(0);
+
+        list = NBIO.remote().prefix("./").list();
+        System.out.println("found " + list.size() + " entries for path '.'");
+        assertThat(list).hasSize(0);
+    }
 }

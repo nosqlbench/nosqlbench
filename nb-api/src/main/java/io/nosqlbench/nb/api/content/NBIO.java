@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +21,8 @@ import java.util.stream.Collectors;
  * surface area in the JVM (Files, Paths, URIs, accessing data, knowing where it comes
  * from, searching for it, etc), more emphasis was put on ease of use and
  * clarity than efficiency. This set of classes is not expected to be used
- * much in NoSqlBench after initialization.
+ * much in NoSqlBench after workload initialization, so is not performance oriented
+ *
  */
 public class NBIO implements NBPathsAPI.Facets {
 
@@ -247,7 +247,7 @@ public class NBIO implements NBPathsAPI.Facets {
     public List<List<Content<?>>> resolveEach() {
         List<List<Content<?>>> resolved = new ArrayList<>();
         for (String name : names) {
-            LinkedHashSet<String> slotSearchPaths = expandSearches(prefixes, List.of(name), extensions, false);
+            LinkedHashSet<String> slotSearchPaths = expandNamesAndSuffixes(List.of(name), extensions);
             Content<?> content = null;
             for (String slotSearchPath : slotSearchPaths) {
                 List<Content<?>> contents = resolver.resolve(slotSearchPath);
@@ -259,81 +259,42 @@ public class NBIO implements NBPathsAPI.Facets {
 
 
     // for testing
-    public LinkedHashSet<String> expandSearches() {
-        return expandSearches(prefixes, names, extensions, false);
+    public LinkedHashSet<String> expandNamesAndSuffixes() {
+        return expandNamesAndSuffixes(names, extensions);
     }
 
 
     // for testing
-    public LinkedHashSet<String> expandSearches(List<String> thePrefixes, List<String> names,
-                                                List<String> suffixes, boolean eachPrefix) {
-
-        List<String> prefixesToSearch = new ArrayList<>(thePrefixes);
-        List<String> namesToSearch = new ArrayList<>(names);
-        List<String> suffixesToSearch = new ArrayList<>(suffixes);
-
-        if (prefixesToSearch.size() == 0) {
-            prefixesToSearch.add("");
-        }
-        if (namesToSearch.size() == 0) {
-            namesToSearch.add(".*");
-        }
-        if (suffixesToSearch.size() == 0) {
-            suffixesToSearch.add("");
-        }
+    public LinkedHashSet<String> expandNamesAndSuffixes(
+        List<String> _names,
+        List<String> _suffixes) {
 
         LinkedHashSet<String> searches = new LinkedHashSet<>();
 
-        for (String name : namesToSearch) {
-            for (String suffix : suffixesToSearch) {
-                String search = name;
-                search = (search.endsWith(suffix) ? search : search + suffix);
-
-                if (eachPrefix) {
-                    for (String prefix : prefixesToSearch) {
-                        String withPrefix = (prefix.isEmpty() ? prefix :
-                            prefix + FileSystems.getDefault().getSeparator())
-                            + search;
-                        searches.add(withPrefix);
+        if (_names.size()==0 && prefixes.size()==0) {
+            searches.add(".*");
+        } else if (_names.size()>0 && _suffixes.size()==0) {
+            searches.addAll(_names);
+        } else if (_names.size()==0 && _suffixes.size()>0) {
+            _suffixes.stream().map(s -> ".*"+s).forEach(searches::add);
+        } else {
+            for (String name : _names) {
+                if (!name.equals(".*")) {
+                    searches.add(name);
+                }
+                for (String suffix : _suffixes) {
+                    if (!name.endsWith(suffix)) {
+                        searches.add(name+suffix);
                     }
-                } else {
-                    searches.add(search);
                 }
             }
         }
-
         return searches;
     }
 
-//    // for testing
-//    public LinkedHashSet<String> expandSearches(String name) {
-//
-//        LinkedHashSet<String> searchSet = new LinkedHashSet<>();
-//
-//        List<String> searchPathsToTry = new ArrayList<>();
-//        searchPathsToTry.add("");
-//        searchPathsToTry.addAll(prefixes);
-//
-//        List<String> extensionsToTry = new ArrayList<>();
-////        extensionsToTry.add("");
-//        extensionsToTry.addAll(extensions);
-//
-//        for (String searchPath : searchPathsToTry) {
-//            for (String extension : extensionsToTry) {
-//                if (!name.endsWith(extension)) {
-//                    name = name + extension;
-//                }
-//                searchSet.add(Path.of(searchPath, name).toString());
-//            }
-//        }
-//        return searchSet;
-//    }
-
-
     @Override
     public List<Content<?>> list() {
-        LinkedHashSet<String> searches = expandSearches();
-
+        LinkedHashSet<String> searches = expandNamesAndSuffixes();
         LinkedHashSet<Content<?>> foundFiles = new LinkedHashSet<>();
 
         // wrap in local search iterator
@@ -342,9 +303,16 @@ public class NBIO implements NBPathsAPI.Facets {
             foundFiles.addAll(founds);
         }
 
-        for (String searchPath : prefixes) {
-            List<Path> founds = resolver.resolveDirectory(searchPath);
+        // If this has no names or suffixes included, use a wildcard for all resources found
+        // under the respective directory roots for the prefixes
+        if (searches.size()==0) {
+            searches.add(".*");
+        }
+        for (String prefix : prefixes) {
+            List<Path> founds = resolver.resolveDirectory(prefix);
             NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true,false);
+
+
             for (Path path : founds) {
                 for (String searchPattern : searches) {
                     NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter(searchPattern,true);
