@@ -12,6 +12,8 @@ import java.util.function.Function;
 
 public class RawStmtsLoader {
 
+    public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml"};
+
     List<Function<String, String>> stringTransformers = new ArrayList<>();
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
@@ -41,7 +43,7 @@ public class RawStmtsLoader {
 
         String data = null;
         try {
-            Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension("yaml").first();
+            Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
             data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
         } catch (Exception e) {
             throw new RuntimeException("error while reading file " + path, e);
