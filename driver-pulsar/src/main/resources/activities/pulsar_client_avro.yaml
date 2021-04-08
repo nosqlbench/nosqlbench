@@ -27,7 +27,7 @@ blocks:
       - name: s2
         optype: batch-msg-send
         msg_key: "{mykey}"
-          msg_value: |
+        msg_value: |
             {
                 "SensorID": "{sensor_id}",
                 "SensorType": "Temperature",
@@ -48,13 +48,13 @@ blocks:
         optype: msg-send
         # producer_name: {producer_name}
         msg_key: "{mykey}"
-          msg_value: |
-            {
-                "SensorID": "{sensor_id}",
-                "SensorType": "Temperature",
-                "ReadingTime": "{reading_time}",
-                "ReadingValue": {reading_value}
-            }
+        msg_value: |
+          {
+              "SensorID": "{sensor_id}",
+              "SensorType": "Temperature",
+              "ReadingTime": "{reading_time}",
+              "ReadingValue": {reading_value}
+          }
 
   - name: consumer-block
     tags:
