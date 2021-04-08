@@ -1,5 +1,12 @@
-- ececf649 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 5be14eed docs improvements
-- 61087a93 (origin/main) Merge pull request #297 from ivansenic/ise-gql-cql-first
-- 1a33f026 Merge pull request #296 from yabinmeng/main
-- d5cfdf13 - AuthN and AuthR for Client API - Pulsar client caching fix - Other minor fix
+- eba79639 (HEAD -> main) add cql duration types to mapping functions
+- 8143a2c2 provide better error messages for malformed yaml
+- 5355edf7 fix yaml indentation in pulsar_client_avro
+- 808ba067 NBIO bug fixes and cleanups
+- abf86ec1 support yml extentions for yaml file searches
+- c332177d fix pom version for cqld4
+- 65705ff9 minor docs update
+- b8dab000 improve error for repeated parameter name
+- d838327f reduce verbosity of scripting extensions to trace
+- f0548a60 (origin/main) Merge pull request #299 from yabinmeng/main
+- 49ea75f6 Yaml file minor update
+- 2d4fb33a - Admin API for deletion (of tenants, namespaces, and topics) - Separate Admin API for tenants and namespaces - Code standardization - README update - Separate the big pulsar.yaml into files for different scenarios
