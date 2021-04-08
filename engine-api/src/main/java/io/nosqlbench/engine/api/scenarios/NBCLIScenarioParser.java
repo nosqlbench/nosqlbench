@@ -267,15 +267,17 @@ public class NBCLIScenarioParser {
 
         for (Path yamlPath : yamlPathList) {
 
-            String referenced = yamlPath.toString();
+            try {
 
-            if (referenced.startsWith("/")) {
-                if (yamlPath.getFileSystem() == FileSystems.getDefault()) {
-                    Path relative = Paths.get(System.getProperty("user.dir")).toAbsolutePath().relativize(yamlPath);
-                    if (!relative.toString().contains("..")) {
-                        referenced = relative.toString();
+                String referenced = yamlPath.toString();
+
+                if (referenced.startsWith("/")) {
+                    if (yamlPath.getFileSystem() == FileSystems.getDefault()) {
+                        Path relative = Paths.get(System.getProperty("user.dir")).toAbsolutePath().relativize(yamlPath);
+                        if (!relative.toString().contains("..")) {
+                            referenced = relative.toString();
+                        }
                     }
-                }
 //                String alternate = referenced.startsWith("/") ? referenced.substring(1) : referenced;
 //                Optional<Content<?>> checkLoad = NBIO.all().prefix(SEARCH_IN)
 //                    .name(alternate).extension("yaml")
@@ -283,46 +285,50 @@ public class NBCLIScenarioParser {
 //                if (checkLoad.isPresent()) {
 //                    referenced = alternate;
 //                }
-            }
-
-            Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                .name(referenced).extension("yaml")
-                .one();
-
-            StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
-            if (stmts.getStmtDocs().size() == 0) {
-                logger.warn("Encountered yaml with no docs in '" + referenced + "'");
-                continue;
-            }
-
-            Map<String, String> templates = new LinkedHashMap<>();
-            try {
-                List<String> lines = Files.readAllLines(yamlPath);
-                for (String line : lines) {
-                    templates = matchTemplates(line, templates);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+                Content<?> content = NBIO.all().prefix(SEARCH_IN)
+                    .name(referenced).extension("yaml")
+                    .one();
+
+                StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
+                if (stmts.getStmtDocs().size() == 0) {
+                    logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                    continue;
+                }
+
+                Map<String, String> templates = new LinkedHashMap<>();
+                try {
+                    List<String> lines = Files.readAllLines(yamlPath);
+                    for (String line : lines) {
+                        templates = matchTemplates(line, templates);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
 
-            Scenarios scenarios = stmts.getDocScenarios();
+                Scenarios scenarios = stmts.getDocScenarios();
 
-            List<String> scenarioNames = scenarios.getScenarioNames();
+                List<String> scenarioNames = scenarios.getScenarioNames();
 
-            if (scenarioNames != null && scenarioNames.size() > 0) {
+                if (scenarioNames != null && scenarioNames.size() > 0) {
 //                String path = yamlPath.toString();
 //                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
-                LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
-                ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
-                Collections.sort(keyNames);
-                for (String keyName : keyNames) {
-                    sortedTemplates.put(keyName, templates.get(keyName));
-                }
+                    LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
+                    ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
+                    Collections.sort(keyNames);
+                    for (String keyName : keyNames) {
+                        sortedTemplates.put(keyName, templates.get(keyName));
+                    }
 
-                String description = stmts.getDescription();
-                workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description, ""));
+                    String description = stmts.getDescription();
+                    workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description, ""));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error while scanning path '" + yamlPath.toString() + "':" + e.getMessage(), e);
             }
+
         }
         Collections.sort(workloadDescriptions);
 

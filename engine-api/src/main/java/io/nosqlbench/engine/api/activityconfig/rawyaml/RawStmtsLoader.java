@@ -45,11 +45,11 @@ public class RawStmtsLoader {
         try {
             Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
             data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
+            return loadString(logger, data);
         } catch (Exception e) {
             throw new RuntimeException("error while reading file " + path, e);
         }
 
-        return loadString(logger, data);
     }
 
     private RawStmtsDocList parseYaml(Logger logger, String data) {

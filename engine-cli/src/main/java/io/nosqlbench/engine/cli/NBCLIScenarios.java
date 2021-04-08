@@ -8,9 +8,13 @@ import java.util.List;
 public class NBCLIScenarios {
     public static void printWorkloads(boolean includeScenarios,
                                       String... includes) {
-        List<WorkloadDesc> workloads =
-            NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
+        List<WorkloadDesc> workloads = List.of();
+        try {
+             workloads= NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while getting workloads:" + e.getMessage(), e);
 
+        }
         for (WorkloadDesc workload : workloads) {
             System.out.println(workload.toMarkdown(includeScenarios));
         }

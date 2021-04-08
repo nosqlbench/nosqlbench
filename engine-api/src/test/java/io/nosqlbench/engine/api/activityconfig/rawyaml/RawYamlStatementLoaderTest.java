@@ -84,8 +84,12 @@ public class RawYamlStatementLoaderTest {
         assertThat(blocks).hasSize(1);
         RawStmtsBlock rawStmtsBlock = blocks.get(0);
         assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
+    }
 
-
+    @Test
+    public void testErrorMsg() {
+        RawStmtsLoader ysl = new RawStmtsLoader();
+        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/badyamlfile.yaml");
     }
 
 }

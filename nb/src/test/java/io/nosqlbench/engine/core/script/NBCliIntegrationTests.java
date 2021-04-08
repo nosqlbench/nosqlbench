@@ -41,7 +41,7 @@ public class NBCliIntegrationTests {
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run(
                 "workload-test", 15, java, "-jar",
-                JARNAME, "--logs-dir", "logs/test", "--list-workloads"
+                JARNAME, "--logs-dir", "logs/test", "--list-workloads", "--show-stacktraces"
         );
         System.out.println(result.getStdoutData());
         System.out.println(result.getStderrData());
