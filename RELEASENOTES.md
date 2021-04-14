@@ -1,12 +1,5 @@
-- eba79639 (HEAD -> main) add cql duration types to mapping functions
-- 8143a2c2 provide better error messages for malformed yaml
-- 5355edf7 fix yaml indentation in pulsar_client_avro
-- 808ba067 NBIO bug fixes and cleanups
-- abf86ec1 support yml extentions for yaml file searches
-- c332177d fix pom version for cqld4
-- 65705ff9 minor docs update
-- b8dab000 improve error for repeated parameter name
-- d838327f reduce verbosity of scripting extensions to trace
-- f0548a60 (origin/main) Merge pull request #299 from yabinmeng/main
-- 49ea75f6 Yaml file minor update
-- 2d4fb33a - Admin API for deletion (of tenants, namespaces, and topics) - Separate Admin API for tenants and namespaces - Code standardization - README update - Separate the big pulsar.yaml into files for different scenarios
+- 30e45242 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- df038f0c provide better error messages for malformed yaml
+- 44d3920c (origin/main) Merge pull request #301 from yabinmeng/main
+- 657d5b80 Add Producer config parameters in config.properties: - blockIfQueueFull - maxPendingMessages - batchingMaxMessages
+- 7fdd6af2 Bug fix of Pulsar Async API
