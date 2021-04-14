@@ -1,5 +1,2 @@
-- 30e45242 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- df038f0c provide better error messages for malformed yaml
-- 44d3920c (origin/main) Merge pull request #301 from yabinmeng/main
-- 657d5b80 Add Producer config parameters in config.properties: - blockIfQueueFull - maxPendingMessages - batchingMaxMessages
-- 7fdd6af2 Bug fix of Pulsar Async API
+- c6a0d53d (HEAD -> main) stabilized version conventions for workloads with baselines2
+- 4c84c804 pull basic version and CLI logging to top
