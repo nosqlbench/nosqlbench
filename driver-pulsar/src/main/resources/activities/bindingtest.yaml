@@ -1,5 +1,6 @@
 #
 # Results:
+# - 10 tenants
 # - 2 namespaces per tanant
 # - 5 topics per namespace
 #------------------------------------------------------
@@ -23,12 +24,13 @@
 #tenant=tenant_1 namespace=default_1 core_topic_name=t2
 #tenant=tenant_1 namespace=default_1 core_topic_name=t3
 #tenant=tenant_1 namespace=default_1 core_topic_name=t4
+# ... ...
 
 bindings:
   # message key and value
   #mykey: NumberNameToString()
   #myvalue: AlphaNumericString(20)
   # Admin API - create tenant, namespace, and topic
-  tenant: Mod(1000); Div(10L); ToString(); Prefix("tenant_")
+  tenant: Mod(100); Div(10L); ToString(); Prefix("tenant_")
   namespace: Mod(10); Div(5L); ToString(); Prefix("default_")
   core_topic_name: Mod(5); ToString(); Prefix("t")

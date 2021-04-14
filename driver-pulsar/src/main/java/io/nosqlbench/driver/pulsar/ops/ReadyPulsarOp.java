@@ -81,7 +81,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> asyncApiFunc = (l) -> false;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label))
-                asyncApiFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic("PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label"));
+                asyncApiFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
             else
                 throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
         }

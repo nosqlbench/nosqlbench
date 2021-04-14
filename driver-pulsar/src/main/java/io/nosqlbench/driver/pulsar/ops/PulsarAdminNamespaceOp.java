@@ -7,10 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.Namespaces;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
-import org.apache.pulsar.client.admin.Tenants;
-import org.apache.pulsar.common.policies.data.TenantInfo;
 
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class PulsarAdminNamespaceOp extends PulsarAdminOp {
