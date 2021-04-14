@@ -116,6 +116,10 @@ public class NBCLI {
             System.exit(0);
         }
 
+        logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
+        logger.info("command-line: "+Arrays.stream(args).collect(Collectors.joining(" ")));
+        logger.info("client-hardware: " + SystemId.getHostSummary());
+
         boolean dockerMetrics = globalOptions.wantsDockerMetrics();
         String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
@@ -285,10 +289,6 @@ public class NBCLI {
             System.out.println(metricsHelp);
             System.exit(0);
         }
-
-        logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
-
-        logger.info("client-hardware: " + SystemId.getHostSummary());
 
         logger.debug("initializing annotators with config:'" + annotatorsConfig + "'");
         Annotators.init(annotatorsConfig);
