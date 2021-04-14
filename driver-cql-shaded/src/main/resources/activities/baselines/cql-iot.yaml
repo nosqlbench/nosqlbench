@@ -1,6 +1,7 @@
 # nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
 description: |
-  This workload emulates a time-series data model and access patterns.
+  This workload emulates a time-series data model and access patterns. This is the same a cql-timeseries,
+  which is the preferred name as it is more canonical. This workload is retained for historic reasons.
 
 scenarios:
   default:
