@@ -34,8 +34,8 @@ public class NBIOWalker {
      * This form uses only the filename component in Paths to be matched by the filter, and the short name is also
      * what is returned by the filter.
      *
-     * @param p The path to search
-     * @param v The visitor to accumulate or operate on matched paths and all directories
+     * @param p      The path to search
+     * @param v      The visitor to accumulate or operate on matched paths and all directories
      * @param filter The Path filter to determine whether a path is included
      */
     public static void walkShortPath(Path p, PathVisitor v, DirectoryStream.Filter<Path> filter) {
@@ -48,8 +48,8 @@ public class NBIOWalker {
      * This form uses only the full path from the initial search path root in all Paths to be matched by
      * the filter, and this form of a Path component is also returned in all Paths seen by the visitor.
      *
-     * @param p The path to search
-     * @param v The visitor to accumulate or operate on matched paths and all directories
+     * @param p      The path to search
+     * @param v      The visitor to accumulate or operate on matched paths and all directories
      * @param filter The Path filter to determine whether a path is included
      */
     public static void walkFullPath(Path p, PathVisitor v, DirectoryStream.Filter<Path> filter) {
@@ -156,6 +156,32 @@ public class NBIOWalker {
             if (this.collectDirectories) {
                 listing.add(path);
             }
+        }
+    }
+
+    public static class PathSuffixFilter implements DirectoryStream.Filter<Path> {
+        private final Pattern[] pathRegexes;
+
+        public PathSuffixFilter(String filename) {
+            Path parts = Path.of(filename);
+            pathRegexes = new Pattern[parts.getNameCount()];
+            for (int i = 0; i < parts.getNameCount(); i++) {
+                pathRegexes[i]=Pattern.compile(parts.getName(i).toString());
+            }
+        }
+
+        @Override
+        public boolean accept(Path entry) throws IOException {
+            int offset = entry.getNameCount()-pathRegexes.length;
+            if (offset<0) {
+                return false;
+            }
+            for (int i = 0; i < pathRegexes.length; i++) {
+                if (!pathRegexes[i].matcher(entry.getName(i+offset).toString()).matches()) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 

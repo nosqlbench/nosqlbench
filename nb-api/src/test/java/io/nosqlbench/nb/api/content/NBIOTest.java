@@ -89,6 +89,9 @@ public class NBIOTest {
         Optional<Content<?>> testcsv1 = forCsvExtension.first();
 
         assertThat(testcsv1).isNotPresent();
+
+        List<Content<?>> list = forCsvExtension.list();
+        assertThat(list).hasSize(0);
     }
 
     @Test
@@ -189,5 +192,34 @@ public class NBIOTest {
         list = NBIO.remote().prefix("./").list();
         System.out.println("found " + list.size() + " entries for path '.'");
         assertThat(list).hasSize(0);
+    }
+
+    @Test
+    public void test() {
+        List<Content<?>> list = NBIO.fs()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name("gamma.yaml").list();
+        assertThat(list).hasSize(1);
+    }
+
+    @Test
+    public void testWildcardFilenameMatch() {
+        NBPathsAPI.DoSearch gammasSearch = NBIO.all()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name(".*gamma")
+            .extension("yaml");
+        List<Content<?>> gammas = gammasSearch.list();
+        assertThat(gammas).hasSize(3);
+    }
+
+
+    @Test
+    public void testSpecificFilenameMatch() {
+        NBPathsAPI.DoSearch gammasSearch = NBIO.all()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name("gamma")
+            .extension("yaml");
+        List<Content<?>> gammas = gammasSearch.list();
+        assertThat(gammas).hasSize(1);
     }
 }

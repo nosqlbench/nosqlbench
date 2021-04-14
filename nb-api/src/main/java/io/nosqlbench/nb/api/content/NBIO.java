@@ -220,7 +220,7 @@ public class NBIO implements NBPathsAPI.Facets {
         List<Content<?>> list = list();
 
         if (list.size() > 1) {
-            throw new BasicError("Found more than one source for " + this.toString() + ", but expected to find one at" +
+            throw new BasicError("Found more than one source for " + this + ", but expected to find one at" +
                 " most.");
         }
         throw new RuntimeException("Invalid code, go fix it, this should never happen.");
@@ -232,12 +232,12 @@ public class NBIO implements NBPathsAPI.Facets {
 
         List<Content<?>> list = list();
         if (list.size() == 0) {
-            throw new BasicError("Unable to find even a single source for '" + this.toString() + "'");
+            throw new BasicError("Unable to find even a single source for '" + this + "'");
         }
 
         if (list.size() > 1) {
             String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining(","));
-            throw new BasicError(("Found too many sources for '" + this.toString() + "', ambiguous name. Pick from " + found));
+            throw new BasicError(("Found too many sources for '" + this + "', ambiguous name. Pick from " + found));
         }
         return list.get(0);
 
@@ -309,15 +309,16 @@ public class NBIO implements NBPathsAPI.Facets {
             searches.add(".*");
         }
         for (String prefix : prefixes) {
-            List<Path> founds = resolver.resolveDirectory(prefix);
+            List<Path> directories = resolver.resolveDirectory(prefix);
             NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true,false);
 
 
-            for (Path path : founds) {
+            for (Path dirPath : directories) {
                 for (String searchPattern : searches) {
-                    NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter(searchPattern,true);
+                    NBIOWalker.PathSuffixFilter filter = new NBIOWalker.PathSuffixFilter(searchPattern);
+                    //NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter(searchPattern,false);
 //                    RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
-                    NBIOWalker.walkFullPath(path, capture, filter);
+                    NBIOWalker.walkFullPath(dirPath, capture, filter);
                 }
             }
             capture.get().stream().map(PathContent::new).forEach(foundFiles::add);
