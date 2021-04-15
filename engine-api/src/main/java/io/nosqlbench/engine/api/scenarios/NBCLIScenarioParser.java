@@ -28,7 +28,7 @@ public class NBCLIScenarioParser {
     public final static String VERBOSE_LOCKED = "===";
     public final static String UNLOCKED = "=";
 
-    private final static Logger logger = LogManager.getLogger(NBCLIScenarioParser.class);
+    private final static Logger logger = LogManager.getLogger("SCENARIOS");
     private static final String SEARCH_IN = "activities";
     public static final String WORKLOAD_SCENARIO_STEP = "WORKLOAD_SCENARIO_STEP";
 
@@ -172,7 +172,7 @@ public class NBCLIScenarioParser {
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
 
-                logger.debug("Named scenario built command: " + String.join(" ", buildingCmd.values()));
+                logger.debug("rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
             }
 

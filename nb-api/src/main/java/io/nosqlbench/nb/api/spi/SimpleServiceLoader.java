@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class SimpleServiceLoader<T> {
 
-    private static final Logger logger = LogManager.getLogger(SimpleServiceLoader.class);
+    private static final Logger logger = LogManager.getLogger("SERVICESAPI");
     private final Class<? extends T> serviceType;
 
     public SimpleServiceLoader(Class<? extends T> serviceType) {
