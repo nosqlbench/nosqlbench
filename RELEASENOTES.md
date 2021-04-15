@@ -1,2 +1,4 @@
-- c6a0d53d (HEAD -> main) stabilized version conventions for workloads with baselines2
-- 4c84c804 pull basic version and CLI logging to top
+- 1dc94080 (HEAD -> main) add missing workload and descriptions
+- a1a3d8b6 better logging names
+- f7e633ff (origin/main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- cd800139 add missing workload and descriptions
