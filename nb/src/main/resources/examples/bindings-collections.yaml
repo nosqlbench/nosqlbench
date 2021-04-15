@@ -7,8 +7,8 @@ scenarios:
     stdout: run driver===stdout format=readout bindings='set_.*'
   lists:
     stdout: run driver===stdout format=readout bindings='list_.*'
-
-
+  maps:
+    stdout: run driver===stdout format=readout bindings='map_.*'
 
 # For collection building functions, there are 6 varieties:
 # - "functions" - The main input is the same for the element functions
@@ -21,13 +21,14 @@ scenarios:
 bindings:
   # This will always create a list like [5L, "five", "5-six"]
   list_functions: ListFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
+
   # The input to the element functions is incremented by 1 for
   list_stepped: ListStepped(Identity(),NumberNameToString(),NumberNameToString())
   list_hashed: ListHashed(Identity(),ToString())
   list_sized: ListSized(HashRange(3,4),Identity(),NumberNameToString()))
   list_sized_stepped: ListSizedStepped(HashRange(3,4),Identity(),NumberNameToString()))
   list_sized_hashed: ListSizedHashed(HashRange(3,4),Identity(),ToString()))
-  list_of_sets: ListSizedStepped(HashRange(3,4),SetSized(HashRange(2,4),NumberNameToString())
+  list_of_sets: ListSizedStepped(HashRange(3,4),SetSized(HashRange(2,4),NumberNameToString()))
 
   set_functions: SetFunctions(Identity(),NumberNameToString(), Template("{}-{}",Identity(),NumberNameToString()));
   set_stepped: SetStepped(Identity(),NumberNameToString(),NumberNameToString())
@@ -38,4 +39,14 @@ bindings:
   set_of_lists: SetSizedStepped( HashRange(3,4), ListSizedStepped(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
   set_of_hashed_lists: SetSizedStepped( HashRange(3,4), ListSizedHashed(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
   set_of_lists_withduplicates: SetSized( HashRange(3,4), ListSized(HashRange(2,3),Combinations('A-Z;0-9;a-z')))
+
+  map_functions: MapFunctions(NumbernameToString(), NumberNameToString(), ToString(), ToString())
+  map_hashed: MapHashed(NumberNameToString(), NumberNameToString(), ToString(), ToString())
+  map_sized: MapSized(1, NumberNameToString(), NumberNameToString(), ToString(), ToString())
+  map_stepped: MapStepped(NumberNameToString(), NumberNameToString(), ToString(), ToString())
+  map_sized_hashed: MapSizedHashed(1, NumberNameToString(), NumberNameToString(), ToString(), ToString())
+  map_sized_stepped: MapSizedStepped(1, NumberNameToString(), NumberNameToString())
+  map_of_maps: MapSized(2,NumberNameToString(),MapSized(2,NumberNameToString(),long->ToString()))
+  map_of_lists: MapSized(2,NumberNameToString(),ListSized(2,NumberNameToString())
+
 

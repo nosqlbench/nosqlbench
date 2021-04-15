@@ -34,7 +34,12 @@ public class SetSizedHashed implements LongFunction<java.util.Set<Object>> {
         "Create a sized set of values like ['2945182322382062539', 'text', '37945690212757860', '287864597160630738', '3299224200079606887']"
     })
     public SetSizedHashed(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
     public SetSizedHashed(int size, Object... funcs) {

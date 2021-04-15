@@ -9,7 +9,6 @@ import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.LongFunction;
-import java.util.function.LongToIntFunction;
 
 /**
  * Create a Map from a long input based on a set of provided key and value functions.
@@ -30,7 +29,7 @@ public class MapStepped implements LongFunction<java.util.Map<Object,Object>> {
     private final int size;
 
     @Example({
-            "MapStepped(1, NumberNameToString(),NumberNameToString(),ToString(),ToString())",
+            "MapStepped(NumberNameToString(),NumberNameToString(),ToString(),ToString())",
             "Create a map of object values. Produces values like {'one':'one'1:1}."
     })
     public MapStepped(Object... funcs) {

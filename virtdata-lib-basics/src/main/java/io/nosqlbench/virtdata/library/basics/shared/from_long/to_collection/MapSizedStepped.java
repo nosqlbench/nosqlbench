@@ -35,7 +35,12 @@ public class MapSizedStepped implements LongFunction<java.util.Map<Object,Object
             "Create a map of object values. Produces values like {'one':'one'1:1}."
     })
     public MapSizedStepped(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.keyFuncs = VirtDataConversions.getFunctions(2, 0, LongFunction.class, funcs);
         this.valueFuncs = VirtDataConversions.getFunctions(2,1, LongFunction.class, funcs);
     }

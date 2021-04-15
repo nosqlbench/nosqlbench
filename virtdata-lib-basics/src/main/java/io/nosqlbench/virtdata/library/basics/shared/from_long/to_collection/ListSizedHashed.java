@@ -8,12 +8,9 @@ import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
-import java.util.function.LongUnaryOperator;
 
 /**
  * Create a List from a long input based on a set of provided functions.
@@ -39,7 +36,12 @@ public class ListSizedHashed implements LongFunction<List<Object>> {
         "ListSizedHashed output ['2945182322382062539', 'text', '37945690212757860', '287864597160630738', '3299224200079606887']"
     })
     public ListSizedHashed(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 

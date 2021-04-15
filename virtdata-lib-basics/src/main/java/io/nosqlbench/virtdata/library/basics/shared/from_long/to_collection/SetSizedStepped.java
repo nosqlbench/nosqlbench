@@ -32,7 +32,12 @@ public class SetSizedStepped implements LongFunction<java.util.Set<Object>> {
         "Create a set, like ['three','four']"
     })
     public SetSizedStepped(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 

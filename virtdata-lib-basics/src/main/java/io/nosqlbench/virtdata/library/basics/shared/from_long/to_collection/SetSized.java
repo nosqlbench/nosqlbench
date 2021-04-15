@@ -33,7 +33,12 @@ public class SetSized implements LongFunction<java.util.Set<Object>> {
             "Create a sized set of object values, like ['one','text'], because 'text' is duplicated 4 times"
     })
     public SetSized(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
     public SetSized(int size, Object... funcs) {

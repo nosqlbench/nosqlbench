@@ -8,10 +8,8 @@ import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
-import java.util.function.LongUnaryOperator;
 
 /**
  * Create a List from a long input based on a set of provided functions.
@@ -37,7 +35,12 @@ public class ListSized implements LongFunction<List<Object>> {
             "output: ['one','one','text','text','text']"
     })
     public ListSized(Object sizeFunc, Object... funcs) {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        if (sizeFunc instanceof Number) {
+            int size = ((Number)sizeFunc).intValue();
+            this.sizeFunc = s -> size;
+        } else {
+            this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
+        }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
     public ListSized(int size, Object... funcs) {
