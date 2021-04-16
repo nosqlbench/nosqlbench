@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.37</version>
+        <version>4.15.38-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-jdbc</artifactId>
-            <version>4.15.37</version>
+            <version>4.15.38-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
