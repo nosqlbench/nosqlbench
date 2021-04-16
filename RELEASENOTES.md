@@ -1,4 +1,3 @@
-- 1dc94080 (HEAD -> main) add missing workload and descriptions
-- a1a3d8b6 better logging names
-- f7e633ff (origin/main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- cd800139 add missing workload and descriptions
+- add77f70 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 5f184e55 add bindings for init-and-use byte buffers and char buffers
+- bf1a43fa add bindings for ToJSON(), ToJSONPretty()
