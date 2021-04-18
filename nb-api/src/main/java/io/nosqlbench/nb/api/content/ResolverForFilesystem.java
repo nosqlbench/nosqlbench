@@ -1,27 +1,18 @@
 package io.nosqlbench.nb.api.content;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ResolverForFilesystem implements ContentResolver {
 
     public static ResolverForFilesystem INSTANCE = new ResolverForFilesystem();
-
-    private Path resolvePath(URI uri) {
-        if (uri.getScheme() != null && !uri.getScheme().isEmpty() && !uri.getScheme().equals("file")) {
-            return null;
-        }
-        Path pathFromUri = Path.of(uri.getPath());
-
-        if (Files.isReadable(pathFromUri)) {
-            return pathFromUri;
-        }
-        return null;
-    }
+    private final static Logger logger = LogManager.getLogger(ResolverForFilesystem.class);
 
     @Override
     public List<Content<?>> resolve(URI uri) {
@@ -43,6 +34,18 @@ public class ResolverForFilesystem implements ContentResolver {
             dirs.add(path);
         }
         return dirs;
+    }
+
+    private Path resolvePath(URI uri) {
+        if (uri.getScheme() != null && !uri.getScheme().isEmpty() && !uri.getScheme().equals("file")) {
+            return null;
+        }
+        Path pathFromUri = Path.of(uri.getPath());
+
+        if (Files.isReadable(pathFromUri)) {
+            return pathFromUri;
+        }
+        return null;
     }
 
     public String toString() {

@@ -53,7 +53,7 @@ public class NBIO implements NBPathsAPI.Facets {
 
     public static List<String> readLines(String filename) {
         Content<?> data = NBIO.all().prefix("data").name(filename).first().orElseThrow(
-                () -> new BasicError("Unable to read lines from " + filename)
+            () -> new BasicError("Unable to read lines from " + filename)
         );
         String[] split = data.getCharBuffer().toString().split("\n");
         return Arrays.asList(split);
@@ -63,7 +63,7 @@ public class NBIO implements NBPathsAPI.Facets {
         return NBIO.readFileDelimCSV(filename, ',', searchPaths);
     }
 
-    public static CSVParser readFileDelimCSV(String filename,char delim, String... searchPaths) {
+    public static CSVParser readFileDelimCSV(String filename, char delim, String... searchPaths) {
         Reader reader = NBIO.readReader(filename, searchPaths);
         CSVFormat format = CSVFormat.DEFAULT.withDelimiter(delim).withFirstRecordAsHeader();
         try {
@@ -90,7 +90,7 @@ public class NBIO implements NBPathsAPI.Facets {
     public static Path getFirstLocalPath(String... potentials) {
         Optional<Content<?>> first = NBIO.local().name(potentials).first();
         return first.orElseThrow(
-                () -> new BasicError("Unable to find loadable content at " + String.join(",",potentials))
+            () -> new BasicError("Unable to find loadable content at " + String.join(",", potentials))
         ).asPath();
     }
 
@@ -247,7 +247,7 @@ public class NBIO implements NBPathsAPI.Facets {
     public List<List<Content<?>>> resolveEach() {
         List<List<Content<?>>> resolved = new ArrayList<>();
         for (String name : names) {
-            LinkedHashSet<String> slotSearchPaths = expandNamesAndSuffixes(List.of(name), extensions);
+            LinkedHashSet<String> slotSearchPaths = expandNamesAndSuffixes(List.of(name), new HashSet<>(extensions));
             Content<?> content = null;
             for (String slotSearchPath : slotSearchPaths) {
                 List<Content<?>> contents = resolver.resolve(slotSearchPath);
@@ -260,31 +260,38 @@ public class NBIO implements NBPathsAPI.Facets {
 
     // for testing
     public LinkedHashSet<String> expandNamesAndSuffixes() {
-        return expandNamesAndSuffixes(names, extensions);
+        return expandNamesAndSuffixes(names, new HashSet(extensions));
     }
 
 
     // for testing
     public LinkedHashSet<String> expandNamesAndSuffixes(
         List<String> _names,
-        List<String> _suffixes) {
+        Set<String> _suffixes) {
 
         LinkedHashSet<String> searches = new LinkedHashSet<>();
 
-        if (_names.size()==0 && prefixes.size()==0) {
+        if (_names.size() == 0 && prefixes.size() == 0) {
             searches.add(".*");
-        } else if (_names.size()>0 && _suffixes.size()==0) {
+        } else if (_names.size() > 0 && _suffixes.size() == 0) {
             searches.addAll(_names);
-        } else if (_names.size()==0 && _suffixes.size()>0) {
-            _suffixes.stream().map(s -> ".*"+s).forEach(searches::add);
+        } else if (_names.size() == 0 && _suffixes.size() > 0) {
+            _suffixes.stream().map(s -> ".*" + s).forEach(searches::add);
         } else {
             for (String name : _names) {
                 if (!name.equals(".*")) {
                     searches.add(name);
                 }
+                boolean suffixed = false;
                 for (String suffix : _suffixes) {
-                    if (!name.endsWith(suffix)) {
-                        searches.add(name+suffix);
+                    if (name.endsWith(suffix)) {
+                        suffixed = true;
+                        break;
+                    }
+                }
+                if (!suffixed) {
+                    for (String suffix : _suffixes) {
+                        searches.add(name + suffix);
                     }
                 }
             }
@@ -305,12 +312,12 @@ public class NBIO implements NBPathsAPI.Facets {
 
         // If this has no names or suffixes included, use a wildcard for all resources found
         // under the respective directory roots for the prefixes
-        if (searches.size()==0) {
+        if (searches.size() == 0) {
             searches.add(".*");
         }
         for (String prefix : prefixes) {
             List<Path> directories = resolver.resolveDirectory(prefix);
-            NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true,false);
+            NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true, false);
 
 
             for (Path dirPath : directories) {
@@ -330,8 +337,8 @@ public class NBIO implements NBPathsAPI.Facets {
     @Override
     public List<Path> relativeTo(String... base) {
         String base1 = base[0];
-        String[] rest = new String[base.length-1];
-        System.arraycopy(base,1,rest,0,rest.length);
+        String[] rest = new String[base.length - 1];
+        System.arraycopy(base, 1, rest, 0, rest.length);
 
         List<Path> paths = new ArrayList<>();
 
@@ -339,7 +346,7 @@ public class NBIO implements NBPathsAPI.Facets {
         for (Content<?> c : list) {
             Path path = c.asPath();
 
-            Path fsBase = path.getFileSystem().getPath(base1,rest);
+            Path fsBase = path.getFileSystem().getPath(base1, rest);
             Path relative = fsBase.relativize(path);
             paths.add(relative);
         }

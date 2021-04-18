@@ -24,7 +24,7 @@ public class NBIOTest {
     public void testExpandWildcardAndExtensionsOnly() {
         NBIO extensions = (NBIO) NBIO.all().name(".*").extension("foo","bar");
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
-        assertThat(searches).containsExactly(".*.foo",".*.bar");
+        assertThat(searches).contains(".*.foo",".*.bar");
     }
 
     @Test
@@ -35,11 +35,17 @@ public class NBIOTest {
     }
 
     @Test
-    public void testExpandNamesAndExtensions() {
+    public void testExpandNamesAndExtensionsIfNotExtended() {
+        NBIO extensions = (NBIO) NBIO.all().name("foo").extension("baz","beez");
+        LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
+        assertThat(searches).contains("foo.baz","foo.beez");
+    }
+
+    @Test
+    public void testExpandNamesAndExtensionsAvoidsExtendedAlreadyExtended() {
         NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension("baz","beez");
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
-        assertThat(searches).containsExactly("foo.bar","foo.bar.baz","foo.bar.beez");
-
+        assertThat(searches).contains("foo.bar");
     }
 
     @Test
@@ -222,4 +228,5 @@ public class NBIOTest {
         List<Content<?>> gammas = gammasSearch.list();
         assertThat(gammas).hasSize(1);
     }
+
 }
