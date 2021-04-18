@@ -1,3 +1,2 @@
-- add77f70 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 5f184e55 add bindings for init-and-use byte buffers and char buffers
-- bf1a43fa add bindings for ToJSON(), ToJSONPretty()
+- 29697ae8 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 619a23c8 NBIO fix for multiple extensions and remote URIs
