@@ -1,5 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.Hash;
 import org.apache.commons.codec.binary.Hex;
@@ -21,6 +24,8 @@ import java.util.function.LongToIntFunction;
  * This function behaves slightly differently than most in that it creates and
  * caches as source byte buffer during initialization.
  */
+@ThreadSafeMapper
+@Categories({Category.general})
 public class HashedCharBufferExtract implements LongFunction<CharBuffer> {
 
     private final LongToIntFunction sizefunc;

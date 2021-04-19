@@ -18,7 +18,7 @@ import java.util.function.LongToIntFunction;
  *
  * As a 'Hashed' function, the input value is hashed again before being used as value.
  */
-@Categories(Category.conversion)
+@Categories({Category.conversion,Category.general})
 @ThreadSafeMapper
 public class ByteBufferSizedHashed implements LongFunction<ByteBuffer> {
 
