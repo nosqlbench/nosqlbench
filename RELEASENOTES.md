@@ -1,2 +1,2 @@
-- 29697ae8 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 619a23c8 NBIO fix for multiple extensions and remote URIs
+- f6590dc9 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- a64ca6be actually add new functions to build
