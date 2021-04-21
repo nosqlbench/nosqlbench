@@ -69,11 +69,12 @@ public class NBCLI {
             NBCLI cli = new NBCLI("eb");
             cli.run(args);
         } catch (Exception e) {
-            String error = ScenarioErrorHandler.handle(e, true);
-            if (error != null) {
-                System.err.println(error);
-            }
-            System.err.flush();
+            String error = ScenarioErrorHandler.handle(e, false);
+            // Commented for now, as the above handler should do everything needed.
+//            if (error != null) {
+//                System.err.println("Scenario stopped due to error above.");
+//            }
+//            System.err.flush();
             System.out.flush();
             System.exit(2);
         }
