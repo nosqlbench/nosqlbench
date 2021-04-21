@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.pulsar;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -14,14 +15,18 @@ import org.apache.pulsar.client.admin.Clusters;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.client.api.transaction.Transaction;
 
-import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -43,6 +48,7 @@ public class PulsarSpace {
     private final String pulsarSvcUrl;
     private final String webSvcUrl;
     private final PulsarAdmin pulsarAdmin;
+    private final Timer createTransactionTimer;
 
     private final Set<String> pulsarClusterMetadata = new HashSet<>();
 
@@ -55,13 +61,15 @@ public class PulsarSpace {
                        String pulsarSvcUrl,
                        String webSvcUrl,
                        PulsarAdmin pulsarAdmin,
-                       ActivityDef activityDef) {
+                       ActivityDef activityDef,
+                       Timer createTransactionTimer) {
         this.spaceName = name;
         this.pulsarNBClientConf = pulsarClientConf;
         this.pulsarSvcUrl = pulsarSvcUrl;
         this.webSvcUrl = webSvcUrl;
         this.pulsarAdmin = pulsarAdmin;
         this.activityDef = activityDef;
+        this.createTransactionTimer = createTransactionTimer;
 
         createPulsarClientFromConf();
         createPulsarSchemaFromConf();
@@ -203,6 +211,28 @@ public class PulsarSpace {
 
         return "";
     }
+
+
+    public Supplier<Transaction> getTransactionSupplier() {
+        PulsarClient pulsarClient = getPulsarClient();
+        return () -> {
+            try (Timer.Context time = createTransactionTimer.time(); ){
+                return pulsarClient
+                    .newTransaction()
+                    .build()
+                    .get();
+            } catch (ExecutionException | InterruptedException err) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Error while starting a new transaction", err);
+                }
+                throw new RuntimeException(err);
+            } catch (NullPointerException err) { // Unfortunately Pulsar 2.7.1 client does not report a better error
+                throw new RuntimeException("Transactions are not enabled on Pulsar Client, " +
+                    "please set client.enableTransaction=true in your Pulsar Client configuration");
+            }
+        };
+    }
+
 
     public Producer<?> getProducer(String cycleTopicName, String cycleProducerName) {
         String topicName = getEffectiveProducerTopicName(cycleTopicName);
