@@ -17,6 +17,7 @@ public class VirtDataConversions {
         LongFunction(LongFunction.class, long.class, Object.class),
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class, Object.class),
+        IntToDoubleFunction(java.util.function.IntToDoubleFunction.class,int.class,double.class),
         IntUnaryOperator(java.util.function.IntUnaryOperator.class, int.class, int.class),
         DoubleFunction(java.util.function.DoubleFunction.class, double.class, Object.class),
         DoubleUnaryOperator(java.util.function.DoubleUnaryOperator.class, double.class, double.class),
@@ -96,7 +97,7 @@ public class VirtDataConversions {
             StringBuilder example = new StringBuilder();
 
 
-            example.append("    // Ignore the place holders, but ensure the return type is accurate\n");
+            example.append("    // Ignore the place holders in your implementation, but ensure the return type is accurate\n");
             String toTypeSyntax = canonicalSyntaxFor(toSignature);
             example.append("    public static ").append(toTypeSyntax);
 
@@ -346,7 +347,7 @@ public class VirtDataConversions {
             }
             String genericSignature = genericsBuffer.toString();
 
-            example.append("    // Ignore the place holders, but ensure the return type is accurate\n");
+            example.append("    // Ignore the place holders in your implementation, but ensure the return type is accurate\n");
             example.append("    public static ").append(toClass.getSimpleName());
             example.append(genericSignature);
 
