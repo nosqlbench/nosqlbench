@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class ActivityProgressIndicator implements Runnable {
 
-    private final static Logger logger = LogManager.getLogger(ActivityProgressIndicator.class);
+    private final static Logger logger = LogManager.getLogger("PROGRESS");
     private final String indicatorSpec;
     private final ScenarioController sc;
     private PeriodicRunnable<ActivityProgressIndicator> runnable;

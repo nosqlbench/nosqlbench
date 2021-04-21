@@ -26,7 +26,7 @@ import javax.script.ScriptException;
  */
 public class ScenarioErrorHandler {
 
-    private final static Logger logger = LogManager.getLogger(ScenarioErrorHandler.class);
+    private final static Logger logger = LogManager.getLogger("ERRORHANDLER");
 
     public static String handle(Throwable t, boolean wantsStackTraces) {
         if (t instanceof ScriptException) {
