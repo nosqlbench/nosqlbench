@@ -49,6 +49,7 @@ public class PulsarActivityUtil {
     public enum DOC_LEVEL_PARAMS {
         TOPIC_URI("topic_uri"),
         ASYNC_API("async_api"),
+        USE_TRANSACTION("use_transaction"),
         ADMIN_DELOP("admin_delop");
 
         public final String label;

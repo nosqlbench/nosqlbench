@@ -7,17 +7,21 @@ import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
+import org.apache.pulsar.client.api.transaction.Transaction;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.LongFunction;
+import java.util.function.Supplier;
 
 public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
-
+    private final static Logger logger = LogManager.getLogger(ReadyPulsarOp.class);
     private final OpTemplate opTpl;
     private final CommandTemplate cmdTpl;
     private final PulsarSpace clientSpace;
@@ -80,11 +84,25 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         // Global parameter: async_api
         LongFunction<Boolean> asyncApiFunc = (l) -> false;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
-            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label))
-                asyncApiFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
-            else
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
+                boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
+                asyncApiFunc = (l) -> value;
+            } else {
+                    throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
+            }
         }
+        logger.info("async_api: {}", asyncApiFunc.apply(0));
+
+        LongFunction<Boolean> useTransactionFunc = (l) -> false;
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label)) {
+                boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label));
+                useTransactionFunc = (l) -> value;
+            } else {
+                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label + "\" parameter cannot be dynamic!");
+            }
+        }
+        logger.info("use_transaction: {}", useTransactionFunc.apply(0));
 
         // Global parameter: admin_delop
         LongFunction<Boolean> adminDelOpFunc = (l) -> false;
@@ -103,9 +121,9 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TOPIC.label)) {
             return resolveAdminTopic(clientSpace, topicUriFunc, asyncApiFunc, adminDelOpFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
-            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc);
+            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
-            return resolveMsgConsume(clientSpace, topicUriFunc, asyncApiFunc);
+            return resolveMsgConsume(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
             return resolveMsgRead(clientSpace, topicUriFunc, asyncApiFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
@@ -230,7 +248,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     private LongFunction<PulsarOp> resolveMsgSend(
         PulsarSpace clientSpace,
         LongFunction<String> topic_uri_func,
-        LongFunction<Boolean> async_api_func
+        LongFunction<Boolean> async_api_func,
+        LongFunction<Boolean> useTransactionFunc
     ) {
         LongFunction<String> cycle_producer_name_func;
         if (cmdTpl.isStatic("producer_name")) {
@@ -243,6 +262,9 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
         LongFunction<Producer<?>> producerFunc =
             (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_producer_name_func.apply(l));
+
+        LongFunction<Supplier<Transaction>> transactionSupplierFunc =
+            (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
         LongFunction<String> keyFunc;
         if (cmdTpl.isStatic("msg_key")) {
@@ -273,13 +295,16 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             producerFunc,
             keyFunc,
             valueFunc,
+            useTransactionFunc,
+            transactionSupplierFunc,
             pulsarActivity);
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(
         PulsarSpace clientSpace,
         LongFunction<String> topic_uri_func,
-        LongFunction<Boolean> async_api_func
+        LongFunction<Boolean> async_api_func,
+        LongFunction<Boolean> useTransactionFunc
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
@@ -328,6 +353,9 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             consumer_name_func = (l) -> null;
         }
 
+        LongFunction<Supplier<Transaction>> transactionSupplierFunc =
+            (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
+
         LongFunction<Consumer<?>> consumerFunc = (l) ->
             clientSpace.getConsumer(
                 topic_uri_func.apply(l),
@@ -339,7 +367,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             );
 
         return new PulsarConsumerMapper(cmdTpl, clientSpace, async_api_func, consumerFunc,
-            pulsarActivity.getBytesCounter(), pulsarActivity.getMessagesizeHistogram());
+            pulsarActivity.getBytesCounter(), pulsarActivity.getMessagesizeHistogram(), pulsarActivity.getCommitTransactionTimer(),
+                useTransactionFunc, transactionSupplierFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgRead(

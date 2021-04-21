@@ -7,8 +7,10 @@ import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.api.transaction.Transaction;
 
 import java.util.function.LongFunction;
+import java.util.function.Supplier;
 
 /**
  * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
@@ -25,6 +27,8 @@ public class PulsarProducerMapper extends PulsarOpMapper {
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> payloadFunc;
     private final PulsarActivity pulsarActivity;
+    private final LongFunction<Boolean> useTransactionFunc;
+    private final LongFunction<Supplier<Transaction>> transactionSupplierFunc;
 
     public PulsarProducerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
@@ -32,12 +36,16 @@ public class PulsarProducerMapper extends PulsarOpMapper {
                                 LongFunction<Producer<?>> producerFunc,
                                 LongFunction<String> keyFunc,
                                 LongFunction<String> payloadFunc,
+                                LongFunction<Boolean> useTransactionFunc,
+                                LongFunction<Supplier<Transaction>> transactionSupplierFunc,
                                 PulsarActivity pulsarActivity) {
         super(cmdTpl, clientSpace, asyncApiFunc);
         this.producerFunc = producerFunc;
         this.keyFunc = keyFunc;
         this.payloadFunc = payloadFunc;
         this.pulsarActivity = pulsarActivity;
+        this.useTransactionFunc = useTransactionFunc;
+        this.transactionSupplierFunc = transactionSupplierFunc;
     }
 
     @Override
@@ -46,11 +54,14 @@ public class PulsarProducerMapper extends PulsarOpMapper {
         boolean asyncApi = asyncApiFunc.apply(value);
         String msgKey = keyFunc.apply(value);
         String msgPayload = payloadFunc.apply(value);
-
+        boolean useTransaction = useTransactionFunc.apply(value);
+        Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
         return new PulsarProducerOp(
             producer,
             clientSpace.getPulsarSchema(),
             asyncApi,
+            useTransaction,
+            transactionSupplier,
             msgKey,
             msgPayload,
             pulsarActivity
