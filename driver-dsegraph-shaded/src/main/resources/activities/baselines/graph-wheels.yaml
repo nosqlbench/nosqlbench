@@ -1,3 +1,5 @@
+description: creates local graphs which resemble a wagon-wheel topology
+
 scenarios:
   default:
     creategraph: run driver=dsegraph graphname=graph_wheels tags=phase:graph-schema

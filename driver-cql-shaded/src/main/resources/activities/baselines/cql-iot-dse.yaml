@@ -1,5 +1,5 @@
 # nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
-description: An IOT workload which more optimal DSE settings
+description: An IOT workload with more optimal settings for DSE
 
 scenarios:
   default:
