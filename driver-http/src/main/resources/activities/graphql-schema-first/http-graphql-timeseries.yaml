@@ -65,7 +65,20 @@ blocks:
             }
         tags:
           name: create-gql-schema
-
+  - tags:
+      phase: schema-astra
+    statements:
+      - create-gql-schema: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/admin
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  deploySchema(namespace: \"<<keyspace:gqlsf_timeseries>>\", schema: \"\"\"\n      type Iot @cql_input {\n        machine_id: Uuid! @cql_column(partitionKey: true)\n        sensor_name: String! @cql_column(partitionKey: true)\n        time: Timestamp! @cql_column(clusteringOrder: DESC)\n        sensor_value: Float!\n    \tstation_id: Uuid!\n        data: String!\n      }\n      type SelectIotResult @cql_payload {\n    \t\tdata: [Iot]\n    \t\tpagingState: String\n    }\n      type Query {\n        getIots(\n          machine_id: Uuid!,\n          sensor_name: String!,\n          pagingState: String @cql_pagingState\n        ): SelectIotResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertIot(iot: IotInput): Iot\n    }\n  \"\"\") {\n    version\n  }\n}\n"
+            }
+        tags:
+          name: create-gql-schema
   - name: rampup
     tags:
       phase: rampup
