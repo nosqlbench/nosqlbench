@@ -1,2 +1,14 @@
-- f6590dc9 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- a64ca6be actually add new functions to build
+- d8d243d7 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 8590dc35 add examples for new charbuffer and bytebuffer bindings
+- 6a0eca25 add binding functions
+- 1c23d5a5 docs update
+- 5164a4d3 make yaml,yml extensions uniform in code
+- 1fa700b9 reduce duplicitous prefix lookups
+- ec4218bb update actions maven pkg cache version
+- cf9e929b support IntToDoubleFunction types
+- ac19e86a deprecate duplicate function ByteBufferToHex for ToHex
+- 3bd6a80a add adapting functions for CharBuffer and String
+- 003162b4 (origin/main) Merge pull request #303 from eolivelli/pulsar/transactions
+- b90d3941 Merge pull request #305 from dougwettlaufer/main
+- 6e1dbef0 Fix graphql timeseries read query
+- 30e49423 Pulsar: first prototype of transaction support
