@@ -92,7 +92,7 @@ blocks:
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
-          {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{machine_id}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
+          {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{sensor_name}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
         tags:
           name: main-select
   - name: main-write
