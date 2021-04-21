@@ -18,10 +18,12 @@ public class VirtDataConversions {
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class, Object.class),
         IntToDoubleFunction(java.util.function.IntToDoubleFunction.class,int.class,double.class),
+        IntToLongFunction(java.util.function.IntToLongFunction.class, int.class, long.class),
         IntUnaryOperator(java.util.function.IntUnaryOperator.class, int.class, int.class),
         DoubleFunction(java.util.function.DoubleFunction.class, double.class, Object.class),
         DoubleUnaryOperator(java.util.function.DoubleUnaryOperator.class, double.class, double.class),
         DoubleToLongFunction(java.util.function.DoubleToLongFunction.class, double.class, long.class),
+        DoubleToIntFunction(java.util.function.DoubleToIntFunction.class, double.class, int.class),
         Function(java.util.function.Function.class, Object.class, Object.class);
 
         private final Class<?> functionClazz;
