@@ -725,6 +725,13 @@ public class AdaptFunctionsFlexibly {
         return l -> f.apply(l).toString();
     }
 
+    public static LongToIntFunction adapt(IntToDoubleFunction f, LongToIntFunction i1) {
+        return l -> (int) f.applyAsDouble(((int)l));
+    }
+
+    public static LongToIntFunction adapt(IntToLongFunction f, LongToIntFunction i1) {
+        return l -> (int)(f.applyAsLong((int) l));
+    }
 
 
 }
