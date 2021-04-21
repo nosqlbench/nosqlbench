@@ -1,5 +1,6 @@
 package io.nosqlbench.virtdata.api.bindings;
 
+import java.nio.CharBuffer;
 import java.util.function.*;
 
 /**
@@ -16,7 +17,7 @@ import java.util.function.*;
  * value which is too large for the smaller register is reduced in magnitude to fit into the smaller data type using
  * modulo division by the maximum positive value of the smaller type.
  * <p>
- * This is suitable for testing cases where you need voliminous data according to a sketch or recipe, but it is not
+ * This is suitable for testing cases where you need voluminous data according to a sketch or recipe, but it is not
  * appropriate for use in rigorous mathematical or algebraic scenarios. Use these methods appropriately, i.e. for
  * generating bulk test data only.
  * </p>
@@ -24,7 +25,7 @@ import java.util.function.*;
  * <h2>Method Naming</h2>
  * <p>
  * The method naming used in this class follows a pattern to make reflective lookup easy and type aware. However, the
- * second and subsequent parameters are not used in the call to the function. The will be null. This allows for explicit
+ * second and subsequent parameters are not used in the call to the function. They will be null. This allows for explicit
  * method matching, including with respect to variant types within generic parameters in target types. Thus, target
  * types with one generic parameter will have a signature like {@code (func, targetclass, generic0)} while those with
  * two generic parameters will have a signature like {@code (func, targetclass, generic0, generic1)}. What matters is
@@ -155,7 +156,7 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongToIntFunction adapt(IntUnaryOperator f, LongToIntFunction i1) {
-        return v -> (int) (f.applyAsInt((int) (v % Integer.MAX_VALUE)));
+        return v -> f.applyAsInt((int) (v % Integer.MAX_VALUE));
     }
 
     public static LongUnaryOperator adapt(DoubleUnaryOperator f, LongUnaryOperator i1) {
@@ -271,7 +272,7 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static DoubleUnaryOperator adapt(LongToDoubleFunction f, DoubleUnaryOperator i1) {
-        return v -> (double) (f.applyAsDouble((long) (v % Long.MAX_VALUE)));
+        return v -> f.applyAsDouble((long) (v % Long.MAX_VALUE));
     }
 
     public static IntUnaryOperator adapt(LongToIntFunction f, IntUnaryOperator i1) {
@@ -542,11 +543,11 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongToDoubleFunction adapt(IntFunction<String> f, String i1, LongToDoubleFunction i2) {
-        return v -> (double) Double.parseDouble(f.apply((int) (v % Integer.MAX_VALUE)));
+        return v -> Double.parseDouble(f.apply((int) (v % Integer.MAX_VALUE)));
     }
 
     public static LongToIntFunction adapt(IntFunction<String> f, String i1, LongToIntFunction i2) {
-        return v -> (int) Integer.parseInt(f.apply((int) (v % Integer.MAX_VALUE)));
+        return v -> Integer.parseInt(f.apply((int) (v % Integer.MAX_VALUE)));
     }
 
     public static LongFunction<Double> adapt(IntFunction<String> f, String i1, LongFunction i2, Double i3) {
@@ -669,7 +670,7 @@ public class AdaptFunctionsFlexibly {
     }
 
     public static LongUnaryOperator adapt(DoubleToLongFunction f, LongUnaryOperator i1) {
-        return v -> (long) (f.applyAsLong(v));
+        return v -> f.applyAsLong(v);
     }
 
     public static LongToDoubleFunction adapt(DoubleToLongFunction f, LongToDoubleFunction i1) {
@@ -716,6 +717,13 @@ public class AdaptFunctionsFlexibly {
         return f::apply;
     }
 
+    public static LongFunction<CharBuffer> adapt(LongFunction<String> f, String i1, LongFunction i2, CharBuffer i3) {
+        return l -> CharBuffer.wrap(f.apply(l));
+    }
+
+    public static LongFunction<String> adapt(LongFunction<CharBuffer> f, CharBuffer i1, LongFunction i2, String i3) {
+        return l -> f.apply(l).toString();
+    }
 
 
 
