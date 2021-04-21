@@ -108,9 +108,8 @@ public class NBCLIScenarioParser {
 
             if (namedSteps == null) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + "', but you can pick from the following:\n" +
-                    scenarios.getScenarioNames().stream()
-                        .map(s -> "- " + s).collect(Collectors.joining("\n")));
+                    + "', but you can pick from one of: " +
+                    scenarios.getScenarioNames().stream().collect(Collectors.joining(", ")));
             }
 
             // each named command line step of the named scenario
