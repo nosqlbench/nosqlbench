@@ -1,5 +1,6 @@
 package io.nosqlbench.activitytype.cql.statements.core;
 
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
@@ -29,7 +30,7 @@ public class YamlCQLStatementLoader {
 
     public AvailableCQLStatements load(String fromPath, String... searchPaths) {
 
-        Content<?> yamlContent = NBIO.all().prefix(searchPaths).name(fromPath).extension("yaml").one();
+        Content<?> yamlContent = NBIO.all().prefix(searchPaths).name(fromPath).extension(RawStmtsLoader.YAML_EXTENSIONS).one();
         String data = yamlContent.asString();
 
         for (Function<String, String> xform : transformers) {

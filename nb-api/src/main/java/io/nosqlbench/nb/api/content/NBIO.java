@@ -236,7 +236,7 @@ public class NBIO implements NBPathsAPI.Facets {
         }
 
         if (list.size() > 1) {
-            String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining(","));
+            String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining("\n","\n","\n"));
             throw new BasicError(("Found too many sources for '" + this + "', ambiguous name. Pick from " + found));
         }
         return list.get(0);

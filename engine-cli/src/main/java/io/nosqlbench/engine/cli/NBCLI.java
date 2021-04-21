@@ -6,6 +6,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ScenarioErrorHandler;
@@ -225,7 +226,7 @@ public class NBCLI {
             Optional<Content<?>> tocopy = NBIO.classpath()
                     .prefix("activities")
                     .prefix(options.wantsIncludes())
-                    .name(resourceToCopy).extension("yaml").first();
+                    .name(resourceToCopy).extension(RawStmtsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) {
 

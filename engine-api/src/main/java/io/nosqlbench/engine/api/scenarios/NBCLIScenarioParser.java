@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.api.scenarios;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
@@ -37,7 +38,7 @@ public class NBCLIScenarioParser {
             .prefix("activities")
             .prefix(includes)
             .name(workload)
-            .extension("yaml")
+            .extension(RawStmtsLoader.YAML_EXTENSIONS)
             .first();
         return found.isPresent();
     }
@@ -51,7 +52,7 @@ public class NBCLIScenarioParser {
             .prefix("activities")
             .prefix(includes)
             .name(workloadName)
-            .extension("yaml")
+            .extension(RawStmtsLoader.YAML_EXTENSIONS)
             .first();
 //
         Content<?> workloadContent = found.orElseThrow();
@@ -96,7 +97,7 @@ public class NBCLIScenarioParser {
                 .prefix(SEARCH_IN)
                 .prefix(includes)
                 .name(workloadName)
-                .extension("yaml")
+                .extension(RawStmtsLoader.YAML_EXTENSIONS)
                 .one();
 
             StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userParams);
@@ -278,17 +279,10 @@ public class NBCLIScenarioParser {
                             referenced = relative.toString();
                         }
                     }
-//                String alternate = referenced.startsWith("/") ? referenced.substring(1) : referenced;
-//                Optional<Content<?>> checkLoad = NBIO.all().prefix(SEARCH_IN)
-//                    .name(alternate).extension("yaml")
-//                    .first();
-//                if (checkLoad.isPresent()) {
-//                    referenced = alternate;
-//                }
                 }
 
                 Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                    .name(referenced).extension("yaml")
+                    .name(referenced).extension(RawStmtsLoader.YAML_EXTENSIONS)
                     .one();
 
                 StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
@@ -349,7 +343,7 @@ public class NBCLIScenarioParser {
 
         List<Content<?>> activities = searchin
             .prefix(includes)
-            .extension("yaml")
+            .extension(RawStmtsLoader.YAML_EXTENSIONS)
             .list();
 
         return filterForScenarios(activities);

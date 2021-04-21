@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.rest.services;
 
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceItemView;
@@ -44,7 +45,7 @@ public class WorkSpace {
     }
 
     public List<WorkloadDesc> getWorkloadsWithScenarioScripts() {
-        List<Content<?>> candidates = NBIO.fs().prefix(this.getWorkspacePath().toString()).extension("yaml").list();
+        List<Content<?>> candidates = NBIO.fs().prefix(this.getWorkspacePath().toString()).extension(RawStmtsLoader.YAML_EXTENSIONS).list();
         List<WorkloadDesc> workloads = NBCLIScenarioParser.filterForScenarios(candidates);
         List<WorkloadDesc> relativized = new ArrayList<>();
         for (WorkloadDesc workload : workloads) {
@@ -82,7 +83,7 @@ public class WorkSpace {
         assertLegalWorkspacePath(targetPath);
 
         if (targetPath.isAbsolute()) {
-            throw new RuntimeException("You may not use absolute paths in workspaces: '" + targetPath.toString() + "'");
+            throw new RuntimeException("You may not use absolute paths in workspaces: '" + targetPath + "'");
         }
         targetPath = this.workspacePath.resolve(targetPath);
 
@@ -136,7 +137,7 @@ public class WorkSpace {
 
     private void assertLegalWorkspacePath(Path target) {
         if (target.toString().contains("..")) {
-            throw new RuntimeException("Possible path injection:" + target.toString());
+            throw new RuntimeException("Possible path injection:" + target);
         }
     }
 
