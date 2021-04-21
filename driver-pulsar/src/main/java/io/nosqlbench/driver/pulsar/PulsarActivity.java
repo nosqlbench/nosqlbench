@@ -31,6 +31,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer executeTimer;
     public Counter bytesCounter;
     public Histogram messagesizeHistogram;
+    public Timer createTransactionTimer;
+    public Timer commitTransactionTimer;
 
     private PulsarSpaceCache pulsarCache;
     private PulsarAdmin pulsarAdmin;
@@ -110,6 +112,9 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
+        createTransactionTimer = ActivityMetrics.timer(activityDef, "createtransaction");
+        commitTransactionTimer = ActivityMetrics.timer(activityDef, "committransaction");
+
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
         messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
 
@@ -120,7 +125,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         pulsarSvcUrl =
             activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
         webSvcUrl =
-            activityDef.getParams().getOptionalString("web_url").orElse("pulsar://localhost:8080");
+            activityDef.getParams().getOptionalString("web_url").orElse("http://localhost:8080");
 
         initPulsarAdmin();
 
@@ -171,6 +176,14 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public Counter getBytesCounter() {
         return bytesCounter;
+    }
+
+    public Timer getCreateTransactionTimer() {
+        return createTransactionTimer;
+    }
+
+    public Timer getCommitTransactionTimer() {
+        return commitTransactionTimer;
     }
 
     public Histogram getMessagesizeHistogram() {

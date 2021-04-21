@@ -2,14 +2,18 @@ package io.nosqlbench.driver.pulsar.ops;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.client.api.transaction.Transaction;
 import org.apache.pulsar.common.schema.SchemaType;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongFunction;
+import java.util.function.Supplier;
 
 public class PulsarConsumerOp extends SyncPulsarOp {
 
@@ -21,16 +25,25 @@ public class PulsarConsumerOp extends SyncPulsarOp {
     private final int timeoutSeconds;
     private final Counter bytesCounter;
     private final Histogram messagesizeHistogram;
+    private final boolean useTransaction;
+    private final Supplier<Transaction> transactionSupplier;
+    private final Timer transactionCommitTimer;
 
     public PulsarConsumerOp(Consumer<?> consumer, Schema<?> schema, boolean asyncPulsarOp, int timeoutSeconds,
                             Counter bytesCounter,
-                            Histogram messagesizeHistogram) {
+                            Histogram messagesizeHistogram,
+                            boolean useTransaction,
+                            Supplier<Transaction> transactionSupplier,
+                            Timer transactionCommitTimer) {
         this.consumer = consumer;
         this.pulsarSchema = schema;
         this.asyncPulsarOp = asyncPulsarOp;
         this.timeoutSeconds = timeoutSeconds;
         this.bytesCounter = bytesCounter;
         this.messagesizeHistogram = messagesizeHistogram;
+        this.useTransaction = useTransaction;
+        this.transactionSupplier = transactionSupplier;
+        this.transactionCommitTimer = transactionCommitTimer;
     }
 
     public void syncConsume() {
@@ -64,7 +77,22 @@ public class PulsarConsumerOp extends SyncPulsarOp {
             int messagesize = message.getData().length;
             bytesCounter.inc(messagesize);
             messagesizeHistogram.update(messagesize);
-            consumer.acknowledge(message.getMessageId());
+
+
+            if (useTransaction) {
+                Transaction transaction = transactionSupplier.get();
+                consumer.acknowledgeAsync(message.getMessageId(), transaction).get();
+
+                // little problem: here we are counting the "commit" time
+                // inside the overall time spent for the execution of the consume operation
+                // we should refactor this operation as for PulsarProducerOp, and use the passed callback
+                // to track with precision the time spent for the operation and for the commit
+                try (Timer.Context ctx = transactionCommitTimer.time()) {
+                    transaction.commit().get();
+                }
+            } else{
+                consumer.acknowledge(message.getMessageId());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
