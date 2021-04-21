@@ -66,6 +66,23 @@ blocks:
           truncate table <<keyspace:gqlcf_iot>>.<<table:iot>>;
         tags:
           name: truncate-table
+  - tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+     - create-table-astra : |
+        create table if not exists <<keyspace:gqlcf_iot>>.<<table:iot>> (
+        machine_id UUID,     // source machine
+        sensor_name text,    // sensor name
+        time timestamp,      // timestamp of collection
+        sensor_value double, //
+        station_id UUID,     // source location
+        data text,
+        PRIMARY KEY ((machine_id, sensor_name), time)
+        ) WITH CLUSTERING ORDER BY (time DESC);
+       tags:
+         name: create-table-astra
   - name: rampup
     tags:
       phase: rampup

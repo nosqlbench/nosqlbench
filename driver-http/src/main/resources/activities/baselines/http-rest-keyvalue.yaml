@@ -29,23 +29,76 @@ blocks:
   - name: schema
     tags:
       phase: schema
-    params:
-      prepared: false
     statements:
-      - create-keyspace: |
-          create keyspace if not exists <<keyspace:baselines>>
-          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
-          AND durable_writes = true;
+      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<keyspace:baselines>>",
+              "replicas": <<rf:1>>
+          }
         tags:
           name: create-keyspace
-      - create-table: |
-          create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
-          key text,
-           value text,
-           PRIMARY KEY (key)
-          );
+      - create-table: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<table:keyvalue>>",
+              "columnDefinitions": [
+                  {
+                      "name": "key",
+                      "typeDefinition": "text"
+                  },
+                  {
+                      "name": "value",
+                      "typeDefinition": "text"
+                  }
+              ],
+              "primaryKey": {
+                  "partitionKey": [
+                      "key"
+                  ]
+              },
+              "ifNotExists": true
+          }
         tags:
           name: create-table
+  - tags:
+      phase: schema-astra
+    statements:
+      - create-table-astra: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<table:keyvalue>>",
+              "columnDefinitions": [
+                  {
+                      "name": "key",
+                      "typeDefinition": "text"
+                  },
+                  {
+                      "name": "value",
+                      "typeDefinition": "text"
+                  }
+              ],
+              "primaryKey": {
+                  "partitionKey": [
+                      "key"
+                  ]
+              },
+              "ifNotExists": true
+          }
+        tags:
+          name: create-table-astra
   - name: rampup
     tags:
       phase: rampup

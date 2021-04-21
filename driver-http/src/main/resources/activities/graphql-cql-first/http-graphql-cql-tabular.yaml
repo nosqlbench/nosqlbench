@@ -38,24 +38,37 @@ blocks:
   - name: schema
     tags:
       phase: schema
-    params:
-      prepared: false
     statements:
-      - create-keyspace: |
-          create keyspace if not exists <<keyspace:gqlcf_tabular>>
-          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
-          AND durable_writes = true;
+      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
         tags:
           name: create-keyspace
-      - create-table: |
-          create table if not exists <<keyspace:gqlcf_tabular>>.<<table:tabular>> (
-           part text,
-           clust text,
-           data text,
-           PRIMARY KEY (part,clust)
-          );
+      - create-table: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
         tags:
           name: create-table
+  - tags:
+      phase: schema-astra
+    statements:
+      - create-table-astra: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
+        tags:
+          name: create-table-astra
   - name: rampup
     tags:
       phase: rampup
