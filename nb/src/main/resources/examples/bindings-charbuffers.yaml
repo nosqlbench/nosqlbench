@@ -1,10 +1,12 @@
 description: |
-  This is a set of example for how to create or use
-  CharBuffers in various ways.
+  This is a set of example for how to create or use CharBuffers in various ways.
   Two function types work together to offer flexibility in how you build
   text images for sampling.
 
-
+scenarios:
+  default: run driver=stdout format=readout
+  cb_fixed: run driver=stdout format=readout bindings='cycle|cb_fixed'
+  maze: run driver=stdout format=readout bindings='.*seed.*'
 
 bindings:
 
@@ -70,5 +72,12 @@ bindings:
   # initial image to be varied. Each seed should be thought of as a bank
   # selector. This can be useful to ensure that data is different
   # across similar fields in a test, for example.
-  cb_samples_with_seed: CharBufImage('01 ',100,3,2L)
+  cb_seed1: CharBufImage('╱╲',100,30,1L)
+  cb_seed2: CharBufImage('╱╲',100,30,2L)
+  cb_seed3: CharBufImage('╱╲',100,30,3L)
+  cb_seed4: CharBufImage('╱╲',100,30,4L)
+  cb_seed5: CharBufImage('╱╲',100,30,5L)
+  cb_seed6: CharBufImage('╱╲',100,30,6L)
+  cb_seed7: CharBufImage('╱╲',100,30,7L)
+  cb_seed8: CharBufImage('╱╲',100,30,8L)
 

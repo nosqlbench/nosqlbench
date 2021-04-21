@@ -1,32 +1,41 @@
 description: |
-  This is a set of example for how to create or use
-  ByteBuffers in various ways.
+  This is a set of example for how to create or use ByteBuffers in various ways.
+
+scenarios:
+  default: run driver=stdout format=readout
 
 bindings:
+
+  # To see the cycle correspondence with
   cycle: Identity()
+
+  # ToHexString() is added to many of these so that you can see the data
+  # in the byte buffers. To send a byte buffer object to a driver,
+  # be sure to remove the ToHexString() functions.
+
   # fill a byte buffer of the given size with hashed longs
   # Hashing is incremental, not recursive, thus data looks
   # like a sliding window over values
-  hashed_bb: ByteBufferSizedHashed(1000);
+  hashed_bb: ByteBufferSizedHashed(30); ToHexString();
 
   # control the size of the extracted sample with a hash range
-  hashed_bb_sizerange: ByteBufferSizedHashed(HashRange(1,10))
+  hashed_bb_sizerange: ByteBufferSizedHashed(HashRange(1,10)); ToHexString();
 
   # control the size of the extracted sample based on a continuous function
-  hashed_bb_size_normal: ByteBufferSizedHashed(Normal(5.0, 1.0))
+  hashed_bb_size_normal: ByteBufferSizedHashed(Normal(5.0, 1.0)); ToHexString();
 
   # control the size of the extracted sample based on a discrete function
-  hashed_bb_size_binomial: ByteBufferSizedHashed(Binomial(8,0.5))
+  hashed_bb_size_binomial: ByteBufferSizedHashed(Binomial(8,0.5)); ToHexString();
 
   # convert a ByteBuffer to a hex-encoded string with upper case
-  bb_to_hex_uc: ByteBufferSizedHashed(1000); ToHexString();
+  bb_to_hex_uc: ByteBufferSizedHashed(20); ToHexString();
 
   # convert a ByteBuffer to a hex-encoded string with lower case
-  bb_to_hex_lc: ByteBufferSizedHashed(1000); ToHexString(false);
+  bb_to_hex_lc: ByteBufferSizedHashed(20); ToHexString(false);
 
   # generate a byte buffer of 1000 bytes, and then compute a MD5
   # digest into another byte buffer
-  digest_bb: ByteBufferSizedHashed(1000); DigestToByteBuffer('MD5');
+  digest_bb: ByteBufferSizedHashed(1000); DigestToByteBuffer('MD5'); ToHexString();
 
   # Md5 digest as above, but using a long as input, short-circuiting
   # the byte buffer construction spelled out above. This is easier
@@ -36,7 +45,7 @@ bindings:
   digest_bb_direct: DigestToByteBuffer('MD5');
 
   # A canned version of the above
-  long_md5_bb: ToMD5ByteBuffer()
+  long_md5_bb: ToMD5ByteBuffer(); ToHexString();
 
   # The example below show various type-specialized ByteBuffer
   # functions which are automatically selected depending on the
@@ -44,32 +53,21 @@ bindings:
 
   # long byte buffer
   # same as long -> ToByteBuffer() -> ByteBuffer
-  long_bb: ToByteBuffer();
+  long_bb: ToByteBuffer(); ToHexString();
 
   # double byte buffer
   # same as long -> ToDouble() -> double; double -> ToByteBuffer() -> ByteBuffer
-  double_bb: ToDouble(); ToByteBuffer();
+  double_bb: ToDouble(); ToByteBuffer(); ToHexString();
 
   # integer byte buffer
   # same as long -> ToInt() -> int; int -> ToByteBuffer() -> ByteBuffer
-  int_bb: ToInt(); ToByteBuffer();
+  int_bb: ToInt(); ToByteBuffer(); ToHexString();
 
   # string to ByteBuffer
   # same as long -> NumberNameToString() -> String; String -> ToByteBuffer()
-  string_bb: NumberNameToString(); ToByteBuffer();
+  string_bb: NumberNameToString(); ToByteBuffer(); ToHexString();
 
-  # char buffer to byte buffer
+  # char buffer to byte buffer, another way to get the same result as above
   # same as
   # long -> NumberNameToString() -> String; String -> ToCharBuffer() -> CharBuffer; CharBuffer -> ToByteBuffer() -> ByteBuffer
-  cb_bb: NumberNameToString(); ToCharBuffer(); ToByteBuffer();
-
-
-
-
-
-
-
-
-
-
-
+  cb_bb: NumberNameToString(); ToCharBuffer(); ToByteBuffer(); ToHexString();
