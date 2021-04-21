@@ -36,13 +36,13 @@ public class NBIO implements NBPathsAPI.Facets {
 
     private List<String> names = new ArrayList<>();
     private List<String> extensions = new ArrayList<>();
-    private List<String> prefixes = Arrays.asList(globalIncludes);
+    private Set<String> prefixes = new HashSet<>(Arrays.asList(globalIncludes));
 
     private NBIO() {
     }
 
     private NBIO(URIResolver resolver,
-                 List<String> prefixes,
+                 Set<String> prefixes,
                  List<String> names,
                  List<String> extensions) {
         this.resolver = resolver;
@@ -137,7 +137,7 @@ public class NBIO implements NBPathsAPI.Facets {
 
     @Override
     public NBPathsAPI.GetPrefix prefix(String... searchPaths) {
-        ArrayList<String> addingPaths = new ArrayList<>(this.prefixes);
+        HashSet<String> addingPaths = new HashSet<>(this.prefixes);
         addingPaths.addAll(Arrays.asList(searchPaths));
         return new NBIO(resolver, addingPaths, names, extensions);
     }
