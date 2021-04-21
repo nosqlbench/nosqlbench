@@ -1,13 +1,12 @@
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_charbuffer;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.Hash;
-import org.apache.commons.codec.binary.Hex;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.CharBufImage;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
@@ -26,28 +25,26 @@ import java.util.function.LongToIntFunction;
  */
 @ThreadSafeMapper
 @Categories({Category.general})
-public class HashedCharBufferExtract implements LongFunction<CharBuffer> {
+public class CharBufferExtract implements LongFunction<CharBuffer> {
 
+    private final CharBuffer image;
     private final LongToIntFunction sizefunc;
-    private final ThreadLocal<CharBuffer> bbaccessor;
-    private final Hash inthash = new Hash();
+    private final Hash posFunc = new Hash();
+    private final int imgsize;
 
-    public HashedCharBufferExtract(Object initFunc, Object sizeFunc) {
+    public CharBufferExtract(Object initFunc, Object sizeFunc) {
         CharBuffer image = null;
         if (initFunc instanceof Number) {
-            int bufsize = ((Number)initFunc).intValue();
-            ByteBufferSizedHashed bufgen = new ByteBufferSizedHashed(bufsize);
-            ByteBuffer bbimage = bufgen.apply(0).asReadOnlyBuffer();
-            image = CharBuffer.wrap(Hex.encodeHex(bbimage));
+            int bufsize = ((Number) initFunc).intValue();
+            this.image = new CharBufImage(bufsize).apply(1L);
         } else {
             LongFunction<String> bbfunc = VirtDataConversions.adaptFunction(initFunc, LongFunction.class, String.class);
-            image = CharBuffer.wrap(bbfunc.apply(0));
+            this.image = CharBuffer.wrap(bbfunc.apply(0));
         }
-        CharBuffer finalImage = image;
-        bbaccessor = ThreadLocal.withInitial(() -> finalImage.asReadOnlyBuffer());
+        this.imgsize = this.image.limit();
 
         if (sizeFunc instanceof Number) {
-            int size = ((Number)sizeFunc).intValue();
+            int size = ((Number) sizeFunc).intValue();
             this.sizefunc = l -> size;
         } else {
             this.sizefunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
@@ -56,12 +53,9 @@ public class HashedCharBufferExtract implements LongFunction<CharBuffer> {
 
     @Override
     public CharBuffer apply(long value) {
-        CharBuffer bbimage = bbaccessor.get();
-        int newbufsize = sizefunc.applyAsInt(value);
-        newbufsize=Math.min(newbufsize,bbimage.capacity());
-        char[] chars = new char[newbufsize];
-        int base_offset = inthash.applyAsInt(value) % (bbimage.capacity()-chars.length);
-        bbaccessor.get().position(base_offset).get(chars);
-        return CharBuffer.wrap(chars);
+        int size = Math.min(sizefunc.applyAsInt(value), imgsize);
+        int pos = posFunc.applyAsInt(value);
+        pos = pos % ((imgsize - size) + 1);
+        return image.subSequence(pos, pos + size);
     }
 }

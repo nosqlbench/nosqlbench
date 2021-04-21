@@ -2,12 +2,9 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.library.basics.shared.util.CharsetMapping;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.LongFunction;
 
 /**
@@ -36,7 +33,7 @@ public class Combinations implements LongFunction<String> {
     @Example({"Combinations('0-9A-F;0-9A-F;0-9A-F;0-9A-F;')","two bytes of hexadecimal"})
     @Example({"Combinations('A-9')","upper case alphanumeric"})
     public Combinations(String spec) {
-        this.charsets = parseSpec(spec);
+        this.charsets = CharsetMapping.parseSpec(spec);
         this.modulo = computeRadixFactors(this.charsets);
     }
 
@@ -62,66 +59,6 @@ public class Combinations implements LongFunction<String> {
         }
 //        m[m.length-1]=modulo;
         return m;
-    }
-
-    private char[][] parseSpec(String spec) {
-        String[] ranges = spec.split("[,;]");
-        char[][] cs = new char[ranges.length][];
-        for (int i = 0; i < ranges.length; i++) {
-            char[] range = rangeFor(ranges[i]);
-            cs[i] = range;
-        }
-        return cs;
-    }
-
-    private char[] rangeFor(String range) {
-        List<Character> chars = new ArrayList<>();
-        int pos = 0;
-        while (pos < range.length()) {
-            if (range.length() > pos + 2 && range.substring(pos + 1, pos + 2).equals("-")) {
-                List<Character> rangeChars = rangeFor(range.substring(pos, pos + 1), range.substring(pos + 2, pos + 3));
-                chars.addAll(rangeChars);
-                pos += 3;
-            } else {
-                chars.add(range.substring(pos, pos + 1).charAt(0));
-                pos += 1;
-            }
-        }
-        char[] charAry = new char[chars.size()];
-        for (int i = 0; i < chars.size(); i++) {
-            charAry[i] = chars.get(i);
-        }
-        return charAry;
-    }
-
-    private List<Character> rangeFor(String startChar, String endChar) {
-        int start = startChar.getBytes(StandardCharsets.US_ASCII)[0];
-        int end = endChar.getBytes(StandardCharsets.US_ASCII)[0];
-        assertPrintable(start);
-        assertPrintable(end);
-        assertOrder(start, end);
-        List<Character> chars = new ArrayList<>();
-        ByteBuffer bb = ByteBuffer.allocate(1);
-        for (int i = start; i <= end; i++) {
-            bb.clear();
-            bb.put(0, (byte) i);
-            CharBuffer decoded = StandardCharsets.US_ASCII.decode(bb);
-            chars.add(decoded.get(0));
-        }
-        return chars;
-    }
-
-    private void assertOrder(int start, int end) {
-        if (end < start) {
-            throw new RuntimeException("char '" + (char) end + "' (" + end + ") occurs after '" + (char) start + "' (" + start + "). Are you sure this is the right spec? (reverse the order)");
-        }
-
-    }
-
-    private void assertPrintable(int asciiCode) {
-        if (asciiCode > 126 || asciiCode < 32) {
-            throw new RuntimeException("ASCII character for code " + asciiCode + " is outside the range of printable characters.");
-        }
     }
 
 }
