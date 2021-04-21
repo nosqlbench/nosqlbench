@@ -25,7 +25,7 @@ import java.util.Iterator;
  *
  * <H2>Usage Patterns</H2>
  *
- * This is intended to be called as an interative data source, where another
+ * This is intended to be called as an interactive data source, where another
  * iteration controls flow.
  *
  * <H2>Warnings</H2>

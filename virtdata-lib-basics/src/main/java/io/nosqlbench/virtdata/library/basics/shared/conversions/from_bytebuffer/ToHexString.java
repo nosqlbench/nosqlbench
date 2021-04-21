@@ -17,10 +17,16 @@ public class ToHexString implements Function<ByteBuffer,String> {
 
     private final boolean useUpperCase;
 
+    /**
+     * Convert the ByteBuffer's contents to a hex string using upper case by default.
+     */
     public ToHexString() {
         this(true);
     }
 
+    /**
+     * Convert the ByteBuffer's contents to a hex string upper or lower case.
+     */
     public ToHexString(boolean useUpperCase) {
         this.useUpperCase = useUpperCase;
     }

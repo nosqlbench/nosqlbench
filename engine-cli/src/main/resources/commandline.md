@@ -107,29 +107,33 @@ Specify the graphite destination and enable reporting
 
     --report-graphite-to <addr>[:<port>]
 
-Specify the interval for graphite or CSV reporting in seconds (default: 10)
+Specify the interval for graphite or CSV reporting in seconds:
 
-    --report-interval <interval-seconds>
+    --report-interval 10
 
-Specify the metrics name prefix for graphite reporting
+Specify the metrics name prefix for graphite reporting:
 
     --metrics-prefix <metrics-prefix>
 
-Log all HDR histogram data to a file
+Log all HDR histogram data to a file:
 
     --log-histograms histodata.log
     --log-histograms 'histodata.log:.*'
     --log-histograms 'histodata.log:.*:1m'
     --log-histograms 'histodata.log:.*specialmetrics:10s'
 
-Log HDR histogram stats to a CSV file
+Log HDR histogram stats to a CSV file:
 
     --log-histostats stats.csv
     --log-histostats 'stats.csv:.*'       # same as above
     --log-histostats 'stats.csv:.*:1m'    # with 1-minute interval
     --log-histostats 'stats.csv:.*specialmetrics:10s'
 
-Adjust the progress reporting interval
+Adjust the HDR histogram precision:
+
+    --hdr-digits 3
+
+Adjust the progress reporting interval:
 
     --progress console:1m
 
