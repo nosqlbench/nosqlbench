@@ -1,4 +1,7 @@
-- 3ddd0d94 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 55ef39e2 (HEAD -> main) revert stderr output change for now
+- 2a7a0e51 revert stderr output change for now
+- afee41ec (origin/main) bindings, workload updates, docs updates
+- 3ddd0d94 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
 - 37d3e393 update new function examples and add scenarios
 - 9589a80a updated descriptions
 - fd65dfae support resolution of additional function types
@@ -7,7 +10,7 @@
 - 9d1d4ce6 added adapter functions
 - 8707ccce logging name improvements
 - fca986e1 use one-line messages where reasonable
-- 89eeaa94 (origin/main) Merge pull request #307 from dougwettlaufer/feature/http-schema-update
+- 89eeaa94 Merge pull request #307 from dougwettlaufer/feature/http-schema-update
 - 1cb4759d Add schema-astra phase to timeseries workloads
 - deff1fe9 Merge pull request #306 from dougwettlaufer/feature/http-schema-update
 - 31865d26 Use http requests when creating schema for rest and graphql
