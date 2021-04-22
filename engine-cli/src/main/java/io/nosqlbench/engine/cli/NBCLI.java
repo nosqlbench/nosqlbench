@@ -72,7 +72,7 @@ public class NBCLI {
             String error = ScenarioErrorHandler.handle(e, false);
             // Commented for now, as the above handler should do everything needed.
             if (error != null) {
-                System.err.println("Scenario stopped due to error above.");
+                System.err.println("Scenario stopped due to error. See logs for details.");
             }
             System.err.flush();
             System.out.flush();
