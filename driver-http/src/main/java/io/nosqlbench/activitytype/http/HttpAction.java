@@ -114,7 +114,7 @@ public class HttpAction implements SyncAction {
                 }
                 if (httpActivity.isDiagnosticMode()) {
                     if (response != null) {
-                        httpActivity.console.summarizeResponseChain(null, response, System.out, cycle, nanos);
+                        httpActivity.console.summarizeResponseChain(error, response, System.out, cycle, nanos);
                     } else {
                         System.out.println("---- RESPONSE was null");
                     }
