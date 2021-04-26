@@ -113,6 +113,7 @@ public class HttpAction implements SyncAction {
                     httpActivity.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                 }
                 if (httpActivity.isDiagnosticMode()) {
+                    httpActivity.console.summarizeRequest("request", error, httpOp.request, System.out, cycle, nanos);
                     if (response != null) {
                         httpActivity.console.summarizeResponseChain(error, response, System.out, cycle, nanos);
                     } else {
