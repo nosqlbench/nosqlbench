@@ -82,7 +82,7 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
         StringBuilder sb = new StringBuilder();
         for (java.nio.file.Path path : enabled.getPaths()) {
             PathWalker.findAll(path).forEach(f -> {
-                sb.append(path.relativize(f).toString()).append("\n");
+                sb.append(path.relativize(f)).append("\n");
             });
         }
         return sb.toString();
@@ -103,7 +103,7 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
         for (java.nio.file.Path path : enabled.getPaths()) {
             PathWalker.findAll(path).forEach(f -> {
                 if (f.toString().endsWith(".md")) {
-                    sb.append(path.relativize(f).toString()).append("\n");
+                    sb.append(path.relativize(f)).append("\n");
                 }
             });
         }
@@ -131,16 +131,19 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
     /**
      * @param pathspec the path as known to the manifest
      * @return The contents of a file
+     *
+     * @see <A href="https://eclipse-ee4j.github.io/jersey.github.io/documentation/latest/user-guide.html#d0e7648">jersey providers</A>
+     *
      */
     @GET
     @Path(value = "{pathspec:.*}")
     public Response getFileInPath(@PathParam("pathspec") String pathspec) {
+        init(false);
         try {
             java.nio.file.Path path = findPath(pathspec);
             String contentType = Files.probeContentType(path);
             MediaType mediaType = MediaType.valueOf(contentType);
-
-            return Response.ok(path.toFile(),mediaType).build();
+            return Response.ok(Files.newBufferedReader(path), mediaType).build();
         } catch (Exception e) {
             return Response.serverError().entity(e.getMessage()).build();
         }
