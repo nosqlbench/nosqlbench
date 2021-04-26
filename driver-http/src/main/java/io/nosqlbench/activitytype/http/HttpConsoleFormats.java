@@ -5,7 +5,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.Flow;
 
 public class HttpConsoleFormats {
 
@@ -37,6 +40,7 @@ public class HttpConsoleFormats {
     private final static long _DATA100 = 1L << 7;
     private final static long _DATA1000 = 1L << 8;
 
+    private final static Set<String> PRINTABLE_TYPES = Set.of("text","html","json","xhtml");
     enum Diag {
 
         headers(_HEADERS),
@@ -118,7 +122,7 @@ public class HttpConsoleFormats {
                     mask = diag.addTo(mask);
                 } catch (Exception e) {
                     throw new RuntimeException("Invalid http diagnostic filter '" + include + "', choose from " +
-                            Arrays.toString(Diag.values()));
+                        Arrays.toString(Diag.values()));
 
                 }
             }
@@ -177,6 +181,8 @@ public class HttpConsoleFormats {
         out.println(COMPONENT_CUE + request.method() + " " + request.uri() + " " + request.version().orElse(HttpClient.Version.HTTP_2));
         summariseHeaders(request.headers(), out);
         out.println(DETAIL_CUE + "body length:" + request.bodyPublisher().get().contentLength());
+        summarizeRequestContent(request, out);
+
     }
 
     public void summarizeResponse(String caption, Exception e, HttpResponse<String> response, PrintStream out, long cycle, long nanos) {
@@ -185,7 +191,7 @@ public class HttpConsoleFormats {
         }
 
         out.println(RESPONSE_CUE + (caption != null ? caption : " RESPONSE") +
-                " status=" + response.statusCode() + " took=" + (nanos / 1_000_000) + "ms");
+            " status=" + response.statusCode() + " took=" + (nanos / 1_000_000) + "ms");
 
         if (e != null) {
             out.println(MESSAGE_CUE + " EXCEPTION: " + e.getMessage());
@@ -195,6 +201,7 @@ public class HttpConsoleFormats {
         summarizeContent(response, out);
 
     }
+
 
     private void summarizeContent(HttpResponse<String> response, PrintStream out) {
         if (Diag.anyIncluded(mask, Diag.data, Diag.data10, Diag.data100, Diag.data1000)) {
@@ -212,7 +219,7 @@ public class HttpConsoleFormats {
                 printable = "non-printable/multiple content types provided";
             } else {
                 String contentType = contentTypeList.get(0).toLowerCase();
-                if (!contentType.contains("text") && !contentType.contains("json")) {
+                if (!PRINTABLE_TYPES.contains(contentType.toLowerCase())) {
                     printable = "non-printable content type:" + contentTypeList.get(0);
                 } else {
                     printable = response.body();
@@ -226,16 +233,96 @@ public class HttpConsoleFormats {
                         }
                     } else if (Diag.data100.includedIn(mask)) {
                         if (printable.length() > 100) {
-                            printable = printable.substring(0, 100) + "\ntruncated at 100 characters\n";
+                            printable = printable.substring(0, 100) + "\n--truncated at 100 characters--\n";
                         }
                     } else if (Diag.data10.includedIn(mask)) {
                         if (printable.length() > 10) {
-                            printable = printable.substring(0, 10) + "\ntruncated at 10 characters\n";
+                            printable = printable.substring(0, 10) + "\n--truncated at 10 characters--\n";
                         }
                     }
                 }
             }
             System.out.println(printable);
+        }
+    }
+
+    public void summarizeRequestContent(HttpRequest request, PrintStream out) {
+        StringBuilder sb = new StringBuilder();
+        if (request.bodyPublisher().isEmpty()) {
+            sb.append(PAYLOAD_CUE).append("\n--no body publisher is defined for this request--\n");
+        } else {
+            String charset = "UTF-8";
+            String contentType = "text/html";
+            List<String> contentTypeHeaders = request.headers().allValues("content-type");
+            if (contentTypeHeaders.size()==0) {
+                sb.append("\n--WARNING: content-type header assumed as 'text/html; charset=UTF-8--\n");
+            } else if (contentTypeHeaders.size()>1) {
+                sb.append("--non-printable/multiple content types provided--");
+            } else {
+                String cth = contentTypeHeaders.get(0);
+                String[] fields = cth.split("; *",2);
+                switch(fields.length) {
+                    case 2: charset = fields[1].split("=")[1].trim();
+                    case 1: contentType = fields[0].trim();
+                }
+
+                if (!PRINTABLE_TYPES.contains(contentType.toLowerCase())) {
+                    sb.append("--non-printable content type:").append(contentType).append("--");
+                } else {
+                    HttpRequest.BodyPublisher publisher = request.bodyPublisher().get();
+                    long contentLength = publisher.contentLength();
+                    if (contentLength > 0) {
+                        List<ByteBuffer> byteBuffers = new BodyReceiver()
+                            .subscribe(publisher)
+                            .awaitBuffers();
+                        for (ByteBuffer buf : byteBuffers) {
+                            sb.append(new String(buf.array(), Charset.forName(charset)));
+                        }
+                    } else {
+                        sb.append("\n<no-content>\n");
+                    }
+
+                }
+            }
+        }
+        out.println(sb);
+    }
+
+    private final static class BodyReceiver implements Flow.Subscriber<ByteBuffer> {
+
+        public List<ByteBuffer> buffers = new LinkedList<>();
+
+        public BodyReceiver subscribe(Flow.Publisher<ByteBuffer> flowpub) {
+            flowpub.subscribe(this);
+            return this;
+        }
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+        }
+
+        @Override
+        public void onNext(ByteBuffer item) {
+            buffers.add(item);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+
+        @Override
+        public synchronized void onComplete() {
+            notifyAll();
+        }
+
+        public synchronized List<ByteBuffer> awaitBuffers() {
+            try {
+                wait();
+                return buffers;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
