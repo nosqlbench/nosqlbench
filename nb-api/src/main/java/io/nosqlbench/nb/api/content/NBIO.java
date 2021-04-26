@@ -264,7 +264,16 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
 
-    // for testing
+    /**
+     * Given names and suffixes, expand a list of names which may be valid.
+     * If no name is given, then <pre>{@code .*}</pre> is used.
+     * If suffixes are given, then all returned results must include at least
+     * one of the suffixes. If the name includes one of the suffixes given,
+     * then additional names are expanded to match the additional suffixes.
+     * @param _names base filenames or path fragment, possibly fully-qualified
+     * @param _suffixes zero or more suffixes, which, if given, imply that one of them must match
+     * @return Expanded names of valid filename fragments according to the above rules
+     */
     public LinkedHashSet<String> expandNamesAndSuffixes(
         List<String> _names,
         Set<String> _suffixes) {
@@ -279,20 +288,20 @@ public class NBIO implements NBPathsAPI.Facets {
             _suffixes.stream().map(s -> ".*" + s).forEach(searches::add);
         } else {
             for (String name : _names) {
-                if (!name.equals(".*")) {
-                    searches.add(name);
-                }
+//                if (!name.equals(".*")) {
+//                    searches.add(name);
+//                }
+                String basename = name;
                 boolean suffixed = false;
                 for (String suffix : _suffixes) {
                     if (name.endsWith(suffix)) {
                         suffixed = true;
+                        basename = name.substring(0,name.length()-suffix.length());
                         break;
                     }
                 }
-                if (!suffixed) {
-                    for (String suffix : _suffixes) {
-                        searches.add(name + suffix);
-                    }
+                for (String suffix : _suffixes) {
+                    searches.add(basename + suffix);
                 }
             }
         }

@@ -28,10 +28,10 @@ public class NBIOTest {
     }
 
     @Test
-    public void testExpandNameOnly() {
-        NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension();
+    public void testExpandNameAndAllSuffixesOnly() {
+        NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension("test1","test2");
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
-        assertThat(searches).containsExactly("foo.bar");
+        assertThat(searches).containsExactly("foo.bar.test1","foo.bar.test2");
     }
 
     @Test
@@ -43,9 +43,9 @@ public class NBIOTest {
 
     @Test
     public void testExpandNamesAndExtensionsAvoidsExtendedAlreadyExtended() {
-        NBIO extensions = (NBIO) NBIO.all().name("foo.bar").extension("baz","beez");
+        NBIO extensions = (NBIO) NBIO.all().name("foo.baz").extension("baz","beez");
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
-        assertThat(searches).contains("foo.bar");
+        assertThat(searches).contains("foo.baz","foo.beez");
     }
 
     @Test
@@ -69,10 +69,10 @@ public class NBIOTest {
     public void testExpandAddExtensionNeeded() {
         NBIO extensions = (NBIO) NBIO.all().name("foo").extension("bar");
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
-        assertThat(searches).containsExactly("foo","foo.bar");
+        assertThat(searches).containsExactly("foo.bar");
         NBIO extensionsDot = (NBIO) NBIO.all().name("foo").extension(".bar");
         LinkedHashSet<String> searchesDot = extensionsDot.expandNamesAndSuffixes();
-        assertThat(searchesDot).containsExactly("foo","foo.bar");
+        assertThat(searchesDot).containsExactly("foo.bar");
     }
 
     @Test
@@ -166,8 +166,8 @@ public class NBIOTest {
     @Test
     public void testLoadNamedFileAsYmlExtension() {
         List<Content<?>> list = NBIO.classpath()
-            .name("nesteddir1/nesteddir2/testworkload1.yml")
-            .extension("abc")
+            .name("nesteddir1/nesteddir2/testworkload1")
+            .extension("yml")
             .list();
         assertThat(list).hasSize(1);
 
@@ -227,6 +227,34 @@ public class NBIOTest {
             .extension("yaml");
         List<Content<?>> gammas = gammasSearch.list();
         assertThat(gammas).hasSize(1);
+    }
+
+    @Test
+    public void onlyMatchExtensionFilesWhenExtensionsProvided() {
+
+        // This search is invalid because by providing extensions, all results
+        // are required to match one of the extensions, thus the only valid
+        // match here would be alpha-gamma.yaml.js
+        NBPathsAPI.DoSearch invalidSearch = NBIO.all()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name("alpha-gamma.yaml")
+            .extension("js");
+
+        NBPathsAPI.DoSearch validSearch1 = NBIO.all()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name("alpha-gamma")
+            .extension("js");
+
+        NBPathsAPI.DoSearch validSearch2 = NBIO.all()
+            .prefix(Paths.get("target/test-classes/").toString())
+            .name("alpha-gamma.js")
+            .extension();
+
+
+        assertThat(invalidSearch.list()).hasSize(0);
+        assertThat(validSearch1.list()).hasSize(1);
+        assertThat(validSearch2.list()).hasSize(1);
+
     }
 
 }
