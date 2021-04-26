@@ -1,16 +1,9 @@
-- 55ef39e2 (HEAD -> main) revert stderr output change for now
-- 2a7a0e51 revert stderr output change for now
-- afee41ec (origin/main) bindings, workload updates, docs updates
-- 3ddd0d94 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 37d3e393 update new function examples and add scenarios
-- 9589a80a updated descriptions
-- fd65dfae support resolution of additional function types
-- b1afbe33 typo fixes
-- f544ecb7 preview only first line of workload descriptions
-- 9d1d4ce6 added adapter functions
-- 8707ccce logging name improvements
-- fca986e1 use one-line messages where reasonable
-- 89eeaa94 Merge pull request #307 from dougwettlaufer/feature/http-schema-update
-- 1cb4759d Add schema-astra phase to timeseries workloads
-- deff1fe9 Merge pull request #306 from dougwettlaufer/feature/http-schema-update
-- 31865d26 Use http requests when creating schema for rest and graphql
+- b8f6d38f (HEAD -> main) nosqlbench-308 Arg parsing broken since v4.15.33 - unrecognized option
+- 22612644 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 64d3bd2a (origin/main) Merge pull request #309 from dougwettlaufer/fix-graphql-kv-workload
+- 459587e3 readability improvements
+- 3e7c6840 provide jetty-compatible entity types for zip resources
+- d17254e0 include error detail in http diag readout
+- 46aeef0a bump cqld4 version
+- 72a3096a allow extraction of request body in http diagnostics
+- 7ff1e3db Use the correct keyspace in graphql kv and fix descriptions
