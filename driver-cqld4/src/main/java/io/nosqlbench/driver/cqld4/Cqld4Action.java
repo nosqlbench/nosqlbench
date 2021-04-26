@@ -12,9 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Cqld4Action implements SyncAction, ActivityDefObserver {
 
-    /**
-     * The thread number within the activity instance
-     **/
     private final int slot;
     private final Cqld4Activity activity;
 
@@ -39,7 +36,6 @@ public class Cqld4Action implements SyncAction, ActivityDefObserver {
         this.resultTimer = activity.getInstrumentation().getOrCreateResultTimer();
         this.resultSuccessTimer = activity.getInstrumentation().getOrCreateResultSuccessTimer();
         this.triesHisto = activity.getInstrumentation().getOrCreateTriesHistogram();
-
     }
 
     @Override

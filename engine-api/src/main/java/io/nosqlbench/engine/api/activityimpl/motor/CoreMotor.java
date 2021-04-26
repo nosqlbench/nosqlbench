@@ -240,9 +240,9 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                 opTracker = new OpTrackerImpl<>(activity, slotId);
                 opTracker.setCycleOpFunction(async.getOpInitFunction());
 
-                StrideOutputConsumer<D> outputreader = null;
+                StrideOutputConsumer<D> strideconsumer = null;
                 if (action instanceof StrideOutputConsumer) {
-                    outputreader = (StrideOutputConsumer<D>) async;
+                    strideconsumer = (StrideOutputConsumer<D>) async;
                 }
 
                 while (slotState.get() == Running) {
@@ -271,7 +271,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                             cycleSegment.peekNextCycle(),
                             stride,
                             output,
-                            outputreader);
+                            strideconsumer);
                     strideTracker.start();
 
                     long strideStart = System.nanoTime();
@@ -303,7 +303,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                             synchronized (opTracker) {
                                 while (opTracker.isFull()) {
                                     try {
-                                        logger.trace("Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
+                                        logger.trace(() -> "Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
                                         optrackerBlockCounter.inc();
                                         opTracker.wait(10000);
                                     } catch (InterruptedException ignored) {
@@ -312,14 +312,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                             }
 
                             async.enqueue(op);
-
-//                            T opc = async.newOpContext();
-//                            opc.addSink(strideTracker);
-//                            async.enqueue(opc);
-//                            boolean canAcceptMore = async.enqueue(opc);
-//                            if (!canAcceptMore) {
-//                                logger.trace("Action queue full at cycle=" + cyclenum);
-//                            }
 
                         } catch (Exception t) {
                             logger.error("Error while processing async cycle " + cyclenum + ", error:" + t);

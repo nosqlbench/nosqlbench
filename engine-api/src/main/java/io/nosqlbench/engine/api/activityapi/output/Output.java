@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 
 /**
- * A cycle marker is simply a type that knows how to do something
+ * A cycle output is simply a type that knows how to do something
  * useful with the result of a particular cycle.
  * Outputs are required to be thread-safe.
  */
