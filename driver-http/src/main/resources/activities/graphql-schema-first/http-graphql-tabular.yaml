@@ -6,7 +6,7 @@
 # - rest uses limit as it queries only by a single primary key, we can not map this to GQL (also should data be clustering key)
 
 description: |
-  This workload emulates a time-series data model and access patterns.
+  This workload emulates a tabular workload with partitions, clusters, and data fields.
   This should be identical to the cql variant except for:
   - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
   - Schema creation GraphQL first, we don't use cql and thus can only create schema with limited options.

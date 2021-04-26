@@ -1,6 +1,6 @@
 # nb -v http-graphql-cql-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
 description: |
-  This workload emulates a time-series data model and access patterns.
+  This workload emulates a tabular workload with partitions, clusters, and data fields.
   This should be identical to the cql variant except for:
   - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
   - There is no instrumentation with the http driver.
