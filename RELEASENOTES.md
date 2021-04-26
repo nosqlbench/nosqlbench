@@ -1,9 +1,2 @@
-- b8f6d38f (HEAD -> main) nosqlbench-308 Arg parsing broken since v4.15.33 - unrecognized option
-- 22612644 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 64d3bd2a (origin/main) Merge pull request #309 from dougwettlaufer/fix-graphql-kv-workload
-- 459587e3 readability improvements
-- 3e7c6840 provide jetty-compatible entity types for zip resources
-- d17254e0 include error detail in http diag readout
-- 46aeef0a bump cqld4 version
-- 72a3096a allow extraction of request body in http diagnostics
-- 7ff1e3db Use the correct keyspace in graphql kv and fix descriptions
+- 7b2816e6 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 6281c8c9 fix body diagnostics for http driver
