@@ -1,2 +1,4 @@
-- 7b2816e6 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 6281c8c9 fix body diagnostics for http driver
+- 5ecda12f (HEAD -> main) use built-in activity error handler wiring for http
+- d905c352 base exception metrics on name only
+- fed7a9e1 allow activities to provide an error name mapper
+- c45662ab allow NBErrorHandler to map more detailed error names
