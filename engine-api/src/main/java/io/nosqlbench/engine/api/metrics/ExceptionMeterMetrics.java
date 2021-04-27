@@ -28,20 +28,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * Use this to provide exception metering in a uniform way.
  */
 public class ExceptionMeterMetrics {
-    private final ConcurrentHashMap<Class<? extends Throwable>, Meter> meters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Meter> meters = new ConcurrentHashMap<>();
     private final ActivityDef activityDef;
 
     public ExceptionMeterMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void mark(Throwable t) {
-        Meter c = meters.get(t.getClass());
+    public void mark(String name) {
+        Meter c = meters.get(name);
         if (c == null) {
             synchronized (meters) {
                 c = meters.computeIfAbsent(
-                    t.getClass(),
-                    k -> ActivityMetrics.meter(activityDef, "exceptions." + t.getClass().getSimpleName())
+                    name,
+                    k -> ActivityMetrics.meter(activityDef, "exceptions." + name)
                 );
             }
         }

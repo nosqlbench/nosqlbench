@@ -30,20 +30,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * from each type of error you want to track.
  */
 public class ExceptionHistoMetrics {
-    private final ConcurrentHashMap<Class<? extends Throwable>, Histogram> histos = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Histogram> histos = new ConcurrentHashMap<>();
     private final ActivityDef activityDef;
 
     public ExceptionHistoMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void update(Throwable e, long magnitude) {
-        Histogram h = histos.get(e.getClass());
+    public void update(String name, long magnitude) {
+        Histogram h = histos.get(name);
         if (h == null) {
             synchronized (histos) {
                 h = histos.computeIfAbsent(
-                    e.getClass(),
-                    k -> ActivityMetrics.histogram(activityDef, "errorhistos." + e.getClass().getSimpleName())
+                    name,
+                    k -> ActivityMetrics.histogram(activityDef, "errorhistos." + name)
                 );
             }
         }

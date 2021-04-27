@@ -65,7 +65,7 @@ public class JDBCAction implements SyncAction {
         } catch (Exception e) {
             LOGGER.debug("Try " + tries + ": failed to execute statement: " + sql, e);
 
-            activity.getExceptionCount().count(e);
+            activity.getExceptionCount().count(e.getClass().getSimpleName());
 
             if (e instanceof SQLException) {
                 SQLException sqle = (SQLException) e;

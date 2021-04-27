@@ -80,10 +80,10 @@ public class NBCycleErrorHandler implements CycleErrorHandler<Throwable, ErrorSt
             case retry:
                 retry = true;
             case histogram:
-                exceptionHistoMetrics.update(error,cce.getDurationNanos());
+                exceptionHistoMetrics.update(error.getClass().getSimpleName(),cce.getDurationNanos());
             case count:
             case counter:
-                exceptionCountMetrics.count(error);
+                exceptionCountMetrics.count(error.getClass().getSimpleName());
             case ignore:
             default:
                 break;

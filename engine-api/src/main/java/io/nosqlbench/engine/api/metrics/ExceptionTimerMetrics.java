@@ -29,20 +29,20 @@ import java.util.concurrent.TimeUnit;
  * Use this to provide exception metering in a uniform way.
  */
 public class ExceptionTimerMetrics {
-    private final ConcurrentHashMap<Class<? extends Throwable>, Timer> timers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Timer> timers = new ConcurrentHashMap<>();
     private final ActivityDef activityDef;
 
     public ExceptionTimerMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void update(Throwable throwable, long nanosDuration) {
-        Timer timer = timers.get(throwable.getClass());
+    public void update(String name, long nanosDuration) {
+        Timer timer = timers.get(name);
         if (timer == null) {
             synchronized (timers) {
                 timer = timers.computeIfAbsent(
-                    throwable.getClass(),
-                    k -> ActivityMetrics.timer(activityDef, "exceptions." + throwable.getClass().getSimpleName())
+                    name,
+                    k -> ActivityMetrics.timer(activityDef, "exceptions." + name)
                 );
             }
         }

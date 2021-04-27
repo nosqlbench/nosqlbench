@@ -59,7 +59,7 @@ public class GraphErrorHandler {
                 case retry:
                     retry = true;
                 case count:
-                    exceptionMeterMetrics.mark(realerror);
+                    exceptionMeterMetrics.mark(realerror.getClass().getSimpleName());
                 case ignore:
                 default:
                     break;
@@ -78,7 +78,7 @@ public class GraphErrorHandler {
                 case retry:
                     retry = true;
                 case count:
-                    exceptionMeterMetrics.mark(retryable);
+                    exceptionMeterMetrics.mark(retryable.getClass().getSimpleName());
                 case ignore:
                 default:
                     break;
