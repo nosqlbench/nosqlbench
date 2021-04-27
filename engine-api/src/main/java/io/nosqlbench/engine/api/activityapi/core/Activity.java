@@ -31,6 +31,7 @@ import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -199,4 +200,8 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     void setConsoleOut(PrintWriter writer);
 
     ErrorMetrics getExceptionMetrics();
+
+    default Function<Throwable,String> getErrorNameMapper() {
+        return t -> t.getClass().getSimpleName();
+    }
 }
