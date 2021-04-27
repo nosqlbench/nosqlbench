@@ -62,14 +62,6 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         this.sequencer = createOpSequence(ReadyHttpOp::new);
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
-        this.errorhandler = new NBErrorHandler(
-            () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
-            this::getExceptionMetrics
-        );
-    }
-
-    public NBErrorHandler getErrorHandler() {
-        return this.errorhandler;
     }
 
     @Override

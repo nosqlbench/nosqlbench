@@ -4,6 +4,8 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
@@ -31,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 /**
@@ -57,6 +58,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private long startedAtMillis;
     private int nameEnumerator = 0;
     private ErrorMetrics errorMetrics;
+    private NBErrorHandler errorHandler;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -84,6 +86,15 @@ public class SimpleActivity implements Activity, ProgressCapable {
         onActivityDefUpdate(this.activityDef);
     }
 
+    public synchronized NBErrorHandler getErrorHandler() {
+        if (errorHandler==null) {
+            errorHandler=new NBErrorHandler(
+                () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
+                () -> getExceptionMetrics(),
+                getErrorNameMapper());
+        }
+        return errorHandler;
+    }
 
     public synchronized RunState getRunState() {
         return runState;
@@ -488,6 +499,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
             throw new RuntimeException("Progress meter must be implemented here.");
         }
     }
+
 
 
 }
