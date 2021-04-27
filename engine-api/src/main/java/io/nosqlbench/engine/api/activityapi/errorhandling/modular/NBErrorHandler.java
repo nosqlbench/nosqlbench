@@ -9,6 +9,7 @@ import io.nosqlbench.nb.api.config.params.NBParams;
 import java.util.*;
 import java.util.ServiceLoader.Provider;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,36 +18,43 @@ public class NBErrorHandler {
 
     private final Supplier<ErrorMetrics> errorMetricsSupplier;
     private final Supplier<String> configSpecSupplier;
+    private final Function<Throwable, String> namer;
     private final Map<String, List<ErrorHandler>> handlerCache = new ConcurrentHashMap<>();
     private final List<HandlerMapping> configs = new ArrayList<>();
 
     public NBErrorHandler(Supplier<String> configSpecSupplier, Supplier<ErrorMetrics> metricsSupplier) {
+        this(configSpecSupplier, metricsSupplier, throwable -> throwable.getClass().getSimpleName());
+    }
+
+    public NBErrorHandler(Supplier<String> configSpecSupplier, Supplier<ErrorMetrics> metricsSupplier, Function<Throwable,String> namer) {
         this.errorMetricsSupplier = metricsSupplier;
         this.configSpecSupplier = configSpecSupplier;
+        this.namer = namer;
+
         Arrays.stream(configSpecSupplier.get().split(";"))
             .map(HandlerMapping::new)
             .forEach(configs::add);
     }
 
-    public ErrorDetail handleError(Throwable t, long cycle, long nanosIntoOp) {
-        String errorName = t.getClass().getSimpleName();
+    public ErrorDetail handleError(Throwable throwable, long cycle, long nanosIntoOp) {
+        String errorName = namer.apply(throwable);
+//        String errorName = t.getClass().getSimpleName();
         List<ErrorHandler> handlers = handlerCache.get(errorName);
         ErrorDetail detail = ErrorDetail.ERROR_NONRETRYABLE;
 
         if (handlers == null) {
-            handlers = lookup(t);
-            handlerCache.put(t.getClass().getSimpleName(), handlers);
+            handlers = lookup(errorName);
+            handlerCache.put(errorName, handlers);
         }
 
         boolean retry = false;
         for (ErrorHandler handler : handlers) {
-            detail = handler.handleError(t, cycle, nanosIntoOp, detail);
+            detail = handler.handleError(errorName, throwable, cycle, nanosIntoOp, detail);
         }
         return detail;
     }
 
-    private synchronized List<ErrorHandler> lookup(Throwable t) {
-        String errorName = t.getClass().getSimpleName();
+    private synchronized List<ErrorHandler> lookup(String errorName) {
         for (HandlerMapping config : configs) {
             for (Pattern errorPattern : config.matchers) {
                 if (errorPattern.matcher(errorName).matches()) {
@@ -62,7 +70,7 @@ public class NBErrorHandler {
                 }
             }
         }
-        throw new RuntimeException("Unable to find a configured error handler for error '" + t.getClass().getSimpleName() + "'");
+        throw new RuntimeException("Unable to find a configured error handler for error '" + errorName + "'");
     }
 
     private ErrorHandler getHandler(Element cfg) {

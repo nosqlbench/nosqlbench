@@ -1,7 +1,5 @@
-package io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers;
+package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.ConfigAware;
 import io.nosqlbench.nb.api.config.ConfigModel;
@@ -15,7 +13,7 @@ public class ResultCode implements ErrorHandler, ConfigAware {
     private byte code;
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         return detail.withResultCode(code);
     }
 

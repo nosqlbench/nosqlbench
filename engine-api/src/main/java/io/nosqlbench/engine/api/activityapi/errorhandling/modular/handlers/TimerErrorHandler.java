@@ -15,8 +15,8 @@ public class TimerErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
     private ExceptionTimerMetrics exceptionTimerMetrics;
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        exceptionTimerMetrics.update(t, durationInNanos);
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        exceptionTimerMetrics.update(name, durationInNanos);
         return detail;
     }
 

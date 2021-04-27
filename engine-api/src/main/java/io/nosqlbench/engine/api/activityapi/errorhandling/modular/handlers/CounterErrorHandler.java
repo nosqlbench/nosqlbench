@@ -14,8 +14,8 @@ public class CounterErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
     private ExceptionCountMetrics exceptionCountMetrics;
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        exceptionCountMetrics.count(t);
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        exceptionCountMetrics.count(name);
         return detail;
     }
 

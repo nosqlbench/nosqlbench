@@ -13,8 +13,8 @@ public class MeterErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
     private ExceptionMeterMetrics exceptionMeterMetrics;
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        exceptionMeterMetrics.mark(t);
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        exceptionMeterMetrics.mark(name);
         return detail;
     }
 

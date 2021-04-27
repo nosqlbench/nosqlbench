@@ -8,7 +8,7 @@ import io.nosqlbench.nb.annotations.Service;
 public class IgnoreErrorHandler implements ErrorHandler {
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         return detail;
     }
 

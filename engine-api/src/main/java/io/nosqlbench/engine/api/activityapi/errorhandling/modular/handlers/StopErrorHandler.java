@@ -12,7 +12,7 @@ public class StopErrorHandler implements ErrorHandler {
     private final static Logger logger = LogManager.getLogger(StopErrorHandler.class);
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         throw new RuntimeException(t);
     }
 }

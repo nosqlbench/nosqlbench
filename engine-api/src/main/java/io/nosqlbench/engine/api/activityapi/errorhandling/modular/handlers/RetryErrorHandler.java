@@ -7,7 +7,7 @@ import io.nosqlbench.nb.annotations.Service;
 @Service(value = ErrorHandler.class, selector = "retry")
 public class RetryErrorHandler implements ErrorHandler {
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         return detail.withRetryable();
     }
 }

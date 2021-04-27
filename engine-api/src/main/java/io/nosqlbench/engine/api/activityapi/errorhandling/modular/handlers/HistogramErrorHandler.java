@@ -18,8 +18,8 @@ public class HistogramErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
     private ExceptionHistoMetrics exceptionHistoMetrics;
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        exceptionHistoMetrics.update(t, durationInNanos);
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        exceptionHistoMetrics.update(name, durationInNanos);
         return detail;
     }
 

@@ -11,7 +11,7 @@ public class WarnErrorHandler implements ErrorHandler {
     private final static Logger logger = LogManager.getLogger("ERRORS");
 
     @Override
-    public ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         logger.warn("error with cycle " + cycle + " errmsg: " + t.getMessage());
         return detail;
     }

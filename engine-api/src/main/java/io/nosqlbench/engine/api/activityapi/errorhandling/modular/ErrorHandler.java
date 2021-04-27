@@ -11,5 +11,5 @@ public interface ErrorHandler {
      * @param durationInNanos How long into an operation the error occured
      * @return true if the operation should be retried, assuming retries available
      */
-    ErrorDetail handleError(Throwable t, long cycle, long durationInNanos, ErrorDetail detail);
+    ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail);
 }
