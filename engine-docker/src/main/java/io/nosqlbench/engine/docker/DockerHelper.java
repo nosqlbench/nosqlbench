@@ -228,6 +228,10 @@ public class DockerHelper {
         List<String> validRepoTags = tags.stream().map(s -> label + ":" + s).collect(Collectors.toList());
         for (Image image : images) {
             String[] foundRepoTags = image.getRepoTags();
+            if (foundRepoTags == null) {
+                continue;
+            }
+
             for (String foundRepoTag : foundRepoTags) {
                 for (String validRepoTag : validRepoTags) {
                     if (foundRepoTag.equals(validRepoTag)) {
