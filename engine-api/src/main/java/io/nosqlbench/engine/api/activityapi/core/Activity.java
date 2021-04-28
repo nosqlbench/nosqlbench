@@ -201,6 +201,12 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     ErrorMetrics getExceptionMetrics();
 
+    /**
+     * When a driver needs to identify an error uniquely for the purposes of
+     * routing it to the correct error handler, or naming it in logs, or naming
+     * metrics, override this method in your activity.
+     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
+     */
     default Function<Throwable,String> getErrorNameMapper() {
         return t -> t.getClass().getSimpleName();
     }
