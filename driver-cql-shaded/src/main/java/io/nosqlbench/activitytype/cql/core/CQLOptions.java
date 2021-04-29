@@ -4,8 +4,8 @@ import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.*;
 import io.netty.util.HashedWheelTimer;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -216,6 +216,13 @@ public class CQLOptions {
             String[] args= argslist.isBlank() ? new String[0] : argslist.split(",");
 
             switch (policyname) {
+                case "RRP":
+                case "RoundRobinPolicy":
+                    if (policy!=null) {
+                        throw new BasicError("You can't wrap another policy with RRP");
+                    }
+                    policy = new RoundRobinPolicy();
+                    break;
                 case "WLP":
                 case "whitelist":
                     List<InetSocketAddress> sockAddrs = Arrays.stream(args)

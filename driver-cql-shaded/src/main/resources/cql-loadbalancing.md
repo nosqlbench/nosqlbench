@@ -28,6 +28,12 @@ line:
 
 Each supported policy is described in detail below, with the options supported.
 
+### RRP: Round Robin Policy
+
+Format: `RRP()`
+
+**note** You can't wrap another policy with RRP.
+
 ### WLP: White List Policy
 
 Format: `WLP(addr,...)`
