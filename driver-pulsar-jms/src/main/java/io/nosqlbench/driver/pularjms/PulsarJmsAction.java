@@ -16,24 +16,20 @@ public class PulsarJmsAction implements SyncAction {
 
     private final static Logger logger = LogManager.getLogger(PulsarJmsAction.class);
 
-    private final ActivityDef activityDef;
+    private final PulsarJmsActivity activity;
     private final int slot;
 
-    private final PulsarJmsActivity activity;
-    private OpSequence<OpDispenser<PulsarJmsOp>> sequencer;
+    int maxTries;
 
-    int maxTries = 1;
-
-    public PulsarJmsAction(ActivityDef activityDef, int slot, PulsarJmsActivity activity) {
-        this.activityDef = activityDef;
-        this.slot = slot;
+    public PulsarJmsAction(PulsarJmsActivity activity, int slot) {
         this.activity = activity;
+        this.slot = slot;
         this.maxTries = activity.getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     @Override
     public void init() {
-        this.sequencer = activity.getSequencer();
+
     }
 
     @Override
@@ -45,7 +41,7 @@ public class PulsarJmsAction implements SyncAction {
 
         PulsarJmsOp pulsarJmsOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<PulsarJmsOp> readyPulsarJmsOp = sequencer.get(cycle);
+            LongFunction<PulsarJmsOp> readyPulsarJmsOp = activity.getSequencer().get(cycle);
             pulsarJmsOp = readyPulsarJmsOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
