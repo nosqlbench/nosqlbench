@@ -1,12 +1,9 @@
-package io.nosqlbench.driver.pularjms;
+package io.nosqlbench.driver.pulsarjms;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.driver.pularjms.ops.PulsarJmsOp;
+import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

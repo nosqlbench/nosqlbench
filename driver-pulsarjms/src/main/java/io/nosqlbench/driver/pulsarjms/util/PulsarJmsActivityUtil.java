@@ -1,23 +1,11 @@
-package io.nosqlbench.driver.pularjms.util;
+package io.nosqlbench.driver.pulsarjms.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pulsar.client.api.Schema;
-import org.apache.pulsar.client.impl.schema.generic.GenericAvroSchema;
-import org.apache.pulsar.common.schema.SchemaInfo;
-import org.apache.pulsar.common.schema.SchemaType;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 public class PulsarJmsActivityUtil {
 
