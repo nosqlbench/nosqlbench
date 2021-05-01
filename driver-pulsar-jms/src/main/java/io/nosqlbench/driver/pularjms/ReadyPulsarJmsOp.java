@@ -1,8 +1,9 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.pularjms;
 
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsMsgSendMapper;
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
-import io.nosqlbench.driver.pulsarjms.util.PulsarJmsActivityUtil;
+import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
+import io.nosqlbench.driver.pularjms.ops.PulsarJmsMsgSendMapper;
+import io.nosqlbench.driver.pularjms.ops.PulsarJmsOp;
+import io.nosqlbench.driver.pularjms.util.PulsarJmsActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
@@ -60,7 +61,7 @@ public class ReadyPulsarJmsOp implements OpDispenser<PulsarJmsOp> {
         }
 
         // Global: JMS destinaion
-        LongFunction<Destination> jmsDestinationFunc;
+        LongFunction<Destination> jmsDestinationFunc = (l) -> null;
         try {
             LongFunction<String> finalTopicUriFunc = topicUriFunc;
             jmsDestinationFunc = (l) -> pulsarJmsActivity.getOrCreateJmsDestination(finalTopicUriFunc.apply(l));

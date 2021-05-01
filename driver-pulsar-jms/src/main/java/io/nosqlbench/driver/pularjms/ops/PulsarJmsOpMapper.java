@@ -1,6 +1,6 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.pularjms.ops;
 
-import io.nosqlbench.driver.pulsarjms.PulsarJmsActivity;
+import io.nosqlbench.driver.pularjms.PulsarJmsActivity;
 
 import javax.jms.Destination;
 import java.util.function.LongFunction;
