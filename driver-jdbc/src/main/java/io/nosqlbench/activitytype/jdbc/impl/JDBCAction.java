@@ -3,13 +3,13 @@ package io.nosqlbench.activitytype.jdbc.impl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.activitytype.jdbc.api.JDBCActivity;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
@@ -40,59 +40,37 @@ public class JDBCAction implements SyncAction {
         }
 
         int maxTries = activity.getMaxTries();
-        int errorCode = 0;
 
         for (int tries = 1; tries <= maxTries; tries++) {
-            errorCode = execute(boundStmt, tries);
-            if (errorCode == 0) return 0;
-        }
+            Exception error = null;
+            long startTimeNanos = System.nanoTime();
 
-        LOGGER.debug("Max tries " + maxTries + " exceeded for executing statement " + boundStmt);
-        return errorCode;
-    }
+            try (Connection conn = activity.getDataSource().getConnection()) {
+                Statement jdbcStmt = conn.createStatement();
+                jdbcStmt.execute(boundStmt);
 
-    private int execute(String sql, int tries) {
-        long startTimeNano = System.nanoTime();
-        Long resultTime = null;
-
-        try (Connection conn = activity.getDataSource().getConnection()) {
-            Statement jdbcStmt = conn.createStatement();
-            jdbcStmt.execute(sql);
-
-            resultTime = System.nanoTime() - startTimeNano;
-            activity.getResultSuccessTimer().update(resultTime, TimeUnit.NANOSECONDS);
-
-        } catch (Exception e) {
-            LOGGER.debug("Try " + tries + ": failed to execute statement: " + sql, e);
-
-            activity.getExceptionCount().count(e.getClass().getSimpleName());
-
-            if (e instanceof SQLException) {
-                SQLException sqle = (SQLException) e;
-
-                activity.getSQLExceptionCount().inc(sqle);
-
-                // TODO non-retryable exception should return its non-zero error code to runCycle() caller
-                if (!activity.isRetryable(sqle)) {
-                    return 0;
-                }
-
-                return sqle.getErrorCode();
+            } catch (Exception e) {
+                error = e;
             }
 
-            return 1;
+            long executionTimeNanos = System.nanoTime() - startTimeNanos;
 
-        } finally {
-            if (resultTime == null) {
-                resultTime = System.nanoTime() - startTimeNano;
-            }
-
-            activity.getResultTimer().update(resultTime, TimeUnit.NANOSECONDS);
+            activity.getResultTimer().update(executionTimeNanos, TimeUnit.NANOSECONDS);
             activity.getTriesHisto().update(tries);
+
+            if (error == null) {
+                activity.getResultSuccessTimer().update(executionTimeNanos, TimeUnit.NANOSECONDS);
+                return 0;
+            } else {
+                ErrorDetail detail = activity.getErrorHandler().handleError(error, cycle, executionTimeNanos);
+                if (!detail.isRetryable()) {
+                    LOGGER.debug("Exit failure after non-retryable error");
+                    return 1;
+                }
+            }
         }
 
-        LOGGER.trace("Try " + tries + ": successfully executed statement: " + sql);
-        return 0;
+        LOGGER.debug("Exit failure after maxretries=" + maxTries);
+        return 1;
     }
-
 }

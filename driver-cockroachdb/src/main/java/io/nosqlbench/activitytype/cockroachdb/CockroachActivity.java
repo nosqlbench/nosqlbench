@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Arrays;
 
 public class CockroachActivity extends JDBCActivity {
@@ -16,6 +15,14 @@ public class CockroachActivity extends JDBCActivity {
     public CockroachActivity(ActivityDef activityDef) {
         super(activityDef);
     }
+
+    // TODO provide an error handler with sane defaults including
+    //   * retry on 40001 SQL state code (CockroachDB txn retry)
+    //   * retry (implement exponential, to avoid stampeding herd) on timeout getting connection from connection pool
+    //
+    //@Override
+    //public NBErrorHandler getErrorHandler() {
+    //}
 
     @Override
     protected DataSource newDataSource() {
@@ -26,13 +33,17 @@ public class CockroachActivity extends JDBCActivity {
             getOptionalString("serverName").
             orElseThrow(() -> new RuntimeException("serverName parameter required"));
 
-        // portNumber, user, password are optional
+        // portNumber, databaseName, user, password are optional
         Integer portNumber = getParams().getOptionalInteger("portNumber").orElse(26257);
+        String databaseName = getParams().getOptionalString("databaseName").orElse(null);
         String user = getParams().getOptionalString("user").orElse(null);
         String password = getParams().getOptionalString("password").orElse(null);
 
         ds.setServerNames(new String[]{serverName});
         ds.setPortNumbers(new int[]{portNumber});
+        if (databaseName != null) {
+            ds.setDatabaseName(databaseName);
+        }
         if (user != null) {
             ds.setUser(user);
         }
@@ -40,17 +51,13 @@ public class CockroachActivity extends JDBCActivity {
             ds.setPassword(password);
         }
 
-        LOGGER.debug("Final DataSource fields"
+        LOGGER.debug("Final DataSource fields:"
             + " serverNames=" + Arrays.toString(ds.getServerNames())
             + " portNumbers=" + Arrays.toString(ds.getPortNumbers())
+            + " databaseName=" + ds.getDatabaseName()
             + " user=" + ds.getUser()
             + " password=" + ds.getPassword());
 
         return ds;
-    }
-
-    @Override
-    public boolean isRetryable(SQLException sqlException) {
-        return sqlException.getSQLState().equals("40001"); // sql state code for transaction conflict
     }
 }
