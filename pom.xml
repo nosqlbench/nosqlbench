@@ -50,7 +50,6 @@
         <module>driver-jdbc</module>
         <module>driver-cockroachdb</module>
         <module>driver-pulsar</module>
-        <module>driver-pulsar-jms</module>
 
         <!-- VIRTDATA MODULES -->
 
