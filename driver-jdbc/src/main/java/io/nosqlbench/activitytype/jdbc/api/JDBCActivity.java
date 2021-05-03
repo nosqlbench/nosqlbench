@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 // This should not be exposed as as service directly unless it can
 // be used with a modular JDBC configuration.
@@ -27,8 +27,7 @@ public abstract class JDBCActivity extends SimpleActivity {
     private Timer resultTimer;
     private Timer resultSuccessTimer;
     private Histogram triesHisto;
-    private ExceptionCountMetrics exceptionCount;
-    private SQLExceptionCountMetrics sqlExceptionCount;
+    private int maxTries;
 
     protected DataSource dataSource;
     protected OpSequence<OpDispenser<String>> opSequence;
@@ -46,6 +45,8 @@ public abstract class JDBCActivity extends SimpleActivity {
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
+
+        this.maxTries = getParams().getOptionalInteger("maxtries").orElse(3);
 
         LOGGER.debug("initializing data source");
         dataSource = newDataSource();
@@ -70,8 +71,6 @@ public abstract class JDBCActivity extends SimpleActivity {
         resultTimer = ActivityMetrics.timer(getActivityDef(), "result");
         resultSuccessTimer = ActivityMetrics.timer(getActivityDef(), "result-success");
         triesHisto = ActivityMetrics.histogram(getActivityDef(), "tries");
-        exceptionCount = new ExceptionCountMetrics(getActivityDef());
-        sqlExceptionCount = new SQLExceptionCountMetrics(getActivityDef());
 
         opSequence = createOpSequence(ReadyJDBCOp::new);
         setDefaultsFromOpSequence(opSequence);
@@ -79,12 +78,20 @@ public abstract class JDBCActivity extends SimpleActivity {
         onActivityDefUpdate(getActivityDef());
     }
 
-    public int getMaxTries() {
-        return 3;
+    public String errorNameMapper(Throwable e) {
+        if (e instanceof SQLException) {
+            return ((SQLException) e).getSQLState();
+        }
+        return e.getClass().getSimpleName();
     }
 
-    public boolean isRetryable(SQLException sqlException) {
-        return true;
+    @Override
+    public Function<Throwable, String> getErrorNameMapper() {
+        return this::errorNameMapper;
+    }
+
+    public int getMaxTries() {
+        return this.maxTries;
     }
 
     public DataSource getDataSource() {
@@ -109,30 +116,5 @@ public abstract class JDBCActivity extends SimpleActivity {
 
     public Histogram getTriesHisto() {
         return triesHisto;
-    }
-
-    public ExceptionCountMetrics getExceptionCount() {
-        return exceptionCount;
-    }
-
-    public SQLExceptionCountMetrics getSQLExceptionCount() {
-        return sqlExceptionCount;
-    }
-
-    public static class SQLExceptionCountMetrics {
-        private final ConcurrentHashMap<Integer, Counter> counters = new ConcurrentHashMap<>();
-        private final ActivityDef activityDef;
-
-        private SQLExceptionCountMetrics(ActivityDef activityDef) {
-            this.activityDef = activityDef;
-        }
-
-        public void inc(SQLException e) {
-            Counter c = counters.computeIfAbsent(
-                e.getErrorCode(),
-                k -> ActivityMetrics.counter(activityDef, "errorcodecounts." + k)
-            );
-            c.inc();
-        }
     }
 }
