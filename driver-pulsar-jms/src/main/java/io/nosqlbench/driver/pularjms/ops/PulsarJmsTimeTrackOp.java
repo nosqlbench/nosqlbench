@@ -1,4 +1,4 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.pularjms.ops;
 
 /**
  * Base type of all Sync Pulsar Operations including Producers and Consumers.

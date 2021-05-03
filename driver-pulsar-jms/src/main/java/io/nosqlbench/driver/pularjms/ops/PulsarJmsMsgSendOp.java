@@ -1,8 +1,8 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.pularjms.ops;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.driver.pulsarjms.PulsarJmsActivity;
+import io.nosqlbench.driver.pularjms.PulsarJmsActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

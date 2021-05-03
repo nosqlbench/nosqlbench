@@ -1,11 +1,11 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.pularjms;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
-import io.nosqlbench.driver.pulsarjms.util.PulsarJmsActivityUtil;
+import io.nosqlbench.driver.pularjms.ops.PulsarJmsOp;
+import io.nosqlbench.driver.pularjms.util.PulsarJmsActivityUtil;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -83,6 +83,8 @@ public class PulsarJmsActivity extends SimpleActivity {
 
     /**
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
+     *
+     * @param pulsarTopic
      */
     public Destination getOrCreateJmsDestination(String pulsarTopic) {
         String encodedTopicStr = PulsarJmsActivityUtil.encode(pulsarTopic);
@@ -129,6 +131,6 @@ public class PulsarJmsActivity extends SimpleActivity {
         }
     }
     public void asyncOperationFailed(Throwable ex) {
-        this.asyncOperationFailure = ex;
+        this.asyncOperationFailure = asyncOperationFailure;
     }
 }
