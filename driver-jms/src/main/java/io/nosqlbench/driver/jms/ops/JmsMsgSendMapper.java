@@ -1,6 +1,6 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.jms.ops;
 
-import io.nosqlbench.driver.pulsarjms.PulsarJmsActivity;
+import io.nosqlbench.driver.jms.JmsActivity;
 
 import javax.jms.Destination;
 import java.util.function.LongFunction;
@@ -15,25 +15,25 @@ import java.util.function.LongFunction;
  *
  * For additional parameterization, the command template is also provided.
  */
-public class PulsarJmsMsgSendMapper extends PulsarJmsOpMapper {
+public class JmsMsgSendMapper extends JmsOpMapper {
     private final LongFunction<String> msgBodyFunc;
 
-    public PulsarJmsMsgSendMapper(PulsarJmsActivity pulsarJmsActivity,
-                                  LongFunction<Boolean> asyncApiFunc,
-                                  LongFunction<Destination> jmsDestinationFunc,
-                                  LongFunction<String> msgBodyFunc) {
-        super(pulsarJmsActivity, asyncApiFunc, jmsDestinationFunc);
+    public JmsMsgSendMapper(JmsActivity jmsActivity,
+                            LongFunction<Boolean> asyncApiFunc,
+                            LongFunction<Destination> jmsDestinationFunc,
+                            LongFunction<String> msgBodyFunc) {
+        super(jmsActivity, asyncApiFunc, jmsDestinationFunc);
         this.msgBodyFunc = msgBodyFunc;
     }
 
     @Override
-    public PulsarJmsOp apply(long value) {
+    public JmsOp apply(long value) {
         Destination jmsDestination = jmsDestinationFunc.apply(value);
         boolean asyncApi = asyncApiFunc.apply(value);
         String msgBody = msgBodyFunc.apply(value);
 
-        return new PulsarJmsMsgSendOp(
-            pulsarJmsActivity,
+        return new JmsMsgSendOp(
+            jmsActivity,
             asyncApi,
             jmsDestination,
             msgBody

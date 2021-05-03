@@ -1,9 +1,9 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.jms.ops;
 
 /**
  * Base type of all Sync Pulsar Operations including Producers and Consumers.
  */
-public abstract class PulsarJmsTimeTrackOp implements PulsarJmsOp {
+public abstract class JmsTimeTrackOp implements JmsOp {
 
     public void run(Runnable timeTracker) {
         try {

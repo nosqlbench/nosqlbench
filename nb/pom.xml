@@ -135,6 +135,12 @@
             <version>4.15.45-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-jms</artifactId>
+            <version>4.15.45-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>

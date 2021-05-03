@@ -1,9 +1,9 @@
-package io.nosqlbench.driver.pulsarjms.ops;
+package io.nosqlbench.driver.jms.ops;
 
 /**
  * Base type of all Pulsar Operations including Producers and Consumers.
  */
-public interface PulsarJmsOp {
+public interface JmsOp {
 
     /**
      * Execute the operation, invoke the timeTracker when the operation ended.

@@ -1,0 +1,37 @@
+bindings:
+  payload: NumberNameToString()  #AlphaNumericString(20)
+  tenant: Mod(10000); Div(10L); ToString(); Prefix("tnt")
+  namespace: Mod(10); Div(5L); ToString(); Prefix("ns")
+  core_topic_name: Mod(5); ToString(); Prefix("t")
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  ### static only
+  async_api: "false"
+
+  ### Static Only
+  # Using Enrico's JMS library (https://github.com/riptano/pulsar-jms),
+  # we can use "Pulsar" as the JMS provider
+  jms_provider_type: "pulsar"
+
+  ### Static only
+  # Valid values: queue (point-to-point) or topic (pub-sub)
+  jms_desitation_type: "queue"
+
+  ### Static only
+  # Valid values: persistent or non-persistent
+  jms_delivery_mode: "persistent"
+
+  ### Static Only
+  # Only relevant when the JMS provider is Pulsar
+  #topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
+  pulsar_topic_uri: "persistent://public/default/t0"
+
+blocks:
+  - name: producer-block
+    tags:
+      phase: jms_producer
+    statements:
+      - name: s1
+        optype: msg_send
+        msg_body: "{payload}"

@@ -1,7 +1,7 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.jms;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
+import io.nosqlbench.driver.jms.ops.JmsOp;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import org.apache.logging.log4j.LogManager;
@@ -9,16 +9,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class PulsarJmsAction implements SyncAction {
+public class JmsAction implements SyncAction {
 
-    private final static Logger logger = LogManager.getLogger(PulsarJmsAction.class);
+    private final static Logger logger = LogManager.getLogger(JmsAction.class);
 
-    private final PulsarJmsActivity activity;
+    private final JmsActivity activity;
     private final int slot;
 
     int maxTries;
 
-    public PulsarJmsAction(PulsarJmsActivity activity, int slot) {
+    public JmsAction(JmsActivity activity, int slot) {
         this.activity = activity;
         this.slot = slot;
         this.maxTries = activity.getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
@@ -36,10 +36,10 @@ public class PulsarJmsAction implements SyncAction {
 
         long start = System.nanoTime();
 
-        PulsarJmsOp pulsarJmsOp;
+        JmsOp jmsOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<PulsarJmsOp> readyPulsarJmsOp = activity.getSequencer().get(cycle);
-            pulsarJmsOp = readyPulsarJmsOp.apply(cycle);
+            LongFunction<JmsOp> readyPulsarJmsOp = activity.getSequencer().get(cycle);
+            jmsOp = readyPulsarJmsOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
             activity.getErrorhandler().handleError(bindException, cycle, 0);
@@ -53,7 +53,7 @@ public class PulsarJmsAction implements SyncAction {
             try {
                 // it is up to the pulsarOp to call Context#close when the activity is executed
                 // this allows us to track time for async operations
-                pulsarJmsOp.run(ctx::close);
+                jmsOp.run(ctx::close);
                 break;
             } catch (RuntimeException err) {
                 ErrorDetail errorDetail = activity

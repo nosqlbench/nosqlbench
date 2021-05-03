@@ -1,8 +1,8 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.jms;
 
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsMsgSendMapper;
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
-import io.nosqlbench.driver.pulsarjms.util.PulsarJmsActivityUtil;
+import io.nosqlbench.driver.jms.ops.JmsMsgSendMapper;
+import io.nosqlbench.driver.jms.ops.JmsOp;
+import io.nosqlbench.driver.jms.util.PulsarJmsActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
@@ -13,26 +13,26 @@ import javax.jms.Destination;
 import javax.jms.JMSRuntimeException;
 import java.util.function.LongFunction;
 
-public class ReadyPulsarJmsOp implements OpDispenser<PulsarJmsOp> {
+public class ReadyJmsOp implements OpDispenser<JmsOp> {
 
     private final OpTemplate opTpl;
     private final CommandTemplate cmdTpl;
-    private final LongFunction<PulsarJmsOp> opFunc;
-    private final PulsarJmsActivity pulsarJmsActivity;
+    private final LongFunction<JmsOp> opFunc;
+    private final JmsActivity jmsActivity;
 
-    public ReadyPulsarJmsOp(OpTemplate opTemplate, PulsarJmsActivity pulsarJmsActivity) {
+    public ReadyJmsOp(OpTemplate opTemplate, JmsActivity jmsActivity) {
         this.opTpl = opTemplate;
         this.cmdTpl = new CommandTemplate(opTpl);
-        this.pulsarJmsActivity = pulsarJmsActivity;
+        this.jmsActivity = jmsActivity;
 
         this.opFunc = resolve();
     }
 
-    public PulsarJmsOp apply(long value) {
+    public JmsOp apply(long value) {
         return opFunc.apply(value);
     }
 
-    public LongFunction<PulsarJmsOp> resolve() {
+    public LongFunction<JmsOp> resolve() {
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {
             throw new RuntimeException("Statement parameter \"optype\" must be static and have a valid value!");
         }
@@ -63,7 +63,7 @@ public class ReadyPulsarJmsOp implements OpDispenser<PulsarJmsOp> {
         LongFunction<Destination> jmsDestinationFunc;
         try {
             LongFunction<String> finalTopicUriFunc = topicUriFunc;
-            jmsDestinationFunc = (l) -> pulsarJmsActivity.getOrCreateJmsDestination(finalTopicUriFunc.apply(l));
+            jmsDestinationFunc = (l) -> jmsActivity.getOrCreateJmsDestination(finalTopicUriFunc.apply(l));
         }
         catch (JMSRuntimeException ex) {
             throw new RuntimeException("PulsarJMS message send:: unable to create JMS desit!");
@@ -79,7 +79,7 @@ public class ReadyPulsarJmsOp implements OpDispenser<PulsarJmsOp> {
         }
     }
 
-    private LongFunction<PulsarJmsOp> resolveMsgSend(
+    private LongFunction<JmsOp> resolveMsgSend(
         LongFunction<Boolean> async_api_func,
         LongFunction<Destination> jmsDestinationFunc
     ) {
@@ -96,8 +96,8 @@ public class ReadyPulsarJmsOp implements OpDispenser<PulsarJmsOp> {
             throw new RuntimeException("PulsarJMS message send:: \"msg_body\" field must be specified!");
         }
 
-        return new PulsarJmsMsgSendMapper(
-            pulsarJmsActivity,
+        return new JmsMsgSendMapper(
+            jmsActivity,
             async_api_func,
             jmsDestinationFunc,
             msgBodyFunc);

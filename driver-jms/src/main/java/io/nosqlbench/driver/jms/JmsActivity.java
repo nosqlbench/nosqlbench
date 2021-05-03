@@ -1,11 +1,11 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.jms;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-import io.nosqlbench.driver.pulsarjms.ops.PulsarJmsOp;
-import io.nosqlbench.driver.pulsarjms.util.PulsarJmsActivityUtil;
+import io.nosqlbench.driver.jms.ops.JmsOp;
+import io.nosqlbench.driver.jms.util.PulsarJmsActivityUtil;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class PulsarJmsActivity extends SimpleActivity {
+public class JmsActivity extends SimpleActivity {
 
     private final ConcurrentHashMap<String, Destination> jmsDestinations = new ConcurrentHashMap<>();
 
@@ -32,7 +32,7 @@ public class PulsarJmsActivity extends SimpleActivity {
 
     private JMSContext jmsContext;
 
-    private OpSequence<OpDispenser<PulsarJmsOp>> sequence;
+    private OpSequence<OpDispenser<JmsOp>> sequence;
     private volatile Throwable asyncOperationFailure;
     private NBErrorHandler errorhandler;
 
@@ -41,7 +41,7 @@ public class PulsarJmsActivity extends SimpleActivity {
     private Counter bytesCounter;
     private Histogram messagesizeHistogram;
 
-    public PulsarJmsActivity(ActivityDef activityDef) {
+    public JmsActivity(ActivityDef activityDef) {
         super(activityDef);
     }
 
@@ -71,7 +71,7 @@ public class PulsarJmsActivity extends SimpleActivity {
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
         messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
 
-        this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this));
+        this.sequence = createOpSequence((ot) -> new ReadyJmsOp(ot, this));
         setDefaultsFromOpSequence(sequence);
         onActivityDefUpdate(activityDef);
 
@@ -98,7 +98,7 @@ public class PulsarJmsActivity extends SimpleActivity {
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) { super.onActivityDefUpdate(activityDef); }
-    public OpSequence<OpDispenser<PulsarJmsOp>> getSequencer() { return sequence; }
+    public OpSequence<OpDispenser<JmsOp>> getSequencer() { return sequence; }
 
     public String getPulsarSvcUrl() {
         return pulsarSvcUrl;

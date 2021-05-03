@@ -1,4 +1,4 @@
-package io.nosqlbench.driver.pulsarjms;
+package io.nosqlbench.driver.jms;
 
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
@@ -7,26 +7,26 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = ActivityType.class, selector = "pulsarjms")
-public class PulsarJmsActivityType implements ActivityType<PulsarJmsActivity> {
+public class JmsActivityType implements ActivityType<JmsActivity> {
     @Override
-    public ActionDispenser getActionDispenser(PulsarJmsActivity activity) {
+    public ActionDispenser getActionDispenser(JmsActivity activity) {
         return new PulsarJmsActionDispenser(activity);
     }
 
     @Override
-    public PulsarJmsActivity getActivity(ActivityDef activityDef) {
-        return new PulsarJmsActivity(activityDef);
+    public JmsActivity getActivity(ActivityDef activityDef) {
+        return new JmsActivity(activityDef);
     }
 
     private static class PulsarJmsActionDispenser implements ActionDispenser {
-        private final PulsarJmsActivity activity;
-        public PulsarJmsActionDispenser(PulsarJmsActivity activity) {
+        private final JmsActivity activity;
+        public PulsarJmsActionDispenser(JmsActivity activity) {
             this.activity = activity;
         }
 
         @Override
         public Action getAction(int slot) {
-            return new PulsarJmsAction(activity, slot);
+            return new JmsAction(activity, slot);
         }
     }
 }
