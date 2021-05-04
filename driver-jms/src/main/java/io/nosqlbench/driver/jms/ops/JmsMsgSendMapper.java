@@ -1,8 +1,11 @@
 package io.nosqlbench.driver.jms.ops;
 
 import io.nosqlbench.driver.jms.JmsActivity;
+import io.nosqlbench.driver.jms.util.JmsHeader;
+import io.nosqlbench.driver.jms.util.JmsHeaderLongFunc;
 
 import javax.jms.Destination;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 /**
@@ -21,21 +24,26 @@ public class JmsMsgSendMapper extends JmsOpMapper {
     public JmsMsgSendMapper(JmsActivity jmsActivity,
                             LongFunction<Boolean> asyncApiFunc,
                             LongFunction<Destination> jmsDestinationFunc,
+                            JmsHeaderLongFunc jmsHeaderLongFunc,
+                            Map<String, Object> jmsMsgProperties,
                             LongFunction<String> msgBodyFunc) {
-        super(jmsActivity, asyncApiFunc, jmsDestinationFunc);
+        super(jmsActivity, asyncApiFunc, jmsDestinationFunc, jmsHeaderLongFunc, jmsMsgProperties);
         this.msgBodyFunc = msgBodyFunc;
     }
 
     @Override
     public JmsOp apply(long value) {
-        Destination jmsDestination = jmsDestinationFunc.apply(value);
         boolean asyncApi = asyncApiFunc.apply(value);
+        Destination jmsDestination = jmsDestinationFunc.apply(value);
+        JmsHeader jmsHeader = (JmsHeader)jmsHeaderLongFunc.apply(value);
         String msgBody = msgBodyFunc.apply(value);
 
         return new JmsMsgSendOp(
             jmsActivity,
             asyncApi,
             jmsDestination,
+            jmsHeader,
+            jmsMsgProperties,
             msgBody
         );
     }

@@ -25,9 +25,7 @@ public class JmsAction implements SyncAction {
     }
 
     @Override
-    public void init() {
-
-    }
+    public void init() { }
 
     @Override
     public int runCycle(long cycle) {
@@ -38,8 +36,8 @@ public class JmsAction implements SyncAction {
 
         JmsOp jmsOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<JmsOp> readyPulsarJmsOp = activity.getSequencer().get(cycle);
-            jmsOp = readyPulsarJmsOp.apply(cycle);
+            LongFunction<JmsOp> readyJmsOp = activity.getSequencer().get(cycle);
+            jmsOp = readyJmsOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
             activity.getErrorhandler().handleError(bindException, cycle, 0);
@@ -51,7 +49,7 @@ public class JmsAction implements SyncAction {
         for (int i = 0; i < maxTries; i++) {
             Timer.Context ctx = activity.getExecuteTimer().time();
             try {
-                // it is up to the pulsarOp to call Context#close when the activity is executed
+                // it is up to the jmsOp to call Context#close when the activity is executed
                 // this allows us to track time for async operations
                 jmsOp.run(ctx::close);
                 break;

@@ -6,7 +6,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = ActivityType.class, selector = "pulsarjms")
+@Service(value = ActivityType.class, selector = "jms")
 public class JmsActivityType implements ActivityType<JmsActivity> {
     @Override
     public ActionDispenser getActionDispenser(JmsActivity activity) {

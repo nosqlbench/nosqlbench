@@ -9,22 +9,37 @@ params:
   ### static only
   async_api: "false"
 
-  ### Static Only
-  # Using Enrico's JMS library (https://github.com/riptano/pulsar-jms),
-  # we can use "Pulsar" as the JMS provider
-  jms_provider_type: "pulsar"
-
   ### Static only
   # Valid values: queue (point-to-point) or topic (pub-sub)
   jms_desitation_type: "queue"
 
-  ### Static only
-  # Valid values: persistent or non-persistent
-  jms_delivery_mode: "persistent"
+  ### JMS producer message header
+  ### https://docs.oracle.com/javaee/7/api/constant-values.html#javax.jms.DeliveryMode.NON_PERSISTENT
+  # - static or dynamic
+  # - Producer only
+  # Valid values: non-persistent(1), or persistent(2) - default
+  jms_producer_header_msg_delivery_mode: "2"
+  # Valid values: 0~9 (4 as default)
+  jms_producer_header_msg_priority: "4"
+  # Valid values: non-negative long; default 0 (never expires)
+  jms_producer_header_msg_ttl: "0"
+  # Valid values: non-negative long; default 0 (no delay)
+  jms_producer_header_msg_delivery_delay: "0"
+  # Valid values: true/false; default false (message timestamp is enabled)
+  jms_producer_header_disable_msg_timestamp: "false"
+  # Valid values: true/false; default false (message ID is enabled)
+  jms_producer_header_disable_msg_id: "false"
+
+  ### JMS producer message properties
+  # - static only
+  # - Producer only
+  # - In format: "key1=value1;key2=value2;..."
+  jms_producer_msg_properties: ""
+
 
   ### Static Only
-  # Only relevant when the JMS provider is Pulsar
-  #topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
+  # NOTE: ONLY relevant when the JMS provider is Pulsar
+  #pulsar_topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
   pulsar_topic_uri: "persistent://public/default/t0"
 
 blocks:
