@@ -19,6 +19,8 @@ import java.util.function.LongFunction;
  * For additional parameterization, the command template is also provided.
  */
 public class JmsMsgSendMapper extends JmsOpMapper {
+    private final JmsHeaderLongFunc jmsHeaderLongFunc;
+    private final Map<String, Object> jmsMsgProperties;
     private final LongFunction<String> msgBodyFunc;
 
     public JmsMsgSendMapper(JmsActivity jmsActivity,
@@ -27,7 +29,10 @@ public class JmsMsgSendMapper extends JmsOpMapper {
                             JmsHeaderLongFunc jmsHeaderLongFunc,
                             Map<String, Object> jmsMsgProperties,
                             LongFunction<String> msgBodyFunc) {
-        super(jmsActivity, asyncApiFunc, jmsDestinationFunc, jmsHeaderLongFunc, jmsMsgProperties);
+        super(jmsActivity, asyncApiFunc, jmsDestinationFunc);
+
+        this.jmsHeaderLongFunc = jmsHeaderLongFunc;
+        this.jmsMsgProperties = jmsMsgProperties;
         this.msgBodyFunc = msgBodyFunc;
     }
 

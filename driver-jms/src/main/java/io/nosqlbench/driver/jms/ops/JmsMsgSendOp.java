@@ -45,7 +45,7 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
         this.jmsMsgProperties = jmsMsgProperties;
         this.msgBody = msgBody;
 
-        if (jmsHeader.isValidHeader()) {
+        if (!jmsHeader.isValidHeader()) {
             throw new RuntimeException(jmsHeader.getInvalidJmsHeaderMsgText());
         }
 
@@ -62,6 +62,7 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
 
     private JMSProducer createJmsProducer() {
         JMSProducer jmsProducer = this.jmsContext.createProducer();
+
         jmsProducer.setDeliveryMode(this.jmsHeader.getDeliveryMode());
         jmsProducer.setPriority(this.jmsHeader.getMsgPriority());
         jmsProducer.setDeliveryDelay(this.jmsHeader.getMsgDeliveryDelay());
@@ -73,9 +74,7 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
 //            jmsProducer.setAsync();
 //        }
 
-        Iterator<Map.Entry<String, Object>> itr = jmsMsgProperties.entrySet().iterator();
-        while(itr.hasNext()) {
-            Map.Entry<String, Object> entry = itr.next();
+        for (Map.Entry<String, Object> entry : jmsMsgProperties.entrySet()) {
             jmsProducer.setProperty(entry.getKey(), entry.getValue());
         }
 
@@ -89,6 +88,7 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
             byte[] msgBytes = msgBody.getBytes(StandardCharsets.UTF_8);
             messageSize = msgBytes.length;
             jmsProducer.send(jmsDestination, msgBody.getBytes(StandardCharsets.UTF_8));
+
             messagesizeHistogram.update(messageSize);
             bytesCounter.inc(messageSize);
         }

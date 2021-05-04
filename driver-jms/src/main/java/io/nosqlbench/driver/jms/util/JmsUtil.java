@@ -15,7 +15,35 @@ public class JmsUtil {
     public final static String JMS_PROVIDER_TYPE_KEY_STR = "jms_provider_type";
     public final static String JMS_DESTINATION_TYPE_KEY_STR = "jms_desitation_type";
 
+    ///// JMS Producer
+    // Supported JMS provider type
+    public enum JMS_MSG_HEADER_KEYS {
+        DELIVERY_MODE("jms_producer_header_msg_delivery_mode"),
+        PRIORITY("jms_producer_header_msg_priority"),
+        TTL("jms_producer_header_msg_ttl"),
+        DELIVERY_DELAY("jms_producer_header_msg_delivery_delay"),
+        DISABLE_TIMESTAMP("jms_producer_header_disable_msg_timestamp"),
+        DISABLE_ID("jms_producer_header_disable_msg_id");
+
+        public final String label;
+        JMS_MSG_HEADER_KEYS(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidJmsHeaderKey(String type) {
+        return Arrays.stream(JMS_MSG_HEADER_KEYS.values()).anyMatch(t -> t.label.equals(type));
+    }
     public final static String JMS_PRODUCER_MSG_PROPERTY_KEY_STR = "jms_producer_msg_properties";
+    public final static String JMS_PRODUCER_MSG_BODY_KEY_STR = "msg_body";
+
+    ///// JMS Consumer
+    public final static String JMS_CONSUMER_DURABLE_KEY_STR = "jms_consumer_msg_durable";
+    public final static String JMS_CONSUMER_SHARED_KEY_STR = "jms_consumer_msg_shared";
+    public final static String JMS_CONSUMER_MSG_SUBSCRIPTIOn_KEY_STR = "jms_consumer_subscription";
+    public final static String JMS_CONSUMER_MSG_READ_SELECTOR_KEY_STR = "jms_consumer_msg_read_selector";
+    public final static String JMS_CONSUMER_MSG_NOLOCAL_KEY_STR = "jms_consumer_msg_nolocal";
+    public final static String JMS_CONSUMER_READ_TIMEOUT_KEY_STR = "jms_consumer_msg_read_timeout";
+
 
     // Only applicable to Pulsar JMS provider
     public final static String PULSAR_JMS_TOPIC_URI_KEY_STR = "pulsar_topic_uri";
@@ -59,24 +87,6 @@ public class JmsUtil {
     }
     public static boolean isValidJmsDestinationType(String type) {
         return Arrays.stream(JMS_DESTINATION_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-
-    // Supported JMS provider type
-    public enum JMS_MSG_HEADER_KEYS {
-        DELIVERY_MODE("jms_producer_header_msg_delivery_mode"),
-        PRIORITY("jms_producer_header_msg_priority"),
-        TTL("jms_producer_header_msg_ttl"),
-        DELIVERY_DELAY("jms_producer_header_msg_delivery_delay"),
-        DISABLE_TIMESTAMP("jms_producer_header_disable_msg_timestamp"),
-        DISABLE_ID("jms_producer_header_disable_msg_id");
-
-        public final String label;
-        JMS_MSG_HEADER_KEYS(String label) {
-            this.label = label;
-        }
-    }
-    public static boolean isValidJmsHeaderKey(String type) {
-        return Arrays.stream(JMS_MSG_HEADER_KEYS.values()).anyMatch(t -> t.label.equals(type));
     }
 
     public static String encode(String... strings) {

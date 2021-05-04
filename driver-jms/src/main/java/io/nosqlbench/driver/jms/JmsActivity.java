@@ -62,7 +62,7 @@ public class JmsActivity extends SimpleActivity {
             jmsConnInfo = new JmsPulsarConnInfo(jmsProviderType, activityDef);
         }
 
-        PulsarConnectionFactory factory = null;
+        PulsarConnectionFactory factory;
         if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
             Map<String, Object> configuration = new HashMap<>();
             configuration.put("webServiceUrl", ((JmsPulsarConnInfo)jmsConnInfo).getWebSvcUrl());
@@ -101,9 +101,9 @@ public class JmsActivity extends SimpleActivity {
     /**
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
      */
-    public Destination getOrCreateJmsDestination(String jmsDestinationType, JmsHeader jmsHeader, String destName) {
+    public Destination getOrCreateJmsDestination(String jmsDestinationType, String destName) {
         String encodedTopicStr =
-            JmsUtil.encode(jmsDestinationType, ("" + jmsHeader.getDeliveryMode()), destName);
+            JmsUtil.encode(jmsDestinationType, destName);
         Destination destination = jmsDestinations.get(encodedTopicStr);
 
         if ( destination == null ) {
