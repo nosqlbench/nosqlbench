@@ -7,9 +7,7 @@ import io.nosqlbench.driver.jms.util.JmsHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.Destination;
-import javax.jms.JMSContext;
-import javax.jms.JMSProducer;
+import javax.jms.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
@@ -69,10 +67,37 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
         jmsProducer.setDisableMessageTimestamp(this.jmsHeader.isDisableMsgTimestamp());
         jmsProducer.setDisableMessageID(this.jmsHeader.isDisableMsgId());
 
-        // TODO: async producer
-//        if (this.asyncJmsOp) {
-//            jmsProducer.setAsync();
-//        }
+        if (this.asyncJmsOp) {
+            jmsProducer.setAsync(new CompletionListener() {
+                @Override
+                public void onCompletion(Message msg) {
+                    try {
+                        byte[] msgBody = msg.getBody(byte[].class);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Async message send success - message body: " + new String(msgBody));
+                        }
+                    }
+                    catch (JMSException jmsException) {
+                        jmsException.printStackTrace();
+                        logger.warn("Unexpected error when parsing message body: " + jmsException.getMessage());
+                    }
+                }
+
+                @Override
+                public void onException(Message msg, Exception e) {
+                    try {
+                        byte[] msgBody = msg.getBody(byte[].class);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Async message send failure - message body: " + new String(msgBody));
+                        }
+                    }
+                    catch (JMSException jmsException) {
+                        jmsException.printStackTrace();
+                        logger.warn("Unexpected error when parsing message body: " + jmsException.getMessage());
+                    }
+                }
+            });
+        }
 
         for (Map.Entry<String, Object> entry : jmsMsgProperties.entrySet()) {
             jmsProducer.setProperty(entry.getKey(), entry.getValue());

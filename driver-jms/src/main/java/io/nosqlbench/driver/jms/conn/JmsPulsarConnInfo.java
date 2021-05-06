@@ -1,24 +1,42 @@
 package io.nosqlbench.driver.jms.conn;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.driver.jms.util.PulsarConfig;
+
+import java.util.Map;
 
 public class JmsPulsarConnInfo extends JmsConnInfo {
 
-    private String pulsarSvcUrl;
-    private String webSvcUrl;
+    private final String webSvcUrl;
+    private final String pulsarSvcUrl;
+    private final PulsarConfig extraPulsarConfig;
 
-    public JmsPulsarConnInfo(String jmsProviderType, ActivityDef activityDef) {
+    public JmsPulsarConnInfo(String jmsProviderType, String webSvcUrl, String pulsarSvcUrl, PulsarConfig pulsarConfig) {
         super(jmsProviderType);
 
-        webSvcUrl =
-            activityDef.getParams().getOptionalString("web_url").orElse("http://localhost:8080");
-        pulsarSvcUrl =
-            activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
+        this.webSvcUrl = webSvcUrl;
+        this.pulsarSvcUrl = pulsarSvcUrl;
+        this.extraPulsarConfig = pulsarConfig;
+
+        this.addJmsConnConfigItem("webServiceUrl", this.webSvcUrl);
+        this.addJmsConnConfigItem("brokerServiceUrl", this.pulsarSvcUrl);
+
+        Map<String, Object> clientCfgMap = this.extraPulsarConfig.getClientConfMap();
+        if (!clientCfgMap.isEmpty()) {
+            this.addJmsConnConfigItems(clientCfgMap);
+        }
+
+        Map<String, Object> producerCfgMap = this.extraPulsarConfig.getProducerConfMap();
+        if (!producerCfgMap.isEmpty()) {
+            this.addJmsConnConfigItem("producerConfig", producerCfgMap);
+        }
+
+        Map<String, Object> consumerCfgMap = this.extraPulsarConfig.getConsumerConfMap();
+        if (!consumerCfgMap.isEmpty()) {
+            this.addJmsConnConfigItem("consumerConfig", consumerCfgMap);
+        }
     }
 
-    public void setPulsarSvcUrl(String pulsarSvcUrl) { this.pulsarSvcUrl = pulsarSvcUrl; }
-    public String getPulsarSvcUrl() { return this.pulsarSvcUrl; }
-
-    public void setWebSvcUrl(String webSvcUrl) { this.webSvcUrl = webSvcUrl; }
     public String getWebSvcUrl() { return this.webSvcUrl; }
+    public String getPulsarSvcUrl() { return this.pulsarSvcUrl; }
+    public PulsarConfig getExtraPulsarConfig() { return this.extraPulsarConfig; }
 }

@@ -7,7 +7,7 @@ bindings:
 # document level parameters that apply to all Pulsar client types:
 params:
   ### static only
-  async_api: "false"
+  async_api: "true"
 
   ### Static only
   # Valid values: queue (point-to-point) or topic (pub-sub)
@@ -16,7 +16,12 @@ params:
   ### Static Only
   # NOTE: ONLY relevant when the JMS provider is Pulsar
   #pulsar_topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
-  pulsar_topic_uri: "persistent://public/default/t0"
+  #pulsar_topic_uri: "persistent://public/default/pt100"
+  #pulsar_topic_uri: "persistent://public/default/t0"
+  pulsar_topic_uri: "persistent://public/default/pt100_10"
+  #pulsar_topic_uri: "persistent://public/default/pt200_10"
+  #pulsar_topic_uri: "persistent://public/default/pt300_10"
+  #pulsar_topic_uri: "persistent://public/default/pt400_10"
 
 blocks:
   - name: "producer-block"

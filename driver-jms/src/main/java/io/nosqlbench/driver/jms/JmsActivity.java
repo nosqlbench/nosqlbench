@@ -7,22 +7,19 @@ import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
 import io.nosqlbench.driver.jms.conn.JmsConnInfo;
 import io.nosqlbench.driver.jms.conn.JmsPulsarConnInfo;
 import io.nosqlbench.driver.jms.ops.JmsOp;
-import io.nosqlbench.driver.jms.util.JmsHeader;
 import io.nosqlbench.driver.jms.util.JmsUtil;
+import io.nosqlbench.driver.jms.util.PulsarConfig;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -53,31 +50,52 @@ public class JmsActivity extends SimpleActivity {
         super.initActivity();
 
         // default JMS type: Pulsar
+        // - currently this is the only supported JMS provider
         jmsProviderType =
             activityDef.getParams()
                 .getOptionalString(JmsUtil.JMS_PROVIDER_TYPE_KEY_STR)
                 .orElse(JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label);
 
+        // "Pulsar" as the JMS provider
         if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
-            jmsConnInfo = new JmsPulsarConnInfo(jmsProviderType, activityDef);
-        }
 
-        PulsarConnectionFactory factory;
-        if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
-            Map<String, Object> configuration = new HashMap<>();
-            configuration.put("webServiceUrl", ((JmsPulsarConnInfo)jmsConnInfo).getWebSvcUrl());
-            configuration.put("brokerServiceUrl",((JmsPulsarConnInfo)jmsConnInfo).getPulsarSvcUrl());
+            String webSvcUrl =
+                activityDef.getParams()
+                    .getOptionalString(JmsUtil.JMS_PULSAR_PROVIDER_WEB_URL_KEY_STR)
+                    .orElse("http://localhost:8080");
+            String pulsarSvcUrl =
+                activityDef.getParams()
+                    .getOptionalString(JmsUtil.JMS_PULSAR_PROVIDER_SVC_URL_KEY_STR)
+                    .orElse("pulsar://localhost:6650");
 
-            try {
-                factory = new PulsarConnectionFactory(configuration);
-                this.jmsContext = factory.createContext();
-            } catch (JMSException e) {
-                throw new RuntimeException(
-                    "Unable to initialize JMS connection factory (driver type: " + jmsProviderType + ")!");
+            if (StringUtils.isAnyBlank(webSvcUrl, pulsarSvcUrl)) {
+                throw new RuntimeException("For \"" + JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label + "\" type, " +
+                    "\"" + JmsUtil.JMS_PULSAR_PROVIDER_WEB_URL_KEY_STR + "\" and " +
+                    "\"" + JmsUtil.JMS_PULSAR_PROVIDER_SVC_URL_KEY_STR  + "\" parameters are manadatory!");
             }
+
+            // Check if extra Pulsar config. file is in place
+            // - default file: "pulsar_config.properties" under the current directory
+            String pulsarCfgFile =
+                activityDef.getParams()
+                    .getOptionalString(JmsUtil.JMS_PULSAR_PROVIDER_CFG_FILE_KEY_STR)
+                    .orElse(JmsUtil.JMS_PULSAR_PROVIDER_DFT_CFG_FILE_NAME);
+
+            PulsarConfig pulsarConfig = new PulsarConfig(pulsarCfgFile);
+
+            jmsConnInfo = new JmsPulsarConnInfo(jmsProviderType, webSvcUrl, pulsarSvcUrl, pulsarConfig);
         }
         else {
             throw new RuntimeException("Unsupported JMS driver type : " + jmsProviderType);
+        }
+
+        PulsarConnectionFactory factory;
+        try {
+            factory = new PulsarConnectionFactory(jmsConnInfo.getJmsConnConfig());
+            this.jmsContext = factory.createContext();
+        } catch (JMSException e) {
+            throw new RuntimeException(
+                "Unable to initialize JMS connection factory (driver type: " + jmsProviderType + ")!");
         }
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");

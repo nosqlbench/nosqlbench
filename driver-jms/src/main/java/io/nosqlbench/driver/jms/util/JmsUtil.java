@@ -11,8 +11,35 @@ public class JmsUtil {
 
     private final static Logger logger = LogManager.getLogger(JmsUtil.class);
 
+    // Supported JMS provider type
+    public enum JMS_PROVIDER_TYPES {
+        PULSAR("pulsar");
+
+        public final String label;
+        JMS_PROVIDER_TYPES(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidJmsProviderType(String type) {
+        return Arrays.stream(JMS_PROVIDER_TYPES.values()).anyMatch(t -> t.label.equals(type));
+    }
+
+    /////
+    // NB command line parameters
+    // - JMS provider type
+    public final static String JMS_PROVIDER_TYPE_KEY_STR = "provider_type";
+
+    /// Only applicable when the provider is "Pulsar"
+    // - Pulsar configuration properties file
+    public final static String JMS_PULSAR_PROVIDER_CFG_FILE_KEY_STR = "pulsar_cfg_file";
+    public final static String JMS_PULSAR_PROVIDER_DFT_CFG_FILE_NAME = "pulsar_config.properties";
+    // - Pulsar web url
+    public final static String JMS_PULSAR_PROVIDER_WEB_URL_KEY_STR = "web_url";
+    // - Pulsar service url
+    public final static String JMS_PULSAR_PROVIDER_SVC_URL_KEY_STR = "service_url";
+
+
     public final static String ASYNC_API_KEY_STR = "async_api";
-    public final static String JMS_PROVIDER_TYPE_KEY_STR = "jms_provider_type";
     public final static String JMS_DESTINATION_TYPE_KEY_STR = "jms_desitation_type";
 
     ///// JMS Producer
@@ -60,19 +87,6 @@ public class JmsUtil {
     }
     public static boolean isValidClientType(String type) {
         return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-
-    // Supported JMS provider type
-    public enum JMS_PROVIDER_TYPES {
-        PULSAR("pulsar");
-
-        public final String label;
-        JMS_PROVIDER_TYPES(String label) {
-            this.label = label;
-        }
-    }
-    public static boolean isValidJmsProviderType(String type) {
-        return Arrays.stream(JMS_PROVIDER_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
 
     // JMS Destination Types
