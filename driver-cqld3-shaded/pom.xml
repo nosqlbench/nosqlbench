@@ -184,10 +184,22 @@
                             <pattern>com.google.common</pattern>
                             <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
                         </relocation>
-<!--                        <relocation>-->
-<!--                            <pattern>com.datastax</pattern>-->
-<!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
-<!--                        </relocation>-->
+                        <relocation>
+                            <pattern>com.datastax</pattern>
+                            <shadedPattern>com.datastax.cql3.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.activitytype.cql</pattern>
+                            <shadedPattern>io.nosqlbench.activitytype.cql3.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.endpoints.cql</pattern>
+                            <shadedPattern>io.nosqlbench.endpoints.cql3.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.generators.cql</pattern>
+                            <shadedPattern>io.nosqlbench.generators.cql3.shaded</shadedPattern>
+                        </relocation>
 <!--                        <relocation>-->
 <!--                            <pattern>io.netty</pattern>-->
 <!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
@@ -202,6 +214,7 @@
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     </transformers>
                     <!--          <finalName>${project.artifactId}</finalName>-->
                     <filters>
