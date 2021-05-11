@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.45-SNAPSHOT</version>
+        <version>4.15.45</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -23,13 +23,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-          <version>4.15.45-SNAPSHOT</version>
+          <version>4.15.45</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.45-SNAPSHOT</version>
+          <version>4.15.45</version>
         </dependency>
 
         <dependency>
@@ -206,7 +206,7 @@
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                     </transformers>
                     <!--          <finalName>${project.artifactId}</finalName>-->
                     <filters>
