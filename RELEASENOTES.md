@@ -1,4 +1,23 @@
-- 5ecda12f (HEAD -> main) use built-in activity error handler wiring for http
-- d905c352 base exception metrics on name only
-- fed7a9e1 allow activities to provide an error name mapper
-- c45662ab allow NBErrorHandler to map more detailed error names
+- b966c81a (HEAD -> main, origin/main) Merge pull request #318 from grighetto/316-fix-shaded-cqld3
+- fc2d8a84 #316 Properly shade classes in `driver-cqld3-shaded` module such that it doesn't clash with the classes in the `driver-cql-shaded`; Added new transformer to make it work with Java's `ServiceLoader` after shading.
+- 4f065a73 Merge pull request #317 from yabinmeng/main
+- 87385c15 Maven central pom update
+- e6491433 Add Pulsar client, producer, and consumer configuration support
+- b1fe01e5 Add support for JMS consumer
+- 94cbd9c2 Add support for JMS header fields and message properties
+- 0e334014 Merge remote-tracking branch 'upstream/main' into main
+- f4aafb70 Pulsar JMS driver type name change and package name typo fix
+- ee848a95 Merge pull request #315 from yabinmeng/revert-311-main
+- 09615afb Revert "Add NB support for Pulsar JMS"
+- 63b0a681 Merge pull request #314 from szimmer1/cockroachdb-driver-errorhandler
+- 0c4269ca Merge pull request #313 from yabinmeng/revert-312-main
+- c9919608 Refactor JDBCActivity to use NBErrorHandler
+- fd2d5c8b Revert "Pulsar JMS driver type name change and package name typo fix"
+- 2162a25f Merge pull request #312 from yabinmeng/main
+- 136c920e Pulsar JMS driver type name change and package name typo fix
+- 01a57db1 Merge pull request #311 from yabinmeng/main
+- f75ccc1b Add Pulsar JMS driver
+- 6c9b7999 Add Pulsar JMS driver
+- 0aef0e0d Add Pulsar JMS driver
+- ff591c4c Merge pull request #310 from dougwettlaufer/docker-metrics-no-repo
+- a5d90b78 Handle listing docker images without repo tags
