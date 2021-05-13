@@ -3,11 +3,10 @@ package io.nosqlbench.driver.pulsar.ops;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 
-import java.util.Set;
 import java.util.function.LongFunction;
 
 /**
- * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
+ * This maps a set of specifier functions to a pulsar operation. The result contains
  * enough state to define a pulsar operation such that it can be executed, measured, and possibly
  * retried if needed.
  *

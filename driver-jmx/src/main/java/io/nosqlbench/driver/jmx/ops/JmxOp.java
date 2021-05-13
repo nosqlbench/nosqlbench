@@ -10,7 +10,7 @@ import javax.management.remote.JMXConnector;
 /**
  * All JMX Operations should built on this base type.
  */
-public abstract class JmxOp {
+public abstract class JmxOp implements Runnable {
 
     protected final static Logger logger = LogManager.getLogger(JmxOp.class);
 
@@ -43,4 +43,8 @@ public abstract class JmxOp {
     }
 
     public abstract void execute();
+
+    public void run() {
+        execute();
+    }
 }

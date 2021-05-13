@@ -4,6 +4,7 @@ import java.net.http.HttpRequest;
 import java.util.regex.Pattern;
 
 public class HttpOp {
+
     public final Pattern ok_status;
     public final Pattern ok_body;
     public final HttpRequest request;

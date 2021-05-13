@@ -4,7 +4,6 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
@@ -449,6 +448,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>    A holder for an executable operation for the native driver used by this activity.
      * @return The sequence of operations as determined by filtering and ratios
      */
+    @Deprecated(forRemoval = true)
     protected <O> OpSequence<OpDispenser<O>> createOpSequence(Function<OpTemplate, OpDispenser<O>> opinit) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         StrInterpolator interp = new StrInterpolator(activityDef);
@@ -498,6 +498,17 @@ public class SimpleActivity implements Activity, ProgressCapable {
         } else {
             throw new RuntimeException("Progress meter must be implemented here.");
         }
+    }
+
+    /**
+     * Activities with retryable operations (when specified with the retry error handler for some
+     * types of error), should allow the user to specify how many retries are allowed before
+     * giving up on the operation.
+     * @return The number of allowable retries
+     */
+    @Override
+    public int getMaxTries() {
+        return getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
 

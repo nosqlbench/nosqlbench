@@ -44,7 +44,6 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
     private MongoClient client;
     private MongoDatabase mongoDatabase;
     private boolean showQuery;
-    private int maxTries;
 
     private OpSequence<ReadyMongoStatement> opSequence;
 
@@ -84,9 +83,6 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         mongoDatabase = client.getDatabase(databaseName);
         showQuery = activityDef.getParams().getOptionalBoolean("showquery")
                                .orElse(false);
-        maxTries = activityDef.getParams().getOptionalInteger("maxtries")
-                              .orElse(10);
-
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
@@ -155,7 +151,4 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         return showQuery;
     }
 
-    protected int getMaxTries() {
-        return maxTries;
-    }
 }

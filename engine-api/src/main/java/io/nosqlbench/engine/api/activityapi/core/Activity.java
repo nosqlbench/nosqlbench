@@ -210,4 +210,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     default Function<Throwable,String> getErrorNameMapper() {
         return t -> t.getClass().getSimpleName();
     }
+
+    int getMaxTries();
 }
