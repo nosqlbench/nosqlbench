@@ -1,4 +1,2 @@
-- 5ecda12f (HEAD -> main) use built-in activity error handler wiring for http
-- d905c352 base exception metrics on name only
-- fed7a9e1 allow activities to provide an error name mapper
-- c45662ab allow NBErrorHandler to map more detailed error names
+- b0dc6ca8 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #319 from yabinmeng/main
+- adfbcacb Maven central pom update
