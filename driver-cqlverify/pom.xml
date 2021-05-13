@@ -5,7 +5,7 @@
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
     <version>4.15.47-SNAPSHOT</version>
-    <relativePath>../mvn-defaults</relativePath>
+    <relativePath>../mvn-defaults/pom.xml</relativePath>
   </parent>
 
   <artifactId>driver-cqlverify</artifactId>

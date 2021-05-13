@@ -6,7 +6,7 @@
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
         <version>4.15.47-SNAPSHOT</version>
-        <relativePath>../mvn-defaults</relativePath>
+        <relativePath>../mvn-defaults/pom.xml</relativePath>
     </parent>
 
     <artifactId>driver-jmx</artifactId>
