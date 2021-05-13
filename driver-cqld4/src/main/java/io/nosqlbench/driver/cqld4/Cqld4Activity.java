@@ -11,6 +11,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
 
+/**
+ * @see <a href="https://docs.datastax.com/en/developer/java-driver/4.11/manual/core/integration/">Cql driver 4 Integration</a>
+ */
 public class Cqld4Activity extends SimpleActivity {
 
     private final static Logger logger = LogManager.getLogger(Cqld4Activity.class);
