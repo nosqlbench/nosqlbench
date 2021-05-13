@@ -77,6 +77,8 @@ public class HttpAction implements SyncAction {
         } finally {
         }
 
+        int resultCode=0;
+
         while (tries < maxTries) {
             tries++;
 
@@ -128,6 +130,7 @@ public class HttpAction implements SyncAction {
                 } else {
                     // count and log exception types
                     ErrorDetail detail = httpActivity.getErrorHandler().handleError(error, cycle, nanos);
+                    resultCode=detail.resultCode;
                     if (!detail.isRetryable()) {
                         break; // break out of the tries loop without retrying, because the error handler said so
                     }
@@ -139,7 +142,7 @@ public class HttpAction implements SyncAction {
 
         httpActivity.triesHisto.update(tries);
 
-        return 0;
+        return resultCode;
     }
 
     private HttpRequest.BodyPublisher bodySourceFrom(Map<String, String> cmdMap) {
