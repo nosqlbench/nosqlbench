@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.45-SNAPSHOT</version>
+        <version>4.15.47-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -50,6 +50,7 @@
         <module>driver-jdbc</module>
         <module>driver-cockroachdb</module>
         <module>driver-pulsar</module>
+        <module>driver-jms</module>
 
         <!-- VIRTDATA MODULES -->
 
