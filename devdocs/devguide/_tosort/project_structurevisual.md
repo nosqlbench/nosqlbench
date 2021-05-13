@@ -1,6 +1,6 @@
 # NoSQLBench Module Dependencies
 
-This is viewable in Intellij markdown preview with the optional plugins
+This is viewable in IntelliJ markdown preview with the optional plugins
 enabled.
 
 ```plantuml
