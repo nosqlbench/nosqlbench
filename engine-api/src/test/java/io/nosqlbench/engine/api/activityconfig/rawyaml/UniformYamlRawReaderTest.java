@@ -77,7 +77,7 @@ public class UniformYamlRawReaderTest {
 
         LinkedList<TestSet> tests = new LinkedList<>();
 
-        List<Content<?>> yaml = NBIO.fs().prefix("target/test-classes/workload_definition/").name("templated_workloads").extension("md").list();
+        List<Content<?>> yaml = NBIO.fs().prefix("target/classes/workload_definition/").name("templated_workloads").extension("md").list();
 
         Pattern emphasis = Pattern.compile("\\*(.*?)\\*\n");
         Class<?> fcbclass = FencedCodeBlock.class;
@@ -98,14 +98,15 @@ public class UniformYamlRawReaderTest {
                     node = node.getNext();
                     index=0;
                 }
+
                 if (p.test(node)) {
                     List<Node> found = p.get();
 //                    System.out.println(summarize(found));
                     String label = heading + String.format("-%02d", (++index));
                     testblocks.add(new TestBlock(
-                        new TestSet(label,found.get(0).getChars(),found.get(1).getFirstChild().getChars()),
-                        new TestSet(label,found.get(2).getChars(),found.get(3).getFirstChild().getChars()),
-                        new TestSet(label,found.get(4).getChars(),found.get(5).getFirstChild().getChars())
+                        new TestSet(label,found.get(0),found.get(1),content.asPath()),
+                        new TestSet(label,found.get(2),found.get(3),content.asPath()),
+                        new TestSet(label,found.get(4),found.get(5),content.asPath())
                     ));
                     node=found.get(found.size()-1);
                 }
@@ -285,12 +286,12 @@ public class UniformYamlRawReaderTest {
      */
     private void validateYamlWithJson(String desc, String yaml, String json) {
         System.out.format("%-40s","- checking yaml->json");
-        List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
 
-        StmtsDocList stmts = StatementsLoader.loadString(yaml);
+//        StmtsDocList stmts = StatementsLoader.loadString(yaml);
         JsonParser parser = new JsonParser();
 
         try {
+            List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
             JsonElement elem = parser.parse(json);
             if (elem.isJsonArray()) {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
