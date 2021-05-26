@@ -17,9 +17,13 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
+import io.nosqlbench.nb.api.errors.BasicError;
+
 import java.util.*;
 
 public class StatementsOwner extends RawStmtFields {
+
+    private final static List<String> stmtsFieldNames = List.of("op","ops","operation","statement","statements");
 
     private List<RawStmtDef> rawStmtDefs = new ArrayList<>();
 
@@ -35,27 +39,21 @@ public class StatementsOwner extends RawStmtFields {
     }
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
-        if (propsmap.containsKey("statement") && propsmap.containsKey("statements")) {
-            throw new RuntimeException("You can define either statement or statements, but not both.");
+
+        HashSet<String> found = new HashSet<>();
+        for (String fname : stmtsFieldNames) {
+            if (propsmap.containsKey(fname)) {
+                found.add(fname);
+            }
+        }
+        if (found.size()>1) {
+            throw new BasicError("You used " + found + " as an op name, but only one of these is allowed.");
+        }
+        if (found.size()==1) {
+            Object stmtsFieldValue = propsmap.remove(found.iterator().next());
+            setStatementsFieldByType(stmtsFieldValue);
         }
 
-        Object statementsObject = propsmap.remove("statements");
-
-        if (statementsObject == null) {
-            statementsObject = propsmap.remove("statement");
-        }
-
-        if (statementsObject != null) {
-            setStatementsFieldByType(statementsObject);
-        }
-
-//        if (statementsObject!=null) {
-//            if (statementsObject instanceof List) {
-//                setByObject(statementsObject);
-//            } else {
-//                throw new RuntimeException("Invalid type for statements property: " + statementsObject.getClass().getCanonicalName());
-//            }
-//        }
         super.setFieldsByReflection(propsmap);
     }
 

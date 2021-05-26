@@ -17,27 +17,40 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import io.nosqlbench.nb.api.errors.BasicError;
+
+import java.util.*;
 
 public class RawStmtDef extends RawStmtFields {
 
-    private String statement;
+    private Object op;
+
+    private final static List<String> opNames = List.of("stmt","statement","op","operation");
 
     public RawStmtDef() {
     }
 
-    public RawStmtDef(String name, String statement) {
+    public RawStmtDef(String name, String op) {
         setName(name);
-        this.statement = statement;
+        this.op = op;
     }
 
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
+        HashSet<String> found = new HashSet<>();
+        for (String opName : opNames) {
+            if (map.containsKey(opName)) {
+                found.add(opName);
+            }
+        }
+        if (found.size()>1) {
+            throw new BasicError("You used " + found + " as an op name, but only one of these is allowed.");
+        }
+        if (found.size()==1) {
+            Object op = map.remove(found.iterator().next());
+            this.setOp(op);
+        }
 
-        Optional.ofNullable((String) map.remove("stmt")).ifPresent(this::setStmt);
-        Optional.ofNullable((String) map.remove("statement")).ifPresent(this::setStmt);
         Optional.ofNullable((String) map.remove("name")).ifPresent(this::setName);
         Optional.ofNullable((String) map.remove("desc")).ifPresent(this::setDesc);
         Optional.ofNullable((String) map.remove("description")).ifPresent(this::setDesc);
@@ -48,7 +61,7 @@ public class RawStmtDef extends RawStmtFields {
 
 
         // Depends on order stability, relying on LinkedHashMap -- Needs stability unit tests
-        if (this.statement == null) {
+        if (this.op == null) {
             Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
             if (!iterator.hasNext()) {
                 throw new RuntimeException("undefined-name-statement-tuple:" +
@@ -84,12 +97,24 @@ public class RawStmtDef extends RawStmtFields {
         map.forEach((key, value) -> getParams().put(key, value));
     }
 
+    private void setOp(Object op) {
+        this.op = op;
+    }
+
     public String getStmt() {
-        return statement;
+        if (op instanceof CharSequence) {
+            return op.toString();
+        } else {
+            throw new BasicError("tried to access a non-char statement definition with #getStmt()");
+        }
+    }
+
+    public Object getOp() {
+        return op;
     }
 
     private void setStmt(String statement) {
-        this.statement = statement;
+        this.op = statement;
     }
 
     public String getName() {

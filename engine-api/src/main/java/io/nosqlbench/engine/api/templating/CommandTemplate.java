@@ -2,6 +2,7 @@ package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.nb.api.config.ParamsParser;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
@@ -27,7 +28,7 @@ import java.util.function.Function;
  * may be provided when needed for specialized forms of syntax or variations which should also
  * be supported. See the constructor docs for details on these variations.
  */
-public class CommandTemplate {
+public class CommandTemplate<T> {
 
     private final static Logger logger = LogManager.getLogger(CommandTemplate.class);
 
@@ -39,7 +40,7 @@ public class CommandTemplate {
     /**
      * Create a CommandTemplate directly from an OpTemplate.
      *
-     * In this form, if {@link OpTemplate#getStmt()}
+     * In this form, if {@link OpTemplate#getOp()}
      * is non-null, then it taken as a line-oriented value and parsed according to default {@link ParamsParser} behavior.
      *
      * Additionally, any op params provided are considered as entries to add to the command template's map.
@@ -47,25 +48,25 @@ public class CommandTemplate {
      * @param optpl An OpTemplate
      */
     public CommandTemplate(OpTemplate optpl) {
-        this(optpl.getName(), optpl.getStmt(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), List.of());
+        this(optpl.getName(), optpl.getOp().toString(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), List.of());
     }
 
     /**
      * Create a CommandTemplate directly from an OpTemplate, as in {@link #CommandTemplate(OpTemplate)},
      * with added support for parsing the oneline form with the provided parsers.
      *
-     * In this form, if {@link OpTemplate#getStmt()}
+     * In this form, if {@link OpTemplate#getOp()}
      * is non-null, then it taken as a line-oriented value and parsed according to default {@link ParamsParser} behavior.
      * However, the provided parsers (if any) are used first in order to match alternate forms of syntax.
      *
-     * See {@link CommandTemplate#CommandTemplate(String, String, Map, Map, List)} for full details on the provided
+     * See {@link CommandTemplate#CommandTemplate(String, Object, Map, Map, List)} for full details on the provided
      * parsers.
      *
      * @param optpl   An OpTemplate
      * @param parsers A list of parser functions
      */
     public CommandTemplate(OpTemplate optpl, List<Function<String, Map<String, String>>> parsers) {
-        this(optpl.getName(), optpl.getStmt(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
+        this(optpl.getName(), optpl.getOp(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
     }
 
     /**
@@ -85,12 +86,12 @@ public class CommandTemplate {
      * </P>
      *
      * @param name            The name of the command template
-     * @param oneline         A oneline version of the parameters to be parsed by {@link ParamsParser}
+     * @param op              An object version of the parameters to be parsed by {@link ParamsParser}
      * @param params          A set of named parameters and values in name:value form.
      * @param bindings        A set of named bindings in name:recipe form.
      * @param optionalParsers A set of functions which, if provided, will be used to read the oneline form.
      */
-    public CommandTemplate(String name, String oneline, Map<String, String> params, Map<String, String> bindings, List<Function<String, Map<String, String>>> optionalParsers) {
+    public CommandTemplate(String name, Object op, Map<String, String> params, Map<String, String> bindings, List<Function<String, Map<String, String>>> optionalParsers) {
 
         this.name = name;
         Map<String, String> cmd = new HashMap<>();
@@ -98,6 +99,13 @@ public class CommandTemplate {
         // Only parse and inject the one-line form if it is defined.
         // The first parser to match and return a map will be the last one tried.
         // If none of the supplemental parsers work, the default params parser is used
+
+        String oneline;
+        if (op instanceof CharSequence) {
+            oneline=op.toString();
+        } else {
+            throw new BasicError("Unable to create a oneline version of the CommandTemplate with op type of " + op.getClass().getSimpleName());
+        }
         if (oneline != null) {
             List<Function<String, Map<String, String>>> parserlist = new ArrayList<>(optionalParsers);
             parserlist.add(s -> ParamsParser.parse(s, false));
@@ -105,7 +113,7 @@ public class CommandTemplate {
             for (Function<String, Map<String, String>> parser : parserlist) {
                 Map<String, String> parsed = parser.apply(oneline);
                 if (parsed != null) {
-                    logger.debug("parsed request: " + parsed.toString());
+                    logger.debug("parsed request: " + parsed);
                     cmd.putAll(parsed);
                     didParse = true;
                     break;

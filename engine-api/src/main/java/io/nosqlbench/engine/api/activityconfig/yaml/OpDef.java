@@ -17,9 +17,11 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
+import com.google.gson.annotations.SerializedName;
 import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
+import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +30,13 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class OpDef implements OpTemplate {
+
+    private static final String FIELD_DESC = "description";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_OP = "op";
+    private static final String FIELD_BINDINGS = "bindings";
+    private static final String FIELD_PARAMS = "params";
+    private static final String FIELD_TAGS = "tags";
 
     private final RawStmtDef rawStmtDef;
     private final StmtsBlock block;
@@ -49,8 +58,8 @@ public class OpDef implements OpTemplate {
     }
 
     @Override
-    public String getStmt() {
-        return rawStmtDef.getStmt();
+    public Object getOp() {
+        return rawStmtDef.getOp();
     }
 
     @Override
@@ -65,6 +74,7 @@ public class OpDef implements OpTemplate {
     }
 
     @Override
+    @SerializedName("params")
     public Map<String, Object> getParams() {
         return params;
     }
@@ -137,7 +147,7 @@ public class OpDef implements OpTemplate {
             return value;
         }
         throw new RuntimeException("Unable to cast type " + object.getClass().getSimpleName() + " to" +
-                " " + type.getSimpleName() + ". Perhaps the yaml format is suggesting the wrong type.");
+            " " + type.getSimpleName() + ". Perhaps the yaml format is suggesting the wrong type.");
     }
 
     @Override
@@ -178,7 +188,7 @@ public class OpDef implements OpTemplate {
 
     @Override
     public String toString() {
-        return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() + "), bindings:(" + getBindings() + "))";
+        return "stmt(name:" + getName() + ", stmt:" + getOp() + ", tags:(" + getTags() + "), params:(" + getParams() + "), bindings:(" + getBindings() + "))";
     }
 
     @Override
@@ -190,5 +200,42 @@ public class OpDef implements OpTemplate {
     @Override
     public String getDesc() {
         return rawStmtDef.getDesc();
+    }
+
+
+    @Override
+    public Map<String, Object> asData() {
+        LinkedHashMap<String, Object> fields = new LinkedHashMap<>();
+
+        if (this.getDesc() != null && !this.getDesc().isBlank()) {
+            fields.put(FIELD_DESC, this.getDesc());
+        }
+
+        if (this.getBindings().size() > 0) {
+            fields.put(FIELD_BINDINGS, this.getBindings());
+        }
+
+        if (this.getParams().size() > 0) {
+            fields.put(FIELD_PARAMS, this.getParams());
+        }
+
+        if (this.getTags().size() > 0) {
+            fields.put(FIELD_TAGS, this.getTags());
+        }
+
+        fields.put(FIELD_OP, this.getOp());
+
+        fields.put(FIELD_NAME, this.getName());
+
+        return fields;
+    }
+
+    @Override
+    public String getStmt() {
+        if (getOp() instanceof CharSequence) {
+            return getOp().toString();
+        } else {
+            throw new BasicError("tried to access op type '" + getOp().getClass().getSimpleName() + "' as a string statement.");
+        }
     }
 }

@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
-import com.vladsch.flexmark.ast.Heading;
 import com.vladsch.flexmark.ext.yaml.front.matter.YamlFrontMatterExtension;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
@@ -31,13 +30,15 @@ import com.vladsch.flexmark.util.ast.Node;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -46,19 +47,39 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UniformYamlRawReaderTest {
+public class UniformWorkloadSpecificationTest {
 
-    private final static Logger logger = LogManager.getLogger(UniformYamlRawReaderTest.class);
+
+    private final static Logger logger = LogManager.getLogger(UniformWorkloadSpecificationTest.class);
 
     private static final Parser parser = Parser.builder().extensions(List.of(YamlFrontMatterExtension.create())).build();
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+
+    @Test
+    public void testTemplatedWorkloads() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("templated_workloads.md")
+                .one().asPath()
+        );
+    }
+
+    @Test
+    public void testTemplatedOperations() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("templated_operations.md")
+                .one().asPath()
+        );
+    }
+
     public String summarize(Node node) {
         StringBuilder sb = new StringBuilder();
-        while (node!=null) {
+        while (node != null) {
             sb.append("-> ").append(node.getClass().getSimpleName()).append("\n");
             sb.append(node.getChars()).append("\n");
-            node=node.getNext();
+            node = node.getNext();
         }
         return sb.toString();
     }
@@ -72,83 +93,64 @@ public class UniformYamlRawReaderTest {
         return sb.toString();
     }
 
-    @Test
-    public void testAllForms() {
 
+    private void testSpecPath(Path specPath) {
         LinkedList<TestSet> tests = new LinkedList<>();
-
-        List<Content<?>> yaml = NBIO.fs().prefix("target/classes/workload_definition/").name("templated_workloads").extension("md").list();
-
         Pattern emphasis = Pattern.compile("\\*(.*?)\\*\n");
         Class<?> fcbclass = FencedCodeBlock.class;
-        NodePredicates p = new NodePredicates(emphasis,fcbclass,emphasis,fcbclass,emphasis,fcbclass);
+        NodePredicates p = new NodePredicates(emphasis, fcbclass, emphasis, fcbclass, emphasis, fcbclass);
+        HeadingScanner headings = new HeadingScanner(" > ");
 
         List<TestBlock> testblocks = new ArrayList<>();
 
-        for (Content<?> content : yaml) {
-            Document parsed = parser.parse(content.asString());
-            Node node = parsed.getFirstChild();
-//            summarize(node,System.out);
-            String heading = "none";
-            int index = 0;
+        headings.update(specPath);
 
-            while (node != null) {
-                if (node instanceof Heading) {
-                    heading = node.getChars().toString();
-                    node = node.getNext();
-                    index=0;
-                }
-
-                if (p.test(node)) {
-                    List<Node> found = p.get();
-//                    System.out.println(summarize(found));
-                    String label = heading + String.format("-%02d", (++index));
-                    testblocks.add(new TestBlock(
-                        new TestSet(label,found.get(0),found.get(1),content.asPath()),
-                        new TestSet(label,found.get(2),found.get(3),content.asPath()),
-                        new TestSet(label,found.get(4),found.get(5),content.asPath())
-                    ));
-                    node=found.get(found.size()-1);
-                }
-                if (node!=null) {
-                    node = node.getNext();
-                }
-            }
-
-            for (TestBlock testblock : testblocks) {
-                runTest(testblock);
-            }
-//
-//            while (node.getNext())
-//
-//            Node node = parsed.getFirstChildAny(FencedCodeBlock.class, Heading.class);
-//
-//            String heading = "none";
-//            int index = 0;
-//            while (node != null) {
-//                if (node instanceof Heading) {
-//                    heading = node.getChars().toString();
-//                    node = node.getNextAny(FencedCodeBlock.class, Heading.class);
-//                    index=0;
-//                } else if (node instanceof FencedCodeBlock) {
-//                    tests.add(new TestSet(heading+String.format("-%02d",(++index+1)/2), (FencedCodeBlock)node));
-//                    node = node.getNextAny(FencedCodeBlock.class, Heading.class);
-//                }
-//            }
+        String input = null;
+        try {
+            input = Files.readString(specPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
+        Document parsed = parser.parse(input);
+        Node node = parsed.getFirstChild();
+//            summarize(node,System.out);
+        int index = 0;
+
+        while (node != null) {
+            headings.update(node);
+            if (p.test(node)) {
+                List<Node> found = p.get();
+//                    System.out.println(summarize(found));
+                testblocks.add(new TestBlock(
+                    new TestSet(headings, found.get(0), found.get(1), specPath),
+                    new TestSet(headings, found.get(2), found.get(3), specPath),
+                    new TestSet(headings, found.get(4), found.get(5), specPath)
+                ));
+                node = found.get(found.size() - 1);
+                headings.index();
+            }
+            if (node != null) {
+                node = node.getNext();
+            }
+        }
+
+        for (TestBlock testblock : testblocks) {
+            runTest(testblock);
+        }
     }
 
     private void runTest(TestBlock testblock) {
 
-        if (testblock.size()==3) {
+        if (testblock.size() == 3) {
             String tuple = testblock.get(0).info.toString() + "->" + testblock.get(1).info + "->" + testblock.get(2).info;
-            tuple = tuple.replaceAll("[^-a-zA-Z0-9<> _]","");
+            tuple = tuple.replaceAll("[^-a-zA-Z0-9<> _]", "");
 
             System.out.println(testblock.get(0).getDesc());
+            System.out.println(testblock.get(0).getLocationRef());
 
             if (tuple.equals("yaml->json->ops")) {
-                testYamlJsonOps(testblock);
+                testBracket_YamlJsonOps(testblock);
             }
         } else {
             throw new RuntimeException("Test block sized " + testblock.size() + " unrecognized by test loader.");
@@ -159,7 +161,7 @@ public class UniformYamlRawReaderTest {
     /**
      * Not thread-safe!
      */
-    private static class NodePredicates implements Predicate<Node>,Supplier<List<Node>> {
+    private static class NodePredicates implements Predicate<Node>, Supplier<List<Node>> {
         final List<Predicate<Node>> predicates;
         final List<Node> found = new ArrayList<>();
 
@@ -196,7 +198,8 @@ public class UniformYamlRawReaderTest {
      */
     private static class NodePredicate implements Predicate<Node>, Supplier<Node> {
         private final Predicate<Node> predicate;
-        private Node found= null;
+        private Node found = null;
+
         public NodePredicate(Object o) {
             this.predicate = resolvePredicate(o);
         }
@@ -219,8 +222,7 @@ public class UniformYamlRawReaderTest {
         public boolean test(Node node) {
             this.found = null;
             boolean isFound = predicate.test(node);
-            if (isFound)
-            {
+            if (isFound) {
                 this.found = node;
             }
             return isFound;
@@ -243,13 +245,25 @@ public class UniformYamlRawReaderTest {
         }
     };
 
-    private void testYamlJsonOps(TestBlock block) {
-        validateYamlWithJson(block.get(0).getDesc(), block.get(0).text.toString(), block.get(1).text.toString());
-        validateYamlWithOpsModel(block.get(0).getDesc(), block.get(0).text.toString(), block.get(2).text.toString());
+    private void testBracket_YamlJsonOps(TestBlock block) {
+
+        validateYamlWithJson(
+            block.get(0).getDesc(),
+            block.get(0).text.toString(),
+            block.get(1).text.toString(),
+            block.get(1)
+        );
+
+        validateYamlWithOpsModel(
+            block.get(0).getDesc(),
+            block.get(0).text.toString(),
+            block.get(2).text.toString(),
+            block.get(2)
+        );
     }
 
-    private void validateYamlWithOpsModel(String desc, String yaml, String json) {
-        System.out.format("%-40s","- checking yaml->ops");
+    private void validateYamlWithOpsModel(String desc, String yaml, String json, TestSet testref) {
+        System.out.format("%-40s", "- checking yaml->ops");
 
         JsonParser parser = new JsonParser();
         try {
@@ -258,11 +272,12 @@ public class UniformYamlRawReaderTest {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
+
                 StmtsDocList stmtsDocs = StatementsLoader.loadString(yaml);
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String optemplate_as_json = gson.toJson(stmts);
-                System.out.print(optemplate_as_json);
+                List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
+
+                assertThat(stmt_objs).isEqualTo(expectedList);
 
             }
 
@@ -272,7 +287,6 @@ public class UniformYamlRawReaderTest {
         }
 
 
-
     }
 
 
@@ -280,12 +294,13 @@ public class UniformYamlRawReaderTest {
      * Compare one or more raw yaml docs to JSON5 representation of the same.
      * For clarity in the docs, a single object is allowed in the json5, in which case
      * an error is thrown if the yaml side contains more or less than 1 element.
+     *
      * @param desc A moniker describing the test
      * @param yaml YAML describing a templated workload
      * @param json JSON describing a templated workload
      */
-    private void validateYamlWithJson(String desc, String yaml, String json) {
-        System.out.format("%-40s","- checking yaml->json");
+    private void validateYamlWithJson(String desc, String yaml, String json, TestSet testset) {
+        System.out.format("%-40s", "- checking yaml->json");
 
 //        StmtsDocList stmts = StatementsLoader.loadString(yaml);
         JsonParser parser = new JsonParser();
@@ -301,9 +316,10 @@ public class UniformYamlRawReaderTest {
                 System.out.println("OK");
             } else if (elem.isJsonObject()) {
                 Map<String, Object> expectedSingle = gson.fromJson(json, Map.class);
+
                 compareEach(expectedSingle, docmaps.get(0));
                 assertThat(docmaps.get(0)).isEqualTo(expectedSingle);
-                if (docmaps.size()!=1) {
+                if (docmaps.size() != 1) {
                     throw new RuntimeException("comparator expected a single object, but found " + docmaps.size());
                 }
                 System.out.println("OK");
@@ -312,7 +328,12 @@ public class UniformYamlRawReaderTest {
                 throw new RuntimeException("unknown type in comparator: " + json);
             }
         } catch (Exception e) {
-            logger.error("Error while processing data:\n" + json + ": " + e.getMessage(), e);
+            StringBuilder sb = new StringBuilder();
+            sb.append("error while verifying model:\n");
+            sb.append(" path: ").append(testset.getPath().toString()).append("\n");
+            sb.append(" line: ").append(testset.getRefNode().getLineNumber()).append("\n");
+
+            logger.error(sb + ": " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
 

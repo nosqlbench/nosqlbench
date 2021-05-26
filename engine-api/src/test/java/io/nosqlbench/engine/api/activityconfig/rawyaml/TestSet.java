@@ -1,44 +1,30 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.util.ast.Node;
 
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.Locale;
+import java.util.function.Supplier;
 
 final class TestSet {
-    private final String desc;
+    private final String description;
     private final Path path;
     private final int line;
+    private final Node refnode;
     public CharSequence info;
     public CharSequence text;
 
-    public TestSet(String desc, Node infoNode, Node dataNode, Path path) {
-        this.desc = desc;
+    public TestSet(Supplier<CharSequence> desc, Node infoNode, Node dataNode, Path path) {
+        this.description = desc.get().toString();
         this.info = infoNode.getChars();
         this.text = dataNode.getFirstChild().getChars();
         this.line = dataNode.getFirstChild().getLineNumber();
         this.path = path;
-    }
-
-    public TestSet(String description, CharSequence info, CharSequence text, Path path, int line) {
-        this.desc = description;
-        this.info = info;
-        this.text = text;
-        this.path = path;
-        this.line = line;
-    }
-
-    public TestSet(String description, FencedCodeBlock node, Path path) {
-        this.desc = description;
-        this.info = node.getInfo();
-        text = Objects.requireNonNull(node.getFirstChild()).getChars();
-        this.path = path;
-        this.line = node.getLineNumber();
+        this.refnode = dataNode;
     }
 
     public String getDesc() {
-        return desc;
+        return description;
     }
 
     public Path getPath() {
@@ -48,4 +34,27 @@ final class TestSet {
     public int getLine() {
         return line;
     }
+
+    public Node getRefNode() {
+        return refnode;
+    }
+
+    /**
+     * Provide the logical path of the file being examined in this test set.
+     * If the system properties indicate that the test is being run from within intellij,
+     * the path will be relatized from the next module level up to allow for hot linking
+     * directly to files.
+     * @return A useful relative path to the file being tested
+     */
+    public String getLocationRef() {
+        boolean inij = System.getProperty("sun.java.command","").toLowerCase(Locale.ROOT).contains("intellij");
+        Path vcwd = Path.of(".").toAbsolutePath().normalize();
+        vcwd = inij ? vcwd.getParent().normalize() : vcwd;
+        Path relpath = vcwd.relativize(this.path.toAbsolutePath());
+        if (inij) {
+            relpath = Path.of(relpath.toString().replace("target/classes/","src/main/resources/"));
+        }
+        return "\t at (" + relpath.toString() + ":" + this.getLine() + ")";
+    }
+
 }

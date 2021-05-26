@@ -1,228 +1,40 @@
 # Op Templates
 
-The rules around op templates deserve a separate section, given that
-there are many techniques that a user can choose from.
+The rules around op templates deserve a separate section, given that there are many techniques that
+a user can choose from.
 
-The valid elements of the raw workload form are explained below, using
-YAML and JSON5 as a schematic language. This guide is not meant to be very
-explanatory for new users, but it can serve as a handy reference about how
-workloads can be structured.
+The valid elements of the raw workload form are explained below, using YAML and JSON5 as a schematic
+language. This guide is not meant to be very explanatory for new users, but it can serve as a handy
+reference about how workloads can be structured.
 
-Any bundled workload loader should test all of these fenced code blocks
-and confirm that the data structures are logically equivalent, using any
-json5 blocks as a trigger to compare against the prior block.
+Any bundled workload loader should test all of these fenced code blocks and confirm that the data
+structures are logically equivalent, using any json5 blocks as a trigger to compare against the
+prior block.
 **This document is a testable specification.**
 
-While some of the examples below appear to be demonstrating basic
-cross-format encoding, there is more going on. This document captures a
-set of basic sanity rules for all raw workload data, as well as visual
-examples and narratives to assist users and maintainers. In short, if you
-don't see what you want to do here, it is probably not valid in the
-format, and if you know that to be false, then this document needs to be
-updated with more details!
+While some of the examples below appear to be demonstrating basic cross-format encoding, there is
+more going on. This document captures a set of basic sanity rules for all raw workload data, as well
+as visual examples and narratives to assist users and maintainers. In short, if you don't see what
+you want to do here, it is probably not valid in the format, and if you know that to be false, then
+this document needs to be updated with more details!
 
----
-
-## Description
-
-**zero or one `description` fields:**
-
-The first line of the description represents the summary of the
-description in summary views. Otherwise, the whole value is used.
-
-```yaml
-description: |
-    summary of this workload
-    and more details
-```
-
-==
-
-```json5
-{
-    "description": "summary of this workload\nand more details\n"
-}
-```
-
----
-
-## Scenarios
-
-**zero or one `scenarios` fields, containing one of the following forms**
-
-The way that you create macro-level workloads from individual stages is
-called *named scenarios* in NB. These are basically command line templates
-which can be invoked automatically by calling their name out on your
-command line. More details on their usage are in the workload construction
-guide. We're focused merely on the structural rules here.
-
-```yaml
-# As named scenarios with a single un-named step
-scenarios:
-    default: run driver=diag cycles=10
-```
-
-```json5
-{
-    "scenarios": {
-        "default": "run driver=diag cycles=10"
-    }
-}
-```
-
-OR
-
-```yaml
-# As named scenarios with named steps
-scenarios:
-    default:
-        step1: run alias=first driver=diag cycles=10
-        step2: run alias=second driver=diag cycles=10
-```
-
-```json5
-{
-    "scenarios": {
-        "default": {
-            "step1": "run alias=first driver=diag cycles=10",
-            "step2": "run alias=second driver=diag cycles=10"
-        }
-    }
-}
-```
-
-OR
-
-```yaml
-# As named scenarios with a list of un-named steps
-scenarios:
-    default:
-        - run alias=first driver=diag cycles=10
-        - run alias=second driver=diag cycles=10
-```
-
-```json5
-{
-    "scenarios": {
-        "default": [
-            "run alias=first driver=diag cycles=10",
-            "run alias=second driver=diag cycles=10"
-        ]
-    }
-}
-```
-
----
-
-## Bindings
-
-**zero or one `bindings` fields, containing a map of named bindings
-recipes**
-
-Bindings are the functions which synthesize data for your operations. They
-are specified in recipes which are just function chains from the provided
-libraries.
-
-```yaml
-bindings:
-    cycle: Identity();
-    name: NumberNameToString();
-```
-
-```json5
-{
-    "bindings": {
-        "cycle": "Identity();",
-        "name": "NumberNameToString();"
-    }
-}
-```
-
----
-
-## Params
-
-**zero of one `params` fields, containing a map of parameter names to
-values**
-
-Params are modifiers to your operations. They specify important details
-which are not part of the operation's command or payload, like consistency
-level, or timeout settings.
-
-```yaml
-params:
-    param1: pvalue1
-    param2: pvalue2
-```
-
-```json5
-{
-    "params": {
-        "param1": "pvalue1",
-        "param2": "pvalue2"
-    }
-}
-```
-
----
-
-## Tags
-
-**zero or one `tags` fields, containing a map of tag names and values**
-
-Tags are how you mark your operations for special inclusion into tests.
-They are basically naming metadata that lets you filter what type of
-operations you actually use. Further details on tags are in the workload
-construction guide.
-
-```yaml
-tags:
-    phase: main
-```
-
-```json5
-{
-    "tags": {
-        "phase": "main"
-    }
-}
-```
-
----
-
-## Op Templates
-
-The representation of an operation in the workload definition is the most
-flexible as well as the most potentially confusion. The reasons for this
-are explained in the README for this module. Thus, it is useful to be
-detail oriented in these examples.
-
-An op template, as expressed by the user, is just a recipe for how to
-construct an operation at runtime. They are not operations. They are
-merely blueprints that the driver uses to create real operations that can
-be executed.
-
-This applies at two levels:
-
-1) When the user specifies their op template as part of a workload
-   definition.
-2) When the loaded workload definition is promoted to a convenient
-   OpTemplate type for use by the driver developer.
-
-Just be aware that this term can be used in both ways.
-
-For historic reasons, the field name used for op templates in yaml files
-is *statements*, although it will be valid to use any of `statement`,
-`statements`, `op`, `ops`, `operation`, or `operations`. This is because
-these names are all symbolic and familiar to certain protocols. The
-recommended name is `ops` for most cases. Internally, pre-processing will
-likely be used to convert them all to simply `ops`.
+The field used in workload templates to represent an operation can often be symbolic to users. For
+this reason, several names are allowed: ops, op, operations, statements, statement. It doesn't
+matter whether the value is provided as a map, list, or scalar. These all do the same thing,
+although an error is thrown if you specify more than one. The interpretation is always the same: An
+ordered collection of op templates. In map forms, the key is the op name. In forms which contain no
+provided name (as a key or as a property of an element map), a name is automatically provided by the
+API.
 
 ### a single un-named op template
+
+*yaml:*
 
 ```yaml
 op: select * from bar.table;
 ```
+
+*json:*
 
 ```json5
 {
@@ -230,12 +42,27 @@ op: select * from bar.table;
 }
 ```
 
+*ops:*
+
+```json5
+[
+    {
+        "name": "block0--stmt1",
+        "op": "select * from bar.table;"
+    }
+]
+```
+
 ### un-named op templates as a list of strings
+
+*yaml:*
 
 ```yaml
 ops:
     - select * from bar.table;
 ```
+
+*json:*
 
 ```json5
 {
@@ -245,12 +72,30 @@ ops:
 }
 ```
 
-### named op templates as a list of maps
+*ops:*
+
+```json5
+[
+    {
+        "name": "block0--stmt1",
+        "op": "select * from bar.table;"
+    }
+]
+```
+
+### named op templates as a list of maps with name-stmt as first entry
+
+This form will take the first key and value of the map as the name and statement for the op
+template.
+
+*yaml:*
 
 ```yaml
 ops:
     - op1: select * from bar.table;
 ```
+
+*json:*
 
 ```json5
 {
@@ -262,12 +107,61 @@ ops:
 }
 ```
 
+*ops:*
+
+```json5
+[
+    {
+        "name": "block0--op1",
+        "op": "select * from bar.table;"
+    }
+]
+```
+
+### op templates as a list of maps with name field
+
+*yaml:*
+
+```yaml
+ops:
+    - name: op1
+      op: select * from bar.table;
+```
+
+*json:*
+
+```json5
+{
+    "ops": [
+        {
+            "name": "op1",
+            "op": "select * from bar.table;"
+        }
+    ]
+}
+```
+
+*ops:*
+
+```json5
+[
+    {
+        "name": "block0--op1",
+        "op": "select * from bar.table;"
+    }
+]
+```
+
 ### named op templates as a map of strings
+
+*yaml:*
 
 ```yaml
 ops:
     op1: select * from bar.table;
 ```
+
+*json:*
 
 ```json5
 {
@@ -277,13 +171,28 @@ ops:
 }
 ```
 
+*ops:*
+
+```json5
+[
+    {
+        "name": "block0--op1",
+        "op": "select * from bar.table;"
+    }
+]
+```
+
 ### named op templates as a map of maps
+
+*yaml:*
 
 ```yaml
 ops:
     op1:
         stmt: select * from bar.table;
 ```
+
+*json:*
 
 ```json5
 {
@@ -295,35 +204,154 @@ ops:
 }
 ```
 
----
+*ops:*
 
-## Blocks
+```json5
+[
+    {
+        "name": "block0--op1",
+        "op": "select * from bar.table;"
+    }
+]
+```
 
-Blocks are used to group operations which should be configured or run
-together such as during a specific part of a test sequence. Blocks can
-contain any of the defined elements above.
+# Op Template Properties
 
-### named blocks as a map of property maps
+All the forms above merely show how you can structure op templates into common collection forms and
+have them be interpreted in a flexible yet obvious way.
+
+However, all the properties described in [templated_workloads.md](templated_workloads.md)
+can be attached directly to op templates too. This section contains a few examples to illustrate
+this at work.
+
+## detailed op template example
+
+*yaml:*
 
 ```yaml
-blocks:
-    block1:
-        ops:
-            op1: select * from bar.table;
-            op2:
-                type: batch
-                stmt: insert into bar.table (a,b,c) values (1,2,3);
+ops:
+    op1:
+        name: special-op-name
+        op: select * from ks1.tb1;
+        bindings:
+            binding1: NumberNameToString();
+        tags:
+            phase: schema
+        params:
+            prepated: false
+        description: This is just an example operation
 ```
+
+*json:*
 
 ```json5
 {
+    "ops": {
+        "op1": {
+            "bindings": {
+                "binding1": "NumberNameToString();"
+            },
+            "description": "This is just an example operation",
+            "name": "special-op-name",
+            "op": "select * from ks1.tb1;",
+            "params": {
+                "prepated": false
+            },
+            "tags": {
+                "phase": "schema"
+            }
+        }
+    }
+}
+```
+
+*ops:*
+
+```json5
+[
+    {
+        "bindings": {
+            "binding1": "NumberNameToString();"
+        },
+        "description": "This is just an example operation",
+        "name": "block0--special-op-name",
+        "op": "select * from ks1.tb1;",
+        "params": {
+            "prepated": false
+        },
+        "tags": {
+            "phase": "schema"
+        }
+    }
+]
+```
+
+# Property Layering
+
+Properties that are provided at the top (doc) level become defaults for each nested layer (block or
+ops). Each named binding, param, or tag is automatically assigned to any contained layers which do
+not have one of the same name. When two layers contain the same named binding, param or tag, the
+inner-most scope decides the value seen at the op level.
+
+## block-level defaults and overrides
+
+*yaml:*
+
+```yaml
+tags:
+    docleveltag: is-tagging-everything # applies to all operations in this case
+
+bindings:
+    binding1: Identity(); # will be overridden at the block level
+
+params:
+    prepared: true # set prepared true by default for all contained op templates
+
+blocks:
+    block-named-fred:
+        bindings:
+            binding1: NumberNameToString();
+        tags:
+            phase: schema
+        params:
+            prepared: false
+        description: This is just an example operation
+        ops:
+            op1:
+                name: special-op-name
+                op: select * from ks1.tb1;
+
+```
+
+*json:*
+
+```json5
+{
+    "tags": {
+        "docleveltag": "is-tagging-everything"
+    },
+    "bindings": {
+        "binding1": "Identity();"
+    },
+    "params": {
+        "prepared": true
+    },
     "blocks": {
-        "block1": {
+        "block-named-fred": {
+            "bindings": {
+                "binding1": "NumberNameToString();"
+            },
+            "description": "This is just an example operation",
+            "params": {
+                "prepared": false
+            },
+            "tags": {
+                "phase": "schema"
+            },
             "ops": {
-                "op1": "select * from bar.table;",
-                "op2": {
-                    "type": "batch",
-                    "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
+                "op1": {
+                    "name": "special-op-name",
+                    "op": "select * from ks1.tb1;"
                 }
             }
         }
@@ -331,58 +359,25 @@ blocks:
 }
 ```
 
-### un-named blocks as a list of property maps
-
-```yaml
-blocks:
-    - ops:
-          op1: select * from bar.table;
-          op2:
-              type: batch
-              stmt: insert into bar.table (a,b,c) values (1,2,3);
-```
+*ops:*
 
 ```json5
-{
-    "blocks": [
-        {
-            "ops": {
-                "op1": "select * from bar.table;",
-                "op2": {
-                    "type": "batch",
-                    "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-                }
-            }
+[
+    {
+        "bindings": {
+            "binding1": "NumberNameToString();"
+        },
+        "name": "block-named-fred--special-op-name",
+        "op": "select * from ks1.tb1;",
+        "params": {
+            "prepared": false
+        },
+        "tags": {
+            "phase": "schema",
+            "docleveltag": "is-tagging-everything"
         }
-    ]
-}
+    }
+]
 ```
 
----
-
-## Names
-
-All documents, blocks, and ops within a workload can have an assigned
-name. When map and list forms are both supported for entries, the map
-form provides the name. When list forms are used, an additional field
-named `name` can be used.
-
-```yaml
-blocks:
-    - name: myblock
-      op: "test op"
-
-```
-```json5
-{
-    "blocks" : [
-        {
-            "name": "myblock",
-            "op": "test op"
-        }
-    ]
-}
-```
-
-# Normalization
 

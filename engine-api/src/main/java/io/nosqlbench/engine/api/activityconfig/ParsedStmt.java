@@ -20,6 +20,7 @@ package io.nosqlbench.engine.api.activityconfig;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
@@ -47,7 +48,7 @@ public class ParsedStmt {
      */
     public ParsedStmt(OpDef opDef, Function<String, String>... transforms) {
         this.opDef = opDef;
-        String transformed = opDef.getStmt();
+        String transformed = getStmt();
         for (Function<String, String> transform : transforms) {
             transformed = transform.apply(transformed);
         }
@@ -56,7 +57,7 @@ public class ParsedStmt {
 
     public ParsedStmt orError() {
         if (hasError()) {
-            throw new RuntimeException("Unable to parse statement: " + this.toString());
+            throw new RuntimeException("Unable to parse statement: " + this);
         }
         return this;
     }
@@ -132,7 +133,11 @@ public class ParsedStmt {
      * @return the raw statement from the enclosed {@link OpDef}
      */
     public String getStmt() {
-        return opDef.getStmt();
+        if (opDef.getOp() instanceof CharSequence) {
+            return opDef.getOp().toString();
+        } else {
+            throw new BasicError("Tried to access op type '" + opDef.getOp().getClass().getSimpleName() + " as a string statement");
+        }
     }
 
     /**

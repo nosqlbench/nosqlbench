@@ -125,7 +125,7 @@ public interface OpTemplate extends Tagged {
 
     String getName();
 
-    String getStmt();
+    Object getOp();
 
     Map<String, String> getBindings();
 
@@ -156,4 +156,13 @@ public interface OpTemplate extends Tagged {
     ParsedStmt getParsed(Function<String, String>... transforms);
 
     String getDesc();
+
+    Map<String, Object> asData();
+
+    /**
+     * Legacy support for String form statements. This will be replaced after refactoring.
+     * @return A string version of the op
+     * @throws io.nosqlbench.nb.api.errors.BasicError if the op is not a CharSequence
+     */
+    String getStmt();
 }

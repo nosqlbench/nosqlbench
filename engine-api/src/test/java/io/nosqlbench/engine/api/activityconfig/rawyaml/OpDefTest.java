@@ -75,7 +75,7 @@ public class OpDefTest {
         assertThat(assys).hasSize(2);
         OpTemplate sdef1 = assys.get(0);
         assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
-        assertThat(assys.get(0).getStmt()).isEqualTo("s1");
+        assertThat(assys.get(0).getOp()).isEqualTo("s1");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class OpDefTest {
         OpTemplate op1 = block1.getOps().get(1);
         assertThat(op1.getParams()).containsAllEntriesOf(Map.of());
         assertThat(op1.getName()).isEqualTo("map-of-maps--block0--s2");
-        assertThat(op1.getStmt()).isEqualTo("statement2");
+        assertThat(op1.getOp()).isEqualTo("statement2");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class OpDefTest {
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
         assertThat(op0.getName()).isEqualTo("string-statement--block0--stmt1");
-        assertThat(op0.getStmt()).isEqualTo("test statement");
+        assertThat(op0.getOp()).isEqualTo("test statement");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class OpDefTest {
         System.out.println(op0.getParams());
 
         assertThat(op0.getName()).isEqualTo("list-of-named-map--block1--s1");
-        assertThat(op0.getStmt()).isNull();
+        assertThat(op0.getOp()).isNull();
 //        System.out.println("here");
         // TODO: This needs to be clarified and the logic made less ambiguous
 //        assertThat(op0.getParams()).hasSize(1);
