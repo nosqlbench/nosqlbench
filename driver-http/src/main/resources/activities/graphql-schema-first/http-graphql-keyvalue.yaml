@@ -1,7 +1,6 @@
 # nb -v run driver=http yaml=http-graphql-keyvalue tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
 
 # TODO 
-# - /graphqlv2 will change in future, adapt when needed
 # - do we need a truncate schema / namespace at the end
 
 description: |
@@ -36,34 +35,47 @@ blocks:
   - tags:
       phase: schema
     statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/admin
+      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
             {
-              "query":"mutation {\n  createNamespace(name: \"<<keyspace:gqlsf_keyvalue>>\", replicas: <<rf:1>>) {\n    namespace {\n      name\n    }\n  }\n}\n"
+              "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
             }
         tags:
           name: create-keyspace
-      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/admin
+      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
             {
-              "query":"mutation {\n  deploySchema(namespace: \"<<keyspace:gqlsf_keyvalue>>\", schema: \"\"\"\n      type KeyValue @cql_input {\n        key: String! @cql_column(partitionKey: true)\n        value: String!\n      }\n      type Query {\n        getKeyValue(\n          key: String!,\n        ): KeyValue\n      }\n      type Mutation {\n    \t\tinsertKeyValue(keyValue: KeyValueInput): KeyValue\n    }\n  \"\"\") {\n    version\n  }\n}\n"
+              "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_keyvalue>>\", schema: \"\"\"\n      type KeyValue @cql_input {\n        key: String! @cql_column(partitionKey: true)\n        value: String!\n      }\n      type Query {\n        getKeyValue(\n          key: String!,\n        ): KeyValue\n      }\n      type Mutation {\n    \t\tinsertKeyValue(keyValue: KeyValueInput): KeyValue\n    }\n  \"\"\") {\n    version\n  }\n}\n"
             }
         tags:
           name: create-gql-schema
-
+  - tags:
+      phase: schema-astra
+    statements:
+      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+              "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_keyvalue>>\", schema: \"\"\"\n      type KeyValue @cql_input {\n        key: String! @cql_column(partitionKey: true)\n        value: String!\n      }\n      type Query {\n        getKeyValue(\n          key: String!,\n        ): KeyValue\n      }\n      type Mutation {\n    \t\tinsertKeyValue(keyValue: KeyValueInput): KeyValue\n    }\n  \"\"\") {\n    version\n  }\n}\n"
+            }
+        tags:
+          name: create-gql-schema-astra
   - name: rampup
     tags:
       phase: rampup
     statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_keyvalue>>
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -82,7 +94,7 @@ blocks:
     params:
       ratio: <<read_ratio:1>>
     statements:
-      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_keyvalue>>
+      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -101,7 +113,7 @@ blocks:
     params:
       ratio: <<write_ratio:9>>
     statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphqlv2/namespace/<<keyspace:gqlsf_keyvalue>>
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
