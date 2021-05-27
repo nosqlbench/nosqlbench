@@ -1,3 +1,26 @@
+# Command API
+
+Command templates are the third layer of workload templating. As described in other spec documents,
+the other layers are:
+
+1. [Workload level templates](templated_workloads.md) - This specification covers the basics of a
+   workload template, including the valid properties and structure.
+2. [Operation level templates](templated_operations.md) - This specification covers how operations
+   can be specified, including semantics and structure.
+3. Command level templates, explained below. These are the detailed views of what goes into an op
+   template, parsed and structured in a way that allows for efficient use at runtime.
+
+Users do not create command templates directly. Instead, these are the *parsed* form of op templates
+as seen by the NB driver. The whole point of a command template is to provide crisp semantics and
+structure about what a user is asking a driver to do. Command Template
+
+Command templates are essentially schematics for an operation. They are a structural interpretation
+of the content provided by users in op templates. Each op template provided can be converted into a
+command template. In short, the op template is the form that users tend to edit in yaml or provided
+as a data structure via scripting. **Command templates are the view of an op template as seen by an
+NB driver.**
+
+```
 ### Command Templates
 
 Command templates are part of the workload API.
@@ -48,3 +71,6 @@ in contrast, may need to be realized dynamically for each cycle, given
 that you don't know the value of the fields in the command until you know
 the cycle value.
 
+
+
+```

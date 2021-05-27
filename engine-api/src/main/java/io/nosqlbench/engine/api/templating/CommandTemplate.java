@@ -35,7 +35,8 @@ public class CommandTemplate<T> {
     private final String name;
     private final Map<String, String> statics = new HashMap<>();
     private final Map<String, StringBindings> dynamics = new HashMap<>();
-    private final int mapsize;
+
+    transient private final int mapsize;
 
     /**
      * Create a CommandTemplate directly from an OpTemplate.
@@ -149,7 +150,7 @@ public class CommandTemplate<T> {
 
 
     /**
-     * Applyl the provided binding functions to the command template, yielding a map with concrete values
+     * Apply the provided binding functions to the command template, yielding a map with concrete values
      * to be used by a native command.
      *
      * @param cycle The cycle value which will be used by the binding functions
