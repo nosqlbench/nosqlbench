@@ -74,6 +74,16 @@ public class UniformWorkloadSpecificationTest {
         );
     }
 
+    @Test
+    public void testTemplateVariables() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("template_variables.md")
+                .one().asPath()
+        );
+    }
+
+
     public String summarize(Node node) {
         StringBuilder sb = new StringBuilder();
         while (node != null) {

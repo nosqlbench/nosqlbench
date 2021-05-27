@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -17,7 +18,15 @@ public class RawStmtsLoader {
     List<Function<String, String>> stringTransformers = new ArrayList<>();
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
-    public void addTransformer(Function<String, String> newTransformer) {
+    public RawStmtsLoader(Function<String,String> transformer) {
+        addTransformer(transformer);
+    }
+
+    public RawStmtsLoader() {
+        addTransformer(new StrInterpolator());
+    }
+
+    private void addTransformer(Function<String, String> newTransformer) {
         Collections.addAll(this.transformers, newTransformer);
     }
 

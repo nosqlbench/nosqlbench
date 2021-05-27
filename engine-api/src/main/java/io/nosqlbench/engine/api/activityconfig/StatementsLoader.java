@@ -39,7 +39,6 @@ public class StatementsLoader {
 
     public static StmtsDocList loadString(String yamlContent) {
         RawStmtsLoader loader = new RawStmtsLoader();
-        loader.addTransformer(new StrInterpolator());
         RawStmtsDocList rawDocList = loader.loadString(logger, yamlContent);
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
@@ -50,8 +49,7 @@ public class StatementsLoader {
         Content<?> content,
         Map<String,String> params
     ) {
-        RawStmtsLoader loader = new RawStmtsLoader();
-        loader.addTransformer(new StrInterpolator(params));
+        RawStmtsLoader loader = new RawStmtsLoader(new StrInterpolator(params));
         RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
@@ -74,8 +72,7 @@ public class StatementsLoader {
             String... searchPaths) {
         RawStmtsDocList list = null;
 
-        RawStmtsLoader gloaderImpl = new RawStmtsLoader();
-        gloaderImpl.addTransformer(new StrInterpolator());
+        RawStmtsLoader gloaderImpl = new RawStmtsLoader(new StrInterpolator());
 
         list = gloaderImpl.loadPath(logger, path, searchPaths);
         return new StmtsDocList(list);
@@ -97,8 +94,7 @@ public class StatementsLoader {
             String... searchPaths) {
         RawStmtsDocList list = null;
 
-        RawStmtsLoader gloaderImpl = new RawStmtsLoader();
-        gloaderImpl.addTransformer(transformer);
+        RawStmtsLoader gloaderImpl = new RawStmtsLoader(transformer);
         list = gloaderImpl.loadPath(logger, path, searchPaths);
         return new StmtsDocList(list);
     }
