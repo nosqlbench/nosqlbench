@@ -225,7 +225,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-cqld4</artifactId>
-                    <version>4.0.0-SNAPSHOT</version>
+                    <version>4.15.41-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
