@@ -1,2 +1,19 @@
-- b0dc6ca8 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #319 from yabinmeng/main
-- adfbcacb Maven central pom update
+- e8379cc9 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- e0838ff3 (origin/main) Merge pull request #322 from szimmer1/cockroachdb-driver-postgres-workload
+- 2c5624d2 add premade bindings example
+- 2cba9709 additional premade binding functions
+- 78b23f0e add free and attributed zipcode data
+- 0cd100d4 simplify CSV sampling usage
+- 4f2482ec localize flexmark to API module
+- 2bcf47ca remove summary output until it is fixed
+- 0a3fc4fa remove non-release repo from pom
+- 581fbf74 fix broken version link
+- d2fc94b8 avoid NPE in ElemProbD
+- e4cf4c49 Adds postgres-basic workload and scenarios as the cockroachdb driver is compatible with postgres
+- ba5d6025 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 5497e20f Merge pull request #321 from dougwettlaufer/update-gql-schema-first
+- eaddc4f0 Update schema-first workloads to reflect latest api
+- 3607b804 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- afdfc715 Merge pull request #320 from EricBorczuk/add-jsonapi-workload
+- 91578c52 Add JSON API keyvalue workload
+- 2efc5469 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
