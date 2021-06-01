@@ -1,0 +1,61 @@
+description: |
+  examples of premade bindings
+  These are bindings which are build on other bindings, but which
+  provide simple and powerful sampling functions based on real-world data.
+
+scenarios:
+  default: run driver===stdout format=readout
+  names: run driver===stdout format=readout bindings=names
+  cities: run driver===stdout format=readout bindings=cities
+  states: run driver===stdout format=readout bindings=states
+  zips: run driver===stdout format=readout bindings=zips
+  counties: run driver===stdout format=readout bindings=counties
+  countries: run driver===stdout format=readout bindings=country
+
+
+# Each binding is named, so the bindings is a map of names to
+# bindings recipes. Bindings that are defined at the document
+# root level are made available to all statements.
+
+# In these example files, statements are not defined, since
+# we use the stdout driver, which can create a convenient output
+# format for us based on the binding names.
+
+bindings:
+
+  cycle: Identity();
+
+  # Names, taken from the last US census data which tabulated
+  # any names which occurred more than 100 times.
+  names_first: FirstNames();
+  names_full: FullNames();
+  names_last: LastNames();
+
+  # Cities, provided by simplemaps at https://simplemaps.com/data/us-zips
+  cities: Cities()
+  cities_pop: CitiesByPopulation();
+
+  # States, provided by simplemaps at https://simplemaps.com/data/us-zips
+  states_names: StateNames()
+  states_names_pop: StateNamesByPopulation();
+  states_codes: StateCodes();
+  states_codes_pop: StateCodesByPopulation();
+
+  # ZipCodes, provided by simplemaps at https://simplemaps.com/data/us-zips
+  zips: ZipCodes();
+  zips_pop: ZipCodesByPopulation();
+
+  # County Names
+  counties: Counties();
+  counties_pop: CountiesByPopulation();
+
+  # Country Names and Codes
+  country_codes: CountryCodes();
+  country_names: CountryNames();
+
+  # TimeZones
+  timezones: TimeZones();
+  timezones_pop: TimeZonesByPopulation();
+
+
+
