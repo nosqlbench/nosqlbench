@@ -20,20 +20,20 @@
                as the potential JMS Destination
     </description>
 
-    <repositories>
-        <!-- Tempoarily needed for Pulsar JMS Java library -->
-        <repository>
-            <id>datastax-releases-local</id>
-            <name>DataStax Local Releases</name>
-            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
+<!--        <repository>-->
+<!--            <id>datastax-releases-local</id>-->
+<!--            <name>DataStax Local Releases</name>-->
+<!--            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>-->
+<!--            <releases>-->
+<!--                <enabled>false</enabled>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
     <dependencies>
         <!-- core dependencies -->
