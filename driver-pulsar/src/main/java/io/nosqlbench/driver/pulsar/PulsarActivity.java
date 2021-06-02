@@ -97,9 +97,6 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
             pulsarAdmin = adminBuilder.build();
 
-            ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
-            logger.debug(configurationData.toString());
-
         } catch (PulsarClientException e) {
             logger.error("Fail to create PulsarAdmin from global configuration!");
             throw new RuntimeException("Fail to create PulsarAdmin from global configuration!");

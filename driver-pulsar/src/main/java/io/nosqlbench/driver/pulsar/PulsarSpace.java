@@ -221,7 +221,7 @@ public class PulsarSpace {
                     .newTransaction()
                     .build()
                     .get();
-            } catch (ExecutionException | InterruptedException err) {
+            } catch (ExecutionException | InterruptedException | PulsarClientException err) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Error while starting a new transaction", err);
                 }
