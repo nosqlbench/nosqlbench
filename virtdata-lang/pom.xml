@@ -7,8 +7,8 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.47-SNAPSHOT</version>
-        <relativePath>../mvn-defaults/pom.xml</relativePath>
+        <version>4.15.48-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
     </parent>
 
     <name>virtdata-lang</name>

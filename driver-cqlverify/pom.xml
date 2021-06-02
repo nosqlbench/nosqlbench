@@ -4,8 +4,8 @@
   <parent>
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.15.47-SNAPSHOT</version>
-    <relativePath>../mvn-defaults/pom.xml</relativePath>
+    <version>4.15.48-SNAPSHOT</version>
+    <relativePath>../mvn-defaults</relativePath>
   </parent>
 
   <artifactId>driver-cqlverify</artifactId>
@@ -24,13 +24,13 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>driver-cql-shaded</artifactId>
-        <version>4.15.47-SNAPSHOT</version>
+        <version>4.15.48-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>drivers-api</artifactId>
-        <version>4.15.47-SNAPSHOT</version>
+        <version>4.15.48-SNAPSHOT</version>
     </dependency>
 
   </dependencies>

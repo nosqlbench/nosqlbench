@@ -414,7 +414,7 @@ public class Scenario implements Callable<ScenarioResult> {
             }
         }
         fullChannels.forEach(result::reportTo);
-        briefChannels.forEach(result::reportCountsTo);
+//        briefChannels.forEach(result::reportCountsTo);
     }
 
     @Override

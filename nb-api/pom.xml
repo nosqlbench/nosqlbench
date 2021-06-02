@@ -5,8 +5,8 @@
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
-    <version>4.15.47-SNAPSHOT</version>
-    <relativePath>../mvn-defaults/pom.xml</relativePath>
+    <version>4.15.48-SNAPSHOT</version>
+    <relativePath>../mvn-defaults</relativePath>
   </parent>
 
   <artifactId>nb-api</artifactId>
@@ -31,18 +31,20 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>nb-annotations</artifactId>
-        <version>4.15.47-SNAPSHOT</version>
+        <version>4.15.48-SNAPSHOT</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.vladsch.flexmark</groupId>
-      <artifactId>flexmark-ext-yaml-front-matter</artifactId>
-    </dependency>
+      <dependency>
+          <groupId>com.vladsch.flexmark</groupId>
+          <artifactId>flexmark-ext-yaml-front-matter</artifactId>
+          <version>0.61.6</version>
+      </dependency>
+      <dependency>
+          <groupId>com.vladsch.flexmark</groupId>
+          <artifactId>flexmark-html2md-converter</artifactId>
+          <version>0.61.6</version>
+      </dependency>
 
-    <dependency>
-      <groupId>com.vladsch.flexmark</groupId>
-      <artifactId>flexmark-html2md-converter</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>net.sf.jopt-simple</groupId>

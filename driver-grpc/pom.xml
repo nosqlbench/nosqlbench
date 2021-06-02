@@ -4,7 +4,7 @@
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
-    <version>4.15.47-SNAPSHOT</version>
+    <version>4.15.48-SNAPSHOT</version>
     <relativePath>../mvn-defaults/pom.xml</relativePath>
   </parent>
 
@@ -21,13 +21,13 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>engine-api</artifactId>
-      <version>4.15.47-SNAPSHOT</version>
+      <version>4.15.48-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>drivers-api</artifactId>
-      <version>4.15.47-SNAPSHOT</version>
+      <version>4.15.48-SNAPSHOT</version>
     </dependency>
 
       <dependency>

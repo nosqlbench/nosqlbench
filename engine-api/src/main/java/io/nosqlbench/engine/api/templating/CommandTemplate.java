@@ -28,7 +28,7 @@ import java.util.function.Function;
  * may be provided when needed for specialized forms of syntax or variations which should also
  * be supported. See the constructor docs for details on these variations.
  */
-public class CommandTemplate<T> {
+public class CommandTemplate {
 
     private final static Logger logger = LogManager.getLogger(CommandTemplate.class);
 

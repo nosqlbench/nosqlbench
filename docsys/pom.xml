@@ -9,8 +9,8 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.47-SNAPSHOT</version>
-        <relativePath>../mvn-defaults/pom.xml</relativePath>
+        <version>4.15.48-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
     </parent>
 
     <dependencies>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
-            <version>4.15.47-SNAPSHOT</version>
+            <version>4.15.48-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>4.15.47-SNAPSHOT</version>
+            <version>4.15.48-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
