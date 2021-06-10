@@ -1,11 +1,9 @@
 package io.nosqlbench.driver.jms.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Base64;
 
 public class JmsUtil {
 
@@ -101,19 +99,6 @@ public class JmsUtil {
     }
     public static boolean isValidJmsDestinationType(String type) {
         return Arrays.stream(JMS_DESTINATION_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-
-    public static String encode(String... strings) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String str : strings) {
-            if (!StringUtils.isBlank(str))
-                stringBuilder.append(str).append("::");
-        }
-
-        String concatenatedStr =
-            StringUtils.substringBeforeLast(stringBuilder.toString(), "::");
-
-        return Base64.getEncoder().encodeToString(concatenatedStr.getBytes());
     }
 }
 

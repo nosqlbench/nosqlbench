@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -402,19 +401,6 @@ public class PulsarActivityUtil {
         }
 
         return schema;
-    }
-
-    public static String encode(String... strings) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String str : strings) {
-            if (!StringUtils.isBlank(str))
-                stringBuilder.append(str).append("::");
-        }
-
-        String concatenatedStr =
-            StringUtils.substringBeforeLast(stringBuilder.toString(), "::");
-
-        return Base64.getEncoder().encodeToString(concatenatedStr.getBytes());
     }
 }
 
