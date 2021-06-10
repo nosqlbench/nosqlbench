@@ -21,16 +21,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOError;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -79,8 +86,8 @@ public class CQLSessionCache implements Shutdownable {
 
         Optional<String> scb = activityDef.getParams()
             .getOptionalString("secureconnectbundle");
-        scb.map(File::new)
-            .ifPresent(builder::withCloudSecureConnectBundle);
+
+        scb.map(this::maybeConvertUrlToFile).ifPresent(builder::withCloudSecureConnectBundle);
 
         activityDef.getParams()
             .getOptionalString("insights").map(Boolean::parseBoolean)
@@ -339,5 +346,36 @@ public class CQLSessionCache implements Shutdownable {
             session.close();
             cluster.close();
         }
+    }
+
+    File maybeConvertUrlToFile(String b) {
+        try {
+            URL url = new URL(b);
+            if (url.getProtocol().startsWith("http")) {
+                File tmp = Paths.get(System.getProperty("java.io.tmpdir"), "scb-" + DigestUtils.sha1Hex(b) + ".zip").toFile();
+                if (tmp.exists())
+                    return tmp;
+
+                try (BufferedInputStream inputStream = new BufferedInputStream(url.openStream());
+                     FileOutputStream fileOS = new FileOutputStream(tmp)) {
+                    byte data[] = new byte[1024];
+                    int byteContent;
+                    while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
+                        fileOS.write(data, 0, byteContent);
+                    }
+                }
+                catch (IOException ex) {
+                    tmp.delete();
+                    throw new IOError(ex);
+                }
+                logger.info("Downloaded {} to {}", b, tmp.getAbsoluteFile());
+                return tmp;
+            }
+        }
+        catch (MalformedURLException e) {
+            //Not a url
+        }
+
+        return new File(b);
     }
 }
