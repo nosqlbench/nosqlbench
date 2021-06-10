@@ -1,19 +1,13 @@
-- e8379cc9 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- e0838ff3 (origin/main) Merge pull request #322 from szimmer1/cockroachdb-driver-postgres-workload
-- 2c5624d2 add premade bindings example
-- 2cba9709 additional premade binding functions
-- 78b23f0e add free and attributed zipcode data
-- 0cd100d4 simplify CSV sampling usage
-- 4f2482ec localize flexmark to API module
-- 2bcf47ca remove summary output until it is fixed
-- 0a3fc4fa remove non-release repo from pom
-- 581fbf74 fix broken version link
-- d2fc94b8 avoid NPE in ElemProbD
-- e4cf4c49 Adds postgres-basic workload and scenarios as the cockroachdb driver is compatible with postgres
-- ba5d6025 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 5497e20f Merge pull request #321 from dougwettlaufer/update-gql-schema-first
-- eaddc4f0 Update schema-first workloads to reflect latest api
-- 3607b804 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- afdfc715 Merge pull request #320 from EricBorczuk/add-jsonapi-workload
-- 91578c52 Add JSON API keyvalue workload
-- 2efc5469 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 6c0373e0 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #331 from tjake/scb-download
+- 27d55aef Merge pull request #330 from nosqlbench/dependabot/maven/docsys/org.eclipse.jetty-jetty-servlets-11.0.3
+- 38204917 Merge pull request #329 from XN137/simplify-pulsar-jms-cache-keys
+- ddc6a649 Merge pull request #328 from XN137/driver-jms-avoid-decoding-msgbody-twice
+- 814f5630 Allow scb to be downloaded directly via it's url
+- b3956c86 Bump jetty-servlets from 11.0.1 to 11.0.3 in /docsys
+- 94f93fe4 simplify cache key creation in pulsar + jms driver
+- 2d84c4d0 avoid decoding msgBody twice in JmsMsgSendOp
+- 18e9bb91 Merge pull request #326 from nosqlbench/dependabot/maven/mvn-defaults/org.yaml-snakeyaml-1.26
+- 0120964c Merge pull request #325 from nosqlbench/dependabot/maven/driver-web/org.apache.httpcomponents-httpclient-4.5.13
+- 20926b8d Bump snakeyaml from 1.23 to 1.26 in /mvn-defaults
+- 9b4d57b1 Bump httpclient from 4.5.12 to 4.5.13 in /driver-web
+- d2fe5661 Merge pull request #323 from nosqlbench/dependabot/maven/docsys/org.glassfish.jersey.core-jersey-common-3.0.2
