@@ -108,11 +108,10 @@ public class JmsMsgSendOp extends JmsTimeTrackOp {
 
     @Override
     public void run() {
-        int messageSize;
         try {
             byte[] msgBytes = msgBody.getBytes(StandardCharsets.UTF_8);
-            messageSize = msgBytes.length;
-            jmsProducer.send(jmsDestination, msgBody.getBytes(StandardCharsets.UTF_8));
+            int messageSize = msgBytes.length;
+            jmsProducer.send(jmsDestination, msgBytes);
 
             messagesizeHistogram.update(messageSize);
             bytesCounter.inc(messageSize);
