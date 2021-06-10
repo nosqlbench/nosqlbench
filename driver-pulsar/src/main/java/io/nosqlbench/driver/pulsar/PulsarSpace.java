@@ -233,6 +233,9 @@ public class PulsarSpace {
         };
     }
 
+    private static String buildCacheKey(String... keyParts) {
+        return String.join("::", keyParts);
+    }
 
     public Producer<?> getProducer(String cycleTopicName, String cycleProducerName) {
         String topicName = getEffectiveProducerTopicName(cycleTopicName);
@@ -242,8 +245,8 @@ public class PulsarSpace {
             throw new RuntimeException("Producer:: must specify a topic name either at the global level or the cycle level");
         }
 
-        String encodedStr = PulsarActivityUtil.encode(producerName, topicName);
-        Producer<?> producer = producers.get(encodedStr);
+        String producerCacheKey = buildCacheKey(producerName, topicName);
+        Producer<?> producer = producers.get(producerCacheKey);
 
         if (producer == null) {
             PulsarClient pulsarClient = getPulsarClient();
@@ -273,7 +276,7 @@ public class PulsarSpace {
                 ProducerBuilder producerBuilder = pulsarClient.newProducer(pulsarSchema);
                 producerBuilder.loadConf(producerConf);
                 producer = producerBuilder.create();
-                producers.put(encodedStr, producer);
+                producers.put(producerCacheKey, producer);
 
                 ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalbytessent", safeExtractMetric(producer, (s -> s.getTotalBytesSent() + s.getNumBytesSent())));
                 ActivityMetrics.gauge(activityDef, producerMetricsPrefix + "totalmsgssent", safeExtractMetric(producer, (s -> s.getTotalMsgsSent() + s.getNumMsgsSent())));
@@ -449,29 +452,29 @@ public class PulsarSpace {
             throw new RuntimeException("Consumer:: \"topic_uri\", \"topic_names\" and \"topics_pattern\" parameters can't be all empty/invalid!");
         }
 
-        String encodedStr;
+        String consumerCacheKey;
         // precedence sequence:
         //    topic_names (consumer statement param) >
         //      topics_pattern (consumer statement param) >
         //        topic_uri (document level param)
         if (!topicNames.isEmpty()) {
-            encodedStr = PulsarActivityUtil.encode(
+            consumerCacheKey = buildCacheKey(
                 consumerName,
                 subscriptionName,
-                StringUtils.join(topicNames, "|"));
+                String.join("|", topicNames));
         } else if (topicsPattern != null) {
-            encodedStr = PulsarActivityUtil.encode(
+            consumerCacheKey = buildCacheKey(
                 consumerName,
                 subscriptionName,
                 topicsPatternStr);
         } else {
-            encodedStr = PulsarActivityUtil.encode(
+            consumerCacheKey = buildCacheKey(
                 consumerName,
                 subscriptionName,
                 cycleTopicUri);
         }
 
-        Consumer<?> consumer = consumers.get(encodedStr);
+        Consumer<?> consumer = consumers.get(consumerCacheKey);
 
         if (consumer == null) {
             PulsarClient pulsarClient = getPulsarClient();
@@ -508,7 +511,7 @@ public class PulsarSpace {
                 throw new RuntimeException("Unable to create a Pulsar consumer!");
             }
 
-            consumers.put(encodedStr, consumer);
+            consumers.put(consumerCacheKey, consumer);
         }
 
         return consumer;
@@ -576,8 +579,8 @@ public class PulsarSpace {
             throw new RuntimeException("Reader:: Invalid value for Reader start message position!");
         }
 
-        String encodedStr = PulsarActivityUtil.encode(topicName, readerName, startMsgPosStr);
-        Reader<?> reader = readers.get(encodedStr);
+        String readerCacheKey = buildCacheKey(topicName, readerName, startMsgPosStr);
+        Reader<?> reader = readers.get(readerCacheKey);
 
         if (reader == null) {
             PulsarClient pulsarClient = getPulsarClient();
@@ -614,7 +617,7 @@ public class PulsarSpace {
                 throw new RuntimeException("Unable to create a Pulsar reader!");
             }
 
-            readers.put(encodedStr, reader);
+            readers.put(readerCacheKey, reader);
         }
 
         return reader;

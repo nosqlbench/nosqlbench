@@ -116,13 +116,16 @@ public class JmsActivity extends SimpleActivity {
         );
     }
 
+    private static String buildCacheKey(String... keyParts) {
+        return String.join("::", keyParts);
+    }
+
     /**
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
      */
     public Destination getOrCreateJmsDestination(String jmsDestinationType, String destName) {
-        String encodedTopicStr =
-            JmsUtil.encode(jmsDestinationType, destName);
-        Destination destination = jmsDestinations.get(encodedTopicStr);
+        String destinationCacheKey = buildCacheKey(jmsDestinationType, destName);
+        Destination destination = jmsDestinations.get(destinationCacheKey);
 
         if ( destination == null ) {
             // TODO: should we match Persistent/Non-peristent JMS Delivery mode with
@@ -133,7 +136,7 @@ public class JmsActivity extends SimpleActivity {
                 destination = jmsContext.createTopic(destName);
             }
 
-            jmsDestinations.put(encodedTopicStr, destination);
+            jmsDestinations.put(destinationCacheKey, destination);
         }
 
         return destination;
