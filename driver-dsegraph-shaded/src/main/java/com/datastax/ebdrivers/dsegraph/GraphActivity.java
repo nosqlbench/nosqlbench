@@ -46,7 +46,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
     public Timer resultTimer;
     public Timer logicalGraphOps;
     public Histogram triesHisto;
-    protected List<OpTemplate> stmts;
+    protected List<OpTemplate<?>> stmts;
     private int stride;
     private DseSession session;
     private DseCluster cluster;
@@ -100,7 +100,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             throw new RuntimeException("There were no unfiltered statements found for this activity.");
         }
 
-        for (OpTemplate stmtDef : stmts) {
+        for (OpTemplate<?> stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
 
@@ -209,7 +209,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
         try {
             cluster = builder.build();
         } catch (Exception e) {
-            logger.error("Error while instantiating cluster from builder: " + e.toString(), e);
+            logger.error("Error while instantiating cluster from builder: " + e, e);
             throw e;
         }
         activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
@@ -236,7 +236,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             logger.info("cluster-metadata-allhosts:\n" + session.getCluster().getMetadata().getAllHosts());
             return session;
         } catch (Exception e) {
-            logger.error("Error while creating a session for dsegraph: " + e.toString(), e);
+            logger.error("Error while creating a session for dsegraph: " + e, e);
             throw e;
         }
 

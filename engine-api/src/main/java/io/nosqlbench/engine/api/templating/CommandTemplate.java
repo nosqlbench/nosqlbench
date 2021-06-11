@@ -48,7 +48,7 @@ public class CommandTemplate {
      *
      * @param optpl An OpTemplate
      */
-    public CommandTemplate(OpTemplate optpl) {
+    public CommandTemplate(OpTemplate<?> optpl) {
         this(optpl.getName(), optpl.getOp().toString(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), List.of());
     }
 
@@ -66,7 +66,7 @@ public class CommandTemplate {
      * @param optpl   An OpTemplate
      * @param parsers A list of parser functions
      */
-    public CommandTemplate(OpTemplate optpl, List<Function<String, Map<String, String>>> parsers) {
+    public CommandTemplate(OpTemplate<?> optpl, List<Function<String, Map<String, String>>> parsers) {
         this(optpl.getName(), optpl.getOp(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
     }
 
@@ -92,7 +92,13 @@ public class CommandTemplate {
      * @param bindings        A set of named bindings in name:recipe form.
      * @param optionalParsers A set of functions which, if provided, will be used to read the oneline form.
      */
-    public CommandTemplate(String name, Object op, Map<String, String> params, Map<String, String> bindings, List<Function<String, Map<String, String>>> optionalParsers) {
+    public CommandTemplate(
+        String name,
+        Object op,
+        Map<String, String> params,
+        Map<String, String> bindings,
+        List<Function<String, Map<String, String>>> optionalParsers
+    ) {
 
         this.name = name;
         Map<String, String> cmd = new HashMap<>();
@@ -103,7 +109,7 @@ public class CommandTemplate {
 
         String oneline;
         if (op instanceof CharSequence) {
-            oneline=op.toString();
+            oneline = op.toString();
         } else {
             throw new BasicError("Unable to create a oneline version of the CommandTemplate with op type of " + op.getClass().getSimpleName());
         }
@@ -137,8 +143,8 @@ public class CommandTemplate {
 
         cmd.forEach((param, value) -> {
             ParsedTemplate paramTemplate = new ParsedTemplate(value, bindings);
-            if (paramTemplate.getBindPoints().size() > 0) {
-                BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
+            if (paramTemplate.getCheckedBindPoints().size() > 0) {
+                BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getCheckedBindPoints());
                 StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
                 dynamics.put(param, paramStringBindings);
             } else {

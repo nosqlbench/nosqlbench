@@ -73,12 +73,12 @@ public class KafkaProducerActivity extends SimpleActivity {
         String tagFilter = activityDef.getParams().getOptionalString("tags").orElse("");
         StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, new StrInterpolator(activityDef),
             "activities");
-        List<OpTemplate> statements = stmtsDocList.getStmts(tagFilter);
+        List<OpTemplate<?>> statements = stmtsDocList.getStmts(tagFilter);
 
         String format = getParams().getOptionalString("format").orElse(null);
 
         if (statements.size() > 0) {
-            for (OpTemplate statement : statements) {
+            for (OpTemplate<?> statement : statements) {
                 sequencer.addOp(
                     new KafkaStatement(statement,
                                        servers,

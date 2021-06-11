@@ -121,19 +121,19 @@ import java.util.function.Function;
  *     p2: v2
  * }</pre>
  */
-public interface OpTemplate extends Tagged {
+public interface OpTemplate<T> extends Tagged {
 
     String getName();
 
-    Object getOp();
+    T getOp();
 
     Map<String, String> getBindings();
 
     Map<String, Object> getParams();
 
-    <T> Map<String, T> getParamsAsValueType(Class<? extends T> type);
+    <V> Map<String, V> getParamsAsValueType(Class<? extends V> type);
 
-    <V> V removeParamOrDefault(String name, V defaultValue);
+    <VT> VT removeParamOrDefault(String name, VT defaultValue);
 
     @SuppressWarnings("unchecked")
     <V> V getParamOrDefault(String name, V defaultValue);

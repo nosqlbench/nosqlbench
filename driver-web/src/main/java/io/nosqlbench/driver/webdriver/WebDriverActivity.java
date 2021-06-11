@@ -127,7 +127,7 @@ public class WebDriverActivity extends SimpleActivity {
                     cmdBuilder.append(" value='").append(command.getValue().replaceAll("'","\\\\'")).append("'");
                 }
                 cmdBuilder.append("\n");
-                logger.debug("build cmd: '" + testBuilder.toString() + "'");
+                logger.debug("build cmd: '" + testBuilder + "'");
                 String cmdName = sideName+"_"+String.format("%s_%03d", sideName, ++idx);
                 commands.put(cmdName,cmdBuilder.toString());
             }
@@ -180,13 +180,13 @@ public class WebDriverActivity extends SimpleActivity {
         SequencePlanner<CommandTemplate> planner = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate<?>> stmts = stmtsDocList.getStmts(tagfilter);
 
         if (stmts.size() == 0) {
             throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
         }
 
-        for (OpTemplate optemplate : stmts) {
+        for (OpTemplate<?> optemplate : stmts) {
             long ratio = optemplate.getParamOrDefault("ratio", 1);
             CommandTemplate cmd = new CommandTemplate(optemplate);
             planner.addOp(cmd, ratio);

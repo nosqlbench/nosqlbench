@@ -2,7 +2,7 @@ package io.nosqlbench.activitytype.cql.core;
 
 import com.datastax.driver.core.*;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -129,13 +129,10 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(OpDef opDef, ParsedStmt parsed) {
-        List<String> spans = new ArrayList<>();
-
+    public static Map<String, String> parseAndGetSpecificBindings(OpTemplate<?> opDef, ParsedStmt parsed) {
         String statement = opDef.getStmt();
 
-        Set<String> extraBindings = new HashSet<>();
-        extraBindings.addAll(opDef.getBindings().keySet());
+        Set<String> extraBindings = new HashSet<>(opDef.getBindings().keySet());
         Map<String, String> specificBindings = new LinkedHashMap<>();
 
         Matcher m = stmtToken.matcher(statement);
@@ -148,7 +145,6 @@ public class CQLBindHelper {
             String form2 = m.group(2);
             String tokenName = (form1 != null && !form1.isEmpty()) ? form1 : form2;
             lastMatch = m.end();
-            spans.add(pre);
 
             if (extraBindings.contains(tokenName)) {
                 if (specificBindings.get(tokenName) != null){

@@ -70,7 +70,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private final ActivityDef activityDef;
     private final Map<String, Writer> namedWriters = new HashMap<>();
-    protected List<OpTemplate> stmts;
+    protected List<OpTemplate<?>> stmts;
     Timer retryDelayTimer;
     Timer pagesTimer;
     Histogram skippedTokensHisto;
@@ -180,7 +180,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         Set<String> timerStarts = new HashSet<>();
         Set<String> timerStops = new HashSet<>();
 
-        for (OpTemplate stmtDef : stmts) {
+        for (OpTemplate<?> stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
@@ -282,7 +282,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 .map(s -> s.split("[,: ]"))
                 .map(Save::new)
                 .ifPresent(save_op -> {
-                    psummary.append(" save=>").append(save_op.toString());
+                    psummary.append(" save=>").append(save_op);
                     template.addRowCycleOperators(save_op);
                 });
 
@@ -291,7 +291,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 .stream().flatMap(Arrays::stream)
                 .map(ResultSetCycleOperators::newOperator)
                 .forEach(rso -> {
-                    psummary.append(" rsop=>").append(rso.toString());
+                    psummary.append(" rsop=>").append(rso);
                     template.addResultSetOperators(rso);
                 });
 
@@ -300,7 +300,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 .stream().flatMap(Arrays::stream)
                 .map(RowCycleOperators::newOperator)
                 .forEach(ro -> {
-                    psummary.append(" rowop=>").append(ro.toString());
+                    psummary.append(" rowop=>").append(ro);
                     template.addRowCycleOperators(ro);
                 });
 
@@ -326,7 +326,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 VerificationMetrics vmetrics = getVerificationMetrics();
 
                 RowDifferencer.ThreadLocalWrapper differencer = new RowDifferencer.ThreadLocalWrapper(vmetrics, expected, diffType);
-                psummary.append(" rowop=>verify-fields:").append(differencer.toString());
+                psummary.append(" rowop=>verify-fields:").append(differencer);
 
                 template.addResultSetOperators(new AssertSingleRowResultSet());
                 template.addRowCycleOperators(differencer);
@@ -348,7 +348,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().getBindPoints());
 
             if (psummary.length() > 0) {
-                logger.info("statement named '" + stmtDef.getName() + "' has custom settings:" + psummary.toString());
+                logger.info("statement named '" + stmtDef.getName() + "' has custom settings:" + psummary);
             }
 
             planner.addOp(template.resolve(), ratio);

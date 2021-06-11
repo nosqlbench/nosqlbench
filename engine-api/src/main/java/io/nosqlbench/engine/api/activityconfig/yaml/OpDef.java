@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class OpDef implements OpTemplate {
+public class OpDef<T> implements OpTemplate<T> {
 
     private static final String FIELD_DESC = "description";
     private static final String FIELD_NAME = "name";
@@ -58,8 +58,8 @@ public class OpDef implements OpTemplate {
     }
 
     @Override
-    public Object getOp() {
-        return rawStmtDef.getOp();
+    public T getOp() {
+        return (T) rawStmtDef.getOp();
     }
 
     @Override

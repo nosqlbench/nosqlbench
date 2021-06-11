@@ -81,7 +81,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public void shutdownActivity() {
         try {
             if (pw != null) {
-                if (!fileName.toLowerCase().equals("stdout")) {
+                if (!fileName.equalsIgnoreCase("stdout")) {
                     logger.trace("Closing non-stdout output stream.");
                     pw.close();
                 }
@@ -112,7 +112,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     protected Writer createPrintWriter() {
         PrintWriter pw;
-        if (fileName.toLowerCase().equals("stdout")) {
+        if (fileName.equalsIgnoreCase("stdout")) {
             pw = getConsoleOut();
         } else {
             try {
@@ -134,7 +134,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate<?>> stmts = stmtsDocList.getStmts(tagfilter);
 
         String format = getParams().getOptionalString("format").orElse(null);
 
@@ -155,7 +155,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 String bindings = getActivityDef().getParams().getOptionalString("bindings").orElse("doc");
                 activeBindingNames.addAll(stmtsDocList.getDocBindings().keySet());
 
-                Pattern bindingsFilter = Pattern.compile(bindings.toLowerCase().equals("doc") ? ".*" : bindings);
+                Pattern bindingsFilter = Pattern.compile(bindings.equalsIgnoreCase("doc") ? ".*" : bindings);
                 Set<String> filteredBindingNames = new LinkedHashSet<>();
                 activeBindingNames
                         .stream()
@@ -179,7 +179,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 sequencer.addOp(sb, 1L);
             }
         } else if (stmts.size() > 0) {
-            for (OpTemplate stmt : stmts) {
+            for (OpTemplate<?> stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
                 BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
                 String statement = parsed.getPositionalStatement(Function.identity());

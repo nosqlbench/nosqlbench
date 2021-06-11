@@ -20,10 +20,7 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
@@ -47,7 +44,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
             .collect(Collectors.toList());
     }
 
-    public List<OpTemplate> getStmts() {
+    public List<OpTemplate<?>> getStmts() {
         return getStmts("");
     }
 
@@ -56,14 +53,17 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * @return The list of all included statements for all included blocks of  in this document,
      * including the inherited and overridden values from the this doc and the parent block.
      */
-    public List<OpTemplate> getStmts(String tagFilterSpec) {
+    public List<OpTemplate<?>> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
+        List<OpTemplate<?>> opTemplates = new ArrayList<>();
 
-        List<OpTemplate> stmts = getStmtDocs().stream()
+
+        getStmtDocs().stream()
             .flatMap(d -> d.getStmts().stream())
             .filter(ts::matchesTagged)
-            .collect(Collectors.toList());
-        return stmts;
+            .forEach(opTemplates::add);
+
+        return opTemplates;
     }
 
 

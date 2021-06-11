@@ -14,9 +14,9 @@ public class ReadyMongoStatement {
     private final StringBindings bindings;
     private final ReadPreference readPreference;
 
-    public ReadyMongoStatement(OpTemplate stmtDef) {
+    public ReadyMongoStatement(OpTemplate<?> stmtDef) {
         ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
-        BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
+        BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getCheckedBindPoints());
         StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
 
         this.bindings = template.resolve();
