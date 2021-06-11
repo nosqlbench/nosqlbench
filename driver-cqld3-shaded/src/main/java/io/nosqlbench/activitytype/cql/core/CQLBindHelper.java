@@ -78,14 +78,11 @@ public class CQLBindHelper {
 
     public static BoundStatement bindStatement(Statement statement, String name, Object value, DataType.Name typeName) {
         switch (typeName) {
+            case TEXT: //  TEXT(10, String.class)
             case ASCII: // ASCII(1, String.class)
                 return ((BoundStatement) statement).bind().setString(name, (String) value);
             case VARCHAR: // VARCHAR(13, String.class)
-                return ((BoundStatement) statement).bind().setString(name, (String) value);
-            case TEXT: //  TEXT(10, String.class)
-                return ((BoundStatement) statement).bind().setString(name, (String) value);
             case BIGINT: // BIGINT(2, Long.class)
-                return ((BoundStatement) statement).bind().setLong(name, (long) value);
             case COUNTER: // COUNTER(5, Long.class)
                 return ((BoundStatement) statement).bind().setLong(name, (long) value);
             case BLOB: // BLOB(3, ByteBuffer.class)
@@ -102,23 +99,19 @@ public class CQLBindHelper {
                 return ((BoundStatement) statement).bind().setFloat(name, (float) value);
             case INET: // INET(16, InetAddress.class)
                 return ((BoundStatement) statement).bind().setInet(name, (InetAddress) value);
-            case INT: // INT(9, Integer.class)
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
             case TIMESTAMP: // TIMESTAMP(11, Date.class)
                 return ((BoundStatement) statement).bind().setTimestamp(name, (Date) value);
             case UUID: // UUID(12, UUID.class)
-                return ((BoundStatement) statement).bind().setUUID(name, (UUID) value);
             case TIMEUUID: // TIMEUUID(15, UUID.class)
                 return ((BoundStatement) statement).bind().setUUID(name, (UUID) value);
-            case VARINT: // VARINT(14, BigInteger.class)
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
             case UDT: // UDT(48, UDTValue.class)
                  return ((BoundStatement) statement).bind().setUDTValue(name, (UDTValue) value);
             case TUPLE: // TUPLE(49, TupleValue.class
                 return ((BoundStatement) statement).bind().setTupleValue(name, (TupleValue) value);
+            case VARINT: // VARINT(14, BigInteger.class)
             case SMALLINT:
-                return ((BoundStatement) statement).bind().setInt(name, (int) value);
             case TINYINT:
+            case INT: // INT(9, Integer.class)
                 return ((BoundStatement) statement).bind().setInt(name, (int) value);
             case DATE:
                 return ((BoundStatement) statement).bind().setDate(name, (LocalDate) value);
@@ -129,7 +122,7 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(OpDef opDef, ParsedStmt parsed) {
+    public static Map<String, String> parseAndGetSpecificBindings(OpDef<?> opDef, ParsedStmt parsed) {
         List<String> spans = new ArrayList<>();
 
         String statement = opDef.getStmt();
