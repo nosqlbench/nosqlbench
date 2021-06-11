@@ -4,7 +4,7 @@ import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
 *   Copyright 2016 jshook

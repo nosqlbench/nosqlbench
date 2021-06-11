@@ -3,7 +3,7 @@ package io.nosqlbench.virtdata.core.composers;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.FunctionType;
 import io.nosqlbench.virtdata.core.bindings.DataMapperFunctionMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

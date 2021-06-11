@@ -6,22 +6,23 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class NBErrorHandlerTest {
 
     private final RuntimeException runtimeException = new RuntimeException("test exception");
 
-
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testNullConfig() {
         ErrorMetrics errorMetrics = new ErrorMetrics(ActivityDef.parseActivityDef("alias=testalias_stop"));
         NBErrorHandler errhandler = new NBErrorHandler(() -> "stop", () -> errorMetrics);
-        ErrorDetail detail = errhandler.handleError(runtimeException, 1, 2);
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> errhandler.handleError(runtimeException, 1, 2));
     }
 
     @Test
@@ -90,6 +91,4 @@ public class NBErrorHandlerTest {
         assertThat(detail.isRetryable()).isFalse();
         assertThat(detail.resultCode).isEqualTo(42);
     }
-
-
 }

@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

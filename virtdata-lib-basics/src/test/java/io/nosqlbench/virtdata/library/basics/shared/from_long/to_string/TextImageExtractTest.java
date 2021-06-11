@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TextImageExtractTest {
 

@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -26,19 +26,22 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class HashedErrorHandlerTest {
 
     HashedErrorHandler<Throwable, Boolean> handler;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         handler = new HashedErrorHandler<Throwable,Boolean>();
     }
 
-    @Test(expected= RuntimeException.class)
+    @Test
     public void testDefaultHandlerThrowsException() {
-        handler.handleError(1L, new InvalidParameterException("this is an invalid exception, actually"));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
+            handler.handleError(1L, new InvalidParameterException("this is an invalid exception, actually"));
+        });
     }
 
     @Test
@@ -91,7 +94,7 @@ public class HashedErrorHandlerTest {
         assertThat(result).isFalse();
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testNamedGroup() {
         handler.setGroup("test1",IndexOutOfBoundsException.class,ArrayIndexOutOfBoundsException.class);
         handler.setGroup("types",InvalidParameterException.class);
@@ -99,36 +102,41 @@ public class HashedErrorHandlerTest {
         assertThat(handler.getGroupNames()).hasSize(2);
         assertThat(handler.getGroupNames()).contains("test1");
         assertThat(handler.getGroupNames()).contains("types");
-        handler.handleError(5L,new InvalidParameterException("this is an error"));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+            handler.handleError(5L,new InvalidParameterException("this is an error")));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testFindVagueSingleSubmatchException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
-        handler.setHandlerForPattern("Index", CycleErrorHandlers.rethrow("12345 678910 11 12"));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+                handler.setHandlerForPattern("Index", CycleErrorHandlers.rethrow("12345 678910 11 12")));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testFindMultipleRegex() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         handler.setHandlerForPattern(".*Index.*", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
-        Boolean result = handler.handleError(9L, new IndexOutOfBoundsException("9L was out of bounds"));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+            handler.handleError(9L, new IndexOutOfBoundsException("9L was out of bounds")));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testNonMatchingSubstringException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         Set<Class<? extends Throwable>> groups = handler.getGroup("index");
         assertThat(groups).isNotNull();
         assertThat(groups).hasSize(2);
         assertThat(groups.contains(IndexOutOfBoundsException.class)).isTrue();
-        handler.setHandlerForPattern("Dyahwemo", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+            handler.setHandlerForPattern("Dyahwemo", CycleErrorHandlers.rethrow("Journey through the klein bottle.")));
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testSetHandlerForMissingGroupException() {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
-        handler.setHandlerForGroup("outdex", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+            handler.setHandlerForGroup("outdex", CycleErrorHandlers.rethrow("Journey through the klein bottle.")));
     }
 
     @Test

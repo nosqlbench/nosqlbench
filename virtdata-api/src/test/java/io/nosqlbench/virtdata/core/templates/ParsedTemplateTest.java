@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core.templates;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ParsedTemplateTest {
 
@@ -39,7 +40,7 @@ public class ParsedTemplateTest {
         assertThat(pt.getExtraBindings()).hasSameElementsAs(bindings.keySet());
     }
 
-    @Ignore("currently not working correctly")
+    @Disabled("currently not working correctly")
     @Test
     public void testShouldMatchQuestionMark() {
         ParsedTemplate pt = new ParsedTemplate(oneQuestion, bindings);
@@ -90,11 +91,12 @@ public class ParsedTemplateTest {
     }
 
     //, expectedExceptionsMessageRegExp = ".*must contain a named group called anchor.*"
-    @Test(expected= InvalidParameterException.class)
+    @Test
     public void testShouldErrorOnInvalidPattern() {
         String wontuse = "This won't get used.";
         Pattern p = Pattern.compile("\\[(\\w[_a-zA-Z]+)]");
-        ParsedTemplate pt = new ParsedTemplate(wontuse, bindings, p);
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(()-> new ParsedTemplate(wontuse, bindings, p));
     }
 
     @Test

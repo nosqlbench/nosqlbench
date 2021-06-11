@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Normal;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Formatter;
 import java.util.Locale;

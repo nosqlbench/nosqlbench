@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_object;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.FixedValues;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

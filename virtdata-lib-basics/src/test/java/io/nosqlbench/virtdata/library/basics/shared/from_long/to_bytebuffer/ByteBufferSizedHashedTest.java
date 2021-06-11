@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.function.LongToIntFunction;

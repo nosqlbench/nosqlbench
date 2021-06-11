@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core.config;
 
 import io.nosqlbench.nb.api.config.ConfigData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;

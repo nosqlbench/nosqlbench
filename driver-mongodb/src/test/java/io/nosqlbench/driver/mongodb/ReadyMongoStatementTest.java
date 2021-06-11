@@ -10,8 +10,8 @@ import io.nosqlbench.virtdata.core.templates.BindPoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.conversions.Bson;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +25,7 @@ public class ReadyMongoStatementTest {
     private ActivityDef activityDef;
     private StmtsDocList stmtsDocList;
 
-    @Before
+    @BeforeEach
     public void setup() {
         String[] params = {
                 "yaml=activities/mongodb-basic.yaml",

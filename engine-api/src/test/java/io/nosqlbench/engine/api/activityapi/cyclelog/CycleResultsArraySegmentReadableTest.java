@@ -20,7 +20,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.StreamSupport;
 

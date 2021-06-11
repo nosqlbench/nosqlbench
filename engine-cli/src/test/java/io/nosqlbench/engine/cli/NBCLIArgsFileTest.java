@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.cli;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class NBCLIArgsFileTest {
 
@@ -30,11 +31,11 @@ public class NBCLIArgsFileTest {
         System.out.println(result);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testLoadingMissingRequiredFails() {
-        LinkedList<String> result;
         NBCLIArgsFile argsFile = new NBCLIArgsFile();
-        result = argsFile.process("--argsfile-required", "src/test/resources/argsfiles/nonextant.cli");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> argsFile.process("--argsfile-required", "src/test/resources/argsfiles/nonextant.cli"));
     }
 
     @Test

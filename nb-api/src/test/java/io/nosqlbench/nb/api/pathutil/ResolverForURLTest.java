@@ -4,7 +4,7 @@ import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.ResolverForClasspath;
 import io.nosqlbench.nb.api.content.ResolverForFilesystem;
 import io.nosqlbench.nb.api.content.ResolverForURL;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 import java.nio.file.Path;

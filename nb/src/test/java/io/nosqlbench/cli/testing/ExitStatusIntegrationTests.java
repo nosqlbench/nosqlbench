@@ -17,7 +17,7 @@
 
 package io.nosqlbench.cli.testing;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.stream.Collectors;

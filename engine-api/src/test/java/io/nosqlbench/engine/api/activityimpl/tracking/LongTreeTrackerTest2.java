@@ -2,8 +2,8 @@ package io.nosqlbench.engine.api.activityimpl.tracking;
 
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTracker;
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTrackerAtomic;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -139,7 +139,7 @@ public class LongTreeTrackerTest2 {
      */
 
     @Test
-    @Ignore
+    @Disabled
     public void speedcheckThreadLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTracker();
@@ -159,7 +159,7 @@ public class LongTreeTrackerTest2 {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void speedcheckConcurrentLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTrackerAtomic();

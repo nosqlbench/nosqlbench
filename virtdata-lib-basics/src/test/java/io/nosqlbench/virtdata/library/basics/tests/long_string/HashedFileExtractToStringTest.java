@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.HashedFileExtractToString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.IntSummaryStatistics;
 import java.util.function.LongUnaryOperator;

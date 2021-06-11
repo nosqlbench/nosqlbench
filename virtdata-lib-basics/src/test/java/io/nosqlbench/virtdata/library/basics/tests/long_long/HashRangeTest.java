@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_long;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

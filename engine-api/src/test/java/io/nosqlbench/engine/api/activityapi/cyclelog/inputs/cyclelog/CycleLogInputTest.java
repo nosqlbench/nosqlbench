@@ -19,8 +19,8 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogOutput;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
@@ -31,7 +31,7 @@ public class CycleLogInputTest {
     private final static String filepath="cycle-log-reader-test";
     private static File cyclefile;
 
-    @BeforeClass
+    @BeforeAll
     public static void createTempFile() {
         try {
             cyclefile = File.createTempFile(filepath, "cyclelog");

@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_localdate;
 
 import org.joda.time.DateTime;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.LocalDate;

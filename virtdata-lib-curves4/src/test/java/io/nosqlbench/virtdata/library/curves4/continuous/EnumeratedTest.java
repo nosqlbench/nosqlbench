@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Enumerated;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;

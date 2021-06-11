@@ -3,11 +3,12 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class DigestToByteBufferTest {
 
@@ -39,11 +40,11 @@ public class DigestToByteBufferTest {
         System.out.println(Hex.encodeHexString(digest));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testInvalidName() {
         DigestToByteBuffer d1 = new DigestToByteBuffer("Whoops");
-        ByteBuffer digest = d1.apply(233423L);
-        assertThat(digest).isEqualTo(ByteBuffer.wrap(new byte[] {0x32}));
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> d1.apply(233423L));
     }
 
 }

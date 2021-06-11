@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.basics.core.stathelpers.aliasmethod;
 
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasElementSampler;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.ElemProbD;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

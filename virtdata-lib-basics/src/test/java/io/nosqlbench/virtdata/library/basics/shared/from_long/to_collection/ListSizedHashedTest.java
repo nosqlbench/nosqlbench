@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.function.LongFunction;

@@ -1,8 +1,8 @@
 package io.nosqlbench.nb.api.config.params;
 
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.List;
@@ -36,7 +36,7 @@ public class NBParamsTest {
     }
 
     @Test
-    @Ignore("This case is unwieldy and generally not useful")
+    @Disabled("This case is unwieldy and generally not useful")
     public void testNestedMixedJsonParamsMap() {
         Element one = NBParams.one("{\"key1\":\"key2={\"key3\":\"value3\",\"key4\":\"value4\"}\"}");
         assertThat(one.get("key1.key2.key3", String.class)).isPresent();

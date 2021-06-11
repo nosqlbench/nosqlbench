@@ -2,8 +2,8 @@ package io.nosqlbench.virtdata.library.basics.core.stathelpers.aliasmethod;
 
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class AliasSamplerDoubleIntTest {
     // Single threaded performance: 100000000 ops in 1366334133 nanos for 73188539.746449 ops/s
     // yes, that is >70M discrete probability samples per second, but hey, it's only 3 discrete probabilities in this test
     @Test
-    @Ignore
+    @Disabled
     public void testAliasMicroBenchSmallMany() {
         List<EvProbD> events = new ArrayList<>();
         events.add(new EvProbD(1,1D));

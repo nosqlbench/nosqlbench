@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core;
 
 import io.nosqlbench.virtdata.core.bindings.ResolvedFunction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.LongUnaryOperator;
 

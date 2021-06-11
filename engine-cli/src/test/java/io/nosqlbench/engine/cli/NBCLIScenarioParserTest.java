@@ -2,11 +2,12 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class NBCLIScenarioParserTest {
 
@@ -49,15 +50,16 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
     }
 
-    @Test(expected = BasicError.class)
+    @Test
     public void testThatVerboseFinalParameterThrowsError() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"});
-        List<Cmd> cmds = opts.getCommands();
+        assertThatExceptionOfType(BasicError.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"}));
     }
 
-    @Test(expected = BasicError.class)
+    @Test
     public void testThatMissingScenarioNameThrowsError() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"});
+        assertThatExceptionOfType(BasicError.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
     }
 
     @Test

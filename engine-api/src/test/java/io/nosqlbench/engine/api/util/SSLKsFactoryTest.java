@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 
