@@ -30,7 +30,6 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
-import joptsimple.internal.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -299,7 +298,7 @@ public class NBCLI {
                 .session(sessionName)
                 .now()
                 .layer(Layer.CLI)
-                .detail("cli", Strings.join(args, "\n"))
+                .detail("cli", String.join("\n", args))
                 .build()
         );
 
