@@ -110,6 +110,7 @@ public class TagFilterTest {
         assertThat(tfRight.matches(itemtags).matched()).isTrue();
     }
 
+    @Test
     public void testMatchingDetails() {
         Tagged tagged = new Tagged() {
             @Override
@@ -127,10 +128,7 @@ public class TagFilterTest {
         TagFilter.Result result = tfLeft.matchesTaggedResult(tagged);
         assertThat(result.matched()).isFalse();
         System.out.println(result.getLog());
-        assertThat(result.getLog()).contains("filter(one:four-.*) tag(one:four-five-six): matched pattern");
-        assertThat(result.getLog()).contains("filter(five) tag(five): matched names");
-        assertThat(result.getLog()).contains("filter(seven) tag(): did not match");
-        assertThat(result.getLog()).contains("filter(six:again) tag(six): null tag value did not match");
+        assertThat(result.getLog()).contains("(☑,☐) filter(one:'four-.*' five two seven six=again) tag(one:four-five-six): did not match '^'four-.*' five two seven six=again$'");
 
     }
 
