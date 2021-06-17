@@ -1,13 +1,21 @@
-- 6c0373e0 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #331 from tjake/scb-download
-- 27d55aef Merge pull request #330 from nosqlbench/dependabot/maven/docsys/org.eclipse.jetty-jetty-servlets-11.0.3
-- 38204917 Merge pull request #329 from XN137/simplify-pulsar-jms-cache-keys
-- ddc6a649 Merge pull request #328 from XN137/driver-jms-avoid-decoding-msgbody-twice
-- 814f5630 Allow scb to be downloaded directly via it's url
-- b3956c86 Bump jetty-servlets from 11.0.1 to 11.0.3 in /docsys
-- 94f93fe4 simplify cache key creation in pulsar + jms driver
-- 2d84c4d0 avoid decoding msgBody twice in JmsMsgSendOp
-- 18e9bb91 Merge pull request #326 from nosqlbench/dependabot/maven/mvn-defaults/org.yaml-snakeyaml-1.26
-- 0120964c Merge pull request #325 from nosqlbench/dependabot/maven/driver-web/org.apache.httpcomponents-httpclient-4.5.13
-- 20926b8d Bump snakeyaml from 1.23 to 1.26 in /mvn-defaults
-- 9b4d57b1 Bump httpclient from 4.5.12 to 4.5.13 in /driver-web
-- d2fe5661 Merge pull request #323 from nosqlbench/dependabot/maven/docsys/org.glassfish.jersey.core-jersey-common-3.0.2
+- DateRangeFunc() would create zero-length ranges
+  before. Now it correctly uses start and end times. If you have a test with this function,
+  it may return larger results than before.
+- 7c7ea039 (HEAD -> main) post-merge fixups
+- 9403f51f improve ToDate semantics and docs
+- 0edbfb1f fix test for TagFilter
+- 365ad619 remove extraneous var in ActivityExecutor
+- 34855a39 (origin/main) Merge pull request #336 from XN137/fix-errorprone-errors
+- 60ff1d9c Merge pull request #335 from XN137/avoid-threadsafety-warnings
+- c5caf51a Merge pull request #334 from XN137/remove-junit4-dependency
+- a02df22d Merge pull request #333 from XN137/jdk-string-join
+- 950b31fb fix errors found by errorprone
+- b98451ab upgrade antlr4-maven-plugin to v4.9.2 avoid threadsafety warnings
+- 5e8e6bf1 use assertj v3.19.0
+- 8dcac028 use junit5 v5.7.2 with proper scoping
+- 2cd393ae use junit5 apis to remove junit4 dependency
+- 0e68abf1 prefer jdk over lib internals for String join
+- dc1c6c5e Merge pull request #332 from XN137/fix-virtdata-api-test-folder
+- 6232edff move virtdata-api tests to correct folder
+
+
