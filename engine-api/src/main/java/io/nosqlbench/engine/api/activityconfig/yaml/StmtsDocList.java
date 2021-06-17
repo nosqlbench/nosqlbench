@@ -44,7 +44,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
             .collect(Collectors.toList());
     }
 
-    public List<OpTemplate<?>> getStmts() {
+    public List<OpTemplate> getStmts() {
         return getStmts("");
     }
 
@@ -53,9 +53,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * @return The list of all included statements for all included blocks of  in this document,
      * including the inherited and overridden values from the this doc and the parent block.
      */
-    public List<OpTemplate<?>> getStmts(String tagFilterSpec) {
+    public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
-        List<OpTemplate<?>> opTemplates = new ArrayList<>();
+        List<OpTemplate> opTemplates = new ArrayList<>();
 
 
         getStmtDocs().stream()

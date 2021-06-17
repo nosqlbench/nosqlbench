@@ -23,13 +23,10 @@ import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
-public class OpDef<T> implements OpTemplate<T> {
+public class OpDef implements OpTemplate {
 
     private static final String FIELD_DESC = "description";
     private static final String FIELD_NAME = "name";
@@ -58,8 +55,20 @@ public class OpDef<T> implements OpTemplate<T> {
     }
 
     @Override
-    public T getOp() {
-        return (T) rawStmtDef.getOp();
+    public Map<String,?> getOp() {
+        Object op = rawStmtDef.getOp();
+        HashMap<String, Object> newmap = new LinkedHashMap<>();
+        if (op instanceof Map) {
+            ((Map<?,?>)op).forEach((k,v) -> {
+                newmap.put(k.toString(),v);
+            });
+        } else if (op instanceof  CharSequence) {
+            newmap.put("stmt",op.toString());
+        } else {
+            throw new BasicError("Unable to coerce a '" + op.getClass().getCanonicalName() + "' into an op template");
+        }
+
+        return newmap;
     }
 
     @Override

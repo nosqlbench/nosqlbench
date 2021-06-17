@@ -70,7 +70,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
     private final ExceptionHistoMetrics exceptionHistoMetrics;
     private final ActivityDef activityDef;
     private final Map<String, Writer> namedWriters = new HashMap<>();
-    protected List<OpTemplate<?>> stmts;
+    protected List<OpTemplate> stmts;
     Timer retryDelayTimer;
     Timer pagesTimer;
     private Histogram triesHisto;
@@ -179,7 +179,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         Set<String> timerStarts = new HashSet<>();
         Set<String> timerStops = new HashSet<>();
 
-        for (OpTemplate<?> stmtDef : stmts) {
+        for (OpTemplate stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orError();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);

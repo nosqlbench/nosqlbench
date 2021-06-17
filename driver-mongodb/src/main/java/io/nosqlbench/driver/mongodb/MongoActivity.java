@@ -112,11 +112,11 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         TagFilter tagFilter = new TagFilter(tagfilter);
         stmtsDocList.getStmts().stream().map(tagFilter::matchesTaggedResult).forEach(r -> logger.info(r.getLog()));
 
-        List<OpTemplate<?>> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         if (stmts.isEmpty()) {
             logger.error("No statements found for this activity");
         } else {
-            for (OpTemplate<?> stmt : stmts) {
+            for (OpTemplate stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
                 String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);

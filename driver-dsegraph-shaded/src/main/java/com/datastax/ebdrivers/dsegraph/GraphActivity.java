@@ -46,7 +46,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
     public Timer resultTimer;
     public Timer logicalGraphOps;
     public Histogram triesHisto;
-    protected List<OpTemplate<?>> stmts;
+    protected List<OpTemplate> stmts;
     private int stride;
     private DseSession session;
     private DseCluster cluster;
@@ -100,7 +100,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             throw new RuntimeException("There were no unfiltered statements found for this activity.");
         }
 
-        for (OpTemplate<?> stmtDef : stmts) {
+        for (OpTemplate stmtDef : stmts) {
 
             ParsedStmt parsed = stmtDef.getParsed().orError();
 

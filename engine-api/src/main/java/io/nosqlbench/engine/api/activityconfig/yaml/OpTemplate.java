@@ -121,11 +121,11 @@ import java.util.function.Function;
  *     p2: v2
  * }</pre>
  */
-public interface OpTemplate<T> extends Tagged {
+public interface OpTemplate extends Tagged {
 
     String getName();
 
-    T getOp();
+    Map<String,?> getOp();
 
     Map<String, String> getBindings();
 

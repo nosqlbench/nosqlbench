@@ -73,18 +73,6 @@ public class ParsedStmt {
         return parsed.hasError();
     }
 
-    /**
-     * The list of binding names returned by this method does not
-     * constitute an error. They may be used for
-     * for informational purposes in error handlers, for example.
-     *
-     * @return a set of bindings names which were provided to
-     * this parsed statement, but which were not referenced
-     * in either <pre>{anchor}</pre> or <pre>?anchor</pre> form.
-     */
-    public Set<String> getExtraBindings() {
-        return parsed.getExtraBindings();
-    }
 
     /**
      * Returns a list of binding names which were referenced
@@ -96,18 +84,7 @@ public class ParsedStmt {
      * @return A list of binding names which were referenced but not defined*
      */
     public Set<String> getMissingBindings() {
-        return parsed.getMissingBindings();
-    }
-
-    /**
-     * Return a map of bindings which were referenced in the statement.
-     * This is an easy way to get the list of effective bindings for
-     * a statement for diagnostic purposes without including a potentially
-     * long list of library bindings.
-     * @return a bindings map of referenced bindings in the statement
-     */
-    public Map<String, String> getSpecificBindings() {
-        return parsed.getSpecificBindings();
+        return parsed.getMissing();
     }
 
     /**
@@ -170,7 +147,7 @@ public class ParsedStmt {
     }
 
     public List<BindPoint> getBindPoints() {
-        return parsed.getBindPoints();
+        return parsed.getCheckedBindPoints();
     }
 
 }

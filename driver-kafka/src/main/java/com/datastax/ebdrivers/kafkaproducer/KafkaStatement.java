@@ -31,7 +31,7 @@ public class KafkaStatement {
     private AvroSchema valueSerializerSchema = null;
     private final String key;
 
-    public KafkaStatement(OpTemplate<?> stmtDef, String servers, String clientId, String schemaRegistryUrl) {
+    public KafkaStatement(OpTemplate stmtDef, String servers, String clientId, String schemaRegistryUrl) {
         ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
         BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getCheckedBindPoints());
         StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);

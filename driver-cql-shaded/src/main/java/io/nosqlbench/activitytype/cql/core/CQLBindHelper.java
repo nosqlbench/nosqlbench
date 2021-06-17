@@ -129,7 +129,7 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(OpTemplate<?> opDef, ParsedStmt parsed) {
+    public static Map<String, String> parseAndGetSpecificBindings(OpTemplate opDef, ParsedStmt parsed) {
         String statement = opDef.getStmt();
 
         Set<String> extraBindings = new HashSet<>(opDef.getBindings().keySet());

@@ -134,7 +134,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<OpTemplate<?>> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
 
         String format = getParams().getOptionalString("format").orElse(null);
 
@@ -179,7 +179,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 sequencer.addOp(sb, 1L);
             }
         } else if (stmts.size() > 0) {
-            for (OpTemplate<?> stmt : stmts) {
+            for (OpTemplate stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
                 BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
                 String statement = parsed.getPositionalStatement(Function.identity());

@@ -48,7 +48,7 @@ public class CommandTemplate {
      *
      * @param optpl An OpTemplate
      */
-    public CommandTemplate(OpTemplate<?> optpl) {
+    public CommandTemplate(OpTemplate optpl) {
         this(optpl.getName(), optpl.getOp().toString(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), List.of());
     }
 
@@ -66,7 +66,7 @@ public class CommandTemplate {
      * @param optpl   An OpTemplate
      * @param parsers A list of parser functions
      */
-    public CommandTemplate(OpTemplate<?> optpl, List<Function<String, Map<String, String>>> parsers) {
+    public CommandTemplate(OpTemplate optpl, List<Function<String, Map<String, String>>> parsers) {
         this(optpl.getName(), optpl.getOp(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
     }
 

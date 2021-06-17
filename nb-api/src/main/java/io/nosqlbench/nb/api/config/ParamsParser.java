@@ -41,8 +41,8 @@ import java.util.Map;
  * These occur as {@code name=value}, and may be delimited by spaces or semicolons, like
  * {@code name1=value1 name2=value2} or {@code name1=value1;name2=value2}.
  * Values can even contain spaces, even though space is a possible delimiter.
- * Thus, {@code name1= value foo bar
- * name2=baz} works, with the values {@code value foo bar} and {@code baz}.
+ * Thus, <em>{@code name1= value foo bar
+ * name2=baz}</em> works, with the values {@code value foo bar} and {@code baz}.
  * </p>
  *
  * <h3>Names</h3>
@@ -237,7 +237,7 @@ public class ParamsParser {
                 s = ParseState.expectingName;
                 break;
             case readingName:
-                parms.put(lastVarname,parms.get(lastVarname)+' '+varname.toString());
+                parms.put(lastVarname,parms.get(lastVarname)+' '+ varname);
                 varname.setLength(0);
                 break;
             default:

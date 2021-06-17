@@ -65,6 +65,12 @@ import java.util.stream.StreamSupport;
  */
 public class ParsedTemplate {
 
+    public enum Form {
+        literal,
+        rawbind,
+        template,
+    }
+
     /**
      * The canonical template pattern follows the pattern of an opening curly brace,
      * followed by a word character, followed by any contiguous
@@ -78,24 +84,29 @@ public class ParsedTemplate {
      * </pre>
      */
 
+
     public final static Pattern STANDARD_ANCHOR = Pattern.compile("\\{(?<anchor>\\w+[-_\\d\\w.]*)}");
     public final static Pattern EXTENDED_ANCHOR = Pattern.compile("\\{\\{(?<anchor>.*?)}}");
-
     private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
-    private final Pattern[] patterns;
-    // Spans is an even-odd form of (literal, variable, ..., ..., literal)
-    private final String rawtemplate;
-    private final String[] spans;
 
-    private final Set<String> missingBindings = new HashSet<>();
-    private final Set<String> extraBindings = new HashSet<>();
+//    private final Pattern[] patterns;
+
+    /**
+     * Spans is an even-odd form of (literal, variable, ..., ..., literal)
+     * Thus a 1-length span is a single literal
+     **/
+    private final String[] spans;
+//    private final String rawtemplate;
+
+    /**
+     * A map of binding names and recipes (or null)
+     */
     private final Map<String, String> bindings = new LinkedHashMap<>();
-    private final Map<String, String> specificBindings = new LinkedHashMap<>();
 
     /**
      * Construct a new ParsedTemplate from the provided statement template.
      *
-     * @param rawtemplate The string that contains literal sections and anchor sections interspersed
+     * @param rawtemplate      The string that contains literal sections and anchor sections interspersed
      * @param providedBindings The bindings that are provided for the template to be parsed
      */
     public ParsedTemplate(String rawtemplate, Map<String, String> providedBindings) {
@@ -114,20 +125,28 @@ public class ParsedTemplate {
      * have a named group with the name 'anchor', as in (?&lt;anchor&gt;...)
      * </P>
      *
-     * @param rawtemplate      A string template which contains optionally embedded named anchors
-     * @param providedBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
-     * @param providedPatterns The patterns which match the named anchor format and extract anchor names from the raw template
+     * @param rawtemplate       A string template which contains optionally embedded named anchors
+     * @param availableBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
+     * @param parserPatterns    The patterns which match the named anchor format and extract anchor names from the raw template
      */
-    public ParsedTemplate(String rawtemplate, Map<String, String> providedBindings, Pattern... providedPatterns) {
-        this.rawtemplate = rawtemplate;
-        this.bindings.putAll(providedBindings);
-        this.patterns = providedPatterns;
-        this.spans = parse();
+    public ParsedTemplate(String rawtemplate, Map<String, String> availableBindings, Pattern... parserPatterns) {
+        this.bindings.putAll(availableBindings);
+        this.spans = parse(rawtemplate, availableBindings, parserPatterns);
+    }
+
+    public Form getForm() {
+        if (this.spans.length == 1) {
+            return Form.literal;
+        } else if (this.spans[0].isEmpty() && this.spans[2].isEmpty()) {
+            return Form.rawbind;
+        } else {
+            return Form.template;
+        }
     }
 
     public ParsedTemplate orError() {
         if (hasError()) {
-            throw new RuntimeException("Unable to parse statement: " + this.toString());
+            throw new RuntimeException("Unable to parse statement: " + this);
         }
         return this;
     }
@@ -140,11 +159,9 @@ public class ParsedTemplate {
      * <li>specificBindings will contain an ordered map of the binding definitions</li>
      * </ul>
      */
-    private String[] parse() {
+    private String[] parse(String rawtemplate, Map<String, String> providedBindings, Pattern[] patterns) {
         List<String> spans = new ArrayList<>();
-        Set<String> usedAnchors = new HashSet<>();
 
-        extraBindings.addAll(bindings.keySet());
         String statement = rawtemplate;
         int patternsMatched = 0;
 
@@ -152,8 +169,8 @@ public class ParsedTemplate {
 
         for (Pattern pattern : patterns) {
             if (!pattern.toString().contains("?<anchor>")) {
-                throw new InvalidParameterException("The provided pattern '" + pattern.toString() + "' must contain a named group called anchor," +
-                        "as in '(?<anchor>...)'");
+                throw new InvalidParameterException("The provided pattern '" + pattern + "' must contain a named group called anchor," +
+                    "as in '(?<anchor>...)'");
             }
 
             Matcher m = pattern.matcher(rawtemplate);
@@ -171,14 +188,7 @@ public class ParsedTemplate {
 
                 spans.add(tokenName);
 
-                if (extraBindings.contains(tokenName)) {
-                    usedAnchors.add(tokenName);
-                    specificBindings.put(tokenName, bindings.get(tokenName));
-                } else {
-                    missingBindings.add(tokenName);
-                }
             }
-            usedAnchors.forEach(extraBindings::remove);
 
             break; // If the last matcher worked at all, only do one cycle
         }
@@ -189,42 +199,25 @@ public class ParsedTemplate {
             spans.add(statement);
         }
 
+
         return spans.toArray(new String[0]);
 
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("template: '").append(rawtemplate).append("'");
-        sb.append("\n parsed: ");
-        sb.append(StreamSupport.stream(Arrays.spliterator(spans), false)
-                .map(s -> "[" + s + "]").collect(Collectors.joining(",")));
-        sb.append("\n missing bindings: ")
-                .append(missingBindings.stream().collect(Collectors.joining(",", "[", "]")));
-        sb.append(" extra bindings: ");
-        sb.append("\n extra bindings: ")
-                .append(extraBindings.stream().collect(Collectors.joining(",", "[", "]")));
-        return sb.toString();
+        String sb = "\n parsed: " +
+            StreamSupport.stream(Arrays.spliterator(spans), false)
+                .map(s -> "[" + s + "]").collect(Collectors.joining(",")) +
+            "\n missing bindings: " +
+            getMissing().stream().collect(Collectors.joining(",", "[", "]"));
+        return sb;
     }
 
     /**
      * @return true if the parsed statement is not usable.
      */
     public boolean hasError() {
-        return missingBindings.size() > 0;
-    }
-
-    /**
-     * The list of binding names returned by this method does not
-     * constitute an error. They may be used for
-     * for informational purposes in error handlers, for example.
-     *
-     * @return a set of bindings names which were provided to
-     * this parsed statement, but which were not referenced
-     * in either <pre>{anchor}</pre> or <pre>?anchor</pre> form.
-     */
-    public Set<String> getExtraBindings() {
-        return extraBindings;
+        return getMissing().size() > 0;
     }
 
     /**
@@ -236,22 +229,19 @@ public class ParsedTemplate {
      *
      * @return A list of binding names which were referenced but not defined*
      */
-    public Set<String> getMissingBindings() {
-        return missingBindings;
-    }
+    public Set<String> getMissing() {
+        if (spans.length == 1) {
+            return Set.of();
+        }
 
-    /**
-     * Return a map of bindings which were referenced in the statement.
-     * This is an easy way to get the list of effective bindings for
-     * a statement for diagnostic purposes without including a potentially
-     * long list of library bindings. This method does <em>not</em>
-     * represent all of the binding points, as when anchor names are
-     * used more than once.
-     *
-     * @return a bindings map of referenced bindings in the statement
-     */
-    public Map<String, String> getSpecificBindings() {
-        return specificBindings;
+        HashSet<String> missing = new HashSet<>();
+        for (int i = 1; i < spans.length; i += 2) {
+            if (!bindings.containsKey(spans[i])) {
+                missing.add(spans[i]);
+            }
+        }
+
+        return missing;
     }
 
     /**
@@ -275,16 +265,26 @@ public class ParsedTemplate {
      * @throws InvalidParameterException if the template has an error,
      *                                   such as an anchor which has no provided binding.
      */
-    public List<BindPoint> getBindPoints() {
+    public List<BindPoint> getCheckedBindPoints() {
         List<BindPoint> bindpoints = new ArrayList<>();
         for (int i = 1; i < spans.length; i += 2) {
             if (!bindings.containsKey(spans[i])) {
-                throw new InvalidParameterException("Binding named '" + spans[i] + "' is not provided for template '" + rawtemplate + "'");
+                throw new InvalidParameterException("Binding named '" + spans[i] + "' is not contained in the bindings map.");
             }
             bindpoints.add(new BindPoint(spans[i], bindings.get(spans[i])));
         }
 
         return bindpoints;
+    }
+
+    public List<BindPoint> getUncheckedBindPoints() {
+        List<BindPoint> bindpoints = new ArrayList<>();
+        for (int i = 1; i < spans.length; i += 2) {
+            bindpoints.add(new BindPoint(spans[i], bindings.getOrDefault(spans[i], null)));
+        }
+
+        return bindpoints;
+
     }
 
     /**
@@ -299,7 +299,7 @@ public class ParsedTemplate {
         StringBuilder sb = new StringBuilder(spans[0]);
 
         for (int i = 1; i < spans.length; i += 2) {
-            sb.append(tokenFormatter!=null ? tokenFormatter.apply(spans[i]) : spans[i]);
+            sb.append(tokenFormatter != null ? tokenFormatter.apply(spans[i]) : spans[i]);
             sb.append(spans[i + 1]);
         }
         return sb.toString();
@@ -314,5 +314,19 @@ public class ParsedTemplate {
         return spans;
     }
 
+
+    /**
+     * Returns the parsed template as a single binding spec if and only if the pattern matches
+     * a single binding anchor with no prefix or suffix.
+     *
+     * @return A single binding spec if that is all that was specified.
+     */
+    public Optional<BindPoint> asBinding() {
+        if (spans.length == 3 && spans[0].isEmpty() && spans[2].isEmpty()) {
+            return Optional.of(new BindPoint(spans[1], bindings.getOrDefault(spans[1], null)));
+        } else {
+            return Optional.empty();
+        }
+    }
 
 }

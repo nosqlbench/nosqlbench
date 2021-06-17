@@ -122,7 +122,7 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(OpDef<?> opDef, ParsedStmt parsed) {
+    public static Map<String, String> parseAndGetSpecificBindings(OpDef opDef, ParsedStmt parsed) {
         List<String> spans = new ArrayList<>();
 
         String statement = opDef.getStmt();

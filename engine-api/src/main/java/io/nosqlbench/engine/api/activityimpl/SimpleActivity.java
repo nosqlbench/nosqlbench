@@ -468,10 +468,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
             stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), interp, "activities");
         }
 
-        List<OpTemplate<?>> stmts = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         List<Long> ratios = new ArrayList<>(stmts.size());
         for (int i = 0; i < stmts.size(); i++) {
-            OpTemplate<?> opTemplate = stmts.get(i);
+            OpTemplate opTemplate = stmts.get(i);
             long ratio = opTemplate.removeParamOrDefault("ratio", 1);
             ratios.add(ratio);
         }

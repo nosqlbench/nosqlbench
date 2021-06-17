@@ -83,6 +83,15 @@ public class UniformWorkloadSpecificationTest {
         );
     }
 
+    @Test
+    public void testCommandAPI() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("command_api.md")
+                .one().asPath()
+        );
+    }
+
 
     public String summarize(Node node) {
         StringBuilder sb = new StringBuilder();
@@ -293,7 +302,12 @@ public class UniformWorkloadSpecificationTest {
 
             System.out.println("OK");
         } catch (Exception e) {
-            System.out.println("ERROR");
+//            System.out.println("Error while validating equivalence between the yaml and the rendered op context:");
+//            System.out.println("yaml:");
+//            System.out.println(yaml);
+//            System.out.println("ops:");
+//            System.out.println(json);
+            throw new RuntimeException(e);
         }
 
 

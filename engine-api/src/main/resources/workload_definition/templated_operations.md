@@ -48,7 +48,9 @@ op: select * from bar.table;
 [
     {
         "name": "block0--stmt1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -78,7 +80,9 @@ ops:
 [
     {
         "name": "block0--stmt1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -113,7 +117,9 @@ ops:
 [
     {
         "name": "block0--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -147,7 +153,9 @@ ops:
 [
     {
         "name": "block0--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -177,7 +185,9 @@ ops:
 [
     {
         "name": "block0--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -210,7 +220,9 @@ ops:
 [
     {
         "name": "block0--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     }
 ]
 ```
@@ -275,7 +287,9 @@ ops:
         },
         "description": "This is just an example operation",
         "name": "block0--special-op-name",
-        "op": "select * from ks1.tb1;",
+        "op": {
+            "stmt": "select * from ks1.tb1;"
+        },
         "params": {
             "prepated": false
         },
@@ -368,7 +382,9 @@ blocks:
             "binding1": "NumberNameToString();"
         },
         "name": "block-named-fred--special-op-name",
-        "op": "select * from ks1.tb1;",
+        "op": {
+            "stmt": "select * from ks1.tb1;"
+        },
         "params": {
             "prepared": false
         },

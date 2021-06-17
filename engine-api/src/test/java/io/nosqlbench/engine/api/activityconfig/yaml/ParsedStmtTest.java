@@ -40,14 +40,12 @@ public class ParsedStmtTest {
         StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         OpTemplate stmtDef0 = block0.getOps().get(0);
         ParsedStmt parsed0 = stmtDef0.getParsed();
-        assertThat(parsed0.getExtraBindings()).containsExactly("alpha","gamma");
         assertThat(parsed0.getMissingBindings()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
         StmtsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
         OpTemplate stmtDef1 = block1.getOps().get(0);
         ParsedStmt parsed1 = stmtDef1.getParsed();
-        assertThat(parsed1.getExtraBindings()).containsExactly();
         assertThat(parsed1.getMissingBindings()).containsExactly();
         assertThat(parsed1.hasError()).isFalse();
     }
@@ -63,7 +61,7 @@ public class ParsedStmtTest {
 
         OpTemplate stmtDef1 = block2.getOps().get(1);
         ParsedStmt parsed1 = stmtDef1.getParsed();
-        assertThat(parsed1.getMissingBindings().isEmpty());
+        assertThat(parsed1.getMissingBindings()).isEmpty();
         assertThat(parsed1.hasError()).isFalse();
     }
 

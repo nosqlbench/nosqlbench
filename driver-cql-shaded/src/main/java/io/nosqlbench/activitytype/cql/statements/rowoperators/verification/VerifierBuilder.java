@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class VerifierBuilder {
-    public static BindingsTemplate getExpectedValuesTemplate(OpTemplate<?> stmtDef) {
+    public static BindingsTemplate getExpectedValuesTemplate(OpTemplate stmtDef) {
 
         BindingsTemplate expected = new BindingsTemplate();
 

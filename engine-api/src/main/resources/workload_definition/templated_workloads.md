@@ -388,11 +388,15 @@ blocks:
 [
     {
         "name": "namedblock1--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     },
     {
         "name": "namedblock1--op2",
-        "op": "insert into bar.table (a,b,c) values (1,2,3);",
+        "op": {
+            "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
+        },
         "params": {
             "type": "batch"
         }
@@ -449,18 +453,24 @@ blocks:
 [
     {
         "name": "block1--op1",
-        "op": "select * from bar.table;"
+        "op": {
+            "stmt": "select * from bar.table;"
+        }
     },
     {
         "name": "block1--op2",
-        "op": "insert into bar.table (a,b,c) values (1,2,3);",
+        "op": {
+            "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
+        },
         "params": {
             "type": "batch"
         }
     },
     {
         "name": "this-is-block-2--op3",
-        "op": "select * from foo.table;"
+        "op": {
+            "stmt": "select * from foo.table;"
+        }
     }
 ]
 ```
@@ -501,7 +511,9 @@ blocks:
 [
     {
         "name": "myblock--stmt1",
-        "op": "test op"
+        "op": {
+            "stmt": "test op"
+        }
     }
 ]
 ```
