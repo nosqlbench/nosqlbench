@@ -216,7 +216,7 @@ public class IntegratedBindingsTest {
     public void testDirectFunctionalInterfaceLongUnary() {
         LongUnaryOperator f = VirtData.getFunction("Add(5L)", LongUnaryOperator.class);
         assertThat(f).isNotNull();
-        assertThat(f.getClass()==LongUnaryOperator.class);
+        assertThat(f.getClass()).isEqualTo(io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Add.class);
     }
 
     @Test

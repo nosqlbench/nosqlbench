@@ -24,10 +24,10 @@ public enum FunctionType {
     R_T(Function.class, Object.class, Object.class);
 
     private final Class<?> functionClass;
-    private Class<?> inputClass;
-    private Class<?> returnClass;
-    private ValueType returnValueType;
-    private ValueType inputValueType;
+    private final Class<?> inputClass;
+    private final Class<?> returnClass;
+    private final ValueType returnValueType;
+    private final ValueType inputValueType;
 
     FunctionType(Class<?> functionClass, Class<?> inputClass, Class<?> returnClass) {
         this.functionClass = functionClass;

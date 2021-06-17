@@ -56,7 +56,7 @@ public class ParsedStmt {
 
     public ParsedStmt orError() {
         if (hasError()) {
-            throw new RuntimeException("Unable to parse statement: " + this.toString());
+            throw new RuntimeException("Unable to parse statement: " + this);
         }
         return this;
     }
@@ -147,14 +147,6 @@ public class ParsedStmt {
      */
     public Map<String, String> getBindings() {
         return opDef.getBindings();
-    }
-
-    /**
-     * @return the params from the enclosed {@link OpDef}
-     * @deprecated You should use {@link #getParamReader()} instead.
-     */
-    public Map<String, Object> getParams() {
-        return opDef.getParams();
     }
 
     /**

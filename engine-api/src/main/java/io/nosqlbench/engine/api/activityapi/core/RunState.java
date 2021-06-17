@@ -33,7 +33,7 @@ public enum RunState {
     // The thread has stopped. This should only be set by the controlled thread
     Stopped("_\u23F9");
 
-    private String runcode;
+    private final String runcode;
 
     RunState(String runcode) {
         this.runcode = runcode;

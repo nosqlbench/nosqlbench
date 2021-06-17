@@ -47,20 +47,12 @@ public class HistoIntervalLoggerTest {
 
         hil.onHistogramAdded("histo1",nicerHistogram);
 
-        List<Long> moments = new ArrayList<>(100);
-        moments.add(System.currentTimeMillis()); // 0
         nicerHistogram.update(1L);
-        moments.add(System.currentTimeMillis()); // 1
         delay(1001);
-        moments.add(System.currentTimeMillis()); // 2
         nicerHistogram.update(1000000L);
-        moments.add(System.currentTimeMillis()); // 3
         delay(1001);
-        moments.add(System.currentTimeMillis()); // 4
         nicerHistogram.update(1000L);
-        moments.add(System.currentTimeMillis()); // 5
         hil.onHistogramRemoved("histo1");
-        moments.add(System.currentTimeMillis()); // 6
 
         hil.closeMetrics();
 
@@ -73,7 +65,7 @@ public class HistoIntervalLoggerTest {
                 break;
             }
             histos.add(histogram);
-        };
+        }
 
         assertThat(histos.size()).isEqualTo(2);
         assertThat(histos.get(0)).isInstanceOf(Histogram.class);
@@ -87,7 +79,7 @@ public class HistoIntervalLoggerTest {
             try {
                 Thread.sleep(target-System.currentTimeMillis());
             } catch (InterruptedException ignored) {
-            } ;
+            }
         }
         System.out.println("delayed " + (System.currentTimeMillis() - now) + " millis");
     }

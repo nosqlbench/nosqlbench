@@ -178,8 +178,6 @@ public class RateSpec {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
         double ratePortion = Math.abs(opsPerSec - ((long) opsPerSec));
         String ratefmt = (ratePortion > 0.001D) ? String.format("%,.3f", opsPerSec) : String.format("%,d", (long) opsPerSec);
 

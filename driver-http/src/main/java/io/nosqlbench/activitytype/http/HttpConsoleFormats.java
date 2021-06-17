@@ -108,7 +108,6 @@ public class HttpConsoleFormats {
         }
 
         long mod = 1L;
-        Set<String> incl = new HashSet<>();
         long mask = 0L;
 
         for (String include : filterSet) {

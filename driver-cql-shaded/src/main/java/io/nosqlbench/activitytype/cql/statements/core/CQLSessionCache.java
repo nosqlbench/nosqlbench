@@ -320,7 +320,7 @@ public class CQLSessionCache implements Shutdownable {
         Cluster cl = builder.build();
 
         // Apply default idempotence, if set
-        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
+        activityDef.getParams().getOptionalBoolean("defaultidempotence").ifPresent(
             b -> cl.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
         );
 
@@ -358,7 +358,7 @@ public class CQLSessionCache implements Shutdownable {
 
                 try (BufferedInputStream inputStream = new BufferedInputStream(url.openStream());
                      FileOutputStream fileOS = new FileOutputStream(tmp)) {
-                    byte data[] = new byte[1024];
+                    byte[] data = new byte[1024];
                     int byteContent;
                     while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
                         fileOS.write(data, 0, byteContent);

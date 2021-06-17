@@ -383,9 +383,8 @@ public class ScenarioController {
      * @param waitTimeMillis The time to wait, usually set very high
      * @return true, if all activities completed before the timer expired, false otherwise
      */
-    public boolean awaitCompletion(int waitTimeMillis) {
+    public boolean awaitCompletion(long waitTimeMillis) {
         boolean completed = true;
-        long waitstart = System.currentTimeMillis();
         long remaining = waitTimeMillis;
 
         List<ActivityFinisher> finishers = new ArrayList<>();
@@ -410,7 +409,6 @@ public class ScenarioController {
         }
 
         return completed;
-
     }
 
     private ActivityDef aliasToDef(String alias) {

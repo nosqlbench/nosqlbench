@@ -98,7 +98,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      */
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
-        this.annotatedCommand = annotatedCommand;
         Annotators.recordAnnotation(Annotation.newBuilder()
                 .session(sessionId)
                 .now()
@@ -248,7 +247,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         return wasStopped;
     }
 
-
     /**
      * Listens for changes to parameter maps, maps them to the activity instance, and notifies all eligible listeners of
      * changes.
@@ -256,9 +254,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     @Override
     public synchronized void handleParameterMapUpdate(ParameterMap parameterMap) {
 
-        if (activity instanceof ActivityDefObserver) {
-            activity.onActivityDefUpdate(activityDef);
-        }
+        activity.onActivityDefUpdate(activityDef);
 
         // An activity must be initialized before the motors and other components are
         // considered ready to handle parameter map changes. This is signaled in an activity

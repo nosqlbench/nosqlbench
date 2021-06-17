@@ -209,10 +209,10 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
         try {
             cluster = builder.build();
         } catch (Exception e) {
-            logger.error("Error while instantiating cluster from builder: " + e.toString(), e);
+            logger.error("Error while instantiating cluster from builder: " + e, e);
             throw e;
         }
-        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
+        activityDef.getParams().getOptionalBoolean("defaultidempotence").ifPresent(
                 b -> cluster.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
         );
 
@@ -236,7 +236,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             logger.info("cluster-metadata-allhosts:\n" + session.getCluster().getMetadata().getAllHosts());
             return session;
         } catch (Exception e) {
-            logger.error("Error while creating a session for dsegraph: " + e.toString(), e);
+            logger.error("Error while creating a session for dsegraph: " + e, e);
             throw e;
         }
 

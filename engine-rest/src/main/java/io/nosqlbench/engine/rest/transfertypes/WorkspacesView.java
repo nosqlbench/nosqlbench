@@ -16,9 +16,7 @@ public class WorkspacesView {
 
     public List<String> getWorkspaces() {
         List<String> workspaces = new ArrayList<>();
-
-        try {
-            DirectoryStream<Path> paths = Files.newDirectoryStream(workspacesRoot);
+        try (DirectoryStream<Path> paths = Files.newDirectoryStream(workspacesRoot)) {
             for (Path path : paths) {
                 workspaces.add(path.toString());
             }

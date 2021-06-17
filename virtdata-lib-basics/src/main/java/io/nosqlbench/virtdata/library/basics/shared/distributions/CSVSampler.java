@@ -8,7 +8,6 @@ import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasElementSampler;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.ElemProbD;
-import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -68,8 +67,6 @@ public class CSVSampler implements LongFunction<String> {
      */
     @Example({"CSVSampler('USPS','n/a','name','census_state_abbrev')",""})
     public CSVSampler(String labelColumn, String weightColumn, String... data) {
-        List<EvProbD> events = new ArrayList<>();
-        List<String> values = new ArrayList<>();
 
         Function<LabeledStatistic, Double> weightFunc = LabeledStatistic::sum;
         LongUnaryOperator prefunc = new Hash();

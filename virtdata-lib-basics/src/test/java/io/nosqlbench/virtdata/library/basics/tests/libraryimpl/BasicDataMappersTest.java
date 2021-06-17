@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class BasicDataMappersTest {
 
-
     @Test
     public void testGetDataMapper() throws Exception {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper("StaticStringMapper('foo')");
@@ -52,6 +51,7 @@ public class BasicDataMappersTest {
         assertThat(dataMapper.get()).isNotNull();
         Date d1 = dataMapper.get().get(1);
         Date d2 = dataMapper.get().get(2);
+        assertThat(d2).isAfter(d1);
     }
 
     @Test
@@ -59,7 +59,9 @@ public class BasicDataMappersTest {
         Optional<DataMapper<Date>> dataMapper = VirtData.getOptionalMapper("ToDate(1000,10000)");
         assertThat(dataMapper).isNotNull();
         assertThat(dataMapper.get()).isNotNull();
-        assertThat(dataMapper.get().get(1).after(new Date(1)));
+        assertThat(dataMapper.get().get(0)).isEqualTo(new Date(0));
+        assertThat(dataMapper.get().get(10)).isEqualTo(new Date(1));
+        assertThat(dataMapper.get().get(20)).isEqualTo(new Date(2));
     }
 
     @Test
@@ -69,5 +71,4 @@ public class BasicDataMappersTest {
         assertThat(dataMapper.get()).isNotNull();
         assertThat(dataMapper.get().get(1)).isNotNull();
     }
-
 }
