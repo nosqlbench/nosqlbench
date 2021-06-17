@@ -12,10 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedTemplateTest {
 
-    private final Map<String, String> bindings = new HashMap<>() {{
-        put("bindname1", "bindspec1");
-        put("bindname2", "bindspec2");
-    }};
+    private final Map<String, String> bindings = Map.of(
+            "bindname1", "bindspec1",
+            "bindname2", "bindspec2");
     private final String rawNothing = "This has no anchors";
     private final String oneCurly = "A {curly} brace.";
     private final String oneQuestion = " A ?question anchor.";
@@ -34,7 +33,7 @@ public class ParsedTemplateTest {
     public void testShoudlMatchCurlyBraces() {
         ParsedTemplate pt = new ParsedTemplate(oneCurly, bindings);
         assertThat(pt.getSpans()).containsExactly("A ", "curly", " brace.");
-        assertThat(pt.getSpecificBindings().isEmpty());
+        assertThat(pt.getSpecificBindings()).isEmpty();
         assertThat(pt.getMissingBindings()).contains("curly");
         assertThat(pt.getExtraBindings()).hasSameElementsAs(bindings.keySet());
     }

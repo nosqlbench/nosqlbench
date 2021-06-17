@@ -60,10 +60,10 @@ public class HostHash implements LongUnaryOperator {
                 distinctNames.add(iface.getHostName());
             });
             List<String> nameList = new ArrayList<>(distinctNames);
-            nameList.sort(String::compareTo);
+            Collections.sort(nameList);
             Murmur3F m3f = new Murmur3F(0);
             m3f.reset();
-            distinctNames.forEach(
+            nameList.forEach(
                     s -> m3f.update(s.getBytes(StandardCharsets.UTF_8))
             );
             return m3f.getValue();

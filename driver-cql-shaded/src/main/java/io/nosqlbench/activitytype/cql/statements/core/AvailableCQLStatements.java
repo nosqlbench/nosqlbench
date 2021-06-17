@@ -30,8 +30,6 @@ public class AvailableCQLStatements {
     }
 
     public List<CQLStatementDefParser> getMatching(String tagSpec) {
-
-        List<CQLStatementDefParser> defs = new ArrayList<>();
         TagFilter ts = new TagFilter(tagSpec);
         List<CQLStatementDefParser> CQLStatementDefParsers =
                 availableDefs.stream()

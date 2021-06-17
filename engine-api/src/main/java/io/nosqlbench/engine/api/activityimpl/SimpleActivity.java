@@ -255,7 +255,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public void setPhaseLimiter(RateLimiter rateLimiter) {
-        this.phaseLimiter = phaseLimiter;
+        this.phaseLimiter = rateLimiter;
     }
 
     @Override

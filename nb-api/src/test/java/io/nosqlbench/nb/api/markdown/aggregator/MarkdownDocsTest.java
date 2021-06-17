@@ -9,9 +9,9 @@ import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.from;
 
 public class MarkdownDocsTest {
 
@@ -74,16 +74,14 @@ public class MarkdownDocsTest {
                 URL url = resources.nextElement();
                 System.out.println("url="+url.toExternalForm());
                 Path path = Paths.get(url.toURI());
-                Files.walk(path, FileVisitOption.FOLLOW_LINKS)
-                        .filter(p -> !Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
-                        .forEach(subpaths::add);
+                try (Stream<Path> fileStream = Files.walk(path, FileVisitOption.FOLLOW_LINKS)) {
+                    fileStream.filter(p -> !Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
+                            .forEach(subpaths::add);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return subpaths;
-
     }
-
-
 }

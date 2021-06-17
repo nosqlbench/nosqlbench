@@ -27,8 +27,6 @@ import java.util.*;
 
 public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
 
-    private final static String NameToken = "name";
-    private final static String StmtToken = "stmt";
     private final RawStmtsBlock rawStmtsBlock;
     private final StmtsDoc rawStmtsDoc;
     private final int blockIdx;

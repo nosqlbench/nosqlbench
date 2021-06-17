@@ -174,27 +174,28 @@ public class TestNBCLIOptions {
     @Test
     public void listWorkloads() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"});
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(opts.wantsScenariosList());
+        assertThat(opts.wantsWorkloadsList()).isTrue();
+    }
+
+    @Test
+    public void listScenarios() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scenarios"});
+        assertThat(opts.wantsScenariosList()).isTrue();
     }
 
     @Test
     public void listScripts() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scripts"});
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(opts.wantsScriptList());
+        assertThat(opts.wantsScriptList()).isTrue();
     }
-
 
     @Test
     public void clTest() {
         String dir= "./";
         URL resource = getClass().getClassLoader().getResource(dir);
-        assertThat(resource);
+        assertThat(resource).isNotNull();
         Path basePath = NBIO.getFirstLocalPath(dir);
         List<Path> yamlPathList = PathWalker.findAll(basePath).stream().filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
-        assertThat(yamlPathList);
+        assertThat(yamlPathList).isNotEmpty();
     }
-
-
 }

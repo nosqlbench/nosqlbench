@@ -143,9 +143,9 @@ public class ShuffleTest {
         }
 //        return shuffle.stats;
         return new int[0];
-
     }
 
+    @Test
     public void test16() {
         int max=16;
         Shuffle shuffle = new Shuffle(0,max);
@@ -161,7 +161,6 @@ public class ShuffleTest {
             assertThat(r[i]).isEqualTo(i+1);
         }
 //        System.out.println("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
-
     }
 
     @Test

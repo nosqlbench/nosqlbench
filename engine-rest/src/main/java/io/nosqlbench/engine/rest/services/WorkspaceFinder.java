@@ -56,15 +56,12 @@ public class WorkspaceFinder {
 
     public List<WorkspaceView> getWorkspaceViews() {
         List<WorkspaceView> views = new ArrayList<>();
-        DirectoryStream<Path> wsrEntries = null;
-        try {
-            wsrEntries = Files.newDirectoryStream(root);
+        try (DirectoryStream<Path> wsrEntries = Files.newDirectoryStream(root)) {
+            for (Path entry : wsrEntries) {
+                views.add(new WorkspaceView(entry));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        for (Path entry : wsrEntries) {
-            views.add(new WorkspaceView(entry));
         }
         return views;
     }

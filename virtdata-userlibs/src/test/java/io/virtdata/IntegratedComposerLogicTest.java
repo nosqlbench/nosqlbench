@@ -132,14 +132,13 @@ public class IntegratedComposerLogicTest {
     public void sanityCheckFunctionCasting() {
         Class<?> c1 = NumberNameToString.class;
         Class<?> c2 = LongFunction.class;
-        assertThat(ClassUtils.isAssignable(c1,c2));
+        assertThat(ClassUtils.isAssignable(c1, c2)).isTrue();
 
         Class<?> c3 = Identity.class;
         Class<?> c4 = LongFunction.class;
-        assertThat(ClassUtils.isAssignable(c3,c4));
+        assertThat(ClassUtils.isAssignable(c3, c4)).isTrue();
         LongUnaryOperator f;
         f = new Identity();
-
     }
 
     @Test(expected = RuntimeException.class)

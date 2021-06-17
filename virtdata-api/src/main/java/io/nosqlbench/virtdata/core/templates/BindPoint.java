@@ -31,6 +31,11 @@ public class BindPoint {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(anchor, bindspec);
+    }
+
+    @Override
     public String toString() {
         return "BindPoint{" +
                 "anchor='" + anchor + '\'' +

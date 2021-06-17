@@ -68,8 +68,6 @@ public class ServiceProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-        List<Element> ts = new ArrayList<>();
-
         try {
             for (String annotationType : this.getSupportedAnnotationTypes()) {
                 Class<? extends Annotation> annotationClass =

@@ -28,7 +28,6 @@ public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHisto
     private final String metricName;
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry = 0L;
-    private ConvenientSnapshot lastSnapshot;
     private List<Timer> mirrors;
 
     public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {

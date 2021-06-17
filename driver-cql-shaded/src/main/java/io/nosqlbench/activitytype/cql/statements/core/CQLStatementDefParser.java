@@ -12,11 +12,8 @@ public class CQLStatementDefParser {
     private final static Logger logger = LogManager.getLogger(CQLStatementDefParser.class);
     //    private final static Pattern templateToken = Pattern.compile("<<(\\w+(:(.+?))?)>>");
     private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
-    private final static String UNSET_VALUE = "UNSET-VALUE";
     private final String stmt;
     private final String name;
-
-    private CQLStatementDef deprecatedDef; // deprecated, to be removed
 
     public void setBindings(Map<String, String> bindings) {
         this.bindings = bindings;
@@ -24,18 +21,9 @@ public class CQLStatementDefParser {
 
     private Map<String, String> bindings;
 
-    public CQLStatementDef getDeprecatedDef() {
-        return deprecatedDef;
-    }
-
-    public void setDeprecatedDef(CQLStatementDef deprecatedDef) {
-        this.deprecatedDef = deprecatedDef;
-    }
-
     public CQLStatementDefParser(String name, String stmt) {
         this.stmt = stmt;
         this.name = name;
-        this.bindings = bindings;
     }
 
     public Map<String,String> getBindings() {
@@ -122,6 +110,7 @@ public class CQLStatementDefParser {
             this.missingGenerators = missingGenerators;
             this.missingAnchors = missingAnchors;
             this.statement = stmt;
+            this.bindings = bindings;
             this.name = name;
         }
 

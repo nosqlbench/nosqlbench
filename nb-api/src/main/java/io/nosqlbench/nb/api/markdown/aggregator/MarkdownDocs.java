@@ -27,12 +27,7 @@ public class MarkdownDocs {
     }
 
     public static List<MarkdownInfo> find(String name, DocScope... scopes) {
-        List<MarkdownInfo> aggregated = new ArrayList<>();
-
         List<Content<?>> markdownContent = RawMarkdownSources.getAllMarkdown();
-
-        // Find all topics and aggregators
-        List<String> aggregators = new ArrayList<>();
 
         List<MarkdownInfo> markdownInfos = markdownContent
             .stream()
@@ -78,7 +73,7 @@ public class MarkdownDocs {
         return mdgraph.processed();
 //
 //
-//
+//        List<MarkdownInfo> aggregated = new ArrayList<>();
 //        List<Edge<List<String>>> edges = new ArrayList<>();
 //        List<String> matchedtopics = null;
 //

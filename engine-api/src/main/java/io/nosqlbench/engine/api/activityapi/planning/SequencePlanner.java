@@ -59,7 +59,6 @@ public class SequencePlanner<T> {
                 logger.trace("sequencing elements by concatenation");
                 this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements, ratios);
         }
-        this.elements = elements;
         return new Sequence<>(sequencerType, elements, elementIndex);
     }
 

@@ -304,7 +304,7 @@ public class CQLSessionCache implements Shutdownable {
         Cluster cl = builder.build();
 
         // Apply default idempotence, if set
-        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
+        activityDef.getParams().getOptionalBoolean("defaultidempotence").ifPresent(
             b -> cl.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
         );
 

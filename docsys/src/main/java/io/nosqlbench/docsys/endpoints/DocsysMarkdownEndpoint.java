@@ -180,12 +180,6 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
     }
 
     private void enable(Set<String> enabled) {
-
-        Set<String> toEnable = new HashSet<>();
-        if (this.enables !=null) {
-            toEnable.addAll(this.enables);
-        }
-
         for (DocsNameSpace nsinfo : docsinfo) {
             // add namespaces which are neither enabled nor disabled to the default group
             if (nsinfo.isEnabledByDefault()) {
@@ -204,6 +198,4 @@ public class DocsysMarkdownEndpoint implements WebServiceObject {
             this.enabled = disabled.remove(enabled);
         }
     }
-
-
 }
