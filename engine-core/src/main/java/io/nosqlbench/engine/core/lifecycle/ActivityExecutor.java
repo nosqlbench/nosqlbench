@@ -423,8 +423,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * @return true, if the desired SlotState was detected
      */
     private boolean awaitMotorState(Motor m, int waitTime, int pollTime, RunState... desiredRunStates) {
-        Set<RunState> desiredStates = new HashSet<>(Arrays.asList(desiredRunStates));
-
         long startedAt = System.currentTimeMillis();
         while (System.currentTimeMillis() < (startedAt + waitTime)) {
             Map<RunState, Integer> actualStates = new HashMap<>();
@@ -434,11 +432,11 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             for (RunState desiredRunState : desiredRunStates) {
                 actualStates.remove(desiredRunState);
             }
-            logger.trace("state of remaining slots:" + actualStates.toString());
+            logger.trace("state of remaining slots:" + actualStates);
             if (actualStates.size() == 0) {
                 return true;
             } else {
-                System.out.println("motor states:" + actualStates.toString());
+                System.out.println("motor states:" + actualStates);
                 try {
                     Thread.sleep(pollTime);
                 } catch (InterruptedException ignored) {
