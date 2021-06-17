@@ -1,9 +1,10 @@
 package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class NullOrPassTest {
 
@@ -22,14 +23,16 @@ public class NullOrPassTest {
         NullOrPass g = new NullOrPass(0.0,"value");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testLowRatio() {
-        NullOrPass f = new NullOrPass(-0.00001d,"value");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> new NullOrPass(-0.00001d,"value"));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testHighRatio() {
-        NullOrPass g = new NullOrPass(1.000001d,"value");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> new NullOrPass(1.000001d,"value"));
     }
 
 }

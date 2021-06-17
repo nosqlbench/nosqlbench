@@ -3,7 +3,7 @@ package io.nosqlbench.activitytype.cql.datamappers.functions.double_to_cqldurati
 import com.datastax.driver.core.Duration;
 import io.nosqlbench.activitytype.cql.datamappers.functions.long_to_cqlduration.CqlDurationFunctions;
 import io.nosqlbench.activitytype.cql.datamappers.functions.long_to_cqlduration.ToCqlDurationNanos;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;

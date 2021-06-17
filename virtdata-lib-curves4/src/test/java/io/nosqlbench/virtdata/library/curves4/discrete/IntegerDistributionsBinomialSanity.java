@@ -3,8 +3,8 @@ package io.nosqlbench.virtdata.library.curves4.discrete;
 import io.nosqlbench.virtdata.library.curves4.discrete.common.DiscreteLongLongSampler;
 import io.nosqlbench.virtdata.library.curves4.discrete.common.IntegerDistributionICDSource;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -56,7 +56,7 @@ public class IntegerDistributionsBinomialSanity {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void showBinomialICDF() {
         DiscreteLongLongSampler b85 = new DiscreteLongLongSampler(new IntegerDistributionICDSource(

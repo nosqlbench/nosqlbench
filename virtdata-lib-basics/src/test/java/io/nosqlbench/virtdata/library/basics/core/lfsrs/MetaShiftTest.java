@@ -1,8 +1,9 @@
 package io.nosqlbench.virtdata.library.basics.core.lfsrs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class MetaShiftTest {
 
@@ -14,9 +15,10 @@ public class MetaShiftTest {
         assertThat(MetaShift.getMsbPosition(Long.MAX_VALUE)).isEqualTo(63);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testNegativeException() {
-        assertThat(MetaShift.getMsbPosition(-34)).isEqualTo(64);
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> MetaShift.getMsbPosition(-34));
     }
 
     @Test
@@ -25,9 +27,10 @@ public class MetaShiftTest {
         assertThat(f.config.feedback).isEqualTo(9L);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testBankSelectorOverrun() {
-        MetaShift.Func f = MetaShift.forSizeAndBank(4, 123);
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> MetaShift.forSizeAndBank(4, 123));
     }
 
 //    @Test

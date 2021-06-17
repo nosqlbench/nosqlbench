@@ -1,6 +1,6 @@
 package io.nosqlbench.nb.api;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SystemIdTest {
 

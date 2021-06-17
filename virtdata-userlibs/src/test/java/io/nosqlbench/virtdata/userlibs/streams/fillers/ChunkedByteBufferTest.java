@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.userlibs.streams.fillers;
 
 import io.nosqlbench.virtdata.userlibs.streams.ByteBufferStreams;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 

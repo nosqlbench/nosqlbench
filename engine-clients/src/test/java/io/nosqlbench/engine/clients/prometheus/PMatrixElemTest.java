@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PMatrixElemTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testMatrixElem() {
         Gson gson = new GsonBuilder().create();
         String json = NBIO.classpath().name("test.json").one().asString();

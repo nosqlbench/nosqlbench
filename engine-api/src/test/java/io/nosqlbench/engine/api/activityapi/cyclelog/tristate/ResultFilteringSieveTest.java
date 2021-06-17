@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReada
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

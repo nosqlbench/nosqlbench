@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.input;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

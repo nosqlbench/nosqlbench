@@ -1,11 +1,13 @@
 package io.nosqlbench.virtdata.util;
 
 import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class VirtDataFunctionsTest  {
 
@@ -16,11 +18,10 @@ public class VirtDataFunctionsTest  {
         long f2 = adapted.apply(42L);
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void testWrongLongUnaryConversion() {
-        Function<Long,Integer> fl = (Long l) -> Math.max(l.intValue(),43);
-        LongFunction<Long> adapted = VirtDataFunctions.adapt(fl, LongFunction.class, Long.class, true);
-        long f2 = adapted.apply(42L);
+        Function<Long,Integer> fl = (Long l) -> Math.max(l.intValue(), 43);
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(() -> VirtDataFunctions.adapt(fl, LongFunction.class, Long.class, true));
     }
-
 }

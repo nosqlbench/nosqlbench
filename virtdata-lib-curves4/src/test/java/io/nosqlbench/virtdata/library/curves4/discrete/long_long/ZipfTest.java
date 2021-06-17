@@ -1,12 +1,12 @@
 package io.nosqlbench.virtdata.library.curves4.discrete.long_long;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class ZipfTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testZipfMatrix() {
 
         for (int i = 0; i < 20; i++) {

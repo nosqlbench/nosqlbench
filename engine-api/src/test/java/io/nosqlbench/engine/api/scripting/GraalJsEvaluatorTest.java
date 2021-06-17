@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.scripting;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 

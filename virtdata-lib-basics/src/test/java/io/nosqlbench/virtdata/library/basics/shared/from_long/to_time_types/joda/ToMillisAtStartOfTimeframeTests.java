@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types.jod
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

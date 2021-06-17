@@ -19,7 +19,7 @@ package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.cli.testing.ProcessInvoker;
 import io.nosqlbench.cli.testing.ProcessResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

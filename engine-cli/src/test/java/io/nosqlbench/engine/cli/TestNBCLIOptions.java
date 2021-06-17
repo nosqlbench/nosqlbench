@@ -2,7 +2,7 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.nb.api.content.NBIO;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class TestNBCLIOptions {
 
@@ -87,9 +88,10 @@ public class TestNBCLIOptions {
         assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldErrorSanelyWhenNoMatch() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"unrecognizable command"});
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"unrecognizable command"}));
     }
 
     @Test
@@ -102,14 +104,16 @@ public class TestNBCLIOptions {
         assertThat(cmd.getParams().get("param1")).isEqualTo("value1");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void testShouldErrorSanelyWhenScriptNameSkipped() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "param1=value1"});
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"script", "param1=value1"}));
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void testShouldErrorForMissingScriptName() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script"});
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"script"}));
     }
 
     @Test
@@ -140,10 +144,10 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void shouldThrowErrorForInvalidStopActivity() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "stop", "woah=woah" });
-        List<Cmd> cmds = opts.getCommands();
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "stop", "woah=woah" }));
     }
 
     @Test
@@ -155,11 +159,10 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void shouldThrowErrorForInvalidAwaitActivity() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" });
-        List<Cmd> cmds = opts.getCommands();
-
+        assertThatExceptionOfType(InvalidParameterException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" }));
     }
 
     @Test

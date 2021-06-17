@@ -3,7 +3,7 @@ package io.virtdata;
 import io.nosqlbench.virtdata.library.basics.shared.distributions.DelimFrequencySampler;
 import io.nosqlbench.virtdata.library.basics.shared.distributions.WeightedStringsFromCSV;
 import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVFrequencySampler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

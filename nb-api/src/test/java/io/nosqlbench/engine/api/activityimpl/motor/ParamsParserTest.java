@@ -18,11 +18,12 @@
 package io.nosqlbench.engine.api.activityimpl.motor;
 
 import io.nosqlbench.nb.api.config.ParamsParser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ParamsParserTest {
 
@@ -60,7 +61,6 @@ public class ParamsParserTest {
         assertThat(p).hasSize(2);
         assertThat(p).containsKey("b");
         assertThat(p.get("b")).isEqualTo("fo'urfive");
-
     }
 
     @Test
@@ -127,7 +127,6 @@ public class ParamsParserTest {
         assertThat(p).containsKey("b");
         assertThat(p.get("a")).isEqualTo("1");
         assertThat(p.get("b")).isEqualTo("2");
-
     }
 
     @Test
@@ -138,7 +137,6 @@ public class ParamsParserTest {
         assertThat(p).containsKey("b");
         assertThat(p.get("a")).isEqualTo("1 2 3");
         assertThat(p.get("b")).isEqualTo("2");
-
     }
 
     @Test
@@ -149,17 +147,12 @@ public class ParamsParserTest {
         assertThat(p).containsKey("b");
         assertThat(p.get("a")).isEqualTo("1");
         assertThat(p.get("b")).isEqualTo("2 3 4");
-
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testValidNameException() {
-        Map<String, String> p = ParamsParser.parse("a=1\\\\;'\";b=2 3 4",true);
-        assertThat(p).hasSize(2);
-        assertThat(p).containsKey("a");
-        assertThat(p).containsKey("b");
-        assertThat(p.get("a")).isEqualTo("1\\;'\"");
-        assertThat(p.get("b")).isEqualTo("2 3 4");
+    @Test
+    public void testInvalidNameException() {
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> ParamsParser.parse("a=1\\\\;'\";b=2 3 4",true));
     }
 
     @Test
@@ -170,8 +163,6 @@ public class ParamsParserTest {
         assertThat(p).containsKey("b");
         assertThat(p.get("a")).isEqualTo("fiver");
         assertThat(p.get("b")).isEqualTo(" sixer");
-
     }
-
 
 }

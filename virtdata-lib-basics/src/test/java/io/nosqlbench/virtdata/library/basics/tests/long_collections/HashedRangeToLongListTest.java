@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_collections;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.HashedRangeToLongList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

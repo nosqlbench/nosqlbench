@@ -1,13 +1,14 @@
 package io.nosqlbench.virtdata.core.composers;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class FunctionAssemblerTest {
 
@@ -51,13 +52,14 @@ public class FunctionAssemblerTest {
         assertThat(aLong).isEqualTo(15);
     }
 
-    @Test(expected = ClassCastException.class)
-    public void testLongFunctionLongFunctionMistyped() throws Exception {
+    @Test
+    public void testLongFunctionLongFunctionMistyped() {
         FunctionComposer fass = new FunctionAssembly();
         fass.andThen(new LongAddFiveFunction());
         fass.andThen(new GenericStringCat());
         DataMapper<String> dataMapper = fass.getDataMapper();
-        dataMapper.get(5);
+        assertThatExceptionOfType(ClassCastException.class)
+                .isThrownBy(() -> dataMapper.get(5));
     }
 
     @Test
@@ -79,12 +81,13 @@ public class FunctionAssemblerTest {
 //        assertThat(s).isEqualTo("Cat5");
 //    }
 
-    @Test(expected= ClassCastException.class)
+    @Test
     public void testFunctionFunctionMistyped() {
         FunctionComposer fass = new FunctionAssembly();
         fass.andThen(new GenericStringCat());
         DataMapper<String> dataMapper = fass.getDataMapper();
-        String s = dataMapper.get(5);
+        assertThatExceptionOfType(ClassCastException.class)
+                .isThrownBy(() -> dataMapper.get(5));
     }
 
     @Test

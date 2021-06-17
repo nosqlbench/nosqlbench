@@ -3,7 +3,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_charbuffer.CharBufferExtract;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.HashedLoremExtractToString;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.conversions.from_double;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;

@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_double.to_bigdecimal;
 
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.library.basics.core.DateTimeFormats;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types.ToEpochTimeUUID;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

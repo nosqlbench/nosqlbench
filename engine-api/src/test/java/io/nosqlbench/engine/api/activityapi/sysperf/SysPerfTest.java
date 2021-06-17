@@ -17,8 +17,8 @@
 
 package io.nosqlbench.engine.api.activityapi.sysperf;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.attribute.FileTime;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SysPerfTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testForcedBench() {
 
 //        SysPerf.get().reset();

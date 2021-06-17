@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

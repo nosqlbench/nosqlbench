@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Formatter;
 import java.util.Locale;

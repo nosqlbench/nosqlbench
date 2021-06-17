@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.CoreResultValueFilt
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Predicate;
 

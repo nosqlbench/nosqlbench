@@ -19,11 +19,12 @@
 package io.nosqlbench.engine.api.activityapi;
 
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ParameterMapTest {
 
@@ -85,11 +86,12 @@ public class ParameterMapTest {
         assertThat(multiNames.get().getOptionalString("delta","gamma").orElse("missing")).isEqualTo("blue");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testAmbiguousMultiValueThrowsException() {
         Optional<ParameterMap> multiNames = ParameterMap.parseParams("alpha=blue;beta=red;delta=blue");
         assertThat(multiNames).isPresent();
-        assertThat(multiNames.get().getOptionalString("alpha","delta").orElse("missing")).isEqualTo("blue");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> multiNames.get().getOptionalString("alpha","delta"));
     }
 
     @Test

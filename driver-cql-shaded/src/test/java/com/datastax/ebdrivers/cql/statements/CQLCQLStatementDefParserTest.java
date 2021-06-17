@@ -1,7 +1,7 @@
 package com.datastax.ebdrivers.cql.statements;
 
 import io.nosqlbench.activitytype.cql.statements.core.CQLStatementDefParser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.List;

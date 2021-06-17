@@ -19,10 +19,10 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import org.assertj.core.data.MapEntry;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ public class StmtsDocListTest {
     }};
 
 
-    @BeforeClass
+    @BeforeAll
     public static void testLoadYaml() {
         doclist = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
     }

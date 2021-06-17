@@ -27,7 +27,7 @@
     <jaxb.impl.version>2.4.0-b180830.0438</jaxb.impl.version>
     <jmh.version>1.22</jmh.version>
     <joda.time.version>2.9.9</joda.time.version>
-    <junit.jupiter.version>5.3.2</junit.jupiter.version>
+    <junit.jupiter.version>5.7.2</junit.jupiter.version>
 
     <lz4.version>1.4.1</lz4.version>
 <!--    <metrics.version>4.0.7</metrics.version>-->
@@ -88,7 +88,7 @@
 
       <dependency>
         <groupId>org.junit.jupiter</groupId>
-        <version>5.6.2</version>
+        <version>${junit.jupiter.version}</version>
         <artifactId>junit-jupiter</artifactId>
         <scope>test</scope>
       </dependency>
@@ -208,7 +208,6 @@
         <artifactId>oshi-core</artifactId>
         <version>5.2.2</version>
       </dependency>
-
 
       <dependency>
         <groupId>com.google.code.gson</groupId>
@@ -354,31 +353,20 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.15.0</version>
+      <version>3.19.0</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
-      <version>1.6.2</version>
+      <version>1.7.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.6.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <version>5.6.2</version>
+      <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
 

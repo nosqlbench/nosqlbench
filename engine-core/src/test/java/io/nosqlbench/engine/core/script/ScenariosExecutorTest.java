@@ -18,13 +18,13 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class ScenariosExecutorTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
         Scenario s = new Scenario("testing", Scenario.Engine.Graalvm,"stdout:3000");

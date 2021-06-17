@@ -4,8 +4,8 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
 import io.nosqlbench.virtdata.library.basics.shared.functionadapters.ToLongFunction;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ public class CoinFuncTest {
     }
 
     // Uncomment this if you want to see the qualitative check
-    @Ignore
+    @Disabled
     @Test
     public void testResults() {
         CoinFunc f = new CoinFunc(0.1,
