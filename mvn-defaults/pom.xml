@@ -559,7 +559,7 @@
         <plugin>
           <groupId>org.antlr</groupId>
           <artifactId>antlr4-maven-plugin</artifactId>
-          <version>4.8</version>
+          <version>4.9.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
