@@ -45,11 +45,9 @@ public class TagFilterTest {
 
     @Test
     public void testSomeFilterTagsNoItemTagsDoesNotMatch() {
-        Map<String, String> itemtags = new HashMap<>() {{
-        }};
+        Map<String, String> itemtags = new HashMap<>();
         TagFilter tf = new TagFilter("tag=foo");
         assertThat(tf.matches(itemtags).matched()).isFalse();
-
     }
 
     @Test
@@ -59,7 +57,6 @@ public class TagFilterTest {
         }};
         TagFilter tf = new TagFilter("");
         assertThat(tf.matches(itemtags).matched()).isTrue();
-
     }
 
     @Test
@@ -76,7 +73,6 @@ public class TagFilterTest {
         }};
         assertThat(tf.matches(itemtags2).matched()).isTrue();
     }
-
 
     @Test
     public void testMatchingKeyMismatchingValueDoesNotMatch() {
@@ -110,7 +106,8 @@ public class TagFilterTest {
         assertThat(tfRight.matches(itemtags).matched()).isTrue();
     }
 
-    public void testMatchingDetails() {
+    // TODO: enable and fix test
+    private void testMatchingDetails() {
         Tagged tagged = new Tagged() {
             @Override
             public Map<String, String> getTags() {
@@ -131,7 +128,6 @@ public class TagFilterTest {
         assertThat(result.getLog()).contains("filter(five) tag(five): matched names");
         assertThat(result.getLog()).contains("filter(seven) tag(): did not match");
         assertThat(result.getLog()).contains("filter(six:again) tag(six): null tag value did not match");
-
     }
 
     @Test
@@ -171,5 +167,4 @@ public class TagFilterTest {
         TagFilter tf2 = new TagFilter("any(car:truck,phase:moon)");
         assertThat(tf2.matches(itemtags).matched()).isFalse();
     }
-
 }

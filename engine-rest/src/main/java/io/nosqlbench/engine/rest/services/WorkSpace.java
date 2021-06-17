@@ -123,8 +123,7 @@ public class WorkSpace {
 
         List<WorkspaceItemView> items = new ArrayList<>();
 
-        try {
-            DirectoryStream<Path> elementPaths = Files.newDirectoryStream(target);
+        try (DirectoryStream<Path> elementPaths = Files.newDirectoryStream(target)) {
             for (Path elementPath : elementPaths) {
                 items.add(new WorkspaceItemView(this.workspacePath,elementPath));
             }

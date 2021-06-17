@@ -197,6 +197,6 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     }
 
     public void asyncOperationFailed(Throwable ex) {
-        this.asyncOperationFailure = asyncOperationFailure;
+        this.asyncOperationFailure = ex;
     }
 }

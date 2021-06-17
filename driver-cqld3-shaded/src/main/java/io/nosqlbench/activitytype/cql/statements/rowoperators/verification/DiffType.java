@@ -23,7 +23,7 @@ public enum DiffType {
     /// the actual data.
     all(0x1|0x1<<1|0x1<<2);
 
-    public int bitmask;
+    public final int bitmask;
 
     DiffType(int bit) {
         this.bitmask = bit;

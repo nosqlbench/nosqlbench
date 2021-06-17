@@ -67,9 +67,6 @@ import java.util.function.ToLongFunction;
  */
 public class IntervalSequencer<T> implements ElementSequencer<T> {
 
-    private List<T> elems;
-    private ToLongFunction<T> ratioFunc;
-
     @Override
     public int[] seqIndexByRatioFunc(List<T> elements, ToLongFunction<T> ratioFunc) {
 

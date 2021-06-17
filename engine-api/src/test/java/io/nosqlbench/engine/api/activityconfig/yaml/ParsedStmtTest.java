@@ -63,7 +63,7 @@ public class ParsedStmtTest {
 
         OpTemplate stmtDef1 = block2.getOps().get(1);
         ParsedStmt parsed1 = stmtDef1.getParsed();
-        assertThat(parsed1.getMissingBindings().isEmpty());
+        assertThat(parsed1.getMissingBindings()).isEmpty();
         assertThat(parsed1.hasError()).isFalse();
     }
 

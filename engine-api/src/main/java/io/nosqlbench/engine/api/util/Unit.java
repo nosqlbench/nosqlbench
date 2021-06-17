@@ -265,17 +265,13 @@ public class Unit {
         TB("TB", "terabyte", bytesPerGB * 1000),
         PB("PB", "petabyte", bytesPerGB * 1000000),
         EB("EB", "exabyte", bytesPerGB * bytesPerGB),
-        ZB("ZB", "zettabyte", bytesPerGB * bytesPerGB * 1000),
-        YB("YB", "yottabyte", bytesPerGB * bytesPerGB * 1000000),
 
         KIB("KiB", "kibibyte", 1024),
         MIB("MiB", "mebibyte", 1024 * 1024),
         GIB("GiB", "gibibyte", BytesPerGiB),
         TIB("TiB", "tebibyte", BytesPerGiB * 1024),
         PIB("PIB", "pebibyte", BytesPerGiB * 1024 * 1024),
-        EIB("EiB", "exbibyte", BytesPerGiB * BytesPerGiB),
-        ZIB("ZiB", "zebibyte", BytesPerGiB * BytesPerGiB * 1024),
-        YIB("YiB", "yobibyte", BytesPerGiB * BytesPerGiB * 1024 * 1024);
+        EIB("EiB", "exbibyte", BytesPerGiB * BytesPerGiB);
 
         private final String name;
         private final long bytes;

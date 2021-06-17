@@ -311,7 +311,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 endedAtMillis = System.currentTimeMillis();
             }
         }
-        int awaitCompletionTime = 86400 * 365 * 1000;
+        long awaitCompletionTime = 86400 * 365 * 1000L;
         logger.debug("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
         //TODO: Ensure control flow covers controller shutdown in event of internal error.

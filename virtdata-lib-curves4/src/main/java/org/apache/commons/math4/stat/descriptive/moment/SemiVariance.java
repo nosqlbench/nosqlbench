@@ -340,7 +340,7 @@ public class SemiVariance extends AbstractUnivariateStatistic implements Seriali
          /**
           * boolean value  UPSIDE <-> true
           */
-         private boolean direction;
+         private final boolean direction;
 
          /**
           * Create a Direction with the given value.

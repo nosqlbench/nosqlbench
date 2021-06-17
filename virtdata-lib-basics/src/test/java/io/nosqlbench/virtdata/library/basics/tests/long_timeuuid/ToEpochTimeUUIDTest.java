@@ -22,7 +22,10 @@ public class ToEpochTimeUUIDTest {
             formats.add(formatted);
 
             e = new ToEpochTimeUUID(formatted);
+        }
 
+        for (String formatted : formats) {
+            System.out.println(formatted);
         }
 
         /**

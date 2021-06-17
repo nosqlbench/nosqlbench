@@ -3,6 +3,7 @@ package io.nosqlbench.activitytype.cqlverify;
 import io.nosqlbench.activitytype.cql.core.CqlActivity;
 import io.nosqlbench.activitytype.cql.statements.rsoperators.AssertSingleRowResultSet;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,27 +23,26 @@ public class CqlVerifyActivity extends CqlActivity {
     @Override
     public synchronized void initActivity() {
 
-        if (!super.getActivityDef().getParams().contains("verify") &&
-            !super.getActivityDef().getParams().contains("verify-fields")) {
+        ParameterMap activityParams = super.getActivityDef().getParams();
+        if (!activityParams.containsKey("verify") &&
+            !activityParams.containsKey("verify-fields")) {
             logger.info("Pre-configuring activity param 'verify=*' since none was provided.");
             logger.info("To control this on a per-statement basis, use the verify param.");
-            super.getActivityDef().getParams().put("verify", "*");
+            activityParams.put("verify", "*");
         }
 
-        if (!super.getActivityDef().getParams().contains("compare")) {
-            super.getActivityDef().getParams().put("compare", "all");
+        if (!activityParams.containsKey("compare")) {
+            activityParams.put("compare", "all");
             logger.info("Pre-configuring activity param 'compare=all' since none was provided.");
             logger.info("To control this on a per-statement basis, use the compare param.");
         }
 
         super.initActivity();
-
     }
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
         addResultSetCycleOperator(new AssertSingleRowResultSet());
-
     }
 }

@@ -26,10 +26,8 @@ public class WeightedFuncs implements LongFunction<Object> {
     private HashedDoubleRange unitSampler = new HashedDoubleRange(0.0d, 1.0d);
 
     public WeightedFuncs(Object... weightsAndFuncs) {
-        List<EvProbD> probabilites = new ArrayList<>();
-        List<LongFunction<Object>> functions = new ArrayList<>();
-
         List<EvProbD> probabilities = new ArrayList<>();
+        List<LongFunction<Object>> functions = new ArrayList<>();
 
         if ((weightsAndFuncs.length % 2) != 0) {
             throw new RuntimeException("You must have weights and functions, pairwise." +
@@ -45,7 +43,7 @@ public class WeightedFuncs implements LongFunction<Object> {
             } catch (NumberFormatException nfe) {
                 throw new RuntimeException("the 0th and ever even value must be a floating point weight.");
             }
-            probabilites.add(new EvProbD(i >> 1, weight));
+            probabilities.add(new EvProbD(i >> 1, weight));
 
             Object f = weightsAndFuncs[i + 1];
             try {
@@ -58,7 +56,7 @@ public class WeightedFuncs implements LongFunction<Object> {
             }
         }
         this.funcs = functions.toArray(new LongFunction[0]);
-        this.functionSampler = new AliasSamplerDoubleInt(probabilites);
+        this.functionSampler = new AliasSamplerDoubleInt(probabilities);
     }
 
     @Override

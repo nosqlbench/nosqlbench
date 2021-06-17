@@ -84,9 +84,7 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalLength);
-        return sb.toString();
+        return "HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalLength;
     }
 
     public long getInterval() {

@@ -41,7 +41,6 @@ public class HistoStatsCSVWriter {
 
     private PrintStream initFile(File logfile) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(logfile);
             PrintStream writer = new PrintStream(logfile);
             return writer;
         } catch (IOException e) {

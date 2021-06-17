@@ -377,7 +377,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     }
 
     public static String toJSON(Map<?,?> map) {
-        StringBuilder sb = new StringBuilder();
         List<String> l = new ArrayList<>();
         map.forEach((k,v) -> l.add("'" + k + "': '" + v + "'"));
         return "params={"+String.join(",\n  ",l)+"};\n";
