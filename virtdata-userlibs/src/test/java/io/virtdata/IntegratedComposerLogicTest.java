@@ -137,7 +137,7 @@ public class IntegratedComposerLogicTest {
 
         Class<?> c3 = Identity.class;
         Class<?> c4 = LongFunction.class;
-        assertThat(ClassUtils.isAssignable(c3, c4)).isTrue();
+        assertThat(ClassUtils.isAssignable(c3, c4)).isFalse();
         LongUnaryOperator f;
         f = new Identity();
     }
