@@ -1,5 +1,7 @@
-- 5b4a695f (HEAD -> main) update ANTLR to 4.2.9 in all places
-- 3b74ae20 (origin/main) General improvements and bug-fixes. Thanks to @XN137
+- 663e3010 (HEAD -> main) correct test for current functional APIs
+- e981f808 (origin/main) General improvements and bug-fixes. Thanks to @XN137
+- 5b4a695f update ANTLR to 4.2.9 in all places
+- 3b74ae20 General improvements and bug-fixes. Thanks to @XN137
 - 7c7ea039 post-merge fixups
 - 9403f51f improve ToDate semantics and docs
 - 0edbfb1f fix test for TagFilter
@@ -16,6 +18,3 @@
 - 0e68abf1 prefer jdk over lib internals for String join
 - dc1c6c5e Merge pull request #332 from XN137/fix-virtdata-api-test-folder
 - 6232edff move virtdata-api tests to correct folder
-- DateRangeFunc() would create zero-length ranges
-  before. Now it correctly uses start and end times. If you have a test with this function,
-  it may return larger results than before.
