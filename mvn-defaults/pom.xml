@@ -13,6 +13,7 @@
 
     <!-- properties for package versions -->
     <ascii.data.version>1.2.0</ascii.data.version>
+    <antlr4.version>4.9.2</antlr4.version>
     <commons.codec.version>1.14</commons.codec.version>
     <commons.compress.version>1.20</commons.compress.version>
     <commons.csv.version>1.8</commons.csv.version>
@@ -270,7 +271,7 @@
       <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
-        <version>4.9.2</version>
+        <version>${antlr4.version}</version>
       </dependency>
 
       <dependency>
@@ -547,7 +548,7 @@
         <plugin>
           <groupId>org.antlr</groupId>
           <artifactId>antlr4-maven-plugin</artifactId>
-          <version>4.9.2</version>
+          <version>${antlr4.version}</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
