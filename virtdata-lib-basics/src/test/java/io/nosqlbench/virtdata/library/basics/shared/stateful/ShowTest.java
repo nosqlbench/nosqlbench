@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Save;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,8 +23,6 @@ public class ShowTest {
         assertThat(showFoo.apply(2342343L)).isEqualTo("{foo=23}");
         assertThat(showBar.apply(23423L)).isEqualTo("{bar=Bar}");
         new Clear().apply(234);
-        assertThat(showAll.apply("234").isEmpty());
+        assertThat(showAll.apply("234")).isEqualTo("{}");
     }
-
-
 }

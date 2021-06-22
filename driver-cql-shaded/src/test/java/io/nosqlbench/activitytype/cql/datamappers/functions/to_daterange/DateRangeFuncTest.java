@@ -1,6 +1,6 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.to_daterange;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 import java.util.function.LongFunction;

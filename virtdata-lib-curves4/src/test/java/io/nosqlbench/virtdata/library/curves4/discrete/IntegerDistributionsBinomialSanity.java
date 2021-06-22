@@ -3,8 +3,8 @@ package io.nosqlbench.virtdata.library.curves4.discrete;
 import io.nosqlbench.virtdata.library.curves4.discrete.common.DiscreteLongLongSampler;
 import io.nosqlbench.virtdata.library.curves4.discrete.common.IntegerDistributionICDSource;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegerDistributionsBinomialSanity {
 
-    private static double[] binomial85steps = new double[]{
+    private static final double[] binomial85steps = new double[]{
             0.00390d, 0.03125d, 0.10937d, 0.21875d, 0.27343d, 0.21875d, 0.10937d, 0.03125d, 0.00390d,
     };
 
@@ -23,7 +23,7 @@ public class IntegerDistributionsBinomialSanity {
         ),false);
         assertThat(b85.applyAsLong(0L)).isEqualTo(0);
         assertThat(b85.applyAsLong(Long.MAX_VALUE)).isEqualTo(8);
-        double c[] = new double[binomial85steps.length];
+        double[] c = new double[binomial85steps.length];
         c[0]=binomial85steps[0];
         for (int i = 1; i < c.length; i++) {
             c[i] = c[i-1]+binomial85steps[i];
@@ -56,7 +56,7 @@ public class IntegerDistributionsBinomialSanity {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void showBinomialICDF() {
         DiscreteLongLongSampler b85 = new DiscreteLongLongSampler(new IntegerDistributionICDSource(

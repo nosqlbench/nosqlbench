@@ -1,13 +1,13 @@
 package io.nosqlbench.engine.clients.grafana.analyzer;
 
 import io.nosqlbench.engine.clients.grafana.transfer.GDashboard;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class GrafanaRegionAnalyzerTest {
 
     @Test
-    @Ignore
+    @Disabled
     public void testGetQueries() {
         GrafanaRegionAnalyzer gra = new GrafanaRegionAnalyzer();
         gra.setBaseUrl("http://44.242.139.57:3000/");

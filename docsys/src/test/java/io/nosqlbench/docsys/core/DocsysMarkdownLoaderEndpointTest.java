@@ -1,7 +1,7 @@
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DocsysMarkdownLoaderEndpointTest {
 

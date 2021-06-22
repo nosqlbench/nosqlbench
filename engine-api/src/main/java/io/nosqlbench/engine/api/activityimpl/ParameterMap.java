@@ -198,7 +198,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public void clear() {
-        logger.debug("parameter map cleared:" + toString());
+        logger.debug("parameter map cleared:" + this);
         super.clear();
 
         markMutation();
@@ -206,7 +206,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        logger.debug("getting entry set for " + toString());
+        logger.debug("getting entry set for " + this);
         return super.entrySet()
                 .stream()
                 .map(e -> new AbstractMap.SimpleEntry<String,Object>(e.getKey(), e.getValue()) {})
@@ -377,7 +377,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     }
 
     public static String toJSON(Map<?,?> map) {
-        StringBuilder sb = new StringBuilder();
         List<String> l = new ArrayList<>();
         map.forEach((k,v) -> l.add("'" + k + "': '" + v + "'"));
         return "params={"+String.join(",\n  ",l)+"};\n";

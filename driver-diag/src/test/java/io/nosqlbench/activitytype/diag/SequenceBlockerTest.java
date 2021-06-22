@@ -17,7 +17,7 @@
 
 package io.nosqlbench.activitytype.diag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.PrintStream;
 
@@ -39,7 +39,7 @@ public class SequenceBlockerTest {
 
     private final static class Printer implements Runnable {
 
-        private PrintStream printStream;
+        private final PrintStream printStream;
         private final String out;
 
         public Printer(PrintStream printStream, String out) {

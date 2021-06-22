@@ -6,7 +6,7 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Identity;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
 import org.apache.commons.lang3.ClassUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -14,6 +14,7 @@ import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class IntegratedComposerLogicTest {
 
@@ -132,19 +133,19 @@ public class IntegratedComposerLogicTest {
     public void sanityCheckFunctionCasting() {
         Class<?> c1 = NumberNameToString.class;
         Class<?> c2 = LongFunction.class;
-        assertThat(ClassUtils.isAssignable(c1,c2));
+        assertThat(ClassUtils.isAssignable(c1, c2)).isTrue();
 
         Class<?> c3 = Identity.class;
         Class<?> c4 = LongFunction.class;
-        assertThat(ClassUtils.isAssignable(c3,c4));
+        assertThat(ClassUtils.isAssignable(c3, c4)).isFalse();
         LongUnaryOperator f;
         f = new Identity();
-
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testVirtDataTypeVarianceError() {
-        DataMapper mapper = VirtData.getMapper("Uniform(0.0D,1.0D) -> java.lang.String", long.class);
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> VirtData.getMapper("Uniform(0.0D,1.0D) -> java.lang.String", long.class));
     }
 
     @Test

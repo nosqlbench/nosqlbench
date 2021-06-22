@@ -26,9 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment {
     private final String metricName;
-    private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
+    private final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry = 0L;
-    private ConvenientSnapshot lastSnapshot;
     private List<Timer> mirrors;
 
     public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {

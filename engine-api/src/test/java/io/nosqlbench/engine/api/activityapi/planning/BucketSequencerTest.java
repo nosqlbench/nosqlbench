@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.api.activityapi.planning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

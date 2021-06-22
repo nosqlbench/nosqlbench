@@ -56,15 +56,12 @@ public class WorkspaceFinder {
 
     public List<WorkspaceView> getWorkspaceViews() {
         List<WorkspaceView> views = new ArrayList<>();
-        DirectoryStream<Path> wsrEntries = null;
-        try {
-            wsrEntries = Files.newDirectoryStream(root);
+        try (DirectoryStream<Path> wsrEntries = Files.newDirectoryStream(root)) {
+            for (Path entry : wsrEntries) {
+                views.add(new WorkspaceView(entry));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        for (Path entry : wsrEntries) {
-            views.add(new WorkspaceView(entry));
         }
         return views;
     }
@@ -137,7 +134,7 @@ public class WorkspaceFinder {
 
             Path relativize = root.relativize(path);
             if (relativize.toString().contains("..")) {
-                throw new RuntimeException("Illegal path to delete: " + path.toString());
+                throw new RuntimeException("Illegal path to delete: " + path);
             }
 
             try (Stream<Path> walk = Files.walk(path)) {
@@ -145,9 +142,9 @@ public class WorkspaceFinder {
                     .map(Path::toFile)
 //                    .peek(System.out::println)
                     .forEach(f -> {
-                        logger.debug("deleting '" + f.toString() + "'");
+                        logger.debug("deleting '" + f + "'");
                         if (!f.delete()) {
-                            throw new RuntimeException("Unable to delete " + f.toString());
+                            throw new RuntimeException("Unable to delete " + f);
                         }
                     });
 

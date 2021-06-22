@@ -16,7 +16,7 @@ public class ReadyMongoStatement {
 
     public ReadyMongoStatement(OpTemplate stmtDef) {
         ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
-        BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getCheckedBindPoints());
+        BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
         StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
 
         this.bindings = template.resolve();

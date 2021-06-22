@@ -239,13 +239,13 @@ public class Unit {
 
         public static Count valueOfSuffix(String suffix) {
             for (Count count : Count.values()) {
-                if (count.toString().toLowerCase().equals(suffix.toLowerCase())) {
+                if (count.toString().equalsIgnoreCase(suffix)) {
                     return count;
                 }
-                if (count.label.toLowerCase().equals(suffix.toLowerCase())) {
+                if (count.label.equalsIgnoreCase(suffix)) {
                     return count;
                 }
-                if (count.name.toLowerCase().equals(suffix.toLowerCase())) {
+                if (count.name.equalsIgnoreCase(suffix)) {
                     return count;
                 }
             }
@@ -265,17 +265,13 @@ public class Unit {
         TB("TB", "terabyte", bytesPerGB * 1000),
         PB("PB", "petabyte", bytesPerGB * 1000000),
         EB("EB", "exabyte", bytesPerGB * bytesPerGB),
-        ZB("ZB", "zettabyte", bytesPerGB * bytesPerGB * 1000),
-        YB("YB", "yottabyte", bytesPerGB * bytesPerGB * 1000000),
 
         KIB("KiB", "kibibyte", 1024),
         MIB("MiB", "mebibyte", 1024 * 1024),
         GIB("GiB", "gibibyte", BytesPerGiB),
         TIB("TiB", "tebibyte", BytesPerGiB * 1024),
         PIB("PIB", "pebibyte", BytesPerGiB * 1024 * 1024),
-        EIB("EiB", "exbibyte", BytesPerGiB * BytesPerGiB),
-        ZIB("ZiB", "zebibyte", BytesPerGiB * BytesPerGiB * 1024),
-        YIB("YiB", "yobibyte", BytesPerGiB * BytesPerGiB * 1024 * 1024);
+        EIB("EiB", "exbibyte", BytesPerGiB * BytesPerGiB);
 
         private final String name;
         private final long bytes;
@@ -289,16 +285,16 @@ public class Unit {
 
         public static Bytes valueOfSuffix(String unitpart) {
             for (Bytes byteUnit : Bytes.values()) {
-                if (byteUnit.label.toLowerCase().equals(unitpart.toLowerCase())) {
+                if (byteUnit.label.equalsIgnoreCase(unitpart)) {
                     return byteUnit;
                 }
-                if (byteUnit.name.toLowerCase().equals(unitpart.toLowerCase())) {
+                if (byteUnit.name.equalsIgnoreCase(unitpart)) {
                     return byteUnit;
                 }
                 if ((byteUnit.name.toLowerCase() + "s").equals(unitpart.toLowerCase())) {
                     return byteUnit;
                 }
-                if (byteUnit.toString().toLowerCase().equals(unitpart.toLowerCase())) {
+                if (byteUnit.toString().equalsIgnoreCase(unitpart)) {
                     return byteUnit;
                 }
             }
@@ -334,13 +330,13 @@ public class Unit {
 
         public static Duration valueOfSuffix(String spec) {
             for (Duration duration : Duration.values()) {
-                if (duration.label.toLowerCase().equals(spec.toLowerCase())) {
+                if (duration.label.equalsIgnoreCase(spec)) {
                     return duration;
                 }
-                if (duration.toString().toLowerCase().equals(spec.toLowerCase())) {
+                if (duration.toString().equalsIgnoreCase(spec)) {
                     return duration;
                 }
-                if (duration.name.toLowerCase().equals(spec.toLowerCase())) {
+                if (duration.name.equalsIgnoreCase(spec)) {
                     return duration;
                 }
             }

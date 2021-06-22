@@ -1,9 +1,10 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class CombinationsTest {
 
@@ -69,11 +70,12 @@ public class CombinationsTest {
         assertThat(combinations.apply(31)).isEqualTo("D1");
     }
 
-    @Test(expected = ArithmeticException.class)
+    @Test
     public void testOverflow() {
         // (104^9 / 2^63) < 1.0
         // (104^10 / 2^63) > 1.0
-        Combinations combinations = new Combinations(
+        assertThatExceptionOfType(ArithmeticException.class)
+                .isThrownBy(() -> new Combinations(
                 "A-ZA-ZA-ZA-Z;"
                         + "A-ZA-ZA-ZA-Z;"
                         + "A-ZA-ZA-ZA-Z;"
@@ -84,9 +86,7 @@ public class CombinationsTest {
                         + "A-ZA-ZA-ZA-Z;"
                         + "A-ZA-ZA-ZA-Z;"
                         + "A-ZA-ZA-ZA-Z;"
-        );
-
-        combinations.apply(Long.MAX_VALUE);
+        ));
     }
 
 

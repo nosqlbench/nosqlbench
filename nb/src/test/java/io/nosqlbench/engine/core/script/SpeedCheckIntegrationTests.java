@@ -15,8 +15,8 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 
 /**
@@ -26,13 +26,13 @@ import org.junit.Test;
 public class SpeedCheckIntegrationTests {
 
     @Test
-    @Ignore
+    @Disabled
     public void testSpeedSanity() {
         ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("speedcheck");
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testThreadSpeeds() {
         ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("threadspeeds");
     }

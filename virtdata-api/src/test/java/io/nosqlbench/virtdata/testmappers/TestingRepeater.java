@@ -6,7 +6,7 @@ import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
 public class TestingRepeater implements LongUnaryOperator {
-    private int repeat;
+    private final int repeat;
 
     public TestingRepeater(int repeat) {
         this.repeat = repeat;

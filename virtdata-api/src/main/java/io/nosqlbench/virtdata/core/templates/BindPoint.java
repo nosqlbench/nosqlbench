@@ -3,12 +3,16 @@ package io.nosqlbench.virtdata.core.templates;
 import java.util.Objects;
 
 public class BindPoint {
-    private String anchor;
-    private String bindspec;
+    private final String anchor;
+    private final String bindspec;
 
     public BindPoint(String anchor, String bindspec) {
         this.anchor = anchor;
         this.bindspec = bindspec;
+    }
+
+    public static BindPoint of(String userid, String bindspec) {
+        return new BindPoint(userid,bindspec);
     }
 
     public String getAnchor() {
@@ -28,6 +32,11 @@ public class BindPoint {
 
         if (!Objects.equals(anchor, bindPoint.anchor)) return false;
         return Objects.equals(bindspec, bindPoint.bindspec);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(anchor, bindspec);
     }
 
     @Override

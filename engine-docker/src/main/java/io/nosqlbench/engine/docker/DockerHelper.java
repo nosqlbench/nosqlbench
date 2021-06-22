@@ -85,13 +85,11 @@ public class DockerHelper {
             portBindings.add(pb);
         }
 
-        List<Volume> volumeList = new ArrayList<>();
         List<Bind> volumeBindList = new ArrayList<>();
         for (String volumeDesc : volumeDescList) {
             String volFrom = volumeDesc.split(":")[0];
             String volTo = volumeDesc.split(":")[1];
             Volume vol = new Volume(volTo);
-            volumeList.add(vol);
             volumeBindList.add(new Bind(volFrom, vol));
         }
 
@@ -121,7 +119,6 @@ public class DockerHelper {
         }
 
         return containerResponse.getId();
-
     }
 
     private boolean startStoppedContainer(String name) {

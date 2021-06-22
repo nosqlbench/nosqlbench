@@ -12,11 +12,8 @@ public class CQLStatementDefParser {
     private final static Logger logger = LogManager.getLogger(CQLStatementDefParser.class);
     //    private final static Pattern templateToken = Pattern.compile("<<(\\w+(:(.+?))?)>>");
     private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
-    private final static String UNSET_VALUE = "UNSET-VALUE";
     private final String stmt;
     private final String name;
-
-    private CQLStatementDef deprecatedDef; // deprecated, to be removed
 
     public void setBindings(Map<String, String> bindings) {
         this.bindings = bindings;
@@ -24,18 +21,9 @@ public class CQLStatementDefParser {
 
     private Map<String, String> bindings;
 
-    public CQLStatementDef getDeprecatedDef() {
-        return deprecatedDef;
-    }
-
-    public void setDeprecatedDef(CQLStatementDef deprecatedDef) {
-        this.deprecatedDef = deprecatedDef;
-    }
-
     public CQLStatementDefParser(String name, String stmt) {
         this.stmt = stmt;
         this.name = name;
-        this.bindings = bindings;
     }
 
     public Map<String,String> getBindings() {
@@ -64,7 +52,7 @@ public class CQLStatementDefParser {
     public String getParsedStatementOrError(Set<String> namedBindings) {
         ParseResult result = getParseResult(namedBindings);
         if (result.hasError()) {
-            throw new RuntimeException("Statement template has errors:\n" + result.toString());
+            throw new RuntimeException("Statement template has errors:\n" + result);
         }
         return result.getStatement();
     }
@@ -115,13 +103,14 @@ public class CQLStatementDefParser {
         private final Set<String> missingGenerators;
         private final Set<String> missingAnchors;
         private final String statement;
-        private Map<String,String> bindings;
+        private final Map<String,String> bindings;
         private final String name;
 
         public ParseResult(String stmt, String name, Map<String,String> bindings, Set<String> missingGenerators, Set<String> missingAnchors) {
             this.missingGenerators = missingGenerators;
             this.missingAnchors = missingAnchors;
             this.statement = stmt;
+            this.bindings = bindings;
             this.name = name;
         }
 

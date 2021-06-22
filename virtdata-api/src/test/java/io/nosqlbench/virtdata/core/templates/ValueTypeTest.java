@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core.templates;
 
 import io.nosqlbench.virtdata.core.bindings.ValueType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

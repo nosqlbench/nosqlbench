@@ -29,7 +29,7 @@ public enum ValueType implements Comparator<ValueType> {
     OBJECT(Object.class, 8);
 
     private final Class<?> clazz;
-    private int precedence;
+    private final int precedence;
 
     ValueType(Class<?> clazz, int precedence) {
         this.clazz = clazz;

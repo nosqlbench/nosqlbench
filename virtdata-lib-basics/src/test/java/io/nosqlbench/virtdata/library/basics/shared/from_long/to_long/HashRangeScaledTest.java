@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import org.assertj.core.data.Percentage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.LongSummaryStatistics;
 

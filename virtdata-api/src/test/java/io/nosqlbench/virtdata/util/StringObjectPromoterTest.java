@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.util;
 
 import io.nosqlbench.virtdata.core.bindings.StringObjectPromoter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,9 +47,9 @@ public class StringObjectPromoterTest {
 
     @Test
     public void testBigDecimalFallback() {
-        Object o = StringObjectPromoter.promote("1"+String.valueOf(Double.MAX_VALUE));
+        Object o = StringObjectPromoter.promote("1"+ Double.MAX_VALUE);
         assertThat(o).isInstanceOf(BigDecimal.class);
-        assertThat(o).isEqualTo(new BigDecimal("1"+String.valueOf(Double.MAX_VALUE)));
+        assertThat(o).isEqualTo(new BigDecimal("1"+ Double.MAX_VALUE));
     }
 
     @Test

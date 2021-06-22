@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,11 +45,9 @@ public class TagFilterTest {
 
     @Test
     public void testSomeFilterTagsNoItemTagsDoesNotMatch() {
-        Map<String, String> itemtags = new HashMap<>() {{
-        }};
+        Map<String, String> itemtags = new HashMap<>();
         TagFilter tf = new TagFilter("tag=foo");
         assertThat(tf.matches(itemtags).matched()).isFalse();
-
     }
 
     @Test
@@ -59,7 +57,6 @@ public class TagFilterTest {
         }};
         TagFilter tf = new TagFilter("");
         assertThat(tf.matches(itemtags).matched()).isTrue();
-
     }
 
     @Test
@@ -76,7 +73,6 @@ public class TagFilterTest {
         }};
         assertThat(tf.matches(itemtags2).matched()).isTrue();
     }
-
 
     @Test
     public void testMatchingKeyMismatchingValueDoesNotMatch() {
@@ -110,6 +106,7 @@ public class TagFilterTest {
         assertThat(tfRight.matches(itemtags).matched()).isTrue();
     }
 
+    @Test
     public void testMatchingDetails() {
         Tagged tagged = new Tagged() {
             @Override
@@ -127,10 +124,7 @@ public class TagFilterTest {
         TagFilter.Result result = tfLeft.matchesTaggedResult(tagged);
         assertThat(result.matched()).isFalse();
         System.out.println(result.getLog());
-        assertThat(result.getLog()).contains("filter(one:four-.*) tag(one:four-five-six): matched pattern");
-        assertThat(result.getLog()).contains("filter(five) tag(five): matched names");
-        assertThat(result.getLog()).contains("filter(seven) tag(): did not match");
-        assertThat(result.getLog()).contains("filter(six:again) tag(six): null tag value did not match");
+        assertThat(result.getLog()).contains("(☑,☐) filter(one:'four-.*' five two seven six=again) tag(one:four-five-six): did not match '^'four-.*' five two seven six=again$'");
 
     }
 
@@ -171,5 +165,4 @@ public class TagFilterTest {
         TagFilter tf2 = new TagFilter("any(car:truck,phase:moon)");
         assertThat(tf2.matches(itemtags).matched()).isFalse();
     }
-
 }

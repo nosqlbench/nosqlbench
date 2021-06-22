@@ -20,8 +20,8 @@ import java.util.function.LongUnaryOperator;
  */
 public class HostHash implements LongUnaryOperator {
 
-    private static long hostHash = computeHostHash();
-    private ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
+    private static final long hostHash = computeHostHash();
+    private final ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
     private Murmur3F murmur3F;
 
     @Example({"HostHash()","a simple per-host hash function"})
@@ -60,10 +60,10 @@ public class HostHash implements LongUnaryOperator {
                 distinctNames.add(iface.getHostName());
             });
             List<String> nameList = new ArrayList<>(distinctNames);
-            nameList.sort(String::compareTo);
+            Collections.sort(nameList);
             Murmur3F m3f = new Murmur3F(0);
             m3f.reset();
-            distinctNames.forEach(
+            nameList.forEach(
                     s -> m3f.update(s.getBytes(StandardCharsets.UTF_8))
             );
             return m3f.getValue();

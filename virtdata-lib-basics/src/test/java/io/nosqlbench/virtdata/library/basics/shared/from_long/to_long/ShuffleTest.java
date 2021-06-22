@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -59,7 +59,7 @@ public class ShuffleTest {
      * </pre>
      */
     @Test
-    @Ignore
+    @Disabled
     public void testWorstCaseThrough28Bits() {
         int min=1;
         int max=28;
@@ -115,7 +115,7 @@ public class ShuffleTest {
      * </pre>
      */
     @Test
-    @Ignore
+    @Disabled
     public void testBestCaseThrough31Bits() {
         int min=1;
         int max=31;
@@ -143,9 +143,9 @@ public class ShuffleTest {
         }
 //        return shuffle.stats;
         return new int[0];
-
     }
 
+    @Test
     public void test16() {
         int max=16;
         Shuffle shuffle = new Shuffle(0,max);
@@ -161,11 +161,10 @@ public class ShuffleTest {
             assertThat(r[i]).isEqualTo(i+1);
         }
 //        System.out.println("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
-
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void test97() {
         int max=97;
         Shuffle shuffle = new Shuffle(0,max);
@@ -184,7 +183,7 @@ public class ShuffleTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void test1000000() {
         int max=1000000;
 

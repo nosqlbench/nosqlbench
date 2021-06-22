@@ -19,7 +19,6 @@ public class ResolverForURL implements ContentResolver {
 
     @Override
     public List<Content<?>> resolve(URI uri) {
-        List<Content<?>> contents = new ArrayList<>();
         URLContent urlContent = resolveURI(uri);
         if (urlContent!=null) {
             return List.of(urlContent);

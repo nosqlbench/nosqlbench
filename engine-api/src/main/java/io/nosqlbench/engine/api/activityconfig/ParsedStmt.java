@@ -132,14 +132,6 @@ public class ParsedStmt {
     }
 
     /**
-     * @return the params from the enclosed {@link OpDef}
-     * @deprecated You should use {@link #getParamReader()} instead.
-     */
-    public Map<String, Object> getParams() {
-        return opDef.getParams();
-    }
-
-    /**
      * @return a params reader from the enclosed {@link OpDef} params map
      */
     public Element getParamReader() {
@@ -147,7 +139,7 @@ public class ParsedStmt {
     }
 
     public List<BindPoint> getBindPoints() {
-        return parsed.getCheckedBindPoints();
+        return parsed.getBindPoints();
     }
 
 }

@@ -212,7 +212,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             logger.error("Error while instantiating cluster from builder: " + e, e);
             throw e;
         }
-        activityDef.getParams().getOptionalBoolean("defaultidempotence").map(
+        activityDef.getParams().getOptionalBoolean("defaultidempotence").ifPresent(
                 b -> cluster.getConfiguration().getQueryOptions().setDefaultIdempotence(b)
         );
 

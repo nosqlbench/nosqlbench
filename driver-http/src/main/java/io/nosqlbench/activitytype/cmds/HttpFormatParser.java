@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cmds;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.BindPointParser;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -90,7 +90,7 @@ public class HttpFormatParser {
 
         StringBuilder sb = new StringBuilder();
         String input = template;
-        Matcher matcher = ParsedTemplate.STANDARD_ANCHOR.matcher(input);
+        Matcher matcher = BindPointParser.BINDPOINT_ANCHOR.matcher(input);
         int idx = 0;
         while (matcher.find()) {
             String pre = input.substring(idx, matcher.start());

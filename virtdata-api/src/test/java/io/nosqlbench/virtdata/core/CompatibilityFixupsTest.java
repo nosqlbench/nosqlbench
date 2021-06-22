@@ -1,9 +1,10 @@
 package io.nosqlbench.virtdata.core;
 
 import io.nosqlbench.virtdata.core.bindings.CompatibilityFixups;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 public class CompatibilityFixupsTest {
 
     @Test
@@ -30,7 +31,5 @@ public class CompatibilityFixupsTest {
     @Test
     public void testParsingSanity() {
         assertThat(CompatibilityFixups.fixup("long -> Add(5) -> long")).isEqualTo("long -> Add(5) -> long");
-
     }
-
 }

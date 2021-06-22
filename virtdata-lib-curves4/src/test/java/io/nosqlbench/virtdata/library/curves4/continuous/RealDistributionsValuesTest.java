@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Normal;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -18,7 +18,7 @@ public class RealDistributionsValuesTest {
     @Test
     public void testComputedNormal() {
         RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"compute"), 1000000);
-        System.out.println(runData.toString());
+        System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
         assertThat(runData.getFractionalPercentile(0.4D))
@@ -30,7 +30,7 @@ public class RealDistributionsValuesTest {
     @Test
     public void testInterpolatedNormal() {
         RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"interpolate"), 1000000);
-        System.out.println(runData.toString());
+        System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
         assertThat(runData.getFractionalPercentile(0.4D))
@@ -48,7 +48,7 @@ public class RealDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData.toString());
+        System.out.println(runData);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class RealDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData.toString());
+        System.out.println(runData);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class RealDistributionsValuesTest {
     private RunData iterateMapperDouble(LongToDoubleFunction mapper, int iterations) {
         assertThat(mapper).isNotNull();
 
-        double samples[] = new double[iterations];
+        double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
@@ -120,7 +120,7 @@ public class RealDistributionsValuesTest {
             f.format("iterations: %d\n", iterations);
             f.format("iterations/ms: %5f\n", (iterations/ms));
             for (int i = 10; i < 100; i += 10) {
-                double pctile = (double) i;
+                double pctile = i;
                 f.format("pctile %4d  %4f\n", i, s1.getPercentile(pctile));
             }
             return sb.toString();

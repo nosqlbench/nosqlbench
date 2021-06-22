@@ -1,19 +1,21 @@
-- e8379cc9 (HEAD -> main) Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- e0838ff3 (origin/main) Merge pull request #322 from szimmer1/cockroachdb-driver-postgres-workload
-- 2c5624d2 add premade bindings example
-- 2cba9709 additional premade binding functions
-- 78b23f0e add free and attributed zipcode data
-- 0cd100d4 simplify CSV sampling usage
-- 4f2482ec localize flexmark to API module
-- 2bcf47ca remove summary output until it is fixed
-- 0a3fc4fa remove non-release repo from pom
-- 581fbf74 fix broken version link
-- d2fc94b8 avoid NPE in ElemProbD
-- e4cf4c49 Adds postgres-basic workload and scenarios as the cockroachdb driver is compatible with postgres
-- ba5d6025 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- 5497e20f Merge pull request #321 from dougwettlaufer/update-gql-schema-first
-- eaddc4f0 Update schema-first workloads to reflect latest api
-- 3607b804 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- afdfc715 Merge pull request #320 from EricBorczuk/add-jsonapi-workload
-- 91578c52 Add JSON API keyvalue workload
-- 2efc5469 Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- 663e3010 (HEAD -> main) correct test for current functional APIs
+- e981f808 (origin/main) General improvements and bug-fixes. Thanks to @XN137
+- 5b4a695f update ANTLR to 4.2.9 in all places
+- 3b74ae20 General improvements and bug-fixes. Thanks to @XN137
+- 7c7ea039 post-merge fixups
+- 9403f51f improve ToDate semantics and docs
+- 0edbfb1f fix test for TagFilter
+- 365ad619 remove extraneous var in ActivityExecutor
+- 34855a39 Merge pull request #336 from XN137/fix-errorprone-errors
+- 60ff1d9c Merge pull request #335 from XN137/avoid-threadsafety-warnings
+- c5caf51a Merge pull request #334 from XN137/remove-junit4-dependency
+- a02df22d Merge pull request #333 from XN137/jdk-string-join
+- 950b31fb fix errors found by errorprone
+- b98451ab upgrade antlr4-maven-plugin to v4.9.2 avoid threadsafety warnings
+- 5e8e6bf1 use assertj v3.19.0
+- 8dcac028 use junit5 v5.7.2 with proper scoping
+- 2cd393ae use junit5 apis to remove junit4 dependency
+- 0e68abf1 prefer jdk over lib internals for String join
+- dc1c6c5e Merge pull request #332 from XN137/fix-virtdata-api-test-folder
+- 6232edff move virtdata-api tests to correct folder
+- re-run of github actions due to storage error

@@ -32,14 +32,14 @@ public class ServiceProcessor extends AbstractProcessor {
         return supportedAnnotations;
     }
 
-    private static Pattern packageNamePattern = Pattern.compile("(?<packageName>.+)?\\.(?<className>.+)");
+    private static final Pattern packageNamePattern = Pattern.compile("(?<packageName>.+)?\\.(?<className>.+)");
     private Filer filer;
     private Map<String, String> options;
     private Elements elementUtils;
     private Messager messenger;
     private SourceVersion sourceVersion;
     private Types typeUtils;
-    private Map<String, Writer> writers = new HashMap<>();
+    private final Map<String, Writer> writers = new HashMap<>();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -67,8 +67,6 @@ public class ServiceProcessor extends AbstractProcessor {
     @SuppressWarnings("unchecked")
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
-        List<Element> ts = new ArrayList<>();
 
         try {
             for (String annotationType : this.getSupportedAnnotationTypes()) {

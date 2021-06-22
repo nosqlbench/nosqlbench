@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +44,6 @@ public class RateSpecTest {
         RateSpec d = new RateSpec("12345,1.4,restart");
         assertThat(d.verb).isEqualTo(RateSpec.Verb.restart);
         RateSpec c = new RateSpec("12345,1.1");
-        assertThat(c.verb== RateSpec.Verb.start);
+        assertThat(c.verb).isEqualTo(RateSpec.Verb.start);
     }
 }

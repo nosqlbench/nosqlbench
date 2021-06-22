@@ -27,7 +27,7 @@ import java.util.function.ToLongFunction;
 public class SequencePlanner<T> {
     private final static Logger logger = LogManager.getLogger(SequencePlanner.class);
     private final SequencerType sequencerType;
-    private List<T> elements = new ArrayList<>();
+    private final List<T> elements = new ArrayList<>();
     private final List<Long> ratios = new ArrayList<>();
     private int[] elementIndex;
 
@@ -59,7 +59,6 @@ public class SequencePlanner<T> {
                 logger.trace("sequencing elements by concatenation");
                 this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements, ratios);
         }
-        this.elements = elements;
         return new Sequence<>(sequencerType, elements, elementIndex);
     }
 

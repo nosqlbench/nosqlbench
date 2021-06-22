@@ -19,10 +19,10 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +30,7 @@ public class ParsedStmtTest {
     private static final Logger logger = LogManager.getLogger(ParsedStmtTest.class);
     private static StmtsDocList doclist;
 
-    @BeforeClass
+    @BeforeAll
     public static void testLoadYaml() {
         doclist = StatementsLoader.loadPath(logger, "testdocs/bindings.yaml");
     }

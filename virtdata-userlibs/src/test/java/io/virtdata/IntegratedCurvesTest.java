@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -33,7 +33,7 @@ public class IntegratedCurvesTest {
     private RunData iterateMapperLong(DataMapper<Long> mapper, int iterations) {
         assertThat(mapper).isNotNull();
 
-        double samples[] = new double[iterations];
+        double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
@@ -48,7 +48,7 @@ public class IntegratedCurvesTest {
     private RunData iterateMapperDouble(DataMapper<Double> mapper, int iterations) {
         assertThat(mapper).isNotNull();
 
-        double samples[] = new double[iterations];
+        double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
@@ -93,7 +93,7 @@ public class IntegratedCurvesTest {
             f.format("iterations: %d\n", iterations);
             f.format("iterations/ms: %5f\n", (iterations / ms));
             for (int i = 10; i < 100; i += 10) {
-                double pctile = (double) i;
+                double pctile = i;
                 f.format("pctile %4d  %4f\n", i, s1.getPercentile(pctile));
             }
             return sb.toString();

@@ -3,7 +3,7 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 import com.vladsch.flexmark.ext.yaml.front.matter.YamlFrontMatterExtension;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

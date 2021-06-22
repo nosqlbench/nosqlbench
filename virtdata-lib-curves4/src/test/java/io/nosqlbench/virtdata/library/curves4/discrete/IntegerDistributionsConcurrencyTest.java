@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
 import org.assertj.core.data.Offset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,7 +128,7 @@ public class IntegerDistributionsConcurrencyTest {
         private final Object signal;
         private final int slot;
         private final String mapperSpec;
-        private int size;
+        private final int size;
 
         public IntegerDistributionCallable(int slot, int size, String mapperSpec, Object signal) {
             this.slot = slot;

@@ -38,25 +38,30 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.Date;
 import java.util.function.LongFunction;
 
 /**
- * Convert the input value to a {@code Date}
+ * Convert the input value to a {@code Date}, by multiplying and then dividing
+ * the input by the provided parameters.
  */
 @ThreadSafeMapper
 @Categories({Category.datetime})
 public class ToDate implements LongFunction<Date> {
 
-    private long spacing;
-    private long repeat_count;
+    private final long spacing;
+    private final long repeat_count;
 
-    public ToDate(int spacing, int repeat_count){
-        this.spacing = spacing;
-        this.repeat_count = repeat_count;
+    @Example({"ToDate(86400000,2)","produce two Date values per day"})
+    public ToDate(int millis_multiplier, int millis_divisor){
+        this.spacing = millis_multiplier;
+        this.repeat_count = millis_divisor;
     }
+
+    @Example({"ToDate(86400000)","produce a single Date() per day"})
     public ToDate(int spacing){
         this(spacing, 1);
     }

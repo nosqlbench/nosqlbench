@@ -2,7 +2,7 @@ package io.nosqlbench.engine.core.metrics;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.metrics.DeltaHdrHistogramReservoir;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +19,7 @@ public class NBMetricsSummaryTest {
 
         NBMetricsSummary.summarize(sb, "test", timer);
 
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 
 }

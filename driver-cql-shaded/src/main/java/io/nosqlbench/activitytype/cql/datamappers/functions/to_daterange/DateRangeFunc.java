@@ -75,13 +75,12 @@ public class DateRangeFunc implements LongFunction<DateRange> {
         this.upper = upper;
     }
 
-
     @Override
     public DateRange apply(long value) {
         Date lowerDate = new Date(lower.applyAsLong(value));
         DateRange.DateRangeBound lower = DateRange.DateRangeBound.lowerBound(lowerDate,precision);
         Date upperDate = new Date(upper.applyAsLong(value));
-        DateRange.DateRangeBound upper = DateRange.DateRangeBound.upperBound(lowerDate,precision);
+        DateRange.DateRangeBound upper = DateRange.DateRangeBound.upperBound(upperDate,precision);
         DateRange dateRange = new DateRange(lower, upper);
         return dateRange;
     }

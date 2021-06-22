@@ -48,8 +48,6 @@ public class FunctionManifestProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-        List<Element> ts = new ArrayList<>();
-
         try {
             if (writer==null) {
                 writer = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/functions")

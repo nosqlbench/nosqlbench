@@ -20,28 +20,25 @@ import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class IntegratedComposerLibraryTest {
 
     // The deprecated functions are not being included in the next release, so this test's purpose has been
     // reversed.
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testArgumentMatchingViaMainLib() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("param","RandomLineToString('data/variable_words.txt')");
-        Bindings bindings = bt.resolveBindings();
-        Object[] all = bindings.getAll(5);
-        assertThat(all).isNotNull();
-        assertThat(all.length).isEqualTo(1);
-        Object o = all[0];
-        assertThat(o.getClass()).isEqualTo(String.class);
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> bt.resolveBindings());
     }
 
     @Test
@@ -83,7 +80,7 @@ public class IntegratedComposerLibraryTest {
 
     // TODO: Fix this test
     @Test
-    @Ignore
+    @Disabled
     public void testTypeCoercionWhenNeeded() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("mod_to_string", "compose Mod(3) ; Suffix('0000000000') -> String");
@@ -98,7 +95,7 @@ public class IntegratedComposerLibraryTest {
 
     // TODO: Fix this test
     @Test
-    @Ignore
+    @Disabled
     public void testBasicRange() {
         BindingsTemplate bt = new BindingsTemplate();
         bt.addFieldBinding("phone","HashRange(1000000000, 9999999999)");

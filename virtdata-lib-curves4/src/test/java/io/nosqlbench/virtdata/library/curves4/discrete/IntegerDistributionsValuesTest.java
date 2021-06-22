@@ -4,8 +4,8 @@ import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import io.nosqlbench.virtdata.library.curves4.discrete.long_long.Zipf;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
 import org.assertj.core.data.Offset;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -16,11 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegerDistributionsValuesTest {
 
-    @Ignore
+    @Disabled
     @Test
     public void testComputedZipf() {
         RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
-        System.out.println(runData.toString());
+        System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.7D))
@@ -34,7 +34,7 @@ public class IntegerDistributionsValuesTest {
     @Test
     public void testInterpolatedZipf() {
         RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
-        System.out.println(runData.toString());
+        System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.7D))
@@ -55,7 +55,7 @@ public class IntegerDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData.toString());
+        System.out.println(runData);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class IntegerDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData.toString());
+        System.out.println(runData);
     }
 
     @Test
@@ -83,11 +83,11 @@ public class IntegerDistributionsValuesTest {
     private RunData iterateMapperLong(LongUnaryOperator mapper, int iterations) {
         assertThat(mapper).isNotNull();
 
-        double samples[] = new double[iterations];
+        double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
-            samples[i] = mapper.applyAsLong((long)i);
+            samples[i] = mapper.applyAsLong(i);
         }
         long time_generated = System.nanoTime();
 
@@ -98,11 +98,11 @@ public class IntegerDistributionsValuesTest {
     private RunData iterateMapperDouble(LongToDoubleFunction mapper, int iterations) {
         assertThat(mapper).isNotNull();
 
-        double samples[] = new double[iterations];
+        double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
-            samples[i] = mapper.applyAsDouble((long)i);
+            samples[i] = mapper.applyAsDouble(i);
         }
         long time_generated = System.nanoTime();
 
@@ -141,7 +141,7 @@ public class IntegerDistributionsValuesTest {
             f.format("iterations: %d\n", iterations);
             f.format("iterations/ms: %5f\n", (iterations/ms));
             for (int i = 10; i < 100; i += 10) {
-                double pctile = (double) i;
+                double pctile = i;
                 f.format("pctile %4d  %4f\n", i, s1.getPercentile(pctile));
             }
             return sb.toString();

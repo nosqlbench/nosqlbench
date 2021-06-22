@@ -41,7 +41,6 @@ public class HistoStatsCSVWriter {
 
     private PrintStream initFile(File logfile) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(logfile);
             PrintStream writer = new PrintStream(logfile);
             return writer;
         } catch (IOException e) {
@@ -66,7 +65,7 @@ public class HistoStatsCSVWriter {
                 Locale.US,
                 "#[StartTime: %.3f (seconds since epoch), %s]\n",
                 startTime / 1000.0,
-                new Date(startTime).toString()
+                new Date(startTime)
         );
         writer.flush();
     }
@@ -104,7 +103,7 @@ public class HistoStatsCSVWriter {
         csvLine.append(",").append(h.getValueAtPercentile(0.999D));
         csvLine.append(",").append(h.getValueAtPercentile(0.9999D));
         csvLine.append(",").append(h.getMaxValue());
-        writer.println(csvLine.toString());
+        writer.println(csvLine);
 
     }
 }

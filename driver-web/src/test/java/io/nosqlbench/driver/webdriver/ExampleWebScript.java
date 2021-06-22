@@ -1,8 +1,8 @@
 package io.nosqlbench.driver.webdriver;
 
 import io.nosqlbench.nb.api.testutils.Perf;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -18,7 +18,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 public class ExampleWebScript {
 
     @Test
-    @Ignore
+    @Disabled
     public void getDocsSiteChromeDriver() {
         System.setProperty("webdriver.http.factory", "okhttp");
         WebDriver driver = new ChromeDriver();
@@ -33,13 +33,13 @@ public class ExampleWebScript {
         }
         System.out.println("!");
 
-        System.out.println(perf.toString());
+        System.out.println(perf);
 //        driver.get("http://docs.nosqlbench.io/");
         driver.close();
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getDocSiteWebHtml() {
 //        System.setProperty("webdriver.http.factory", "okhttp");
         WebDriver driver = new HtmlUnitDriver(false);
@@ -54,7 +54,7 @@ public class ExampleWebScript {
         }
         System.out.println("!");
 
-        System.out.println(perf.toString());
+        System.out.println(perf);
 //        driver.get("http://docs.nosqlbench.io/");
         driver.close();
     }

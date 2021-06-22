@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -364,10 +363,7 @@ public class PulsarActivityUtil {
     ///////
     // Complex strut type: Avro or Json
     public static boolean isAvroSchemaTypeStr(String typeStr) {
-        boolean isAvroType = false;
-        if (typeStr.equalsIgnoreCase("AVRO")) {
-            isAvroType = true;
-        }
+        boolean isAvroType = typeStr.equalsIgnoreCase("AVRO");
         return isAvroType;
     }
     public static Schema<?> getAvroSchema(String typeStr, String definitionStr) {
@@ -402,19 +398,6 @@ public class PulsarActivityUtil {
         }
 
         return schema;
-    }
-
-    public static String encode(String... strings) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String str : strings) {
-            if (!StringUtils.isBlank(str))
-                stringBuilder.append(str).append("::");
-        }
-
-        String concatenatedStr =
-            StringUtils.substringBeforeLast(stringBuilder.toString(), "::");
-
-        return Base64.getEncoder().encodeToString(concatenatedStr.getBytes());
     }
 }
 

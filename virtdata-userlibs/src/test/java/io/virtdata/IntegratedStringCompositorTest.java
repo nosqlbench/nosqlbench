@@ -3,8 +3,8 @@ package io.virtdata;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.StringCompositor;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
@@ -15,7 +15,7 @@ public class IntegratedStringCompositorTest {
     private static BindingsTemplate template;
     private static Bindings bindings;
 
-    @BeforeClass
+    @BeforeAll
     public static void setupTemplate() {
         BindingsTemplate bindingsTemplate = new BindingsTemplate();
         bindingsTemplate.addFieldBinding("ident","Identity()");

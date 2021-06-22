@@ -83,7 +83,7 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
 
     private class ResultSpanIterator implements Iterator<CycleResultsSegment> {
         private final ByteBuffer iterbuf;
-        private Predicate<ResultReadable> filter;
+        private final Predicate<ResultReadable> filter;
         private CycleResultsSegment next;
 
         public ResultSpanIterator(ByteBuffer buf, Predicate<ResultReadable> filter) {
@@ -104,11 +104,8 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
 
         @Override
         public CycleResultsSegment next() {
-            if (next==null) {
-                hasNext();
-                if (next==null) {
-                    throw new RuntimeException("Possible call to next() without calling hasNext(). There was no remaining unfiltered data.");
-                }
+            if (next == null && !hasNext()) {
+                throw new RuntimeException("Call to next() but there was no remaining unfiltered data.");
             }
             CycleResultsSegment wasNext = this.next;
             next=null;

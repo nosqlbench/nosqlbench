@@ -1,10 +1,11 @@
 package io.nosqlbench.engine.cli;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class BasicScriptBufferTest {
 
@@ -62,14 +63,9 @@ public class BasicScriptBufferTest {
         assertThat(script).matches("(?s).*a single line.*");
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void shouldThrowErrorForInvalidWaitMillisOperand() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "noway" });
-        BasicScriptBuffer b = new BasicScriptBuffer();
-        b.add(opts.getCommands().toArray(new Cmd[0]));
-        String s = b.getParsedScript();
+        assertThatExceptionOfType(NumberFormatException.class)
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "waitmillis", "noway" }));
     }
-
-
-
 }

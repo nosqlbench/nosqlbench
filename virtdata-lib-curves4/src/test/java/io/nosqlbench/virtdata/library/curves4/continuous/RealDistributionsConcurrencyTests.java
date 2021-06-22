@@ -2,7 +2,7 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class RealDistributionsConcurrencyTests {
         private final Object signal;
         private final int slot;
         private final String mapperSpec;
-        private int size;
+        private final int size;
 
         public RealDistributionCallable(int slot, int size, String mapperSpec, Object signal) {
             this.slot = slot;

@@ -6,7 +6,7 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.SucceededOp
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.EventedOpImpl;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class OpTrackerImplTest {
 

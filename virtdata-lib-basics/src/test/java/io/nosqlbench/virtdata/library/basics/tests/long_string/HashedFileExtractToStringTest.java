@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.HashedFileExtractToString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.IntSummaryStatistics;
 import java.util.function.LongUnaryOperator;
@@ -22,7 +22,7 @@ public class HashedFileExtractToStringTest {
             assertThat(apply.length()).isLessThanOrEqualTo(3000);
         }
 
-        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss.toString());
+        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
     }
 
     @Test
@@ -36,6 +36,6 @@ public class HashedFileExtractToStringTest {
             iss.accept(apply.length());
         }
 
-        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss.toString());
+        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
     }
 }

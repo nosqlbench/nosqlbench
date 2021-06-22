@@ -3,7 +3,7 @@ package io.nosqlbench.activitytype.cmds;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpRequest;
 import java.util.Map;

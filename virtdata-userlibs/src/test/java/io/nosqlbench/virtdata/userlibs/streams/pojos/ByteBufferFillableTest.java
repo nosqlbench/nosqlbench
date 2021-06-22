@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.userlibs.streams.pojos;
 
 import io.nosqlbench.virtdata.userlibs.streams.fillers.ByteBufferSource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

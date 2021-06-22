@@ -2,7 +2,6 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.errors.BasicError;
-import joptsimple.internal.Strings;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
@@ -338,7 +337,7 @@ public class NBCLIArgsFile {
             }
         }
         if (splitword.length() > 0) {
-            throw new RuntimeException("unqualified line continuation for '" + splitword.toString() + "'");
+            throw new RuntimeException("unqualified line continuation for '" + splitword + "'");
         }
 
         return loaded;
@@ -426,13 +425,13 @@ public class NBCLIArgsFile {
             String word = iter.next();
             if (word.startsWith("-")) {
                 if (element.size() > 0) {
-                    lines.add(Strings.join(element, " "));
+                    lines.add(String.join(" ", element));
                     element.clear();
                 }
             }
             element.add(word);
         }
-        lines.add(Strings.join(element, " "));
+        lines.add(String.join(" ", element));
         return lines;
     }
 

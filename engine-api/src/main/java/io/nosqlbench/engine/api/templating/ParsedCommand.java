@@ -89,11 +89,11 @@ public class ParsedCommand {
         cmd.forEach((k,v) -> {
             if (v instanceof CharSequence) {
                 ParsedTemplate parsed = new ParsedTemplate(v.toString(), bindings);
-                switch (parsed.getForm()) {
+                switch (parsed.getType()) {
                     case literal:
                         break;
-                    case rawbind:
-                    case template:
+                    case bindref:
+                    case concat:
                         this.dynamics.put(k,v.toString());
                         break;
                 }

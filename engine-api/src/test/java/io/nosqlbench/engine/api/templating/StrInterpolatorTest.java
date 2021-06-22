@@ -17,7 +17,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class StrInterpolatorTest {
 
-    private static List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{
+    private static final List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{
         add(
                 new HashMap<String,String>() {{
                     put("akey", "aval1");
@@ -50,7 +50,7 @@ public class StrInterpolatorTest {
         );
     }};
 
-    private static StrInterpolator interp = new StrInterpolator(abcd);
+    private static final StrInterpolator interp = new StrInterpolator(abcd);
 
     @Test
     public void shouldReturnIdentity() {

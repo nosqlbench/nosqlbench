@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DiscreteProbabilityBufferTest {
 

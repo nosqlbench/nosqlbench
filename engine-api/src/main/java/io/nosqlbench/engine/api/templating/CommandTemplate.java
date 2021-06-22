@@ -143,8 +143,8 @@ public class CommandTemplate {
 
         cmd.forEach((param, value) -> {
             ParsedTemplate paramTemplate = new ParsedTemplate(value, bindings);
-            if (paramTemplate.getCheckedBindPoints().size() > 0) {
-                BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getCheckedBindPoints());
+            if (paramTemplate.getBindPoints().size() > 0) {
+                BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
                 StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();
                 dynamics.put(param, paramStringBindings);
             } else {

@@ -1,9 +1,10 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class HashIntervalTest {
 
@@ -15,8 +16,9 @@ public class HashIntervalTest {
 
     }
 
-    @Test(expected = BasicError.class)
+    @Test
     public void testRangeError() {
-        HashInterval hi = new HashInterval(3L, 3L);
+        assertThatExceptionOfType(BasicError.class)
+                .isThrownBy(() -> new HashInterval(3L, 3L));
     }
 }

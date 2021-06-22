@@ -1,8 +1,8 @@
 package io.nosqlbench.engine.clients.grafana;
 
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public class GrafanaClientTest {
     private static final String testurl = "http://localhost:3000/";
 
     @Test
-    @Ignore
+    @Disabled
     public void testCreateAnnotation() {
         GrafanaClient client = new GrafanaClient(testurl);
         client.getConfig().basicAuth("admin", "admin");
@@ -22,7 +22,7 @@ public class GrafanaClientTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testFindAnnotations() {
         GrafanaClient client = new GrafanaClient(testurl);
         client.getConfig().basicAuth("admin", "admin");
@@ -31,7 +31,7 @@ public class GrafanaClientTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testGetApiToken() {
         GrafanaClient client = new GrafanaClient(testurl);
         client.getConfig().basicAuth("admin", "admin");

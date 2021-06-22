@@ -4,7 +4,7 @@ import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc1;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc2;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFunc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFuncs;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FDocFuncsTest {
 

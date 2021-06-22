@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.api.activityimpl.tracking;
 
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.TreeTracker1024;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

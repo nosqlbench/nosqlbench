@@ -17,20 +17,36 @@
 
 package io.nosqlbench.virtdata.core.templates;
 
-import org.apache.logging.log4j.Logger;
+
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+// TODO: Consider using "Driver Adapter" or "Workload Adapter" instead of ActivityType
+
 /**
- * A parsed template is a form of a raw template which has been parsed for its
- * named anchors and sanity checked against a set of provided bindings.
+ * A ParsedTemplate represents any string provided by a user which is meant to be
+ * a prototype for an operation. Grammars used by native drivers can be decorated
+ * with named injection and extraction points for data, known respectively as
+ * {@link BindPoint}s and {@link CapturePoint}s.
+ *
+ * The syntax used for bind points and capture points is standard across all
+ * high-level drivers. As such, this class captures the definition of
+ * decorative syntax and the rules for parsing them out.
+ *
+ * The key responsibilities of ParsedTemplate are:
+ * <UL>
+ * <LI>recognize bind points within statement templates</LI>
+ * <LI>recognize capture points within statement templates</LI>
+ * <LI>render statement templates with bind and capture points elided using a native syntax for variables</LI>
+ * <LI>provide metadata to drivers about defined bind and capture points</LI>
+ * <LI>provide a text template for re-assembly with injected data</LI>
+ * </UL>
  *
  * Once the parsed template is constructed, the method {@link ParsedTemplate#orError()}
  * should <em>always</em> called before it is used.
@@ -65,82 +81,74 @@ import java.util.stream.StreamSupport;
  */
 public class ParsedTemplate {
 
-    public enum Form {
+    private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
+    private final List<CapturePoint> captures;
+    private final String rawtemplate;
+
+    /**
+     * The type of a parsed template depends on the structure of the bindings provided.
+     */
+    public enum Type {
+
+        /**
+         * A literal template is one which has no bindings that need to be provided to render a specific statement.
+         * These templates are basically static statements.
+         * Example: <em>{@code truncate testks.testtable;}</em>
+         */
         literal,
-        rawbind,
-        template,
+        /**
+         * A bindref template is one which has only a single bind point and no leading or trailing text.
+         * It represents a single value which is to be injected, with no clear indication as to whether the
+         * value should be in string form or not. These are used when referencing objects by bind point name.
+         * Callers which use rawbind templates where Strings are needed should convert them with {@link Object#toString()}}
+         * Example: <em>{@code {myvalue}}</em>
+         */
+        bindref,
+        /**
+         * A string template is one which is neither a literal template nor a bindref template. This includes
+         * any template which has any amount of literal text and any template with more than one bind point.
+         */
+        concat
     }
 
     /**
-     * The canonical template pattern follows the pattern of an opening curly brace,
-     * followed by a word character, followed by any contiguous
-     * combination of dashes, underscores, digits, words, and dots, followed by
-     * a closing curly brace.</LI>
-     *
-     * <H2>Examples</H2>
-     * <pre>
-     * {var1}
-     * {var2.var3__-var5}
-     * </pre>
-     */
-
-
-    public final static Pattern STANDARD_ANCHOR = Pattern.compile("\\{(?<anchor>\\w+[-_\\d\\w.]*)}");
-    public final static Pattern EXTENDED_ANCHOR = Pattern.compile("\\{\\{(?<anchor>.*?)}}");
-    private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
-
-//    private final Pattern[] patterns;
-
-    /**
      * Spans is an even-odd form of (literal, variable, ..., ..., literal)
-     * Thus a 1-length span is a single literal
+     * Thus a 1-length span is a single literal, and a 3 length span has a single bind point
      **/
     private final String[] spans;
-//    private final String rawtemplate;
 
     /**
      * A map of binding names and recipes (or null)
      */
     private final Map<String, String> bindings = new LinkedHashMap<>();
 
-    /**
-     * Construct a new ParsedTemplate from the provided statement template.
-     *
-     * @param rawtemplate      The string that contains literal sections and anchor sections interspersed
-     * @param providedBindings The bindings that are provided for the template to be parsed
-     */
-    public ParsedTemplate(String rawtemplate, Map<String, String> providedBindings) {
-        this(rawtemplate, providedBindings, STANDARD_ANCHOR, EXTENDED_ANCHOR);
-    }
+    private final BindPointParser bindPointParser = new BindPointParser();
+    private final CapturePointParser capturePointParser = new CapturePointParser();
 
     /**
      * Parse the given raw template, check the bind points against the provide bindings, and
      * provide detailed template checks for validity.
      *
-     * <H4>Overriding Patterns</H4>
-     * <P>
-     * If patterns are not provided then {@link ParsedTemplate#STANDARD_ANCHOR} are used, which includes
-     * the ability to match {var1} and ?var1 style anchors. If patterns are
-     * provided, then they must be compatible with the {@link Matcher#find()} method, and must also
-     * have a named group with the name 'anchor', as in (?&lt;anchor&gt;...)
-     * </P>
-     *
      * @param rawtemplate       A string template which contains optionally embedded named anchors
      * @param availableBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
-     * @param parserPatterns    The patterns which match the named anchor format and extract anchor names from the raw template
      */
-    public ParsedTemplate(String rawtemplate, Map<String, String> availableBindings, Pattern... parserPatterns) {
+    public ParsedTemplate(String rawtemplate, Map<String, String> availableBindings) {
         this.bindings.putAll(availableBindings);
-        this.spans = parse(rawtemplate, availableBindings, parserPatterns);
+        this.rawtemplate = rawtemplate;
+
+        CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
+        this.captures = captureData.getCaptures();
+        List<String> spanData = bindPointParser.apply(captureData.getRawTemplate());
+        this.spans = spanData.toArray(new String[0]);
     }
 
-    public Form getForm() {
+    public Type getType() {
         if (this.spans.length == 1) {
-            return Form.literal;
+            return Type.literal;
         } else if (this.spans[0].isEmpty() && this.spans[2].isEmpty()) {
-            return Form.rawbind;
+            return Type.bindref;
         } else {
-            return Form.template;
+            return Type.concat;
         }
     }
 
@@ -149,59 +157,6 @@ public class ParsedTemplate {
             throw new RuntimeException("Unable to parse statement: " + this);
         }
         return this;
-    }
-
-    /**
-     * After this method runs, the following conditions should apply:
-     * <ul>
-     * <li>spans will contain all the literal and variable sections in order, starting a literal, even if it is empty</li>
-     * <li>spans will be an odd number in length, meaning that the last section will also be a literal, even if it is empty</li>
-     * <li>specificBindings will contain an ordered map of the binding definitions</li>
-     * </ul>
-     */
-    private String[] parse(String rawtemplate, Map<String, String> providedBindings, Pattern[] patterns) {
-        List<String> spans = new ArrayList<>();
-
-        String statement = rawtemplate;
-        int patternsMatched = 0;
-
-        int lastMatch = 0;
-
-        for (Pattern pattern : patterns) {
-            if (!pattern.toString().contains("?<anchor>")) {
-                throw new InvalidParameterException("The provided pattern '" + pattern + "' must contain a named group called anchor," +
-                    "as in '(?<anchor>...)'");
-            }
-
-            Matcher m = pattern.matcher(rawtemplate);
-
-            if (!m.find()) { // sanity check that this matcher works at all or go to the next pattern
-                continue;
-            }
-
-            while (m.find(lastMatch)) {
-                String pre = statement.substring(lastMatch, m.start());
-                spans.add(pre);
-
-                String tokenName = m.group("anchor");
-                lastMatch = m.end();
-
-                spans.add(tokenName);
-
-            }
-
-            break; // If the last matcher worked at all, only do one cycle
-        }
-
-        if (lastMatch >= 0) {
-            spans.add(statement.substring(lastMatch));
-        } else {
-            spans.add(statement);
-        }
-
-
-        return spans.toArray(new String[0]);
-
     }
 
     public String toString() {
@@ -245,7 +200,7 @@ public class ParsedTemplate {
     }
 
     /**
-     * @return a list of anchors as fou nd in the raw template.
+     * @return a list of anchors as found in the raw template.
      */
     public List<String> getAnchors() {
         List<String> anchors = new ArrayList<>();
@@ -265,7 +220,7 @@ public class ParsedTemplate {
      * @throws InvalidParameterException if the template has an error,
      *                                   such as an anchor which has no provided binding.
      */
-    public List<BindPoint> getCheckedBindPoints() {
+    public List<BindPoint> getBindPoints() {
         List<BindPoint> bindpoints = new ArrayList<>();
         for (int i = 1; i < spans.length; i += 2) {
             if (!bindings.containsKey(spans[i])) {
@@ -277,7 +232,7 @@ public class ParsedTemplate {
         return bindpoints;
     }
 
-    public List<BindPoint> getUncheckedBindPoints() {
+    private List<BindPoint> getUncheckedBindPoints() {
         List<BindPoint> bindpoints = new ArrayList<>();
         for (int i = 1; i < spans.length; i += 2) {
             bindpoints.add(new BindPoint(spans[i], bindings.getOrDefault(spans[i], null)));
@@ -327,6 +282,10 @@ public class ParsedTemplate {
         } else {
             return Optional.empty();
         }
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return this.captures;
     }
 
 }

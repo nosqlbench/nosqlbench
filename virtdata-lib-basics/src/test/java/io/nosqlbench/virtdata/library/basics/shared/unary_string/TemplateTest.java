@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.*;
 

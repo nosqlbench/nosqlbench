@@ -21,8 +21,8 @@ import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +68,7 @@ public class ScriptIntegrationTests {
     }
 
 
-    @BeforeClass
+    @BeforeAll
     public static void logit() {
         System.out.println("Running SYNC version of Script Integration Tests.");
     }

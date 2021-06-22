@@ -19,10 +19,10 @@ package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.*;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class StmtEscapingTest {
     private final static Logger logger = LogManager.getLogger(StmtEscapingTest.class);
     private static List<OpTemplate> defs;
 
-    @BeforeClass
+    @BeforeAll
     public static void testLayering() {
 
         StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/escaped_stmts.yaml");

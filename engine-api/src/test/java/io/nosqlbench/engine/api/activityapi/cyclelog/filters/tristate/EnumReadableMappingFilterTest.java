@@ -18,7 +18,7 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +48,7 @@ public class EnumReadableMappingFilterTest {
         }
     }
 
-    private static enum TestEnum implements ResultReadable {
+    private enum TestEnum implements ResultReadable {
 
         Alpha(1),
         Beta(2),

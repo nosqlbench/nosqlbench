@@ -7,8 +7,8 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class TestableTemplate implements LongFunction<String> {
 
-    private LongFunction<?>[] funcs;
-    private String separator;
+    private final LongFunction<?>[] funcs;
+    private final String separator;
 
     public TestableTemplate(String separator, LongFunction<?>... funcs) {
         this.funcs = funcs;

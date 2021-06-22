@@ -113,7 +113,7 @@ public class ScenariosExecutor {
         }
         Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
-                .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
+                .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElse(null)));
         return new ScenariosResults(this, scenarioResultMap);
     }
 
