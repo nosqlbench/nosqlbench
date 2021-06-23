@@ -6,16 +6,14 @@ import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.function.Function;
 
 /**
  * Uses a string template and a bindings template to create instances of {@link StringBindings}.
  */
 public class StringBindingsTemplate {
 
-    private String stringTemplate;
-    private BindingsTemplate bindingsTemplate;
+    private final String stringTemplate;
+    private final BindingsTemplate bindingsTemplate;
 
     public StringBindingsTemplate(String stringTemplate, BindingsTemplate bindingsTemplate) {
         this.stringTemplate = stringTemplate;
@@ -56,7 +54,7 @@ public class StringBindingsTemplate {
         HashSet<String> unqualifiedNames = new HashSet<>(compositor.getBindPointNames());
         unqualifiedNames.removeAll(new HashSet<>(bindingsTemplate.getBindPointNames()));
         if (unqualifiedNames.size()>0) {
-            throw new RuntimeException("Named anchors were specified in the template which were not provided in the bindings: " + unqualifiedNames.toString());
+            throw new RuntimeException("Named anchors were specified in the template which were not provided in the bindings: " + unqualifiedNames);
         }
 
         Bindings bindings = bindingsTemplate.resolveBindings();
@@ -68,7 +66,7 @@ public class StringBindingsTemplate {
         HashSet<String> unqualifiedNames = new HashSet<>(compositor.getBindPointNames());
         unqualifiedNames.removeAll(new HashSet<>(bindingsTemplate.getBindPointNames()));
         if (unqualifiedNames.size()>0) {
-            throw new RuntimeException("Named anchors were specified in the template which were not provided in the bindings: " + unqualifiedNames.toString());
+            throw new RuntimeException("Named anchors were specified in the template which were not provided in the bindings: " + unqualifiedNames);
         }
         return bindingsTemplate.getDiagnostics();
     }

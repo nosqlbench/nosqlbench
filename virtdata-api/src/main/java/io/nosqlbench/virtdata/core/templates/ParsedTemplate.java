@@ -85,6 +85,10 @@ public class ParsedTemplate {
     private final List<CapturePoint> captures;
     private final String rawtemplate;
 
+    public static ParsedTemplate of(String rawtemplate, Map<String,String> bindings) {
+        return new ParsedTemplate(rawtemplate,bindings);
+    }
+
     /**
      * The type of a parsed template depends on the structure of the bindings provided.
      */

@@ -2,6 +2,7 @@ package io.nosqlbench.virtdata.core.templates;
 
 import io.nosqlbench.virtdata.core.bindings.Binder;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 
 /**
  * Allows the generation of strings from a string template and bindings template.
@@ -14,6 +15,11 @@ public class StringBindings implements Binder<String> {
     public StringBindings(StringCompositor compositor, Bindings bindings) {
         this.compositor = compositor;
         this.bindings = bindings;
+    }
+
+    public StringBindings(ParsedTemplate pt) {
+        this.compositor = new StringCompositor(pt);
+        this.bindings = new BindingsTemplate(pt.getBindPoints()).resolveBindings();
     }
 
     /**

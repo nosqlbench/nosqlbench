@@ -35,6 +35,10 @@ public class StringCompositor implements ValuesBinder<StringCompositor, String> 
         this.stringfunc = stringfunc;
     }
 
+    public StringCompositor(ParsedTemplate pt) {
+        templateSegments = pt.getSpans();
+    }
+
     // for testing
     protected String[] parseTemplate(String template) {
         ParsedTemplate parsed = new ParsedTemplate(template, Collections.emptyMap());

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 
 /**
@@ -74,6 +75,16 @@ import java.util.Map;
  * spaces and partial word are included in the last value assigment found. Leading spaces on literal
  * values are skipped unless escaped.</p>
  *
+ * <H3>Detection</H3>
+ * When a caller wants to parse this format optionally when the format is recognizable as having parameters,
+ * the {@link #hasValues(String)} method can be called. To be recognized as having parameters, a more strict
+ * definition is used: The patter must start with a simple assignment having a varname which starts with an
+ * alphabetic character or an underscore, followed by any alpha-numeric, dot {@code .}, dash {@code -}, or
+ * underscore {@code _} with an assignment character {@code =} following. The following regex can be used
+ * as an example for documentation purposes when explaining op mapping conventions to users:
+ * <pre>{@code
+ * [_a-zA-Z][-_.\\w]*
+ * }</pre>
  */
 public class ParamsParser {
     public final static String ASSIGN_CHARS = "=:";
@@ -89,7 +100,8 @@ public class ParamsParser {
 
     public static boolean hasValues(String input, String assignChars) {
         for (int i = 0; i < assignChars.length(); i++) {
-            if (input.contains(assignChars.substring(i, i + 1))) {
+            Pattern assignPattern = Pattern.compile("[A-Za-z_][-_\\w\\d.]*\\s*" + assignChars.charAt(i) + ".*");
+            if (assignPattern.matcher(input).matches()) {
                 return true;
             }
         }
@@ -137,7 +149,7 @@ public class ParamsParser {
 
             switch (s) {
                 case expectingName:
-                    if (c =='\'' || c=='"') {
+                    if (c == '\'' || c == '"') {
                         throw new RuntimeException("Unable to parse a name starting with character '" + c + "'. Names" +
                             " must be literal values.");
                     } else if (c != ' ' && c != ';') {
@@ -152,7 +164,7 @@ public class ParamsParser {
                         String partial = parms.get(lastVarname);
                         if (partial == null) {
                             throw new RuntimeException("space continuation while reading name or value, but no prior " +
-                                    "for " + lastVarname + " exists");
+                                "for " + lastVarname + " exists");
                         }
                         parms.put(lastVarname, partial + " " + varname);
                         varname.setLength(0);
@@ -186,7 +198,7 @@ public class ParamsParser {
                         value.append(c);
                     } else {
                         parms.put(varname.toString(), value.toString());
-                        lastVarname=varname.toString();
+                        lastVarname = varname.toString();
                         varname.setLength(0);
                         value.setLength(0);
                         s = ParseState.expectingName;
@@ -237,22 +249,22 @@ public class ParamsParser {
                 s = ParseState.expectingName;
                 break;
             case readingName:
-                parms.put(lastVarname,parms.get(lastVarname)+' '+ varname);
+                parms.put(lastVarname, parms.get(lastVarname) + ' ' + varname);
                 varname.setLength(0);
                 break;
             default:
         }
 
-        if (input.length()>0 && parms.size()==0) {
+        if (input.length() > 0 && parms.size() == 0) {
             throw new RuntimeException("Unable to parse input:" + input);
         }
 
         if (canonicalize) {
-            List<String> keys= new ArrayList<>(parms.keySet());
+            List<String> keys = new ArrayList<>(parms.keySet());
             for (String key : keys) {
-                String properkey= Synonyms.canonicalize(key,logger);
+                String properkey = Synonyms.canonicalize(key, logger);
                 if (!key.equals(properkey)) {
-                    parms.put(properkey,parms.get(key));
+                    parms.put(properkey, parms.get(key));
                     parms.remove(key);
                 }
             }

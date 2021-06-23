@@ -1,36 +1,40 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.config.ParamsParser;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
- * Parse an OpTemplate into a ParsedCommand
+ * Parse an OpTemplate into a ParsedCommand, which can dispense object maps
  */
-public class ParsedCommand {
+public class ParsedCommand implements LongFunction<Map<String, ?>> {
 
     private final static Logger logger = LogManager.getLogger(ParsedCommand.class);
 
-    /** the name of this operation **/
+    /**
+     * the name of this operation
+     **/
     private final String name;
 
-    /** The fields which are statically assigned **/
-    private final Map<String,Object> statics = new LinkedHashMap<>();
+    /**
+     * The fields which are statically assigned
+     **/
+    private final Map<String, Object> statics = new LinkedHashMap<>();
 
     /**
      * The fields which are dynamic, and must be realized via functions.
      * This map contains keys which identify the field names, and values, which may be null or undefined.
      */
-    private final Map<String,String> dynamics = new LinkedHashMap<>();
+    private final Map<String, LongFunction<?>> dynamics = new LinkedHashMap<>();
 
     /**
      * The names of payload values in the result of the operation which should be saved.
@@ -38,75 +42,53 @@ public class ParsedCommand {
      * representation of a result. If the values are defined, then each one represents the name
      * that the found value should be saved as instead of the original name.
      */
-    private final Map<String,String> captures = new LinkedHashMap<>();
+    private final List<List<CapturePoint>> captures = new ArrayList<>();
+    private final int mapsize;
 
     /**
      * Create a parsed command from an Op template. The op template is simply the normalized view of
      * op template structure which is uniform regardless of the original format.
+     *
      * @param ot An OpTemplate representing an operation to be performed in a native driver.
      */
     ParsedCommand(OpTemplate ot) {
-        this(ot,List.of());
+        this(ot, List.of());
     }
 
-    ParsedCommand(OpTemplate ot, List<Function<String, Map<String, String>>> optionalParsers) {
+    ParsedCommand(OpTemplate ot, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
         this.name = ot.getName();
 
-        Map<String,Object> cmd = new LinkedHashMap<>();
-
-        if (ot.getOp() instanceof CharSequence) {
-
-            String oneline = ot.getOp().toString();
-            List<Function<String, Map<String, String>>> parserlist = new ArrayList<>(optionalParsers);
-            boolean didParse = false;
-            parserlist.add(s -> ParamsParser.parse(s, false));
-
-            for (Function<String, Map<String, String>> parser : parserlist) {
-                Map<String, String> parsed = parser.apply(oneline);
-                if (parsed != null) {
-                    logger.debug("parsed request: " + parsed);
-                    cmd.putAll(parsed);
-                    didParse = true;
-                    break;
-                }
-            }
-        } else if (ot.getOp() instanceof Map) {
-            Map<?,?> map = ot.getOp();
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                cmd.put(entry.getKey().toString(),entry.getValue());
-            }
-        } else {
-            throw new BasicError("op template has op type of " + ot.getOp().getClass().getCanonicalName() + ", which is not supported.");
+        Map<String, Object> map = ot.getOp().orElseThrow();
+        for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
+            map = preprocessor.apply(map);
         }
-        resolveCmdMap(cmd,ot.getBindings());
 
-//        ArrayList<Function<String, Map<String, String>>> _parsers = new ArrayList<>(parsers);
-
-    }
-
-    private void resolveCmdMap(Map<String, Object> cmd, Map<String, String> bindings) {
-        Map<String,Object> resolved = new LinkedHashMap<>();
-        cmd.forEach((k,v) -> {
+        map.forEach((k, v) -> {
             if (v instanceof CharSequence) {
-                ParsedTemplate parsed = new ParsedTemplate(v.toString(), bindings);
-                switch (parsed.getType()) {
+                ParsedTemplate pt = ParsedTemplate.of(((CharSequence) v).toString(), ot.getBindings());
+                this.captures.add(pt.getCaptures());
+                switch (pt.getType()) {
                     case literal:
+                        statics.put(k, ((CharSequence) v).toString());
                         break;
                     case bindref:
+                        String spec = pt.asBinding().orElseThrow().getBindspec();
+                        Optional<DataMapper<Object>> mapper = VirtData.getOptionalMapper(spec);
+                        dynamics.put(k, mapper.orElseThrow());
+                        break;
                     case concat:
-                        this.dynamics.put(k,v.toString());
+                        StringBindings sb = new StringBindings(pt);
+                        dynamics.put(k, sb);
                         break;
                 }
-            } else if (v instanceof Map) {
-                Map<String,Object> m = (Map<String, Object>) v;
-//                ((Map<?, ?>) v).forEach((k,v) -> {
-//
-//                });
-                resolved.put(k,Map.of("type","Map"));
             } else {
-
+                statics.put(k, v);
             }
         });
+
+        mapsize = statics.size() + dynamics.size();
+
+
     }
 
     public String getName() {
@@ -117,7 +99,17 @@ public class ParsedCommand {
         return statics;
     }
 
-    public Map<String, String> getDynamics() {
+    public Map<String, LongFunction<?>> getDynamics() {
         return dynamics;
+    }
+
+    @Override
+    public Map<String, Object> apply(long value) {
+        HashMap<String,Object> map = new HashMap<>(mapsize);
+        map.putAll(statics);
+        dynamics.forEach((k,v) -> {
+            map.put(k,v.apply(value));
+        });
+        return map;
     }
 }

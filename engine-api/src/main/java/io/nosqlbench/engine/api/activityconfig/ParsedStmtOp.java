@@ -17,10 +17,9 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
-import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
@@ -29,33 +28,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-/**
- * Allow for uniform statement anchor parsing, using the <pre>?anchor</pre>
- * and <pre>{anchor}</pre> anchoring conventions. This type also includes
- * all of the properties from the enclosed StmtDef, in addition to a couple of
- * helpers. It should allow programmers to project this type directly from an
- * existing {@link OpDef} as a substitute.
- */
-public class ParsedStmt {
+public class ParsedStmtOp {
 
-    private final OpDef opDef;
+    private final OpTemplate optpl;
     private final ParsedTemplate parsed;
 
     /**
      * Construct a new ParsedStatement from the provided stmtDef and anchor token.
      *
-     * @param opDef An existing statement def as read from the YAML API.
+     * @param optpl An existing statement def as read from the YAML API.
      */
-    public ParsedStmt(OpDef opDef, Function<String, String>... transforms) {
-        this.opDef = opDef;
+    public ParsedStmtOp(OpTemplate optpl) {
+        this.optpl = optpl;
         String transformed = getStmt();
-        for (Function<String, String> transform : transforms) {
-            transformed = transform.apply(transformed);
-        }
-        parsed = new ParsedTemplate(transformed, opDef.getBindings());
+        parsed = new ParsedTemplate(transformed, optpl.getBindings());
     }
 
-    public ParsedStmt orError() {
+    public ParsedStmtOp orError() {
         if (hasError()) {
             throw new RuntimeException("Unable to parse statement: " + this);
         }
@@ -100,42 +89,38 @@ public class ParsedStmt {
     }
 
     /**
-     * @return the statement name from the enclosed {@link OpDef}
+     * @return the statement name from the enclosed {@link OpTemplate}
      */
     public String getName() {
-        return opDef.getName();
+        return optpl.getName();
     }
 
     /**
-     * @return the raw statement from the enclosed {@link OpDef}
+     * @return the raw statement from the enclosed {@link OpTemplate}
      */
     public String getStmt() {
-        if (opDef.getOp() instanceof CharSequence) {
-            return opDef.getOp().toString();
-        } else {
-            throw new BasicError("Tried to access op type '" + opDef.getOp().getClass().getSimpleName() + " as a string statement");
-        }
+        return optpl.getStmt().orElseThrow();
     }
 
     /**
-     * @return the tags from the enclosed {@link OpDef}
+     * @return the tags from the enclosed {@link OpTemplate}
      */
     public Map<String, String> getTags() {
-        return opDef.getTags();
+        return optpl.getTags();
     }
 
     /**
-     * @return the bindings from the enclosed {@link OpDef}
+     * @return the bindings from the enclosed {@link OpTemplate}
      */
     public Map<String, String> getBindings() {
-        return opDef.getBindings();
+        return optpl.getBindings();
     }
 
     /**
-     * @return a params reader from the enclosed {@link OpDef} params map
+     * @return a params reader from the enclosed {@link OpTemplate} params map
      */
     public Element getParamReader() {
-        return NBParams.one(opDef.getParams());
+        return NBParams.one(optpl.getParams());
     }
 
     public List<BindPoint> getBindPoints() {

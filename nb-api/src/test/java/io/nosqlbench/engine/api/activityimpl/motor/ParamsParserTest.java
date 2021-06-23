@@ -165,4 +165,17 @@ public class ParamsParserTest {
         assertThat(p.get("b")).isEqualTo(" sixer");
     }
 
+    @Test
+    public void testHasValues() {
+        assertThat(ParamsParser.hasValues("has=values")).isTrue();
+        assertThat(ParamsParser.hasValues("has = values")).isTrue();
+        assertThat(ParamsParser.hasValues("has =values")).isTrue();
+        assertThat(ParamsParser.hasValues("has= values")).isTrue();
+        assertThat(ParamsParser.hasValues("3has= values")).isFalse();
+        assertThat(ParamsParser.hasValues("_has= values")).isTrue();
+        assertThat(ParamsParser.hasValues("h-as= values")).isTrue();
+        assertThat(ParamsParser.hasValues("h.as= values")).isTrue();
+        assertThat(ParamsParser.hasValues("h_as= values")).isTrue();
+    }
+
 }

@@ -17,10 +17,8 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-
 import java.util.Map;
 
 public interface Tagged {
-    public Map<String,String> getTags();
+    Map<String,String> getTags();
 }
