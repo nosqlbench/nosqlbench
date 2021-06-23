@@ -1,8 +1,8 @@
 package io.nosqlbench.activitytype.cql.core;
 
 import com.datastax.driver.core.*;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpDef;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -122,10 +122,10 @@ public class CQLBindHelper {
         }
     }
 
-    public static Map<String, String> parseAndGetSpecificBindings(OpDef opDef, ParsedStmt parsed) {
+    public static Map<String, String> parseAndGetSpecificBindings(OpTemplate opDef, ParsedStmtOp parsed) {
         List<String> spans = new ArrayList<>();
 
-        String statement = opDef.getStmt();
+        String statement = opDef.getStmt().orElseThrow();
 
         Set<String> extraBindings = new HashSet<>();
         extraBindings.addAll(opDef.getBindings().keySet());
