@@ -44,7 +44,7 @@ public class StmtDetailOverrideTest {
         assertThat(doc1block0.getOps().size()).isEqualTo(1);
         OpTemplate s = doc1block0.getOps().get(0);
         assertThat(s.getName()).isEqualTo("block0--stmt1");
-        assertThat(s.getStmt()).isEqualTo("globalstatement1");
+        assertThat(s.getStmt()).contains("globalstatement1");
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
         assertThat(s.getTags()).hasSize(1);
@@ -55,21 +55,21 @@ public class StmtDetailOverrideTest {
 
         s = stmts.get(0);
         assertThat(s.getName()).isEqualTo("testblock1--stmt1");
-        assertThat(s.getStmt()).isEqualTo("astatement1");
+        assertThat(s.getStmt()).contains("astatement1");
         assertThat(s.getTags()).hasSize(1);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = stmts.get(1);
         assertThat(s.getName()).isEqualTo("testblock1--s2name");
-        assertThat(s.getStmt()).isEqualTo("s2statement data");
+        assertThat(s.getStmt()).contains("s2statement data");
         assertThat(s.getTags()).hasSize(1);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = stmts.get(2);
         assertThat(s.getName()).isEqualTo("testblock1--s3");
-        assertThat(s.getStmt()).isEqualTo("statement three");
+        assertThat(s.getStmt()).contains("statement three");
         assertThat(s.getTags()).containsEntry("tname1", "tval1");
         assertThat(s.getTags()).containsEntry("global_tag1", "tag value");
         assertThat(s.getBindings()).hasSize(3);
@@ -77,7 +77,7 @@ public class StmtDetailOverrideTest {
 
         s = stmts.get(3);
         assertThat(s.getName()).isEqualTo("testblock1--s4");
-        assertThat(s.getStmt()).isEqualTo("statement 4");
+        assertThat(s.getStmt()).contains("statement 4");
         assertThat(s.getTags()).hasSize(1);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);

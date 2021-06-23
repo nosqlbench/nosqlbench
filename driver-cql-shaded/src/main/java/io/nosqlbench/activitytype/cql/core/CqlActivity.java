@@ -28,7 +28,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
@@ -182,7 +182,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmt parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orError();
+            ParsedStmtOp parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
             boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
@@ -345,7 +345,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }
 
-            template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().getBindPoints());
+            template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().orElseThrow().getBindPoints());
 
             if (psummary.length() > 0) {
                 logger.info("statement named '" + stmtDef.getName() + "' has custom settings:" + psummary);
@@ -391,14 +391,14 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
                         "This will be deprecated in a future release.");
                     logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                        "http://docs.nosqlbench.io/ for more details.");
                 } else {
                     throw new BasicError("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
                         "This has been deprecated for a long time now. You should use the modern yaml format, which is easy" +
                         "to convert to. If you want to ignore this and kick the issue" +
                         " down the road to someone else, then you can add ignore_important_warnings=true. " +
                         "Please refer to " +
-                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                        "http://docs.nosqlbench.io/ for more details.");
                 }
                 break;
             case "2":
@@ -415,7 +415,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc +
                             " with compatibility mode. This will be deprecated in a future release.");
                         logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                            "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                            "http://docs.nosqlbench.io/ for more details.");
                     } catch (Exception compatError) {
                         logger.warn("Tried to load yaml in compatibility mode, " +
                             "since it failed to load with the standard format, " +

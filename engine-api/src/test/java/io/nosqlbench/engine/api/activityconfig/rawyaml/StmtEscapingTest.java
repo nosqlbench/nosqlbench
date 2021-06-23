@@ -54,19 +54,19 @@ public class StmtEscapingTest {
 
     @Test
     public void testBackslashEscape() {
-        String s1 = defs.get(0).getStmt();
+        String s1 = defs.get(0).getStmt().orElseThrow();
         assertThat(s1).isEqualTo("This is a \"statement\"");
     }
 
     @Test
     public void testBackslashInBlock() {
-        String s2 = defs.get(1).getStmt();
+        String s2 = defs.get(1).getStmt().orElseThrow();
         assertThat(s2).isEqualTo("This is a \\\"statement\\\".\n");
     }
 
     @Test
     public void testTripleQuotesInBlock() {
-        String s3 = defs.get(2).getStmt();
+        String s3 = defs.get(2).getStmt().orElseThrow();
         assertThat(s3).isEqualTo("This is a \"\"\"statement\"\"\".\n");
     }
 

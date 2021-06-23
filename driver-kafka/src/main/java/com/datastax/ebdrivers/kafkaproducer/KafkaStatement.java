@@ -32,9 +32,9 @@ public class KafkaStatement {
     private final String key;
 
     public KafkaStatement(OpTemplate stmtDef, String servers, String clientId, String schemaRegistryUrl) {
-        ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
+        ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt().orElseThrow(), stmtDef.getBindings());
         BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
-        StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
+        StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt().orElseThrow(), paramBindings);
 
         this.bindings = template.resolve();
 

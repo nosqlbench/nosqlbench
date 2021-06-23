@@ -14,7 +14,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -102,7 +102,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
 
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmt parsed = stmtDef.getParsed().orError();
+            ParsedStmtOp parsed = stmtDef.getParsed().orElseThrow();
 
             ReadyGraphStatementTemplate readyGraphStatement;
             long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1").toString());
@@ -112,16 +112,16 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
             if (repeat.isPresent()) {
                 readyGraphStatement = new ReadyGraphStatementTemplate(
                         stmtDef.getName(),
-                        GraphStmtParser.getCookedRepeatedStatement(stmtDef.getStmt(), repeat.get()),
-                        stmtDef.getParsed().getBindPoints(),
-                        GraphStmtParser.getFields(stmtDef.getStmt(), stmtDef.getBindings()).toArray(new String[0]),
+                        GraphStmtParser.getCookedRepeatedStatement(stmtDef.getStmt().orElseThrow(), repeat.get()),
+                        stmtDef.getParsed().orElseThrow().getBindPoints(),
+                        GraphStmtParser.getFields(stmtDef.getStmt().orElseThrow(), stmtDef.getBindings()).toArray(new String[0]),
                         repeat.get());
             } else {
                 readyGraphStatement = new ReadyGraphStatementTemplate(
                         stmtDef.getName(),
-                        GraphStmtParser.getCookedStatement(stmtDef.getStmt()),
-                        stmtDef.getParsed().getBindPoints(),
-                        GraphStmtParser.getFields(stmtDef.getStmt(), stmtDef.getBindings()).toArray(new String[0]));
+                        GraphStmtParser.getCookedStatement(stmtDef.getStmt().orElseThrow()),
+                        stmtDef.getParsed().orElseThrow().getBindPoints(),
+                        GraphStmtParser.getFields(stmtDef.getStmt().orElseThrow(), stmtDef.getBindings()).toArray(new String[0]));
             }
             planner.addOp(readyGraphStatement, ratio);
         }

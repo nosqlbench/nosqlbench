@@ -11,7 +11,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -117,7 +117,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
             logger.error("No statements found for this activity");
         } else {
             for (OpTemplate stmt : stmts) {
-                ParsedStmt parsed = stmt.getParsed().orError();
+                ParsedStmtOp parsed = stmt.getParsed().orElseThrow();
                 String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);
 

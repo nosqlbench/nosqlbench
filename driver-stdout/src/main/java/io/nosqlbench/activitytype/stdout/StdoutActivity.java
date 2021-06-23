@@ -23,7 +23,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -180,7 +180,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
             }
         } else if (stmts.size() > 0) {
             for (OpTemplate stmt : stmts) {
-                ParsedStmt parsed = stmt.getParsed().orError();
+                ParsedStmtOp parsed = stmt.getParsed().orElseThrow();
                 BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
                 String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);
@@ -188,7 +188,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                     statement = statement + "\n";
                 }
 
-                StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
+                StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt().orElseThrow(), bt);
                 StringBindings sb = sbt.resolve();
                 sequencer.addOp(sb, stmt.getParamOrDefault("ratio", 1));
             }

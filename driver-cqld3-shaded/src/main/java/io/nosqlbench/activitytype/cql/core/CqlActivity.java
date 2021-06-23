@@ -28,7 +28,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
@@ -179,9 +179,11 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
         Set<String> timerStarts = new HashSet<>();
         Set<String> timerStops = new HashSet<>();
 
+        Pattern questionPattern = Pattern.compile("\\?(?<arg>\\w+)");
+
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmt parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orError();
+            ParsedStmtOp parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
             boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
@@ -344,7 +346,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }
 
-            template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().getBindPoints());
+            template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().orElseThrow().getBindPoints());
 
             if (psummary.length() > 0) {
                 logger.info("statement named '" + stmtDef.getName() + "' has custom settings:" + psummary);

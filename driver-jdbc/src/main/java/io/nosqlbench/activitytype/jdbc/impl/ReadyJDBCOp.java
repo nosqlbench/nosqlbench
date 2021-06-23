@@ -11,9 +11,9 @@ public class ReadyJDBCOp implements OpDispenser<String> {
     private final StringBindings bindings;
 
     public ReadyJDBCOp(OpTemplate stmtDef) {
-        ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
+        ParsedTemplate paramTemplate = new ParsedTemplate(stmtDef.getStmt().orElseThrow(), stmtDef.getBindings());
         BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
-        StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt(), paramBindings);
+        StringBindingsTemplate template = new StringBindingsTemplate(stmtDef.getStmt().orElseThrow(), paramBindings);
 
         bindings = template.resolve();
     }
