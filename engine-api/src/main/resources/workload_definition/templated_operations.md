@@ -50,6 +50,9 @@ op: select * from bar.table;
         "name": "block0--stmt1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--stmt1"
         }
     }
 ]
@@ -82,6 +85,9 @@ ops:
         "name": "block0--stmt1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--stmt1"
         }
     }
 ]
@@ -119,6 +125,9 @@ ops:
         "name": "block0--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--op1"
         }
     }
 ]
@@ -155,6 +164,9 @@ ops:
         "name": "block0--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--op1"
         }
     }
 ]
@@ -187,6 +199,9 @@ ops:
         "name": "block0--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--op1"
         }
     }
 ]
@@ -222,6 +237,9 @@ ops:
         "name": "block0--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block0--op1"
         }
     }
 ]
@@ -294,7 +312,8 @@ ops:
             "prepated": false
         },
         "tags": {
-            "phase": "schema"
+            "phase": "schema",
+            "name": "block0--special-op-name"
         }
     }
 ]
@@ -390,7 +409,8 @@ blocks:
         },
         "tags": {
             "phase": "schema",
-            "docleveltag": "is-tagging-everything"
+            "docleveltag": "is-tagging-everything",
+            "name": "block-named-fred--special-op-name"
         }
     }
 ]

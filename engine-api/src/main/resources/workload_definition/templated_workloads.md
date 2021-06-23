@@ -390,6 +390,9 @@ blocks:
         "name": "namedblock1--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "namedblock1--op1"
         }
     },
     {
@@ -399,6 +402,9 @@ blocks:
         },
         "params": {
             "type": "batch"
+        },
+        "tags": {
+            "name": "namedblock1--op2"
         }
     }
 ]
@@ -455,6 +461,9 @@ blocks:
         "name": "block1--op1",
         "op": {
             "stmt": "select * from bar.table;"
+        },
+        "tags": {
+            "name": "block1--op1"
         }
     },
     {
@@ -464,12 +473,18 @@ blocks:
         },
         "params": {
             "type": "batch"
+        },
+        "tags": {
+            "name": "block1--op2"
         }
     },
     {
         "name": "this-is-block-2--op3",
         "op": {
             "stmt": "select * from foo.table;"
+        },
+        "tags": {
+            "name": "this-is-block-2--op3"
         }
     }
 ]
@@ -513,6 +528,9 @@ blocks:
         "name": "myblock--stmt1",
         "op": {
             "stmt": "test op"
+        },
+        "tags": {
+            "name": "myblock--stmt1"
         }
     }
 ]
