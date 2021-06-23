@@ -1,9 +1,13 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.ParsedStmt;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.util.Tagged;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -121,48 +125,186 @@ import java.util.function.Function;
  *     p2: v2
  * }</pre>
  */
-public interface OpTemplate extends Tagged {
+public abstract class OpTemplate implements Tagged {
 
-    String getName();
+    private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    // TODO: coalesce Gson instances to a few statics on a central NB API class
 
-    Map<String,?> getOp();
+    public final static String FIELD_DESC = "description";
+    public final static String FIELD_NAME = "name";
+    public final static String FIELD_OP = "op";
+    public final static String FIELD_BINDINGS = "bindings";
+    public final static String FIELD_PARAMS = "params";
+    public final static String FIELD_TAGS = "tags";
 
-    Map<String, String> getBindings();
+    /**
+     * @return a description for the op template, or an empty string
+     */
+    public abstract String getDesc();
 
-    Map<String, Object> getParams();
+    /**
+     * @return a name for the op template, user-specified or auto-generated
+     */
+    public abstract String getName();
 
-    <V> Map<String, V> getParamsAsValueType(Class<? extends V> type);
+    /**
+     * Return a map of tags for this statement. Implementations are required to
+     * add a tag for "name" automatically when this value is set during construction.
+     * @return A map of assigned tags for the op, with the name added as an auto-tag.
+     */
+    public abstract Map<String, String> getTags();
 
-    <VT> VT removeParamOrDefault(String name, VT defaultValue);
+    public abstract Map<String, String> getBindings();
+
+    public abstract Map<String, Object> getParams();
+
+    public <T> Map<String, T> getParamsAsValueType(Class<? extends T> type) {
+        Map<String, T> map = new LinkedHashMap<>();
+        for (String pname : getParams().keySet()) {
+            Object object = getParams().get(pname);
+            if (object != null) {
+                if (type.isAssignableFrom(object.getClass())) {
+                    map.put(pname, type.cast(object));
+                } else {
+                    throw new RuntimeException("With param named '" + pname + "" +
+                        "' You can't assign an object of type '" + object.getClass().getSimpleName() + "" +
+                        "' to '" + type.getSimpleName() + "'. Maybe the YAML format is suggesting the wrong type.");
+                }
+            }
+        }
+        return map;
+    }
+
+
+    public <V> V removeParamOrDefault(String name, V defaultValue) {
+        Objects.requireNonNull(defaultValue);
+
+        if (!getParams().containsKey(name)) {
+            return defaultValue;
+        }
+
+        Object value = getParams().remove(name);
+
+        try {
+            return (V) defaultValue.getClass().cast(value);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to cast type " + value.getClass().getCanonicalName() + " to " + defaultValue.getClass().getCanonicalName(), e);
+        }
+    }
 
     @SuppressWarnings("unchecked")
-    <V> V getParamOrDefault(String name, V defaultValue);
+    public <V> V getParamOrDefault(String name, V defaultValue) {
+        Objects.requireNonNull(defaultValue);
 
-    <V> V getParam(String name, Class<? extends V> type);
+        if (!getParams().containsKey(name)) {
+            return defaultValue;
+        }
+        Object value = getParams().get(name);
+        try {
+            return (V) defaultValue.getClass().cast(value);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to cast type " + value.getClass().getCanonicalName() + " to " + defaultValue.getClass().getCanonicalName(), e);
+        }
+    }
+
+
+
+    public <V> V getParam(String name, Class<? extends V> type) {
+        Object object = getParams().get(name);
+        if (object == null) {
+            return null;
+        }
+        if (type.isAssignableFrom(object.getClass())) {
+            V value = type.cast(object);
+            return value;
+        }
+        throw new RuntimeException("Unable to cast type " + object.getClass().getSimpleName() + " to" +
+            " " + type.getSimpleName() + ". Perhaps the yaml format is suggesting the wrong type.");
+    }
 
     @SuppressWarnings("unchecked")
-    <V> Optional<V> getOptionalStringParam(String name, Class<? extends V> type);
+    public <V> Optional<V> getOptionalStringParam(String name, Class<? extends V> type) {
+        if (type.isPrimitive()) {
+            throw new RuntimeException("Do not use primitive types for the target class here. For example, Boolean.class is accepted, but boolean.class is not.");
+        }
+        if (getParams().containsKey(name)) {
+            Object object = getParams().get(name);
+            if (object == null) {
+                return Optional.empty();
+            }
+            try {
+                V reified = type.cast(object);
+                return Optional.of(reified);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to cast type " + object.getClass().getCanonicalName() + " to " + type.getCanonicalName());
+            }
+        }
+        return Optional.empty();
+    }
 
-    Optional<String> getOptionalStringParam(String name);
-
-    Map<String, String> getTags();
+    public Optional<String> getOptionalStringParam(String name) {
+        return getOptionalStringParam(name, String.class);
+    }
 
     /**
      * Parse the statement for anchors and return a richer view of the StmtDef which
      * is simpler to use for most statement configuration needs.
      *
-     * @return a new {@link ParsedStmt}
+     * @return a new {@link ParsedStmtOp}
      */
-    ParsedStmt getParsed(Function<String, String>... transforms);
+    public Optional<ParsedStmtOp> getParsed(Function<String,String>... rewriters) {
+        Optional<String> os = getStmt();
+        return os.map(s -> {
+            String result = s;
+            for (Function<String, String> rewriter : rewriters) {
+                result = rewriter.apply(result);
+            }
+            return result;
+        }).map(s -> new ParsedStmtOp(this));
+    }
 
-    String getDesc();
+    public abstract Optional<Map<String, Object>> getOp();
 
-    Map<String, Object> asData();
+    public Map<String, Object> asData() {
+        LinkedHashMap<String, Object> fields = new LinkedHashMap<>();
+
+        if (this.getDesc() != null && !this.getDesc().isBlank()) {
+            fields.put(FIELD_DESC, this.getDesc());
+        }
+
+        if (this.getBindings().size() > 0) {
+            fields.put(FIELD_BINDINGS, this.getBindings());
+        }
+
+        if (this.getParams().size() > 0) {
+            fields.put(FIELD_PARAMS, this.getParams());
+        }
+
+        if (this.getTags().size() > 0) {
+            fields.put(FIELD_TAGS, this.getTags());
+        }
+
+        this.getOp().ifPresent(o -> fields.put(FIELD_OP,o));
+
+        fields.put(FIELD_NAME, this.getName());
+
+        return fields;
+    }
 
     /**
-     * Legacy support for String form statements. This will be replaced after refactoring.
-     * @return A string version of the op
-     * @throws io.nosqlbench.nb.api.errors.BasicError if the op is not a CharSequence
+     * Legacy support for String form statements. This is left here as a convenience method,
+     * however it is changed to an Optional to force caller refactorings.
+     *
+     * @return An optional string version of the op, empty if there is no 'stmt' property in the op fields, or no op fields at all.
      */
-    String getStmt();
+    public Optional<String> getStmt() {
+        return getOp().map(m->m.get("stmt")).map(s->{
+            if (s instanceof CharSequence) {
+                return s.toString();
+            } else {
+                return gson.toJson(s);
+            }
+        });
+    }
+
 }
