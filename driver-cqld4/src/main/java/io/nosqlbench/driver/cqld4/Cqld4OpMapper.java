@@ -6,28 +6,28 @@ import io.nosqlbench.driver.cqld4.opdispensers.Cqld4PreparedStatementDispenser;
 import io.nosqlbench.driver.cqld4.opdispensers.Cqld4SimpleCqlStatementDispenser;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.templating.CommandTemplate;
+import io.nosqlbench.engine.api.templating.ParsedCommand;
 
 import java.util.function.Function;
 
 public class Cqld4OpMapper implements Function<OpTemplate, OpDispenser<Cqld4Op>> {
 
-    private final Function<OpTemplate,OpDispenser<Cqld4Op>> templateToDispenser;
+    private final Function<OpTemplate, OpDispenser<Cqld4Op>> templateToDispenser;
     private final CqlSession session;
 
-    public Cqld4OpMapper(CqlSession session, OpTemplate opTemplate) {
+    public Cqld4OpMapper(CqlSession session, OpTemplate optpl) {
         this.session = session;
-        CommandTemplate cmd = new CommandTemplate(opTemplate);
-        templateToDispenser = resolve(opTemplate);
+        ParsedCommand cmd = new ParsedCommand(optpl);
+        templateToDispenser = resolve(cmd);
     }
 
-    private Function<OpTemplate, OpDispenser<Cqld4Op>> resolve(OpTemplate) {
-        if (cmd.isStatic("prepared")) {
+    private Function<OpTemplate, OpDispenser<Cqld4Op>> resolve(ParsedCommand cmd) {
+        if (cmd.isStatic("prepared") && cmd.getStatic("prepared", boolean.class)) {
             return new Cqld4PreparedStatementDispenser(cmd);
         } else if (cmd.isStatic("batch")) {
-            return ot -> new Cqld4BatchStatementDispenser(session,cmd);
+            return ot -> new Cqld4BatchStatementDispenser(session, cmd);
         } else {
-            return ot -> new Cqld4SimpleCqlStatementDispenser(session,cmd);
+            return ot -> new Cqld4SimpleCqlStatementDispenser(session, cmd);
         }
     }
 

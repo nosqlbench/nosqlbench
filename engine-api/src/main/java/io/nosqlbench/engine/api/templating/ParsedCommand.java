@@ -51,11 +51,11 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
      *
      * @param ot An OpTemplate representing an operation to be performed in a native driver.
      */
-    ParsedCommand(OpTemplate ot) {
+    public ParsedCommand(OpTemplate ot) {
         this(ot, List.of());
     }
 
-    ParsedCommand(OpTemplate ot, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
+    public ParsedCommand(OpTemplate ot, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
         this.name = ot.getName();
 
         Map<String, Object> map = ot.getOp().orElseThrow();
@@ -111,5 +111,23 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
             map.put(k,v.apply(value));
         });
         return map;
+    }
+
+    public boolean isStatic(String prepared) {
+        return statics.containsKey(prepared);
+    }
+
+    public <T> T getStatic(String prepared, Class<T> classOfT) {
+        return (T) statics.get(prepared);
+    }
+
+    public <T> T get(String fieldName, long input) {
+        if (statics.containsKey(fieldName)) {
+            return (T) statics.get(fieldName);
+        }
+        if (dynamics.containsKey(fieldName)) {
+            return (T) dynamics.get(fieldName).apply(input);
+        }
+        return null;
     }
 }
