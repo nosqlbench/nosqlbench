@@ -60,14 +60,14 @@ public class CommandTemplate {
      * is non-null, then it taken as a line-oriented value and parsed according to default {@link ParamsParser} behavior.
      * However, the provided parsers (if any) are used first in order to match alternate forms of syntax.
      *
-     * See {@link CommandTemplate#CommandTemplate(String, Object, Map, Map, List)} for full details on the provided
+     * See {@link CommandTemplate#CommandTemplate(String, String, Map, Map, List)} for full details on the provided
      * parsers.
      *
      * @param optpl   An OpTemplate
      * @param parsers A list of parser functions
      */
     public CommandTemplate(OpTemplate optpl, List<Function<String, Map<String, String>>> parsers) {
-        this(optpl.getName(), optpl.getOp(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
+        this(optpl.getName(), optpl.getStmt().orElseThrow(), optpl.getParamsAsValueType(String.class), optpl.getBindings(), parsers);
     }
 
     /**
@@ -94,7 +94,7 @@ public class CommandTemplate {
      */
     public CommandTemplate(
         String name,
-        Object op,
+        String op,
         Map<String, String> params,
         Map<String, String> bindings,
         List<Function<String, Map<String, String>>> optionalParsers
@@ -108,8 +108,9 @@ public class CommandTemplate {
         // If none of the supplemental parsers work, the default params parser is used
 
         String oneline;
+
         if (op instanceof CharSequence) {
-            oneline = op.toString();
+            oneline = op;
         } else {
             throw new BasicError("Unable to create a oneline version of the CommandTemplate with op type of " + op.getClass().getSimpleName());
         }

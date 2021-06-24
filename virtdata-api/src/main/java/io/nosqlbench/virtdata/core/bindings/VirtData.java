@@ -27,7 +27,7 @@ public class VirtData {
         }
         List<BindPoint> bindPoints = new ArrayList<>();
         for (int i = 0; i < namesAndSpecs.length; i += 2) {
-            bindPoints.add(new BindPoint(namesAndSpecs[i],namesAndSpecs[i+1]));
+            bindPoints.add(new BindPoint(namesAndSpecs[i],namesAndSpecs[i+1], BindPoint.Type.definition));
         }
         return getTemplate(config, bindPoints);
     }
@@ -169,7 +169,7 @@ public class VirtData {
             T actualTestValue = mapper.get().get(1L);
             if (!ClassUtils.isAssignable(actualTestValue.getClass(),clazz,true)) {
                 throw new RuntimeException("The flow specifier '" + flowSpec + "' successfully created a function, but the test value" +
-                        "(" + String.valueOf(actualTestValue) + ") of type [" + actualTestValue.getClass() + "] produced by it was not " +
+                        "(" + actualTestValue + ") of type [" + actualTestValue.getClass() + "] produced by it was not " +
                         "assignable to the type '" + clazz.getCanonicalName() + "' which was explicitly set" +
                         " at the API level.");
             }

@@ -16,8 +16,8 @@ public class CommandTemplateTest {
         StmtsDocList stmtsDocs = StatementsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: test1=foo test2=bar");
-        OpTemplate stmtDef = stmtsDocs.getStmts().get(0);
-        CommandTemplate ct = new CommandTemplate(stmtDef);
+        OpTemplate optpl = stmtsDocs.getStmts().get(0);
+        CommandTemplate ct = new CommandTemplate(optpl);
         assertThat(ct.isStatic()).isTrue();
     }
 
@@ -29,8 +29,8 @@ public class CommandTemplateTest {
             " - s1: test1=foo test2={bar}\n" +
             "   bindings:\n" +
             "    bar: NumberNameToString();\n");
-        OpTemplate stmtDef = stmtsDocs.getStmts().get(0);
-        CommandTemplate ct = new CommandTemplate(stmtDef);
+        OpTemplate optpl = stmtsDocs.getStmts().get(0);
+        CommandTemplate ct = new CommandTemplate(optpl);
         String format = gson.toJson(ct);
         System.out.println(format);
 
