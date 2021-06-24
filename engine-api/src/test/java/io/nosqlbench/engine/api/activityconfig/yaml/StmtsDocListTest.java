@@ -87,11 +87,11 @@ public class StmtsDocListTest {
 
         assertThat(stmts1.get(0).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(stmts1.get(0).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(stmts1.get(0).getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"));
+        assertThat(stmts1.get(0).getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"),MapEntry.entry("name","doc1--block0--stmt1"));
 
         assertThat(stmts1.get(1).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(stmts1.get(1).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(stmts1.get(1).getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"));
+        assertThat(stmts1.get(1).getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"),MapEntry.entry("name","doc1--block0--stmt2"));
 
     }
 

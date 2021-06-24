@@ -47,7 +47,7 @@ public class StmtDetailOverrideTest {
         assertThat(s.getStmt()).contains("globalstatement1");
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
-        assertThat(s.getTags()).hasSize(1);
+        assertThat(s.getTags()).hasSize(2);
 
         StmtsBlock doc1block1 = doc1.getBlocks().get(1);
         List<OpTemplate> stmts = doc1block1.getOps();
@@ -56,14 +56,14 @@ public class StmtDetailOverrideTest {
         s = stmts.get(0);
         assertThat(s.getName()).isEqualTo("testblock1--stmt1");
         assertThat(s.getStmt()).contains("astatement1");
-        assertThat(s.getTags()).hasSize(1);
+        assertThat(s.getTags()).hasSize(2);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = stmts.get(1);
         assertThat(s.getName()).isEqualTo("testblock1--s2name");
         assertThat(s.getStmt()).contains("s2statement data");
-        assertThat(s.getTags()).hasSize(1);
+        assertThat(s.getTags()).hasSize(2);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
@@ -78,7 +78,7 @@ public class StmtDetailOverrideTest {
         s = stmts.get(3);
         assertThat(s.getName()).isEqualTo("testblock1--s4");
         assertThat(s.getStmt()).contains("statement 4");
-        assertThat(s.getTags()).hasSize(1);
+        assertThat(s.getTags()).hasSize(2);
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 

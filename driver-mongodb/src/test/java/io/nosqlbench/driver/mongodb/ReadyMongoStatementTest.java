@@ -61,7 +61,7 @@ public class ReadyMongoStatementTest {
 
     @Test
     public void testResolvePhaseMainRead() {
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:main-find");
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:.*main-find");
 
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
@@ -83,7 +83,7 @@ public class ReadyMongoStatementTest {
 
     @Test
     public void testResolvePhaseMainWrite() {
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:main-insert");
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("phase:main,name:.*main-insert");
 
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);

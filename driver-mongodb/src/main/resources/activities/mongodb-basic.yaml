@@ -40,8 +40,6 @@ blocks:
           }
         params:
           readPreference: primary
-        tags:
-          name: main-find
   - name: main-write
     tags:
       phase: main
@@ -57,5 +55,3 @@ blocks:
           }
         params:
           readPreference: primary
-        tags:
-          name: main-insert
