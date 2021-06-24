@@ -5,7 +5,6 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import org.junit.jupiter.api.Test;
 
-import java.net.http.HttpRequest;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,7 +96,7 @@ public class ReadyHttpOpTest {
                 " body: StaticString('test')\n");
         OpTemplate stmtDef = docs.getStmts().get(0);
 
-        Map<String, String> parse = HttpFormatParser.parseInline(stmtDef.getStmt());
+        Map<String, String> parse = HttpFormatParser.parseInline(stmtDef.getStmt().orElseThrow());
         assertThat(parse).containsAllEntriesOf(
                 Map.of(
                         "method", "{method}",

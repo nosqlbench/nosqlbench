@@ -75,7 +75,7 @@ public class OpDefTest {
         assertThat(ops).hasSize(2);
         OpTemplate sdef1 = ops.get(0);
         assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
-        assertThat(ops.get(0).getOp()).isEqualTo(Map.of("stmt","s1"));
+        assertThat(ops.get(0).getOp()).contains(Map.of("stmt","s1"));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class OpDefTest {
         OpTemplate op1 = block1.getOps().get(1);
         assertThat(op1.getParams()).containsAllEntriesOf(Map.of());
         assertThat(op1.getName()).isEqualTo("map-of-maps--block0--s2");
-        assertThat(op1.getOp()).isEqualTo(Map.of("stmt","statement2"));
+        assertThat(op1.getOp()).contains(Map.of("stmt","statement2"));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class OpDefTest {
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
         assertThat(op0.getName()).isEqualTo("string-statement--block0--stmt1");
-        assertThat(op0.getOp()).isEqualTo(Map.of("stmt","test statement"));
+        assertThat(op0.getOp()).contains(Map.of("stmt","test statement"));
     }
 
     @Test
