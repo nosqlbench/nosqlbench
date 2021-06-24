@@ -186,9 +186,9 @@ public class WebDriverActivity extends SimpleActivity {
             throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
         }
 
-        for (OpTemplate optemplate : stmts) {
-            long ratio = optemplate.getParamOrDefault("ratio", 1);
-            CommandTemplate cmd = new CommandTemplate(optemplate);
+        for (OpTemplate optpl : stmts) {
+            long ratio = optpl.getParamOrDefault("ratio", 1);
+            CommandTemplate cmd = new CommandTemplate(optpl);
             planner.addOp(cmd, ratio);
         }
         return planner.resolve();

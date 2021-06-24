@@ -1,30 +1,17 @@
 package io.nosqlbench.driver.jms;
 
-import io.nosqlbench.driver.jms.ops.JmsMsgSendMapper;
 import io.nosqlbench.driver.jms.ops.JmsOp;
-import io.nosqlbench.driver.jms.util.JmsHeader;
-import io.nosqlbench.driver.jms.util.JmsHeaderLongFunc;
 import io.nosqlbench.driver.jms.util.JmsUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSRuntimeException;
-import javax.jms.Message;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 abstract public class ReadyJmsOp implements OpDispenser<JmsOp> {
 
-    protected final OpTemplate opTpl;
+    protected final OpTemplate optpl;
     protected final CommandTemplate cmdTpl;
     protected final JmsActivity jmsActivity;
 
@@ -35,8 +22,8 @@ abstract public class ReadyJmsOp implements OpDispenser<JmsOp> {
     protected final LongFunction<JmsOp> opFunc;
 
     public ReadyJmsOp(OpTemplate opTemplate, JmsActivity jmsActivity) {
-        this.opTpl = opTemplate;
-        this.cmdTpl = new CommandTemplate(opTpl);
+        this.optpl = opTemplate;
+        this.cmdTpl = new CommandTemplate(optpl);
         this.jmsActivity = jmsActivity;
 
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {

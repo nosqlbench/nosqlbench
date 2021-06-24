@@ -8,8 +8,8 @@ import java.util.function.Function;
 public class DiagRunnableOpMapper implements Function<OpTemplate, OpDispenser<Runnable>> {
 
     @Override
-    public OpDispenser<Runnable> apply(OpTemplate opTemplate) {
-        CommandTemplate commandTemplate = new CommandTemplate(opTemplate);
+    public OpDispenser<Runnable> apply(OpTemplate optpl) {
+        CommandTemplate commandTemplate = new CommandTemplate(optpl);
         return new DiagRunnableOpDispenser(commandTemplate);
     }
 

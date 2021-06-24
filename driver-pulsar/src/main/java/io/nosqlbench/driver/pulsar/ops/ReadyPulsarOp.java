@@ -30,11 +30,11 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
     // TODO: Add docs for the command template with respect to the OpTemplate
 
-    public ReadyPulsarOp(OpTemplate opTemplate, PulsarSpaceCache pcache, PulsarActivity pulsarActivity) {
+    public ReadyPulsarOp(OpTemplate optpl, PulsarSpaceCache pcache, PulsarActivity pulsarActivity) {
         // TODO: Consider parsing map structures into equivalent binding representation
         this.pulsarActivity = pulsarActivity;
-        this.opTpl = opTemplate;
-        this.cmdTpl = new CommandTemplate(opTemplate);
+        this.opTpl = optpl;
+        this.cmdTpl = new CommandTemplate(optpl);
 
         if (cmdTpl.isDynamic("op_scope")) {
             throw new RuntimeException("op_scope must be static");
