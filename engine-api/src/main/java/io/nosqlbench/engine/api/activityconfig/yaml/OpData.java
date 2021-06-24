@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
+import java.security.InvalidParameterException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,13 +34,18 @@ public class OpData extends OpTemplate {
     }
 
     public OpData applyFields(Map<String,Object> opdata) {
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_DESC)).ifPresent(v -> this.setDesc(v.toString()));
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_NAME)).ifPresent(v -> this.setName(v.toString()));
+        LinkedHashMap<String,Object> toapply = new LinkedHashMap<>(opdata);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_DESC)).ifPresent(v -> this.setDesc(v.toString()));
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_NAME)).ifPresent(v -> this.setName(v.toString()));
 
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_BINDINGS)).ifPresent(this::setBindings);
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_OP)).ifPresent(this::setOp);
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_PARAMS)).ifPresent(this::setParams);
-        Optional.ofNullable(opdata.remove(OpTemplate.FIELD_TAGS)).ifPresent(this::setTags);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_BINDINGS)).ifPresent(this::setBindings);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_OP)).ifPresent(this::setOp);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_PARAMS)).ifPresent(this::setParams);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_TAGS)).ifPresent(this::setTags);
+
+        if (toapply.size()>0) {
+            throw new InvalidParameterException("Fields were not applied to OpData:" + toapply);
+        }
         return this;
     }
 
