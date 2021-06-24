@@ -82,8 +82,10 @@ import java.util.stream.StreamSupport;
 public class ParsedTemplate {
 
     private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
-    private final List<CapturePoint> captures;
+
     private final String rawtemplate;
+    private final List<CapturePoint> captures;
+    private final List<BindPoint> bindpoints;
 
     public static ParsedTemplate of(String rawtemplate, Map<String,String> bindings) {
         return new ParsedTemplate(rawtemplate,bindings);
@@ -142,8 +144,9 @@ public class ParsedTemplate {
 
         CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
         this.captures = captureData.getCaptures();
-        List<String> spanData = bindPointParser.apply(captureData.getRawTemplate());
-        this.spans = spanData.toArray(new String[0]);
+        BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(),availableBindings);
+        this.spans = bindPointsResult.getSpans().toArray(new String[0]);
+        this.bindpoints = bindPointsResult.getBindpoints();
     }
 
     public Type getType() {
@@ -225,25 +228,16 @@ public class ParsedTemplate {
      *                                   such as an anchor which has no provided binding.
      */
     public List<BindPoint> getBindPoints() {
-        List<BindPoint> bindpoints = new ArrayList<>();
-        for (int i = 1; i < spans.length; i += 2) {
-            if (!bindings.containsKey(spans[i])) {
-                throw new InvalidParameterException("Binding named '" + spans[i] + "' is not contained in the bindings map.");
+        bindpoints.forEach(b -> {
+            if (b.getBindspec()==null || b.getBindspec().isEmpty()) {
+                throw new RuntimeException("No binding spec was provided for bind point '" + b + "'");
             }
-            bindpoints.add(new BindPoint(spans[i], bindings.get(spans[i])));
-        }
-
+        });
         return bindpoints;
     }
 
     private List<BindPoint> getUncheckedBindPoints() {
-        List<BindPoint> bindpoints = new ArrayList<>();
-        for (int i = 1; i < spans.length; i += 2) {
-            bindpoints.add(new BindPoint(spans[i], bindings.getOrDefault(spans[i], null)));
-        }
-
         return bindpoints;
-
     }
 
     /**
@@ -282,7 +276,7 @@ public class ParsedTemplate {
      */
     public Optional<BindPoint> asBinding() {
         if (spans.length == 3 && spans[0].isEmpty() && spans[2].isEmpty()) {
-            return Optional.of(new BindPoint(spans[1], bindings.getOrDefault(spans[1], null)));
+            return Optional.of(bindpoints.get(0));
         } else {
             return Optional.empty();
         }
