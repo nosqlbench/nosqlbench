@@ -3,7 +3,7 @@ package io.nosqlbench.engine.api.activityapi.planning;
 import java.util.function.LongFunction;
 
 /**
- * An OpSource provides an Op when given an ordinal.
+ * An OpSource provides an Op for a given long value.
  * OpSources are expected to be deterministic with respect to inputs.
  *
  * @param <T>

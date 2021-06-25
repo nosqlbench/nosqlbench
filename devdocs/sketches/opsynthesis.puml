@@ -1,0 +1,65 @@
+@startuml
+autoactivate on
+participant "Workload\nModel" as workload
+participant "Driver\nAdapter" as adapter #ff0
+participant "Op\nType" as optype  #ff0
+
+participant "Standard\nActivity" as activity #0fa
+participant "Op\nSource" as opsource #0fa
+participant "Standard\nAction" as action #0fa
+
+participant "Native\nDriver" as native #ff00ff
+participant "Target\nSystem" as target #ff00ff
+
+=== during initialization ===
+activity -> adapter: getOpMapperFunc()
+return <OpMapperFunc>
+activity -> workload: getWorkloadTemplate()
+return <OpTemplate>
+
+
+note over activity
+ The activity composes an OpSource
+ function from the template data
+ and the op mapping logic
+end note
+
+activity -> opsource ** : compose function\n<OpSource<OpType>>
+
+activity -> action ** : create worker\nwith <OpSource<OpType>>
+
+=== during cycling ===
+
+action -> opsource: getOp()
+
+opsource -> optype ** : create
+return <op>
+
+return <op:OpType>
+
+action -> action: run(op)
+
+
+native -> target: execute operation
+return <result>
+
+
+return result
+
+
+'activity -> workload: getOpTemplate
+'activity <- workload: <OpTemplate>
+
+'activity -> workload: getOp
+'workload -> activity
+'
+'activity -> adapter
+'
+'activity -> adapter: getOpSource
+'activate adapter
+'activity <- adapter: <OpSource>
+'deactivate adapter
+'
+'activity -> opsource: getOp
+'
+@end

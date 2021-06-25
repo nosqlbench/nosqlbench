@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.DiagRunnableOpMapper;
@@ -18,17 +18,17 @@ import java.util.function.Function;
  */
 public abstract class StandardActivity<O extends Runnable> extends SimpleActivity {
 
-    private OpSequence<OpDispenser<O>> sequencer;
+    private OpSource<O> opsource;
 
     public StandardActivity(ActivityDef activityDef) {
         super(activityDef);
     }
 
-    public synchronized OpSequence<OpDispenser<O>> getSequencer() {
-        if (this.sequencer == null) {
+    public synchronized OpSource<O> getOpsource() {
+        if (this.opsource == null) {
             Function<OpTemplate, OpDispenser<O>> dispenserMapper = getOpMapperFunction();
         }
-        return sequencer;
+        return opsource;
     }
 
     protected abstract Function<OpTemplate, OpDispenser<O>> getOpMapperFunction();

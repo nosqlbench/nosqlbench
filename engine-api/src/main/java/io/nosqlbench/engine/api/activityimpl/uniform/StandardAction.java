@@ -4,9 +4,8 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 public class StandardAction<A extends StandardActivity<O>, O extends Runnable> implements SyncAction, ActivityDefObserver {
 
     private final A activity;
-    private final OpSequence<OpDispenser<O>> opsource;
+    private final OpSource<O> opsource;
 
-    public StandardAction(A activity, OpSequence<OpDispenser<O>> opsource) {
+    public StandardAction(A activity, OpSource<O> opsource) {
         this.activity = activity;
         this.opsource = opsource;
     }
@@ -35,8 +34,7 @@ public class StandardAction<A extends StandardActivity<O>, O extends Runnable> i
 
         O op = null;
         try (Timer.Context ct = activity.getInstrumentation().getOrCreateInputTimer().time()) {
-            OpDispenser<O> ready = opsource.apply(cycle);
-            op = ready.apply(cycle);
+            op = opsource.apply(cycle);
         }
 
         int tries = 0;
