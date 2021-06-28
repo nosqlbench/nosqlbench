@@ -62,6 +62,12 @@
       <artifactId>oshi-core</artifactId>
     </dependency>
 
+      <dependency>
+          <groupId>com.amazonaws</groupId>
+          <artifactId>aws-java-sdk-s3</artifactId>
+          <version>1.12.12</version>
+      </dependency>
+
       <!-- perf testing -->
 
     <dependency>
