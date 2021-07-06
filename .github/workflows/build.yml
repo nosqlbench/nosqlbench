@@ -2,8 +2,6 @@ name: build
 
 on:
   push:
-    paths:
-      - RELEASENOTES.**
   pull_request:
 
 
