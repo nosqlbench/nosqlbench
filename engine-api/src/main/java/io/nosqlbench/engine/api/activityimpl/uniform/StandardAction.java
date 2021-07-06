@@ -23,10 +23,12 @@ public class StandardAction<A extends StandardActivity<O>, O extends Runnable> i
 
     private final A activity;
     private final OpSource<O> opsource;
+    private final int slot;
 
-    public StandardAction(A activity, OpSource<O> opsource) {
+    public StandardAction(A activity, int slot) {
         this.activity = activity;
-        this.opsource = opsource;
+        this.opsource = activity.getOpSource();
+        this.slot = slot;
     }
 
     @Override
@@ -39,12 +41,12 @@ public class StandardAction<A extends StandardActivity<O>, O extends Runnable> i
 
         int tries = 0;
         int code= 0;
-        Throwable error = null;
         while (tries++ <= activity.getMaxTries()) {
-
+            Throwable error = null;
             long startedAt = System.nanoTime();
             try (Timer.Context ct = activity.getInstrumentation().getOrCreateExecuteTimer().time()) {
                 op.run();
+                break;
             } catch (Exception e) {
                 error = e;
             } finally {

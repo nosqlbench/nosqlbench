@@ -1,12 +1,15 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.OpSource;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.DiagRunnableOpMapper;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -16,28 +19,37 @@ import java.util.function.Function;
  *
  * @param <O> A type of runnable which wraps the operations for this type of driver.
  */
-public abstract class StandardActivity<O extends Runnable> extends SimpleActivity {
+public class StandardActivity<O extends Runnable> extends SimpleActivity {
 
-    private OpSource<O> opsource;
+    private final DriverAdapter<O> adapter;
+    private final OpSource<O> opsource;
 
-    public StandardActivity(ActivityDef activityDef) {
+    public StandardActivity(DriverAdapter<O> adapter, ActivityDef activityDef) {
         super(activityDef);
+        this.adapter = adapter;
+
+        try {
+            Function<ParsedCommand, OpDispenser<O>> opmapper = adapter.getOpMapper();
+            Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
+            OpSequence<OpDispenser<O>> seq = createOpSourceFromCommands(opmapper,List.of(preprocessor));
+            opsource= OpSource.of(seq);
+        } catch (Exception e) {
+            if (e instanceof OpConfigError) {
+                throw e;
+            } else {
+                throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
+            }
+        }
     }
 
-    public synchronized OpSource<O> getOpsource() {
-        if (this.opsource == null) {
-            Function<OpTemplate, OpDispenser<O>> dispenserMapper = getOpMapperFunction();
-        }
+    public OpSource<O> getOpSource() {
         return opsource;
     }
 
-    protected abstract Function<OpTemplate, OpDispenser<O>> getOpMapperFunction();
-
-
-    public Function<OpTemplate, OpDispenser<? extends Runnable>> getRunnableOpFunction() {
-        DiagRunnableOpMapper mapper = new DiagRunnableOpMapper();
-        return mapper::apply;
-    }
+//    public Function<OpTemplate, OpDispenser<? extends Runnable>> getRunnableOpFunction() {
+//        DiagRunnableOpMapper mapper = new DiagRunnableOpMapper();
+//        return mapper::apply;
+//    }
 
 
 }
