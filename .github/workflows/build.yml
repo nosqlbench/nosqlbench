@@ -2,6 +2,13 @@ name: build
 
 on:
   push:
+    paths:
+      - RELEASENOTES.**
+  pull_request:
+
+
+on:
+  push:
     branches: main
     paths:
      - '!RELEASENOTES.**'
