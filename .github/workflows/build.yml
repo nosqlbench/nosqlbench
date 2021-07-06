@@ -4,13 +4,6 @@ on:
   push:
   pull_request:
 
-
-on:
-  push:
-    branches: main
-    paths:
-     - '!RELEASENOTES.**'
-
 jobs:
   build:
     runs-on: ubuntu-18.04
