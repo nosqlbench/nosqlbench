@@ -22,9 +22,9 @@ public class Cqld4OpMapper implements Function<OpTemplate, OpDispenser<Cqld4Op>>
     }
 
     private Function<OpTemplate, OpDispenser<Cqld4Op>> resolve(ParsedCommand cmd) {
-        if (cmd.isStatic("prepared") && cmd.getStatic("prepared", boolean.class)) {
+        if (cmd.isDefinedStatic("prepared") && cmd.getStaticValue("prepared", boolean.class)) {
             return new Cqld4PreparedStatementDispenser(cmd);
-        } else if (cmd.isStatic("batch")) {
+        } else if (cmd.isDefinedStatic("batch")) {
             return ot -> new Cqld4BatchStatementDispenser(session, cmd);
         } else {
             return ot -> new Cqld4SimpleCqlStatementDispenser(session, cmd);
