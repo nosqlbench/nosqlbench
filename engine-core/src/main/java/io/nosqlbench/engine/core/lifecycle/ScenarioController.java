@@ -19,6 +19,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.nb.api.annotations.Layer;
@@ -55,13 +57,13 @@ public class ScenarioController {
      */
     public synchronized void start(ActivityDef activityDef) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .now()
-                .layer(Layer.Activity)
-                .label("alias", activityDef.getAlias())
-                .detail("command", "start")
-                .detail("params", activityDef.toString())
-                .build());
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", activityDef.getAlias())
+            .detail("command", "start")
+            .detail("params", activityDef.toString())
+            .build());
 
 
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
@@ -104,13 +106,13 @@ public class ScenarioController {
      */
     public synchronized void run(int timeout, ActivityDef activityDef) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .now()
-                .layer(Layer.Activity)
-                .label("alias", activityDef.getAlias())
-                .detail("command", "run")
-                .detail("params", activityDef.toString())
-                .build());
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", activityDef.getAlias())
+            .detail("command", "run")
+            .detail("params", activityDef.toString())
+            .build());
 
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
         scenariologger.debug("RUN alias=" + activityDef.getAlias());
@@ -164,13 +166,13 @@ public class ScenarioController {
      */
     public synchronized void stop(ActivityDef activityDef) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .now()
-                .layer(Layer.Activity)
-                .label("alias", activityDef.getAlias())
-                .detail("command", "stop")
-                .detail("params", activityDef.toString())
-                .build());
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", activityDef.getAlias())
+            .detail("command", "stop")
+            .detail("params", activityDef.toString())
+            .build());
 
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
         if (activityExecutor == null) {
@@ -266,9 +268,9 @@ public class ScenarioController {
      */
     private ActivityExecutor getActivityExecutor(String activityAlias) {
         Optional<ActivityExecutor> executor =
-                Optional.ofNullable(activityExecutors.get(activityAlias));
+            Optional.ofNullable(activityExecutors.get(activityAlias));
         return executor.orElseThrow(
-                () -> new RuntimeException("ActivityExecutor for alias " + activityAlias + " not found.")
+            () -> new RuntimeException("ActivityExecutor for alias " + activityAlias + " not found.")
         );
 
     }
@@ -298,13 +300,30 @@ public class ScenarioController {
 
                 if (activityTypeName == null) {
                     String errmsg = "You must provide a driver=<driver> parameter. Valid examples are:\n" +
-                            knownTypes.stream().map(t -> " driver=" + t + "\n").collect(Collectors.joining());
+                        knownTypes.stream().map(t -> " driver=" + t + "\n").collect(Collectors.joining());
                     throw new BasicError(errmsg);
                 }
 
-                ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
+//                ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
+
+                ActivityType<?> activityType = null;
+
+                Optional<ActivityType> ato = ActivityType.FINDER.getOptionally(activityTypeName);
+                if (ato.isPresent()) {
+                    activityType = ato.get();
+                } else {
+                    Optional<DriverAdapter> oda = StandardActivityType.FINDER.getOptionally(activityTypeName);
+                    if (oda.isPresent()) {
+                        DriverAdapter driverAdapter = oda.get();
+                        activityType = new StandardActivityType<>(driverAdapter);
+                    } else {
+                        throw new RuntimeException("Found neither ActivityType named '" + activityTypeName + "' nor DriverAdapter named '" + activityTypeName + "'.");
+                    }
+
+                }
+
                 executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()),
-                        this.sessionId);
+                    this.sessionId);
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
@@ -349,8 +368,8 @@ public class ScenarioController {
      */
     public List<ActivityDef> getActivityDefs() {
         return activityExecutors.values().stream()
-                .map(ActivityExecutor::getActivityDef)
-                .collect(Collectors.toList());
+            .map(ActivityExecutor::getActivityDef)
+            .collect(Collectors.toList());
     }
 
     /**
