@@ -48,6 +48,12 @@ public class SimpleServiceLoader<T> {
         );
     }
 
+
+    public Optional<T> getOptionally(String implName) {
+        Optional<T> type = get(implName);
+        return type;
+    }
+
     /**
      * Load the service providers which are annotated with {@link Service} and selector names.
      *
