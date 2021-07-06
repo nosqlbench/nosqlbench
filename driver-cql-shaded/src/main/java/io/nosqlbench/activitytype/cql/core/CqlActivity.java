@@ -28,7 +28,6 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
@@ -50,6 +49,7 @@ import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,7 +182,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmtOp parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
+            ParsedTemplate parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
             boolean prepared = stmtDef.getParamOrDefault("prepared", true);
             boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
             long ratio = stmtDef.getParamOrDefault("ratio", 1);
@@ -235,7 +235,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     .orElse(CqlBinderTypes.DEFAULT);
 
                 template = new ReadyCQLStatementTemplate(fconfig, binderType, getSession(), prepare, ratio,
-                    parsed.getName());
+                    stmtDef.getName());
             } else {
                 SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
@@ -251,10 +251,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                    parsed.getName(), parameterized, null, null);
+                    stmtDef.getName(), parameterized, null, null);
             }
 
-            Element params = parsed.getParamReader();
+            Element params = stmtDef.getParamReader();
 
             params.get("start-timers", String.class)
                 .map(s -> s.split(", *"))
@@ -334,13 +334,13 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
 
             if (instrument) {
-                logger.info("Adding per-statement success and error and resultset-size timers to statement '" + parsed.getName() + "'");
+                logger.info("Adding per-statement success and error and resultset-size timers to statement '" + stmtDef.getName() + "'");
                 template.instrument(this);
                 psummary.append(" instrument=>true");
             }
 
             if (!logresultcsv.isEmpty()) {
-                logger.info("Adding per-statement result CSV logging to statement '" + parsed.getName() + "'");
+                logger.info("Adding per-statement result CSV logging to statement '" + stmtDef.getName() + "'");
                 template.logResultCsv(this, logresultcsv);
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }

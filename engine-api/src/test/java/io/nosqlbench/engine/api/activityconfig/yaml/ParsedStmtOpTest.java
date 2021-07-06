@@ -18,10 +18,10 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
-import org.junit.jupiter.api.BeforeAll;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,14 +39,14 @@ public class ParsedStmtOpTest {
     public void testBasicParser() {
         StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         OpTemplate stmtDef0 = block0.getOps().get(0);
-        ParsedStmtOp parsed0 = stmtDef0.getParsed().orElseThrow();
-        assertThat(parsed0.getMissingBindings()).containsExactly("delta");
+        ParsedTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        assertThat(parsed0.getMissing()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
         StmtsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
         OpTemplate stmtDef1 = block1.getOps().get(0);
-        ParsedStmtOp parsed1 = stmtDef1.getParsed().orElseThrow();
-        assertThat(parsed1.getMissingBindings()).containsExactly();
+        ParsedTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        assertThat(parsed1.getMissing()).containsExactly();
         assertThat(parsed1.hasError()).isFalse();
     }
 
@@ -55,13 +55,13 @@ public class ParsedStmtOpTest {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
         OpTemplate stmtDef0 = block2.getOps().get(0);
-        ParsedStmtOp parsed0 = stmtDef0.getParsed().orElseThrow();
-        assertThat(parsed0.getMissingBindings()).isEmpty();
+        ParsedTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        assertThat(parsed0.getMissing()).isEmpty();
         assertThat(parsed0.hasError()).isFalse();
 
         OpTemplate stmtDef1 = block2.getOps().get(1);
-        ParsedStmtOp parsed1 = stmtDef1.getParsed().orElseThrow();
-        assertThat(parsed1.getMissingBindings()).isEmpty();
+        ParsedTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        assertThat(parsed1.getMissing()).isEmpty();
         assertThat(parsed1.hasError()).isFalse();
     }
 

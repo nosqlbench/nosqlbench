@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.util.Tagged;
+import io.nosqlbench.nb.api.config.params.Element;
+import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -252,7 +255,7 @@ public abstract class OpTemplate implements Tagged {
      *
      * @return a new {@link ParsedStmtOp}
      */
-    public Optional<ParsedStmtOp> getParsed(Function<String,String>... rewriters) {
+    public Optional<ParsedTemplate> getParsed(Function<String,String>... rewriters) {
         Optional<String> os = getStmt();
         return os.map(s -> {
             String result = s;
@@ -260,7 +263,11 @@ public abstract class OpTemplate implements Tagged {
                 result = rewriter.apply(result);
             }
             return result;
-        }).map(s -> new ParsedStmtOp(this));
+        }).map(s -> new ParsedTemplate(s,getBindings()));
+    }
+
+    public Optional<ParsedTemplate> getParsed() {
+        return getStmt().map(s -> new ParsedTemplate(s, getBindings()));
     }
 
     public abstract Optional<Map<String, Object>> getOp();
@@ -307,4 +314,7 @@ public abstract class OpTemplate implements Tagged {
         });
     }
 
+    public Element getParamReader() {
+        return NBParams.one(getParams());
+    }
 }

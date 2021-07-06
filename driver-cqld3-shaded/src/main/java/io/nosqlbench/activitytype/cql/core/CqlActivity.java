@@ -28,7 +28,6 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
@@ -50,6 +49,7 @@ import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -181,25 +181,25 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
         Pattern questionPattern = Pattern.compile("\\?(?<arg>\\w+)");
 
-        for (OpTemplate stmtDef : stmts) {
+        for (OpTemplate optpl : stmts) {
 
-            ParsedStmtOp parsed = stmtDef.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
-            boolean prepared = stmtDef.getParamOrDefault("prepared", true);
-            boolean parameterized = stmtDef.getParamOrDefault("parameterized", false);
-            long ratio = stmtDef.getParamOrDefault("ratio", 1);
+            ParsedTemplate parsed = optpl.getParsed(CqlActivity::canonicalizeBindings).orElseThrow();
+            boolean prepared = optpl.getParamOrDefault("prepared", true);
+            boolean parameterized = optpl.getParamOrDefault("parameterized", false);
+            long ratio = optpl.getParamOrDefault("ratio", 1);
 
             //parsed.applyStmtTransform(this::canonicalizeBindings);
-            Optional<ConsistencyLevel> cl = stmtDef.getOptionalStringParam("cl", String.class).map(ConsistencyLevel::valueOf);
-            Optional<ConsistencyLevel> serial_cl = stmtDef.getOptionalStringParam("serial_cl").map(ConsistencyLevel::valueOf);
-            Optional<Boolean> idempotent = stmtDef.getOptionalStringParam("idempotent", Boolean.class);
+            Optional<ConsistencyLevel> cl = optpl.getOptionalStringParam("cl", String.class).map(ConsistencyLevel::valueOf);
+            Optional<ConsistencyLevel> serial_cl = optpl.getOptionalStringParam("serial_cl").map(ConsistencyLevel::valueOf);
+            Optional<Boolean> idempotent = optpl.getOptionalStringParam("idempotent", Boolean.class);
 
             StringBuilder psummary = new StringBuilder();
 
-            boolean instrument = stmtDef.getOptionalStringParam("instrument", Boolean.class)
+            boolean instrument = optpl.getOptionalStringParam("instrument", Boolean.class)
                 .or(() -> getParams().getOptionalBoolean("instrument"))
                 .orElse(false);
 
-            String logresultcsv = stmtDef.getParamOrDefault("logresultcsv", "");
+            String logresultcsv = optpl.getParamOrDefault("logresultcsv", "");
 
             String logresultcsv_act = getParams().getOptionalString("logresultcsv").orElse("");
 
@@ -207,7 +207,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 throw new RuntimeException("At the activity level, only logresultcsv=true is allowed, no other values.");
             }
             logresultcsv = !logresultcsv.isEmpty() ? logresultcsv : logresultcsv_act;
-            logresultcsv = !logresultcsv.equalsIgnoreCase("true") ? logresultcsv : stmtDef.getName() + "--results.csv";
+            logresultcsv = !logresultcsv.equalsIgnoreCase("true") ? logresultcsv : optpl.getName() + "--results.csv";
 
             logger.debug("readying statement[" + (prepared ? "" : "un") + "prepared]:" + parsed.getStmt());
 
@@ -231,12 +231,12 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     prepare.setIdempotent(i);
                 });
 
-                CqlBinderTypes binderType = stmtDef.getOptionalStringParam("binder")
+                CqlBinderTypes binderType = optpl.getOptionalStringParam("binder")
                     .map(CqlBinderTypes::valueOf)
                     .orElse(CqlBinderTypes.DEFAULT);
 
                 template = new ReadyCQLStatementTemplate(fconfig, binderType, getSession(), prepare, ratio,
-                    parsed.getName());
+                    optpl.getName());
             } else {
                 SimpleStatement simpleStatement = new SimpleStatement(stmtForDriver);
                 cl.ifPresent((conlvl) -> {
@@ -252,10 +252,10 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                    parsed.getName(), parameterized, null, null);
+                    optpl.getName(), parameterized, null, null);
             }
 
-            Element params = parsed.getParamReader();
+            Element params = optpl.getParamReader();
 
             params.get("start-timers", String.class)
                 .map(s -> s.split(", *"))
@@ -279,7 +279,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                 });
 
 
-            stmtDef.getOptionalStringParam("save")
+            optpl.getOptionalStringParam("save")
                 .map(s -> s.split("[,: ]"))
                 .map(Save::new)
                 .ifPresent(save_op -> {
@@ -287,7 +287,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     template.addRowCycleOperators(save_op);
                 });
 
-            stmtDef.getOptionalStringParam("rsoperators")
+            optpl.getOptionalStringParam("rsoperators")
                 .map(s -> s.split(","))
                 .stream().flatMap(Arrays::stream)
                 .map(ResultSetCycleOperators::newOperator)
@@ -296,7 +296,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     template.addResultSetOperators(rso);
                 });
 
-            stmtDef.getOptionalStringParam("rowoperators")
+            optpl.getOptionalStringParam("rowoperators")
                 .map(s -> s.split(","))
                 .stream().flatMap(Arrays::stream)
                 .map(RowCycleOperators::newOperator)
@@ -311,19 +311,19 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             // a verify param
 
             if (activityDef.getParams().containsKey("verify") ||
-                stmtDef.getParams().containsKey("verify") ||
-                stmtDef.getParams().containsKey("verify-fields")) {
+                optpl.getParams().containsKey("verify") ||
+                optpl.getParams().containsKey("verify-fields")) {
 
-                String verify = stmtDef.getOptionalStringParam("verify")
-                    .or(() -> stmtDef.getOptionalStringParam("verify-fields"))
+                String verify = optpl.getOptionalStringParam("verify")
+                    .or(() -> optpl.getOptionalStringParam("verify-fields"))
                     .or(() -> activityDef.getParams().getOptionalString("verify"))
                     .orElse("*");
 
-                DiffType diffType = stmtDef.getOptionalStringParam("compare")
+                DiffType diffType = optpl.getOptionalStringParam("compare")
                     .or(() -> activityDef.getParams().getOptionalString("compare"))
                     .map(DiffType::valueOf).orElse(DiffType.reffields);
 
-                Bindings expected = VerifierBuilder.getExpectedValuesTemplate(stmtDef).resolveBindings();
+                Bindings expected = VerifierBuilder.getExpectedValuesTemplate(optpl).resolveBindings();
                 VerificationMetrics vmetrics = getVerificationMetrics();
 
                 RowDifferencer.ThreadLocalWrapper differencer = new RowDifferencer.ThreadLocalWrapper(vmetrics, expected, diffType);
@@ -335,21 +335,21 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
 
             if (instrument) {
-                logger.info("Adding per-statement success and error and resultset-size timers to statement '" + parsed.getName() + "'");
+                logger.info("Adding per-statement success and error and resultset-size timers to statement '" + optpl.getName() + "'");
                 template.instrument(this);
                 psummary.append(" instrument=>true");
             }
 
             if (!logresultcsv.isEmpty()) {
-                logger.info("Adding per-statement result CSV logging to statement '" + parsed.getName() + "'");
+                logger.info("Adding per-statement result CSV logging to statement '" + optpl.getName() + "'");
                 template.logResultCsv(this, logresultcsv);
                 psummary.append(" logresultcsv=>").append(logresultcsv);
             }
 
-            template.getContextualBindings().getBindingsTemplate().addFieldBindings(stmtDef.getParsed().orElseThrow().getBindPoints());
+            template.getContextualBindings().getBindingsTemplate().addFieldBindings(optpl.getParsed().orElseThrow().getBindPoints());
 
             if (psummary.length() > 0) {
-                logger.info("statement named '" + stmtDef.getName() + "' has custom settings:" + psummary);
+                logger.info("statement named '" + optpl.getName() + "' has custom settings:" + psummary);
             }
 
             planner.addOp(template.resolve(), ratio);
@@ -392,14 +392,14 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
                         "This will be deprecated in a future release.");
                     logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                        "http://docs.nosqlbench.io/ for more details.");
                 } else {
                     throw new BasicError("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc + " with compatibility mode. " +
                         "This has been deprecated for a long time now. You should use the modern yaml format, which is easy" +
                         "to convert to. If you want to ignore this and kick the issue" +
                         " down the road to someone else, then you can add ignore_important_warnings=true. " +
                         "Please refer to " +
-                        "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                        "http://docs.nosqlbench.io/ for more details.");
                 }
                 break;
             case "2":
@@ -416,7 +416,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                         logger.warn("DEPRECATED-FORMAT: Loaded yaml " + yaml_loc +
                             " with compatibility mode. This will be deprecated in a future release.");
                         logger.warn("DEPRECATED-FORMAT: Please refer to " +
-                            "http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                            "http://docs.nosqlbench.io/ for more details.");
                     } catch (Exception compatError) {
                         logger.warn("Tried to load yaml in compatibility mode, " +
                             "since it failed to load with the standard format, " +

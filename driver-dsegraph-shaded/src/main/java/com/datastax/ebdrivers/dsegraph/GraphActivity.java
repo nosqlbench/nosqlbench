@@ -14,7 +14,6 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
@@ -26,6 +25,7 @@ import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
 import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,7 +102,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
 
         for (OpTemplate stmtDef : stmts) {
 
-            ParsedStmtOp parsed = stmtDef.getParsed().orElseThrow();
+            ParsedTemplate parsed = stmtDef.getParsed().orElseThrow();
 
             ReadyGraphStatementTemplate readyGraphStatement;
             long ratio = Long.valueOf(stmtDef.getParams().getOrDefault("ratio", "1").toString());

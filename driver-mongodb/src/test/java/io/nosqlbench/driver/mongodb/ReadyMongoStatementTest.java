@@ -1,12 +1,12 @@
 package io.nosqlbench.driver.mongodb;
 
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.conversions.Bson;
@@ -43,7 +43,7 @@ public class ReadyMongoStatementTest {
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
         for (OpTemplate stmt : stmts) {
-            ParsedStmtOp parsed = stmt.getParsed().orElseThrow();
+            ParsedTemplate parsed = stmt.getParsed().orElseThrow();
             assertThat(parsed.getBindPoints()).hasSize(2);
 
             BindPoint seqKey = new BindPoint("seq_key", "Mod(1000000L); ToInt()");
@@ -66,7 +66,7 @@ public class ReadyMongoStatementTest {
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
         for (OpTemplate stmt : stmts) {
-            ParsedStmtOp parsed = stmt.getParsed().orElseThrow();
+            ParsedTemplate parsed = stmt.getParsed().orElseThrow();
             assertThat(parsed.getBindPoints()).hasSize(1);
 
             BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000)->long; ToInt()");
@@ -88,7 +88,7 @@ public class ReadyMongoStatementTest {
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         assertThat(stmts).hasSize(1);
         for (OpTemplate stmt : stmts) {
-            ParsedStmtOp parsed = stmt.getParsed().orElseThrow();
+            ParsedTemplate parsed = stmt.getParsed().orElseThrow();
             assertThat(parsed.getBindPoints()).hasSize(2);
 
             BindPoint rwKey = new BindPoint("rw_key", "Uniform(0,1000000)->long; ToInt()");
