@@ -4,12 +4,15 @@ description: An example of a basic cockroach insert
 
 scenarios:
   default:
-    - run driver=cockroachdb tags==phase:main threads==auto cycles===<<main-cycles:1000000>>
+    - run driver=cockroachdb tags==phase:main threads=auto cycles===<<main-cycles:1000000>>
+      serverName=localhost connectionpool=hikari
+      errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;.*40001:count,retry;stop
   rampup:
-    - run driver=cockroachdb tags==phase:rampup threads==auto cycles===<<rampup-cycles:1000000>>
+    - run driver=cockroachdb tags==phase:rampup threads=auto cycles===<<rampup-cycles:1000000>>
+      serverName=localhost connectionpool=hikari
+      errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;.*40001:count,retry;stop
   schema:
-    - run driver=cockroachdb tags==phase:schema threads==1 cycles===2
-    #- run driver=stdout tags==phase:schema threads==1 cycles===UNDEF
+    - run driver=cockroachdb tags==phase:schema threads===1 serverName=localhost
 
 bindings:
   seq_key: Mod(<<keyCount:1000000>>L); ToInt()
@@ -39,7 +42,10 @@ blocks:
       phase: rampup
     params:
     statements:
-      - rampup-insert: insert into <<database:bank>>.<<table:banktransaction>> ( code, amount ) values ( '{seq_key}', {seq_value} );
+      - rampup-insert: |
+          INSERT INTO "<<database:bank>>"."<<table:banktransaction>>"
+          (code, amount) VALUES ('{seq_key}', {seq_value})
+          ON CONFLICT (code) DO NOTHING;
         params:
         tags:
           name: rampup-insert
@@ -51,7 +57,8 @@ blocks:
       ratio: <<read_ratio:1>>
     statements:
       - main-find: |
-          SELECT code, amount FROM <<database:bank>>.<<table:banktransaction>> WHERE code = '{rw_key}' AND amount = {rw_value};
+          SELECT code, amount FROM "<<database:bank>>"."<<table:banktransaction>>"
+          WHERE code = '{rw_key}' AND amount = {rw_value};
         params:
         tags:
           name: main-find
@@ -63,7 +70,7 @@ blocks:
       ratio: <<write_ratio:1>>
     statements:
       - main-insert: |
-          UPDATE <<database:bank>>.<<table:banktransaction>> SET amount = {seq_value} WHERE code = '{seq_key}';
+          UPDATE "<<database:bank>>"."<<table:banktransaction>>" SET amount = {seq_value} WHERE code = '{seq_key}';
         params:
         tags:
           name: main-insert
