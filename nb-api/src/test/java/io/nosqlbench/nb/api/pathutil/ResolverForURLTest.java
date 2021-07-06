@@ -1,18 +1,37 @@
 package io.nosqlbench.nb.api.pathutil;
 
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.ResolverForClasspath;
-import io.nosqlbench.nb.api.content.ResolverForFilesystem;
-import io.nosqlbench.nb.api.content.ResolverForURL;
+import io.nosqlbench.nb.api.content.*;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class ResolverForURLTest {
+
+    @Test
+    public void testS3URIResource() {
+        String s3URI = "s3://my-bucket/my-path/my-object.ext";
+        String text = "my object data\n";
+        S3Access mockS3Access = mock(S3Access.class);
+        when(mockS3Access.openS3Object("my-bucket", "my-path/my-object.ext"))
+            .thenReturn(new ByteArrayInputStream(text.getBytes()));
+        ResolverForS3 r = new ResolverForS3(mockS3Access);
+        List<Content<?>> content = r.resolve(s3URI);
+        assertThat(content).isNotNull();
+        assertThat(content).isNotEmpty();
+        Content<?> c = content.get(0);
+        Object location = c.getLocation();
+        assertThat(location).isInstanceOf(URI.class);
+        assertThat(location.toString()).isEqualTo(s3URI);
+        String actualText = c.getCharBuffer().toString();
+        assertThat(actualText).isEqualTo(text);
+    }
 
     @Test
     public void testUrlResource() {

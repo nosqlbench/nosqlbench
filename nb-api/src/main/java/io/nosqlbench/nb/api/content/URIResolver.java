@@ -1,13 +1,11 @@
 package io.nosqlbench.nb.api.content;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.commons.math3.FieldElement;
 
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This is a stateful search object for resources like Paths or URLs.
@@ -19,6 +17,7 @@ public class URIResolver implements ContentResolver {
     private List<ContentResolver> loaders = new ArrayList<>();
 
     private static List<ContentResolver> EVERYWHERE = List.of(
+        ResolverForS3.INSTANCE,
         ResolverForURL.INSTANCE,
         ResolverForFilesystem.INSTANCE,
         ResolverForClasspath.INSTANCE
@@ -55,6 +54,7 @@ public class URIResolver implements ContentResolver {
      * @return this URISearch
      */
     public URIResolver inURLs() {
+        loaders.add(ResolverForS3.INSTANCE);
         loaders.add(ResolverForURL.INSTANCE);
         return this;
     }
