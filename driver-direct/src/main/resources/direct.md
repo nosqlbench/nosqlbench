@@ -4,6 +4,7 @@ This is a unique type of NoSQLBench driver which assumes no particular
 runtime API, instead relying on runtime reflection to find and invoke
 the methods as specified in the op template.
 
+Presently, therea re two
 ```yaml
 statements:
     - "java.lang.System.out.println(\"Testing\");"
@@ -13,10 +14,10 @@ statements:
           class: java.lang.System
           field: out
           method: println
-          arg0: Testing
+          _arg0: Testing
     - op:
           class: java.lang.System
-          field: out
+          staticfield: out
           method: println
           _x: Testing
     - op:
