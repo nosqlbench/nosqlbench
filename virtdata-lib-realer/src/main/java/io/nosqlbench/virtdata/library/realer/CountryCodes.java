@@ -17,7 +17,7 @@ public class CountryCodes extends CSVSampler implements LongFunction<String> {
 
     @Example("CountryCodes()")
     public CountryCodes() {
-        super("COUNTRY_CODE","n/a","name","countries.csv");
+        super("COUNTRY_CODE","n/a","name","data/countries.csv");
     }
 
 }
