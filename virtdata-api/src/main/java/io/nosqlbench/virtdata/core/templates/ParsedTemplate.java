@@ -30,13 +30,39 @@ import java.util.stream.StreamSupport;
 // TODO: Consider using "Driver Adapter" or "Workload Adapter" instead of ActivityType
 
 /**
+ * <p>
  * A ParsedTemplate represents any string provided by a user which is meant to be
- * a prototype for an operation. Grammars used by native drivers can be decorated
+ * a prototype for value used in an operation. A ParsedTemplate can represent string
+ * values with various levels of interpolation:
+ * <UL>
+ * <LI>A single literal String value, such as <pre>{@code select * from tablefoo;}</pre>
+ * This is the simplest case, as there are no no bindings nor captures.</LI>
+ * <LI>A value with named bindings interpolated into the string like
+ * <pre>{@code select * from tablefoo where userid={userid};}</pre>
+ * In this case, a single named binding point is specified. The <em>userid</em> value will
+ * be provided when the string needs to be fully composed before use.</LI>
+ * <LI>A value with named captures like
+ * <pre>{@code select [username] from tablefoo where userid=32;}</pre>
+ * In this case, a single named capture is specified -- The field name <em>username</em>
+ * will be read from some native result form and saved into memory for later use.
+ * </LI>A single binding reference: <pre>{@code {username}}</pre>
+ * This form is the simplest way to specify that a referenced binding should be used in a field.
+ * This form does not presume that you want the value to be read as a String. The type of
+ * value returned by bindings is used as-is, thus if you need to use a binding reference
+ * as a string, make sure your binding recipe returns a String directly. (All of the other forms
+ * presume to call {@code .toString()} automatically on any binding values.)</pre></LI>
+ * </UL>
+ * </p>
+ *
+ * <p>
+ * <H3>Details</H3>
+ *
+ * Grammars used by native drivers can be decorated
  * with named injection and extraction points for data, known respectively as
  * {@link BindPoint}s and {@link CapturePoint}s.
  *
  * The syntax used for bind points and capture points is standard across all
- * high-level drivers. As such, this class captures the definition of
+ * driver adapters. As such, this class captures the definition of
  * decorative syntax and the rules for parsing them out.
  *
  * The key responsibilities of ParsedTemplate are:
@@ -78,6 +104,7 @@ import java.util.stream.StreamSupport;
  *
  * <H3>Extra Bindings</H3>
  * This is a list of binding names which were provided by the user, but which were not used in the raw template by name.
+ * </p>
  */
 public class ParsedTemplate {
 
@@ -87,8 +114,8 @@ public class ParsedTemplate {
     private final List<CapturePoint> captures;
     private final List<BindPoint> bindpoints;
 
-    public static ParsedTemplate of(String rawtemplate, Map<String,String> bindings) {
-        return new ParsedTemplate(rawtemplate,bindings);
+    public static ParsedTemplate of(String rawtemplate, Map<String, String> bindings) {
+        return new ParsedTemplate(rawtemplate, bindings);
     }
 
     /**
@@ -144,7 +171,7 @@ public class ParsedTemplate {
 
         CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
         this.captures = captureData.getCaptures();
-        BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(),availableBindings);
+        BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(), availableBindings);
         this.spans = bindPointsResult.getSpans().toArray(new String[0]);
         this.bindpoints = bindPointsResult.getBindpoints();
     }
@@ -229,14 +256,10 @@ public class ParsedTemplate {
      */
     public List<BindPoint> getBindPoints() {
         bindpoints.forEach(b -> {
-            if (b.getBindspec()==null || b.getBindspec().isEmpty()) {
+            if (b.getBindspec() == null || b.getBindspec().isEmpty()) {
                 throw new RuntimeException("No binding spec was provided for bind point '" + b + "'");
             }
         });
-        return bindpoints;
-    }
-
-    private List<BindPoint> getUncheckedBindPoints() {
         return bindpoints;
     }
 
@@ -284,6 +307,10 @@ public class ParsedTemplate {
 
     public List<CapturePoint> getCaptures() {
         return this.captures;
+    }
+
+    public String getStmt() {
+        return rawtemplate;
     }
 
 }
