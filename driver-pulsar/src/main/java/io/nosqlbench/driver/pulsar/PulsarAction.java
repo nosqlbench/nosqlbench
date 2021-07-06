@@ -37,7 +37,7 @@ public class PulsarAction implements SyncAction {
 
         PulsarOp pulsarOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<PulsarOp> readyPulsarOp = activity.getSequencer().get(cycle);
+            LongFunction<PulsarOp> readyPulsarOp = activity.getSequencer().apply(cycle);
             pulsarOp = readyPulsarOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...

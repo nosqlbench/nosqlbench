@@ -19,10 +19,10 @@ package io.nosqlbench.activitytype.stdout;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityapi.planning.OpSource;
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("Duplicates")
 public class StdoutAction implements SyncAction {
@@ -32,7 +32,7 @@ public class StdoutAction implements SyncAction {
     private final StdoutActivity activity;
     private final int maxTries = 10;
     private boolean showstmts;
-    private OpSource<StringBindings> opsource;
+    private OpSequence<StringBindings> opsource;
 
     public StdoutAction(int slot, StdoutActivity activity) {
         this.slot = slot;
@@ -49,7 +49,7 @@ public class StdoutAction implements SyncAction {
         StringBindings stringBindings;
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            stringBindings = opsource.get(cycle);
+            stringBindings = opsource.apply(cycle);
             statement = stringBindings.bind(cycle);
             showstmts = activity.getShowstmts();
             if (showstmts) {

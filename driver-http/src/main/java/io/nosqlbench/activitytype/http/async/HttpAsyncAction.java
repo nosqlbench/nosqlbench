@@ -46,7 +46,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
     @Override
     public LongFunction<HttpAsyncOp> getOpInitFunction() {
         return l -> {
-            LongFunction<HttpOp> readyHttpOp = sequencer.get(l);
+            LongFunction<HttpOp> readyHttpOp = sequencer.apply(l);
             return new HttpAsyncOp(this,readyHttpOp,l,client);
         };
     }

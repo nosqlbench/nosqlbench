@@ -62,7 +62,7 @@ public class HttpAction implements SyncAction {
         // operation for execution, including data generation as well as
         // op construction
         try (Timer.Context bindTime = httpActivity.bindTimer.time()) {
-            LongFunction<HttpOp> readyOp = sequencer.get(cycle);
+            LongFunction<HttpOp> readyOp = sequencer.apply(cycle);
             httpOp = readyOp.apply(cycle);
         } catch (Exception e) {
             if (httpActivity.isDiagnosticMode()) {

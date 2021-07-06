@@ -36,7 +36,7 @@ public class JmsAction implements SyncAction {
 
         JmsOp jmsOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<JmsOp> readyJmsOp = activity.getSequencer().get(cycle);
+            LongFunction<JmsOp> readyJmsOp = activity.getSequencer().apply(cycle);
             jmsOp = readyJmsOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...

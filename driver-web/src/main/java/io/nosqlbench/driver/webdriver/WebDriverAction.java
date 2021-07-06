@@ -45,7 +45,7 @@ public class WebDriverAction implements SyncAction, ActivityDefObserver {
     @Override
     public int runCycle(long cycle) {
 
-        CommandTemplate commandTemplate = activity.getOpSequence().get(cycle);
+        CommandTemplate commandTemplate = activity.getOpSequence().apply(cycle);
         try {
             WebDriverVerbs.execute(cycle, commandTemplate, context, dryrun);
             return 0;

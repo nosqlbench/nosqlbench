@@ -52,7 +52,7 @@ public class GraphAction implements SyncAction, ActivityDefObserver {
 
             try (Timer.Context bindTime = activity.bindTimer.time()) {
 
-                BindableGraphStatement bindableGraphStatement = opSequencer.get(cycle);
+                BindableGraphStatement bindableGraphStatement = opSequencer.apply(cycle);
                 simpleGraphStatement = bindableGraphStatement.bind(cycle);
 
                 if (showstmts) {

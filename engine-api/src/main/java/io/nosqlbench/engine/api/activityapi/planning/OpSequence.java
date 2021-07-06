@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityapi.planning;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * An OpSequence provides fast access to a set of operations in a specific
@@ -26,10 +27,10 @@ import java.util.function.Function;
  *
  * @param <T> The type of element which is to be sequenced
  */
-public interface OpSequence<T> extends OpSource<T> {
+public interface OpSequence<T> extends LongFunction<T> {
 
     /**
-     * Get the list of individual operations which could be returned by {@link #get(long)}.
+     * Get the list of individual operations which could be returned by {@link #apply(long)}.
      * @return A {@link List} of T
      */
     List<T> getOps();
@@ -47,4 +48,5 @@ public interface OpSequence<T> extends OpSource<T> {
      * @return A new OpSequence of type U
      */
     <U> OpSequence<U> transform(Function<T, U> func);
+
 }

@@ -27,7 +27,7 @@ public class KafkaAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
-        sequencer.get(cycle).write(cycle);
+        sequencer.apply(cycle).write(cycle);
         return 1;
     }
 

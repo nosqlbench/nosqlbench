@@ -43,7 +43,7 @@ public class Cqld4Action implements SyncAction, ActivityDefObserver {
 
         Cqld4Op cql4op;
         try (Timer.Context ctx = bindTimer.time()) {
-            OpDispenser<Cqld4Op> opDispenser = activity.getSequence().get(cycle);
+            OpDispenser<Cqld4Op> opDispenser = activity.getSequence().apply(cycle);
             cql4op = opDispenser.apply(cycle);
         }
 

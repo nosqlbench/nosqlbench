@@ -34,7 +34,7 @@ public class MongoAction implements SyncAction {
         ReadyMongoStatement rms;
         Bson queryBson;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            rms = sequencer.get(cycle);
+            rms = sequencer.apply(cycle);
             queryBson = rms.bind(cycle);
 
             // Maybe show the query in log/console - only for diagnostic use

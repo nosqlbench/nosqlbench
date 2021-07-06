@@ -17,7 +17,7 @@ public class Sequence<T> implements OpSequence<T> {
     }
 
     @Override
-    public T get(long selector) {
+    public T apply(long selector) {
         int index = (int) (selector % seq.length);
         index = seq[index];
         return elems.get(index);

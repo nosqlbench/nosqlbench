@@ -32,7 +32,7 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
 
         StdoutOpContext opc = new StdoutOpContext();
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            opc.stringBindings = sequencer.get(cycle);
+            opc.stringBindings = sequencer.apply(cycle);
             opc.statement = opc.stringBindings.bind(cycle);
             if (activity.getShowstmts()) {
                 logger.info("STMT(cycle=" + cycle + "):\n" + opc.statement);

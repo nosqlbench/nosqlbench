@@ -32,7 +32,7 @@ public class JMXAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
-        LongFunction<JmxOp> readyJmxOp = sequencer.get(cycle);
+        LongFunction<JmxOp> readyJmxOp = sequencer.apply(cycle);
         JmxOp jmxOp = readyJmxOp.apply(cycle);
         jmxOp.execute();
         return 0;

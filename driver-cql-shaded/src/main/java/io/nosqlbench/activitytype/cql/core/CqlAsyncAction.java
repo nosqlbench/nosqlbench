@@ -95,7 +95,7 @@ public class CqlAsyncAction extends BaseAsyncAction<CqlOpData, CqlActivity> {
 
         // bind timer covers all statement selection and binding, skipping, transforming logic
         try (Timer.Context bindTime = bindTimer.time()) {
-            cqlop.readyCQLStatement = sequencer.get(cycle);
+            cqlop.readyCQLStatement = sequencer.apply(cycle);
             cqlop.statement = cqlop.readyCQLStatement.bind(cycle);
 
             // If a filter is defined, skip and count any statements that do not match it
