@@ -1,5 +1,7 @@
 package io.nosqlbench.engine.api.activityapi.planning;
 
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+
 import java.util.function.LongFunction;
 
 /**
@@ -9,6 +11,10 @@ import java.util.function.LongFunction;
  * @param <T>
  */
 public interface OpSource<T> extends LongFunction<T> {
+
+    static <O extends Runnable> OpSource<O> of(OpSequence<OpDispenser<O>> seq) {
+        return (long l) -> seq.apply(l).apply(l);
+    }
 
     /**
      * Get the next operation for the given long value. This is simply
