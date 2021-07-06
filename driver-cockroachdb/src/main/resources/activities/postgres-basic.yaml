@@ -1,24 +1,27 @@
 # java -jar nb.jar run driver=cockroachdb workload=postgres-basic tags=phase:rampup cycles=10 \
 #   serverName=localhost databaseName=bank
-# java -jar nb.jar run driver=cockroachdb workload=postgres-basic tags=phase:main cycles=10 serverName=localhost 
+# java -jar nb.jar run driver=cockroachdb workload=postgres-basic tags=phase:main cycles=10 serverName=localhost
 description: An example of a basic postgres bank transaction workload
 
 scenarios:
   default:
-    - run driver===cockroachdb tags===phase:main threads==auto cycles=10000000
-      serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
-      password=postgres
-  rampup:
-    - run driver===cockroachdb tags===phase:rampup threads==auto cycles=<<accounts:1000000>>
-      serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
-      password=postgres connectionpool=hikari filler-binding="AlphaNumericString(10)"
-  rampup-large:
-    - run driver===cockroachdb tags===phase:rampup threads==auto cycles=<<accounts:1000000>>
+    - run driver===cockroachdb tags===phase:main threads=auto cycles=10000000
       serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
       password=postgres connectionpool=hikari
+      errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
+  rampup:
+    - run driver===cockroachdb tags===phase:rampup threads=auto cycles=<<accounts:1000000>>
+      serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
+      password=postgres connectionpool=hikari filler-binding="AlphaNumericString(10)"
+      errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
+  rampup-large:
+    - run driver===cockroachdb tags===phase:rampup threads=auto cycles=<<accounts:1000000>>
+      serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
+      password=postgres connectionpool=hikari
+      errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
   schema:
     - run driver===cockroachdb tags===phase:schema threads===1 serverName=localhost portNumber=5432
-      databaseName=bank user=postgres password=postgres connectionpool=hikari
+      databaseName=bank user=postgres password=postgres
 
 bindings:
   seq_uuid: Mod(<<accounts:1000000>>L); ToHashedUUID()
@@ -55,7 +58,7 @@ blocks:
     params:
     statements:
       - rampup-insert: |
-          INSERT INTO "<<table:account>>" (uuid, amount, amount_unit, updated_at, created_at, filler) 
+          INSERT INTO "<<table:account>>" (uuid, amount, amount_unit, updated_at, created_at, filler)
           VALUES ('{seq_uuid}', {rand_amount}, 'us_cents', '{timestamp}', '{timestamp}', '{filler}')
           ON CONFLICT DO NOTHING;
         params:

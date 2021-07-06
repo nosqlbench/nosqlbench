@@ -1,6 +1,5 @@
 package io.nosqlbench.activitytype.jdbc.api;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.zaxxer.hikari.HikariConfig;
@@ -11,7 +10,6 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,6 +26,7 @@ public abstract class JDBCActivity extends SimpleActivity {
     private Timer resultSuccessTimer;
     private Histogram triesHisto;
     private int maxTries;
+    private int minRetryDelayMs;
 
     protected DataSource dataSource;
     protected OpSequence<OpDispenser<String>> opSequence;
@@ -47,6 +46,7 @@ public abstract class JDBCActivity extends SimpleActivity {
         super.onActivityDefUpdate(activityDef);
 
         this.maxTries = getParams().getOptionalInteger("maxtries").orElse(3);
+        this.minRetryDelayMs = getParams().getOptionalInteger("minretrydelayms").orElse(200);
 
         LOGGER.debug("initializing data source");
         dataSource = newDataSource();
@@ -79,10 +79,15 @@ public abstract class JDBCActivity extends SimpleActivity {
     }
 
     public String errorNameMapper(Throwable e) {
+        StringBuilder sb = new StringBuilder(e.getClass().getSimpleName());
         if (e instanceof SQLException) {
-            return ((SQLException) e).getSQLState();
+            String sqlState = ((SQLException) e).getSQLState();
+            if (sqlState != null && !sqlState.isEmpty()) {
+                sb.append('_');
+                sb.append(sqlState);
+            }
         }
-        return e.getClass().getSimpleName();
+        return sb.toString();
     }
 
     @Override
@@ -92,6 +97,10 @@ public abstract class JDBCActivity extends SimpleActivity {
 
     public int getMaxTries() {
         return this.maxTries;
+    }
+
+    public int getMinRetryDelayMs() {
+        return this.minRetryDelayMs;
     }
 
     public DataSource getDataSource() {

@@ -40,9 +40,9 @@ public class JDBCAction implements SyncAction {
         }
 
         int maxTries = activity.getMaxTries();
+        Exception error = null;
 
         for (int tries = 1; tries <= maxTries; tries++) {
-            Exception error = null;
             long startTimeNanos = System.nanoTime();
 
             try (Connection conn = activity.getDataSource().getConnection()) {
@@ -65,12 +65,31 @@ public class JDBCAction implements SyncAction {
                 ErrorDetail detail = activity.getErrorHandler().handleError(error, cycle, executionTimeNanos);
                 if (!detail.isRetryable()) {
                     LOGGER.debug("Exit failure after non-retryable error");
-                    return 1;
+                    throw new RuntimeException("non-retryable error", error);
                 }
+            }
+
+            try {
+                int retryDelay = retryDelayMs(tries, activity.getMinRetryDelayMs());
+                LOGGER.debug("tries=" + tries + " sleeping for " + retryDelay + " ms");
+                Thread.sleep(retryDelay);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("thread interrupted", e);
             }
         }
 
         LOGGER.debug("Exit failure after maxretries=" + maxTries);
-        return 1;
+        throw new RuntimeException("maxtries exceeded", error);
+    }
+
+    /**
+     * Compute retry delay based on exponential backoff with full jitter
+     * @param tries 1-indexed
+     * @param minDelayMs lower bound of retry delay
+     * @return retry delay
+     */
+    private int retryDelayMs(int tries, int minDelayMs) {
+        int exponentialDelay = minDelayMs * (int) Math.pow(2.0, tries - 1);
+        return (int) (Math.random() * exponentialDelay);
     }
 }
