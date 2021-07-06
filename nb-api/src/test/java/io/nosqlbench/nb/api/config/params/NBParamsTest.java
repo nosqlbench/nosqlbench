@@ -1,7 +1,6 @@
 package io.nosqlbench.nb.api.config.params;
 
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -36,9 +35,10 @@ public class NBParamsTest {
     }
 
     @Test
-    @Disabled("This case is unwieldy and generally not useful")
+    // Fixed this. Agreed it is is generally unwieldy and unuseful as an example although it does test the underlying resolver mechanisms
     public void testNestedMixedJsonParamsMap() {
-        Element one = NBParams.one("{\"key1\":\"key2={\"key3\":\"value3\",\"key4\":\"value4\"}\"}");
+        String source = "{\"key1\":\"key2={\\\"key3\\\":\\\"value3\\\",\\\"key4\\\":\\\"value4\\\"}\"}";
+        Element one = NBParams.one(source);
         assertThat(one.get("key1.key2.key3", String.class)).isPresent();
         assertThat(one.get("key1.key2.key3", String.class).get()).isEqualTo("value3");
         assertThat(one.get("key1.key2.key4", String.class).get()).isEqualTo("value4");
