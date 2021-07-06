@@ -23,10 +23,14 @@ public class BindPointParserTest {
     @Test
     public void testSingleDefinitionTypeBindPoint() {
         BindPointParser bpp = new BindPointParser();
-        assertThat(bpp.apply("test {{this is a definition}}", Map.of())).isEqualTo(
+        assertThat(bpp.apply("test {{this is a definition}} and {{another}}", Map.of())).isEqualTo(
             new BindPointParser.Result(
-                List.of("test ","this is a definition",""),
-                List.of(BindPoint.of(BindPointParser.DEFINITION,"this is a definition", BindPoint.Type.definition)))
+                List.of("test ","this is a definition"," and ","another",""),
+                List.of(
+                    BindPoint.of(BindPointParser.DEFINITION,"this is a definition", BindPoint.Type.definition),
+                    BindPoint.of(BindPointParser.DEFINITION, "another",BindPoint.Type.definition)
+                )
+            )
         );
 
     }

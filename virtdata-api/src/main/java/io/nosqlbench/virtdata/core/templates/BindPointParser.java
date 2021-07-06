@@ -10,14 +10,23 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BindPointParser implements BiFunction<String, Map<String,String>, BindPointParser.Result> {
+/**
+ * BindPointParser parses a user-provide string template into spans. It builds a simple list of
+ * BindPoints, and provides both the parsed spans and the BindPoints in a result.
+ * Spans are provided as a list of even,(odd,even,...) string values, where there is always an odd number of entries
+ * and odd-numbered entries are the text extracted from a binding. The binding values are not
+ * changed from the user-specified string, and are not normalized to one of the {@link BindPoint.Type}s.
+ * This is for troubleshooting and diagnostic purposes.
+ * Callers will need to look at the BindPoint types to know whether a binding is provided and thus how to process it.
+ */
+public class BindPointParser implements BiFunction<String, Map<String, String>, BindPointParser.Result> {
 
-    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile("(\\{((?<anchor>\\w+[-_\\d\\w.]*)})|(\\{\\{(?<extended>[^}]+)}}))");
+    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile("(\\{((?<anchor>\\w+[-_\\d\\w.]*)})|(\\{\\{(?<extended>[^}]+?)}}))");
     public final static String DEFINITION = "DEFINITION";
 
 
     @Override
-    public Result apply(String template, Map<String,String> bindings) {
+    public Result apply(String template, Map<String, String> bindings) {
 
         Matcher m = BINDPOINT_ANCHOR.matcher(template);
         int lastMatch = 0;
@@ -27,15 +36,15 @@ public class BindPointParser implements BiFunction<String, Map<String,String>, B
         while (m.find()) {
             String pre = template.substring(lastMatch, m.start());
             spans.add(pre);
-            lastMatch=m.end();
+            lastMatch = m.end();
 
             String anchor = m.group("anchor");
             String extendedAnchor = m.group("extended");
-            if (anchor!=null) {
+            if (anchor != null) {
                 bindpoints.add(BindPoint.of(anchor, bindings.getOrDefault(anchor, null), BindPoint.Type.reference));
                 spans.add(anchor);
-            } else if (extendedAnchor!=null) {
-                bindpoints.add(BindPoint.of(DEFINITION,extendedAnchor, BindPoint.Type.definition));
+            } else if (extendedAnchor != null) {
+                bindpoints.add(BindPoint.of(DEFINITION, extendedAnchor, BindPoint.Type.definition));
                 spans.add(extendedAnchor);
             } else {
                 throw new BasicError("Unable to parse: " + template);
@@ -44,7 +53,7 @@ public class BindPointParser implements BiFunction<String, Map<String,String>, B
         }
         spans.add(lastMatch >= 0 ? template.substring(lastMatch) : template);
 
-        return new Result(spans,bindpoints);
+        return new Result(spans, bindpoints);
     }
 
     public final static class Result {
