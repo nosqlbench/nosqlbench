@@ -5,6 +5,9 @@
     <packaging>jar</packaging>
     <name>docsys</name>
     <url>http://nosqlbench.io/</url>
+    <properties>
+        <jersey.version>3.0.2</jersey.version>
+    </properties>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
@@ -31,7 +34,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>11.0.1</version>
+            <version>11.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -52,23 +55,23 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>3.0.1</version>
+            <version>${jersey.version}</version>
 
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-            <version>3.0.2</version>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-servlet</artifactId>
-            <version>3.0.1</version>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>3.0.1</version>
+            <version>${jersey.version}</version>
         </dependency>
 
         <dependency>

@@ -64,6 +64,15 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
     }
 
 
+    /**
+     * Run a NoSQLBench command just as you would on the command line. Certain parameters are translated
+     * (virtualized) into the workspace view for you automatically. That is, any path which would otherwise
+     * be resolved on the local file system will now be resolved in that same way but with the designated workspace
+     * as the base directory. All filesystem interaction which would otherwise happen in the current working
+     * directory should also be done relative to the designated workspace.
+     * @param rq
+     * @return
+     */
     @POST
     @Path("cli")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -94,7 +103,6 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
                 throw new RuntimeException("Only commands (verbs and params) can be used here");
             }
         }
-
 
         args = substituteFilenames(rq, args);
         NBCLICommandParser.parse(args, cmdList, workspace.asIncludes());
@@ -193,6 +201,12 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
 //        return Response.created(scenarioUri).build();
 //    }
 
+    /**
+     * Return a view of a named scenario, just as with {@link #getScenarios()}}.
+     * If the named scenario is not present, an error will be returned instead.
+     * @param scenarioName
+     * @return
+     */
     @GET
     @Path("scenario/{scenarioName}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -207,6 +221,11 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         }
     }
 
+    /**
+     * @return a view of all the scenarios known to the scenarios executor, whether starting,
+     * running, errored or otherwise. If the scenario is completed, then the result,
+     * including the IO log will be provided, otherwise an exception to explain why it failed.
+     */
     @GET
     @Path("scenarios")
     @Produces(MediaType.APPLICATION_JSON)
