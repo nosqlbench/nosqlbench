@@ -9,4 +9,7 @@ public class BasicError extends RuntimeException {
     public BasicError(String exception) {
         super(exception);
     }
+    public BasicError(String exception, Throwable cause) {
+        super(exception,cause);
+    }
 }
