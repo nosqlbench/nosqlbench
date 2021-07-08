@@ -5,7 +5,6 @@ import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4PreparedBatchOpDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4BatchStatementDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedOpDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStatementDispenser;
-import io.nosqlbench.driver.cqld4.Cqld4Op;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;

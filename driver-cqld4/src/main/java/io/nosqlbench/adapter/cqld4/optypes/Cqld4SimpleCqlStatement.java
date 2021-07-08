@@ -1,8 +1,8 @@
-package io.nosqlbench.adapter.optypes;
+package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import io.nosqlbench.driver.cqld4.Cqld4Op;
+import io.nosqlbench.adapter.cqld4.Cqld4Op;
 
 public class Cqld4SimpleCqlStatement extends Cqld4Op {
     private final CqlSession session;

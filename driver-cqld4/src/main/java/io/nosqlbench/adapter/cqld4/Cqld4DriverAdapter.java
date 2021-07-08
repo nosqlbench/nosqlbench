@@ -1,6 +1,5 @@
 package io.nosqlbench.adapter.cqld4;
 
-import io.nosqlbench.driver.cqld4.Cqld4Op;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;

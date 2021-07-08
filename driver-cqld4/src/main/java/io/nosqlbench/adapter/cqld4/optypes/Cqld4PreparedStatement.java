@@ -1,6 +1,6 @@
-package io.nosqlbench.adapter.optypes;
+package io.nosqlbench.adapter.cqld4.optypes;
 
-import io.nosqlbench.driver.cqld4.Cqld4Op;
+import io.nosqlbench.adapter.cqld4.Cqld4Op;
 
 public class Cqld4PreparedStatement extends Cqld4Op {
     @Override

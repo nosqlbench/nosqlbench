@@ -2,8 +2,8 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import io.nosqlbench.driver.cqld4.Cqld4Op;
-import io.nosqlbench.adapter.optypes.Cqld4SimpleCqlStatement;
+import io.nosqlbench.adapter.cqld4.Cqld4Op;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4SimpleCqlStatement;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
 
