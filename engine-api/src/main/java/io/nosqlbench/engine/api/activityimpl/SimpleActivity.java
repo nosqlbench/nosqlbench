@@ -424,7 +424,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
         return createOpSequence(opTemplateOFunction);
     }
 
-    protected <O> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
+    protected <O extends Runnable> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
         Function<ParsedCommand, OpDispenser<O>> opinit,
         List<Function<Map<String, Object>, Map<String, Object>>> parsers
     ) {

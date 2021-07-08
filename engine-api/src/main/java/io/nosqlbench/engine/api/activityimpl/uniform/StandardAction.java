@@ -17,12 +17,12 @@ import java.util.concurrent.TimeUnit;
  * of this work will be undertaken by the project maintainers.
  *
  * @param <A> The type of activity
- * @param <O> The type of operation
+ * @param <R> The type of operation
  */
-public class StandardAction<A extends StandardActivity<O>, O extends Runnable> implements SyncAction, ActivityDefObserver {
+public class StandardAction<A extends StandardActivity, R extends Runnable> implements SyncAction, ActivityDefObserver {
 
     private final A activity;
-    private final OpSource<O> opsource;
+    private final OpSource<R> opsource;
     private final int slot;
 
     public StandardAction(A activity, int slot) {
@@ -34,7 +34,7 @@ public class StandardAction<A extends StandardActivity<O>, O extends Runnable> i
     @Override
     public int runCycle(long cycle) {
 
-        O op = null;
+        R op = null;
         try (Timer.Context ct = activity.getInstrumentation().getOrCreateInputTimer().time()) {
             op = opsource.apply(cycle);
         }

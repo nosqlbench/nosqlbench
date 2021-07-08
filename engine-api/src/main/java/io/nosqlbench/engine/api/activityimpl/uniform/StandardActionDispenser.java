@@ -4,9 +4,9 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 
 public class StandardActionDispenser implements ActionDispenser {
-    private final StandardActivity<?> activity;
+    private final StandardActivity<?,?> activity;
 
-    public <A extends Activity> StandardActionDispenser(StandardActivity<?> activity) {
+    public <A extends Activity> StandardActionDispenser(StandardActivity<?,?> activity) {
         this.activity = activity;
     }
 

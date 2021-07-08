@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -17,21 +18,22 @@ import java.util.function.Function;
  * core of all new activity types. Extant NB drivers should also migrate
  * to this when possible.
  *
- * @param <O> A type of runnable which wraps the operations for this type of driver.
+ * @param <R> A type of runnable which wraps the operations for this type of driver.
  */
-public class StandardActivity<O extends Runnable> extends SimpleActivity {
+public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
 
-    private final DriverAdapter<O> adapter;
-    private final OpSource<O> opsource;
+    private final DriverAdapter<R,S> adapter;
+    private final OpSource<R> opsource;
+    private NBErrorHandler errorHandler;
 
-    public StandardActivity(DriverAdapter<O> adapter, ActivityDef activityDef) {
+    public StandardActivity(DriverAdapter<R,S> adapter, ActivityDef activityDef) {
         super(activityDef);
         this.adapter = adapter;
 
         try {
-            Function<ParsedCommand, OpDispenser<O>> opmapper = adapter.getOpMapper();
+            Function<ParsedCommand, OpDispenser<R>> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
-            OpSequence<OpDispenser<O>> seq = createOpSourceFromCommands(opmapper,List.of(preprocessor));
+            OpSequence<OpDispenser<R>> seq = createOpSourceFromCommands(opmapper,List.of(preprocessor));
             opsource= OpSource.of(seq);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
@@ -42,14 +44,19 @@ public class StandardActivity<O extends Runnable> extends SimpleActivity {
         }
     }
 
-    public OpSource<O> getOpSource() {
+    public OpSource<R> getOpSource() {
         return opsource;
     }
 
-//    public Function<OpTemplate, OpDispenser<? extends Runnable>> getRunnableOpFunction() {
-//        DiagRunnableOpMapper mapper = new DiagRunnableOpMapper();
-//        return mapper::apply;
-//    }
-
+    /**
+     * When an adapter needs to identify an error uniquely for the purposes of
+     * routing it to the correct error handler, or naming it in logs, or naming
+     * metrics, override this method in your activity.
+     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
+     */
+    @Override
+    public final Function<Throwable, String> getErrorNameMapper() {
+        return adapter.getErrorNameMapper();
+    }
 
 }
