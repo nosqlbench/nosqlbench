@@ -25,6 +25,7 @@ public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
     private final DriverAdapter<R,S> adapter;
     private final OpSource<R> opsource;
     private NBErrorHandler errorHandler;
+    OpSequence<OpDispenser<R>> sequence;
 
     public StandardActivity(DriverAdapter<R,S> adapter, ActivityDef activityDef) {
         super(activityDef);
@@ -33,8 +34,8 @@ public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
         try {
             Function<ParsedCommand, OpDispenser<R>> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
-            OpSequence<OpDispenser<R>> seq = createOpSourceFromCommands(opmapper,List.of(preprocessor));
-            opsource= OpSource.of(seq);
+            sequence = createOpSourceFromCommands(opmapper,List.of(preprocessor));
+            opsource= OpSource.of(sequence);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
@@ -42,6 +43,12 @@ public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
                 throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
             }
         }
+    }
+
+    @Override
+    public void initActivity() {
+        super.initActivity();
+        setDefaultsFromOpSequence(sequence);
     }
 
     public OpSource<R> getOpSource() {
