@@ -21,10 +21,10 @@ import java.util.function.Function;
  * object scoping.
  */
 @Service(value = DriverAdapter.class, selector = "directapi")
-public class DirectCallAdapter extends BaseDriverAdapter<DirectCall> {
+public class DirectCallAdapter extends BaseDriverAdapter<DirectCall,Void> {
 
     @Override
-    public List<Function<String, Optional<Map<String, Object>>>> getStmtRemappers() {
+    public List<Function<String, Optional<Map<String, Object>>>> getOpStmtRemappers() {
         return List.of(new DirectCallStmtParser());
     }
 
