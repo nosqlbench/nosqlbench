@@ -32,18 +32,19 @@ public class Cqld4Space {
         session = createSession(adapter.getActivityDef());
     }
 
-    private CqlSession createSession(ActivityDef activityDef) {
+    private CqlSession createSession(ActivityDef def) {
+        ParameterMap params = def.getParams();
         CqlSessionBuilder builder = new CqlSessionBuilder();
 
-        resolveConfigLoader(activityDef).ifPresent(builder::withConfigLoader);
+        resolveConfigLoader(def).ifPresent(builder::withConfigLoader);
 
-        int port = activityDef.getParams().getOptionalInteger("port").orElse(9042);
+        int port = params.getOptionalInteger("port").orElse(9042);
 
-        Optional<String> scb = activityDef.getParams().getOptionalString("secureconnectbundle");
+        Optional<String> scb = params.getOptionalString("secureconnectbundle");
         scb.flatMap(s -> NBIO.all().name(s).first().map(Content::getInputStream))
             .map(builder::withCloudSecureConnectBundle);
 
-        Optional<List<InetSocketAddress>> contactPointsOption = activityDef.getParams()
+        Optional<List<InetSocketAddress>> contactPointsOption = params
             .getOptionalString("host", "hosts")
             .map(s -> Arrays.asList(s.split(",")))
             .map(
@@ -53,17 +54,22 @@ public class Cqld4Space {
             );
 
         if (scb.isEmpty()) {
-            builder.addContactPoints(
-                contactPointsOption.orElse(List.of(new InetSocketAddress("localhost", port)))
-            );
+            if (contactPointsOption.isPresent()) {
+                builder.addContactPoints(contactPointsOption.get());
+                Optional<String> localdc = params.getOptionalString("localdc");
+                builder.withLocalDatacenter(localdc.orElseThrow(
+                    () -> new BasicError("Starting with driver 4.0, you must specify the local datacenter name with any specified contact points. Example: (use caution) localdc=datacenter1")
+                ));
+            } else {
+                builder.addContactPoints(List.of(new InetSocketAddress("localhost", port)));
+            }
         }
-
 
 //        builder.withCompression(ProtocolOptions.Compression.NONE);
 //
-        Optional<String> usernameOpt = activityDef.getParams().getOptionalString("username");
-        Optional<String> passwordOpt = activityDef.getParams().getOptionalString("password");
-        Optional<String> passfileOpt = activityDef.getParams().getOptionalString("passfile");
+        Optional<String> usernameOpt = params.getOptionalString("username");
+        Optional<String> passwordOpt = params.getOptionalString("password");
+        Optional<String> passfileOpt = params.getOptionalString("passfile");
 
         if (usernameOpt.isPresent()) {
             String username = usernameOpt.get();
@@ -84,10 +90,10 @@ public class Cqld4Space {
                 logger.error(error);
                 throw new RuntimeException(error);
             }
-            builder.withCredentials(username, password);
+            builder.withAuthCredentials(username, password);
         }
 
-        activityDef.getParams().getOptionalString("cbopts").ifPresent(
+        params.getOptionalString("cbopts").ifPresent(
             e -> {
                 throw new BasicError("this driver does not support option 'cbopts'");
             }
@@ -110,12 +116,12 @@ public class Cqld4Space {
             "single-endpoint",
             "haproxy_source_ip"
         ).forEach(o -> {
-            if (activityDef.getParams().getOptionalString(o).isPresent()) {
+            if (params.getOptionalString(o).isPresent()) {
                 String errmsg = "The activity parameter '" + o + "' is not supported in this version" +
                     " of the cqld4 driver as it was before in the cql (1.9) and cqld3 drivers. Note, you" +
                     " can often set these unsupported parameters in the driver configuration file directly." +
                     " If it should be supported as an activity parameter.please file an issue at http://nosqlbench.io/issues.";
-                if (activityDef.getParams().getOptionalBoolean("ignore_warnings").orElse(false)) {
+                if (params.getOptionalBoolean("ignore_warnings").orElse(false)) {
                     throw new BasicError(errmsg + " You can ignore this as a warning-only by setting ignore_warnings=true");
                 } else {
                     logger.warn(errmsg + ", (ignored by setting ignore_warnings=true");
@@ -124,7 +130,7 @@ public class Cqld4Space {
         });
 
 
-        SSLContext context = SSLKsFactory.get().getContext(activityDef);
+        SSLContext context = SSLKsFactory.get().getContext(def);
         if (context != null) {
             builder.withSslContext(context);
         }
@@ -212,14 +218,14 @@ public class Cqld4Space {
             }
         }
 
-        if (loaders.size()==0) {
+        if (loaders.size() == 0) {
             throw new RuntimeException("Unexpected size of loaders list:" + 0);
-        } else if (loaders.size()==1) {
+        } else if (loaders.size() == 1) {
             return Optional.of(loaders.getFirst());
         } else {
             DriverConfigLoader mainloader = loaders.removeFirst();
             for (DriverConfigLoader loader : loaders) {
-                mainloader = DriverConfigLoader.compose(mainloader,loader);
+                mainloader = DriverConfigLoader.compose(mainloader, loader);
             }
             return Optional.of(mainloader);
         }
