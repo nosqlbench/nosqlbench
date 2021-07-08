@@ -315,7 +315,7 @@ public class ScenarioController {
                     Optional<DriverAdapter> oda = StandardActivityType.FINDER.getOptionally(activityTypeName);
                     if (oda.isPresent()) {
                         DriverAdapter driverAdapter = oda.get();
-                        activityType = new StandardActivityType<>(driverAdapter);
+                        activityType = new StandardActivityType<>(driverAdapter,activityDef);
                     } else {
                         throw new RuntimeException("Found neither ActivityType named '" + activityTypeName + "' nor DriverAdapter named '" + activityTypeName + "'.");
                     }
