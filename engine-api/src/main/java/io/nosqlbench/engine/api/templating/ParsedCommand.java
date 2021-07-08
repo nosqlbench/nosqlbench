@@ -4,6 +4,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
@@ -136,6 +137,10 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         return statics.containsKey(field);
     }
 
+    public boolean isDefinedStatic(String field, Class<?> type) {
+        return statics.containsKey(field) && type.isAssignableFrom(field.getClass());
+    }
+
     /**
      * @param fields Names of fields to look for in the static field map.
      * @return true if and only if all provided field names are present in the static field map.
@@ -171,6 +176,29 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     public <T> T getStaticValue(String field) {
         return (T) statics.get(field);
     }
+
+
+    /**
+     * Get the named static field value, or return the provided default, but throw an exception if
+     * the named field is dynamic.
+     * @param name The name of the field value to return.
+     * @param defaultValue A value to return if the named value is not present in static nor dynamic fields.
+     * @param <T>           The type of the field to return.
+     * @return The value
+     * @throws RuntimeException if the field name is only present in the dynamic fields.
+     *
+     */
+    public <T> T getStaticValueOr(String name, T defaultValue) {
+        if (statics.containsKey(name)) {
+            return (T) statics.get(name);
+        } else if (dynamics.containsKey(name)) {
+            throw new BasicError("static field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+                "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
+        } else {
+            return defaultValue;
+        }
+    }
+
 
     /**
      * Return an optional value for the named field. This is an {@link Optional} form of {@link #getStaticValue}.
@@ -208,6 +236,11 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         return null;
     }
 
+    /**
+     * Get the map of all fields for the given input cycle.
+     * @param l seed value, cycle number, input...
+     * @return A map of named objects
+     */
     public Map<String,Object> getMap(long l) {
         return apply(l);
     }
@@ -216,6 +249,17 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         HashSet<String> nameSet = new HashSet<>(statics.keySet());
         nameSet.addAll(dynamics.keySet());
         return nameSet;
+    }
+
+    public <V> LongFunction<V> getAsFunctionOr(String name, V defaultValue) {
+        if (isDefinedStatic(name)) {
+            V value = getStaticValue(name);
+            return l -> value;
+        } else if (isDefinedDynamic(name)) {
+            return l -> get(name, l);
+        } else {
+            return l -> defaultValue;
+        }
     }
 
     public boolean isDefined(String field) {
