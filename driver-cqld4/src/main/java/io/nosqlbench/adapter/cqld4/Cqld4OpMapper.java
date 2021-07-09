@@ -9,7 +9,6 @@ import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
-import io.nosqlbench.nb.api.errors.BasicError;
 
 public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
 
@@ -22,18 +21,9 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
 
     public OpDispenser<Cqld4Op> apply(ParsedCommand cmd) {
 
-        // if session field = static string, else ...
-
-        boolean prepared = cmd.getStaticValueOr("prepared",false);
-        boolean batch = cmd.getStaticValueOr("boolean",false);
-
-        if (cmd.isDefinedDynamic("session")) {
-            throw new BasicError("This driver adapter does not support dynamic sessions.");
-        }
-        // If it did, we would use something like this instead...
-        //        LongFunction<String> session = cmd.getAsFunctionOr("session", "default");
-
-        Cqld4Space cqld4Space = cache.get(cmd.getStaticValueOr("session", "default"));
+        Cqld4Space cqld4Space = cache.get(cmd.getStaticConfigOr("space", "default"));
+        boolean prepared = cmd.getStaticConfigOr("prepared",true);
+        boolean batch = cmd.getStaticConfigOr("boolean",false);
         CqlSession session = cqld4Space.getSession();
 
         if (prepared && batch) {

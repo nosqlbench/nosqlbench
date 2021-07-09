@@ -26,11 +26,6 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     private final static Logger logger = LogManager.getLogger(ParsedCommand.class);
 
     /**
-     * the name of this operation
-     **/
-    private final String name;
-
-    /**
      * The fields which are statically assigned
      **/
     private final Map<String, Object> statics = new LinkedHashMap<>();
@@ -50,6 +45,7 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     private final List<List<CapturePoint>> captures = new ArrayList<>();
     private final int mapsize;
     private final LinkedHashMap<String,Object> protomap = new LinkedHashMap<>();
+    private final OpTemplate ot;
 
     /**
      * Create a parsed command from an Op template. The op template is simply the normalized view of
@@ -62,7 +58,7 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     }
 
     public ParsedCommand(OpTemplate ot, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
-        this.name = ot.getName();
+        this.ot = ot;
 
         Map<String, Object> map = ot.getOp().orElseThrow();
         for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
@@ -104,7 +100,7 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     }
 
     public String getName() {
-        return name;
+        return ot.getName();
     }
 
     public Map<String, Object> getStaticMap() {
@@ -193,6 +189,20 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
             return (T) statics.get(name);
         } else if (dynamics.containsKey(name)) {
             throw new BasicError("static field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+                "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
+        } else {
+            return defaultValue;
+        }
+    }
+
+    public <T> T getStaticConfigOr(String name, T defaultValue) {
+
+        if (statics.containsKey(name)) {
+            return (T) statics.get(name);
+        } else if (ot.getParams().containsKey(name)) {
+            return (T) ot.getParams().get(name);
+        } else if (dynamics.containsKey(name)) {
+            throw new BasicError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
                 "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
         } else {
             return defaultValue;

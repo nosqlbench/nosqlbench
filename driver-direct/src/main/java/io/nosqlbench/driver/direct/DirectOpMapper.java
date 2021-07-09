@@ -1,18 +1,21 @@
 package io.nosqlbench.driver.direct;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public class DirectOpMapper implements Function<ParsedCommand, OpDispenser<DirectCall>> {
+public class DirectOpMapper implements OpMapper<DirectCall> {
 
     @Override
     public OpDispenser<DirectCall> apply(ParsedCommand cmd) {

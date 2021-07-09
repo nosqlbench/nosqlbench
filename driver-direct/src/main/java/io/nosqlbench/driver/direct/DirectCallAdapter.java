@@ -1,9 +1,8 @@
 package io.nosqlbench.driver.direct;
 
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class DirectCallAdapter extends BaseDriverAdapter<DirectCall,Void> {
     }
 
     @Override
-    public Function<ParsedCommand, OpDispenser<DirectCall>> getOpMapper() {
+    public OpMapper<DirectCall> getOpMapper() {
         return new DirectOpMapper();
     }
 }
