@@ -1,8 +1,8 @@
 package io.nosqlbench.engine.rest.services.openapi;
 
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
