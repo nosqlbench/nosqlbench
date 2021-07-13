@@ -36,6 +36,12 @@
       <groupId>com.datastax.dse</groupId>
       <artifactId>dse-java-driver-graph</artifactId>
       <version>1.9.0</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
 
     <dependency>

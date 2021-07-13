@@ -184,24 +184,50 @@
         <groupId>com.github.docker-java</groupId>
         <artifactId>docker-java-api</artifactId>
         <version>${docker.java.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>jcl-over-slf4j</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
 
       <dependency>
         <groupId>com.github.docker-java</groupId>
         <artifactId>docker-java-core</artifactId>
         <version>${docker.java.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>jcl-over-slf4j</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
 
       <dependency>
         <groupId>com.github.docker-java</groupId>
         <artifactId>docker-java-transport-okhttp</artifactId>
         <version>${docker.java.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>jcl-over-slf4j</artifactId>
+              </exclusion>
+          </exclusions>
+
       </dependency>
 
       <dependency>
         <groupId>com.github.docker-java</groupId>
         <artifactId>docker-java</artifactId>
         <version>${docker.java.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>jcl-over-slf4j</artifactId>
+              </exclusion>
+          </exclusions>
+
       </dependency>
 
       <dependency>
