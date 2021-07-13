@@ -173,6 +173,10 @@ public class NBCLIOptions {
         return reportSummaryTo;
     }
 
+    public void setWantsStackTraces(boolean wantsStackTraces) {
+        this.showStackTraces=wantsStackTraces;
+    }
+
     public enum Mode {
         ParseGlobalsOnly,
         ParseAllOptions
@@ -382,7 +386,7 @@ public class NBCLIOptions {
                     selected = path;
                     break;
                 } else {
-                    System.err.println("ERROR: possible state dir path is not a directory: '" + path.toString() + "'");
+                    System.err.println("ERROR: possible state dir path is not a directory: '" + path + "'");
                 }
             }
         }
@@ -397,7 +401,7 @@ public class NBCLIOptions {
                         PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
                 );
             } catch (IOException e) {
-                throw new BasicError("Could not create state directory at '" + selected.toString() + "': " + e.getMessage());
+                throw new BasicError("Could not create state directory at '" + selected + "': " + e.getMessage());
             }
         }
 

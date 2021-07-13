@@ -343,6 +343,10 @@ public class NBCLI {
         logger.info("console logging level is " + options.getConsoleLogLevel());
 
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
+        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
+            options.setWantsStackTraces(true);
+            logger.debug("enabling stack traces since log level is " + options.getConsoleLogLevel());
+        }
 
         Scenario scenario = new Scenario(
             sessionName,
