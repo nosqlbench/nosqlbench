@@ -49,8 +49,8 @@ public class Synonyms {
     }
 
     public static String canonicalize(String arg, Logger logger) {
-        return canonicalize(arg, PARAM_SYNONYMS, (d, p) -> logger.warn(
-            "The param name '" + p + "' is preferred. The use of '" + d + "' may be deprecated in the future."
+        return canonicalize(arg, PARAM_SYNONYMS, (d, p) -> logger.debug(
+            "rewrote synonym to canonical term (" + d +" => " + p +")"
         ));
     }
 }
