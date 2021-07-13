@@ -1,21 +1,20 @@
-- 663e3010 (HEAD -> main) correct test for current functional APIs
-- e981f808 (origin/main) General improvements and bug-fixes. Thanks to @XN137
-- 5b4a695f update ANTLR to 4.2.9 in all places
-- 3b74ae20 General improvements and bug-fixes. Thanks to @XN137
-- 7c7ea039 post-merge fixups
-- 9403f51f improve ToDate semantics and docs
-- 0edbfb1f fix test for TagFilter
-- 365ad619 remove extraneous var in ActivityExecutor
-- 34855a39 Merge pull request #336 from XN137/fix-errorprone-errors
-- 60ff1d9c Merge pull request #335 from XN137/avoid-threadsafety-warnings
-- c5caf51a Merge pull request #334 from XN137/remove-junit4-dependency
-- a02df22d Merge pull request #333 from XN137/jdk-string-join
-- 950b31fb fix errors found by errorprone
-- b98451ab upgrade antlr4-maven-plugin to v4.9.2 avoid threadsafety warnings
-- 5e8e6bf1 use assertj v3.19.0
-- 8dcac028 use junit5 v5.7.2 with proper scoping
-- 2cd393ae use junit5 apis to remove junit4 dependency
-- 0e68abf1 prefer jdk over lib internals for String join
-- dc1c6c5e Merge pull request #332 from XN137/fix-virtdata-api-test-folder
-- 6232edff move virtdata-api tests to correct folder
-- re-run of github actions due to storage error
+- c6c69ac1 (HEAD -> main) exclude jcl-over-slf4j across all deps
+- c5f0696c doc formatting and typo fixes
+- e6c1d206 allow parameterized cql to use standard anchors
+- 1bf8b1bf auto enable stacktraces with any -v
+- ce1eca57 reduce synonym use to debug
+- 14477040 remove extraneous parameters
+- 3b4be094 structuring for readability
+- ff048bd7 update openapi deps
+- a4bad299 (origin/main) Merge pull request #342 from szimmer1/cockroachdb-errorhandler
+- 03803847 Refactor error format for error handling in JDBCActivity. Add examples for default error handler specs for cockroabdb-basic and postgres-basic workloads.
+- 496ca505 fix yaml typo
+- 81d1fc16 also trigger build on all pushes
+- 973c1aee also trigger build on pull request
+- 409b0d31 nosqlbench-340 CountryCodes() binding function runtime error
+- bb3f8b3e Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
+- c3a6ba0d fix misaligned versions from github PR
+- 7acc2dd8 Merge pull request #338 from nosqlbench/dependabot/maven/docsys/org.eclipse.jetty-jetty-server-11.0.3
+- d9ce7b27 Bump jetty-server from 11.0.1 to 11.0.3 in /docsys
+- b2ff3653 Merge pull request #337 from XN137/unify-antlr4-version
+- 9e1dd21f unify antlr4 version via property
