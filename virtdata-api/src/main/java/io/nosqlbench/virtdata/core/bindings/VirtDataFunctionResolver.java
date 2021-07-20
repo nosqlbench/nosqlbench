@@ -1,7 +1,7 @@
 package io.nosqlbench.virtdata.core.bindings;
 
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.ConfigAware;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -98,8 +98,8 @@ public class VirtDataFunctionResolver {
                 MethodType ctorMethodType = MethodType.methodType(void.class, ctor.getParameterTypes());
                 MethodHandle constructor = lookup.findConstructor(ctorDClass, ctorMethodType);
                 Object functionalInstance = constructor.invokeWithArguments(parameters);
-                if (functionalInstance instanceof ConfigAware) {
-                    ((ConfigAware)functionalInstance).applyConfig(customParameters);
+                if (functionalInstance instanceof NBMapConfigurable) {
+                    ((NBMapConfigurable)functionalInstance).applyConfig(customParameters);
                 }
                 boolean threadSafe = functionalInstance.getClass().getAnnotation(ThreadSafeMapper.class) != null;
                 resolvedFunctions.add(
@@ -141,11 +141,11 @@ public class VirtDataFunctionResolver {
 
         if (targetCtor.isVarArgs()) {
             if (sourceParameters.length < (targetTypes.length - 1)) {
-                logger.trace(targetCtor.toString() + " (varargs) does not match, not enough source parameters: " + Arrays.toString(sourceParameters));
+                logger.trace(targetCtor + " (varargs) does not match, not enough source parameters: " + Arrays.toString(sourceParameters));
                 return false;
             }
         } else if (sourceParameters.length != targetTypes.length) {
-            logger.trace(targetCtor.toString() + " (varargs) does not match source parameters (size): " + Arrays.toString(sourceParameters));
+            logger.trace(targetCtor + " (varargs) does not match source parameters (size): " + Arrays.toString(sourceParameters));
             return false;
         }
 
