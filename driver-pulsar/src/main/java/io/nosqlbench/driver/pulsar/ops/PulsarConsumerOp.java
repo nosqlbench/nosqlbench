@@ -64,8 +64,12 @@ public class PulsarConsumerOp extends SyncPulsarOp {
             if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
                 if (logger.isDebugEnabled()) {
                     String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
+
+                    org.apache.avro.Schema avroSchema =
+                        AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+
                     org.apache.avro.generic.GenericRecord avroGenericRecord =
-                        AvroUtil.GetGenericRecord_ApacheAvro(avroDefStr, message.getData());
+                        AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
 
                     logger.debug("msg-key={}  msg-payload={}", message.getKey(), avroGenericRecord.toString());
                 }

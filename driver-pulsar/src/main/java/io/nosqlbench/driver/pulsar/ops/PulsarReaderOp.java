@@ -30,8 +30,12 @@ public class PulsarReaderOp extends SyncPulsarOp {
                 message = reader.readNext();
 
                 if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
+                    org.apache.avro.Schema avroSchema =
+                        AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+
                     org.apache.avro.generic.GenericRecord avroGenericRecord =
-                        AvroUtil.GetGenericRecord_ApacheAvro(avroDefStr, message.getData());
+                        AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
+
                     System.out.println("msg-key=" + message.getKey() + "  msg-payload=" + avroGenericRecord.toString());
                 } else {
                     System.out.println("msg-key=" + message.getKey() + "  msg-payload=" + new String(message.getData()));
