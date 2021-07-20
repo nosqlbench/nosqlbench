@@ -24,7 +24,7 @@ public class JMXActivity extends SimpleActivity implements Activity {
         super.initActivity();
         this.sequence = createOpSequenceFromCommands(ReadyJmxOp::new);
         setDefaultsFromOpSequence(sequence);
-        this.sslContext= SSLKsFactory.get().getContext(activityDef);
+        this.sslContext= SSLKsFactory.get().getContext(activityDef.getParams());
 
         // TODO: Require qualified default with an op sequence as the input
     }

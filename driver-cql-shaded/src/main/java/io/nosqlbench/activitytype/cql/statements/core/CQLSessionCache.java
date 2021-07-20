@@ -17,27 +17,17 @@ import io.nosqlbench.engine.api.scripting.ExprEvaluator;
 import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOError;
-import java.io.IOException;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
-import org.apache.commons.codec.digest.DigestUtils;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -246,7 +236,7 @@ public class CQLSessionCache implements Shutdownable {
             .ifPresent(builder::withCompression);
 
 
-        SSLContext context = SSLKsFactory.get().getContext(activityDef);
+        SSLContext context = SSLKsFactory.get().getContext(activityDef.getParams());
         if (context != null) {
             builder.withSSL(RemoteEndpointAwareJdkSSLOptions.builder().withSSLContext(context).build());
         }

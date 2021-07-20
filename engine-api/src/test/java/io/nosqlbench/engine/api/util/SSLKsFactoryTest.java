@@ -33,7 +33,7 @@ public class SSLKsFactoryTest {
                 "tlsversion=TLSv1.2",
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -46,7 +46,7 @@ public class SSLKsFactoryTest {
                 "kspass=nosqlbench_client"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -60,7 +60,7 @@ public class SSLKsFactoryTest {
                 "keyPassword=nosqlbench"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -71,7 +71,7 @@ public class SSLKsFactoryTest {
                 "tspass=nosqlbench_server"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class SSLKsFactoryTest {
                 "kspass=nosqlbench_client"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -94,7 +94,7 @@ public class SSLKsFactoryTest {
                 "keyPassword=nosqlbench"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class SSLKsFactoryTest {
                 "tlsversion=TLSv1.2",
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -116,7 +116,7 @@ public class SSLKsFactoryTest {
                 "keyFilePath=src/test/resources/ssl/client.key"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -126,7 +126,7 @@ public class SSLKsFactoryTest {
                 "caCertFilePath=src/test/resources/ssl/cacert.crt"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -137,7 +137,7 @@ public class SSLKsFactoryTest {
                 "keyFilePath=src/test/resources/ssl/client.key"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
-        assertThat(SSLKsFactory.get().getContext(activityDef)).isNotNull();
+        assertThat(SSLKsFactory.get().getContext(activityDef.getParams())).isNotNull();
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
                 .withMessageMatching("Unable to load the keystore. Please check.");
     }
 
@@ -164,7 +164,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+            .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
             .withMessageMatching("Unable to init KeyManagerFactory. Please check.*");
     }
 
@@ -177,7 +177,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
                 .withMessageMatching("Unable to load the truststore. Please check.");
     }
 
@@ -189,7 +189,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
                 .withMessageContaining("Unable to load caCert from")
                 .withCauseInstanceOf(FileNotFoundException.class);
     }
@@ -202,7 +202,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
                 .withMessageContaining("Unable to load cert from")
                 .withCauseInstanceOf(FileNotFoundException.class);
     }
@@ -215,7 +215,7 @@ public class SSLKsFactoryTest {
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
+                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
                 .withMessageContaining("Unable to load key from")
                 .withCauseInstanceOf(FileNotFoundException.class);
     }
@@ -223,14 +223,15 @@ public class SSLKsFactoryTest {
     @Test
     public void testOpenSSLGetContextWithMissingCertError() {
         String[] params = {
-                "ssl=openssl",
-                "caCertFilePath=src/test/resources/ssl/cacert.crt",
-                "keyFilePath=src/test/resources/ssl/client.key"
+            "ssl=openssl",
+            "caCertFilePath=src/test/resources/ssl/cacert.crt",
+            "keyFilePath=src/test/resources/ssl/client.key"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef))
-                .withMessageContaining("Unable to load key from")
-                .withCauseInstanceOf(IllegalArgumentException.class);
+            .isThrownBy(() -> SSLKsFactory.get().getContext(activityDef.getParams()))
+            .withMessageContaining("Unable to load key from")
+            .withCauseInstanceOf(IllegalArgumentException.class);
     }
+
 }

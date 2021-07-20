@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Annotator;
-import io.nosqlbench.nb.api.config.ConfigAware;
-import io.nosqlbench.nb.api.config.ConfigLoader;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.ConfigLoader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -53,9 +53,9 @@ public class Annotators {
                 }
                 Annotator annotator = annotatorProvider.get();
 
-                if (annotator instanceof ConfigAware) {
-                    ConfigAware configAware = (ConfigAware) annotator;
-                    configAware.applyConfig(cmap);
+                if (annotator instanceof NBMapConfigurable) {
+                    NBMapConfigurable NBMapConfigurable = (NBMapConfigurable) annotator;
+                    NBMapConfigurable.applyConfig(cmap);
                 }
 
                 annotators.add(annotator);

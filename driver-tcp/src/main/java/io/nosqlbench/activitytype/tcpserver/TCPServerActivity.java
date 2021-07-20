@@ -56,7 +56,7 @@ public class TCPServerActivity extends StdoutActivity {
         queue = new LinkedBlockingQueue<>(capacity);
 
         if (sslEnabled) {
-            socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef);
+            socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef.getParams());
         } else {
             socketFactory = ServerSocketFactory.getDefault();
         }

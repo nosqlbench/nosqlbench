@@ -4,10 +4,10 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.TupleType;
 import com.datastax.driver.core.TupleValue;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.ConfigAware;
-import io.nosqlbench.nb.api.config.ConfigModel;
-import io.nosqlbench.nb.api.config.MutableConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 
 import java.util.*;
 import java.util.function.LongFunction;
@@ -28,7 +28,7 @@ import java.util.function.LongUnaryOperator;
  * </LI>
  */
 @ThreadSafeMapper
-public class CustomFunc955 implements LongFunction<Map<?,?>>, ConfigAware {
+public class CustomFunc955 implements LongFunction<Map<?,?>>, NBMapConfigurable {
 
     private final LongToIntFunction sizefunc;
     private final LongFunction<Object> keyfunc;
@@ -79,8 +79,8 @@ public class CustomFunc955 implements LongFunction<Map<?,?>>, ConfigAware {
     }
 
     @Override
-    public ConfigModel getConfigModel() {
-        return new MutableConfigModel(this)
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass())
             .optional("<cluster>", Cluster.class)
             .asReadOnly();
     }

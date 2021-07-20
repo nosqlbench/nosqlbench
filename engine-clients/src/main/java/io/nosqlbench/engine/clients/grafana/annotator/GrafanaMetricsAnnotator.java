@@ -4,12 +4,16 @@ import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.OnError;
 import io.nosqlbench.nb.api.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Annotator;
-import io.nosqlbench.nb.api.config.*;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +25,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Service(value = Annotator.class, selector = "grafana")
-public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
+public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
 
     private final static Logger logger = LogManager.getLogger("ANNOTATORS");
     //private final static Logger annotationsLog = LogManager.getLogger("ANNOTATIONS" );
@@ -55,7 +59,7 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
             Map<String, String> labels = annotation.getLabels();
 
             Optional.ofNullable(labels.get("alertId"))
-                    .map(Integer::parseInt).ifPresent(ga::setAlertId);
+                .map(Integer::parseInt).ifPresent(ga::setAlertId);
 
             ga.setText(annotation.toString());
 
@@ -64,28 +68,28 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
             // Target
             Optional.ofNullable(labels.get("type"))
-                    .ifPresent(ga::setType);
+                .ifPresent(ga::setType);
 
             Optional.ofNullable(labels.get("id")).map(Integer::valueOf)
-                    .ifPresent(ga::setId);
+                .ifPresent(ga::setId);
 
             Optional.ofNullable(labels.get("alertId")).map(Integer::valueOf)
-                    .ifPresent(ga::setAlertId);
+                .ifPresent(ga::setAlertId);
 
             Optional.ofNullable(labels.get("dashboardId")).map(Integer::valueOf)
-                    .ifPresent(ga::setDashboardId);
+                .ifPresent(ga::setDashboardId);
 
             Optional.ofNullable(labels.get("panelId")).map(Integer::valueOf)
-                    .ifPresent(ga::setPanelId);
+                .ifPresent(ga::setPanelId);
 
             Optional.ofNullable(labels.get("userId")).map(Integer::valueOf)
-                    .ifPresent(ga::setUserId);
+                .ifPresent(ga::setUserId);
 
             Optional.ofNullable(labels.get("userName"))
-                    .ifPresent(ga::setUserName);
+                .ifPresent(ga::setUserName);
 
             Optional.ofNullable(labels.get("metric"))
-                    .ifPresent(ga::setMetric);
+                .ifPresent(ga::setMetric);
 
             // Details
 
@@ -104,66 +108,39 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
     }
 
     @Override
-    public void applyConfig(Map<String, ?> providedConfig) {
-        ConfigModel configModel = getConfigModel();
-        ConfigReader cfg = configModel.apply(providedConfig);
+    public void applyConfig(NBConfiguration cfg) {
 
         GrafanaClientConfig gc = new GrafanaClientConfig();
         gc.setBaseUri(cfg.param("baseurl", String.class));
 
-        if (cfg.containsKey("tags")) {
-            this.tags = ParamsParser.parse(cfg.param("tags", String.class), false);
-        }
+        cfg.getOptional("tags")
+            .map(t -> ParamsParser.parse(t, false))
+            .ifPresent(this::setTags);
 
-        if (cfg.containsKey("username")) {
-            if (cfg.containsKey("password")) {
-                gc.basicAuth(
-                        cfg.param("username", String.class),
-                        cfg.param("password", String.class)
-                );
-            } else {
-                gc.basicAuth(cfg.param("username", String.class), "");
-            }
-        }
+
+        cfg.getOptional("username")
+            .ifPresent(
+                username ->
+                    gc.basicAuth(
+                        username,
+                        cfg.getOptional("password").orElse("")
+                    )
+            );
+
 
         Path keyfilePath = null;
-        if (cfg.containsKey("apikeyfile")) {
-            String apikeyfile = cfg.paramEnv("apikeyfile", String.class);
-            keyfilePath = Path.of(apikeyfile);
-        } else if (cfg.containsKey("apikey")) {
-            gc.addHeaderSource(() -> Map.of("Authorization", "Bearer " + cfg.param("apikey", String.class)));
+        Optional<String> optionalApikeyfile = cfg.getEnvOptional("apikeyfile");
+        Optional<String> optionalApikey = cfg.getOptional("apikey");
+
+        if (optionalApikeyfile.isPresent()) {
+            keyfilePath=optionalApikeyfile.map(Path::of).orElseThrow();
+        } else if (optionalApikey.isPresent()) {
+            gc.addHeaderSource(() -> Map.of("Authorization", "Bearer " + optionalApikey.get()));
         } else {
-            Optional<String> apikeyLocation = NBEnvironment.INSTANCE
-                .interpolate(cfg.paramEnv("apikeyfile", String.class));
-            keyfilePath = apikeyLocation.map(Path::of).orElseThrow();
+            throw new BasicError("Undefined keyfile parameters.");
         }
 
-
-//        if (!Files.exists(keyfilePath)) {
-//            logger.info("Auto-configuring grafana apikey.");
-//            GrafanaClientConfig apiClientConf = gc.copy().basicAuth("admin", "admin");
-//            GrafanaClient apiClient = new GrafanaClient(apiClientConf);
-//            try {
-//                String nodeId = SystemId.getNodeId();
-//
-//                String keyName = "nosqlbench-" + nodeId + "-" + System.currentTimeMillis();
-//                ApiToken apiToken = apiClient.createApiToken(keyName, "Admin", Long.MAX_VALUE);
-//                Files.createDirectories(keyfilePath.getParent(),
-//                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
-//                Files.writeString(keyfilePath, apiToken.getKey());
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//
-//        AuthWrapper authHeaderSupplier = new AuthWrapper(
-//                "Authorization",
-//                new GrafanaKeyFileReader(keyfilePath),
-//                s -> "Bearer " + s
-//        );
-//        gc.addHeaderSource(authHeaderSupplier);
-
-        this.onError = OnError.valueOfName(cfg.get("onerror").toString());
+        cfg.getOptional("onerror").map(OnError::valueOfName).ifPresent(this::setOnError);
 
         this.client = new GrafanaClient(gc);
 
@@ -173,27 +150,34 @@ public class GrafanaMetricsAnnotator implements Annotator, ConfigAware {
 
     }
 
+    private void setOnError(OnError onError) {
+        this.onError=onError;
+    }
+
+    private void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
     @Override
-    public ConfigModel getConfigModel() {
-        return new MutableConfigModel(this)
-                .required("baseurl", String.class,
-                        "The base url of the grafana node, like http://localhost:3000/")
-                .defaultto("apikeyfile", "$NBSTATEDIR/grafana/grafana_apikey",
-                        "The file that contains the api key, supersedes apikey")
-                .optional("apikey", String.class,
-                        "The api key to use, supersedes basic username and password")
-                .optional("username", String.class,
-                        "The username to use for basic auth")
-                .optional("password", String.class,
-                        "The password to use for basic auth")
-                .defaultto("tags", "source:nosqlbench",
-                        "The tags that identify the annotations, in k:v,... form")
-//                .defaultto("onerror", OnError.Warn)
-                .defaultto("onerror", "warn",
-                        "What to do when an error occurs while posting an annotation")
-                .defaultto("timeoutms", 5000,
-                        "connect and transport timeout for the HTTP client")
-                .asReadOnly();
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass())
+            .required("baseurl", String.class,
+                "The base url of the grafana node, like http://localhost:3000/")
+            .defaults("apikeyfile", "$NBSTATEDIR/grafana/grafana_apikey",
+                "The file that contains the api key, supersedes apikey")
+            .optional("apikey", String.class,
+                "The api key to use, supersedes basic username and password")
+            .optional("username", String.class,
+                "The username to use for basic auth")
+            .optional("password", String.class,
+                "The password to use for basic auth")
+            .defaults("tags", "source:nosqlbench",
+                "The tags that identify the annotations, in k:v,... form")
+            .defaults("onerror", "warn",
+                "What to do when an error occurs while posting an annotation")
+            .defaults("timeoutms", 5000,
+                "connect and transport timeout for the HTTP client")
+            .asReadOnly();
     }
 
 

@@ -238,7 +238,7 @@ public class CQLSessionCache implements Shutdownable {
             .ifPresent(builder::withCompression);
 
 
-        SSLContext context = SSLKsFactory.get().getContext(activityDef);
+        SSLContext context = SSLKsFactory.get().getContext(activityDef.getParams());
         if (context != null) {
             builder.withSSL(RemoteEndpointAwareJdkSSLOptions.builder().withSSLContext(context).build());
         }

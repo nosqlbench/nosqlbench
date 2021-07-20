@@ -46,7 +46,7 @@ public class TCPClientActivity extends StdoutActivity {
         SocketFactory socketFactory = SocketFactory.getDefault();
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
         if (sslEnabled) {
-            socketFactory = SSLKsFactory.get().createSocketFactory(activityDef);
+            socketFactory = SSLKsFactory.get().createSocketFactory(activityDef.getParams());
         }
 
         String host = getActivityDef().getParams().getOptionalString("host").orElse("localhost");
