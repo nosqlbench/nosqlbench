@@ -255,3 +255,28 @@ pattern `STATEMENT PARAMETER: <statement name>: ` included in the log
 line, so that the user may verify applied statement settings. Further, an
 explanation for what this parameter does to the specific statement *
 should* be included in a following log line.
+
+### Environment Variables
+
+Environment variable may be hoisted into a driver's configuration, but only
+using explicit mechanisms. By default, environment variables are not injected into
+any NoSQLBench usage context where it is not explicitly enabled by the user.
+The mechanism of enabling environment variables is simple indirection, using
+a symbolic variable reference where they would normally use a value.
+
+Further, the variable must be explicitly enabled for env interpolation
+by the developer, and documented as such. Having variables which often use
+`$...` formats for other purposes besides environment variables is a nuisance.
+Conversely, not supporting env vars in `$...` values which are historically
+enabled for such is also a nuisance.
+
+#### format
+
+such as `myparam=$ENV_VAR_FOO`, where the env var name must follow
+this pattern:
+
+1. A `$` literal dollar sign.
+2. Any alphabetic or underscore character (`[a-zA-Z_]`)
+3. Zero or more trailing characters to include optional dots and digits. (`[a-zA-Z0-9_]*`)
+
+Alternately, the `${...}` form is less strict, and allows any characters which are not `}`.
