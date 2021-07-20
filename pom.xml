@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.51-SNAPSHOT</version>
+        <version>4.15.52-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -33,6 +33,7 @@
         <module>engine-rest</module>
         <module>engine-clients</module>
         <module>drivers-api</module>
+        <module>adapters-api</module>
 
         <!-- driver modules -->
         <module>driver-diag</module>
@@ -78,7 +79,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
-                <module>driver-cqld4</module>
+                <module>adapter-cqld4</module>
             </modules>
         </profile>
         <profile>
