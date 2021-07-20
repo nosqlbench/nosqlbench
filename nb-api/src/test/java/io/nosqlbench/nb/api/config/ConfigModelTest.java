@@ -2,9 +2,7 @@ package io.nosqlbench.nb.api.config;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class MutableConfigModelTest {
+public class ConfigModelTest {
 
     @Test
     void optional() {

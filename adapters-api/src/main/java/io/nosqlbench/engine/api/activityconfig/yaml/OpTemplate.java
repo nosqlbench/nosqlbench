@@ -2,7 +2,6 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.api.activityconfig.ParsedStmtOp;
 import io.nosqlbench.engine.api.util.Tagged;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
@@ -253,7 +252,7 @@ public abstract class OpTemplate implements Tagged {
      * Parse the statement for anchors and return a richer view of the StmtDef which
      * is simpler to use for most statement configuration needs.
      *
-     * @return a new {@link ParsedStmtOp}
+     * @return an optional {@link ParsedTemplate}
      */
     public Optional<ParsedTemplate> getParsed(Function<String,String>... rewriters) {
         Optional<String> os = getStmt();
@@ -315,6 +314,6 @@ public abstract class OpTemplate implements Tagged {
     }
 
     public Element getParamReader() {
-        return NBParams.one(getParams());
+        return NBParams.one(getName(),getParams());
     }
 }

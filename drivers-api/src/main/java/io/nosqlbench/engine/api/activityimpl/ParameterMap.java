@@ -15,7 +15,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.nb.api.config.ParamsParser;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.engine.api.util.Unit;
 
 import org.graalvm.polyglot.Value;
@@ -261,13 +261,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return new ParameterMap(parsedMap);
     }
 
-//    static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
-//        if (optionalEncodedParams.isPresent()) {
-//            return parseParams(optionalEncodedParams.get());
-//        }
-//        return Optional.empty();
-//    }
-
     public static Optional<ParameterMap> parseParams(String encodedParams) {
         try {
             return Optional.ofNullable(parseOrException(encodedParams));
@@ -305,45 +298,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         Object removed = this.remove(key);
         return removed!=null;
     }
-
-    //    /**
-//     * Parse positional parameters, each suffixed with the ';' terminator.
-//     * This form simply allows for the initial parameter names to be elided, so long as they
-//     * are sure to match up with a well-known order. This method cleans up the input, injecting
-//     * the field names as necessary, and then calls the normal parsing logic.
-//     *
-//     * @param encodedParams     parameter string
-//     * @param defaultFieldNames the well-known field ordering
-//     * @return a new ParameterMap, if parsing was successful
-//     */
-//    public static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
-//
-//        String[] splitAtSemi = encodedParams.split(";");
-//
-//        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
-//
-//            if (!splitAtSemi[wordidx].contains("=")) {
-//
-//                if (wordidx > (defaultFieldNames.length - 1)) {
-//                    throw new RuntimeException("positional param (without var=val; format) ran out of "
-//                            + "positional field names:"
-//                            + " names:" + Arrays.toString(defaultFieldNames)
-//                            + ", values: " + Arrays.toString(splitAtSemi)
-//                            + ", original: " + encodedParams
-//                    );
-//                }
-//
-//                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
-//            }
-//            if (!splitAtSemi[wordidx].endsWith(";")) {
-//                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
-//            }
-//        }
-//
-//        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
-//        ParameterMap parameterMap = ParameterMap.parseOrException(allArgs);
-//        return parameterMap;
-//    }
 
     public interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);

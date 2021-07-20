@@ -1,6 +1,5 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
@@ -10,7 +9,7 @@ import java.util.function.Function;
 
 /**
  * <P>The DriverAdapter interface is expected to be the replacement
- * for the current {@link ActivityType}. This interface takes a simpler
+ * for ActivityTypes. This interface takes a simpler
  * approach. Specifically, all of the core logic which was being pasted into each
  * driver type is centralized, and only the necessary interfaces
  * needed for construction new operations and shared context are exposed.

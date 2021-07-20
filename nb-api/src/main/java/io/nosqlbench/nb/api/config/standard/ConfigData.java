@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api.config;
+package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 

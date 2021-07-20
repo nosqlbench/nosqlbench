@@ -1,7 +1,10 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +14,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class BaseDriverAdapter<R extends Runnable,S>
-    implements DriverAdapter<R,S>, ActivityDefAware {
+    implements DriverAdapter<R,S>, NBMapConfigurable {
 
     private final DriverSpaceCache<? extends S> spaceCache;
-    private ActivityDef activityDef;
+    private NBConfiguration NBCfgReader;
 
     protected BaseDriverAdapter() {
         this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer());
@@ -79,16 +82,26 @@ public abstract class BaseDriverAdapter<R extends Runnable,S>
     }
 
     @Override
-    public DriverSpaceCache<? extends S> getSpaceCache() {
+    public final DriverSpaceCache<? extends S> getSpaceCache() {
         return spaceCache;
     }
 
     @Override
-    public void setActivityDef(ActivityDef activiytDef) {
-        this.activityDef = activiytDef;
+    public final void applyConfig(Map<String, ?> providedConfig) {
+        NBConfiguration config = getConfigModel().apply(providedConfig);
     }
 
-    public ActivityDef getActivityDef() {
-        return activityDef;
+    /**
+     * In order to be provided with config information, it is required
+     * that the driver adapter specify the valid configuration options,
+     * their types, and so on.
+     */
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass());
+    }
+
+    public NBConfiguration getConfigReader() {
+        return NBCfgReader;
     }
 }
