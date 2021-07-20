@@ -41,17 +41,38 @@ public class ReadyCQLStatementTemplate {
     private List<String> startTimers;
     private List<String> stopTimers;
 
-    public ReadyCQLStatementTemplate(Map<String, Object> fconfig, CqlBinderTypes binderType, Session session,
-                                     PreparedStatement preparedStmt, long ratio, String name) {
+    public ReadyCQLStatementTemplate(
+        Map<String, Object> fconfig,
+        CqlBinderTypes binderType,
+        Session session,
+        PreparedStatement preparedStmt,
+        long ratio, String name
+    ) {
         this.session = session;
         this.name = name;
         ValuesArrayBinder<PreparedStatement, Statement> binder = binderType.get(session);
-        logger.trace("Using binder_type=>" + binder.toString());
+        logger.trace("Using binder_type=>" + binder);
 
         template = new ContextualBindingsArrayTemplate<>(
             preparedStmt,
             new BindingsTemplate(fconfig),
             binder
+        );
+        this.ratio = ratio;
+    }
+
+    public ReadyCQLStatementTemplate(
+        Map<String, Object> fconfig,
+        Session session,
+        SimpleStatement simpleStatement,
+        long ratio, String name,
+        boolean parameterized) {
+        this.session = session;
+        this.name = name;
+        template = new ContextualBindingsArrayTemplate<>(
+            simpleStatement,
+            new BindingsTemplate(fconfig),
+            new SimpleStatementValuesBinder(parameterized)
         );
         this.ratio = ratio;
     }
@@ -68,24 +89,6 @@ public class ReadyCQLStatementTemplate {
             stopTimers = new ArrayList<>();
         }
         stopTimers.add(name);
-    }
-
-    public ReadyCQLStatementTemplate(
-        Map<String, Object> fconfig,
-        Session session,
-        SimpleStatement simpleStatement,
-        long ratio, String name,
-        boolean parameterized,
-        List<String> startTimers,
-        List<String> stopTimers) {
-        this.session = session;
-        this.name = name;
-        template = new ContextualBindingsArrayTemplate<>(
-            simpleStatement,
-            new BindingsTemplate(fconfig),
-            new SimpleStatementValuesBinder(parameterized)
-        );
-        this.ratio = ratio;
     }
 
     public ReadyCQLStatement resolve() {
@@ -118,19 +121,19 @@ public class ReadyCQLStatementTemplate {
     }
 
     public void addResultSetOperators(ResultSetCycleOperator... addingOperators) {
-        resultSetCycleOperators = (resultSetCycleOperators==null) ? new ResultSetCycleOperator[0]: resultSetCycleOperators;
+        resultSetCycleOperators = (resultSetCycleOperators == null) ? new ResultSetCycleOperator[0] : resultSetCycleOperators;
 
         ResultSetCycleOperator[] newOperators = new ResultSetCycleOperator[resultSetCycleOperators.length + addingOperators.length];
-        System.arraycopy(resultSetCycleOperators,0,newOperators,0,resultSetCycleOperators.length);
-        System.arraycopy(addingOperators,0,newOperators,resultSetCycleOperators.length,addingOperators.length);
-        this.resultSetCycleOperators=newOperators;
+        System.arraycopy(resultSetCycleOperators, 0, newOperators, 0, resultSetCycleOperators.length);
+        System.arraycopy(addingOperators, 0, newOperators, resultSetCycleOperators.length, addingOperators.length);
+        this.resultSetCycleOperators = newOperators;
     }
 
     public void addRowCycleOperators(RowCycleOperator... addingOperators) {
-        rowCycleOperators = (rowCycleOperators==null) ? new RowCycleOperator[0]: rowCycleOperators;
+        rowCycleOperators = (rowCycleOperators == null) ? new RowCycleOperator[0] : rowCycleOperators;
         RowCycleOperator[] newOperators = new RowCycleOperator[rowCycleOperators.length + addingOperators.length];
-        System.arraycopy(rowCycleOperators,0,newOperators,0,rowCycleOperators.length);
-        System.arraycopy(addingOperators, 0, newOperators,rowCycleOperators.length,addingOperators.length);
+        System.arraycopy(rowCycleOperators, 0, newOperators, 0, rowCycleOperators.length);
+        System.arraycopy(addingOperators, 0, newOperators, rowCycleOperators.length, addingOperators.length);
         this.rowCycleOperators = newOperators;
     }
 
