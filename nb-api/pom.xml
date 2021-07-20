@@ -1,98 +1,107 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
 
-  <parent>
-    <artifactId>mvn-defaults</artifactId>
-    <groupId>io.nosqlbench</groupId>
-    <version>4.15.51-SNAPSHOT</version>
-    <relativePath>../mvn-defaults</relativePath>
-  </parent>
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>4.15.52-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
 
-  <artifactId>nb-api</artifactId>
-  <packaging>jar</packaging>
-  <name>${project.artifactId}</name>
-  <description>
-    The top level API module for NoSQLBench. This module should have no internal
-    module dependencies other than the mvn-default module.
-    All modules within NoSQLBench can safely depend on this module with circular
-    dependencies. This module provides cross-cutting code infrastracture, such as
-    path utilities and ways of describing services used between modules.
-    It is also the transitive aggregation point for system-wide library dependencies
-    for logging and testing or similar needs.
-  </description>
+    <artifactId>nb-api</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        The top level API module for NoSQLBench. This module should have no internal
+        module dependencies other than the mvn-default module.
+        All modules within NoSQLBench can safely depend on this module with circular
+        dependencies. This module provides cross-cutting code infrastracture, such as
+        path utilities and ways of describing services used between modules.
+        It is also the transitive aggregation point for system-wide library dependencies
+        for logging and testing or similar needs.
+    </description>
 
-  <dependencies>
+    <dependencies>
 
-    <!-- logging -->
-    <!-- TODO: consolidate to Log4j 2 -->
+        <!-- logging -->
 
-    <!-- The ONLY upstream module in project from nb-api -->
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>nb-annotations</artifactId>
-        <version>4.15.51-SNAPSHOT</version>
-    </dependency>
+        <!-- The ONLY upstream module in project from nb-api -->
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>4.15.52-SNAPSHOT</version>
+        </dependency>
 
-      <dependency>
-          <groupId>com.vladsch.flexmark</groupId>
-          <artifactId>flexmark-ext-yaml-front-matter</artifactId>
-          <version>0.61.6</version>
-      </dependency>
-      <dependency>
-          <groupId>com.vladsch.flexmark</groupId>
-          <artifactId>flexmark-html2md-converter</artifactId>
-          <version>0.61.6</version>
-      </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-ext-yaml-front-matter</artifactId>
+            <version>0.61.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-html2md-converter</artifactId>
+            <version>0.61.6</version>
+        </dependency>
 
 
-    <dependency>
-      <groupId>net.sf.jopt-simple</groupId>
-      <artifactId>jopt-simple</artifactId>
-      <version>5.0.3</version>
-    </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>5.0.3</version>
+        </dependency>
 
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>com.github.oshi</groupId>
-      <artifactId>oshi-core</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+        </dependency>
 
-      <!-- perf testing -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.openjdk.jmh</groupId>
-      <artifactId>jmh-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.openjdk.jmh</groupId>
-      <artifactId>jmh-generator-annprocess</artifactId>
-    </dependency>
+        <!-- TODO: Move this down to virtdata if it is the only module group using it -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+        </dependency>
 
-    <!-- TODO: Move this down to virtdata if it is the only module group using it -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-csv</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
 
-  </dependencies>
 
-  <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>docs-for-testing-only/**</exclude>
-        </excludes>
-        <includes>
-          <include>**</include>
-        </includes>
-      </resource>
-    </resources>
-  </build>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>docs-for-testing-only/**</exclude>
+                </excludes>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
 
 </project>
