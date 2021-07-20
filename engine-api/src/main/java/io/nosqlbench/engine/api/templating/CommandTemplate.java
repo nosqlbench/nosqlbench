@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.config.ParamsParser;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
@@ -28,6 +28,7 @@ import java.util.function.Function;
  * may be provided when needed for specialized forms of syntax or variations which should also
  * be supported. See the constructor docs for details on these variations.
  */
+@Deprecated(forRemoval = true)
 public class CommandTemplate {
 
     private final static Logger logger = LogManager.getLogger(CommandTemplate.class);
