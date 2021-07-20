@@ -251,7 +251,7 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
                     simpleStatement.setIdempotent(i);
                 });
                 template = new ReadyCQLStatementTemplate(fconfig, getSession(), simpleStatement, ratio,
-                    stmtDef.getName(), parameterized, null, null);
+                    stmtDef.getName(), parameterized);
             }
 
             Element params = stmtDef.getParamReader();

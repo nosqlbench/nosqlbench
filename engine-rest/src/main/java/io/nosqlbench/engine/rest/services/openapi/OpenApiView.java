@@ -1,16 +1,16 @@
 package io.nosqlbench.engine.rest.services.openapi;
 
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.Operation;
-import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.Paths;
-import io.swagger.oas.models.headers.Header;
-import io.swagger.oas.models.links.Link;
-import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
-import io.swagger.oas.models.responses.ApiResponse;
-import io.swagger.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.links.Link;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -222,10 +222,12 @@ public class OpenApiView {
         }
         for (String linkKey : links.keySet()) {
             Link modelLink = model.getComponents().getLinks().get(linkKey);
-            RequestBody body = modelLink.getRequestBody();
-            while (body.get$ref() != null) {
-                body = model.getComponents().getRequestBodies().get(body.get$ref());
-            }
+
+//            RequestBody body = modelLink.getRequestBody();
+//            while (body.get$ref() != null) {
+//                body = model.getComponents().getRequestBodies().get(body.get$ref());
+//            }
+            Object body = modelLink.getRequestBody();
             modelLink.setRequestBody(body);
         }
     }

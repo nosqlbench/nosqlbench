@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.51-SNAPSHOT</version>
+        <version>4.15.52-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -22,14 +22,8 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-          <version>4.15.51-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.51-SNAPSHOT</version>
+          <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -53,6 +47,12 @@
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-graph</artifactId>
             <version>1.9.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- For CQL compression option -->
@@ -77,8 +77,14 @@
             <artifactId>netty-codec-haproxy</artifactId>
             <version>4.1.54.Final</version>
         </dependency>
+      <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>engine-api</artifactId>
+        <version>4.15.52-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
 
-<!--        <dependency>-->
+      <!--        <dependency>-->
 <!--            <groupId>io.netty</groupId>-->
 <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
 <!--            <version>4.1.47.Final</version>-->

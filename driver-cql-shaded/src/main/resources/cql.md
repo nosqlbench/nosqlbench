@@ -30,34 +30,41 @@ activity types.
 - **cqldriver** - default: dse - The type of driver to use, either dse, or oss. If you need DSE-specific features, use
   the dse driver. If you are connecting to an OSS Apache Cassandra cluster, you must use the oss driver. The oss driver
   option is only available in nosqlbench.
+
 - **host** - The host or hosts to use for connection points to
     the cluster. If you specify multiple values here, use commas
     with no spaces.
     Examples:
     - `host=192.168.1.25`
     - `host=192.168.1.25,testhost42`
+
 - **workload** - The workload definition which holds the schema and statement defs.
      see workload yaml location for additional details
     (no default, required)
+
 - **port** - The port to connect with
+
 - **cl** - An override to consistency levels for the activity. If
     this option is used, then all consistency levels will be replaced
     by this one for the current activity, and a log line explaining
     the difference with respect to the yaml will be emitted.
     This is not a dynamic parameter. It will only be applied at
     activity start.
+
 - **cbopts** - default: none - this is how you customize the cluster
     settings for the client, including policies, compression, etc. This
     is a string of *Java*-like method calls just as you would use them
     in the Cluster.Builder fluent API. They are evaluated inline
     with the default Cluster.Builder options not covered below.
     Example: cbopts=".withCompression(ProtocolOptions.Compression.NONE)"
+
 - **whitelist** default: none - Applies a whitelist policy to the load balancing
     policy in the driver. If used, a WhitelistPolicy(RoundRobinPolicy())
     will be created and added to the cluster builder on startup.
     Examples:
     - `whitelist=127.0.0.1`
     - `whitelist=127.0.0.1:9042,127.0.0.2:1234`
+
 - **retrypolicy** default: none - Applies a retry policy in the driver
     The only option supported for this version is `retrypolicy=logging`,
     which uses the default retry policy, but with logging added.
@@ -119,22 +126,29 @@ activity types.
     Examples:
     - tokens=1:10000,100000:1000000
     - tokens=1:123456
+
 - **maxtries** - default: 10 - how many times an operation may be
     attempted before it is disregarded
+
 - **maxpages** - default: 1 - how many pages can be read from a query which
     is larger than the fetchsize. If more than this number of pages
     is required for such a query, then an UnexpectedPaging excpetion
     is passed to the error handler as explained below.
+
 - **fetchsize** - controls the driver parameter of the same name.
     Suffixed units can be used here, such as "50K". If this parameter
     is not present, then the driver option is not set.
+
 - **cycles** - standard, however the cql activity type will default
     this to however many statements are included in the current
     activity, after tag filtering, etc.
+
 - **username** - the user to authenticate as. This option requires
     that one of **password** or **passfile** also be defined.
+
 - **password** - the password to authenticate with. This will be
     ignored if passfile is also present.
+
 - **passfile** - the file to read the password from. The first
     line of this file is used as the password.
 
@@ -147,8 +161,10 @@ activity types.
     Examples:
     - `jmxreporting=true`
     - `jmxreporting=false` (the default)
+
 - **alias** - this is a standard nosqlbench parameter, however the cql type will use the workload value also as the
   alias value when not specified.
+
 - **errors** - error handler configuration.
     (default errors=stop,retryable->retry,unverified->stop)
     Examples:
@@ -157,9 +173,11 @@ activity types.
     - errors=warn,retryable=count
     See the separate help on 'cqlerrors' for detailed
     configuration options.
+
 - **defaultidempotence** - sets default idempotence on the
     driver options, but only if it has a value.
     (default unset, valid values: true or false)
+
 - **speculative** - sets the speculative retry policy on the cluster.
     (default unset)
     This can be in one of the following forms:
@@ -177,6 +195,7 @@ activity types.
       (E default to 5 when left out)
       Examples:
       - 100ms:5 - constant threshold of 100ms and 5 allowed executions
+
 - **seq** - selects the statement sequencer used with statement ratios.
     (default: bucket)
     (options: concat | bucket | interval)
@@ -190,6 +209,7 @@ activity types.
     it works.
     All of the sequencers create deterministic schedules which use an internal
     lookup table for indexing into a list of possible statements.
+
 - **trace** - enables a trace on a subset of operations. This is disabled
     by default.
     Examples:
@@ -199,18 +219,23 @@ activity types.
     The above traces every 1000th cycle to stdout.
     If the trace log is not specified, then 'tracelog' is assumed.
     If the filename is specified as stdout, then traces are dumped to stdout.
+
 - **sessionid** - names the configuration to be used for this activity. Within a given scenario, any activities that use
   the same name for clusterid will share a session and cluster. default: 'default'
+
 - **drivermetrics** - enable reporting of driver metrics.
     default: false
+
 - **driverprefix** - set the metrics name that will prefix all CQL driver metrics.
     default: 'driver.*clusterid*.'
     The clusterid specified is included so that separate cluster and session
     contexts can be reported independently for advanced tests.
+
 - **usercodecs** - enable the loading of user codec libraries for more
   details see: com.datastax.codecs.framework.UDTCodecInjector in the
   nosqlbench code base. This is for dynamic codec loading with
   user-provided codecs mapped via the internal UDT APIs. default: false
+
 - **secureconnectbundle** - used to connect to CaaS, accepts a path to the
   secure connect bundle that is downloaded from the CaaS UI. Examples:
     - `secureconnectbundle=/tmp/secure-connect-my_db.zip`
@@ -223,16 +248,20 @@ activity types.
 - **insights** - Set to false to disable the driver from sending insights
   monitoring information
     - `insights=false`
+
 - **tickduration** - sets the tickDuration (milliseconds) of
   HashedWheelTimer of the java driver. This timer is used to schedule
   speculative requests. Examples:
     - `tickduration=10`
     - `tickduration=100` (driver default value)
+
 - **compression** - sets the transport compression to use for this
   activity. Valid values are 'LZ4' and 'SNAPPY'. Both types are bundled
     with EBDSE.
+
 - **showcql** - logs cql statements as INFO (to see INFO messages in stdout use -v or greater) Note: this is expensive
     and should only be done to troubleshoot workloads. Do not use `showcql` for your tests.
+
 - **lbp** - configures the load balancing policies for the Java driver. With this parameter, you can
   configure nested load balancing policies in short-hand form.
 
@@ -360,21 +389,28 @@ now **they are limited to a YAML params block**:
 - alias.result - A timer which tracks the performance of an op result
   only. This is the async get on the future, broken out as a separate
   step.
+
 - alias.result-success - A timer that records rate and histograms of the
   time it takes from submitting a query to completely reading the result
   set that it returns, across all pages. This metric is only counted for
   non-exceptional results, while the result metric above includes
     all operations.
+
 - alias.bind - A timer which tracks the performance of the statement
     binding logic, including the generation of data immediately prior
+
 - alias.execute - A timer which tracks the performance of op submission
     only. This is the async execution call, broken out as a separate step.
+
 - alias.tries - A histogram of how many tries were required to get a
     completed operation
+
 - alias.pages - A timer which tracks the performance of paging, specific
     to more than 1-page query results. i.e., if all reads return within 1
     page, this metric will not have any data.
+
 - alias.strides - A timer around each stride of operations within a thread
+
 - alias.skipped-tokens - A histogram that records the count and cycle values
     of skipped tokens.
 

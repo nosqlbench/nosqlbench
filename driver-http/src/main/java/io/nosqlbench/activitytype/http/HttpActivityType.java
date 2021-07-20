@@ -4,8 +4,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service(value = ActivityType.class, selector = "http")
 public class HttpActivityType implements ActivityType<HttpActivity> {

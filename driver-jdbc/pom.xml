@@ -3,7 +3,7 @@
     <parent>
         <artifactId>nosqlbench</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.51-SNAPSHOT</version>
+        <version>4.15.52-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,13 +15,15 @@
             <artifactId>HikariCP</artifactId>
             <version>3.4.5</version>
         </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.51-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>4.15.52-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
+
 
 
 </project>

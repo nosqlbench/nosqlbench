@@ -19,8 +19,8 @@ import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The DiagActivity, aka "diag", is simply a diagnostic activity.

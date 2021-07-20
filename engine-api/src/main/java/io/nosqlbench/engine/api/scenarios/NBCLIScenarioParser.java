@@ -5,7 +5,7 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.nb.api.config.Synonyms;
+import io.nosqlbench.nb.api.config.params.Synonyms;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.content.NBPathsAPI;
