@@ -3,8 +3,8 @@ package io.nosqlbench.driver.webdriver.verbs;
 import io.nosqlbench.driver.webdriver.WebContext;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.Map;

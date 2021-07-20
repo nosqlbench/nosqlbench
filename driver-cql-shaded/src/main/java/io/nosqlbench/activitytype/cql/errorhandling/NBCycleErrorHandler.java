@@ -6,8 +6,8 @@ import io.nosqlbench.activitytype.cql.errorhandling.exceptions.CQLExceptionDetai
 import io.nosqlbench.engine.api.activityapi.errorhandling.CycleErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A contextualized error handler that can catch a cycle-specific error.

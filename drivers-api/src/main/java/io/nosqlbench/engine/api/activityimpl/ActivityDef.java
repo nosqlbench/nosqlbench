@@ -19,8 +19,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.util.Unit;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.Optional;
@@ -209,4 +209,5 @@ public class ActivityDef {
             throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + "," + getEndCycle() + ")");
         }
     }
+
 }
