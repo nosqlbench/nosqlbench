@@ -3,9 +3,8 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -29,23 +28,22 @@ public class Cqld4Space {
     CqlSession session;
 
     public Cqld4Space(Cqld4DriverAdapter adapter) {
-        session = createSession(adapter.getActivityDef());
+        session = createSession(adapter.getConfigReader());
     }
 
-    private CqlSession createSession(ActivityDef def) {
-        ParameterMap params = def.getParams();
+    private CqlSession createSession(NBConfiguration cfg) {
         CqlSessionBuilder builder = new CqlSessionBuilder();
 
-        resolveConfigLoader(def).ifPresent(builder::withConfigLoader);
+        resolveConfigLoader(cfg).ifPresent(builder::withConfigLoader);
 
-        int port = params.getOptionalInteger("port").orElse(9042);
+        int port = cfg.getOrDefault("port",9042);
 
-        Optional<String> scb = params.getOptionalString("secureconnectbundle");
+        Optional<String> scb = cfg.getOptional(String.class,"secureconnectbundle");
         scb.flatMap(s -> NBIO.all().name(s).first().map(Content::getInputStream))
             .map(builder::withCloudSecureConnectBundle);
 
-        Optional<List<InetSocketAddress>> contactPointsOption = params
-            .getOptionalString("host", "hosts")
+        Optional<List<InetSocketAddress>> contactPointsOption = cfg
+            .getOptional("host", "hosts")
             .map(s -> Arrays.asList(s.split(",")))
             .map(
                 sl -> sl.stream()
@@ -56,7 +54,7 @@ public class Cqld4Space {
         if (scb.isEmpty()) {
             if (contactPointsOption.isPresent()) {
                 builder.addContactPoints(contactPointsOption.get());
-                Optional<String> localdc = params.getOptionalString("localdc");
+                Optional<String> localdc = cfg.getOptional("localdc");
                 builder.withLocalDatacenter(localdc.orElseThrow(
                     () -> new BasicError("Starting with driver 4.0, you must specify the local datacenter name with any specified contact points. Example: (use caution) localdc=datacenter1")
                 ));
@@ -67,9 +65,9 @@ public class Cqld4Space {
 
 //        builder.withCompression(ProtocolOptions.Compression.NONE);
 //
-        Optional<String> usernameOpt = params.getOptionalString("username");
-        Optional<String> passwordOpt = params.getOptionalString("password");
-        Optional<String> passfileOpt = params.getOptionalString("passfile");
+        Optional<String> usernameOpt = cfg.getOptional("username");
+        Optional<String> passwordOpt = cfg.getOptional("password");
+        Optional<String> passfileOpt = cfg.getOptional("passfile");
 
         if (usernameOpt.isPresent()) {
             String username = usernameOpt.get();
@@ -93,7 +91,7 @@ public class Cqld4Space {
             builder.withAuthCredentials(username, password);
         }
 
-        params.getOptionalString("cbopts").ifPresent(
+        cfg.getOptional("cbopts").ifPresent(
             e -> {
                 throw new BasicError("this driver does not support option 'cbopts'");
             }
@@ -116,12 +114,12 @@ public class Cqld4Space {
             "single-endpoint",
             "haproxy_source_ip"
         ).forEach(o -> {
-            if (params.getOptionalString(o).isPresent()) {
+            if (cfg.getOptional(o).isPresent()) {
                 String errmsg = "The activity parameter '" + o + "' is not supported in this version" +
                     " of the cqld4 driver as it was before in the cql (1.9) and cqld3 drivers. Note, you" +
                     " can often set these unsupported parameters in the driver configuration file directly." +
                     " If it should be supported as an activity parameter.please file an issue at http://nosqlbench.io/issues.";
-                if (params.getOptionalBoolean("ignore_warnings").orElse(false)) {
+                if (cfg.getOptional(boolean.class,"ignore_warnings").orElse(false)) {
                     throw new BasicError(errmsg + " You can ignore this as a warning-only by setting ignore_warnings=true");
                 } else {
                     logger.warn(errmsg + ", (ignored by setting ignore_warnings=true");
@@ -130,7 +128,7 @@ public class Cqld4Space {
         });
 
 
-        SSLContext context = SSLKsFactory.get().getContext(def);
+        SSLContext context = SSLKsFactory.get().getContext(cfg);
         if (context != null) {
             builder.withSslContext(context);
         }
@@ -175,12 +173,13 @@ public class Cqld4Space {
         return configs;
     }
 
-    private Optional<DriverConfigLoader> resolveConfigLoader(ActivityDef activityDef) {
-        ParameterMap params = activityDef.getParams();
-        String driverconfig = params.getOptionalString("driverconfig").orElse(null);
-        if (driverconfig == null) {
+    private Optional<DriverConfigLoader> resolveConfigLoader(NBConfiguration cfg) {
+        String driverconfig = cfg.param("driverconfig", String.class);
+
+        if (driverconfig.isEmpty()) {
             return Optional.empty();
         }
+
         List<String> loaderspecs = splitConfigLoaders(driverconfig);
         LinkedList<DriverConfigLoader> loaders = new LinkedList<>();
 
