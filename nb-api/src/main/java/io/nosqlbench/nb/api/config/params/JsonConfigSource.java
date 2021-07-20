@@ -7,6 +7,7 @@ import java.util.List;
 
 public class JsonConfigSource implements ConfigSource {
     private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private String name;
 
     @Override
     public boolean canRead(Object data) {
@@ -20,7 +21,8 @@ public class JsonConfigSource implements ConfigSource {
     }
 
     @Override
-    public List<ElementData> getAll(Object data) {
+    public List<ElementData> getAll(String name, Object data) {
+        this.name = name;
 
         JsonElement element = null;
 
@@ -33,32 +35,36 @@ public class JsonConfigSource implements ConfigSource {
         }
 
         // Handle element modally by type
-        List<ElementData> readers = new ArrayList<>();
+        List<ElementData> elements = new ArrayList<>();
 
 
         if (element.isJsonArray()) {
             JsonArray ary = element.getAsJsonArray();
             for (JsonElement jsonElem : ary) {
                 if (jsonElem.isJsonObject()) {
-                    readers.add(new JsonBackedConfigElement(jsonElem.getAsJsonObject()));
+                    elements.add(new JsonBackedConfigElement(null, jsonElem.getAsJsonObject()));
                 } else {
                     throw new RuntimeException("invalid object type for element in sequence: "
                         + jsonElem.getClass().getSimpleName());
                 }
             }
         } else if (element.isJsonObject()) {
-            readers.add(new JsonBackedConfigElement(element.getAsJsonObject()));
+            elements.add(new JsonBackedConfigElement(null,element.getAsJsonObject()));
         } else if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
             String asString = element.getAsJsonPrimitive().getAsString();
-            ElementData e = DataSources.element(asString);
-            readers.add(e);
+            ElementData e = DataSources.element(name,asString);
+            elements.add(e);
         } else {
             throw new RuntimeException("Invalid object type for element:" +
                 element.getClass().getSimpleName());
         }
 
+        return elements;
+    }
 
-        return readers;
+    @Override
+    public String getName() {
+        return this.name;
     }
 //
 //    @Override

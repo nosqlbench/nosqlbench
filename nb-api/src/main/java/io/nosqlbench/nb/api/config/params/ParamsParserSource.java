@@ -1,11 +1,11 @@
 package io.nosqlbench.nb.api.config.params;
 
-import io.nosqlbench.nb.api.config.ParamsParser;
-
 import java.util.List;
 import java.util.Map;
 
 public class ParamsParserSource implements ConfigSource {
+
+    private String name;
 
     @Override
     public boolean canRead(Object source) {
@@ -13,8 +13,14 @@ public class ParamsParserSource implements ConfigSource {
     }
 
     @Override
-    public List<ElementData> getAll(Object source) {
+    public List<ElementData> getAll(String name,Object source) {
+        this.name = name;
         Map<String, String> paramsMap = ParamsParser.parse(source.toString(), false);
-        return List.of(new MapBackedElement(paramsMap));
+        return List.of(new MapBackedElement(name, paramsMap));
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

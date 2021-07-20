@@ -120,7 +120,7 @@ public class ParsedStmtOp {
      * @return a params reader from the enclosed {@link OpTemplate} params map
      */
     public Element getParamReader() {
-        return NBParams.one(optpl.getParams());
+        return NBParams.one(getName(),optpl.getParams());
     }
 
     public List<BindPoint> getBindPoints() {

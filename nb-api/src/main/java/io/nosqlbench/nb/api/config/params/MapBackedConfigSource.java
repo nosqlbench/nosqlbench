@@ -5,13 +5,21 @@ import java.util.Map;
 
 public class MapBackedConfigSource implements ConfigSource {
 
+    private String name;
+
     @Override
     public boolean canRead(Object source) {
         return (source instanceof Map);
     }
 
     @Override
-    public List<ElementData> getAll(Object source) {
-        return List.of(new MapBackedElement((Map) source));
+    public List<ElementData> getAll(String name, Object source) {
+        this.name = name;
+        return List.of(new MapBackedElement(name, (Map) source));
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

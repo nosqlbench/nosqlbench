@@ -23,7 +23,12 @@ public interface ConfigSource {
      * @param source An object of any kind
      * @return a collection of {@link Element}s
      */
-    List<ElementData> getAll(Object source);
+    List<ElementData> getAll(String injectedName, Object source);
 
-//    ElementData getOneElementData(Object src);
+    /**
+     * If an element was created with a name, this name must be returned as the
+     * canonical name. If it was not, then the name field can provide the name.
+     * @return A name, or null if it is not given nor present in the name field
+     */
+    String getName();
 }

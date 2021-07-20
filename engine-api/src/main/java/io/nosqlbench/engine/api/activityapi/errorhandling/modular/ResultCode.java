@@ -1,14 +1,14 @@
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.ConfigAware;
-import io.nosqlbench.nb.api.config.ConfigModel;
-import io.nosqlbench.nb.api.config.MutableConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 
 import java.util.Map;
 
 @Service(value = ErrorHandler.class, selector = "code")
-public class ResultCode implements ErrorHandler, ConfigAware {
+public class ResultCode implements ErrorHandler, NBMapConfigurable {
 
     private byte code;
 
@@ -23,8 +23,8 @@ public class ResultCode implements ErrorHandler, ConfigAware {
     }
 
     @Override
-    public ConfigModel getConfigModel() {
-        return new MutableConfigModel(this)
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass())
             .required("code", Byte.class)
             .asReadOnly();
     }

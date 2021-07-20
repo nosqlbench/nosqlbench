@@ -2,7 +2,7 @@ package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.ConfigAware;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
 
@@ -81,8 +81,8 @@ public class NBErrorHandler {
             throw new RuntimeException("ErrorHandler named '" + name + "' could not be found in " + providers.keySet());
         }
         ErrorHandler handler = provider.get();
-        if (handler instanceof ConfigAware) {
-            ((ConfigAware) handler).applyConfig(cfg.getMap());
+        if (handler instanceof NBMapConfigurable) {
+            ((NBMapConfigurable) handler).applyConfig(cfg.getMap());
         }
         if (handler instanceof ErrorMetrics.Aware) {
             ((ErrorMetrics.Aware) handler).setErrorMetricsSupplier(errorMetricsSupplier);
@@ -141,11 +141,11 @@ public class NBErrorHandler {
                     ghandlers = leadmatch.group("rest") == null ? "" : leadmatch.group("rest");
                     Element next = null;
                     if (word.matches("\\d+")) {
-                        next = NBParams.one("handler=code code=" + word);
+                        next = NBParams.one(null,"handler=code code=" + word);
                     } else if (word.matches("[a-zA-Z]+")) {
-                        next = NBParams.one("handler=" + word);
+                        next = NBParams.one(null,"handler=" + word);
                     } else {
-                        next = NBParams.one(word);
+                        next = NBParams.one(null,word);
                     }
                     params.add(next);
                 } else {

@@ -2,6 +2,11 @@ package io.nosqlbench.nb.api.config.params;
 
 import java.util.*;
 
+/**
+ * The source data for a param reader is intended to be a collection of something, not a single value.
+ * As such, if a single value is provided, an attempt will be made to convert it from JSON if it starts with
+ * object or array notation. If not, the value is assumed to be in the simple ParamsParser form.
+ */
 public class ElementImpl implements Element {
 
     private final ElementData data;
@@ -11,37 +16,42 @@ public class ElementImpl implements Element {
     }
 
     public String getElementName() {
+        String name = data.getGivenName();
+        if (name!=null) {
+            return name;
+        }
         return get(ElementData.NAME, String.class).orElse(null);
     }
 
     public <T> Optional<T> get(String name, Class<? extends T> classOfT) {
-        List<String> path = Arrays.asList(name.split("\\."));
-
-        ElementData top = data;
-        int idx = 0;
-        String lookup = path.get(idx);
-
-        while (idx + 1 < path.size()) {
-            if (!top.containsKey(lookup)) {
-                throw new RuntimeException("unable to find '" + lookup + "' in '" + String.join(".", path));
-            }
-            Object o = top.get(lookup);
-            top = DataSources.element(o);
-//            top = top.getChildElementData(lookup);
-            idx++;
-            lookup = path.get(idx);
-        }
-
-        if (top.containsKey(lookup)) {
-            Object elem = top.get(lookup);
-            T convertedValue = top.convert(elem, classOfT);
-//            T typeCastedValue = classOfT.cast(elem);
-            return Optional.of(convertedValue);
-        } else {
-            return Optional.empty();
-        }
-
+        T found = lookup(data,name, classOfT);
+        return Optional.ofNullable(found);
     }
+
+    @Override
+    public <T> Optional<T> get(String name) {
+        return Optional.ofNullable(data.lookup(name,null));
+    }
+
+    private <T> T lookup(ElementData data, String name, Class<T> type) {
+        return data.lookup(name,type);
+//        int idx=name.indexOf('.');
+//        while (idx>0) { // TODO: What about when idx==0 ?
+//            String parentName = name.substring(0,idx);
+//            if (data.containsKey(parentName)) {
+//                Object o = data.get(parentName);
+//                ElementData parentElement = DataSources.element(o);
+//                String childName = name.substring(idx+1);
+//                T found = parentElement.lookup(name,type);
+//                if (found!=null) {
+//                    return found;
+//                }
+//            }
+//            idx=name.indexOf('.',idx+1);
+//        }
+//        return data.get(name,type);
+    }
+
 
     public <T> T getOr(String name, T defaultValue) {
         Class<T> cls = (Class<T>) defaultValue.getClass();
@@ -61,5 +71,8 @@ public class ElementImpl implements Element {
         return map;
     }
 
-
+    @Override
+    public String toString() {
+        return data.toString();
+    }
 }

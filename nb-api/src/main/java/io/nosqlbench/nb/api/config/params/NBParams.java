@@ -96,14 +96,17 @@ public class NBParams {
     }
 
     public static Element one(Object source) {
-        List<ElementData> some = DataSources.elements(source);
+        return one(null, source);
+    }
+    public static Element one(String givenName, Object source) {
+        List<ElementData> some = DataSources.elements(givenName,source);
         if (some.size() == 0) {
             throw new RuntimeException("One param object expected, but none found in '" + source + "'");
         }
         if (some.size() > 1) {
             Map<String, ElementData> data = new LinkedHashMap<>();
             for (ElementData elementData : some) {
-                String name = elementData.getElementName();
+                String name = elementData.getName();
                 if (name != null && !name.isBlank()) {
                     data.put(name, elementData);
                 }
@@ -111,7 +114,7 @@ public class NBParams {
             if (data.isEmpty()) {
                 throw new RuntimeException("multiple elements found, but none contained a name for flattening to a map.");
             }
-            return new ElementImpl(new MapBackedElement(data));
+            return new ElementImpl(new MapBackedElement(givenName,data));
         }
         return new ElementImpl(some.get(0));
     }

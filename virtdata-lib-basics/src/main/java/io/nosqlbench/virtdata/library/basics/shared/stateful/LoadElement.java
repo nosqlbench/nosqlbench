@@ -1,10 +1,10 @@
 package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.ConfigAware;
-import io.nosqlbench.nb.api.config.ConfigModel;
-import io.nosqlbench.nb.api.config.MutableConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -17,7 +17,7 @@ import java.util.function.Function;
  * by the provided variable name.
  */
 @ThreadSafeMapper
-public class LoadElement implements Function<Object,Object>, ConfigAware {
+public class LoadElement implements Function<Object,Object>, NBMapConfigurable {
 
     private final String varname;
     private final Object defaultValue;
@@ -50,7 +50,7 @@ public class LoadElement implements Function<Object,Object>, ConfigAware {
     }
 
     @Override
-    public ConfigModel getConfigModel() {
-        return new MutableConfigModel(this).optional("<mapname>", Map.class);
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass()).optional("<mapname>", Map.class);
     }
 }

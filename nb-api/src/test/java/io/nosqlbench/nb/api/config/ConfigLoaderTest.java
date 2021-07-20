@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.config;
 
+import io.nosqlbench.nb.api.config.standard.ConfigLoader;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -1,19 +1,18 @@
 package io.nosqlbench.nb.api.config.params;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
 import java.util.Set;
 
 public class JsonBackedConfigElement implements ElementData {
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private final JsonObject jsonObject;
+    private final String name;
 
-    public JsonBackedConfigElement(JsonObject jsonObject) {
+    public JsonBackedConfigElement(String injectedName, JsonObject jsonObject) {
+        this.name = injectedName;
         this.jsonObject = jsonObject;
     }
 
@@ -33,6 +32,11 @@ public class JsonBackedConfigElement implements ElementData {
     }
 
     @Override
+    public String getGivenName() {
+        return this.name;
+    }
+
+    @Override
     public <T> T convert(Object input, Class<T> type) {
         if (input instanceof JsonElement) {
             T result = gson.fromJson((JsonElement) input, type);
@@ -42,4 +46,16 @@ public class JsonBackedConfigElement implements ElementData {
         }
     }
 
+    @Override
+    public String toString() {
+        return getGivenName() + "(" + (extractElementName()!=null ? extractElementName() : "null" ) +"):" + jsonObject.toString();
+    }
+
+    @Override
+    public String extractElementName() {
+        if (jsonObject.has("name")) {
+            return jsonObject.get("name").getAsString();
+        }
+        return null;
+    }
 }

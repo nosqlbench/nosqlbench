@@ -5,9 +5,11 @@ import java.util.Set;
 
 public class MapBackedElement implements ElementData {
 
-    private final Map map;
+    private final Map<String, ?> map;
+    private final String elementName;
 
-    public MapBackedElement(Map map) {
+    public MapBackedElement(String elementName, Map<String, ?> map) {
+        this.elementName = elementName;
         this.map = map;
     }
 
@@ -24,5 +26,15 @@ public class MapBackedElement implements ElementData {
     @Override
     public boolean containsKey(String name) {
         return map.containsKey(name);
+    }
+
+    @Override
+    public String getGivenName() {
+        return this.elementName;
+    }
+
+    @Override
+    public String toString() {
+        return this.getGivenName() + "(" + (this.extractElementName() != null ? this.extractElementName() : "null") + "):" + map.toString();
     }
 }

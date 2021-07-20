@@ -19,6 +19,10 @@ public class DataSources {
     );
 
     public static List<ElementData> elements(Object src) {
+        return elements(null, src);
+    }
+
+    public static List<ElementData> elements(String name, Object src) {
 
         if (src instanceof CharSequence && src.toString().startsWith("IMPORT{") && src.toString().endsWith("}")) {
             String data = src.toString();
@@ -38,7 +42,7 @@ public class DataSources {
 
         for (ConfigSource source : sources) {
             if (source.canRead(src)) {
-                List<ElementData> elements = source.getAll(src);
+                List<ElementData> elements = source.getAll(name, src);
                 return elements;
             }
         }
@@ -48,7 +52,10 @@ public class DataSources {
     }
 
     public static ElementData element(Object object) {
-        List<ElementData> elements = elements(object);
+        return element(null, object);
+    }
+    public static ElementData element(String name, Object object) {
+        List<ElementData> elements = elements(name, object);
         if (elements.size() != 1) {
             throw new RuntimeException("Expected exactly one object, but found " + elements.size());
         }
