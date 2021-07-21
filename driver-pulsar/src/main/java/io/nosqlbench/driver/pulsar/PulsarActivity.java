@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
+import org.apache.pulsar.client.admin.internal.PulsarAdminImpl;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
 
@@ -55,6 +56,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     }
 
     private void initPulsarAdmin() {
+
         PulsarAdminBuilder adminBuilder =
             PulsarAdmin.builder()
             .serviceHttpUrl(webSvcUrl);
@@ -97,8 +99,9 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
             pulsarAdmin = adminBuilder.build();
 
-            ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
-            logger.debug(configurationData.toString());
+            // Not supported in Pulsar 2.8.0
+//            ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
+//            logger.debug(configurationData.toString());
 
         } catch (PulsarClientException e) {
             logger.error("Fail to create PulsarAdmin from global configuration!");

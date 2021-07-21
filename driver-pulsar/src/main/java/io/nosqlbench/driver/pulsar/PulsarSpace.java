@@ -216,7 +216,7 @@ public class PulsarSpace {
     public Supplier<Transaction> getTransactionSupplier() {
         PulsarClient pulsarClient = getPulsarClient();
         return () -> {
-            try (Timer.Context time = createTransactionTimer.time()){
+            try (Timer.Context time = createTransactionTimer.time() ){
                 return pulsarClient
                     .newTransaction()
                     .build()
@@ -226,7 +226,7 @@ public class PulsarSpace {
                     logger.warn("Error while starting a new transaction", err);
                 }
                 throw new RuntimeException(err);
-            } catch (NullPointerException err) { // Unfortunately Pulsar 2.7.1 client does not report a better error
+            } catch (PulsarClientException err) {
                 throw new RuntimeException("Transactions are not enabled on Pulsar Client, " +
                     "please set client.enableTransaction=true in your Pulsar Client configuration");
             }
@@ -273,7 +273,7 @@ public class PulsarSpace {
                 .replace("/","_"); // persistent://tenant/namespace/topicname -> tenant_namespace_topicname
 
             try {
-                ProducerBuilder producerBuilder = pulsarClient.newProducer(pulsarSchema);
+                ProducerBuilder<?> producerBuilder = pulsarClient.newProducer(pulsarSchema);
                 producerBuilder.loadConf(producerConf);
                 producer = producerBuilder.create();
                 producers.put(producerCacheKey, producer);

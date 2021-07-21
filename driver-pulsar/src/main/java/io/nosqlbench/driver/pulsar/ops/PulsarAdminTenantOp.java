@@ -8,7 +8,7 @@ import org.apache.pulsar.client.admin.Namespaces;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.admin.Tenants;
-import org.apache.pulsar.common.policies.data.TenantInfo;
+import org.apache.pulsar.common.policies.data.TenantInfoImpl;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +45,8 @@ public class PulsarAdminTenantOp extends PulsarAdminOp {
 
         // Admin API - create tenants and namespaces
         if (!adminDelOp) {
-            TenantInfo tenantInfo = new TenantInfo();
+
+            TenantInfoImpl tenantInfo = TenantInfoImpl.builder().build();
             tenantInfo.setAdminRoles(adminRoleSet);
 
             if ( !allowedClusterSet.isEmpty() ) {

@@ -4,9 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Schema;
-import org.apache.pulsar.client.impl.schema.generic.GenericAvroSchema;
-import org.apache.pulsar.common.schema.SchemaInfo;
-import org.apache.pulsar.common.schema.SchemaType;
 
 import java.io.IOException;
 import java.net.URI;
@@ -363,8 +360,7 @@ public class PulsarActivityUtil {
     ///////
     // Complex strut type: Avro or Json
     public static boolean isAvroSchemaTypeStr(String typeStr) {
-        boolean isAvroType = typeStr.equalsIgnoreCase("AVRO");
-        return isAvroType;
+        return typeStr.equalsIgnoreCase("AVRO");
     }
     public static Schema<?> getAvroSchema(String typeStr, String definitionStr) {
         String schemaDefinitionStr = definitionStr;
@@ -384,15 +380,7 @@ public class PulsarActivityUtil {
                 }
             }
 
-            SchemaInfo schemaInfo = SchemaInfo.builder()
-                .schema(schemaDefinitionStr.getBytes(StandardCharsets.UTF_8))
-                .type(SchemaType.AVRO)
-                .properties(new HashMap<>())
-                //TODO: A unique name for each NB run?
-                .name("NBAvro")
-                .build();
-
-            schema = new GenericAvroSchema(schemaInfo);
+            schema = AvroUtil.GetSchema_PulsarAvro("NBAvro", schemaDefinitionStr);
         } else {
             throw new RuntimeException("Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
         }
