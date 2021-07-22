@@ -357,6 +357,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
                     break;
+                case SHOW_STACKTRACES:
+                    arglist.removeFirst();
+                    showStackTraces = true;
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -439,10 +443,6 @@ public class NBCLIOptions {
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
-                    break;
-                case SHOW_STACKTRACES:
-                    arglist.removeFirst();
-                    showStackTraces = true;
                     break;
                 case LIST_METRICS:
                     arglist.removeFirst();

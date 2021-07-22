@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
@@ -68,7 +69,14 @@ public class NBCLI {
             NBCLI cli = new NBCLI("eb");
             cli.run(args);
         } catch (Exception e) {
-            String error = ScenarioErrorHandler.handle(e, false);
+            boolean showStackTraces = false;
+            for (String arg : args) {
+                if (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces")) {
+                    showStackTraces=true;
+                }
+            }
+
+            String error = ScenarioErrorHandler.handle(e, showStackTraces);
             // Commented for now, as the above handler should do everything needed.
             if (error != null) {
                 System.err.println("Scenario stopped due to error. See logs for details.");
