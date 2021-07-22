@@ -1,7 +1,6 @@
 package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.NBEnvironment;
-import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -10,7 +9,7 @@ import java.util.Optional;
 
 public class NBConfiguration {
     private final LinkedHashMap<String, Object> data;
-    private final NBConfigModel configModel;
+    private final NBConfigModel model;
 
     /**
      * Create a NBConfigReader from a known valid configuration and a config model.
@@ -22,7 +21,7 @@ public class NBConfiguration {
      */
     protected NBConfiguration(NBConfigModel model, LinkedHashMap<String, Object> validConfig) {
         this.data = validConfig;
-        this.configModel = model;
+        this.model = model;
     }
 
     /**
@@ -39,41 +38,55 @@ public class NBConfiguration {
         String span = optionalValue.get();
         Optional<String> maybeInterpolated = NBEnvironment.INSTANCE.interpolate(span);
         if (maybeInterpolated.isEmpty()) {
-            throw new BasicError("Unable to interpolate '" + span +"' with env vars.");
+            throw new NBConfigError("Unable to interpolate '" + span +"' with env vars.");
         }
         return maybeInterpolated;
     }
 
-    public String paramEnv(String name) {
-        return paramEnv(name, String.class);
+    public String getWithEnv(String name) {
+        return getWithEnv(name, String.class);
     }
 
-    public <T> T paramEnv(String name, Class<? extends T> vclass) {
-        T param = param(name, vclass);
-        if (param instanceof String) {
-            Optional<String> interpolated = NBEnvironment.INSTANCE.interpolate(param.toString());
+    public <T> T getWithEnv(String name, Class<? extends T> vclass) {
+        T value = get(name, vclass);
+        if (value==null) {
+
+        }
+        if (value instanceof String) {
+            Optional<String> interpolated = NBEnvironment.INSTANCE.interpolate(value.toString());
             if (interpolated.isEmpty()) {
-                throw new RuntimeException("Unable to interpolate env and sys props in '" + param + "'");
+                throw new NBConfigError("Unable to interpolate env and sys props in '" + value + "'");
             }
-            return (T) interpolated.get();
+            String result = interpolated.get();
+            return ConfigModel.convertValueTo(this.getClass().getSimpleName(),name, result, vclass);
         } else {
-            return param;
+            return value;
         }
 
+    }
+
+    public String get(String name) {
+        return get(name, String.class);
     }
 
     public <T> T get(String name, Class<? extends T> type) {
-        if (!configModel.getElements().containsKey(name)) {
-             throw new BasicError("Parameter named '" + name + "' is not valid for " + configModel.getOf().getSimpleName() + ".");
+        Param<T> param = model.getParam(name);
+        if (param==null) {
+            throw new NBConfigError("Parameter named '" + name + "' is not valid for " + model.getOf().getSimpleName() + ".");
         }
+        if (!param.isRequired()) {
+            throw new NBConfigError("Non-optional get on parameter declared optional '" + name + "'");
+        }
+
         Object o = data.get(name);
         if (o == null) {
-            throw new BasicError("config param '" + name + "' was not defined.");
+            throw new NBConfigError("config param '" + name + "' was not defined.");
         }
-        if (type.isAssignableFrom(o.getClass())) {
-            return (T) o;
-        }
-        throw new BasicError("config param '" + name + "' was not assignable to class '" + type.getCanonicalName() + "'");
+        return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name,o,type);
+//        if (type.isAssignableFrom(o.getClass())) {
+//            return (T) o;
+//        }
+//        throw new NBConfigError("config param '" + name + "' was not assignable to class '" + type.getCanonicalName() + "'");
     }
 
     public Optional<String> getOptional(String name) {
@@ -87,9 +100,12 @@ public class NBConfiguration {
     public <T> Optional<T> getOptional(Class<T> type, String... names) {
         Object o = null;
         for (String name : names) {
-            o = data.get(name);
-            if (o!=null) {
-                break;
+            Param<?> param = model.getParam(names);
+            if (param!=null) {
+                o = data.get(param.getNames());
+                if (o!=null) {
+                    break;
+                }
             }
         }
         if (o==null) {
@@ -98,7 +114,7 @@ public class NBConfiguration {
         if (type.isAssignableFrom(o.getClass())) {
             return Optional.of((T) o);
         }
-        throw new BasicError("config param " + Arrays.toString(names) +" was not assignable to class '" + type.getCanonicalName() + "'");
+        throw new NBConfigError("config param " + Arrays.toString(names) +" was not assignable to class '" + type.getCanonicalName() + "'");
     }
 
     public <T> T getOrDefault(String name, T defaultValue) {
@@ -109,14 +125,14 @@ public class NBConfiguration {
         if (defaultValue.getClass().isAssignableFrom(o.getClass())) {
             return (T) o;
         }
-        throw new BasicError("config parameter '" + name + "' is not assignable to required type '" + defaultValue.getClass() + "'");
+        throw new NBConfigError("config parameter '" + name + "' is not assignable to required type '" + defaultValue.getClass() + "'");
     }
 
     public <T> T param(String name, Class<? extends T> vclass) {
         Object o = data.get(name);
-        Param<?> elem = configModel.getElements().get(name);
+        Param<?> elem = model.getNamedParams().get(name);
         if (elem == null) {
-            throw new RuntimeException("Invalid config element named '" + name + "'");
+            throw new NBConfigError("Invalid config element named '" + name + "'");
         }
         Class<T> type = (Class<T>) elem.getType();
         T typeCastedValue = type.cast(o);
@@ -125,8 +141,8 @@ public class NBConfiguration {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.configModel.getOf().getSimpleName()).append(":");
-        sb.append(this.configModel);
+        sb.append(this.model.getOf().getSimpleName()).append(":");
+        sb.append(this.model);
         return sb.toString();
 
     }

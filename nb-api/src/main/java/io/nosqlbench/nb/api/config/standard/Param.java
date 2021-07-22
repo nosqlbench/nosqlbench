@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.config.standard;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public class Param<T> {
 
-    public final String name;
+    public final List<String> names;
     public final Class<? extends T> type;
     public String description;
     private final T defaultValue;
@@ -19,35 +20,85 @@ public class Param<T> {
     private Pattern regex;
 
     public Param(
-        String name,
+        List<String> names,
         Class<? extends T> type,
         String description,
         boolean required,
         T defaultValue
     ) {
-        this.name = name;
+        this.names = names;
         this.type = type;
         this.description = description;
         this.required = required;
         this.defaultValue = defaultValue;
     }
 
-    public static <V> Param<V> optional(String name) {
-        return (Param<V>) optional(name,String.class);
+    /**
+     * Declare an optional String parameter with the given name.
+     * @param name the name of the parameter
+     */
+    public static Param<String> optional(String name) {
+        return optional(List.of(name), String.class);
     }
 
-    public static <V>  Param<V> optional(String name, Class<V> type) {
-        return new Param<V>(name,type,null,false,null);
+    /**
+     * Declare an optional String parameter specified by any of the names. They act as synonyms.
+     * When users provide more than one of these in configuration data, it is considered an error.
+     *
+     * @param names one or more names that the parameter can be specified with.
+     */
+    public static Param<String> optional(List<String> names) {
+        return optional(names, String.class);
     }
-    public static <V>  Param<V> defaultTo(String name, V defaultValue) {
-        return new Param<V>(name,(Class<V>) defaultValue.getClass(),null,false,null);
+
+    /**
+     * Declare an optional parameter specified by any of the names which must be assignable to
+     * (returnable as) the specified type.
+     * When users provide more than one of these in configuration data, it is considered an error.
+     *
+     * @param names one or more names that the parameter can be specified with.
+     * @param type The type of value that the provided configuration value must be returnable as (assignable to)
+     * @param <V> Generic type for inference.
+     */
+    public static <V> Param<V> optional(List<String> names, Class<V> type) {
+        return new Param<V>(names, type, null, false, null);
     }
+
+    /**
+     * Declare an optional parameter for the given name which must be assignable to
+     * (returnable as) the specified type.
+     * When users provide more than one of these in configuration data, it is considered an error.
+     *
+     * @param name the name of the parameter
+     * @param type The type of value that the provided configuration value must be returnable as (assignable to)
+     * @param <V> Generic type for inference.
+     */
+    public static <V> Param<V> optional(String name, Class<V> type) {
+        return new Param<V>(List.of(name), type, null, false, null);
+    }
+
+    public static <V> Param<V> defaultTo(String name, V defaultValue) {
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, false, null);
+    }
+
+    public static <V> Param<V> defaultTo(List<String> names, V defaultValue) {
+        return new Param<V>(names, (Class<V>) defaultValue.getClass(), null, false, null);
+    }
+
+    public static <V> Param<V> required(String name, Class<V> type) {
+        return new Param<V>(List.of(name), type, null, true, null);
+    }
+
+    public static <V> Param<V> required(List<String> names, Class<V> type) {
+        return new Param<V>(names, type, null, true, null);
+    }
+
 
 
     @Override
     public String toString() {
         return "Element{" +
-            "name='" + name + '\'' +
+            "names='" + names.toString() + '\'' +
             ", type=" + type +
             ", description='" + description + '\'' +
             ", required=" + required +
@@ -55,8 +106,8 @@ public class Param<T> {
             '}';
     }
 
-    public String getName() {
-        return name;
+    public List<String> getNames() {
+        return names;
     }
 
     public Class<?> getType() {
@@ -71,8 +122,9 @@ public class Param<T> {
         return required;
     }
 
-    public void setRequired(boolean required) {
+    public Param<?> setRequired(boolean required) {
         this.required = required;
+        return this;
     }
 
     public T getDefaultValue() {
@@ -88,6 +140,7 @@ public class Param<T> {
         this.regex = regex;
         return this;
     }
+
     public Param<T> setRegex(String pattern) {
         this.regex = Pattern.compile(pattern);
         return this;
@@ -102,9 +155,9 @@ public class Param<T> {
 
         if (value == null) {
             if (isRequired()) {
-                return CheckResult.INVALID(this, null, "Value is null but " + this.getName() + " is required");
+                return CheckResult.INVALID(this, null, "Value is null but " + this.getNames() + " is required");
             } else {
-                return CheckResult.VALID(this, null, "Value is null, but " + this.getName() + " is not required");
+                return CheckResult.VALID(this, null, "Value is null, but " + this.getNames() + " is not required");
             }
         }
 
@@ -119,11 +172,11 @@ public class Param<T> {
                 if (!matcher.matches()) {
                     return CheckResult.INVALID(this, value,
                         "Could not match required pattern (" + getRegex().toString() +
-                            ") with value '" + value + "' for field '" + getName() + "'");
+                            ") with value '" + value + "' for field '" + getNames() + "'");
                 }
             }
         }
-        return CheckResult.VALID(this,value,"All validators passed for field '" + getName() + "'");
+        return CheckResult.VALID(this, value, "All validators passed for field '" + getNames() + "'");
     }
 
     public final static class CheckResult<T> {
