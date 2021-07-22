@@ -1,9 +1,10 @@
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.Param;
 
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class ResultCode implements ErrorHandler, NBMapConfigurable {
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(this.getClass())
-            .required("code", Byte.class)
+            .add(Param.required("code", Byte.class))
             .asReadOnly();
     }
 }
