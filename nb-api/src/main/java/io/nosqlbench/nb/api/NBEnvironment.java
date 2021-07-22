@@ -46,11 +46,11 @@ public class NBEnvironment {
     private final LinkedHashMap<String, String> references = new LinkedHashMap<>();
 
     private final static Map<String, String> envToProp = Map.of(
-            "PWD", "user.dir",
-            "HOME", "user.home",
-            "USERNAME", "user.name", // Win*
-            "USER", "user.name", // *n*x
-            "LOGNAME", "user.name" // *n*x
+        "PWD", "user.dir",
+        "HOME", "user.home",
+        "USERNAME", "user.name", // Win*
+        "USER", "user.name", // *n*x
+        "LOGNAME", "user.name" // *n*x
     );
 
     public NBEnvironment resetRefs() {
@@ -61,7 +61,7 @@ public class NBEnvironment {
     public void put(String propname, String value) {
         if (envToProp.containsKey(propname)) {
             throw new RuntimeException("The property you are changing should be considered immutable in this " +
-                    "process: '" + propname + "'");
+                "process: '" + propname + "'");
         }
         if (references.containsKey(propname)) {
             if (references.get(propname).equals(value)) {
@@ -70,8 +70,8 @@ public class NBEnvironment {
                 }
             } else {
                 throw new BasicError("Changing already referenced property '" + propname + "' from \n" +
-                        "'" + references.get(propname) + "' to '" + value + "' is not supported.\n" +
-                        " (maybe you can change the order of your options to set higher-level parameters first.)");
+                    "'" + references.get(propname) + "' to '" + value + "' is not supported.\n" +
+                    " (maybe you can change the order of your options to set higher-level parameters first.)");
             }
 
         }
@@ -138,7 +138,7 @@ public class NBEnvironment {
         String value = getOr(name, null);
         if (value == null) {
             throw new BasicError("No variable was found for '" + name + "' in system properties nor in the shell " +
-                    "environment.");
+                "environment.");
         }
         return value;
     }
