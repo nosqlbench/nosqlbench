@@ -242,7 +242,7 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(SSLKsFactory.class,
-            Param.optional("ssl", String.class)
+            Param.optional("ssl")
                 .setDescription("Enable ssl and set the mode")
                 .setRegex("jdk|openssl"),
             Param.defaultTo("tlsversion", DEFAULT_TLSVERSION),
