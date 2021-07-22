@@ -5,11 +5,14 @@ import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.TupleType;
 import com.datastax.driver.core.TupleValue;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
@@ -21,14 +24,14 @@ import java.util.function.LongUnaryOperator;
  *
  * Functions are required for:
  * <LI>
- *     <LI>map size {@code (LongToIntFunction)}</LI>
- *     <LI>key {@code (LongFunction<Object>)}</LI>
- *     <LI>tuple field 1 {@code (LongToIntFunction)}</LI>
- *     <LI>tuple field 2 {@code {LongToIntFunction)}</LI>
+ * <LI>map size {@code (LongToIntFunction)}</LI>
+ * <LI>key {@code (LongFunction<Object>)}</LI>
+ * <LI>tuple field 1 {@code (LongToIntFunction)}</LI>
+ * <LI>tuple field 2 {@code {LongToIntFunction)}</LI>
  * </LI>
  */
 @ThreadSafeMapper
-public class CustomFunc955 implements LongFunction<Map<?,?>>, NBMapConfigurable {
+public class CustomFunc955 implements LongFunction<Map<?, ?>>, NBMapConfigurable {
 
     private final LongToIntFunction sizefunc;
     private final LongFunction<Object> keyfunc;
@@ -56,16 +59,16 @@ public class CustomFunc955 implements LongFunction<Map<?,?>>, NBMapConfigurable 
     }
 
     @Override
-    public Map<?,?> apply(long value) {
+    public Map<?, ?> apply(long value) {
         int size = sizefunc.applyAsInt(value);
 
         HashMap<String, TupleValue> map = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
-            String key = keyfunc.apply(value+i).toString();
-            int tuple1 = field1func.applyAsInt(value+i);
-            long tuple2 = field2func.applyAsLong(value+i);
+            String key = keyfunc.apply(value + i).toString();
+            int tuple1 = field1func.applyAsInt(value + i);
+            long tuple2 = field2func.applyAsLong(value + i);
             TupleValue tupleValue = tupleType.newValue(tuple1, tuple2);
-            map.put(key,tupleValue);
+            map.put(key, tupleValue);
         }
         return map;
     }
@@ -81,7 +84,7 @@ public class CustomFunc955 implements LongFunction<Map<?,?>>, NBMapConfigurable 
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(this.getClass())
-            .optional("<cluster>", Cluster.class)
+            .add(Param.optional("<cluster>", Cluster.class))
             .asReadOnly();
     }
 }

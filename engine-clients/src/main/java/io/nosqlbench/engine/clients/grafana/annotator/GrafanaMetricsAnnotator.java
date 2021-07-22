@@ -9,10 +9,7 @@ import io.nosqlbench.nb.api.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Annotator;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,7 +108,7 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
     public void applyConfig(NBConfiguration cfg) {
 
         GrafanaClientConfig gc = new GrafanaClientConfig();
-        gc.setBaseUri(cfg.param("baseurl", String.class));
+        gc.setBaseUri(cfg.get("baseurl"));
 
         cfg.getOptional("tags")
             .map(t -> ParamsParser.parse(t, false))
@@ -133,7 +130,7 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
         Optional<String> optionalApikey = cfg.getOptional("apikey");
 
         if (optionalApikeyfile.isPresent()) {
-            keyfilePath=optionalApikeyfile.map(Path::of).orElseThrow();
+            keyfilePath = optionalApikeyfile.map(Path::of).orElseThrow();
         } else if (optionalApikey.isPresent()) {
             gc.addHeaderSource(() -> Map.of("Authorization", "Bearer " + optionalApikey.get()));
         } else {
@@ -151,7 +148,7 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
     }
 
     private void setOnError(OnError onError) {
-        this.onError=onError;
+        this.onError = onError;
     }
 
     private void setTags(Map<String, String> tags) {
@@ -161,22 +158,22 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(this.getClass())
-            .required("baseurl", String.class,
-                "The base url of the grafana node, like http://localhost:3000/")
-            .defaults("apikeyfile", "$NBSTATEDIR/grafana/grafana_apikey",
-                "The file that contains the api key, supersedes apikey")
-            .optional("apikey", String.class,
-                "The api key to use, supersedes basic username and password")
-            .optional("username", String.class,
-                "The username to use for basic auth")
-            .optional("password", String.class,
-                "The password to use for basic auth")
-            .defaults("tags", "source:nosqlbench",
-                "The tags that identify the annotations, in k:v,... form")
-            .defaults("onerror", "warn",
-                "What to do when an error occurs while posting an annotation")
-            .defaults("timeoutms", 5000,
-                "connect and transport timeout for the HTTP client")
+            .add(Param.required("baseurl", String.class)
+                .setDescription("The base url of the grafana node, like http://localhost:3000/"))
+            .add(Param.defaultTo("apikeyfile", "$NBSTATEDIR/grafana/grafana_apikey")
+                .setDescription("The file that contains the api key, supersedes apikey"))
+            .add(Param.optional("apikey", String.class)
+                .setDescription("The api key to use, supersedes basic username and password"))
+            .add(Param.optional("username", String.class)
+                .setDescription("The username to use for basic auth"))
+            .add(Param.optional("password", String.class)
+                .setDescription("The password to use for basic auth"))
+            .add(Param.defaultTo("tags", "source:nosqlbench")
+                .setDescription("The tags that identify the annotations, in k:v,... form"))
+            .add(Param.defaultTo("onerror", "warn")
+                .setDescription("What to do when an error occurs while posting an annotation"))
+            .add(Param.defaultTo("timeoutms", 5000)
+                .setDescription("connect and transport timeout for the HTTP client"))
             .asReadOnly();
     }
 
