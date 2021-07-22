@@ -2,9 +2,10 @@ package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -51,6 +52,6 @@ public class LoadElement implements Function<Object,Object>, NBMapConfigurable {
 
     @Override
     public NBConfigModel getConfigModel() {
-        return ConfigModel.of(this.getClass()).optional("<mapname>", Map.class);
+        return ConfigModel.of(this.getClass(), Param.optional("<mapname>", Map.class));
     }
 }
