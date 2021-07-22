@@ -1,10 +1,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.nb.api.config.standard.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +11,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class BaseDriverAdapter<R extends Runnable,S>
-    implements DriverAdapter<R,S>, NBMapConfigurable {
+    implements DriverAdapter<R,S>, NBConfigurable {
 
     private final DriverSpaceCache<? extends S> spaceCache;
-    private NBConfiguration NBCfgReader;
+    private NBConfiguration cfg;
 
     protected BaseDriverAdapter() {
         this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer());
@@ -86,11 +83,6 @@ public abstract class BaseDriverAdapter<R extends Runnable,S>
         return spaceCache;
     }
 
-    @Override
-    public final void applyConfig(Map<String, ?> providedConfig) {
-        NBConfiguration config = getConfigModel().apply(providedConfig);
-    }
-
     /**
      * In order to be provided with config information, it is required
      * that the driver adapter specify the valid configuration options,
@@ -101,7 +93,13 @@ public abstract class BaseDriverAdapter<R extends Runnable,S>
         return ConfigModel.of(this.getClass());
     }
 
-    public NBConfiguration getConfigReader() {
-        return NBCfgReader;
+    public NBConfiguration getConfiguration() {
+        return cfg;
     }
+
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+        this.cfg = cfg;
+    }
+
 }
