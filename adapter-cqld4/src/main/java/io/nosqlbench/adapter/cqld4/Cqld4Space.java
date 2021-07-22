@@ -4,7 +4,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -28,7 +28,7 @@ public class Cqld4Space {
     CqlSession session;
 
     public Cqld4Space(Cqld4DriverAdapter adapter) {
-        session = createSession(adapter.getConfigReader());
+        session = createSession(adapter.getConfiguration());
     }
 
     private CqlSession createSession(NBConfiguration cfg) {
@@ -38,7 +38,7 @@ public class Cqld4Space {
 
         int port = cfg.getOrDefault("port",9042);
 
-        Optional<String> scb = cfg.getOptional(String.class,"secureconnectbundle");
+        Optional<String> scb = cfg.getOptional(String.class,"secureconnectbundle","scb");
         scb.flatMap(s -> NBIO.all().name(s).first().map(Content::getInputStream))
             .map(builder::withCloudSecureConnectBundle);
 
@@ -174,11 +174,13 @@ public class Cqld4Space {
     }
 
     private Optional<DriverConfigLoader> resolveConfigLoader(NBConfiguration cfg) {
-        String driverconfig = cfg.param("driverconfig", String.class);
+        Optional<String> maybeDriverConfig = cfg.getOptional("driverconfig");
 
-        if (driverconfig.isEmpty()) {
+        if (maybeDriverConfig.isEmpty()) {
             return Optional.empty();
         }
+
+        String driverconfig = maybeDriverConfig.get();
 
         List<String> loaderspecs = splitConfigLoaders(driverconfig);
         LinkedList<DriverConfigLoader> loaders = new LinkedList<>();
@@ -234,4 +236,15 @@ public class Cqld4Space {
     public CqlSession getSession() {
         return session;
     }
+
+    public static NBConfigModel getConfigModel() {
+        return ConfigModel.of(Cqld4DriverAdapter.class)
+            .add(Param.optional("localdc"))
+            .add(Param.optional("secureconnectbundle"))
+            .add(Param.optional("hosts"))
+            .add(Param.optional("driverconfig"))
+            .asReadOnly();
+
+    }
+
 }

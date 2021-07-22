@@ -9,31 +9,34 @@ import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
 
 
     private final DriverSpaceCache<? extends Cqld4Space> cache;
+    private final NBConfiguration cfg;
 
-    public Cqld4OpMapper(DriverSpaceCache<? extends Cqld4Space> cache) {
+    public Cqld4OpMapper(NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
+        this.cfg = config;
         this.cache = cache;
     }
 
     public OpDispenser<Cqld4Op> apply(ParsedCommand cmd) {
 
         Cqld4Space cqld4Space = cache.get(cmd.getStaticConfigOr("space", "default"));
-        boolean prepared = cmd.getStaticConfigOr("prepared",true);
-        boolean batch = cmd.getStaticConfigOr("boolean",false);
+        boolean prepared = cmd.getStaticConfigOr("prepared", true);
+        boolean batch = cmd.getStaticConfigOr("boolean", false);
         CqlSession session = cqld4Space.getSession();
 
         if (prepared && batch) {
-            return new CqlD4PreparedBatchOpDispenser(session,cmd);
+            return new CqlD4PreparedBatchOpDispenser(session, cmd, cfg);
         } else if (prepared) {
-            return new Cqld4PreparedOpDispenser(session,cmd);
+            return new Cqld4PreparedOpDispenser(session, cmd, cfg);
         } else if (batch) {
-            return new Cqld4BatchStatementDispenser(session, cmd);
+            return new Cqld4BatchStatementDispenser(session, cmd, cfg);
         } else {
-            return new Cqld4SimpleCqlStatementDispenser(session,cmd);
+            return new Cqld4SimpleCqlStatementDispenser(session, cmd, cfg);
         }
     }
 

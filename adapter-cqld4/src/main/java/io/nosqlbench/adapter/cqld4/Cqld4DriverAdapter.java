@@ -3,18 +3,21 @@ package io.nosqlbench.adapter.cqld4;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.function.Function;
 
-@Service(value = DriverAdapter.class,selector = "cqld4")
-public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4Op,Cqld4Space> {
+@Service(value = DriverAdapter.class, selector = "cqld4")
+public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4Op, Cqld4Space> {
 
     @Override
     public OpMapper<Cqld4Op> getOpMapper() {
-        return new Cqld4OpMapper(getSpaceCache());
+        DriverSpaceCache<? extends Cqld4Space> spaceCache = getSpaceCache();
+        NBConfiguration config = getConfiguration();
+        return new Cqld4OpMapper(config, spaceCache);
     }
 
     @Override
@@ -24,7 +27,7 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4Op,Cqld4Space> {
 
     @Override
     public NBConfigModel getConfigModel() {
-        return ConfigModel.of(Cqld4DriverAdapter.class).asReadOnly();
+        return Cqld4Space.getConfigModel();
     }
 
 
