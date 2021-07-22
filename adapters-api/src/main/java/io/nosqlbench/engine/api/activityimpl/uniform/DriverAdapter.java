@@ -59,7 +59,7 @@ public interface DriverAdapter<R extends Runnable, S> {
      * </p>
      *
      * <p>
-     * <H2>A note on implementation strategy</H2>
+     * <H2>A note on implementation strategy:</H2>
      * Generally speaking, implementations of this method should interrogate the op fields
      * in the ParsedCommand and return an OpDispenser that matches the user's intentions.
      * This can be based on something explicit, like the  value of a {@code type} field,
@@ -67,8 +67,8 @@ public interface DriverAdapter<R extends Runnable, S> {
      * might take into account which fields are provided as static values and which are
      * specified as bindings. In any case, the op mapping phase is meant to qualify and
      * pre-check that the fields provided are valid and specific for a given type of operation.
-     * What happens within {@link OpDispenser} implementations, however, should do
-     * as little qualification of field value as possible, focusing simply on constructing
+     * What happens within {@link OpDispenser} implementations (the second phase), however, should do
+     * as little qualification of field values as possible, focusing simply on constructing
      * the type of operation for which they are designed.
      * </p>
      *
@@ -101,29 +101,28 @@ public interface DriverAdapter<R extends Runnable, S> {
     }
 
     /**
-     * During Adapter Initialization, Op Mapping, Op Synthesis, or
-     * Op Execution, you may need access to some shared context that
-     * could change over time. You can build the type of context
-     * needed and then provide this function to provide new instances
-     * when needed.
+     * The cache of all objects needed within a single instance
+     * of a DriverAdapter which are not operations. These are generally
+     * things needed by operations, or things needed during the
+     * construction of operations.
      *
-     * These instance are generally called <em>spaces</em> and are
-     * cached in a {@link DriverSpaceCache<S>}.
+     * See {@link DriverSpaceCache} for details on when and how to use this function.
+
+     * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
+     * you may need access to the objects in (the or a) space cache. You can build the
+     * type of context needed and then provide this function to provide new instances
+     * when needed.</p>
      *
+     * @return A cache of named objects
+     */
+    DriverSpaceCache<? extends S> getSpaceCache();
+
+    /**
      * @return A function which can initialize a new S
      */
     default Function<String, ? extends S> getSpaceInitializer() {
         return n -> null;
     }
 
-    /**
-     * The cache of all objects needed within a single instance
-     * of a DriverAdapter which are not operations. These are generally
-     * things needed by operations, or things needed during the
-     * construction of operations.
-     *
-     * @return A cache of named objects
-     */
-    DriverSpaceCache<? extends S> getSpaceCache();
 
 }
