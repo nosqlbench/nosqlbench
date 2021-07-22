@@ -74,8 +74,9 @@ public class NBConfiguration {
         if (param==null) {
             throw new NBConfigError("Parameter named '" + name + "' is not valid for " + model.getOf().getSimpleName() + ".");
         }
-        if (!param.isRequired()) {
-            throw new NBConfigError("Non-optional get on parameter declared optional '" + name + "'");
+        if ((!param.isRequired())&&param.getDefaultValue()==null) {
+            throw new RuntimeException("Non-optional get on optional parameter " + name + "' which has no default value while configuring " + model.getOf() + "." +
+                "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
         }
 
         Object o = data.get(name);

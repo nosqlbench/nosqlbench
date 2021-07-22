@@ -77,12 +77,28 @@ public class Param<T> {
         return new Param<V>(List.of(name), type, null, false, null);
     }
 
+    /**
+     * Parameters which are given a default value are automatically marked as required, as the default
+     * value allows them to be accessed as such.
+     * @param name
+     * @param defaultValue
+     * @param <V>
+     * @return
+     */
     public static <V> Param<V> defaultTo(String name, V defaultValue) {
-        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, false, null);
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, true, defaultValue);
     }
 
+    /**
+     * Parameters which are given a default value are automatically marked as required, as the default
+     * value allows them to be accessed as such.
+     * @param names
+     * @param defaultValue
+     * @param <V>
+     * @return
+     */
     public static <V> Param<V> defaultTo(List<String> names, V defaultValue) {
-        return new Param<V>(names, (Class<V>) defaultValue.getClass(), null, false, null);
+        return new Param<V>(names, (Class<V>) defaultValue.getClass(), null, true, defaultValue);
     }
 
     public static <V> Param<V> required(String name, Class<V> type) {
