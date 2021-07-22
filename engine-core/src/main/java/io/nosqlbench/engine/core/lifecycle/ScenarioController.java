@@ -25,6 +25,7 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -314,8 +315,17 @@ public class ScenarioController {
                 } else {
                     Optional<DriverAdapter> oda = StandardActivityType.FINDER.getOptionally(activityTypeName);
                     if (oda.isPresent()) {
-                        DriverAdapter driverAdapter = oda.get();
-                        activityType = new StandardActivityType<>(driverAdapter,activityDef);
+                        DriverAdapter<?, ?> driverAdapter = oda.get();
+
+                        activityDef.getParams().remove("driver");
+                        if (driverAdapter instanceof NBConfigurable) {
+                            NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
+                            cfgModel = cfgModel.add(ACTIVITY_CFG_MODEL);
+                            NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
+                            ((NBConfigurable) driverAdapter).applyConfig(cfg);
+                        }
+                        activityType = new StandardActivityType<>(driverAdapter, activityDef);
+
                     } else {
                         throw new RuntimeException("Found neither ActivityType named '" + activityTypeName + "' nor DriverAdapter named '" + activityTypeName + "'.");
                     }
@@ -499,4 +509,13 @@ public class ScenarioController {
         indicators.sort((o1, o2) -> Long.compare(o1.getStartedAtMillis(), o2.getStartedAtMillis()));
         return indicators;
     }
+
+    private static final NBConfigModel ACTIVITY_CFG_MODEL = ConfigModel.of(Activity.class)
+        .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto"))
+        .add(Param.optional(List.of("workload","yaml")))
+        .add(Param.optional("cycles"))
+        .add(Param.optional("alias"))
+        .add(Param.optional(List.of("cyclerate","rate")))
+        .add(Param.optional("tags"))
+        .asReadOnly();
 }
