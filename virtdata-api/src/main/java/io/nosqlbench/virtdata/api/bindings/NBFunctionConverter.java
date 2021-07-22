@@ -37,7 +37,7 @@ import java.util.function.*;
  *
  * <em>To ensure coverage of function types, add to the VirtDataConversionsTest class.</em>
  */
-public class AdaptFunctionsFlexibly {
+public class NBFunctionConverter {
 
     public static LongUnaryOperator adapt(LongToDoubleFunction f, LongUnaryOperator placeholder) {
         return v -> (long) (f.applyAsDouble(v) % Long.MAX_VALUE);

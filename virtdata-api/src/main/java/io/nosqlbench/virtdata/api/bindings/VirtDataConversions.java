@@ -92,9 +92,9 @@ public class VirtDataConversions {
         Class<?>[] methodSignature = signature.toArray(new Class<?>[0]);
 
         Method adapter = null;
-        Class<?> hostclass = AdaptFunctionsFlexibly.class;
+        Class<?> hostclass = NBFunctionConverter.class;
         try {
-            adapter = AdaptFunctionsFlexibly.class.getMethod("adapt", methodSignature);
+            adapter = NBFunctionConverter.class.getMethod("adapt", methodSignature);
         } catch (NoSuchMethodException e) {
             StringBuilder example = new StringBuilder();
 
