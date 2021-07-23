@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public class Param<T> {
 
-    public final List<String> names;
+    private final List<String> names;
     public final Class<? extends T> type;
     public String description;
     private final T defaultValue;
@@ -224,4 +224,5 @@ public class Param<T> {
             return isValid;
         }
     }
+
 }

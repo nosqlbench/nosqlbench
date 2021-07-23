@@ -103,10 +103,14 @@ public class NBConfiguration {
         for (String name : names) {
             Param<?> param = model.getParam(names);
             if (param!=null) {
-                o = data.get(param.getNames());
-                if (o!=null) {
-                    break;
+                for (String pname : param.getNames()) {
+                    o =data.get(name);
+                    if (o!=null) {
+                        break;
+                    }
                 }
+            } else {
+                throw new NBConfigError("Parameter was not found for " + Arrays.toString(names) + ".");
             }
         }
         if (o==null) {

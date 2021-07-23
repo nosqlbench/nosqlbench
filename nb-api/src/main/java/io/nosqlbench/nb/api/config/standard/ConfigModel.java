@@ -26,7 +26,7 @@ public class ConfigModel implements NBConfigModel {
 
     public <T> ConfigModel add(Param<T> param) {
         this.params.add(param);
-        for (String name : param.names) {
+        for (String name : param.getNames()) {
             paramsByName.put(name, param);
         }
         lastAdded = null;
@@ -146,7 +146,7 @@ public class ConfigModel implements NBConfigModel {
             List<String> found = new ArrayList<>();
             String activename = null;
             Object cval = null;
-            for (String name : param.names) {
+            for (String name : param.getNames()) {
                 if (config.containsKey(name)) {
                     cval = config.get(name);
                     activename = name;
@@ -192,14 +192,14 @@ public class ConfigModel implements NBConfigModel {
         for (Param<?> param : params) {
             if (param.isRequired() && param.getDefaultValue() == null) {
                 boolean provided = false;
-                for (String name : param.names) {
+                for (String name : param.getNames()) {
                     if (config.containsKey(name)) {
                         provided = true;
                         break;
                     }
                 }
                 if (!provided) {
-                    throw new RuntimeException("A required config element named '" + param.names +
+                    throw new RuntimeException("A required config element named '" + param.getNames() +
                         "' and type '" + param.getType().getSimpleName() + "' was not found\n" +
                         "for configuring a " + getOf().getSimpleName());
                 }
