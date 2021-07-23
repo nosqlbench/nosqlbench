@@ -38,6 +38,8 @@ public interface NBConfigModel {
      * @return A new configuration for the extracted fields only.
      */
     NBConfiguration extract(Map<String, ?> sharedConfig);
+    NBConfiguration extract(NBConfiguration cfg);
 
     NBConfigModel add(NBConfigModel otherModel);
+
 }

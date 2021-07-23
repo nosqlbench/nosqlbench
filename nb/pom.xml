@@ -101,12 +101,6 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-cqlverify</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>driver-mongodb</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
@@ -234,7 +228,14 @@
                     <artifactId>driver-cql-shaded</artifactId>
                     <version>4.15.52-SNAPSHOT</version>
                 </dependency>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-cqlverify</artifactId>
+                    <version>4.15.52-SNAPSHOT</version>
+                </dependency>
             </dependencies>
+
+
         </profile>
         <profile>
             <id>with-cql-d4</id>

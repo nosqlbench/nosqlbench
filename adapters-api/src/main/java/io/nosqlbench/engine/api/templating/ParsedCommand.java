@@ -8,6 +8,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
+import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
@@ -44,7 +45,12 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
      */
     private final List<List<CapturePoint>> captures = new ArrayList<>();
     private final int mapsize;
-    private final LinkedHashMap<String,Object> protomap = new LinkedHashMap<>();
+
+    /**
+     * A prototype of the fully generated map, to be used as the starting point
+     * when rendering the full map with dynamic values.
+     */
+    private final LinkedHashMap<String, Object> protomap = new LinkedHashMap<>();
     private final OpTemplate ot;
 
     /**
@@ -69,7 +75,10 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         mapsize = statics.size() + dynamics.size();
     }
 
-    private void applyTemplateFields(Map<String,Object> map, Map<String,String> bindings) {
+    // For now, we only allow bind points to reference bindings, not other op template
+    // fields. This seems like the saner and less confusing approach, so implementing
+    // op field references should be left until it is requested if at all
+    private void applyTemplateFields(Map<String, Object> map, Map<String, String> bindings) {
         map.forEach((k, v) -> {
             if (v instanceof CharSequence) {
                 ParsedTemplate pt = ParsedTemplate.of(((CharSequence) v).toString(), bindings);
@@ -92,6 +101,9 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
                         break;
                 }
             } else {
+                // Eventually, nested and mixed static dynamic structure could be supported, but
+                // it would be complex to implement and also not that efficient, so let's just copy
+                // structure for now
                 statics.put(k, v);
                 protomap.put(k, v);
             }
@@ -113,9 +125,9 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
 
     @Override
     public Map<String, Object> apply(long value) {
-        LinkedHashMap<String,Object> map = new LinkedHashMap<>(protomap);
-        dynamics.forEach((k,v) -> {
-            map.put(k,v.apply(value));
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>(protomap);
+        dynamics.forEach((k, v) -> {
+            map.put(k, v.apply(value));
         });
         return map;
     }
@@ -152,10 +164,11 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
 
     /**
      * Get the static value for the provided name, cast to the required type.
-     * @param field Name of the field to get
+     *
+     * @param field    Name of the field to get
      * @param classOfT The type of the field to return. If actual type is not compatible to a cast to this type, then a
      *                 casting error will be thrown.
-     * @param <T> The parameter type of the return type, used at compile time only to qualify asserted return type
+     * @param <T>      The parameter type of the return type, used at compile time only to qualify asserted return type
      * @return A value of type T, or null
      */
     public <T> T getStaticValue(String field, Class<T> classOfT) {
@@ -165,24 +178,28 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     /**
      * Get the static value for the provided name, cast to the required type, where the type is inferred
      * from the calling context.
+     *
      * @param field Name of the field to get
-     * @param <T> The parameter type of the return type. used at compile time only to quality return type.
+     * @param <T>   The parameter type of the return type. used at compile time only to quality return type.
      * @return A value of type T, or null
      */
     public <T> T getStaticValue(String field) {
         return (T) statics.get(field);
     }
 
+    public Optional<ParsedTemplate> getStmtAsTemplate() {
+        return ot.getParsed();
+    }
 
     /**
      * Get the named static field value, or return the provided default, but throw an exception if
      * the named field is dynamic.
-     * @param name The name of the field value to return.
+     *
+     * @param name         The name of the field value to return.
      * @param defaultValue A value to return if the named value is not present in static nor dynamic fields.
-     * @param <T>           The type of the field to return.
+     * @param <T>          The type of the field to return.
      * @return The value
      * @throws RuntimeException if the field name is only present in the dynamic fields.
-     *
      */
     public <T> T getStaticValueOr(String name, T defaultValue) {
         if (statics.containsKey(name)) {
@@ -212,14 +229,15 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
 
     /**
      * Return an optional value for the named field. This is an {@link Optional} form of {@link #getStaticValue}.
-     * @param field Name of the field to get
+     *
+     * @param field    Name of the field to get
      * @param classOfT The type of field to return. If the actual type is not compatible to a cast to this type,
      *                 then a casting error will be thrown.
-     * @param <T> The parameter type of the return
+     * @param <T>      The parameter type of the return
      * @return An optional value, empty unless the named value is defined in the static field map.
      */
     public <T> Optional<T> getStaticValueOptionally(String field, Class<T> classOfT) {
-        return Optional.ofNullable(getStaticValue(field,classOfT));
+        return Optional.ofNullable(getStaticValue(field, classOfT));
     }
 
     public <T> Optional<T> getStaticValueOptionally(String field) {
@@ -231,9 +249,10 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
      * to the return type will be based on the type of any assignment or casting on the caller's side.
      * Thus, if the actual type is not compatable to a cast to the needed return type, a casting error will
      * be thrown.
+     *
      * @param field The name of the field to get.
      * @param input The seed value, or cycle value for which to generate the value.
-     * @param <T> The parameter type of the returned value. Inferred from usage context.
+     * @param <T>   The parameter type of the returned value. Inferred from usage context.
      * @return The value.
      */
     public <T> T get(String field, long input) {
@@ -248,10 +267,11 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
 
     /**
      * Get the map of all fields for the given input cycle.
+     *
      * @param l seed value, cycle number, input...
      * @return A map of named objects
      */
-    public Map<String,Object> getMap(long l) {
+    public Map<String, Object> getMap(long l) {
         return apply(l);
     }
 
@@ -300,22 +320,28 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     }
 
     public LongFunction<List<Object>> newListBinder(String... fields) {
-        return new ListBinder(this,fields);
-    }
-    public LongFunction<List<Object>> newListBinder(List<String> fields) {
-        return new ListBinder(this,fields);
+        return new ListBinder(this, fields);
     }
 
-    public LongFunction<Map<String,Object>> newOrderedMapBinder(String... fields) {
-        return new OrderedMapBinder(this,fields);
+    public LongFunction<List<Object>> newListBinder(List<String> fields) {
+        return new ListBinder(this, fields);
+    }
+
+    public LongFunction<Map<String, Object>> newOrderedMapBinder(String... fields) {
+        return new OrderedMapBinder(this, fields);
 
     }
 
     public LongFunction<Object[]> newArrayBinder(String... fields) {
-        return new ArrayBinder(this,fields);
+        return new ArrayBinder(this, fields);
     }
+
     public LongFunction<Object[]> newArrayBinder(List<String> fields) {
-        return new ArrayBinder(this,fields);
+        return new ArrayBinder(this, fields);
+    }
+
+    public LongFunction<Object[]> newArrayBinderFromBindPoints(List<BindPoint> bindPoints) {
+        return new ArrayBinder(bindPoints);
     }
 
     public LongFunction<?> getMapper(String field) {
@@ -328,7 +354,7 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
     }
 
     public boolean isUndefined(String field) {
-        return !(statics.containsKey(field)||dynamics.containsKey(field));
+        return !(statics.containsKey(field) || dynamics.containsKey(field));
     }
 
 

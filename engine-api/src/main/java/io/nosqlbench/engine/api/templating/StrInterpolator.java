@@ -19,22 +19,24 @@ package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import org.apache.commons.text.StrLookup;
-import org.apache.commons.text.StrSubstitutor;
 import org.apache.commons.text.StringSubstitutor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
 
 public class StrInterpolator implements Function<String, String> {
+    private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
 
-    private MultiMap multimap = new MultiMap();
-    private StringSubstitutor substitutor =
+    private final MultiMap multimap = new MultiMap();
+    private final StringSubstitutor substitutor =
         new StringSubstitutor(multimap, "<<", ">>", '\\')
             .setEnableSubstitutionInVariables(true)
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
 
-    private StringSubstitutor substitutor2 =
+    private final StringSubstitutor substitutor2 =
         new StringSubstitutor(multimap, "TEMPLATE(", ")", '\\')
             .setEnableSubstitutionInVariables(true)
             .setEnableUndefinedVariableException(true)
@@ -65,6 +67,10 @@ public class StrInterpolator implements Function<String, String> {
         return after;
     }
 
+    public Set<String> checkpointAccesses() {
+        return multimap.checkpointAccesses();
+    }
+
     public LinkedHashMap<String, String> getTemplateDetails(String input) {
         LinkedHashMap<String, String> details = new LinkedHashMap<>();
 
@@ -73,8 +79,9 @@ public class StrInterpolator implements Function<String, String> {
 
     public static class MultiMap extends StrLookup<String> {
 
-        private List<Map<String, String>> maps = new ArrayList<>();
-        private String warnPrefix = "UNSET";
+        private final List<Map<String, String>> maps = new ArrayList<>();
+        private final String warnPrefix = "UNSET";
+        private final Set<String> accesses = new HashSet<>();
 
         public void add(Map<String, String> addedMap) {
             maps.add(addedMap);
@@ -89,6 +96,8 @@ public class StrInterpolator implements Function<String, String> {
                 key = parts[0];
                 defval = parts[1];
             }
+            accesses.add(key);
+            logger.info("Template parameter '" + key + "' applied and consumed.");
 
             for (Map<String, String> map : maps) {
                 String val = map.get(key);
@@ -98,6 +107,13 @@ public class StrInterpolator implements Function<String, String> {
             }
 
             return (defval != null) ? defval : warnPrefix + ":" + key;
+        }
+
+        public Set<String> checkpointAccesses() {
+            HashSet<String> accesses = new HashSet<>(this.accesses);
+            this.accesses.clear();
+            return accesses;
+
         }
     }
 

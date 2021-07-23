@@ -121,6 +121,11 @@ public class ConfigModel implements NBConfigModel {
         return new NBConfiguration(this, extracted);
     }
 
+    @Override
+    public NBConfiguration extract(NBConfiguration cfg) {
+        return extract(cfg.getMap());
+    }
+
     private void assertDistinctSynonyms(Map<String, ?> config) {
         List<String> names = new ArrayList<>();
         for (Param<?> param : getParams()) {
@@ -229,7 +234,7 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
-    public NBConfigModel add(NBConfigModel otherModel) {
+    public ConfigModel add(NBConfigModel otherModel) {
         for (Param<?> param : otherModel.getParams()) {
             add(param);
         }

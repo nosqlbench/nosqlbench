@@ -36,9 +36,9 @@ public class Cqld4Space {
 
         resolveConfigLoader(cfg).ifPresent(builder::withConfigLoader);
 
-        int port = cfg.getOrDefault("port",9042);
+        int port = cfg.getOrDefault("port", 9042);
 
-        Optional<String> scb = cfg.getOptional(String.class,"secureconnectbundle","scb");
+        Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
         scb.flatMap(s -> NBIO.all().name(s).first().map(Content::getInputStream))
             .map(builder::withCloudSecureConnectBundle);
 
@@ -91,46 +91,47 @@ public class Cqld4Space {
             builder.withAuthCredentials(username, password);
         }
 
-        cfg.getOptional("cbopts").ifPresent(
-            e -> {
-                throw new BasicError("this driver does not support option 'cbopts'");
-            }
-        );
+//        cfg.getOptional("cbopts").ifPresent(
+//            e -> {
+//                throw new BasicError("this driver does not support option 'cbopts'");
+//            }
+//        );
 
-        List.of(
-            "cbopts",
-            "whitelist",
-            "lbp",
-            "loadbalancingpolicy",
-            "speculative",
-            "protocol_version",
-            "socketoptions",
-            "reconnectpolicy",
-            "pooling",
-            "tickduration",
-            "compression",
-            "retrypolicy",
-            "jmxreporting",
-            "single-endpoint",
-            "haproxy_source_ip"
-        ).forEach(o -> {
-            if (cfg.getOptional(o).isPresent()) {
-                String errmsg = "The activity parameter '" + o + "' is not supported in this version" +
-                    " of the cqld4 driver as it was before in the cql (1.9) and cqld3 drivers. Note, you" +
-                    " can often set these unsupported parameters in the driver configuration file directly." +
-                    " If it should be supported as an activity parameter.please file an issue at http://nosqlbench.io/issues.";
-                if (cfg.getOptional(boolean.class,"ignore_warnings").orElse(false)) {
-                    throw new BasicError(errmsg + " You can ignore this as a warning-only by setting ignore_warnings=true");
-                } else {
-                    logger.warn(errmsg + ", (ignored by setting ignore_warnings=true");
-                }
-            }
-        });
+//        List.of(
+//            "cbopts",
+//            "whitelist",
+//            "lbp",
+//            "loadbalancingpolicy",
+//            "speculative",
+//            "protocol_version",
+//            "socketoptions",
+//            "reconnectpolicy",
+//            "pooling",
+//            "tickduration",
+//            "compression",
+//            "retrypolicy",
+//            "jmxreporting",
+//            "single-endpoint",
+//            "haproxy_source_ip"
+//        ).forEach(o -> {
+//            if (cfg.getOptional(o).isPresent()) {
+//                String errmsg = "The activity parameter '" + o + "' is not supported in this version" +
+//                    " of the cqld4 driver as it was before in the cql (1.9) and cqld3 drivers. Note, you" +
+//                    " can often set these unsupported parameters in the driver configuration file directly." +
+//                    " If it should be supported as an activity parameter.please file an issue at http://nosqlbench.io/issues.";
+//                if (cfg.getOptional(boolean.class,"ignore_warnings").orElse(false)) {
+//                    throw new BasicError(errmsg + " You can ignore this as a warning-only by setting ignore_warnings=true");
+//                } else {
+//                    logger.warn(errmsg + ", (ignored by setting ignore_warnings=true");
+//                }
+//            }
+//        });
 
 
-        SSLContext context = SSLKsFactory.get().getContext(cfg);
-        if (context != null) {
-            builder.withSslContext(context);
+        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extract(cfg);
+        SSLContext ctx = SSLKsFactory.get().getContext(sslCfg);
+        if (ctx != null) {
+            builder.withSslContext(ctx);
         }
 
         CqlSession session = builder.build();
@@ -243,6 +244,10 @@ public class Cqld4Space {
             .add(Param.optional("secureconnectbundle"))
             .add(Param.optional("hosts"))
             .add(Param.optional("driverconfig"))
+            .add(Param.optional("username"))
+            .add(Param.optional("password"))
+            .add(Param.optional("passfile"))
+            .add(SSLKsFactory.get().getConfigModel())
             .asReadOnly();
 
     }

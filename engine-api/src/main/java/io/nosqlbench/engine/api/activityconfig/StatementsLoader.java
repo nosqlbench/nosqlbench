@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -49,9 +49,13 @@ public class StatementsLoader {
         Content<?> content,
         Map<String,String> params
     ) {
-        RawStmtsLoader loader = new RawStmtsLoader(new StrInterpolator(params));
+        StrInterpolator transformer = new StrInterpolator(params);
+        RawStmtsLoader loader = new RawStmtsLoader(transformer);
         RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
         StmtsDocList layered = new StmtsDocList(rawDocList);
+        for (String varname : transformer.checkpointAccesses()) {
+            params.remove(varname);
+        }
         return layered;
     }
 
@@ -72,8 +76,8 @@ public class StatementsLoader {
             String... searchPaths) {
         RawStmtsDocList list = null;
 
-        RawStmtsLoader gloaderImpl = new RawStmtsLoader(new StrInterpolator());
-
+        StrInterpolator transformer = new StrInterpolator();
+        RawStmtsLoader gloaderImpl = new RawStmtsLoader(transformer);
         list = gloaderImpl.loadPath(logger, path, searchPaths);
         return new StmtsDocList(list);
     }
