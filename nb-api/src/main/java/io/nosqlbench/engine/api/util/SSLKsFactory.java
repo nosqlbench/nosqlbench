@@ -18,8 +18,6 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.nb.api.config.standard.*;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,6 +36,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -147,7 +146,7 @@ public class SSLKsFactory implements NBMapConfigurable {
                     if (cert != null)
                         keyStore.setCertificateEntry("certFile", cert);
 
-                    File keyFile = cfg.getOptional("keyFilePath", "keyfilepath").map(File::new)
+                    File keyFile = cfg.getOptional("keyfilepath").map(File::new)
                         .orElse(null);
 
                     if (keyFile != null) {
@@ -251,7 +250,7 @@ public class SSLKsFactory implements NBMapConfigurable {
             Param.optional("keystore"),
             Param.optional("truststore"),
             Param.optional("tspass"),
-            Param.optional("keyFilePath"),
+            Param.optional(List.of("keyFilePath","keyfilepath")),
             Param.optional("caCertFilePath"),
             Param.optional("certFilePath")
         ).asReadOnly();

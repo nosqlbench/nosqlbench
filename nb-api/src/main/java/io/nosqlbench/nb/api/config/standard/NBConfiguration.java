@@ -104,7 +104,7 @@ public class NBConfiguration {
             Param<?> param = model.getParam(names);
             if (param!=null) {
                 for (String pname : param.getNames()) {
-                    o =data.get(name);
+                    o =data.get(pname);
                     if (o!=null) {
                         break;
                     }
