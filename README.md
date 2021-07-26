@@ -106,6 +106,6 @@ available, but more work is needed to support them fully. Here is what is suppor
   <tr>
    <td><a href="https://www.netlify.com"
              ><img src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Deploys by Netlify"/></a></td>
-   <td>This site deployed by Netlify!</td>
+   <td>This site (soon to be) deployed by Netlify!</td>
   </tr>
 </table>
