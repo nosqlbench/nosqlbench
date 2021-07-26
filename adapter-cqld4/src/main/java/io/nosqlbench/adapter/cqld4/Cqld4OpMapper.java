@@ -3,8 +3,8 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4PreparedBatchOpDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4BatchStatementDispenser;
-import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedOpDispenser;
-import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStatementDispenser;
+import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedStmtDispenser;
+import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStmtDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
@@ -32,11 +32,11 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
         if (prepared && batch) {
             return new CqlD4PreparedBatchOpDispenser(session, cmd, cfg);
         } else if (prepared) {
-            return new Cqld4PreparedOpDispenser(session, cmd, cfg);
+            return new Cqld4PreparedStmtDispenser(session, cmd);
         } else if (batch) {
             return new Cqld4BatchStatementDispenser(session, cmd, cfg);
         } else {
-            return new Cqld4SimpleCqlStatementDispenser(session, cmd, cfg);
+            return new Cqld4SimpleCqlStmtDispenser(session, cmd, cfg);
         }
     }
 

@@ -417,7 +417,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>
      * @return
      */
-    protected <O> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
+    protected <O extends Runnable> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
 

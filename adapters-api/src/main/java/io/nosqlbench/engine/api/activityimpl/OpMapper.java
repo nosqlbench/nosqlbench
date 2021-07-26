@@ -8,23 +8,42 @@ import java.util.function.Function;
  * <p>
  * <h2>Synopsis</h2>
  * An OpMapper is responsible for converting parsed op templates
- * into dispensers of operations. the intention of the user,
+ * into dispensers of operations based on the intention of the user.
+ *
  * Op Templates as expressed as a set of field values, some literal, and
- * some virtualized (to be generated per-cycle). The op template is
- * parsed into a {@link ParsedCommand}.
+ * some dynamic, to be generated based on a specific cycle value.
  * </p>
  *
  * <p>
  * <h2>Concepts</h2>
- * The OpMapper is a function (the op mapper) that returns another function (the op synthesizer).
- * The returned function is then used to create actual operations in some executable form.
- * The difference
- * between the OpMapper and the OpDispenser is this: The OpMapper is responsible for
- * identifying exactly what type of operation the user intends, according to the rules
- * op construction documented by the driver maintainer. The OpDispenser is responsible
- * for efficiently dispensing objects of a given type which can be used to execute an
- * operation. In short, mapping op templates to the users' intention must happen first, and
- * then building an operation efficiently with that specific knowledge can happen after.
+ * The OpMapper is basically a function that returns another function. The responsibility
+ * for creating executable operations is shared between the {@link OpMapper} and the
+ * {@link OpDispenser}. The logic needed to determine the type of an operation intended
+ * by the user (mapping) is different from the logic you use to construct that specific
+ * type of operation once you know the intent (dispensing). If you look at a example
+ * of doing these together in code, there is always a point at which you know what is
+ * needed to construct an operation. If you draw a line at this point, it represents
+ * the separation of responsibilities between op mappers and op dispensers.
+ * </p>
+ *
+ * <p>This separation of responsibilities serves as both a conceptual clarification as
+ * well as a way to optimize runtime behavior. In the NoSQLBench model, all of the first step
+ * (mapping, the responsibility of this class) occurs at initialization time of an activity.
+ * This means that mapping logic can be as clear, readable, type-safe and obvious as
+ * possible without any negative effect on the later phase. In fact, clarity and obviousness
+ * at this level serves to keep implementations of the next phase much more straight-forward
+ * and streamlined, since all that is left to do is assemble the known elements together
+ * into an executable operation.</p>
+ *
+ * </hr>
+ * <h2>Implementation Strategy</h2>
+ * <p>
+ * A view of an op template is provided in the {@link ParsedCommand} API. This allows
+ * you to examine the fields provided by users. It also lets you see which
+ * of these fields are defined as dynamic and which are simply static values.
+ * When multiple types of operations are supported for a driver adapter, you must decide
+ * on a distinct signature
+ *
  * </p>
  *
  * <p>
