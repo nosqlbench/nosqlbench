@@ -101,3 +101,6 @@ This project uses tools provided by YourKit, LLC. YourKit supports open source p
 Profiler. YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a> and
 <a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>, innovative and intelligent tools for
 profiling Java and .NET applications.
+
+This site is powered by [Netlify](https://www.netlify.com). (Or will be soon, as the new docs site comes online!)
+
