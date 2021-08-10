@@ -4,6 +4,9 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
+import io.nosqlbench.nb.api.config.standard.NBConfigError;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBTypeConverter;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
@@ -52,19 +55,33 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
      */
     private final LinkedHashMap<String, Object> protomap = new LinkedHashMap<>();
     private final OpTemplate ot;
+    private final NBConfiguration acfg;
 
     /**
-     * Create a parsed command from an Op template. The op template is simply the normalized view of
-     * op template structure which is uniform regardless of the original format.
+     * Create a parsed command from an Op template.
      *
-     * @param ot An OpTemplate representing an operation to be performed in a native driver.
+     * @param ot   An OpTemplate representing an operation to be performed in a native driver.
+     * @param acfg The activity configuration, used for reading config parameters
      */
-    public ParsedCommand(OpTemplate ot) {
-        this(ot, List.of());
+    public ParsedCommand(OpTemplate ot, NBConfiguration acfg) {
+        this(ot, acfg, List.of());
     }
 
-    public ParsedCommand(OpTemplate ot, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
+    /**
+     * Create a parsed command from an Op template. This version is exactly like
+     * {@link ParsedCommand(OpTemplate,NBConfiguration)} except that it allows
+     * preprocessors. Preprocessors are all applied to the the op template before
+     * it is applied to the parsed command fields, allowing you to combine or destructure
+     * fields from more tha one representation into a single canonical representation
+     * for processing.
+     *
+     * @param ot            The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
+     * @param acfg          The activity configuration, used to resolve nested config parameters
+     * @param preprocessors Map->Map transformers.
+     */
+    public ParsedCommand(OpTemplate ot, NBConfiguration acfg, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
         this.ot = ot;
+        this.acfg = acfg;
 
         Map<String, Object> map = ot.getOp().orElseThrow();
         for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
@@ -115,11 +132,11 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         return ot.getName();
     }
 
-    public Map<String, Object> getStaticMap() {
+    public Map<String, Object> getStaticPrototype() {
         return statics;
     }
 
-    public Map<String, LongFunction<?>> getDynamicMap() {
+    public Map<String, LongFunction<?>> getDynamicPrototype() {
         return dynamics;
     }
 
@@ -212,18 +229,66 @@ public class ParsedCommand implements LongFunction<Map<String, ?>> {
         }
     }
 
+    /**
+     * Get the specified parameter by the user using the defined field which is closest to the op
+     * template. This is the standard way of getting parameter values which can be specified at the
+     * op template, op param, or activity level.
+     *
+     * @param name         The name of the configuration param
+     * @param defaultValue the default value to return if the value is not defined anywhere in
+     *                     (op fields, op params, activity params)
+     * @param <T>          The type of the value to return
+     * @return A configuration value
+     * @throws io.nosqlbench.nb.api.config.standard.NBConfigError if the named field is defined dynamically,
+     *                                                            as in this case, it is presumed that the parameter is not supported unless it is defined statically.
+     */
     public <T> T getStaticConfigOr(String name, T defaultValue) {
-
         if (statics.containsKey(name)) {
-            return (T) statics.get(name);
+            return NBTypeConverter.convertOr(statics.get(name), defaultValue);
         } else if (ot.getParams().containsKey(name)) {
-            return (T) ot.getParams().get(name);
+            return NBTypeConverter.convertOr(ot.getParams().get(name), defaultValue);
+        } else if (acfg.getMap().containsKey(name)) {
+            return NBTypeConverter.convertOr(acfg.get("name"), defaultValue);
         } else if (dynamics.containsKey(name)) {
-            throw new BasicError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+            throw new NBConfigError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
                 "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
         } else {
             return defaultValue;
         }
+    }
+
+    public <T> Optional<T> getOptionalStaticConfig(String name, Class<T> type) {
+        if (statics.containsKey(name)) {
+            return Optional.of(NBTypeConverter.convert(statics.get(name), type));
+        } else if (ot.getParams().containsKey(name)) {
+            return Optional.of(NBTypeConverter.convert(ot.getParams().get(name), type));
+        } else if (acfg.getMap().containsKey(name)) {
+            return Optional.of(NBTypeConverter.convert(acfg.get("name"), type));
+        } else if (dynamics.containsKey("name")) {
+            throw new NBConfigError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+                "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+
+    /**
+     * Works exactly like {@link #getStaticConfigOr(String, Object)}, except that dynamic values
+     * at the op field level will be generated on a per-input basis. This is a shortcut method for
+     * allowing configuration values to be accessed dynamically where it makes sense.
+     */
+    public <T> T getConfigOr(String name, T defaultValue, long input) {
+        if (statics.containsKey(name)) {
+            return NBTypeConverter.convertOr(statics.get(name), defaultValue);
+        } else if (dynamics.containsKey(name)) {
+            return NBTypeConverter.convertOr(dynamics.get(name).apply(input), defaultValue);
+        } else if (ot.getParams().containsKey(name)) {
+            return NBTypeConverter.convertOr(ot.getParams().get(name), defaultValue);
+        } else if (acfg.getMap().containsKey(name)) {
+            return NBTypeConverter.convertOr(acfg.get("name"), defaultValue);
+        } else return defaultValue;
+
     }
 
 
