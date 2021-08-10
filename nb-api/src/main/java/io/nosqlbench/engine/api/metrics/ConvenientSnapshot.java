@@ -23,11 +23,11 @@ import java.io.OutputStream;
 
 public class ConvenientSnapshot extends Snapshot {
 
-    private double NS_PER_S = 1000000000.0D;
-    private double NS_PER_MS = 1000000.0D;
-    private double NS_PER_US = 1000.0D;
+    private final double NS_PER_S = 1000000000.0D;
+    private final double NS_PER_MS = 1000000.0D;
+    private final double NS_PER_US = 1000.0D;
 
-    private Snapshot snapshot;
+    private final Snapshot snapshot;
     ConvenientSnapshot(Snapshot snapshot) {
         this.snapshot = snapshot;
     }

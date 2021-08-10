@@ -38,16 +38,6 @@
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.graalvm.sdk</groupId>
-            <artifactId>graal-sdk</artifactId>
-        </dependency>
-
 
     </dependencies>
 

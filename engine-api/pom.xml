@@ -75,15 +75,6 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.mitchtalmadge</groupId>
-            <artifactId>ascii-data</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hdrhistogram</groupId>
-            <artifactId>HdrHistogram</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
