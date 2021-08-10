@@ -1,7 +1,11 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +14,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Runnable,S>
+public abstract class BaseDriverAdapter<R extends Op,S>
     implements DriverAdapter<R,S>, NBConfigurable {
 
     private final DriverSpaceCache<? extends S> spaceCache;
@@ -93,6 +97,7 @@ public abstract class BaseDriverAdapter<R extends Runnable,S>
         return ConfigModel.of(this.getClass());
     }
 
+    @Override
     public NBConfiguration getConfiguration() {
         return cfg;
     }

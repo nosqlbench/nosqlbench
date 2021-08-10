@@ -6,6 +6,7 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
@@ -20,7 +21,7 @@ import java.util.function.Function;
  *
  * @param <R> A type of runnable which wraps the operations for this type of driver.
  */
-public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
+public class StandardActivity<R extends Op,S> extends SimpleActivity {
 
     private final DriverAdapter<R,S> adapter;
     private final OpSource<R> opsource;
@@ -34,7 +35,7 @@ public class StandardActivity<R extends Runnable,S> extends SimpleActivity {
         try {
             Function<ParsedCommand, OpDispenser<R>> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
-            sequence = createOpSourceFromCommands(opmapper,List.of(preprocessor));
+            sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor));
             opsource= OpSource.of(sequence);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {

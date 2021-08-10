@@ -2,7 +2,9 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -27,7 +29,7 @@ import java.util.function.Function;
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<R extends Runnable, S> {
+public interface DriverAdapter<R extends Op, S> {
 
 
     /**
@@ -125,4 +127,5 @@ public interface DriverAdapter<R extends Runnable, S> {
     }
 
 
+    NBConfiguration getConfiguration();
 }

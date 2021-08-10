@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.api.activityapi.planning;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 
 import java.util.function.LongFunction;
 
@@ -12,7 +13,7 @@ import java.util.function.LongFunction;
  */
 public interface OpSource<T> extends LongFunction<T> {
 
-    static <O extends Runnable> OpSource<O> of(OpSequence<OpDispenser<O>> seq) {
+    static <O extends Op> OpSource<O> of(OpSequence<OpDispenser<O>> seq) {
         return (long l) -> seq.apply(l).apply(l);
     }
 

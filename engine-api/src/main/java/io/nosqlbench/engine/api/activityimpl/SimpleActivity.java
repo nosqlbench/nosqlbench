@@ -18,10 +18,12 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
@@ -417,18 +419,19 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>
      * @return
      */
-    protected <O extends Runnable> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
+    protected <O extends Op> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
 
         return createOpSequence(opTemplateOFunction);
     }
 
-    protected <O extends Runnable> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
+    protected <O extends Op> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
         Function<ParsedCommand, OpDispenser<O>> opinit,
+        NBConfiguration cfg,
         List<Function<Map<String, Object>, Map<String, Object>>> parsers
     ) {
-        Function<OpTemplate, ParsedCommand> f = t -> new ParsedCommand(t, parsers);
+        Function<OpTemplate, ParsedCommand> f = t -> new ParsedCommand(t, cfg, parsers);
         Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
         return createOpSequence(opTemplateOFunction);
     }

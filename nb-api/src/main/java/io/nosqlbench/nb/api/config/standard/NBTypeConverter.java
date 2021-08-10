@@ -38,7 +38,8 @@ public class NBTypeConverter {
         if (outc.isAssignableFrom(input.getClass())) return true; // assignable
         if (ClassUtils.isAssignable(input.getClass(), outc, true)) return true; // assignable with boxing
         if (String.class.isAssignableFrom(outc)) return true; // all things can be strings
-        if (outc.isPrimitive() && outc != boolean.class && outc != void.class && (input instanceof Number)) return true; // via Number conversions
+        if (outc.isPrimitive() && outc != boolean.class && outc != void.class && (input instanceof Number))
+            return true; // via Number conversions
         return (lookup(input.getClass(), outc) != null); // fall-through to helper method lookup
     }
 
@@ -78,6 +79,13 @@ public class NBTypeConverter {
     public static <T> Optional<T> tryConvert(Object input, Class<T> outType) {
         T converted = do_convert(input, outType);
         return Optional.ofNullable(converted);
+    }
+
+    public static <T> T convertOr(Object input, T defaultValue) {
+        if (input == null) {
+            return defaultValue;
+        }
+        return convert(input, (Class<T>) defaultValue.getClass());
     }
 
     public static <T> T convert(Object input, Class<T> outType) {
@@ -155,7 +163,7 @@ public class NBTypeConverter {
             Object result = converter.invoke(null, input);
             return (T) result;
         } catch (Exception e) {
-            throw new RuntimeException("Unable to convert (" + input + ") to " + outType.getSimpleName() + ": " + e,e);
+            throw new RuntimeException("Unable to convert (" + input + ") to " + outType.getSimpleName() + ": " + e, e);
         }
     }
 

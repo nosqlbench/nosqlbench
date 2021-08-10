@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.api.activityimpl;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedCommand;
 
 import java.util.function.Function;
@@ -61,7 +62,7 @@ import java.util.function.Function;
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<T extends Runnable> extends Function<ParsedCommand, OpDispenser<T>> {
+public interface OpMapper<T extends Op> extends Function<ParsedCommand, OpDispenser<T>> {
 
     /**
      * Interrogate the parsed command, and provide a new

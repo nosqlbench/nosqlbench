@@ -1,6 +1,8 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.Param;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,7 +26,11 @@ public class ParsedCommandTest {
                     "dyna1", "NumberNameToString()"
                 )
             )
-        )
+        ),
+        ConfigModel.of(ParsedCommandTest.class)
+            .add(Param.defaultTo("testcfg","testval"))
+            .asReadOnly()
+            .apply(Map.of())
     );
 
     @Test

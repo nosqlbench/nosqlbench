@@ -1,8 +1,10 @@
 package io.nosqlbench.driver.direct;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+
 import java.lang.reflect.Method;
 
-public class DirectCall implements Runnable {
+public class DirectCall implements Op,Runnable {
     private final Method method;
     private final Object[] args;
     private final Object instance;

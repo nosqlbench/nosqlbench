@@ -1,7 +1,8 @@
 package io.nosqlbench.driver.jmx.ops;
 
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -10,7 +11,7 @@ import javax.management.remote.JMXConnector;
 /**
  * All JMX Operations should built on this base type.
  */
-public abstract class JmxOp implements Runnable {
+public abstract class JmxOp implements Op,Runnable {
 
     protected final static Logger logger = LogManager.getLogger(JmxOp.class);
 

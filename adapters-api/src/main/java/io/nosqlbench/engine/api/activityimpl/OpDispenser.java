@@ -7,8 +7,7 @@ import java.util.function.LongFunction;
  * <H2>Synopsis</H2>
  * An OpDispenser is responsible for mapping a cycle number into
  * an executable operation. This is where <i>Op Synthesis</i> occurs
- * in NoSQLBench -- The process of building executable operations from
- * templates.</p>
+ * in NoSQLBench.</p>
  * <hr/>
  * <p>
  * <H2>Concepts</H2>

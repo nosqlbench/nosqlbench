@@ -20,10 +20,7 @@ package io.nosqlbench.nb.api.config.params;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 
@@ -272,6 +269,21 @@ public class ParamsParser {
         return parms;
     }
 
+    public static Map<String, String> parseToMap(Object src, String mainField) {
+        if (src instanceof Map) {
+            return (Map) src;
+        } else if (src instanceof CharSequence) {
+            String input = ((CharSequence) src).toString();
+            if (hasValues(input)) {
+                return parse(input, false);
+            } else {
+                return new HashMap<>(Map.of(mainField, input));
+            }
+        } else {
+            throw new RuntimeException("can't parseToMap(...) on an object that is neither Map nor CharSequence");
+        }
+    }
+
     private enum ParseState {
         expectingName,
         readingName,
@@ -280,4 +292,6 @@ public class ParamsParser {
         readingSquotedVal,
         readingDquotedVal
     }
+
+
 }
