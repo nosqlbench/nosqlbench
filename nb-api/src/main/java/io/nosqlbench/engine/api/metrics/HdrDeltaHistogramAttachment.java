@@ -46,5 +46,5 @@ public interface HdrDeltaHistogramAttachment extends HdrDeltaHistogramProvider {
      * Attach a metric.
      * @return the attached metric, after adding to the mirrors for the metric.
      */
-    public HdrDeltaHistogramProvider attachHdrDeltaHistogram();
+    HdrDeltaHistogramProvider attachHdrDeltaHistogram();
 }

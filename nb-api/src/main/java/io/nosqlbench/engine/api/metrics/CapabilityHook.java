@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public abstract class CapabilityHook<T> implements MetricRegistryListener {
 
-    private Map<String,T> capables = new HashMap<>();
+    private final Map<String,T> capables = new HashMap<>();
 
     public abstract void onCapableAdded(String name, T capable);
     public abstract void onCapableRemoved(String name, T capable);

@@ -28,7 +28,7 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;
     private long cacheTimeMillis = 0L;
-    private String metricName;
+    private final String metricName;
     private List<Histogram> mirrors;
 
     public NicerHistogram(String metricName, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
