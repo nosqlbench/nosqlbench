@@ -194,11 +194,11 @@ public class ParsedTemplate {
     }
 
     public String toString() {
-        String sb = "\n parsed: " +
+        String sb = "parsed: " +
             StreamSupport.stream(Arrays.spliterator(spans), false)
                 .map(s -> "[" + s + "]").collect(Collectors.joining(",")) +
-            "\n missing bindings: " +
-            getMissing().stream().collect(Collectors.joining(",", "[", "]"));
+            (getMissing().size() > 0 ? "\n missing bindings: " +
+                getMissing().stream().collect(Collectors.joining(",", "[", "]")) : "");
         return sb;
     }
 
