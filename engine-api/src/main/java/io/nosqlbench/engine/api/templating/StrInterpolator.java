@@ -97,7 +97,6 @@ public class StrInterpolator implements Function<String, String> {
                 defval = parts[1];
             }
             accesses.add(key);
-            logger.info("Template parameter '" + key + "' applied and consumed.");
 
             for (Map<String, String> map : maps) {
                 String val = map.get(key);
@@ -106,11 +105,15 @@ public class StrInterpolator implements Function<String, String> {
                 }
             }
 
-            return (defval != null) ? defval : warnPrefix + ":" + key;
+            String value = (defval != null) ? defval : warnPrefix + ":" + key;
+            logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
+            return value;
+
         }
 
         public Set<String> checkpointAccesses() {
             HashSet<String> accesses = new HashSet<>(this.accesses);
+            logger.info("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;
 
