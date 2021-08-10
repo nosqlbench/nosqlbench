@@ -58,19 +58,12 @@ public abstract class Cqld4Op implements CycleOp<ResultSet>, VariableCapture, Op
         this.metrics = metrics;
     }
 
-    @Override
-    public void accept(long cycle) {
-
-    }
-
     public final ResultSet apply(long cycle) {
 
         metrics.onStart();
         Statement<?> stmt = getStmt();
 
         rs = session.execute(stmt);
-
-
 
         processors.start(cycle, rs);
 

@@ -38,7 +38,7 @@ op: select * from bar.table;
 
 ```json5
 {
-    "op": "select * from bar.table;"
+  "op": "select * from bar.table;"
 }
 ```
 
@@ -46,15 +46,16 @@ op: select * from bar.table;
 
 ```json5
 [
-    {
-        "name": "block0--stmt1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--stmt1"
-        }
+  {
+    "name": "block0--stmt1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--stmt1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -64,16 +65,16 @@ op: select * from bar.table;
 
 ```yaml
 ops:
-    - select * from bar.table;
+  - select * from bar.table;
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": [
-        "select * from bar.table;"
-    ]
+  "ops": [
+    "select * from bar.table;"
+  ]
 }
 ```
 
@@ -81,15 +82,16 @@ ops:
 
 ```json5
 [
-    {
-        "name": "block0--stmt1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--stmt1"
-        }
+  {
+    "name": "block0--stmt1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--stmt1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -102,18 +104,18 @@ template.
 
 ```yaml
 ops:
-    - op1: select * from bar.table;
+  - op1: select * from bar.table;
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": [
-        {
-            "op1": "select * from bar.table;"
-        }
-    ]
+  "ops": [
+    {
+      "op1": "select * from bar.table;"
+    }
+  ]
 }
 ```
 
@@ -121,15 +123,16 @@ ops:
 
 ```json5
 [
-    {
-        "name": "block0--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--op1"
-        }
+  {
+    "name": "block0--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--op1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -139,20 +142,20 @@ ops:
 
 ```yaml
 ops:
-    - name: op1
-      op: select * from bar.table;
+  - name: op1
+    op: select * from bar.table;
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": [
-        {
-            "name": "op1",
-            "op": "select * from bar.table;"
-        }
-    ]
+  "ops": [
+    {
+      "name": "op1",
+      "op": "select * from bar.table;"
+    }
+  ]
 }
 ```
 
@@ -160,15 +163,16 @@ ops:
 
 ```json5
 [
-    {
-        "name": "block0--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--op1"
-        }
+  {
+    "name": "block0--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--op1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -178,16 +182,16 @@ ops:
 
 ```yaml
 ops:
-    op1: select * from bar.table;
+  op1: select * from bar.table;
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": {
-        "op1": "select * from bar.table;"
-    }
+  "ops": {
+    "op1": "select * from bar.table;"
+  }
 }
 ```
 
@@ -195,15 +199,16 @@ ops:
 
 ```json5
 [
-    {
-        "name": "block0--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--op1"
-        }
+  {
+    "name": "block0--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--op1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -213,19 +218,19 @@ ops:
 
 ```yaml
 ops:
-    op1:
-        stmt: select * from bar.table;
+  op1:
+    stmt: select * from bar.table;
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": {
-        "op1": {
-            "stmt": "select * from bar.table;"
-        }
+  "ops": {
+    "op1": {
+      "stmt": "select * from bar.table;"
     }
+  }
 }
 ```
 
@@ -233,15 +238,16 @@ ops:
 
 ```json5
 [
-    {
-        "name": "block0--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block0--op1"
-        }
+  {
+    "name": "block0--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
+    },
+    "tags": {
+      "name": "block0--op1",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -260,38 +266,38 @@ this at work.
 
 ```yaml
 ops:
-    op1:
-        name: special-op-name
-        op: select * from ks1.tb1;
-        bindings:
-            binding1: NumberNameToString();
-        tags:
-            phase: schema
-        params:
-            prepated: false
-        description: This is just an example operation
+  op1:
+    name: special-op-name
+    op: select * from ks1.tb1;
+    bindings:
+      binding1: NumberNameToString();
+    tags:
+      phase: schema
+    params:
+      prepated: false
+    description: This is just an example operation
 ```
 
 *json:*
 
 ```json5
 {
-    "ops": {
-        "op1": {
-            "bindings": {
-                "binding1": "NumberNameToString();"
-            },
-            "description": "This is just an example operation",
-            "name": "special-op-name",
-            "op": "select * from ks1.tb1;",
-            "params": {
-                "prepated": false
-            },
-            "tags": {
-                "phase": "schema"
-            }
-        }
+  "ops": {
+    "op1": {
+      "bindings": {
+        "binding1": "NumberNameToString();"
+      },
+      "description": "This is just an example operation",
+      "name": "special-op-name",
+      "op": "select * from ks1.tb1;",
+      "params": {
+        "prepated": false
+      },
+      "tags": {
+        "phase": "schema"
+      }
     }
+  }
 }
 ```
 
@@ -299,23 +305,24 @@ ops:
 
 ```json5
 [
-    {
-        "bindings": {
-            "binding1": "NumberNameToString();"
-        },
-        "description": "This is just an example operation",
-        "name": "block0--special-op-name",
-        "op": {
-            "stmt": "select * from ks1.tb1;"
-        },
-        "params": {
-            "prepated": false
-        },
-        "tags": {
-            "phase": "schema",
-            "name": "block0--special-op-name"
-        }
+  {
+    "bindings": {
+      "binding1": "NumberNameToString();"
+    },
+    "description": "This is just an example operation",
+    "name": "block0--special-op-name",
+    "op": {
+      "stmt": "select * from ks1.tb1;"
+    },
+    "params": {
+      "prepated": false
+    },
+    "tags": {
+      "phase": "schema",
+      "name": "block0--special-op-name",
+      "block": "block0"
     }
+  }
 ]
 ```
 
@@ -332,27 +339,27 @@ inner-most scope decides the value seen at the op level.
 
 ```yaml
 tags:
-    docleveltag: is-tagging-everything # applies to all operations in this case
+  docleveltag: is-tagging-everything # applies to all operations in this case
 
 bindings:
-    binding1: Identity(); # will be overridden at the block level
+  binding1: Identity(); # will be overridden at the block level
 
 params:
-    prepared: true # set prepared true by default for all contained op templates
+  prepared: true # set prepared true by default for all contained op templates
 
 blocks:
-    block-named-fred:
-        bindings:
-            binding1: NumberNameToString();
-        tags:
-            phase: schema
-        params:
-            prepared: false
-        description: This is just an example operation
-        ops:
-            op1:
-                name: special-op-name
-                op: select * from ks1.tb1;
+  block-named-fred:
+    bindings:
+      binding1: NumberNameToString();
+    tags:
+      phase: schema
+    params:
+      prepared: false
+    description: This is just an example operation
+    ops:
+      op1:
+        name: special-op-name
+        op: select * from ks1.tb1;
 
 ```
 
@@ -360,35 +367,35 @@ blocks:
 
 ```json5
 {
-    "tags": {
-        "docleveltag": "is-tagging-everything"
-    },
-    "bindings": {
-        "binding1": "Identity();"
-    },
-    "params": {
-        "prepared": true
-    },
-    "blocks": {
-        "block-named-fred": {
-            "bindings": {
-                "binding1": "NumberNameToString();"
-            },
-            "description": "This is just an example operation",
-            "params": {
-                "prepared": false
-            },
-            "tags": {
-                "phase": "schema"
-            },
-            "ops": {
-                "op1": {
-                    "name": "special-op-name",
-                    "op": "select * from ks1.tb1;"
-                }
-            }
+  "tags": {
+    "docleveltag": "is-tagging-everything"
+  },
+  "bindings": {
+    "binding1": "Identity();"
+  },
+  "params": {
+    "prepared": true
+  },
+  "blocks": {
+    "block-named-fred": {
+      "bindings": {
+        "binding1": "NumberNameToString();"
+      },
+      "description": "This is just an example operation",
+      "params": {
+        "prepared": false
+      },
+      "tags": {
+        "phase": "schema"
+      },
+      "ops": {
+        "op1": {
+          "name": "special-op-name",
+          "op": "select * from ks1.tb1;"
         }
+      }
     }
+  }
 }
 ```
 
@@ -396,23 +403,24 @@ blocks:
 
 ```json5
 [
-    {
-        "bindings": {
-            "binding1": "NumberNameToString();"
-        },
-        "name": "block-named-fred--special-op-name",
-        "op": {
-            "stmt": "select * from ks1.tb1;"
-        },
-        "params": {
-            "prepared": false
-        },
-        "tags": {
-            "phase": "schema",
-            "docleveltag": "is-tagging-everything",
-            "name": "block-named-fred--special-op-name"
-        }
+  {
+    "bindings": {
+      "binding1": "NumberNameToString();"
+    },
+    "name": "block-named-fred--special-op-name",
+    "op": {
+      "stmt": "select * from ks1.tb1;"
+    },
+    "params": {
+      "prepared": false
+    },
+    "tags": {
+      "phase": "schema",
+      "docleveltag": "is-tagging-everything",
+      "name": "block-named-fred--special-op-name",
+      "block": "block-named-fred"
     }
+  }
 ]
 ```
 

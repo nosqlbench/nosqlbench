@@ -5,6 +5,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -92,7 +93,12 @@ public class NBCLIScenarioParserTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getArg("cycles-test")).isEqualTo("20");
+        assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
+            "alias","scenariotest_schemaonly_000",
+            "driver","stdout",
+            "tags","phase:schema",
+            "workload","scenario-test"
+        ));
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "doundef=20"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);

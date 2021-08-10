@@ -81,15 +81,15 @@ Otherwise, the whole value is used.
 
 ```yaml
 description: |
-    summary of this workload
-    and more details
+  summary of this workload
+  and more details
 ```
 
 *json:*
 
 ```json5
 {
-    "description": "summary of this workload\nand more details\n"
+  "description": "summary of this workload\nand more details\n"
 }
 ```
 
@@ -116,16 +116,16 @@ We're focused merely on the structural rules here.
 
 ```yaml
 scenarios:
-    default: run driver=diag cycles=10
+  default: run driver=diag cycles=10
 ```
 
 *json:*
 
 ```json5
 {
-    "scenarios": {
-        "default": "run driver=diag cycles=10"
-    }
+  "scenarios": {
+    "default": "run driver=diag cycles=10"
+  }
 }
 ```
 
@@ -141,21 +141,21 @@ scenarios:
 
 ```yaml
 scenarios:
-    default:
-        step1: run alias=first driver=diag cycles=10
-        step2: run alias=second driver=diag cycles=10
+  default:
+    step1: run alias=first driver=diag cycles=10
+    step2: run alias=second driver=diag cycles=10
 ```
 
 *json:*
 
 ```json5
 {
-    "scenarios": {
-        "default": {
-            "step1": "run alias=first driver=diag cycles=10",
-            "step2": "run alias=second driver=diag cycles=10"
-        }
+  "scenarios": {
+    "default": {
+      "step1": "run alias=first driver=diag cycles=10",
+      "step2": "run alias=second driver=diag cycles=10"
     }
+  }
 }
 ```
 
@@ -171,21 +171,21 @@ scenarios:
 
 ```yaml
 scenarios:
-    default:
-        - run alias=first driver=diag cycles=10
-        - run alias=second driver=diag cycles=10
+  default:
+    - run alias=first driver=diag cycles=10
+    - run alias=second driver=diag cycles=10
 ```
 
 *json:*
 
 ```json5
 {
-    "scenarios": {
-        "default": [
-            "run alias=first driver=diag cycles=10",
-            "run alias=second driver=diag cycles=10"
-        ]
-    }
+  "scenarios": {
+    "default": [
+      "run alias=first driver=diag cycles=10",
+      "run alias=second driver=diag cycles=10"
+    ]
+  }
 }
 ```
 
@@ -208,16 +208,16 @@ should only be changeable for some steps.
 # The user is not allowed to change the value for the alias parameter, and attempting to do so
 # will cause an error to be thrown and the scenario halted.
 scenarios:
-    default: run alias===first driver=diag cycles=10
+  default: run alias===first driver=diag cycles=10
 ```
 
 *json:*
 
 ```json5
 {
-    "scenarios": {
-        "default": "run alias===first driver=diag cycles=10"
-    }
+  "scenarios": {
+    "default": "run alias===first driver=diag cycles=10"
+  }
 }
 ```
 
@@ -248,18 +248,18 @@ which are just function chains from the provided libraries.
 
 ```yaml
 bindings:
-    cycle: Identity();
-    name: NumberNameToString();
+  cycle: Identity();
+  name: NumberNameToString();
 ```
 
 *json:*
 
 ```json5
 {
-    "bindings": {
-        "cycle": "Identity();",
-        "name": "NumberNameToString();"
-    }
+  "bindings": {
+    "cycle": "Identity();",
+    "name": "NumberNameToString();"
+  }
 }
 ```
 
@@ -282,18 +282,18 @@ operation's command or payload, like consistency level, or timeout settings.
 
 ```yaml
 params:
-    param1: pvalue1
-    param2: pvalue2
+  param1: pvalue1
+  param2: pvalue2
 ```
 
 *json:*
 
 ```json5
 {
-    "params": {
-        "param1": "pvalue1",
-        "param2": "pvalue2"
-    }
+  "params": {
+    "param1": "pvalue1",
+    "param2": "pvalue2"
+  }
 }
 ```
 
@@ -317,16 +317,16 @@ in the workload construction guide.
 
 ```yaml
 tags:
-    phase: main
+  phase: main
 ```
 
 *json:*
 
 ```json5
 {
-    "tags": {
-        "phase": "main"
-    }
+  "tags": {
+    "phase": "main"
+  }
 }
 ```
 
@@ -356,29 +356,29 @@ can be specified.
 
 ```yaml
 blocks:
-    namedblock1:
-        ops:
-            op1: select * from bar.table;
-            op2:
-                type: batch
-                stmt: insert into bar.table (a,b,c) values (1,2,3);
+  namedblock1:
+    ops:
+      op1: select * from bar.table;
+      op2:
+        type: batch
+        stmt: insert into bar.table (a,b,c) values (1,2,3);
 ```
 
 *json:*
 
 ```json5
 {
-    "blocks": {
-        "namedblock1": {
-            "ops": {
-                "op1": "select * from bar.table;",
-                "op2": {
-                    "type": "batch",
-                    "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-                }
-            }
+  "blocks": {
+    "namedblock1": {
+      "ops": {
+        "op1": "select * from bar.table;",
+        "op2": {
+          "type": "batch",
+          "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
         }
+      }
     }
+  }
 }
 ```
 
@@ -386,27 +386,29 @@ blocks:
 
 ```json5
 [
-    {
-        "name": "namedblock1--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "namedblock1--op1"
-        }
+  {
+    "name": "namedblock1--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
     },
-    {
-        "name": "namedblock1--op2",
-        "op": {
-            "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-        },
-        "params": {
-            "type": "batch"
-        },
-        "tags": {
-            "name": "namedblock1--op2"
-        }
+    "tags": {
+      "name": "namedblock1--op1",
+      "block": "namedblock1"
     }
+  },
+  {
+    "name": "namedblock1--op2",
+    "op": {
+      "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
+    },
+    "params": {
+      "type": "batch"
+    },
+    "tags": {
+      "name": "namedblock1--op2",
+      "block": "namedblock1"
+    }
+  }
 ]
 ```
 
@@ -418,14 +420,14 @@ When blocks are defined as a list of entries, each entry is a map.
 
 ```yaml
 blocks:
-    - ops:
-          op1: select * from bar.table;
-          op2:
-              type: batch
-              stmt: insert into bar.table (a,b,c) values (1,2,3);
-    - name: this-is-block-2
-      ops:
-          op3: select * from foo.table;
+  - ops:
+      op1: select * from bar.table;
+      op2:
+        type: batch
+        stmt: insert into bar.table (a,b,c) values (1,2,3);
+  - name: this-is-block-2
+    ops:
+      op3: select * from foo.table;
 
 ```
 
@@ -433,23 +435,23 @@ blocks:
 
 ```json5
 {
-    "blocks": [
-        {
-            "ops": {
-                "op1": "select * from bar.table;",
-                "op2": {
-                    "type": "batch",
-                    "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-                }
-            }
-        },
-        {
-            "name": "this-is-block-2",
-            "ops": {
-                "op3": "select * from foo.table;"
-            }
+  "blocks": [
+    {
+      "ops": {
+        "op1": "select * from bar.table;",
+        "op2": {
+          "type": "batch",
+          "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
         }
-    ]
+      }
+    },
+    {
+      "name": "this-is-block-2",
+      "ops": {
+        "op3": "select * from foo.table;"
+      }
+    }
+  ]
 }
 ```
 
@@ -457,36 +459,39 @@ blocks:
 
 ```json5
 [
-    {
-        "name": "block1--op1",
-        "op": {
-            "stmt": "select * from bar.table;"
-        },
-        "tags": {
-            "name": "block1--op1"
-        }
+  {
+    "name": "block1--op1",
+    "op": {
+      "stmt": "select * from bar.table;"
     },
-    {
-        "name": "block1--op2",
-        "op": {
-            "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-        },
-        "params": {
-            "type": "batch"
-        },
-        "tags": {
-            "name": "block1--op2"
-        }
-    },
-    {
-        "name": "this-is-block-2--op3",
-        "op": {
-            "stmt": "select * from foo.table;"
-        },
-        "tags": {
-            "name": "this-is-block-2--op3"
-        }
+    "tags": {
+      "name": "block1--op1",
+      "block": "block1"
     }
+  },
+  {
+    "name": "block1--op2",
+    "op": {
+      "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
+    },
+    "params": {
+      "type": "batch"
+    },
+    "tags": {
+      "name": "block1--op2",
+      "block": "block1"
+    }
+  },
+  {
+    "name": "this-is-block-2--op3",
+    "op": {
+      "stmt": "select * from foo.table;"
+    },
+    "tags": {
+      "name": "this-is-block-2--op3",
+      "block": "this-is-block-2"
+    }
+  }
 ]
 ```
 
@@ -502,8 +507,8 @@ additional field named `name` can be used.
 
 ```yaml
 blocks:
-    - name: myblock
-      op: "test op"
+  - name: myblock
+    op: "test op"
 
 ```
 
@@ -511,12 +516,12 @@ blocks:
 
 ```json5
 {
-    "blocks": [
-        {
-            "name": "myblock",
-            "op": "test op"
-        }
-    ]
+  "blocks": [
+    {
+      "name": "myblock",
+      "op": "test op"
+    }
+  ]
 }
 ```
 
@@ -524,15 +529,16 @@ blocks:
 
 ```json5
 [
-    {
-        "name": "myblock--stmt1",
-        "op": {
-            "stmt": "test op"
-        },
-        "tags": {
-            "name": "myblock--stmt1"
-        }
+  {
+    "name": "myblock--stmt1",
+    "op": {
+      "stmt": "test op"
+    },
+    "tags": {
+      "name": "myblock--stmt1",
+      "block": "myblock"
     }
+  }
 ]
 ```
 
