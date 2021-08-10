@@ -29,7 +29,7 @@ public class ExitStatusIntegrationTests {
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v+"/bin/java").orElse("java");
 
-    private final static String JARNAME = "target/nb.jar";
+    private final static String JARNAME = "target/nbr.jar";
     @Test
     public void testExitStatusOnBadParam() {
         ProcessInvoker invoker = new ProcessInvoker();

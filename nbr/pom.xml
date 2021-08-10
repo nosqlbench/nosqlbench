@@ -9,10 +9,10 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>nb</artifactId>
+    <artifactId>nbr</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>CLI for nosqlbench.</description>
+    <description>Runbime-Only CLI for nosqlbench</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,25 +23,31 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nbr</artifactId>
+            <artifactId>engine-rest</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-web</artifactId>
+            <artifactId>engine-cli</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-kafka</artifactId>
+            <artifactId>engine-docs</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-stdout</artifactId>
+            <artifactId>engine-core</artifactId>
+            <version>4.15.52-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-extensions</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
@@ -50,61 +56,6 @@
             <artifactId>driver-diag</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-tcp</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-http</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-jmx</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-cqld3-shaded</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-mongodb</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-pulsar</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-cockroachdb</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-jms</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-direct</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -159,18 +110,7 @@
                                 <NBJAR_VERSION>${project.version}</NBJAR_VERSION>
                             </environmentVariables>
                             <basedir>${project.basedir}</basedir>
-                            <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>build-static-guidebook</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <basedir>${project.basedir}</basedir>
-                            <executable>${project.basedir}/gendocs.sh</executable>
+                            <executable>${project.basedir}/nbr-scripts/link-jar-name.sh</executable>
                         </configuration>
                     </execution>
                 </executions>
@@ -180,65 +120,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>with-dsegraph-d1</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-dsegraph-shaded</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>with-cql-d1</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-cql-shaded</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
-                </dependency>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-cqlverify</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-
-
-        </profile>
-        <profile>
-            <id>with-cql-d4</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-cqld4</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>with-mongodb</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-mongodb</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
-        </profile>
         <profile>
             <id>build-nb-appimage</id>
             <activation>
@@ -255,14 +136,14 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>build-nb-appimage</id>
+                                <id>build-nbr-appimage</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
                                     <basedir>${project.basedir}</basedir>
-                                    <executable>${project.basedir}/build-bin.sh</executable>
+                                    <executable>${project.basedir}/build-bin-nbr.sh</executable>
                                 </configuration>
                             </execution>
                         </executions>
@@ -297,8 +178,6 @@
             </build>
         </profile>
 
-
     </profiles>
-
 
 </project>

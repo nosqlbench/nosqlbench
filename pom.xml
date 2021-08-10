@@ -22,6 +22,7 @@
         <!-- CORE MODULES -->
         <module>mvn-defaults</module>
         <module>nb</module>
+        <module>nbr</module>
         <module>nb-api</module>
         <module>nb-annotations</module>
         <module>engine-api</module>

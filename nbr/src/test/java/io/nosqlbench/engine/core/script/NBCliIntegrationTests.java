@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBCliIntegrationTests {
 
-    private final static String JARNAME = "target/nb.jar";
+    private final static String JARNAME = "target/nbr.jar";
     private final Logger logger = LogManager.getLogger(NBCliIntegrationTests.class);
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v+"/bin/java").orElse("java");

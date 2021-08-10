@@ -25,11 +25,11 @@ fi
 if [ "$1" = "-DN" ]
 then
  shift
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nbr.jar "$@"
 elif [ "$1" = "-DY" ]
 then
  shift
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nbr.jar "$@"
 else
- exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -jar $DIR/nb.jar "$@"
+ exec $DIR/jre/bin/java -Dnashorn.args="--no-deprecation-warning" ${JAVA_OPTS} -jar $DIR/nbr.jar "$@"
 fi
