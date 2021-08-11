@@ -19,16 +19,13 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -282,58 +279,17 @@ public class ScenarioController {
 
             if (executor == null && createIfMissing) {
 
-                String activityTypeName = activityDef.getParams().getOptionalString("driver", "type").orElse(null);
+                ActivityType<?> activityType = ActivityTypeLoader.load(activityDef).orElseThrow(
+                    () -> new RuntimeException("Could not load Driver for " + activityDef + "'")
+                );
 
-                List<String> knownTypes = ActivityType.FINDER.getAllSelectors();
-
-                // Infer the type from either alias or yaml if possible (exactly one matches)
-                if (activityTypeName == null) {
-                    List<String> matching = knownTypes.stream().filter(
-                        n ->
-                            activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
-                                || activityDef.getParams().getOptionalString("yaml", "workload").orElse("").contains(n)
-                    ).collect(Collectors.toList());
-                    if (matching.size() == 1) {
-                        activityTypeName = matching.get(0);
-                        logger.info("param 'type' was inferred as '" + activityTypeName + "' since it was seen in yaml or alias parameter.");
-                    }
-                }
-
-                if (activityTypeName == null) {
-                    String errmsg = "You must provide a driver=<driver> parameter. Valid examples are:\n" +
-                        knownTypes.stream().map(t -> " driver=" + t + "\n").collect(Collectors.joining());
-                    throw new BasicError(errmsg);
-                }
-
-//                ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
-
-                ActivityType<?> activityType = null;
-
-                Optional<ActivityType> ato = ActivityType.FINDER.getOptionally(activityTypeName);
-                if (ato.isPresent()) {
-                    activityType = ato.get();
-                } else {
-                    Optional<DriverAdapter> oda = StandardActivityType.FINDER.getOptionally(activityTypeName);
-                    if (oda.isPresent()) {
-                        DriverAdapter<?, ?> driverAdapter = oda.get();
-
-                        activityDef.getParams().remove("driver");
-                        if (driverAdapter instanceof NBConfigurable) {
-                            NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
-                            cfgModel = cfgModel.add(ACTIVITY_CFG_MODEL);
-                            NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
-                            ((NBConfigurable) driverAdapter).applyConfig(cfg);
-                        }
-                        activityType = new StandardActivityType<>(driverAdapter, activityDef);
-
-                    } else {
-                        throw new RuntimeException("Found neither ActivityType named '" + activityTypeName + "' nor DriverAdapter named '" + activityTypeName + "'.");
-                    }
-
-                }
-
-                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()),
-                    this.sessionId);
+                executor = new ActivityExecutor(
+                    activityType.getAssembledActivity(
+                        activityDef,
+                        getActivityMap()
+                    ),
+                    this.sessionId
+                );
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
@@ -510,12 +466,4 @@ public class ScenarioController {
         return indicators;
     }
 
-    private static final NBConfigModel ACTIVITY_CFG_MODEL = ConfigModel.of(Activity.class)
-        .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto"))
-        .add(Param.optional(List.of("workload","yaml")))
-        .add(Param.optional("cycles"))
-        .add(Param.optional("alias"))
-        .add(Param.optional(List.of("cyclerate","rate")))
-        .add(Param.optional("tags"))
-        .asReadOnly();
 }

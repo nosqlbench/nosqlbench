@@ -8,7 +8,7 @@ import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
 public class StandardActivityType<A extends StandardActivity<?,?>> extends SimpleActivity implements ActivityType<A> {
 
-    public static SimpleServiceLoader<DriverAdapter> FINDER = new SimpleServiceLoader<DriverAdapter>(DriverAdapter.class);
+    public static SimpleServiceLoader<DriverAdapter> FINDER = new SimpleServiceLoader<>(DriverAdapter.class);
     private final DriverAdapter<?,?> adapter;
 
     public StandardActivityType(DriverAdapter<?,?> adapter, ActivityDef activityDef) {

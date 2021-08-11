@@ -39,7 +39,7 @@ import java.util.Optional;
  */
 public interface ActivityType<A extends Activity> {
 
-    SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<>(ActivityType.class);
+    SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class);
 
     /**
      * Create an instance of an activity from the activity type.
