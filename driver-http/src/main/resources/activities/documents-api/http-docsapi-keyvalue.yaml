@@ -23,9 +23,9 @@ bindings:
   # http request id
   request_id: ToHashedUUID(); ToString();
 
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_key: Mod(<<rampup-cycles:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_key: <<keydist:Uniform(0,<<rampup-cycles:10000000>>)->int>>; ToString() -> String
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
 
 blocks:
