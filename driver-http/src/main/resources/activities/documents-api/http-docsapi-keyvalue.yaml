@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-docsapi-keyvalue tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v run driver=http yaml=http-docsapi-keyvalue tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
 
 description: |
   This workload emulates a key-value data model and access patterns.
@@ -10,9 +10,9 @@ description: |
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    rumpup: run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
@@ -23,10 +23,10 @@ bindings:
   # http request id
   request_id: ToHashedUUID(); ToString();
 
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  seq_key: Mod(<<keycount:10000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:10000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,<<keycount:10000000>>)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,<<keycount:10000000>>)->int>>; ToString() -> String
 
 blocks:
   - tags:
@@ -44,6 +44,13 @@ blocks:
           }
         tags:
           name: create-keyspace
+      - delete-docs-collection : DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        tags:
+          name: delete-table
+        ok-status: "[2-4][0-9][0-9]"
       - create-docs-collection : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
@@ -77,7 +84,7 @@ blocks:
       phase: main
       type: read
     params:
-      ratio: <<read_ratio:1>>
+      ratio: <<read_ratio:5>>
     statements:
       - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>/{rw_key}
         Accept: "application/json"
@@ -85,13 +92,14 @@ blocks:
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         tags:
           name: main-select
+        ok-status: "[2-4][0-9][0-9]"
 
   - name: main-write
     tags:
       phase: main
       type: write
     params:
-      ratio: <<write_ratio:9>>
+      ratio: <<write_ratio:5>>
     statements:
       - main-write: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>/{rw_key}
         Accept: "application/json"
