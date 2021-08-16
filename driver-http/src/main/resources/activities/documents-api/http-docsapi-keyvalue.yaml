@@ -11,7 +11,7 @@ description: |
 scenarios:
   default:
     schema: run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    rumpup: run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    rampup: run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
