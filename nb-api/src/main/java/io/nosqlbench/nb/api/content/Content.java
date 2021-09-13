@@ -1,10 +1,11 @@
 package io.nosqlbench.nb.api.content;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.CharBuffer;
 import java.nio.file.FileSystem;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
@@ -21,6 +22,14 @@ public interface Content<T> extends Supplier<CharSequence>, Comparable<Content<?
     T getLocation();
 
     URI getURI();
+
+    default URL getURL() {
+        try {
+            return getURI().toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     Path asPath();
 
