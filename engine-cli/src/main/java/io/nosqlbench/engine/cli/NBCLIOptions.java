@@ -100,7 +100,7 @@ public class NBCLIOptions {
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%7r %-5level [%t] %-12logger{0} %msg%n%throwable";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
-    public static final String NBSTATEDIR = "NBSTATEDIR";
+
 
     private final LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
@@ -409,7 +409,7 @@ public class NBCLIOptions {
             }
         }
 
-        NBEnvironment.INSTANCE.put(NBSTATEDIR, selected.toString());
+        NBEnvironment.INSTANCE.put(NBEnvironment.NBSTATEDIR, selected.toString());
 
         return selected;
     }

@@ -37,6 +37,9 @@ import java.util.regex.Pattern;
 public class NBEnvironment {
     private Logger logger;
 
+    public static final String NBSTATEDIR = "NBSTATEDIR";
+    public static final String NBLIBS = "NBLIBDIR";
+
     // package private for testing
     NBEnvironment() {
     }
@@ -45,6 +48,12 @@ public class NBEnvironment {
 
     private final LinkedHashMap<String, String> references = new LinkedHashMap<>();
 
+    /**
+     * These properties are well-defined in the Java specs. This map redirects common
+     * environment variable names to the given system property. This allows
+     * these symblic environment variables to be provided in a consistent way across
+     * hardware architectures.
+     */
     private final static Map<String, String> envToProp = Map.of(
         "PWD", "user.dir",
         "HOME", "user.home",
@@ -78,6 +87,13 @@ public class NBEnvironment {
         System.setProperty(propname, value);
     }
 
+    /**
+     * When a value is returned to be used in an assignment context, this method should
+     * be called for reference marking.
+     * @param name The name of the parameter
+     * @param value The value of the parameter
+     * @return The value itself
+     */
     private String reference(String name, String value) {
         this.references.put(name, value);
         return value;
@@ -99,6 +115,13 @@ public class NBEnvironment {
         return reference(name, value);
     }
 
+    /**
+     * This is a non-referencing get of a value, and the canonical way to
+     * access a value. This method codifies the semantics of whether something is
+     * defined or not from the user perspective.
+     * @param name The parameter name
+     * @return A value, or null if none was found
+     */
     private String peek(String name) {
         String value = null;
         if (name.contains(".")) {
@@ -110,7 +133,7 @@ public class NBEnvironment {
         if (envToProp.containsKey(name.toUpperCase())) {
             String propName = envToProp.get(name.toUpperCase());
             if (logger != null) {
-                logger.debug("redirecting env var '" + name + "' to property '" + propName + "'");
+                logger.debug("redirecting env var '" + name + "' to upper-case property '" + propName + "'");
             }
             value = System.getProperty(propName);
             if (value != null) {
