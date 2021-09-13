@@ -73,6 +73,17 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         //return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
     }
 
+    public Optional<String> removeOptionalString(String... paramName) {
+        Optional<String> optionalString = getOptionalString(paramName);
+        if (optionalString.isPresent()) {
+            for (String s : paramName) {
+                remove(s);
+            }
+        }
+        return optionalString;
+    }
+
+
     public Optional<NamedParameter> getOptionalNamedParameter(String... paramName) {
         List<String> defined = Arrays.stream(paramName).filter(super::containsKey).collect(Collectors.toList());
         if (defined.size()==1) {
@@ -298,6 +309,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         Object removed = this.remove(key);
         return removed!=null;
     }
+
 
     public interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);
