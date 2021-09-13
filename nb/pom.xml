@@ -101,7 +101,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-direct</artifactId>
+            <artifactId>driver-directapi</artifactId>
             <version>4.15.52-SNAPSHOT</version>
         </dependency>
 
