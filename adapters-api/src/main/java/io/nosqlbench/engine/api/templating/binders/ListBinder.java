@@ -1,6 +1,6 @@
     package io.nosqlbench.engine.api.templating.binders;
 
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class ListBinder implements LongFunction<List<Object>> {
     private final ArrayList<LongFunction<?>> mapperlist;
     private final int[] dindexes;
 
-    public ListBinder(ParsedCommand cmd, String... fields) {
+    public ListBinder(ParsedOp cmd, String... fields) {
         this.protolist = new ArrayList<>(fields.length);
         this.mapperlist = new ArrayList<>(fields.length);
         int[] indexes = new int[fields.length];
@@ -22,7 +22,7 @@ public class ListBinder implements LongFunction<List<Object>> {
 
         for (int i = 0; i < fields.length; i++) {
             String field = fields[i];
-            if (cmd.isDefinedStatic(field)) {
+            if (cmd.isStatic(field)) {
                 protolist.add(cmd.getStaticValue(field));
                 mapperlist.add(null);
             } else if (cmd.isDefinedDynamic(field)) {
@@ -36,7 +36,7 @@ public class ListBinder implements LongFunction<List<Object>> {
         this.dindexes = Arrays.copyOf(indexes,lastIndex);
     }
 
-    public ListBinder(ParsedCommand cmd, List<String> fields) {
+    public ListBinder(ParsedOp cmd, List<String> fields) {
         this(cmd,fields.toArray(new String[0]));
     }
 

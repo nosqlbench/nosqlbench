@@ -1,7 +1,7 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.Function;
 
@@ -39,7 +39,7 @@ import java.util.function.Function;
  * </hr>
  * <h2>Implementation Strategy</h2>
  * <p>
- * A view of an op template is provided in the {@link ParsedCommand} API. This allows
+ * A view of an op template is provided in the {@link ParsedOp} API. This allows
  * you to examine the fields provided by users. It also lets you see which
  * of these fields are defined as dynamic and which are simply static values.
  * When multiple types of operations are supported for a driver adapter, you must decide
@@ -62,16 +62,16 @@ import java.util.function.Function;
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<T extends Op> extends Function<ParsedCommand, OpDispenser<T>> {
+public interface OpMapper<T extends Op> extends Function<ParsedOp, OpDispenser<T>> {
 
     /**
      * Interrogate the parsed command, and provide a new
      *
-     * @param cmd The {@link ParsedCommand} which is the parsed version of the user-provided op template.
+     * @param cmd The {@link ParsedOp} which is the parsed version of the user-provided op template.
      *            This contains all the fields provided by the user, as well as explicit knowledge of
      *            which ones are static and dynamic.
      * @return An OpDispenser which can be used to synthesize real operations.
      */
     @Override
-    OpDispenser<T> apply(ParsedCommand cmd);
+    OpDispenser<T> apply(ParsedOp cmd);
 }

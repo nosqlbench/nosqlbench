@@ -61,7 +61,7 @@ which is the same across all driver types that can be used with NoSQLBench.
 
 The Op Templates which are provided by users are normalized by NoSQLBench into a standard
 representation that is used within the op mapping and synthesis steps. This representation is
-provided by the ParsedCommand and ParsedTemplate APIs. The User-Facing construct is _Op Template_,
+provided by the ParsedOp and ParsedTemplate APIs. The User-Facing construct is _Op Template_,
 while the developer building driver adapters only sees _Parsed Commands_ and a fully-normalized API.
 
 ## Effective Op Mapping
@@ -74,9 +74,9 @@ constructor. Op Mappers may need access to the activity's parameters or the acti
 These can be provided from the DriverAdapter base type when needed.
 
 Assuming you provide the activity params and the space cache to an OpMapper implementation, when
-it's `apply(ParsedCommand cmd)` method is called, you have access to a few levels of information:
+it's `apply(ParsedOp cmd)` method is called, you have access to a few levels of information:
 
-1. The ParsedCommand -- representing the specific details of an operation to be performed:
+1. The ParsedOp -- representing the specific details of an operation to be performed:
     * op field names
     * static field values - literal values or any non-string collection type (map, set, list)
     * dynamic field values - Any type which contains a string template or a single binding
@@ -142,12 +142,12 @@ Activites have configuration at various levels:
 5. op template fields
 
 Op template fields (seen by the NB driver developer through the
-ParsedCommand API) are properly meant to specify a distinct type of operation
+ParsedOp API) are properly meant to specify a distinct type of operation
 by its defined properties, no less or more. However, users will sometimes
 put op params into the op template alongside the op fields. This is *OK*.
 
 *The rule of thumb is to ensure that a named field can only be used as an
-op field or an op param but not both.* Each ParsedCommand has access to
+op field or an op param but not both.* Each ParsedOp has access to
 all of the layers above, and should be used to extract out the fields
 which are properly configuration level data before the fields are used
 for op mapping. By using this technique, op fields can be configured from any convenient

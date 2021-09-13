@@ -9,7 +9,7 @@ import io.nosqlbench.adapter.cqld4.processors.CqlFieldCaptureProcessor;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -30,7 +30,7 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
         this.cache = cache;
     }
 
-    public OpDispenser<Cqld4Op> apply(ParsedCommand cmd) {
+    public OpDispenser<Cqld4Op> apply(ParsedOp cmd) {
 
         ParsedTemplate stmtTpl = cmd.getStmtAsTemplate().orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + cmd

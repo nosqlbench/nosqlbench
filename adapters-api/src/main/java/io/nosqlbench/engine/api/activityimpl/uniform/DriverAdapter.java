@@ -3,7 +3,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.Map;
@@ -36,7 +36,7 @@ public interface DriverAdapter<R extends Op, S> {
      * <p>
      * <H2>Op Mapping</H2>
      * An Op Mapper is a function which can look at the parsed
-     * fields in a {@link ParsedCommand} and create an OpDispenser.
+     * fields in a {@link ParsedOp} and create an OpDispenser.
      * An OpDispenser is a function that will produce a special
      * type {@link R} that this DriverAdapter implements as its
      * op implementation.</p>
@@ -63,7 +63,7 @@ public interface DriverAdapter<R extends Op, S> {
      * <p>
      * <H2>A note on implementation strategy:</H2>
      * Generally speaking, implementations of this method should interrogate the op fields
-     * in the ParsedCommand and return an OpDispenser that matches the user's intentions.
+     * in the ParsedOp and return an OpDispenser that matches the user's intentions.
      * This can be based on something explicit, like the  value of a {@code type} field,
      * or it can be based on whether certain fields are present or not. Advanced implementations
      * might take into account which fields are provided as static values and which are

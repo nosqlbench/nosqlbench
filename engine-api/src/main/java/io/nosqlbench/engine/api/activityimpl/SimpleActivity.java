@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -427,11 +427,11 @@ public class SimpleActivity implements Activity, ProgressCapable {
     }
 
     protected <O extends Op> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
-        Function<ParsedCommand, OpDispenser<O>> opinit,
+        Function<ParsedOp, OpDispenser<O>> opinit,
         NBConfiguration cfg,
         List<Function<Map<String, Object>, Map<String, Object>>> parsers
     ) {
-        Function<OpTemplate, ParsedCommand> f = t -> new ParsedCommand(t, cfg, parsers);
+        Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
         Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
         return createOpSequence(opTemplateOFunction);
     }

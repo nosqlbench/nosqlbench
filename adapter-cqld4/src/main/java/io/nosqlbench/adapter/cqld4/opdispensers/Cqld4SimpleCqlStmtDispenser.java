@@ -6,17 +6,17 @@ import io.nosqlbench.adapter.cqld4.Cqld4Op;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4SimpleCqlStatement;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 
 public class Cqld4SimpleCqlStmtDispenser implements OpDispenser<Cqld4Op> {
 
     private final CqlSession session;
-    private final ParsedCommand cmd;
+    private final ParsedOp cmd;
     private final int maxpages;
     private final boolean retryreplace;
     private final Cqld4OpMetrics metrics;
 
-    public Cqld4SimpleCqlStmtDispenser(CqlSession session, ParsedCommand cmd) {
+    public Cqld4SimpleCqlStmtDispenser(CqlSession session, ParsedOp cmd) {
         this.session = session;
         this.cmd = cmd;
         this.maxpages = cmd.getStaticConfigOr("maxpages",1);

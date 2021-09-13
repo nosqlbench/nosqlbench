@@ -8,7 +8,7 @@ import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4PreparedStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.function.LongFunction;
@@ -24,7 +24,7 @@ public class Cqld4PreparedStmtDispenser implements OpDispenser<Cqld4Op> {
     private final Cqld4OpMetrics metrics;
     private final RSProcessors processors;
 
-    public Cqld4PreparedStmtDispenser(CqlSession session, ParsedCommand cmd, RSProcessors processors) {
+    public Cqld4PreparedStmtDispenser(CqlSession session, ParsedOp cmd, RSProcessors processors) {
         this.session = session;
         this.processors = processors;
 

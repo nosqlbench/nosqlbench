@@ -7,7 +7,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.templating.ParsedCommand;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class StandardActivity<R extends Op,S> extends SimpleActivity {
         this.adapter = adapter;
 
         try {
-            Function<ParsedCommand, OpDispenser<R>> opmapper = adapter.getOpMapper();
+            Function<ParsedOp, OpDispenser<R>> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
             sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor));
             opsource= OpSource.of(sequence);
