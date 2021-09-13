@@ -24,7 +24,6 @@ import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +38,6 @@ import java.util.Optional;
  */
 public interface ActivityType<A extends Activity> {
 
-    SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class);
 
     /**
      * Create an instance of an activity from the activity type.

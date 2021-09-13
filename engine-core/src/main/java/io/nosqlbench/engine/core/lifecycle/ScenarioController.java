@@ -279,7 +279,7 @@ public class ScenarioController {
 
             if (executor == null && createIfMissing) {
 
-                ActivityType<?> activityType = ActivityTypeLoader.load(activityDef).orElseThrow(
+                ActivityType<?> activityType = new ActivityTypeLoader().load(activityDef).orElseThrow(
                     () -> new RuntimeException("Could not load Driver for " + activityDef + "'")
                 );
 

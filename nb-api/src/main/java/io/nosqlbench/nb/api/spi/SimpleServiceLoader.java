@@ -57,7 +57,8 @@ public class SimpleServiceLoader<T> {
     /**
      * Load the service providers which are annotated with {@link Service} and selector names.
      *
-     * @param includes If provided, a list of patterns which are used to include named services based on the selector name from the
+     * @param includes If provided, a list of patterns which are used to include
+     *                 named services based on the selector name from the
      *                 {@link Service} annotation.
      * @return A map of providers of T
      */

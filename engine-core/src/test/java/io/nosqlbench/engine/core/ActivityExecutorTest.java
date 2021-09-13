@@ -13,6 +13,7 @@ import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.core.lifecycle.ActivityExecutor;
+import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class ActivityExecutorTest {
     @Test
     public void testRestart() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
-        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
+        Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
@@ -65,7 +66,7 @@ public class ActivityExecutorTest {
     @Test
     public void testDelayedStartSanity() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
-        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
+        Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
@@ -87,7 +88,7 @@ public class ActivityExecutorTest {
     @Test
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;");
-        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
+        Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Input longSupplier = new AtomicInput(ad);
         MotorDispenser<?> cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier

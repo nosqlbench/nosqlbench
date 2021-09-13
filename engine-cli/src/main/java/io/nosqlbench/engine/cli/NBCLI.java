@@ -9,10 +9,7 @@ import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.lifecycle.ScenarioErrorHandler;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
-import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
-import io.nosqlbench.engine.core.lifecycle.ShutdownManager;
+import io.nosqlbench.engine.core.lifecycle.*;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownDocInfo;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
@@ -208,7 +205,7 @@ public class NBCLI {
         }
 
         if (options.wantsActivityTypes()) {
-            ActivityType.FINDER.getAllSelectors().forEach(System.out::println);
+            new ActivityTypeLoader().getAllSelectors().forEach(System.out::println);
             System.exit(0);
         }
 

@@ -19,6 +19,7 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,7 +63,7 @@ public class MetricsMapper {
         ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
         logger.info("introspecting metric names for " + activitySpec);
 
-        Optional<ActivityType> activityType = ActivityType.FINDER.get(activityDef.getActivityType());
+        Optional<ActivityType> activityType = new ActivityTypeLoader().load(activityDef);
 
         if (!activityType.isPresent()) {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
