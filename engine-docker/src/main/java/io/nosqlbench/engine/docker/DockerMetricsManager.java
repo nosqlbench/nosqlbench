@@ -127,7 +127,7 @@ public class DockerMetricsManager {
         List<String> linkNames = new ArrayList();
         dh.startDocker(PROMETHEUS_IMG, tag, name, port, volumeDescList, envList, cmdList, reload, linkNames);
 
-        logger.info("prometheus started and listenning");
+        logger.info("prometheus started and listening");
     }
 
     private String startGraphite() {
@@ -187,7 +187,7 @@ public class DockerMetricsManager {
             }
         }
 
-        volumeDescList.add(mappingPath.toString() + ":/tmp/graphite_mapping.conf");
+        volumeDescList.add(mappingPath + ":/tmp/graphite_mapping.conf");
 
     }
 

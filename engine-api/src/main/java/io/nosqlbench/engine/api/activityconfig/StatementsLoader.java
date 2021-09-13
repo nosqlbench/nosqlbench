@@ -32,6 +32,7 @@ public class StatementsLoader {
 
     private final static Logger logger = LogManager.getLogger(StatementsLoader.class);
 
+
     public enum Loader {
         original,
         generified
@@ -88,7 +89,6 @@ public class StatementsLoader {
         String transformed = transformer.apply(statement);
         RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(transformed);
         return new StmtsDocList(rawStmtsDocList);
-
     }
 
     public static StmtsDocList loadPath(

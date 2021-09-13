@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class NBConfiguration {
+
     private final LinkedHashMap<String, Object> data;
     private final NBConfigModel model;
 

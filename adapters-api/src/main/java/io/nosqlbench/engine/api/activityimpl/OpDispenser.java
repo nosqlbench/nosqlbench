@@ -46,7 +46,7 @@ import java.util.function.LongFunction;
 public interface OpDispenser<T> extends LongFunction<T> {
 
     /**
-     * The apply method in an op dispenser should do all of the work of
+     * The apply method in an op dispenser should do all the work of
      * creating an operation that is executable by some other caller.
      * The value produced by the apply method should not require
      * additional processing if a caller wants to execute the operation
