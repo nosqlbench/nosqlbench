@@ -4,12 +4,14 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -22,7 +24,6 @@ import java.util.stream.Collectors;
  * from, searching for it, etc), more emphasis was put on ease of use and
  * clarity than efficiency. This set of classes is not expected to be used
  * much in NoSqlBench after workload initialization, so is not performance oriented
- *
  */
 public class NBIO implements NBPathsAPI.Facets {
 
@@ -142,6 +143,58 @@ public class NBIO implements NBPathsAPI.Facets {
         return new NBIO(resolver, addingPaths, names, extensions);
     }
 
+    private final static Pattern extensionPattern = Pattern.compile("\\.[a-zA-Z]+");
+    private final static Pattern wilcardsPattern = Pattern.compile(".*?[^?+*][\\?\\+\\*].*");
+
+    @Override
+    public NBPathsAPI.DoSearch search(String... searches) {
+        List<String> prefixesToAdd = new ArrayList<>();
+        List<String> namesToAdd = new ArrayList<>();
+        List<String> extensionsToAdd = new ArrayList<>();
+
+        for (String search : searches) {
+            int dotAt = search.lastIndexOf('.');
+            String candidateExtension = search.substring(dotAt);
+            if (extensionPattern.matcher(candidateExtension).matches()) {
+                extensionsToAdd.add(candidateExtension);
+                search = search.substring(0, dotAt);
+            }
+
+            String[] parts = search.split(File.separator);
+            if (parts.length > 0 && search.startsWith(File.separator) && !parts[0].startsWith(File.separator)) {
+                // maintain absolute or relative pathing in spite of String::split
+                parts[0] = File.separator + parts[0];
+            }
+
+            int literalsTill = 0;
+            while (true) {
+                if (literalsTill>= parts.length-1) {
+                    break;
+                }
+                if (wilcardsPattern.matcher(parts[literalsTill]).matches()) {
+                    break;
+                }
+                literalsTill++;
+            }
+
+            String[] prefixary = new String[literalsTill];
+            System.arraycopy(parts, 0, prefixary, 0, prefixary.length);
+            String prefix = String.join(File.separator, prefixary);
+            prefix = (prefix.isEmpty() ? "./" : prefix);
+            prefixesToAdd.add(prefix);
+
+            String[] nameary = new String[parts.length - literalsTill];
+            System.arraycopy(parts,literalsTill,nameary,0,nameary.length);
+            String name = String.join(File.separator, nameary);
+            namesToAdd.add(name);
+
+        }
+
+        return prefix(prefixesToAdd.toArray(new String[]{}))
+            .name(namesToAdd.toArray(new String[]{}))
+            .extension(extensionsToAdd.toArray(new String[]{}));
+    }
+
     @Override
     public NBPathsAPI.GetExtension name(String... searchNames) {
         ArrayList<String> addingNames = new ArrayList<>(this.names);
@@ -236,7 +289,7 @@ public class NBIO implements NBPathsAPI.Facets {
         }
 
         if (list.size() > 1) {
-            String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining("\n","\n","\n"));
+            String found = list.stream().map(c -> c.getURI().toString()).collect(Collectors.joining("\n", "\n", "\n"));
             throw new BasicError(("Found too many sources for '" + this + "', ambiguous name. Pick from " + found));
         }
         return list.get(0);
@@ -270,7 +323,8 @@ public class NBIO implements NBPathsAPI.Facets {
      * If suffixes are given, then all returned results must include at least
      * one of the suffixes. If the name includes one of the suffixes given,
      * then additional names are expanded to match the additional suffixes.
-     * @param _names base filenames or path fragment, possibly fully-qualified
+     *
+     * @param _names    base filenames or path fragment, possibly fully-qualified
      * @param _suffixes zero or more suffixes, which, if given, imply that one of them must match
      * @return Expanded names of valid filename fragments according to the above rules
      */
@@ -296,7 +350,7 @@ public class NBIO implements NBPathsAPI.Facets {
                 for (String suffix : _suffixes) {
                     if (name.endsWith(suffix)) {
                         suffixed = true;
-                        basename = name.substring(0,name.length()-suffix.length());
+                        basename = name.substring(0, name.length() - suffix.length());
                         break;
                     }
                 }
@@ -324,7 +378,8 @@ public class NBIO implements NBPathsAPI.Facets {
         if (searches.size() == 0) {
             searches.add(".*");
         }
-        for (String prefix : prefixes) {
+
+        for (String prefix : this.prefixes) {
             List<Path> directories = resolver.resolveDirectory(prefix);
             NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true, false);
 
@@ -332,8 +387,6 @@ public class NBIO implements NBPathsAPI.Facets {
             for (Path dirPath : directories) {
                 for (String searchPattern : searches) {
                     NBIOWalker.PathSuffixFilter filter = new NBIOWalker.PathSuffixFilter(searchPattern);
-                    //NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter(searchPattern,false);
-//                    RegexPathFilter filter = new RegexPathFilter(searchPattern, true);
                     NBIOWalker.walkFullPath(dirPath, capture, filter);
                 }
             }
