@@ -13,13 +13,12 @@ public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
     @Override
     public StdoutActivity getActivity(ActivityDef activityDef) {
-        Optional<String> yaml = activityDef.getParams().getOptionalString("yaml", "workload");
-
 
         // sanity check that we have a yaml parameter, which contains our statements and bindings
-        if (!yaml.isPresent()) {
-            throw new RuntimeException("Currently, the stdout activity type requires yaml/workload activity parameter" +
-                ".");
+        Optional<String> stmtsrc = activityDef.getParams().getOptionalString("op", "stmt", "statement", "yaml", "workload");
+        if (stmtsrc.isEmpty()) {
+            throw new RuntimeException("Without a workload or op parameter, there is nothing to do. (Add a workload (yaml file) or an op= template, like" +
+                " op='cycle={{Identity()}}'");
         }
 
         return new StdoutActivity(activityDef);
