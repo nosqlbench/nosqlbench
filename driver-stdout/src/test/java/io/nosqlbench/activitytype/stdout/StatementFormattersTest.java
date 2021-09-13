@@ -17,6 +17,7 @@
 
 package io.nosqlbench.activitytype.stdout;
 
+import io.nosqlbench.adapters.stdout.TemplateFormat;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
