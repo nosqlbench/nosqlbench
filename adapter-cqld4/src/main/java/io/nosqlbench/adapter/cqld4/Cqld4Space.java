@@ -27,8 +27,8 @@ public class Cqld4Space {
 
     CqlSession session;
 
-    public Cqld4Space(Cqld4DriverAdapter adapter) {
-        session = createSession(adapter.getConfiguration());
+    public Cqld4Space(NBConfiguration cfg) {
+        session = createSession(cfg);
     }
 
     private CqlSession createSession(NBConfiguration cfg) {
@@ -90,42 +90,6 @@ public class Cqld4Space {
             }
             builder.withAuthCredentials(username, password);
         }
-
-//        cfg.getOptional("cbopts").ifPresent(
-//            e -> {
-//                throw new BasicError("this driver does not support option 'cbopts'");
-//            }
-//        );
-
-//        List.of(
-//            "cbopts",
-//            "whitelist",
-//            "lbp",
-//            "loadbalancingpolicy",
-//            "speculative",
-//            "protocol_version",
-//            "socketoptions",
-//            "reconnectpolicy",
-//            "pooling",
-//            "tickduration",
-//            "compression",
-//            "retrypolicy",
-//            "jmxreporting",
-//            "single-endpoint",
-//            "haproxy_source_ip"
-//        ).forEach(o -> {
-//            if (cfg.getOptional(o).isPresent()) {
-//                String errmsg = "The activity parameter '" + o + "' is not supported in this version" +
-//                    " of the cqld4 driver as it was before in the cql (1.9) and cqld3 drivers. Note, you" +
-//                    " can often set these unsupported parameters in the driver configuration file directly." +
-//                    " If it should be supported as an activity parameter.please file an issue at http://nosqlbench.io/issues.";
-//                if (cfg.getOptional(boolean.class,"ignore_warnings").orElse(false)) {
-//                    throw new BasicError(errmsg + " You can ignore this as a warning-only by setting ignore_warnings=true");
-//                } else {
-//                    logger.warn(errmsg + ", (ignored by setting ignore_warnings=true");
-//                }
-//            }
-//        });
 
 
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extract(cfg);

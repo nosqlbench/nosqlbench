@@ -21,7 +21,7 @@ public abstract class BaseDriverAdapter<R extends Op,S>
     private NBConfiguration cfg;
 
     protected BaseDriverAdapter() {
-        this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer());
+        this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
     }
 
     /**

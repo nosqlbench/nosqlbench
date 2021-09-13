@@ -122,7 +122,7 @@ public interface DriverAdapter<R extends Op, S> {
     /**
      * @return A function which can initialize a new S
      */
-    default Function<String, ? extends S> getSpaceInitializer() {
+    default Function<String, ? extends S> getSpaceInitializer(NBConfiguration cfg) {
         return n -> null;
     }
 
