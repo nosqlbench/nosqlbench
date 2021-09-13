@@ -1,20 +1,15 @@
-- c6c69ac1 (HEAD -> main) exclude jcl-over-slf4j across all deps
-- c5f0696c doc formatting and typo fixes
-- e6c1d206 allow parameterized cql to use standard anchors
-- 1bf8b1bf auto enable stacktraces with any -v
-- ce1eca57 reduce synonym use to debug
-- 14477040 remove extraneous parameters
-- 3b4be094 structuring for readability
-- ff048bd7 update openapi deps
-- a4bad299 (origin/main) Merge pull request #342 from szimmer1/cockroachdb-errorhandler
-- 03803847 Refactor error format for error handling in JDBCActivity. Add examples for default error handler specs for cockroabdb-basic and postgres-basic workloads.
-- 496ca505 fix yaml typo
-- 81d1fc16 also trigger build on all pushes
-- 973c1aee also trigger build on pull request
-- 409b0d31 nosqlbench-340 CountryCodes() binding function runtime error
-- bb3f8b3e Merge branch 'main' of https://github.com/nosqlbench/nosqlbench into main
-- c3a6ba0d fix misaligned versions from github PR
-- 7acc2dd8 Merge pull request #338 from nosqlbench/dependabot/maven/docsys/org.eclipse.jetty-jetty-server-11.0.3
-- d9ce7b27 Bump jetty-server from 11.0.1 to 11.0.3 in /docsys
-- b2ff3653 Merge pull request #337 from XN137/unify-antlr4-version
-- 9e1dd21f unify antlr4 version via property
+- b76bfd8d (HEAD -> main) add csvoutput scripting plugin for response curve capture
+- aaa41053 (origin/main) Merge pull request #349 from ivansenic/ise-fix-stargate-keyvalue
+- e0e59b01 Merge pull request #350 from EricBorczuk/fix-other-stargate-cases
+- 9fe038a6 fix typo
+- fad0eb0d Bring rampup cycles in line with key numbers for other keyvalue tests
+- a6c1502c fixing the document api key-value scenario
+- 4cadb4e8 Merge pull request #346 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.commons-commons-compress-1.21
+- dededf77 Merge pull request #345 from nosqlbench/dependabot/maven/docsys/org.apache.commons-commons-compress-1.21
+- 1af8efa9 Bump commons-compress from 1.20 to 1.21 in /mvn-defaults
+- 41daadb5 Bump commons-compress from 1.20 to 1.21 in /docsys
+- 88e4f4b6 Update README.md
+- d887b124 Update README.md
+- 548ae08e Update README.md
+- 7ce6eba9 Merge pull request #343 from yabinmeng/main
+- c175411c Update Pulsar API to 2.8.0
