@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
-public class CsvOutputPluginWriter extends CsvOutput {
+public class CsvOutputPluginWriter {
 
     private final CSVPrinter printer;
     private final FileWriter filewriter;
