@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.Map;
 
-public class CsvOutputWriterTest {
+public class CsvOutputPluginWriterTest {
 
     @Test
     public void testCsvOutputWriter() {
         File tmpfile = Files.newTemporaryFile();
         tmpfile.deleteOnExit();
         System.out.println("tmpfile="+ tmpfile.getPath());
-        CsvOutputWriter out = new CsvOutputWriter(tmpfile.getPath(), "one", "two");
+        CsvOutputPluginWriter out = new CsvOutputPluginWriter(tmpfile.getPath(), "one", "two");
         out.write(Value.asValue(Map.of("one","one_","two","two_")));
     }
 

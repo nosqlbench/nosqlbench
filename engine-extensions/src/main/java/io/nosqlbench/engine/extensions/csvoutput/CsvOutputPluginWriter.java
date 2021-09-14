@@ -8,23 +8,28 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
-public class CsvOutputWriter extends CsvOutput {
+public class CsvOutputPluginWriter extends CsvOutput {
 
     private final CSVPrinter printer;
     private final FileWriter filewriter;
     private final LinkedHashSet<String> headerKeys;
     private final String filename;
 
-    public CsvOutputWriter(String filename, String... headers) {
-        this.filename = filename;
-        CSVFormat fmt = CSVFormat.DEFAULT;
-        this.headerKeys = new LinkedHashSet<>(Arrays.asList(headers));
+    public CsvOutputPluginWriter(String filename, String... headers) {
         try {
-            this.filewriter = new FileWriter(filename);
-            this.printer = new CSVPrinter(filewriter,fmt);
-            if (Files.size(Path.of(filename))==0) {
+            this.filename = filename;
+            Path filepath = Path.of(filename);
+            Files.createDirectories(filepath.getParent(), PosixFilePermissions.asFileAttribute(
+                PosixFilePermissions.fromString("rwxr-x---")
+            ));
+            CSVFormat fmt = CSVFormat.DEFAULT;
+            this.headerKeys = new LinkedHashSet<>(Arrays.asList(headers));
+            this.filewriter = new FileWriter(filepath.toString());
+            this.printer = new CSVPrinter(filewriter, fmt);
+            if (Files.size(Path.of(filename)) == 0) {
                 printer.printRecord(headerKeys);
                 printer.flush();
             }
@@ -33,21 +38,21 @@ public class CsvOutputWriter extends CsvOutput {
         }
     }
 
-    public CsvOutputWriter write(Value value) {
+    public CsvOutputPluginWriter write(Value value) {
         List<String> lineout = new ArrayList<>();
-        Map<String,String> provided = new HashMap<>();
+        Map<String, String> provided = new HashMap<>();
         if (value.isHostObject()) {
             Object o = value.asHostObject();
             if (o instanceof Map) {
-                ((Map<?, ?>) o).forEach((k,v) -> {
-                    provided.put(k.toString(),v.toString());
+                ((Map<?, ?>) o).forEach((k, v) -> {
+                    provided.put(k.toString(), v.toString());
                 });
             } else {
-                throw new RuntimeException("host object provided as '" + o.getClass().getCanonicalName()+ ", but only Maps are supported.");
+                throw new RuntimeException("host object provided as '" + o.getClass().getCanonicalName() + ", but only Maps are supported.");
             }
         } else if (value.hasMembers()) {
             for (String vkey : value.getMemberKeys()) {
-                provided.put(vkey,value.getMember(vkey).toString());
+                provided.put(vkey, value.getMember(vkey).toString());
             }
         } else {
             throw new RuntimeException("Value was not a Map host object nor a type with members.");
@@ -60,7 +65,7 @@ public class CsvOutputWriter extends CsvOutput {
                 lineout.add("");
             }
         }
-        if (provided.size()>0) {
+        if (provided.size() > 0) {
             throw new RuntimeException("Unqualified column was emitted for file '" + filename);
         }
 
