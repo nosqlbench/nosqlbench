@@ -69,23 +69,26 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(6);
     }
 
-    // TODO: make this work
-//    @Test
-//    public void testThatTemplatesAreExpandedDefault() {
-//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test"});
-//        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-//        assertThat(cmds.size()).isEqualTo(1);
-//        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;cycles=10;workload=scenario-test.yaml;");
-//    }
+    @Test
+    public void testThatTemplatesAreExpandedDefault() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
+        assertThat(cmds.get(0).getArg("cycles")).isEqualTo("10");
+        assertThat(cmds.get(0).getArg("workload")).isEqualTo("target/test-classes/activities/scenario-test.yaml");
+    }
 
-    // TODO: Make this work
-//    @Test
-//    public void testThatTemplatesAreExpandedOverride() {
-//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
-//        List<NBCLIOptions.Cmd> cmds = opts.getCommands();
-//        assertThat(cmds.size()).isEqualTo(1);
-//        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("driver=stdout;cycles=20;cycles-test=20;workload=activities/scenario-test.yaml;");
-//    }
+    @Test
+    public void testThatTemplatesAreExpandedOverride() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
+        assertThat(cmds.get(0).getArg("cycles")).isEqualTo("20");
+        assertThat(cmds.get(0).getArg("cycles-test")).isEqualTo("20");
+        assertThat(cmds.get(0).getArg("workload")).isEqualTo("target/test-classes/activities/scenario-test.yaml");
+    }
 
     @Test
     public void testThatUndefValuesAreUndefined() {
