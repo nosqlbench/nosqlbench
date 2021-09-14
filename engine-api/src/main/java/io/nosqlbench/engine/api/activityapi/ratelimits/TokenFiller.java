@@ -96,7 +96,7 @@ public class TokenFiller implements Runnable {
         }
     }
 
-    public TokenFiller start() {
+    public synchronized TokenFiller start() {
         this.tokenPool.refill(rateSpec.getNanosPerOp());
 
         thread = new Thread(this);
@@ -104,7 +104,7 @@ public class TokenFiller implements Runnable {
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.setDaemon(true);
         thread.start();
-        logger.debug("Starting token filler thread: " + this.toString());
+        logger.debug("Starting token filler thread: " + this);
         return this;
     }
 
@@ -123,7 +123,7 @@ public class TokenFiller implements Runnable {
 
     public synchronized long restart() {
         this.lastRefillAt=System.nanoTime();
-        logger.debug("Restarting token filler at " + lastRefillAt + " thread: " + this.toString());
+        logger.debug("Restarting token filler at " + lastRefillAt + " thread: " + this);
         long wait = this.tokenPool.restart();
         return wait;
     }

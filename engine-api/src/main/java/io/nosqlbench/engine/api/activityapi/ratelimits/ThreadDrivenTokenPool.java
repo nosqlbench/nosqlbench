@@ -55,7 +55,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
     private long burstPoolSize;
     private long maxOverActivePool;
     private double burstRatio;
-    // TODO Consider removing volatile after investigating 
+    // TODO Consider removing volatile after investigating
     private volatile long activePool;
     private volatile long waitingPool;
     private RateSpec rateSpec;
@@ -77,7 +77,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
     public ThreadDrivenTokenPool(RateSpec rateSpec, ActivityDef activityDef) {
         this.activityDef = activityDef;
         apply(rateSpec);
-        logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
+        logger.debug("initialized token pool: " + this + " for rate:" + rateSpec);
 //        filler.start();
     }
 
@@ -262,7 +262,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
         filler.start();
     }
 }
