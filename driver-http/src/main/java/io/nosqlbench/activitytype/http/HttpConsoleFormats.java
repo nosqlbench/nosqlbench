@@ -1,5 +1,7 @@
 package io.nosqlbench.activitytype.http;
 
+import io.nosqlbench.activitytype.http.statuscodes.HttpStatusCodes;
+
 import java.io.PrintStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
@@ -39,9 +41,9 @@ public class HttpConsoleFormats {
     private final static long _DATA10 = 1L << 6;
     private final static long _DATA100 = 1L << 7;
     private final static long _DATA1000 = 1L << 8;
+    private final static long _CODES = 1L << 9;
 
     enum Diag {
-
         headers(_HEADERS),
         stats(_STATS),
         data(_DATA),
