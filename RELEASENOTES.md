@@ -1,11 +1,13 @@
-- 7ffc0cd2 (HEAD -> main) improve http console formats
+- 4e746491 (HEAD -> main) ignore cache files
+- 94ffe1c1 (origin/main) release: bug fixes and minor enhancements to http driver
+- 7ffc0cd2 improve http console formats
 - cdfee8eb http: explain http status codes in diagnostic output
 - 58e79bcd http: make body output truncation more obvious
 - ea0eae3d http: always print body if present and requested
 - d3b1e074 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - df1764f5 fix for #352 progress indicator on console
 - 29601396 remove erroneous interface
-- 7e70a89c (origin/main) Merge pull request #353 from MMirelli/fix/docker-image-alpine-slim
+- 7e70a89c Merge pull request #353 from MMirelli/fix/docker-image-alpine-slim
 - 17096ebb fix broken tests for ScenarioParser
 - 61691fc0 add initial version of stepup analysis
 - 9d96131b unify name of CsvOutptPlugin impl
