@@ -51,8 +51,9 @@ public class HttpConsoleFormats {
         redirects(_REDIRECTS),
         requests(_REQUESTS),
         responses(_RESPONSES),
+        codes(_CODES),
         brief(_HEADERS | _STATS | _REQUESTS | _RESPONSES | _DATA10),
-        all(_HEADERS | _STATS | _REDIRECTS | _REQUESTS | _RESPONSES | _DATA);
+        all(_HEADERS | _STATS | _REDIRECTS | _REQUESTS | _RESPONSES | _DATA | _CODES);
 
         private final long mask;
 
@@ -190,6 +191,10 @@ public class HttpConsoleFormats {
 
         out.println(RESPONSE_CUE + (caption != null ? caption : " RESPONSE") +
             " status=" + response.statusCode() + " took=" + (nanos / 1_000_000) + "ms");
+
+        if (Diag.codes.includedIn(mask)) {
+            out.println(DETAIL_CUE + "STATUS: " + HttpStatusCodes.lookup(response.statusCode()));
+        }
 
         if (e != null) {
             out.println(MESSAGE_CUE + " EXCEPTION: " + e.getMessage());
