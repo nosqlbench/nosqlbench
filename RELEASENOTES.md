@@ -1,15 +1,13 @@
-- b76bfd8d (HEAD -> main) add csvoutput scripting plugin for response curve capture
-- aaa41053 (origin/main) Merge pull request #349 from ivansenic/ise-fix-stargate-keyvalue
-- e0e59b01 Merge pull request #350 from EricBorczuk/fix-other-stargate-cases
-- 9fe038a6 fix typo
-- fad0eb0d Bring rampup cycles in line with key numbers for other keyvalue tests
-- a6c1502c fixing the document api key-value scenario
-- 4cadb4e8 Merge pull request #346 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.commons-commons-compress-1.21
-- dededf77 Merge pull request #345 from nosqlbench/dependabot/maven/docsys/org.apache.commons-commons-compress-1.21
-- 1af8efa9 Bump commons-compress from 1.20 to 1.21 in /mvn-defaults
-- 41daadb5 Bump commons-compress from 1.20 to 1.21 in /docsys
-- 88e4f4b6 Update README.md
-- d887b124 Update README.md
-- 548ae08e Update README.md
-- 7ce6eba9 Merge pull request #343 from yabinmeng/main
-- c175411c Update Pulsar API to 2.8.0
+- 7ffc0cd2 (HEAD -> main) improve http console formats
+- cdfee8eb http: explain http status codes in diagnostic output
+- 58e79bcd http: make body output truncation more obvious
+- ea0eae3d http: always print body if present and requested
+- d3b1e074 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- df1764f5 fix for #352 progress indicator on console
+- 29601396 remove erroneous interface
+- 7e70a89c (origin/main) Merge pull request #353 from MMirelli/fix/docker-image-alpine-slim
+- 17096ebb fix broken tests for ScenarioParser
+- 61691fc0 add initial version of stepup analysis
+- 9d96131b unify name of CsvOutptPlugin impl
+- 668f9f35 synchronize start of token pool
+- 29aa1440 Dockerfile: openjdk:15-alpine -> adoptopenjdk/openjdk15:alpine-slim
