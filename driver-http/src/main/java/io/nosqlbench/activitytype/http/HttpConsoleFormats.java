@@ -241,15 +241,15 @@ public class HttpConsoleFormats {
 
                     if (Diag.data1000.includedIn(mask)) {
                         if (toprint.length() > 1000) {
-                            toprint = toprint.substring(0, 1000) + "\n--truncated at 1000 characters--\n";
+                            toprint = toprint.substring(0, 1000) + "\n^^--truncated at 1000 characters--^^\n";
                         }
                     } else if (Diag.data100.includedIn(mask)) {
                         if (toprint.length() > 100) {
-                            toprint = toprint.substring(0, 100) + "\n--truncated at 100 characters--\n";
+                            toprint = toprint.substring(0, 100) + "\n^^--truncated at 100 characters--^^\n";
                         }
                     } else if (Diag.data10.includedIn(mask)) {
                         if (toprint.length() > 10) {
-                            toprint = toprint.substring(0, 10) + "\n--truncated at 10 characters--\n";
+                            toprint = toprint.substring(0, 10) + "\n^^--truncated at 10 characters--^^\n";
                         }
                     }
                 } else {
