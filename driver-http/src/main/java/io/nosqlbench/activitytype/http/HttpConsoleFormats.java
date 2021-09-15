@@ -218,7 +218,9 @@ public class HttpConsoleFormats {
 
             String contentLenStr = response.headers().map().getOrDefault("content-length", List.of("0")).get(0);
             Long contentLength = Long.parseLong(contentLenStr);
-            if (contentLength == 0L) {
+            String body = response.body();
+
+            if (contentLength == 0L && (body==null||body.length()==0)) {
                 return;
             }
 
@@ -230,7 +232,9 @@ public class HttpConsoleFormats {
             } else {
                 String contentType = contentTypeList.get(0).toLowerCase();
                 if (isPrintableContentType(contentType)) {
-                    toprint = response.body();
+                    if (body!=null) {
+                        toprint = body;
+                    }
                     if (toprint == null) {
                         toprint = "content-length was " + contentLength + ", but body was null";
                     }
