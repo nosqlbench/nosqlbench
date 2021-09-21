@@ -14,6 +14,6 @@ import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVSampler;
 public class TimeZonesByPopulation extends CSVSampler {
     @Example("TimezonesByPopulation()")
     public TimeZonesByPopulation() {
-        super("timezone","population","simplemaps/uszips");
+        super("timezone","population","data/simplemaps/uszips.csv");
     }
 }

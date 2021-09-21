@@ -17,7 +17,7 @@ public class StateCodes extends CSVSampler implements LongFunction<String> {
 
     @Example("StateCodes()")
     public StateCodes() {
-        super("state_id","n/a","name","simplemaps/uszips");
+        super("state_id","n/a","name","data/simplemaps/uszips.csv");
     }
 
 }
