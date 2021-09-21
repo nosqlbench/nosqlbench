@@ -14,6 +14,6 @@ import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVSampler;
 public class CitiesByDensity extends CSVSampler {
     @Example("CitiesByDensity()")
     public CitiesByDensity() {
-        super("city","density","simplemaps/uszips");
+        super("city","density","data/simplemaps/uszips.csv");
     }
 }
