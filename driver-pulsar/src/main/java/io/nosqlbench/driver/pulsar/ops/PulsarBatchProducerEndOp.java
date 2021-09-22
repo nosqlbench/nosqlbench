@@ -24,7 +24,8 @@ public class PulsarBatchProducerEndOp extends SyncPulsarOp {
 
             container.clear();
             PulsarBatchProducerStartOp.threadLocalBatchMsgContainer.set(null);
-        } else {
+        }
+        else {
             throw new BasicError("You tried to end an empty batch message container. This means you" +
                 " did initiate the batch container properly, or there is an error in your" +
                 " pulsar op sequencing and ratios.");

@@ -12,22 +12,25 @@ import org.apache.pulsar.common.schema.SchemaType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class PulsarBatchProducerOp extends SyncPulsarOp {
 
     private final Schema<?> pulsarSchema;
     private final String msgKey;
+    private final Map<String, String> msgProperties;
     private final String msgPayload;
 
     public PulsarBatchProducerOp(Schema<?> schema,
                                  String key,
+                                 Map<String, String> msgProperties,
                                  String payload) {
         this.pulsarSchema = schema;
         this.msgKey = key;
+        this.msgProperties = msgProperties;
         this.msgPayload = payload;
     }
-
 
     @Override
     public void run() {
@@ -42,6 +45,9 @@ public class PulsarBatchProducerOp extends SyncPulsarOp {
         TypedMessageBuilder typedMessageBuilder = producer.newMessage(pulsarSchema);
         if ((msgKey != null) && (!msgKey.isEmpty())) {
             typedMessageBuilder = typedMessageBuilder.key(msgKey);
+        }
+        if (!msgProperties.isEmpty()) {
+            typedMessageBuilder = typedMessageBuilder.properties(msgProperties);
         }
 
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();

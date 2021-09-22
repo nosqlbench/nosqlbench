@@ -20,117 +20,74 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
-import org.apache.pulsar.client.admin.internal.PulsarAdminImpl;
-import org.apache.pulsar.client.api.PulsarClientException;
-import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
+import org.apache.pulsar.client.api.*;
+
+import java.util.Map;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
 
     private final static Logger logger = LogManager.getLogger(PulsarActivity.class);
 
-    public Timer bindTimer;
-    public Timer executeTimer;
-    public Counter bytesCounter;
-    public Histogram messagesizeHistogram;
-    public Timer createTransactionTimer;
-    public Timer commitTransactionTimer;
+    private Counter bytesCounter;
+    private Histogram messageSizeHistogram;
+    private Timer bindTimer;
+    private Timer executeTimer;
+    private Timer createTransactionTimer;
+    private Timer commitTransactionTimer;
+
+    // Metrics for NB Pulsar driver milestone: https://github.com/nosqlbench/nosqlbench/milestone/11
+    // - end-to-end latency
+    private Histogram e2eMsgProcLatencyHistogram;
 
     private PulsarSpaceCache pulsarCache;
-    private PulsarAdmin pulsarAdmin;
 
-    private PulsarNBClientConf clientConf;
-    // e.g. pulsar://localhost:6650
+    private PulsarNBClientConf pulsarNBClientConf;
     private String pulsarSvcUrl;
-    // e.g. http://localhost:8080
     private String webSvcUrl;
+    private PulsarAdmin pulsarAdmin;
+    private PulsarClient pulsarClient;
+    private Schema<?> pulsarSchema;
 
-    private NBErrorHandler errorhandler;
+    private NBErrorHandler errorHandler;
     private OpSequence<OpDispenser<PulsarOp>> sequencer;
     private volatile Throwable asyncOperationFailure;
-
-    // private Supplier<PulsarSpace> clientSupplier;
-    // private ThreadLocal<Supplier<PulsarClient>> tlClientSupplier;
 
     public PulsarActivity(ActivityDef activityDef) {
         super(activityDef);
     }
 
-    private void initPulsarAdmin() {
+    @Override
+    public void shutdownActivity() {
+        super.shutdownActivity();
 
-        PulsarAdminBuilder adminBuilder =
-            PulsarAdmin.builder()
-            .serviceHttpUrl(webSvcUrl);
-
-        try {
-            String authPluginClassName =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authPulginClassName.label);
-            String authParams =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authParams.label);
-
-            String useTlsStr =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.useTls.label);
-            boolean useTls = BooleanUtils.toBoolean(useTlsStr);
-
-            String tlsTrustCertsFilePath =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
-
-            String tlsAllowInsecureConnectionStr =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
-            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
-
-            String tlsHostnameVerificationEnableStr =
-                (String) clientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
-            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
-
-            if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
-                adminBuilder.authentication(authPluginClassName, authParams);
-            }
-
-            if ( useTls ) {
-                adminBuilder
-                    .useKeyStoreTls(true)
-                    .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
-
-                if (!StringUtils.isBlank(tlsTrustCertsFilePath))
-                    adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
-            }
-
-            // Put this outside "if (useTls)" block for easier handling of "tlsAllowInsecureConnection"
-            adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
-            pulsarAdmin = adminBuilder.build();
-
-            // Not supported in Pulsar 2.8.0
-//            ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
-//            logger.debug(configurationData.toString());
-
-        } catch (PulsarClientException e) {
-            logger.error("Fail to create PulsarAdmin from global configuration!");
-            throw new RuntimeException("Fail to create PulsarAdmin from global configuration!");
+        for (PulsarSpace pulsarSpace : pulsarCache.getAssociatedPulsarSpace()) {
+            pulsarSpace.shutdownPulsarSpace();
         }
     }
 
     @Override
     public void initActivity() {
         super.initActivity();
-
+        bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
+        messageSizeHistogram = ActivityMetrics.histogram(activityDef, "message_size");
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
-        createTransactionTimer = ActivityMetrics.timer(activityDef, "createtransaction");
-        commitTransactionTimer = ActivityMetrics.timer(activityDef, "committransaction");
+        createTransactionTimer = ActivityMetrics.timer(activityDef, "create_transaction");
+        commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction");
 
-        bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
-        messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
+        e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency");
 
         String pulsarClntConfFile =
             activityDef.getParams().getOptionalString("config").orElse("config.properties");
-        clientConf = new PulsarNBClientConf(pulsarClntConfFile);
+        pulsarNBClientConf = new PulsarNBClientConf(pulsarClntConfFile);
 
         pulsarSvcUrl =
             activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
         webSvcUrl =
             activityDef.getParams().getOptionalString("web_url").orElse("http://localhost:8080");
 
-        initPulsarAdmin();
+        initPulsarAdminAndClientObj();
+        createPulsarSchemaFromConf();
 
         pulsarCache = new PulsarSpaceCache(this);
 
@@ -138,14 +95,10 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
 
-        this.errorhandler = new NBErrorHandler(
+        this.errorHandler = new NBErrorHandler(
             () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
             this::getExceptionMetrics
         );
-    }
-
-    public NBErrorHandler getErrorhandler() {
-        return errorhandler;
     }
 
     @Override
@@ -153,45 +106,9 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         super.onActivityDefUpdate(activityDef);
     }
 
-    public OpSequence<OpDispenser<PulsarOp>> getSequencer() {
-        return sequencer;
-    }
+    public NBErrorHandler getErrorHandler() { return errorHandler; }
 
-    public PulsarNBClientConf getPulsarConf() {
-        return clientConf;
-    }
-
-    public String getPulsarSvcUrl() {
-        return pulsarSvcUrl;
-    }
-
-    public String getWebSvcUrl() { return webSvcUrl; }
-
-    public PulsarAdmin getPulsarAdmin() { return pulsarAdmin; }
-
-    public Timer getBindTimer() {
-        return bindTimer;
-    }
-
-    public Timer getExecuteTimer() {
-        return this.executeTimer;
-    }
-
-    public Counter getBytesCounter() {
-        return bytesCounter;
-    }
-
-    public Timer getCreateTransactionTimer() {
-        return createTransactionTimer;
-    }
-
-    public Timer getCommitTransactionTimer() {
-        return commitTransactionTimer;
-    }
-
-    public Histogram getMessagesizeHistogram() {
-        return messagesizeHistogram;
-    }
+    public OpSequence<OpDispenser<PulsarOp>> getSequencer() { return sequencer; }
 
     public void failOnAsyncOperationFailure() {
         if (asyncOperationFailure != null) {
@@ -202,4 +119,116 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public void asyncOperationFailed(Throwable ex) {
         this.asyncOperationFailure = ex;
     }
+
+    /**
+     * Initialize
+     * - PulsarAdmin object for adding/deleting tenant, namespace, and topic
+     * - PulsarClient object for message publishing and consuming
+     */
+    private void initPulsarAdminAndClientObj() {
+        PulsarAdminBuilder adminBuilder =
+            PulsarAdmin.builder()
+                .serviceHttpUrl(webSvcUrl);
+
+        ClientBuilder clientBuilder = PulsarClient.builder();
+
+        try {
+            Map<String, Object> clientConfMap = pulsarNBClientConf.getClientConfMap();
+
+            // Override "client.serviceUrl" setting in config.properties
+            clientConfMap.remove("serviceUrl");
+            clientBuilder.loadConf(clientConfMap).serviceUrl(pulsarSvcUrl);
+
+            // Pulsar Authentication
+            String authPluginClassName =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authPulginClassName.label);
+            String authParams =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.authParams.label);
+
+            if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
+                adminBuilder.authentication(authPluginClassName, authParams);
+                clientBuilder.authentication(authPluginClassName, authParams);
+            }
+
+            String useTlsStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.useTls.label);
+            boolean useTls = BooleanUtils.toBoolean(useTlsStr);
+
+            String tlsTrustCertsFilePath =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
+
+            String tlsAllowInsecureConnectionStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
+            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
+
+            String tlsHostnameVerificationEnableStr =
+                (String) pulsarNBClientConf.getClientConfValue(PulsarActivityUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
+            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
+
+            if ( useTls ) {
+                adminBuilder
+                    .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+                clientBuilder
+                    .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+                if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
+                    adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+                    clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+                }
+            }
+
+            // Put this outside "if (useTls)" block for easier handling of "tlsAllowInsecureConnection"
+            adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
+            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
+
+            pulsarAdmin = adminBuilder.build();
+            pulsarClient = clientBuilder.build();
+
+            ////////////////
+            // Not supported in Pulsar 2.8.0
+            //
+            // ClientConfigurationData configurationData = pulsarAdmin.getClientConfigData();
+            // logger.debug(configurationData.toString());
+
+        } catch (PulsarClientException e) {
+            logger.error("Fail to create PulsarAdmin and/or PulsarClient object from the global configuration!");
+            throw new RuntimeException("Fail to create PulsarAdmin and/or PulsarClient object from global configuration!");
+        }
+    }
+
+    /**
+     * Get Pulsar schema from the definition string
+     */
+    private void createPulsarSchemaFromConf() {
+        Object value = pulsarNBClientConf.getSchemaConfValue("schema.type");
+        String schemaType = (value != null) ? value.toString() : "";
+
+        if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType)) {
+            value = pulsarNBClientConf.getSchemaConfValue("schema.definition");
+            String schemaDefStr = (value != null) ? value.toString() : "";
+            pulsarSchema = PulsarActivityUtil.getAvroSchema(schemaType, schemaDefStr);
+        } else if (PulsarActivityUtil.isPrimitiveSchemaTypeStr(schemaType)) {
+            pulsarSchema = PulsarActivityUtil.getPrimitiveTypeSchema((schemaType));
+        } else {
+            throw new RuntimeException("Unsupported schema type string: " + schemaType + "; " +
+                "Only primitive type and Avro type are supported at the moment!");
+        }
+    }
+
+    public PulsarNBClientConf getPulsarConf() { return this.pulsarNBClientConf;}
+    public String getPulsarSvcUrl() { return this.pulsarSvcUrl;}
+    public String getWebSvcUrl() { return this.webSvcUrl; }
+    public PulsarAdmin getPulsarAdmin() { return this.pulsarAdmin; }
+    public PulsarClient getPulsarClient() { return this.pulsarClient; }
+    public Schema<?> getPulsarSchema() { return pulsarSchema; }
+
+    public Counter getBytesCounter() { return bytesCounter; }
+    public Histogram getMessageSizeHistogram() { return messageSizeHistogram; }
+    public Timer getBindTimer() { return bindTimer; }
+    public Timer getExecuteTimer() { return this.executeTimer; }
+    public Timer getCreateTransactionTimer() { return createTransactionTimer; }
+    public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
+
+    public Histogram getE2eMsgProcLatencyHistogram() { return e2eMsgProcLatencyHistogram; }
 }

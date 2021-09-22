@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Base64;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PulsarActivityUtil {
 
@@ -25,12 +28,15 @@ public class PulsarActivityUtil {
         ADMIN_TENANT("admin-tenant"),
         ADMIN_NAMESPACE("admin-namespace"),
         ADMIN_TOPIC("admin-topic"),
+        E2E_MSG_PROC_SEND("ec2-msg-proc-send"),
+        E2E_MSG_PROC_CONSUME("ec2-msg-proc-consume"),
         BATCH_MSG_SEND_START("batch-msg-send-start"),
         BATCH_MSG_SEND("batch-msg-send"),
         BATCH_MSG_SEND_END("batch-msg-send-end"),
         MSG_SEND("msg-send"),
         MSG_CONSUME("msg-consume"),
-        MSG_READ("msg-read");
+        MSG_READ("msg-read"),
+        MSG_MULTI_CONSUME("msg-mt-consume");
 
         public final String label;
 
@@ -42,11 +48,17 @@ public class PulsarActivityUtil {
         return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
 
+    public static final String MSG_SEQUENCE_ID = "sequence_id";
+    public static final String MSG_SEQUENCE_TGTMAX = "sequence_tgtmax";
+
+    ///////
+    // Valid document level parameters for Pulsar NB yaml file
     public enum DOC_LEVEL_PARAMS {
         TOPIC_URI("topic_uri"),
         ASYNC_API("async_api"),
         USE_TRANSACTION("use_transaction"),
-        ADMIN_DELOP("admin_delop");
+        ADMIN_DELOP("admin_delop"),
+        SEQ_TRACKING("seq_tracking");
 
         public final String label;
 
@@ -55,9 +67,28 @@ public class PulsarActivityUtil {
         }
     }
     public static boolean isValidDocLevelParam(String param) {
-        return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(param));
+        return Arrays.stream(DOC_LEVEL_PARAMS.values()).anyMatch(t -> t.label.equals(param));
     }
 
+    ///////
+    // Valid Pulsar API type
+    public enum PULSAR_API_TYPE {
+        PRODUCER("producer"),
+        CONSUMER("consumer"),
+        READER("reader");
+
+        public final String label;
+
+        PULSAR_API_TYPE(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidPulsarApiType(String param) {
+        return Arrays.stream(PULSAR_API_TYPE.values()).anyMatch(t -> t.label.equals(param));
+    }
+    public static String getValidPulsarApiTypeList() {
+        return Arrays.stream(PULSAR_API_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
 
     ///////
     // Valid persistence type
@@ -74,7 +105,6 @@ public class PulsarActivityUtil {
     public static boolean isValidPersistenceType(String type) {
         return Arrays.stream(PERSISTENT_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
-
 
     ///////
     // Valid Pulsar client configuration (activity-level settings)
@@ -171,11 +201,29 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-
     public static boolean isStandardConsumerConfItem(String item) {
         return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
+    ///////
+    // Custom consumer configuration (activity-level settings)
+    // - NOT part of https://pulsar.apache.org/docs/en/client-libraries-java/#consumer
+    // - NB Pulsar driver consumer operation specific
+    public enum CONSUMER_CONF_CUSTOM_KEY {
+        timeout("timeout");
+
+        public final String label;
+
+        CONSUMER_CONF_CUSTOM_KEY(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isCustomConsumerConfItem(String item) {
+        return Arrays.stream(CONSUMER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
+    }
+
+    ///////
+    // Pulsar subscription type
     public enum SUBSCRIPTION_TYPE {
         Exclusive("Exclusive"),
         Failover("Failover"),
@@ -188,7 +236,6 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-
     public static boolean isValidSubscriptionType(String item) {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch(t -> t.label.equals(item));
     }
@@ -220,6 +267,10 @@ public class PulsarActivityUtil {
         return Arrays.stream(READER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
+    ///////
+    // Custom reader configuration (activity-level settings)
+    // - NOT part of https://pulsar.apache.org/docs/en/client-libraries-java/#reader
+    // - NB Pulsar driver reader operation specific
     public enum READER_CONF_CUSTOM_KEY {
         startMessagePos("startMessagePos");
 
@@ -229,11 +280,12 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-
     public static boolean isCustomReaderConfItem(String item) {
         return Arrays.stream(READER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
+    ///////
+    // Valid read positions for a Pulsar reader
     public enum READER_MSG_POSITION_TYPE {
         earliest("earliest"),
         latest("latest"),
@@ -245,9 +297,27 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-
     public static boolean isValideReaderStartPosition(String item) {
         return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+    }
+
+    ///////
+    // Pulsar subscription type
+    public enum SEQ_ERROR_SIMU_TYPE {
+        OutOfOrder("out_of_order"),
+        DataLoss("data_loss");
+
+        public final String label;
+
+        SEQ_ERROR_SIMU_TYPE(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidSeqErrSimuType(String item) {
+        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidSeqErrSimuTypeList() {
+        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
@@ -386,6 +456,25 @@ public class PulsarActivityUtil {
         }
 
         return schema;
+    }
+
+    ///////
+    // Generate effective key string
+    public static String buildCacheKey(String... keyParts) {
+        // Ignore blank keyPart
+        String joinedKeyStr =
+            Stream.of(keyParts)
+            .filter(s -> !StringUtils.isBlank(s))
+            .collect(Collectors.joining(","));
+
+        return Base64.getEncoder().encodeToString(joinedKeyStr.getBytes());
+    }
+
+    ///////
+    // Convert JSON string to a key/value map
+    public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(jsonStr, Map.class);
     }
 }
 
