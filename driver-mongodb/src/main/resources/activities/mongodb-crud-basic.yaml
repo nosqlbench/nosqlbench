@@ -1,0 +1,183 @@
+# nb -v run driver=mongodb yaml=mongodb-crud-basic tags=phase:schema connection=mongodb://127.0.0.1 database=testdb
+
+description: |
+  This workload emulates CRUD operations for the mongoDB.
+  It generates a simple JSON document to be used for writes and updates.
+  It's a counterpart of the Stargate's Documents API CRUD Basic workflow.
+
+scenarios:
+  default:
+    schema:   run driver=mongodb tags==phase:schema threads==1 cycles==UNDEF
+    write:    run driver=mongodb tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=mongodb tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=mongodb tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=mongodb tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+
+bindings:
+  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
+  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+
+  user_id: ToHashedUUID(); ToString() -> String
+  created_on: Uniform(1262304000,1577836800) -> long
+  gender: WeightedStrings('M:10;F:10;O:1')
+  full_name: FullNames()
+  married: ModuloToBoolean()
+  city: Cities()
+  country_code: CountryCodes()
+  lat: Uniform(-180d, 180d)
+  lng: Hash() -> long; Uniform(-180d, 180d)
+  friend_id: Add(-1); ToHashedUUID(); ToString() -> String
+
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - dummy-insert: |
+          {
+            insert: "<<collection:crud_basic>>",
+            documents: [ { _id: "dummyyyy" } ]
+          }
+
+      - drop-collection: |
+          {
+            drop: "<<collection:crud_basic>>"
+          }
+        tags:
+          name: drop-collection
+
+      - create-collection: |
+          {
+            create: "<<collection:crud_basic>>"
+          }
+        tags:
+          name: create-collection
+
+      - create-indexes: |
+          {
+            createIndexes: "<<collection:crud_basic>>",
+            indexes: [
+              {
+                key: { user_id: 1 },
+                name: "user_id_idx",
+                unique: true
+              },
+              {
+                key: { created_on: 1 },
+                name: "created_on_idx"
+              },
+              {
+                key: { gender: 1 },
+                name: "gender_idx"
+              }
+            ]
+          }
+        tags:
+          name: create-indexes
+
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    statements:
+      - write-document: |
+          {
+            insert: "<<collection:crud_basic>>",
+            documents: [
+              {
+                "_id":          "{seq_key}",
+                "user_id":      "{user_id}",
+                "created_on":   {created_on},
+                "gender":       "{gender}",
+                "full_name":    "{full_name}",
+                "married":      {married},
+                "address": {
+                  "primary": {
+                      "city":   "{city}",
+                      "cc":     "{country_code}"
+                  },
+                  "secondary":  {}
+                },
+                "coordinates": [
+                                {lat},
+                                {lng}
+                ],
+                "children":     [],
+                "friends": [
+                                "{friend_id}"
+                ],
+                "debt":         null
+              }
+            ]
+          }
+        tags:
+          name: write-document
+
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    statements:
+      - read-document: |
+          {
+            find: "<<collection:crud_basic>>",
+            filter: { _id: "{random_key}" }
+          }
+        tags:
+          name: read-document
+
+  - name: main-update
+    tags:
+      phase: main
+      type: update
+    statements:
+      - update-document: |
+          {
+            update: "<<collection:crud_basic>>",
+            updates: [
+              {
+                q: { _id: "{random_key}" },
+                u: {
+                  "_id":          "{seq_key}",
+                  "user_id":      "{user_id}",
+                  "created_on":   {created_on},
+                  "gender":       "{gender}",
+                  "full_name":    "{full_name}",
+                  "married":      {married},
+                  "address": {
+                    "primary": {
+                        "city":   "{city}",
+                        "cc":     "{country_code}"
+                    },
+                    "secondary":  {}
+                  },
+                  "coordinates": [
+                                  {lat},
+                                  {lng}
+                  ],
+                  "children":     [],
+                  "friends": [
+                                  "{friend_id}"
+                  ],
+                  "debt":         null
+                }
+              }
+            ]
+          }
+        tags:
+          name: update-document
+
+  - name: main-delete
+    tags:
+      phase: main
+      type: delete
+    statements:
+      - delete-document: |
+          {
+            delete: "<<collection:crud_basic>>",
+            deletes: [
+              {
+                q: { _id: "{seq_key}" },
+                limit: 1
+              }
+            ]
+          }

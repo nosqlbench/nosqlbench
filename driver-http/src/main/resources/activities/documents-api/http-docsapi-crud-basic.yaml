@@ -7,11 +7,11 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    write: run driver=http tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read: run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update: run driver=http tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete: run driver=http tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    schema:   run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    write:    run driver=http tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=http tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=http tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -31,7 +31,7 @@ bindings:
   gender: WeightedStrings('M:10;F:10;O:1')
   full_name: FullNames()
   married: ModuloToBoolean()
-  city: CSVSampler('city','n/a','name','data/simplemaps/uszips.csv')
+  city: Cities()
   country_code: CountryCodes()
   lat: Uniform(-180d, 180d)
   lng: Hash() -> long; Uniform(-180d, 180d)
@@ -129,7 +129,7 @@ blocks:
       phase: main
       type: update
     statements:
-      - write-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
+      - update-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -166,7 +166,7 @@ blocks:
       phase: main
       type: delete
     statements:
-      - write-document: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
+      - delete-document: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
