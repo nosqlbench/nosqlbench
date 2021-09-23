@@ -62,7 +62,7 @@ public class RateLimiterPerfTestMethods {
         return perf.getLastResult();
     }
 
-    public Result rateLimiterSingleThreadedConvergence(Function<RateSpec,RateLimiter> rlf, RateSpec rs, long startingCycles, double margin) {
+    public Result rateLimiterSingleThreadedConvergence(Function<RateSpec, RateLimiter> rlf, RateSpec rs, long startingCycles, double margin) {
         //rl.applyRateSpec(rl.getRateSpec().withOpsPerSecond(1E9));
         Bounds bounds = new Bounds(startingCycles, 2);
         Perf perf = new Perf("nanotime");
@@ -139,21 +139,21 @@ public class RateLimiterPerfTestMethods {
             double duration = (endAt - startAt) / 1000000000.0d;
             double acqops = (count / duration);
 
-            System.out.println(rl.toString());
+            System.out.println(rl);
 
             System.out.println(ANSI_Blue +
-                    String.format(
-                            "spec: %s\n count: %9d, duration %.5fS, acquires/s %.3f, nanos/op: %f\n delay: %d (%.5fS)",
-                            rl.getRateSpec(),
-                            count, duration, acqops, (1_000_000_000.0d / acqops), divDelay, (divDelay / 1_000_000_000.0d)) +
-                    ANSI_Reset);
+                String.format(
+                    "spec: %s\n count: %9d, duration %.5fS, acquires/s %.3f, nanos/op: %f\n delay: %d (%.5fS)",
+                    rl.getRateSpec(),
+                    count, duration, acqops, (1_000_000_000.0d / acqops), divDelay, (divDelay / 1_000_000_000.0d)) +
+                ANSI_Reset);
 
         }
 
         long[] delays = results.stream().mapToLong(Long::longValue).toArray();
 
         String delaySummary = Arrays.stream(delays).mapToDouble(d -> (double) d / 1_000_000_000.0D).mapToObj(d -> String.format("%.3f", d))
-                .collect(Collectors.joining(","));
+            .collect(Collectors.joining(","));
         System.out.println("delays in seconds:\n" + delaySummary);
         System.out.println("delays in ns:\n" + Arrays.toString(delays));
 
@@ -176,7 +176,7 @@ public class RateLimiterPerfTestMethods {
      * This a low-overhead test for multi-threaded access to the same getOpsPerSec limiter. It calculates the
      * effective concurrent getOpsPerSec under atomic contention.
      */
-    public Perf testRateLimiterMultiThreadedContention(Function<RateSpec,RateLimiter> rlFunc, RateSpec spec, long iterations, int threadCount) {
+    public Perf testRateLimiterMultiThreadedContention(Function<RateSpec, RateLimiter> rlFunc, RateSpec spec, long iterations, int threadCount) {
         System.out.println("Running " + Thread.currentThread().getStackTrace()[1].getMethodName());
 
         RateLimiter rl = rlFunc.apply(spec);
@@ -187,24 +187,24 @@ public class RateLimiterPerfTestMethods {
         }
         RateLimiterPerfTestMethods.TestExceptionHandler errorhandler = new RateLimiterPerfTestMethods.TestExceptionHandler();
         RateLimiterPerfTestMethods.TestThreadFactory threadFactory = new RateLimiterPerfTestMethods.TestThreadFactory(errorhandler);
-        ExecutorService tp = Executors.newFixedThreadPool(threadCount+1, threadFactory);
+        ExecutorService tp = Executors.newFixedThreadPool(threadCount + 1, threadFactory);
 
-        System.out.format("Running %d iterations split over %d threads (%d) at getOpsPerSec %.3f\n", iterations, threadCount, (iterations / threadCount), rate);
+        System.out.format("Running %,d iterations split over %,d threads (%,d per) at %,.3f ops/s\n", iterations, threadCount, (iterations / threadCount), rate);
         RateLimiterPerfTestMethods.Acquirer[] threads = new RateLimiterPerfTestMethods.Acquirer[threadCount];
         DeltaHdrHistogramReservoir stats = new DeltaHdrHistogramReservoir("times", 5);
 
-        CyclicBarrier barrier = new CyclicBarrier(threadCount+1);
+        CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
 
         RateLimiterStarter starter = new RateLimiterStarter(barrier, rl);
 
         for (int i = 0; i < threadCount; i++) {
-            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, (int) (iterationsPerThread), stats, barrier);
+            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, iterationsPerThread, stats, barrier);
 //            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, (int) (iterations / threadCount), stats, barrier);
         }
 
         tp.execute(starter);
 
-        System.out.println("limiter stats:" + rl);
+        System.out.println(rl);
         System.out.format("submitting (%d threads)...\n", threads.length);
         List<Future<Result>> futures = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
@@ -223,7 +223,7 @@ public class RateLimiterPerfTestMethods {
 
         errorhandler.throwIfAny();
 
-        System.out.println("limiter stats:" + rl);
+        System.out.println(rl);
 
         Perf aggregatePerf = new Perf("contended with " + threadCount + " threads for " + iterations + " iterations for " + rl.getRateSpec().toString());
         futures.stream().map(f -> {
@@ -234,7 +234,7 @@ public class RateLimiterPerfTestMethods {
             }
         }).forEachOrdered(aggregatePerf::add);
 
-        System.out.println(aggregatePerf);
+//        System.out.println(aggregatePerf);
 
 //        if (rl instanceof HybridRateLimiter) {
 //            String refillLog = ((HybridRateLimiter) rl).getRefillLog();
@@ -246,8 +246,8 @@ public class RateLimiterPerfTestMethods {
     }
 
     private static class RateLimiterStarter implements Runnable {
-        private CyclicBarrier barrier;
-        private RateLimiter rl;
+        private final CyclicBarrier barrier;
+        private final RateLimiter rl;
 
         public RateLimiterStarter(CyclicBarrier barrier, RateLimiter rl) {
             this.barrier = barrier;
@@ -257,9 +257,9 @@ public class RateLimiterPerfTestMethods {
         @Override
         public void run() {
             try {
-                System.out.println("awaiting barrier (starter) (" + barrier.getNumberWaiting() + " awaiting)");
+//                System.out.println("awaiting barrier (starter) (" + barrier.getNumberWaiting() + " awaiting)");
                 barrier.await(60, TimeUnit.SECONDS);
-                System.out.println("started the rate limiter (starter) (" + barrier.getNumberWaiting() + " awaiting)");
+//                System.out.println("started the rate limiter (starter) (" + barrier.getNumberWaiting() + " awaiting)");
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -291,7 +291,7 @@ public class RateLimiterPerfTestMethods {
         private final int threadIdx;
         private final DeltaHdrHistogramReservoir reservoir;
         private final CyclicBarrier barrier;
-        private long iterations;
+        private final long iterations;
 
         public Acquirer(int i, RateLimiter limiter, int iterations, DeltaHdrHistogramReservoir reservoir, CyclicBarrier barrier) {
             this.threadIdx = i;
@@ -304,14 +304,18 @@ public class RateLimiterPerfTestMethods {
         @Override
         public Result call() {
 //            synchronized (barrier) {
-                try {
-                    System.out.println("awaiting barrier " + this.threadIdx + " (" + barrier.getNumberWaiting() + " awaiting)");
-                    barrier.await(60, TimeUnit.SECONDS);
-
-//                    System.out.println("starting " + this.threadIdx);
-                } catch (Exception be) {
-                    throw new RuntimeException(be); // This should not happen unless the test is broken
+            try {
+                if (this.threadIdx == 0) {
+                    System.out.println("awaiting barrier");
                 }
+                barrier.await(60, TimeUnit.SECONDS);
+                if (this.threadIdx == 0) {
+                    System.out.println("starting all threads");
+                }
+
+            } catch (Exception be) {
+                throw new RuntimeException(be); // This should not happen unless the test is broken
+            }
 //            }
             long startTime = System.nanoTime();
             for (int i = 0; i < iterations; i++) {
