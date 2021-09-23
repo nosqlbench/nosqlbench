@@ -14,6 +14,6 @@ import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVSampler;
 public class ZipCodesByPopulation extends CSVSampler {
     @Example("ZipCodesByPopulation()")
     public ZipCodesByPopulation() {
-        super("zip","population","simplemaps/uszips");
+        super("zip","population","data/simplemaps/uszips.csv");
     }
 }

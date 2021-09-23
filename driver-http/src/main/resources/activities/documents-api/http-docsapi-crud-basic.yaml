@@ -1,0 +1,175 @@
+# nb -v run driver=http yaml=http-docsapi-crud-basic tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+
+description: |
+  This workload emulates CRUD operations for the Stargate Documents API.
+  It generates a simple JSON document to be used for writes and updates.
+  Note that stargate_port should reflect the port where the Docs API is exposed (defaults to 8082).
+
+scenarios:
+  default:
+    schema:   run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    write:    run driver=http tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=http tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=http tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
+  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+
+  user_id: ToHashedUUID(); ToString() -> String
+  created_on: Uniform(1262304000,1577836800) -> long
+  gender: WeightedStrings('M:10;F:10;O:1')
+  full_name: FullNames()
+  married: ModuloToBoolean()
+  city: Cities()
+  country_code: CountryCodes()
+  lat: Uniform(-180d, 180d)
+  lng: Hash() -> long; Uniform(-180d, 180d)
+  friend_id: Add(-1); ToHashedUUID(); ToString() -> String
+
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<keyspace:docs_crud_basic>>",
+              "replicas": <<rf:1>>
+          }
+        tags:
+          name: create-keyspace
+
+      - delete-docs-collection: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        tags:
+          name: delete-table
+        ok-status: "[2-4][0-9][0-9]"
+
+      - create-docs-collection: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<table:docs_collection>>"
+          }
+        tags:
+          name: create-table
+
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    statements:
+      - write-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "user_id":      "{user_id}",
+            "created_on":   {created_on},
+            "gender":       "{gender}",
+            "full_name":    "{full_name}",
+            "married":      {married},
+            "address": {
+              "primary": {
+                  "city":   "{city}",
+                  "cc":     "{country_code}"
+              },
+              "secondary":  {}
+            },
+            "coordinates": [
+                            {lat},
+                            {lng}
+            ],
+            "children":     [],
+            "friends": [
+                            "{friend_id}"
+            ],
+            "debt":         null
+          }
+        tags:
+          name: write-document
+
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    statements:
+      - read-document: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        ok-status: "[2-4][0-9][0-9]"
+        tags:
+          name: read-document
+
+  - name: main-update
+    tags:
+      phase: main
+      type: update
+    statements:
+      - update-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+            "user_id":      "{user_id}",
+            "created_on":   {created_on},
+            "gender":       "{gender}",
+            "full_name":    "{full_name}",
+            "married":      {married},
+            "address": {
+              "primary": {
+                  "city":   "{city}",
+                  "cc":     "{country_code}"
+              },
+              "secondary":  {}
+            },
+            "coordinates": [
+                            {lat},
+                            {lng}
+            ],
+            "children":     [],
+            "friends": [
+                            "{friend_id}"
+            ],
+            "debt":         null
+          }
+        tags:
+          name: update-document
+
+  - name: main-delete
+    tags:
+      phase: main
+      type: delete
+    statements:
+      - delete-document: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        ok-status: "[2-4][0-9][0-9]"
+        tags:
+          name: delete-document
