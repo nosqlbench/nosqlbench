@@ -119,7 +119,8 @@ public class RateSpec {
          * Specify that a rate limiter should only be configured without affecting its running state.
          * If the rate limiter is already running, then the configuration should take effect immediately.
          * A rate limiter will be created automatically if needed. Configurations that do not effectively
-         * change the rate limiter are ignored.
+         * change the rate limiter are ignored. This does not automatically start the rate limiter. It
+         * will need to be started explicitly before it is used.
          */
         configure,
         /**
@@ -185,7 +186,7 @@ public class RateSpec {
         double burstPortion = Math.abs(br - ((long) br));
         String burstfmt = (burstPortion > 0.001D) ? String.format("%,.3f", br) : String.format("%,d", (long) br);
 
-        return String.format("rate=%s burstRatio=%.3f (%s SOPSS %s BOPSS) [%s]", ratefmt, burstRatio, ratefmt, burstfmt, verb);
+        return String.format("{ rate:'%s', burstRatio:'%.3f', SOPSS:'%s', BOPSS:'%s', verb:'%s' }", ratefmt, burstRatio, ratefmt, burstfmt, verb);
     }
 
     public RateSpec withOpsPerSecond(double rate) {
