@@ -33,8 +33,61 @@ import java.util.function.Function;
  */
 public class TestRateLimiterPerf1E8 {
 
-    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.configure));
-    private RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
+    private final Function<RateSpec, RateLimiter> rlFunction =
+        rs -> new HybridRateLimiter(
+            ActivityDef.parseActivityDef("alias=tokenrl"),
+            "hybrid",
+            rs.withVerb(RateSpec.Verb.configure)
+        );
+    private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
+
+    @Test
+    @Disabled
+    public void test100Mops_4000threads() {
+        Perf perf = methods.testRateLimiterMultiThreadedContention(
+            rlFunction,
+            new RateSpec(1E8, 1.1),
+            100_000_000,
+            4000
+        );
+        System.out.println(perf.getLastResult());
+    }
+
+    @Test
+    @Disabled
+    public void test100Mops_2000threads() {
+        Perf perf = methods.testRateLimiterMultiThreadedContention(
+            rlFunction,
+            new RateSpec(1E8, 1.1),
+            100_000_000,
+            2000
+        );
+        System.out.println(perf.getLastResult());
+    }
+
+    @Test
+    @Disabled
+    public void test100Mops_1000threads() {
+        Perf perf = methods.testRateLimiterMultiThreadedContention(
+            rlFunction,
+            new RateSpec(1E8, 1.1),
+            100_000_000,
+            1000
+        );
+        System.out.println(perf.getLastResult());
+    }
+
+    @Test
+    @Disabled
+    public void test100Mops_320threads() {
+        Perf perf = methods.testRateLimiterMultiThreadedContention(
+            rlFunction,
+            new RateSpec(1E8, 1.1),
+            100_000_000,
+            320
+        );
+        System.out.println(perf.getLastResult());
+    }
 
     // 160 threads at 100_000_000 ops/s
     // 1600000000_ops 149.351811_S 10712960.186_ops_s, 93_ns_op
@@ -46,7 +99,12 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_160threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,160);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(
+            rlFunction,
+            new RateSpec(1E8, 1.1),
+            100_000_000,
+            160
+        );
         System.out.println(perf.getLastResult());
     }
 
@@ -57,7 +115,7 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_80threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,80);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000, 80);
         System.out.println(perf.getLastResult());
     }
 
@@ -70,7 +128,7 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_40threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,40);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000, 40);
         System.out.println(perf.getLastResult());
     }
 
@@ -90,7 +148,7 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_20threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,20);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000, 20);
         System.out.println(perf.getLastResult());
     }
 
@@ -106,7 +164,7 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_10threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,10);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000, 10);
         System.out.println(perf.getLastResult());
     }
 
@@ -123,7 +181,7 @@ public class TestRateLimiterPerf1E8 {
     @Test
     @Disabled
     public void test100Mops_5threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,5);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000, 5);
         System.out.println(perf.getLastResult());
     }
 

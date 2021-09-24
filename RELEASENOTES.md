@@ -1,15 +1,12 @@
-- 4e746491 (HEAD -> main) ignore cache files
-- 94ffe1c1 (origin/main) release: bug fixes and minor enhancements to http driver
-- 7ffc0cd2 improve http console formats
-- cdfee8eb http: explain http status codes in diagnostic output
-- 58e79bcd http: make body output truncation more obvious
-- ea0eae3d http: always print body if present and requested
-- d3b1e074 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- df1764f5 fix for #352 progress indicator on console
-- 29601396 remove erroneous interface
-- 7e70a89c Merge pull request #353 from MMirelli/fix/docker-image-alpine-slim
-- 17096ebb fix broken tests for ScenarioParser
-- 61691fc0 add initial version of stepup analysis
-- 9d96131b unify name of CsvOutptPlugin impl
-- 668f9f35 synchronize start of token pool
-- 29aa1440 Dockerfile: openjdk:15-alpine -> adoptopenjdk/openjdk15:alpine-slim
+- 14859b09 (HEAD -> main) fix high-centered changes after merge
+- 98ad9780 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- ce73fca6 improve rate limiter tests
+- bc0fb04f standardize formatting of rate limiter diagnostics
+- 55d5c450 fix test method for single value
+- 99982ce7 (origin/main) Merge pull request #358 from ivansenic/ise-mongodb-crud
+- 3b7bf42f added mongoDB CRUD scenarios
+- e33e999e Merge pull request #357 from ivansenic/ise-documents-crud
+- 3c1405d6 Merge pull request #356 from ivansenic/ise-fix-uszips
+- 4c7e0bd8 added Documents API CRUD dataset scenario
+- c9613bea fixing the path to the uszips realdata
+- 9248c915 Fix markdown typos introduced by auto formatting
