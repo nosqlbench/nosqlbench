@@ -1,12 +1,6 @@
-- 14859b09 (HEAD -> main) fix high-centered changes after merge
-- 98ad9780 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- ce73fca6 improve rate limiter tests
-- bc0fb04f standardize formatting of rate limiter diagnostics
-- 55d5c450 fix test method for single value
-- 99982ce7 (origin/main) Merge pull request #358 from ivansenic/ise-mongodb-crud
-- 3b7bf42f added mongoDB CRUD scenarios
-- e33e999e Merge pull request #357 from ivansenic/ise-documents-crud
-- 3c1405d6 Merge pull request #356 from ivansenic/ise-fix-uszips
-- 4c7e0bd8 added Documents API CRUD dataset scenario
-- c9613bea fixing the path to the uszips realdata
-- 9248c915 Fix markdown typos introduced by auto formatting
+- 6db90cdf (HEAD -> main, origin/main) Merge pull request #359 from yabinmeng/main
+- 3ed1e7f6 Merge branch 'main' of https://github.com/yabinmeng/nosqlbench
+- d8bc8ce4 README update
+- aff249fe Merge branch 'nosqlbench:main' into main
+- da7fd894 Merge remote-tracking branch 'upstream/main'
+- 6903a230 README update
