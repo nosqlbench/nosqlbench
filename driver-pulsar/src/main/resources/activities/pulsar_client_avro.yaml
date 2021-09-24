@@ -49,6 +49,7 @@ blocks:
         optype: msg-send
         # producer_name: {producer_name}
         msg_key: "{mykey}"
+        msg_property: "{myprop}"
         msg_value: |
           {
               "SensorID": "{sensor_id}",

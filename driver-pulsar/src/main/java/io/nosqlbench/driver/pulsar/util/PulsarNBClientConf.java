@@ -173,14 +173,16 @@ public class PulsarNBClientConf {
     }
     // other producer helper functions ...
     public String getProducerName() {
-        Object confValue = getProducerConfValue("producer.producerName");
+        Object confValue = getProducerConfValue(
+            "producer." + PulsarActivityUtil.PRODUCER_CONF_STD_KEY.producerName.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
     public String getProducerTopicName() {
-        Object confValue = getProducerConfValue("producer.topicName");
+        Object confValue = getProducerConfValue(
+            "producer." + PulsarActivityUtil.PRODUCER_CONF_STD_KEY.topicName);
         if (confValue == null)
             return "";
         else
@@ -213,48 +215,56 @@ public class PulsarNBClientConf {
     }
     // Other consumer helper functions ...
     public String getConsumerTopicNames() {
-        Object confValue = getConsumerConfValue("consumer.topicNames");
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
     public String getConsumerTopicPattern() {
-        Object confValue = getConsumerConfValue("consumer.topicsPattern");
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
-    public int getConsumerTimeoutSeconds() {
-        Object confValue = getConsumerConfValue("consumer.timeout");
-        if (confValue == null)
-            return -1; // infinite
-        else
-            return Integer.parseInt(confValue.toString());
-    }
     public String getConsumerSubscriptionName() {
-        Object confValue = getConsumerConfValue("consumer.subscriptionName");
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
     public String getConsumerSubscriptionType() {
-        Object confValue = getConsumerConfValue("consumer.subscriptionType");
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
     public String getConsumerName() {
-        Object confValue = getConsumerConfValue("consumer.consumerName");
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
-
+    // NOTE: Below are not a standard Pulsar consumer configuration parameter as
+    //          listed in "https://pulsar.apache.org/docs/en/client-libraries-java/#configure-consumer"
+    //       They're custom-made configuration properties for NB pulsar driver consumer.
+    public int getConsumerTimeoutSeconds() {
+        Object confValue = getConsumerConfValue(
+            "consumer." + PulsarActivityUtil.CONSUMER_CONF_CUSTOM_KEY.timeout.label);
+        if (confValue == null)
+            return -1; // infinite
+        else
+            return Integer.parseInt(confValue.toString());
+    }
 
     //////////////////
     // Get Pulsar reader related config
@@ -279,23 +289,29 @@ public class PulsarNBClientConf {
         else
             readerConfMap.put(key, value);
     }
-    // Other consumer helper functions ...
+    // Other reader helper functions ...
     public String getReaderTopicName() {
-        Object confValue = getReaderConfValue("reader.topicName");
+        Object confValue = getReaderConfValue(
+            "reader." + PulsarActivityUtil.READER_CONF_STD_KEY.topicName.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
     public String getReaderName() {
-        Object confValue = getReaderConfValue("reader.readerName");
+        Object confValue = getReaderConfValue(
+            "reader." + PulsarActivityUtil.READER_CONF_STD_KEY.readerName.label);
         if (confValue == null)
             return "";
         else
             return confValue.toString();
     }
+    // NOTE: Below are not a standard Pulsar reader configuration parameter as
+    //          listed in "https://pulsar.apache.org/docs/en/client-libraries-java/#reader"
+    //       They're custom-made configuration properties for NB pulsar driver reader.
     public String getStartMsgPosStr() {
-        Object confValue = getReaderConfValue("reader.startMessagePos");
+        Object confValue = getReaderConfValue(
+            "reader." + PulsarActivityUtil.READER_CONF_CUSTOM_KEY.startMessagePos.label);
         if (confValue == null)
             return "";
         else

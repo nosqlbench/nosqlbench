@@ -8,8 +8,7 @@ import org.apache.pulsar.client.admin.Namespaces;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.admin.Tenants;
-import org.apache.pulsar.common.policies.data.TenantInfoImpl;
-
+import org.apache.pulsar.common.policies.data.TenantInfo;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -45,26 +44,25 @@ public class PulsarAdminTenantOp extends PulsarAdminOp {
 
         // Admin API - create tenants and namespaces
         if (!adminDelOp) {
-
-            TenantInfoImpl tenantInfo = TenantInfoImpl.builder().build();
-            tenantInfo.setAdminRoles(adminRoleSet);
-
-            if ( !allowedClusterSet.isEmpty() ) {
-                tenantInfo.setAllowedClusters(allowedClusterSet);
-            } else {
-                tenantInfo.setAllowedClusters(clientSpace.getPulsarClusterMetadata());
-            }
+            TenantInfo tenantInfo = TenantInfo.builder()
+                .adminRoles(adminRoleSet)
+                .allowedClusters(!allowedClusterSet.isEmpty() ? allowedClusterSet : clientSpace.getPulsarClusterMetadata())
+                .build();
 
             try {
                 if (!asyncApi) {
                     tenants.createTenant(tenant, tenantInfo);
-                    logger.trace("Successfully created tenant \"" + tenant + "\" synchronously!");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Successful sync creation of tenant {}", tenant);
+                    }
                 } else {
                     CompletableFuture<Void> future = tenants.createTenantAsync(tenant, tenantInfo);
-                    future.whenComplete((unused, throwable) ->
-                        logger.trace("Successfully created tenant \"" + tenant + "\" asynchronously!"))
-                    .exceptionally(ex -> {
-                        logger.error("Failed to create tenant \"" + tenant + "\" asynchronously!");
+                    future.whenComplete((unused, throwable) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Successful async creation of tenant {}", tenant);
+                        }
+                }).exceptionally(ex -> {
+                        logger.error("Failed async creation of tenant {}", tenant);
                         return null;
                     });
                 }
@@ -86,13 +84,19 @@ public class PulsarAdminTenantOp extends PulsarAdminOp {
                 if ( nsNum == 0 ) {
                     if (!asyncApi) {
                         tenants.deleteTenant(tenant);
-                        logger.trace("Successfully deleted tenant \"" + tenant + "\" synchronously!");
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Successful sync deletion of tenant {}", tenant);
+                        }
                     } else {
                         CompletableFuture<Void> future = tenants.deleteTenantAsync(tenant);
-                        future.whenComplete((unused, throwable)
-                            -> logger.trace("Successfully deleted tenant \"" + tenant + "\" asynchronously!"))
-                        .exceptionally(ex -> {
-                            logger.error("Failed to delete tenant \"" + tenant + "\" asynchronously!");
+                        future.whenComplete((unused, throwable) -> {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Successful async deletion of tenant {}", tenant);
+                            }
+                        }).exceptionally(ex -> {
+                            if (logger.isDebugEnabled()) {
+                                logger.error("Failed async deletion of tenant {}", tenant);
+                            }
                             return null;
                         });
                     }

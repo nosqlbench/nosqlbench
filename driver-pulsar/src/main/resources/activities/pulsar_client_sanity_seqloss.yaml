@@ -1,0 +1,36 @@
+bindings:
+  # message key, property and value
+  myprop1: AlphaNumericString(10)
+  myvalue: NumberNameToString()
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  topic_uri: "persistent://public/default/sanity_seqloss2"
+  # Only applicable to producer and consumer
+  # - used for message ordering and message loss check
+  seq_tracking: "false"
+
+blocks:
+  - name: producer-block
+    tags:
+      phase: producer
+      admin_task: false
+    statements:
+      - name: s1
+        optype: msg-send
+        #seqerr_simu: "out_of_order"
+        seqerr_simu: "data_loass"
+        msg_key:
+        msg_property:
+        msg_value: "{myvalue}"
+
+  - name: consumer-block
+    tags:
+      phase: consumer
+      admin_task: false
+    statements:
+      - name: s1
+        optype: msg-consume
+        subscription_name: "mysub"
+        subscription_type:
+        consumer_name:

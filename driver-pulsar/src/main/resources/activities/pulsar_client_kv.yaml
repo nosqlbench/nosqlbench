@@ -1,7 +1,10 @@
 bindings:
-  # message key and value
+  # message key, property and value
   mykey:
+  int_prop_val: ToString(); Prefix("IntProp_")
+  text_prop_val: AlphaNumericString(10); Prefix("TextProp_")
   myvalue: NumberNameToString()  #AlphaNumericString(20)
+  # tenant, namespace, and core topic name (without tenant and namespace)
   tenant: Mod(100); Div(10L); ToString(); Prefix("tnt")
   namespace: Mod(10); Div(5L); ToString(); Prefix("ns")
   core_topic_name: Mod(5); ToString(); Prefix("t")
@@ -25,6 +28,11 @@ blocks:
       - name: s2
         optype: batch-msg-send
         msg_key: "{mykey}"
+        msg_property: |
+          {
+            "prop1": "{int_prop_val}",
+            "prop2": "{text_prop_val}}"
+          }
         msg_value: "{myvalue}"
         ratio: 100
       - name: s3
@@ -49,8 +57,6 @@ blocks:
     statements:
       - name: s1
         optype: msg-consume
-        topic_names:
-        topics_pattern:
         subscription_name: "mysub"
         subscription_type:
         consumer_name:
@@ -63,6 +69,19 @@ blocks:
       - name: s1
         optype: msg-read
         reader_name:
+
+  - name: multi-topic-consumer-block
+    tags:
+      phase: multi-topic-consumer
+      admin_task: false
+    statements:
+      - name: s1
+        optype: msg-mt-consume
+        topic_names:
+        topics_pattern:
+        subscription_name: "mysub"
+        subscription_type:
+        consumer_name:
 
 #  - websocket-producer:
 #    tags:

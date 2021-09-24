@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 
@@ -21,11 +22,12 @@ public class PulsarAdminNamespaceMapper extends PulsarAdminMapper {
 
     public PulsarAdminNamespaceMapper(CommandTemplate cmdTpl,
                                       PulsarSpace clientSpace,
+                                      PulsarActivity pulsarActivity,
                                       LongFunction<Boolean> asyncApiFunc,
                                       LongFunction<Boolean> adminDelOpFunc,
                                       LongFunction<String> namespaceFunc)
     {
-        super(cmdTpl, clientSpace, asyncApiFunc, adminDelOpFunc);
+        super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, adminDelOpFunc);
         this.namespaceFunc = namespaceFunc;
     }
 
