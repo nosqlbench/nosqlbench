@@ -515,15 +515,18 @@ message from multiple Pulsar topics per NB cycle execution. A typical format
 of this command block is as below:
 
 ```yaml
-  - name: consumer-block
+  - name: multi-topic-consumer-block
     tags:
-        phase: consumer
+      phase: multi-topic-consumer
+      admin_task: false
     statements:
-        - name: s1
-          optype: msg-consume
-          subscription_name:
-          subscription_type:
-          consumer_name:
+      - name: s1
+        optype: msg-mt-consume
+        topic_names:
+        topics_pattern:
+        subscription_name: "mysub"
+        subscription_type:
+        consumer_name:
 ```
 
 This command block only has 1 statements (s1):
