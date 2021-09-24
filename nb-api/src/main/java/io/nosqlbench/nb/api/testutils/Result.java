@@ -26,7 +26,7 @@ public class Result {
     private final long start;
     private final long end;
     private final long ops;
-    private String description;
+    private final String description;
 
     public Result(String description, long start, long end, long ops) {
         this.description = description;
@@ -58,15 +58,15 @@ public class Result {
     @Override
     public String toString() {
         long time_ns = end - start;
-        return String.format("'%s': %d_ops %f_S %.3f_ops_s, %.0f_ns_op", description, ops, getTimeSeconds(), getOpsPerSec(), getNsPerOp());
+        return String.format("'%s': %d_ops %,f_S %,.3f_ops_s, %,.0f_ns_op", description, ops, getTimeSeconds(), getOpsPerSec(), getNsPerOp());
     }
 
     public static List<String> toString(List<Result> results) {
         List<String> ldesc = results.stream().map(Result::getDescription).collect(Collectors.toList());
-        List<String> lops = results.stream().map(r -> String.format("%d_ops",r.getTotalOps())).collect(Collectors.toList());
-        List<String> ltime_s = results.stream().map(r -> String.format("%f_S",r.getTimeSeconds())).collect(Collectors.toList());
-        List<String> lops_s = results.stream().map(r -> String.format("%.3f_ops_s",r.getOpsPerSec())).collect(Collectors.toList());
-        List<String> lns_op = results.stream().map(r -> String.format("%.0f_ns_op",r.getNsPerOp())).collect(Collectors.toList());
+        List<String> lops = results.stream().map(r -> String.format("%,d_ops",r.getTotalOps())).collect(Collectors.toList());
+        List<String> ltime_s = results.stream().map(r -> String.format("%,f_S",r.getTimeSeconds())).collect(Collectors.toList());
+        List<String> lops_s = results.stream().map(r -> String.format("%,.3f_ops_s",r.getOpsPerSec())).collect(Collectors.toList());
+        List<String> lns_op = results.stream().map(r -> String.format("%,.0f_ns_op",r.getNsPerOp())).collect(Collectors.toList());
 
         int sizeof_ldesc = ldesc.stream().mapToInt(String::length).max().orElse(0);
         int sizeof_lops = lops.stream().mapToInt(String::length).max().orElse(0);
@@ -82,7 +82,6 @@ public class Result {
         }
         return rows;
     }
-
 
     public long getStartNanos() {
         return this.start;

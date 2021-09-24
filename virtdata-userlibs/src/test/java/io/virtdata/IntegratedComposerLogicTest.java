@@ -69,10 +69,10 @@ public class IntegratedComposerLogicTest {
     public void testResourceLoader() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(" ModuloLineToString('data/variable_words.txt') -> String");
         assertThat(dataMapper).isPresent();
-        assertThat(dataMapper.get().get(1)).isEqualToComparingFieldByField("completion_count");
+        assertThat(dataMapper.get().get(1)).isEqualTo("completion_count");
         dataMapper = VirtData.getOptionalMapper("compose ModuloLineToString('variable_words.txt') -> String");
         assertThat(dataMapper).isPresent();
-        assertThat(dataMapper.get().get(1)).isEqualToComparingFieldByField("completion_count");
+        assertThat(dataMapper.get().get(1)).isEqualTo("completion_count");
     }
 
     @Test
