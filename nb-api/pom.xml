@@ -5,7 +5,7 @@
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
-    <version>4.15.54-SNAPSHOT</version>
+    <version>4.15.54</version>
     <relativePath>../mvn-defaults</relativePath>
   </parent>
 
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>io.nosqlbench</groupId>
       <artifactId>nb-annotations</artifactId>
-        <version>4.15.54-SNAPSHOT</version>
+        <version>4.15.54</version>
     </dependency>
 
       <dependency>
