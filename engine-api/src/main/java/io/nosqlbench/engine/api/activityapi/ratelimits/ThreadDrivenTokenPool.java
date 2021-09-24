@@ -240,13 +240,12 @@ public class ThreadDrivenTokenPool implements TokenPool {
     @Override
     public String toString() {
         return String.format(
-            "{ active:%d, max:%d, fill:'(%,3.1f%%)A (%,3.1f%%)B', wait_ns:%,d, blocks:%,d, notifies:%,d}",
+            "{ active:%d, max:%d, fill:'(%,3.1f%%)A (%,3.1f%%)B', wait_ns:%,d, blocks:%,d }",
             activePool, maxActivePool,
             (((double) activePool / (double) maxActivePool) * 100.0),
             (((double) activePool / (double) maxOverActivePool) * 100.0),
             waitingPool,
-            blocks,
-            notifies
+            blocks
         );
     }
 
