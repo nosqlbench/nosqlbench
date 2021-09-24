@@ -52,13 +52,17 @@ public class PulsarAdminTenantOp extends PulsarAdminOp {
             try {
                 if (!asyncApi) {
                     tenants.createTenant(tenant, tenantInfo);
-                    logger.trace("Successfully created tenant \"" + tenant + "\" synchronously!");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Successful sync creation of tenant {}", tenant);
+                    }
                 } else {
                     CompletableFuture<Void> future = tenants.createTenantAsync(tenant, tenantInfo);
-                    future.whenComplete((unused, throwable) ->
-                        logger.trace("Successfully created tenant \"" + tenant + "\" asynchronously!"))
-                    .exceptionally(ex -> {
-                        logger.error("Failed to create tenant \"" + tenant + "\" asynchronously!");
+                    future.whenComplete((unused, throwable) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Successful async creation of tenant {}", tenant);
+                        }
+                }).exceptionally(ex -> {
+                        logger.error("Failed async creation of tenant {}", tenant);
                         return null;
                     });
                 }
@@ -80,13 +84,19 @@ public class PulsarAdminTenantOp extends PulsarAdminOp {
                 if ( nsNum == 0 ) {
                     if (!asyncApi) {
                         tenants.deleteTenant(tenant);
-                        logger.trace("Successfully deleted tenant \"" + tenant + "\" synchronously!");
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Successful sync deletion of tenant {}", tenant);
+                        }
                     } else {
                         CompletableFuture<Void> future = tenants.deleteTenantAsync(tenant);
-                        future.whenComplete((unused, throwable)
-                            -> logger.trace("Successfully deleted tenant \"" + tenant + "\" asynchronously!"))
-                        .exceptionally(ex -> {
-                            logger.error("Failed to delete tenant \"" + tenant + "\" asynchronously!");
+                        future.whenComplete((unused, throwable) -> {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Successful async deletion of tenant {}", tenant);
+                            }
+                        }).exceptionally(ex -> {
+                            if (logger.isDebugEnabled()) {
+                                logger.error("Failed async deletion of tenant {}", tenant);
+                            }
                             return null;
                         });
                     }
