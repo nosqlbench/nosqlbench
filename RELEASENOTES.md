@@ -1,6 +1,5 @@
-- 6db90cdf (HEAD -> main, origin/main) Merge pull request #359 from yabinmeng/main
-- 3ed1e7f6 Merge branch 'main' of https://github.com/yabinmeng/nosqlbench
-- d8bc8ce4 README update
-- aff249fe Merge branch 'nosqlbench:main' into main
-- da7fd894 Merge remote-tracking branch 'upstream/main'
-- 6903a230 README update
+- 16a502d4 (HEAD -> main, origin/main) Merge pull request #360 from yabinmeng/main
+- d781e1ac README update about customized Pular driver exception
+- 949790b7 Add customized Pulsar driver exceptions
+- f72bdb6b Readme TOC update
+- e9e7e951 Add support for message duplication check (if message de-duplication is enabled, either at broker-level, namespace-level, or topic-level)
