@@ -4,6 +4,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverParamException;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverUnexpectedException;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -77,8 +79,8 @@ public class PulsarProducerOp implements PulsarOp {
             return;
         }
 
-        if ((msgPayload == null) || msgPayload.isEmpty()) {
-            throw new RuntimeException("Message payload (\"msg-value\") can't be empty!");
+        if ( StringUtils.isBlank(msgPayload)) {
+            throw new PulsarDriverParamException("Message payload (\"msg-value\") can't be empty!");
         }
 
         TypedMessageBuilder typedMessageBuilder;
@@ -158,12 +160,15 @@ public class PulsarProducerOp implements PulsarOp {
                 }
             }
             catch (PulsarClientException | ExecutionException | InterruptedException pce) {
-                logger.trace(
+                String errMsg =
                     "Sync message sending failed: " +
                     "key - " + msgKey + "; " +
                     "properties - " + msgProperties + "; " +
-                    "payload - " + msgPayload);
-                throw new RuntimeException(pce);
+                    "payload - " + msgPayload;
+
+                logger.trace(errMsg);
+
+                throw new PulsarDriverUnexpectedException(errMsg);
             }
 
             timeTracker.run();
@@ -219,7 +224,7 @@ public class PulsarProducerOp implements PulsarOp {
                 });
             }
             catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new PulsarDriverUnexpectedException(e);
             }
         }
     }

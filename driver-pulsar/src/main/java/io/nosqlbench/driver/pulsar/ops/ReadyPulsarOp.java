@@ -1,6 +1,8 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.*;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverParamException;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverUnsupportedOpException;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -41,13 +43,13 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         this.cmdTpl = new CommandTemplate(opTemplate);
 
         if (cmdTpl.isDynamic("op_scope")) {
-            throw new RuntimeException("op_scope must be static");
+            throw new PulsarDriverParamException("\"op_scope\" parameter must be static");
         }
 
         // TODO: At the moment, only supports static "client"
         if (cmdTpl.containsKey("client")) {
             if (cmdTpl.isDynamic("client")) {
-                throw new RuntimeException("\"client\" can't be made dynamic!");
+                throw new PulsarDriverParamException("\"client\" parameter can't be made dynamic!");
             } else {
                 String client_name = cmdTpl.getStatic("client");
                 this.clientSpace = pcache.getPulsarSpace(client_name);
@@ -67,12 +69,12 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     private LongFunction<PulsarOp> resolve() {
 
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {
-            throw new RuntimeException("Statement parameter \"optype\" must be static and have a valid value!");
+            throw new PulsarDriverParamException("[resolve()] \"optype\" parameter must be static and have a valid value!");
         }
         String stmtOpType = cmdTpl.getStatic("optype");
 
         if (cmdTpl.containsKey("topic_url")) {
-            throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
+            throw new PulsarDriverParamException("[resolve()] \"topic_url\" parameter is not valid. Perhaps you mean \"topic_uri\"?");
         }
 
         // Doc-level parameter: topic_uri
@@ -93,7 +95,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
                 asyncApiFunc = (l) -> value;
             } else {
-                    throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
+                    throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
             }
         }
         logger.info("async_api: {}", asyncApiFunc.apply(0));
@@ -105,7 +107,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label));
                 useTransactionFunc = (l) -> value;
             } else {
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label + "\" parameter cannot be dynamic!");
             }
         }
         logger.info("use_transaction: {}", useTransactionFunc.apply(0));
@@ -116,7 +118,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label))
                 adminDelOpFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label));
             else
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label + "\" parameter cannot be dynamic!");
         }
         logger.info("admin_delop: {}", adminDelOpFunc.apply(0));
 
@@ -126,7 +128,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label))
                 seqTrackingFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label));
             else
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label + "\" parameter cannot be dynamic!");
         }
         logger.info("seq_tracking: {}", seqTrackingFunc.apply(0));
 
@@ -136,7 +138,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label))
                 brokerMsgDedupFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label));
             else
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label + "\" parameter cannot be dynamic!");
         }
         logger.info("msg_dedup_broker: {}", seqTrackingFunc.apply(0));
 
@@ -212,7 +214,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         }
         // Invalid operation type
         else {
-            throw new RuntimeException("Unsupported Pulsar operation type");
+            throw new PulsarDriverUnsupportedOpException();
         }
     }
 
@@ -224,7 +226,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     {
         if ( cmdTpl.isDynamic("admin_roles") ||
              cmdTpl.isDynamic("allowed_clusters") ) {
-            throw new RuntimeException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
+            throw new PulsarDriverParamException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
         }
 
         LongFunction<Set<String>> adminRolesFunc;
@@ -357,7 +359,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             if (cmdTpl.isStatic("seqerr_simu")) {
                 seqErrSimuTypeFunc = (l) -> cmdTpl.getStatic("seqerr_simu");
             } else {
-                throw new RuntimeException("\"seqerr_simu\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolveMsgSend()] \"seqerr_simu\" parameter cannot be dynamic!");
             }
         }
 
@@ -391,7 +393,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 valueFunc = (l) -> null;
             }
         } else {
-            throw new RuntimeException("Producer:: \"msg_value\" field must be specified!");
+            throw new PulsarDriverParamException("[resolveMsgSend()] \"msg_value\" field must be specified!");
         }
 
         return new PulsarProducerMapper(
@@ -682,7 +684,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 valueFunc = (l) -> null;
             }
         } else {
-            throw new RuntimeException("Batch Producer:: \"msg_value\" field must be specified!");
+            throw new PulsarDriverParamException("[resolveMsgBatchSend()] \"msg_value\" field must be specified!");
         }
 
         return new PulsarBatchProducerMapper(

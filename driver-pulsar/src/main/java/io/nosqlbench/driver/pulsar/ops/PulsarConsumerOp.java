@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
+import io.nosqlbench.driver.pulsar.exception.*;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -149,22 +150,16 @@ public class PulsarConsumerOp implements PulsarOp {
                         if ((curMsgSeqId - prevMsgSeqId) != 1) {
                             // abnormal case: out of ordering
                             if (curMsgSeqId < prevMsgSeqId) {
-                                throw new RuntimeException("" +
-                                    "[SyncAPI] Detected message ordering is not guaranteed (curCycleNum=" + curCycleNum +
-                                    ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
-                                    "Older messages are received earlier!");
+                                throw new PulsarMsgOutOfOrderException(
+                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
                             }
                             // abnormal case: message loss
                             else if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                throw new RuntimeException("" +
-                                    "[SyncAPI] Detected message sequence id gap (curCycleNum=" + curCycleNum +
-                                    ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
-                                    "Some published messages are not received!");
+                                throw new PulsarMsgLossException(
+                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
                             } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                throw new RuntimeException("" +
-                                    "[SyncAPI] Detected duplicate message when message deduplication is enabled " +
-                                    "(curCycleNum=" + curCycleNum + ", curMsgSeqId=" + curMsgSeqId +
-                                    ", prevMsgSeqId=" + prevMsgSeqId + ")!");
+                                throw new PulsarMsgDuplicateException(
+                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
                             }
                         }
                     }
@@ -193,7 +188,8 @@ public class PulsarConsumerOp implements PulsarOp {
             catch (Exception e) {
                 logger.error(
                     "Sync message receiving failed - timeout value: {} seconds ", timeoutSeconds);
-                throw new RuntimeException(e);
+                throw new PulsarDriverUnexpectedException("" +
+                    "Sync message receiving failed - timeout value: " + timeoutSeconds + " seconds ");
             }
         }
         else {
@@ -254,22 +250,16 @@ public class PulsarConsumerOp implements PulsarOp {
                             if ((curMsgSeqId - prevMsgSeqId) != 1) {
                                 // abnormal case: out of ordering
                                 if (curMsgSeqId < prevMsgSeqId) {
-                                    throw new RuntimeException("" +
-                                        "[AsyncAPI] Detected message ordering is not guaranteed (curCycleNum=" + curCycleNum +
-                                        ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
-                                        "Older messages are received earlier!");
+                                    throw new PulsarMsgOutOfOrderException(
+                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
                                 }
                                 // abnormal case: message loss
                                 else if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                    throw new RuntimeException("" +
-                                        "[AsyncAPI] Detected message sequence id gap (curCycleNum=" + curCycleNum +
-                                        ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
-                                        "Some published messages are not received!");
+                                    throw new PulsarMsgLossException(
+                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
                                 } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                    throw new RuntimeException("" +
-                                        "[AsyncAPI] Detected duplicate message when message deduplication is enabled " +
-                                        "(curCycleNum=" + curCycleNum + ", curMsgSeqId=" + curMsgSeqId +
-                                        ", prevMsgSeqId=" + prevMsgSeqId + ")!");
+                                    throw new PulsarMsgDuplicateException(
+                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
                                 }
                             }
                         }
@@ -289,7 +279,7 @@ public class PulsarConsumerOp implements PulsarOp {
                 });
             }
             catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new PulsarDriverUnexpectedException("Async message receiving failed");
             }
         }
     }
