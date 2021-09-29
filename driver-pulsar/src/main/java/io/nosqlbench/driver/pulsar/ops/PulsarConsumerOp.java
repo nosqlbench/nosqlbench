@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
@@ -27,6 +28,7 @@ public class PulsarConsumerOp implements PulsarOp {
     private final boolean seqTracking;
     private final Supplier<Transaction> transactionSupplier;
 
+    private final boolean topicMsgDedup;
     private final Consumer<?> consumer;
     private final Schema<?> pulsarSchema;
     private final int timeoutSeconds;
@@ -34,7 +36,7 @@ public class PulsarConsumerOp implements PulsarOp {
     private final long curCycleNum;
 
     private long curMsgSeqId;
-    private long prevMsgSeqid;
+    private long prevMsgSeqId;
 
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
@@ -49,6 +51,7 @@ public class PulsarConsumerOp implements PulsarOp {
         boolean useTransaction,
         boolean seqTracking,
         Supplier<Transaction> transactionSupplier,
+        boolean topicMsgDedup,
         Consumer<?> consumer,
         Schema<?> schema,
         int timeoutSeconds,
@@ -62,6 +65,7 @@ public class PulsarConsumerOp implements PulsarOp {
         this.seqTracking = seqTracking;
         this.transactionSupplier = transactionSupplier;
 
+        this.topicMsgDedup = topicMsgDedup;
         this.consumer = consumer;
         this.pulsarSchema = schema;
         this.timeoutSeconds = timeoutSeconds;
@@ -69,7 +73,7 @@ public class PulsarConsumerOp implements PulsarOp {
         this.e2eMsgProc = e2eMsgProc;
 
         this.curMsgSeqId = 0;
-        this.prevMsgSeqid = 0;
+        this.prevMsgSeqId = (curCycleNum - 1);
 
         this.bytesCounter = pulsarActivity.getBytesCounter();
         this.messageSizeHistogram = pulsarActivity.getMessageSizeHistogram();
@@ -136,22 +140,32 @@ public class PulsarConsumerOp implements PulsarOp {
                 }
 
                 // keep track of message ordering and message loss
-                if (seqTracking) {
-                    String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
+                String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
+                if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
                     curMsgSeqId = Long.parseLong(msgSeqIdStr);
 
-                    // normal case: message sequence id is monotonically increasing by 1
-                    if ((curMsgSeqId - prevMsgSeqid) == 1) {
-                        prevMsgSeqid = curMsgSeqId;
-                    }
-                    else {
-                        // abnormal case: out of ordering
-                        if (curMsgSeqId < prevMsgSeqid) {
-                            throw new RuntimeException("Detected message ordering is not guaranteed. Older messages are received earlier!");
-                        }
-                        // abnormal case: message loss
-                        else if ( (curMsgSeqId - prevMsgSeqid) > 1 ) {
-                            throw new RuntimeException("Detected message sequence id gap. Some published messages are not received!");
+                    if ( prevMsgSeqId > -1) {
+                        // normal case: message sequence id is monotonically increasing by 1
+                        if ((curMsgSeqId - prevMsgSeqId) != 1) {
+                            // abnormal case: out of ordering
+                            if (curMsgSeqId < prevMsgSeqId) {
+                                throw new RuntimeException("" +
+                                    "[SyncAPI] Detected message ordering is not guaranteed (curCycleNum=" + curCycleNum +
+                                    ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
+                                    "Older messages are received earlier!");
+                            }
+                            // abnormal case: message loss
+                            else if ((curMsgSeqId - prevMsgSeqId) > 1) {
+                                throw new RuntimeException("" +
+                                    "[SyncAPI] Detected message sequence id gap (curCycleNum=" + curCycleNum +
+                                    ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
+                                    "Some published messages are not received!");
+                            } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
+                                throw new RuntimeException("" +
+                                    "[SyncAPI] Detected duplicate message when message deduplication is enabled " +
+                                    "(curCycleNum=" + curCycleNum + ", curMsgSeqId=" + curMsgSeqId +
+                                    ", prevMsgSeqId=" + prevMsgSeqId + ")!");
+                            }
                         }
                     }
                 }
@@ -230,22 +244,33 @@ public class PulsarConsumerOp implements PulsarOp {
                         e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
                     }
 
-                    // keep track of message ordering and message loss
-                    if (seqTracking) {
-                        String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
+                    // keep track of message ordering, message loss, and message duplication
+                    String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
+                    if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
                         curMsgSeqId = Long.parseLong(msgSeqIdStr);
 
-                        // normal case: message sequence id is monotonically increasing by 1
-                        if ((curMsgSeqId - prevMsgSeqid) == 1) {
-                            prevMsgSeqid = curMsgSeqId;
-                        } else {
-                            // abnormal case: out of ordering
-                            if (curMsgSeqId < prevMsgSeqid) {
-                                throw new RuntimeException("Detected message ordering is not guaranteed. Older messages are received earlier!");
-                            }
-                            // abnormal case: message loss
-                            else if ((curMsgSeqId - prevMsgSeqid) > 1) {
-                                throw new RuntimeException("Detected message sequence id gap. Some published messages are not received!");
+                        if (prevMsgSeqId > -1) {
+                            // normal case: message sequence id is monotonically increasing by 1
+                            if ((curMsgSeqId - prevMsgSeqId) != 1) {
+                                // abnormal case: out of ordering
+                                if (curMsgSeqId < prevMsgSeqId) {
+                                    throw new RuntimeException("" +
+                                        "[AsyncAPI] Detected message ordering is not guaranteed (curCycleNum=" + curCycleNum +
+                                        ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
+                                        "Older messages are received earlier!");
+                                }
+                                // abnormal case: message loss
+                                else if ((curMsgSeqId - prevMsgSeqId) > 1) {
+                                    throw new RuntimeException("" +
+                                        "[AsyncAPI] Detected message sequence id gap (curCycleNum=" + curCycleNum +
+                                        ", curMsgSeqId=" + curMsgSeqId + ", prevMsgSeqId=" + prevMsgSeqId + "). " +
+                                        "Some published messages are not received!");
+                                } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
+                                    throw new RuntimeException("" +
+                                        "[AsyncAPI] Detected duplicate message when message deduplication is enabled " +
+                                        "(curCycleNum=" + curCycleNum + ", curMsgSeqId=" + curMsgSeqId +
+                                        ", prevMsgSeqId=" + prevMsgSeqId + ")!");
+                                }
                             }
                         }
                     }

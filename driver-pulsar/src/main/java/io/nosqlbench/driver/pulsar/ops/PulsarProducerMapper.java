@@ -1,6 +1,5 @@
 package io.nosqlbench.driver.pulsar.ops;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
@@ -12,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.LongFunction;
@@ -70,14 +68,17 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
 
         // Simulate error 10% of the time
         float rndVal = RandomUtils.nextFloat(0, 1.0f);
-        boolean simulationError = (rndVal > 0) && (rndVal < 0.1f);
+        boolean simulationError = (rndVal >= 0) && (rndVal < 0.1f);
         String seqErrSimuType = seqErrSimuTypeFunc.apply(value);
         boolean simulateMsgOutofOrder = simulationError &&
             !StringUtils.isBlank(seqErrSimuType) &&
             StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.OutOfOrder.label);
         boolean simulateMsgLoss = simulationError &&
             !StringUtils.isBlank(seqErrSimuType) &&
-            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.DataLoss.label);
+            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.MsgLoss.label);
+        boolean simulateMsgDup = simulationError &&
+            !StringUtils.isBlank(seqErrSimuType) &&
+            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.MsgDup.label);
 
         String msgKey = keyFunc.apply(value);
         String msgPayload = payloadFunc.apply(value);
@@ -100,14 +101,22 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
 
         // Set message sequence tracking property
         if (seqTracking) {
-            if (!simulateMsgOutofOrder) {
+            // normal case
+            if (!simulateMsgOutofOrder && !simulateMsgDup) {
                 msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value));
             }
-            else {
+            // simulate message out of order
+            else if ( simulateMsgOutofOrder ) {
                 int rndmOffset = 2;
                 if (value > rndmOffset)
                     msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value-rndmOffset));
             }
+            // simulate message duplication
+            else {
+                msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value-1));
+            }
+            // message loss simulation is not done by message property
+            // we simply skip sending message in the current NB cycle
         }
 
         return new PulsarProducerOp(

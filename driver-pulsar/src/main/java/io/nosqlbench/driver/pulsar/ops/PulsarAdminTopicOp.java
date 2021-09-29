@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.PulsarSpace;
+import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,13 +34,7 @@ public class PulsarAdminTopicOp extends PulsarAdminOp {
         this.topicUri = topicUri;
         this.partitionTopic = partitionTopic;
         this.partitionNum = partitionNum;
-
-        // Get tenant/namespace string
-        // - topicUri   : persistent://<tenant>/<namespace>/<topic>
-        // - tmpStr     : <tenant>/<namespace>/<topic>
-        // - fullNsName : <tenant>/<namespace>
-        String tmpStr = StringUtils.substringAfter(this.topicUri,"://");
-        this.fullNsName = StringUtils.substringBeforeLast(tmpStr, "/");
+        this.fullNsName = PulsarActivityUtil.getFullNamespaceName(this.topicUri);
     }
 
     // Check whether the specified topic already exists

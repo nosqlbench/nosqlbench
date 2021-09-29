@@ -127,6 +127,8 @@ At high level, Pulsar driver yaml file has the following structure:
     * **seq_tracking**: Whether to do message sequence tracking. This is
       used for message out-of-order and message loss detection (more on
       this later).
+    * **msg_dedup_broker**: Whether or not broker level message deduplication
+      is enabled.
 * **blocks**: includes a series of command blocks. Each command block
   defines one major Pulsar operation such as *producer*, *consumer*, etc.
   Right now, the following command blocks are already supported or will be
@@ -154,7 +156,10 @@ bindings:
 params:
   topic_uri: "<pulsar_topic_name>"
   async_api: "false"
+  use_transaction: "false"
   admin_delop: "false"
+  seq_transaction: "false"
+  msg_dedup_broker: "false"
 
 blocks:
   - name: <command_block_1>
@@ -684,7 +689,7 @@ NTP protocol.
 2) If there is some time lag of starting the consumer, we need to count that
 into consideration when interpreting the end-to-end message processing latency.
 
-## 1.8. Detect Message Out-of-order Error and Message Loss
+## 1.8. Detect Message Out-of-order, Message Loss, and Message Duplication
 
 In order to detect errors like message out-of-order and message loss through
 the NB Pulsar driver, we need to set the following document level parameter
@@ -696,6 +701,24 @@ params:
   seq_tracking: "true"
 ```
 
+For message duplication detection, if broker level message dedup configuration
+is enabled ("brokerDeduplicationEnabled=true" in broker.conf), we also need to
+enable this document level parameter:
+```
+params:
+  msg_dedup_broker: "true"
+```
+
+However, since message dedup. can be also enabled or disabled at namespace level
+or topic level, the NB Pulsar driver will also check the settings at these layers
+through API. Basically, the final message dedup setting for a topic is determined
+by the following rules:
+* if topic level message dedup is not set, check namespace level setting
+* if namespace level message dedup is not set, check broker level setting which
+  in turn is determined by the document level NB parameter **msg_dedup_broker**
+* if message dedup is enabled at multiple levels, the priority sequence follows:
+  * topic level > namespace level > broker level
+
 The logic of how this works is based on the fact that NB execution cycle number
 is monotonically increasing by 1 for every cycle moving forward. When publishing
 a series of messages, we use the current NB cycle number as one message property
@@ -703,17 +726,14 @@ which is also monotonically increasing by 1.
 
 When receiving the messages, if the message sequence number stored in the message
 property is not monotonically increasing or if there is a gap larger than 1, then
-it means the messages are either delivered out of the order or there are some message
-loss. Either way, the consumer NB execution will throw runtime exceptions, with the
-following messages respectively:
+it must be one of the following errors:
+* if the current message sequence ID is less than the previous message sequence ID, then
+  it is message out-of-order error
+* if the current message sequence ID is more than 1 bigger than the previous message sequence
+  ID, then it is message loss error
+* if message dedup is enabled and the current message sequence ID is equal to the previous message sequence ID, then it is message duplication error
 
-```text
-   "Detected message ordering is not guaranteed. Older messages are received earlier!"
-```
-
-```text
-   "Detected message sequence id gap. Some published messages are not received!"
-```
+In either case, a runtime error will be thrown out with corresponding error messages.
 
 ## 1.9. NB Activity Execution Parameters
 
