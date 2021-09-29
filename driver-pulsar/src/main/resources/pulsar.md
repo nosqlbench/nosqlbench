@@ -727,11 +727,14 @@ which is also monotonically increasing by 1.
 When receiving the messages, if the message sequence number stored in the message
 property is not monotonically increasing or if there is a gap larger than 1, then
 it must be one of the following errors:
-* if the current message sequence ID is less than the previous message sequence ID, then
-  it is message out-of-order error
-* if the current message sequence ID is more than 1 bigger than the previous message sequence
-  ID, then it is message loss error
-* if message dedup is enabled and the current message sequence ID is equal to the previous message sequence ID, then it is message duplication error
+* If the current message sequence ID is less than the previous message sequence ID,
+  then it is message out-of-order error. Exception **PulsarMsgOutOfOrderException**
+  will be thrown out.
+* if the current message sequence ID is more than 1 bigger than the previous message
+  sequence ID, then it is message loss error. Exception **PulsarMsgLossException**
+  will be thrown out.
+* if message dedup is enabled and the current message sequence ID is equal to the
+  previous message sequence ID, then it is message duplication error. Exception **PulsarMsgDuplicateException** will be thrown out.
 
 In either case, a runtime error will be thrown out with corresponding error messages.
 
