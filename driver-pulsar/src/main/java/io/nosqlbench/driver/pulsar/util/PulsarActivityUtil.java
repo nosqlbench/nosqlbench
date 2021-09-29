@@ -58,7 +58,8 @@ public class PulsarActivityUtil {
         ASYNC_API("async_api"),
         USE_TRANSACTION("use_transaction"),
         ADMIN_DELOP("admin_delop"),
-        SEQ_TRACKING("seq_tracking");
+        SEQ_TRACKING("seq_tracking"),
+        MSG_DEDUP_BROKER("msg_dedup_broker");
 
         public final String label;
 
@@ -305,7 +306,8 @@ public class PulsarActivityUtil {
     // Pulsar subscription type
     public enum SEQ_ERROR_SIMU_TYPE {
         OutOfOrder("out_of_order"),
-        DataLoss("data_loss");
+        MsgLoss("msg_loss"),
+        MsgDup("msg_dup");
 
         public final String label;
 
@@ -475,6 +477,18 @@ public class PulsarActivityUtil {
     public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(jsonStr, Map.class);
+    }
+
+    ///////
+    // Get full namespace name (<tenant>/<namespace>) from a Pulsar topic URI
+    public static String getFullNamespaceName(String topicUri) {
+        // Get tenant/namespace string
+        // - topicUri   : persistent://<tenant>/<namespace>/<topic>
+        // - tmpStr     : <tenant>/<namespace>/<topic>
+        // - fullNsName : <tenant>/<namespace>
+
+        String tmpStr = StringUtils.substringAfter(topicUri,"://");
+        return StringUtils.substringBeforeLast(tmpStr, "/");
     }
 }
 

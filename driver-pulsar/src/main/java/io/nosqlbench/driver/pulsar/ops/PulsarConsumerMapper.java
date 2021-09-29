@@ -30,6 +30,7 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final static Logger logger = LogManager.getLogger(PulsarProducerMapper.class);
 
     private final LongFunction<Consumer<?>> consumerFunc;
+    private final LongFunction<Boolean> topicMsgDedupFunc;
     private final boolean e2eMsProc;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
@@ -39,10 +40,12 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
                                 LongFunction<Boolean> useTransactionFunc,
                                 LongFunction<Boolean> seqTrackingFunc,
                                 LongFunction<Supplier<Transaction>> transactionSupplierFunc,
+                                LongFunction<Boolean> topicMsgDedupFunc,
                                 LongFunction<Consumer<?>> consumerFunc,
                                 boolean e2eMsgProc) {
         super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, useTransactionFunc, seqTrackingFunc, transactionSupplierFunc);
         this.consumerFunc = consumerFunc;
+        this.topicMsgDedupFunc = topicMsgDedupFunc;
         this.e2eMsProc = e2eMsgProc;
     }
 
@@ -53,6 +56,7 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
         boolean useTransaction = useTransactionFunc.apply(value);
         boolean seqTracking = seqTrackingFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
+        boolean topicMsgDedup = topicMsgDedupFunc.apply(value);
 
         return new PulsarConsumerOp(
             pulsarActivity,
@@ -60,6 +64,7 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
             useTransaction,
             seqTracking,
             transactionSupplier,
+            topicMsgDedup,
             consumer,
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
