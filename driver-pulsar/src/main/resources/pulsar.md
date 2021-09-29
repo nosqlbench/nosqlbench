@@ -16,7 +16,7 @@
   - [1.5. Message Properties](#15-message-properties)
   - [1.6. Schema Support](#16-schema-support)
   - [1.7. Measure End-to-end Message Processing Latency](#17-measure-end-to-end-message-processing-latency)
-  - [1.8. Detect Message Out-of-order Error and Message Loss](#18-detect-message-out-of-order-error-and-message-loss)
+  - [1.8. Detect Message Out-of-order, Message Loss, and Message Duplication](#18-detect-message-out-of-order-message-loss-and-message-duplication)
   - [1.9. NB Activity Execution Parameters](#19-nb-activity-execution-parameters)
   - [1.10. NB Pulsar Driver Execution Example](#110-nb-pulsar-driver-execution-example)
   - [1.11. Appendix A. Template Global Setting File (config.properties)](#111-appendix-a-template-global-setting-file-configproperties)
