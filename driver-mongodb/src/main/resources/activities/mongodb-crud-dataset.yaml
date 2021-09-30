@@ -57,6 +57,7 @@ blocks:
       - write-document: |
           {
             insert: "<<collection:crud_dataset>>",
+            writeConcern: { w: "majority" },
             documents: [ { "_id": "{seq_key}", {document_json_without_id} ]
           }
         tags:
@@ -85,6 +86,7 @@ blocks:
       - update-document: |
           {
             update: "<<collection:crud_dataset>>",
+            writeConcern: { w: "majority" },
             updates: [
               {
                 q: { _id: "{random_key}" },
