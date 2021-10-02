@@ -82,6 +82,7 @@ blocks:
       - write-document: |
           {
             insert: "<<collection:crud_basic>>",
+            writeConcern: { w: "majority" },
             documents: [
               {
                 "_id":          "{seq_key}",
@@ -133,6 +134,7 @@ blocks:
       - update-document: |
           {
             update: "<<collection:crud_basic>>",
+            writeConcern: { w: "majority" },
             updates: [
               {
                 q: { _id: "{random_key}" },
