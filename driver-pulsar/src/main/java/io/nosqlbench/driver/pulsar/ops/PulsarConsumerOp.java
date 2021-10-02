@@ -31,6 +31,7 @@ public class PulsarConsumerOp implements PulsarOp {
 
     private final boolean topicMsgDedup;
     private final Consumer<?> consumer;
+    private final String subscriptionType;
     private final Schema<?> pulsarSchema;
     private final int timeoutSeconds;
     private final boolean e2eMsgProc;
@@ -54,6 +55,7 @@ public class PulsarConsumerOp implements PulsarOp {
         Supplier<Transaction> transactionSupplier,
         boolean topicMsgDedup,
         Consumer<?> consumer,
+        String subscriptionType,
         Schema<?> schema,
         int timeoutSeconds,
         long curCycleNum,
@@ -68,6 +70,7 @@ public class PulsarConsumerOp implements PulsarOp {
 
         this.topicMsgDedup = topicMsgDedup;
         this.consumer = consumer;
+        this.subscriptionType = subscriptionType;
         this.pulsarSchema = schema;
         this.timeoutSeconds = timeoutSeconds;
         this.curCycleNum = curCycleNum;
@@ -149,17 +152,28 @@ public class PulsarConsumerOp implements PulsarOp {
                         // normal case: message sequence id is monotonically increasing by 1
                         if ((curMsgSeqId - prevMsgSeqId) != 1) {
                             // abnormal case: out of ordering
+                            // - for any subscription type, this check should always hold
                             if (curMsgSeqId < prevMsgSeqId) {
                                 throw new PulsarMsgOutOfOrderException(
                                     false, curCycleNum, curMsgSeqId, prevMsgSeqId);
                             }
-                            // abnormal case: message loss
-                            else if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                throw new PulsarMsgLossException(
-                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                            } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                throw new PulsarMsgDuplicateException(
-                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                            // - this sequence based message loss and message duplicate check can't be used for
+                            //   "Shared" subscription (ignore this check)
+                            // - TODO: for Key_Shared subscription type, this logic needs to be improved on
+                            //         per-key basis
+                            else {
+                                if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
+                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
+                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
+                                    // abnormal case: message loss
+                                    if ((curMsgSeqId - prevMsgSeqId) > 1) {
+                                        throw new PulsarMsgLossException(
+                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                    } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
+                                        throw new PulsarMsgDuplicateException(
+                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                    }
+                                }
                             }
                         }
                     }
@@ -249,17 +263,28 @@ public class PulsarConsumerOp implements PulsarOp {
                             // normal case: message sequence id is monotonically increasing by 1
                             if ((curMsgSeqId - prevMsgSeqId) != 1) {
                                 // abnormal case: out of ordering
+                                // - for any subscription type, this check should always hold
                                 if (curMsgSeqId < prevMsgSeqId) {
                                     throw new PulsarMsgOutOfOrderException(
-                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                        false, curCycleNum, curMsgSeqId, prevMsgSeqId);
                                 }
-                                // abnormal case: message loss
-                                else if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                    throw new PulsarMsgLossException(
-                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                    throw new PulsarMsgDuplicateException(
-                                        true, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                // - this sequence based message loss and message duplicate check can't be used for
+                                //   "Shared" subscription (ignore this check)
+                                // - TODO: for Key_Shared subscription type, this logic needs to be improved on
+                                //         per-key basis
+                                else {
+                                    if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
+                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
+                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
+                                        // abnormal case: message loss
+                                        if ((curMsgSeqId - prevMsgSeqId) > 1) {
+                                            throw new PulsarMsgLossException(
+                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                        } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
+                                            throw new PulsarMsgDuplicateException(
+                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -401,11 +401,6 @@ public class PulsarSpace {
         SubscriptionType subscriptionType = getEffectiveSubscriptionType(cycleSubscriptionType);
         String consumerName = getEffectiveConsumerName(cycleConsumerName);
 
-        if ( subscriptionType.equals(SubscriptionType.Exclusive) && (activityDef.getThreads() > 1) ) {
-            throw new RuntimeException("Consumer:: trying to create multiple consumers of " +
-                "\"Exclusive\" subscription type under the same subscription name to the same topic!");
-        }
-
         if (StringUtils.isAnyBlank(cycleTopicName, subscriptionName)) {
             throw new RuntimeException("Consumer:: must specify a topic name and a subscription name");
         }

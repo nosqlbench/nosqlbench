@@ -108,8 +108,8 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
             // simulate message out of order
             else if ( simulateMsgOutofOrder ) {
                 int rndmOffset = 2;
-                if (value > rndmOffset)
-                    msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value-rndmOffset));
+                msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID,
+                    String.valueOf((value > rndmOffset) ? (value-rndmOffset) : value));
             }
             // simulate message duplication
             else {

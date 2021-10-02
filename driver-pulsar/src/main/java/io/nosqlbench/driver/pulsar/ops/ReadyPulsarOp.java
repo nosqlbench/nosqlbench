@@ -497,6 +497,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             transactionSupplierFunc,
             topicMsgDedupFunc,
             consumerFunc,
+            subscription_type_func,
             e2eMsgProc);
     }
 
@@ -586,6 +587,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             // e.g. pulsarAdmin.getPulsarAdmin().topics().getDeduplicationStatus(message.getTopicName())
             brokerMsgDupFunc,
             mtConsumerFunc,
+            subscription_type_func,
             false);
     }
 
