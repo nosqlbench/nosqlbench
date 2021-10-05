@@ -1,5 +1,5 @@
-- 16a502d4 (HEAD -> main, origin/main) Merge pull request #360 from yabinmeng/main
-- d781e1ac README update about customized Pular driver exception
-- 949790b7 Add customized Pulsar driver exceptions
-- f72bdb6b Readme TOC update
-- e9e7e951 Add support for message duplication check (if message de-duplication is enabled, either at broker-level, namespace-level, or topic-level)
+- 3b674983 (HEAD -> main, origin/main) Merge pull request #362 from yabinmeng/main
+- bf98d644 Merge branch 'nosqlbench:main' into main
+- 793af965 Ignore abnormal message processing error for Shared and Key_Shared subscription type.
+- f32caf1e Merge pull request #361 from ivansenic/ise-mongo-update
+- e8b32584 add writeConcern to the mongodb crud workflows
