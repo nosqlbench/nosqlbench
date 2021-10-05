@@ -49,8 +49,12 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
             <version>4.15.58-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
+            <version>4.15.58-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -227,7 +231,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-dsegraph-shaded</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
+                    <version>4.15.58-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -240,12 +244,12 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-cql-shaded</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
+                    <version>4.15.58-SNAPSHOT</version>
                 </dependency>
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-cqlverify</artifactId>
-                    <version>4.15.52-SNAPSHOT</version>
+                    <version>4.15.58-SNAPSHOT</version>
                 </dependency>
             </dependencies>
 
