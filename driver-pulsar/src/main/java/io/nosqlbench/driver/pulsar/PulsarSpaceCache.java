@@ -20,20 +20,17 @@ public class PulsarSpaceCache {
         this.activity = pulsarActivity;
     }
 
-    public PulsarSpace getPulsarSpace(String name) {
-        return clientScopes.computeIfAbsent(name, spaceName ->
-            new PulsarSpace(
-                spaceName,
-                activity.getPulsarConf(),
-                activity.getPulsarSvcUrl(),
-                activity.getWebSvcUrl(),
-                activity.getPulsarAdmin(),
-                activity.getActivityDef(),
-                activity.getCreateTransactionTimer()
-            ));
+    public Iterable<PulsarSpace> getAssociatedPulsarSpace() {
+        return clientScopes.values();
     }
 
-    public PulsarActivity getActivity() {
+    public PulsarActivity getAssociatedPulsarActivity() {
         return activity;
     }
+
+    public PulsarSpace getPulsarSpace(String name) {
+        return clientScopes.computeIfAbsent(name, spaceName -> new PulsarSpace(spaceName, activity));
+    }
+
+    public PulsarActivity getActivity() { return activity; }
 }

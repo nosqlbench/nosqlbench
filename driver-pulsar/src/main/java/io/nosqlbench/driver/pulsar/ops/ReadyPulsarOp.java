@@ -1,6 +1,8 @@
 package io.nosqlbench.driver.pulsar.ops;
 
 import io.nosqlbench.driver.pulsar.*;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverParamException;
+import io.nosqlbench.driver.pulsar.exception.PulsarDriverUnsupportedOpException;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -9,6 +11,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.PulsarAdmin;
+import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
@@ -21,7 +25,9 @@ import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
+
     private final static Logger logger = LogManager.getLogger(ReadyPulsarOp.class);
+
     private final OpTemplate opTpl;
     private final CommandTemplate cmdTpl;
     private final PulsarSpace clientSpace;
@@ -37,13 +43,13 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         this.cmdTpl = new CommandTemplate(optpl);
 
         if (cmdTpl.isDynamic("op_scope")) {
-            throw new RuntimeException("op_scope must be static");
+            throw new PulsarDriverParamException("\"op_scope\" parameter must be static");
         }
 
         // TODO: At the moment, only supports static "client"
         if (cmdTpl.containsKey("client")) {
             if (cmdTpl.isDynamic("client")) {
-                throw new RuntimeException("\"client\" can't be made dynamic!");
+                throw new PulsarDriverParamException("\"client\" parameter can't be made dynamic!");
             } else {
                 String client_name = cmdTpl.getStatic("client");
                 this.clientSpace = pcache.getPulsarSpace(client_name);
@@ -63,15 +69,15 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     private LongFunction<PulsarOp> resolve() {
 
         if (!cmdTpl.containsKey("optype") || !cmdTpl.isStatic("optype")) {
-            throw new RuntimeException("Statement parameter \"optype\" must be static and have a valid value!");
+            throw new PulsarDriverParamException("[resolve()] \"optype\" parameter must be static and have a valid value!");
         }
         String stmtOpType = cmdTpl.getStatic("optype");
 
         if (cmdTpl.containsKey("topic_url")) {
-            throw new RuntimeException("topic_url is not valid. Perhaps you mean topic_uri ?");
+            throw new PulsarDriverParamException("[resolve()] \"topic_url\" parameter is not valid. Perhaps you mean \"topic_uri\"?");
         }
 
-        // Global parameter: topic_uri
+        // Doc-level parameter: topic_uri
         LongFunction<String> topicUriFunc = (l) -> null;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label)) {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label)) {
@@ -80,60 +86,135 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 topicUriFunc = (l) -> cmdTpl.getDynamic(PulsarActivityUtil.DOC_LEVEL_PARAMS.TOPIC_URI.label, l);
             }
         }
+        logger.info("topic_uri: {}", topicUriFunc.apply(0));
 
-        // Global parameter: async_api
+        // Doc-level parameter: async_api
         LongFunction<Boolean> asyncApiFunc = (l) -> false;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
                 boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
                 asyncApiFunc = (l) -> value;
             } else {
-                    throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
+                    throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
             }
         }
         logger.info("async_api: {}", asyncApiFunc.apply(0));
 
+        // Doc-level parameter: async_api
         LongFunction<Boolean> useTransactionFunc = (l) -> false;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label)) {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label)) {
                 boolean value = BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label));
                 useTransactionFunc = (l) -> value;
             } else {
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label + "\" parameter cannot be dynamic!");
             }
         }
         logger.info("use_transaction: {}", useTransactionFunc.apply(0));
 
-        // Global parameter: admin_delop
+        // Doc-level parameter: admin_delop
         LongFunction<Boolean> adminDelOpFunc = (l) -> false;
         if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label)) {
             if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label))
                 adminDelOpFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label));
             else
-                throw new RuntimeException("\"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label + "\" parameter cannot be dynamic!");
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label + "\" parameter cannot be dynamic!");
         }
+        logger.info("admin_delop: {}", adminDelOpFunc.apply(0));
+
+        // Doc-level parameter: seq_tracking
+        LongFunction<Boolean> seqTrackingFunc = (l) -> false;
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label))
+                seqTrackingFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label));
+            else
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label + "\" parameter cannot be dynamic!");
+        }
+        logger.info("seq_tracking: {}", seqTrackingFunc.apply(0));
+
+        // Doc-level parameter: msg_dedup_broker
+        LongFunction<Boolean> brokerMsgDedupFunc = (l) -> false;
+        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label)) {
+            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label))
+                brokerMsgDedupFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label));
+            else
+                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label + "\" parameter cannot be dynamic!");
+        }
+        logger.info("msg_dedup_broker: {}", seqTrackingFunc.apply(0));
+
 
         // TODO: Complete implementation for websocket-producer and managed-ledger
+        // Admin operation: create/delete tenant
         if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TENANT.label) ) {
             return resolveAdminTenant(clientSpace, asyncApiFunc, adminDelOpFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_NAMESPACE.label)) {
+        }
+        // Admin operation: create/delete namespace
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_NAMESPACE.label)) {
             return resolveAdminNamespace(clientSpace, asyncApiFunc, adminDelOpFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TOPIC.label)) {
+        }
+        // Admin operation: create/delete topic
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TOPIC.label)) {
             return resolveAdminTopic(clientSpace, topicUriFunc, asyncApiFunc, adminDelOpFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
-            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
-            return resolveMsgConsume(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
+        }
+        // Regular/non-admin operation: single message sending (producer)
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_SEND.label)) {
+            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc, seqTrackingFunc);
+        }
+        // Regular/non-admin operation: single message consuming from a single topic (consumer)
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_CONSUME.label)) {
+            return resolveMsgConsume(
+                clientSpace,
+                topicUriFunc,
+                asyncApiFunc,
+                useTransactionFunc,
+                seqTrackingFunc,
+                brokerMsgDedupFunc,
+                false);
+        }
+        // Regular/non-admin operation: single message consuming from multiple-topics (consumer)
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_MULTI_CONSUME.label)) {
+            return resolveMultiTopicMsgConsume(
+                clientSpace,
+                topicUriFunc,
+                asyncApiFunc,
+                useTransactionFunc,
+                seqTrackingFunc,
+                brokerMsgDedupFunc);
+        }
+        // Regular/non-admin operation: single message consuming a single topic (reader)
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
             return resolveMsgRead(clientSpace, topicUriFunc, asyncApiFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
+        }
+        // Regular/non-admin operation: batch message processing - batch start
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
             return resolveMsgBatchSendStart(clientSpace, topicUriFunc, asyncApiFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label)) {
+        }
+        // Regular/non-admin operation: batch message processing - message sending (producer)
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label)) {
             return resolveMsgBatchSend(clientSpace, asyncApiFunc);
-        } else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label)) {
+        }
+        // Regular/non-admin operation: batch message processing - batch send
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label)) {
             return resolveMsgBatchSendEnd(clientSpace, asyncApiFunc);
-        } else {
-            throw new RuntimeException("Unsupported Pulsar operation type");
+        }
+        // Regular/non-admin operation: end-to-end message processing - sending message
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.E2E_MSG_PROC_SEND.label)) {
+            return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc, seqTrackingFunc);
+        }
+        // Regular/non-admin operation: end-to-end message processing - consuming message
+        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.E2E_MSG_PROC_CONSUME.label)) {
+            return resolveMsgConsume(
+                clientSpace,
+                topicUriFunc,
+                asyncApiFunc,
+                useTransactionFunc,
+                seqTrackingFunc,
+                brokerMsgDedupFunc,
+                true);
+        }
+        // Invalid operation type
+        else {
+            throw new PulsarDriverUnsupportedOpException();
         }
     }
 
@@ -145,7 +226,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     {
         if ( cmdTpl.isDynamic("admin_roles") ||
              cmdTpl.isDynamic("allowed_clusters") ) {
-            throw new RuntimeException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
+            throw new PulsarDriverParamException("\"admin_roles\" or \"allowed_clusters\" parameter must NOT be dynamic!");
         }
 
         LongFunction<Set<String>> adminRolesFunc;
@@ -184,6 +265,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return new PulsarAdminTenantMapper(
             cmdTpl,
             clientSpace,
+            pulsarActivity,
             asyncApiFunc,
             adminDelOpFunc,
             adminRolesFunc,
@@ -209,6 +291,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return new PulsarAdminNamespaceMapper(
             cmdTpl,
             clientSpace,
+            pulsarActivity,
             asyncApiFunc,
             adminDelOpFunc,
             namespaceFunc);
@@ -238,6 +321,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         return new PulsarAdminTopicMapper(
             cmdTpl,
             clientSpace,
+            pulsarActivity,
             asyncApiFunc,
             adminDelOpFunc,
             topic_uri_fun,
@@ -249,8 +333,12 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         PulsarSpace clientSpace,
         LongFunction<String> topic_uri_func,
         LongFunction<Boolean> async_api_func,
-        LongFunction<Boolean> useTransactionFunc
+        LongFunction<Boolean> useTransactionFunc,
+        LongFunction<Boolean> seqTrackingFunc
     ) {
+        LongFunction<Supplier<Transaction>> transactionSupplierFunc =
+            (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
+
         LongFunction<String> cycle_producer_name_func;
         if (cmdTpl.isStatic("producer_name")) {
             cycle_producer_name_func = (l) -> cmdTpl.getStatic("producer_name");
@@ -263,9 +351,19 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Producer<?>> producerFunc =
             (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_producer_name_func.apply(l));
 
-        LongFunction<Supplier<Transaction>> transactionSupplierFunc =
-            (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
+        // check if we're going to simulate producer message out-of-sequence error
+        // - message ordering
+        // - message loss
+        LongFunction<String> seqErrSimuTypeFunc = (l) -> null;
+        if (cmdTpl.containsKey("seqerr_simu")) {
+            if (cmdTpl.isStatic("seqerr_simu")) {
+                seqErrSimuTypeFunc = (l) -> cmdTpl.getStatic("seqerr_simu");
+            } else {
+                throw new PulsarDriverParamException("[resolveMsgSend()] \"seqerr_simu\" parameter cannot be dynamic!");
+            }
+        }
 
+        // message key
         LongFunction<String> keyFunc;
         if (cmdTpl.isStatic("msg_key")) {
             keyFunc = (l) -> cmdTpl.getStatic("msg_key");
@@ -273,6 +371,16 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             keyFunc = (l) -> cmdTpl.getDynamic("msg_key", l);
         } else {
             keyFunc = (l) -> null;
+        }
+
+        // message property
+        LongFunction<String> propFunc;
+        if (cmdTpl.isStatic("msg_property")) {
+            propFunc = (l) -> cmdTpl.getStatic("msg_property");
+        } else if (cmdTpl.isDynamic("msg_property")) {
+            propFunc = (l) -> cmdTpl.getDynamic("msg_property", l);
+        } else {
+            propFunc = (l) -> null;
         }
 
         LongFunction<String> valueFunc;
@@ -285,26 +393,121 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 valueFunc = (l) -> null;
             }
         } else {
-            throw new RuntimeException("Producer:: \"msg_value\" field must be specified!");
+            throw new PulsarDriverParamException("[resolveMsgSend()] \"msg_value\" field must be specified!");
         }
 
         return new PulsarProducerMapper(
             cmdTpl,
             clientSpace,
+            pulsarActivity,
             async_api_func,
-            producerFunc,
-            keyFunc,
-            valueFunc,
             useTransactionFunc,
+            seqTrackingFunc,
             transactionSupplierFunc,
-            pulsarActivity);
+            producerFunc,
+            seqErrSimuTypeFunc,
+            keyFunc,
+            propFunc,
+            valueFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(
         PulsarSpace clientSpace,
         LongFunction<String> topic_uri_func,
         LongFunction<Boolean> async_api_func,
-        LongFunction<Boolean> useTransactionFunc
+        LongFunction<Boolean> useTransactionFunc,
+        LongFunction<Boolean> seqTrackingFunc,
+        LongFunction<Boolean> brokerMsgDupFunc,
+        boolean e2eMsgProc
+    ) {
+        LongFunction<String> subscription_name_func;
+        if (cmdTpl.isStatic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getStatic("subscription_name");
+        } else if (cmdTpl.isDynamic("subscription_name")) {
+            subscription_name_func = (l) -> cmdTpl.getDynamic("subscription_name", l);
+        } else {
+            subscription_name_func = (l) -> null;
+        }
+
+        LongFunction<String> subscription_type_func;
+        if (cmdTpl.isStatic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getStatic("subscription_type");
+        } else if (cmdTpl.isDynamic("subscription_type")) {
+            subscription_type_func = (l) -> cmdTpl.getDynamic("subscription_type", l);
+        } else {
+            subscription_type_func = (l) -> null;
+        }
+
+        LongFunction<String> consumer_name_func;
+        if (cmdTpl.isStatic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getStatic("consumer_name");
+        } else if (cmdTpl.isDynamic("consumer_name")) {
+            consumer_name_func = (l) -> cmdTpl.getDynamic("consumer_name", l);
+        } else {
+            consumer_name_func = (l) -> null;
+        }
+
+        LongFunction<Supplier<Transaction>> transactionSupplierFunc =
+            (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
+
+        LongFunction<Boolean> topicMsgDedupFunc = (l) -> {
+            String topic = topic_uri_func.apply(l);
+            String namespace = PulsarActivityUtil.getFullNamespaceName(topic);
+            PulsarAdmin pulsarAdmin = pulsarActivity.getPulsarAdmin();
+
+            // Check namespace-level deduplication setting
+            // - default to broker level deduplication setting
+            boolean nsMsgDedup = brokerMsgDupFunc.apply(l);
+            try {
+                nsMsgDedup = pulsarAdmin.namespaces().getDeduplicationStatus(namespace);
+            }
+            catch (PulsarAdminException pae) {
+                // it is fine if we're unable to check namespace level setting; use default
+            }
+
+            // Check topic-level deduplication setting
+            // - default to namespace level deduplication setting
+            boolean topicMsgDedup = nsMsgDedup;
+            try {
+                topicMsgDedup = pulsarAdmin.topics().getDeduplicationStatus(topic);
+            }
+            catch (PulsarAdminException pae) {
+                // it is fine if we're unable to check topic level setting; use default
+            }
+
+            return topicMsgDedup;
+        };
+
+
+        LongFunction<Consumer<?>> consumerFunc = (l) ->
+            clientSpace.getConsumer(
+                topic_uri_func.apply(l),
+                subscription_name_func.apply(l),
+                subscription_type_func.apply(l),
+                consumer_name_func.apply(l)
+            );
+
+        return new PulsarConsumerMapper(
+            cmdTpl,
+            clientSpace,
+            pulsarActivity,
+            async_api_func,
+            useTransactionFunc,
+            seqTrackingFunc,
+            transactionSupplierFunc,
+            topicMsgDedupFunc,
+            consumerFunc,
+            subscription_type_func,
+            e2eMsgProc);
+    }
+
+    private LongFunction<PulsarOp> resolveMultiTopicMsgConsume(
+        PulsarSpace clientSpace,
+        LongFunction<String> topic_uri_func,
+        LongFunction<Boolean> async_api_func,
+        LongFunction<Boolean> useTransactionFunc,
+        LongFunction<Boolean> seqTrackingFunc,
+        LongFunction<Boolean> brokerMsgDupFunc
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
@@ -356,8 +559,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Supplier<Transaction>> transactionSupplierFunc =
             (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
-        LongFunction<Consumer<?>> consumerFunc = (l) ->
-            clientSpace.getConsumer(
+        LongFunction<Consumer<?>> mtConsumerFunc = (l) ->
+            clientSpace.getMultiTopicConsumer(
                 topic_uri_func.apply(l),
                 topic_names_func.apply(l),
                 topics_pattern_func.apply(l),
@@ -366,9 +569,26 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 consumer_name_func.apply(l)
             );
 
-        return new PulsarConsumerMapper(cmdTpl, clientSpace, async_api_func, consumerFunc,
-            pulsarActivity.getBytesCounter(), pulsarActivity.getMessagesizeHistogram(), pulsarActivity.getCommitTransactionTimer(),
-                useTransactionFunc, transactionSupplierFunc);
+        return new PulsarConsumerMapper(
+            cmdTpl,
+            clientSpace,
+            pulsarActivity,
+            async_api_func,
+            useTransactionFunc,
+            seqTrackingFunc,
+            transactionSupplierFunc,
+            // For multi-topic subscription message consumption,
+            // - Only consider broker-level message deduplication setting
+            // - Ignore namespace- and topic-level message deduplication setting
+            //
+            // This is because Pulsar is able to specify a list of topics from
+            // different namespaces. In theory, we can get topic deduplication
+            // status from each message, but this will be too much overhead.
+            // e.g. pulsarAdmin.getPulsarAdmin().topics().getDeduplicationStatus(message.getTopicName())
+            brokerMsgDupFunc,
+            mtConsumerFunc,
+            subscription_type_func,
+            false);
     }
 
     private LongFunction<PulsarOp> resolveMsgRead(
@@ -401,7 +621,12 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 start_msg_pos_str_func.apply(l)
             );
 
-        return new PulsarReaderMapper(cmdTpl, clientSpace, async_api_func, readerFunc);
+        return new PulsarReaderMapper(
+            cmdTpl,
+            clientSpace,
+            pulsarActivity,
+            async_api_func,
+            readerFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgBatchSendStart(
@@ -421,7 +646,12 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Producer<?>> batchProducerFunc =
             (l) -> clientSpace.getProducer(topic_uri_func.apply(l), cycle_batch_producer_name_func.apply(l));
 
-        return new PulsarBatchProducerStartMapper(cmdTpl, clientSpace, asyncApiFunc, batchProducerFunc);
+        return new PulsarBatchProducerStartMapper(
+            cmdTpl,
+            clientSpace,
+            pulsarActivity,
+            asyncApiFunc,
+            batchProducerFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgBatchSend(PulsarSpace clientSpace,
@@ -436,6 +666,16 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             keyFunc = (l) -> null;
         }
 
+        // message property
+        LongFunction<String> propFunc;
+        if (cmdTpl.isStatic("msg_property")) {
+            propFunc = (l) -> cmdTpl.getStatic("msg_property");
+        } else if (cmdTpl.isDynamic("msg_property")) {
+            propFunc = (l) -> cmdTpl.getDynamic("msg_property", l);
+        } else {
+            propFunc = (l) -> null;
+        }
+
         LongFunction<String> valueFunc;
         if (cmdTpl.containsKey("msg_value")) {
             if (cmdTpl.isStatic("msg_value")) {
@@ -446,20 +686,26 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 valueFunc = (l) -> null;
             }
         } else {
-            throw new RuntimeException("Batch Producer:: \"msg_value\" field must be specified!");
+            throw new PulsarDriverParamException("[resolveMsgBatchSend()] \"msg_value\" field must be specified!");
         }
 
         return new PulsarBatchProducerMapper(
             cmdTpl,
             clientSpace,
+            pulsarActivity,
             asyncApiFunc,
             keyFunc,
+            propFunc,
             valueFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgBatchSendEnd(PulsarSpace clientSpace,
                                                           LongFunction<Boolean> asyncApiFunc)
     {
-        return new PulsarBatchProducerEndMapper(cmdTpl, clientSpace, asyncApiFunc);
+        return new PulsarBatchProducerEndMapper(
+            cmdTpl,
+            clientSpace,
+            pulsarActivity,
+            asyncApiFunc);
     }
 }

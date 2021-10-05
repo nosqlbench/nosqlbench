@@ -41,7 +41,7 @@ public class PulsarAction implements SyncAction {
             pulsarOp = readyPulsarOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
-            activity.getErrorhandler().handleError(bindException, cycle, 0);
+            activity.getErrorHandler().handleError(bindException, cycle, 0);
             throw new RuntimeException(
                 "while binding request in cycle " + cycle + ": " + bindException.getMessage(), bindException
             );
@@ -56,7 +56,7 @@ public class PulsarAction implements SyncAction {
                 break;
             } catch (RuntimeException err) {
                 ErrorDetail errorDetail = activity
-                    .getErrorhandler()
+                    .getErrorHandler()
                     .handleError(err, cycle, System.nanoTime() - start);
                 if (!errorDetail.isRetryable()) {
                     break;

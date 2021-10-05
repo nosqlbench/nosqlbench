@@ -1,3 +1,9 @@
+- 3b674983 (HEAD -> main, origin/main) Merge pull request #362 from yabinmeng/main
+- bf98d644 Merge branch 'nosqlbench:main' into main
+- 793af965 Ignore abnormal message processing error for Shared and Key_Shared subscription type.
+- f32caf1e Merge pull request #361 from ivansenic/ise-mongo-update
+- e8b32584 add writeConcern to the mongodb crud workflows
+- retrigger release
 - 663e3010 (HEAD -> main) correct test for current functional APIs
 - e981f808 (origin/main) General improvements and bug-fixes. Thanks to @XN137
 - 5b4a695f update ANTLR to 4.2.9 in all places

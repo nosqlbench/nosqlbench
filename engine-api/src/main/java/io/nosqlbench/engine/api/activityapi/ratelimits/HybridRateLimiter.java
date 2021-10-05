@@ -218,15 +218,17 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(HybridRateLimiter.class.getSimpleName());
+        sb.append("{\n");
         if (this.getRateSpec() != null) {
-            sb.append(" spec=").append(this.getRateSpec().toString());
-        }
-        if (this.state != null) {
-            sb.append(" state=").append(this.state);
+            sb.append("      spec:").append(this.getRateSpec().toString());
         }
         if (this.tokens != null) {
-            sb.append(" tokens=").append(this.tokens.toString());
+            sb.append(",\n tokenpool:").append(this.tokens.toString());
         }
+        if (this.state != null) {
+            sb.append(",\n     state:'").append(this.state).append("'");
+        }
+        sb.append("\n}");
         return sb.toString();
     }
 

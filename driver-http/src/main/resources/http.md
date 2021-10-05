@@ -106,7 +106,7 @@ statements:
 
 The above two examples are semantically identical, only the format is
 different. Notice that the expansion of the URI is still captured in a
-field called uri, with all of the dynamic pieces stitched together in the
+field called uri, with all the dynamic pieces stitched together in the
 value. You can't use arbitrary request fields. Every request field must
 from (method, uri, version, body, ok-status, ok-body) or otherwise be
 capitalized to signify an HTTP header.
@@ -122,7 +122,7 @@ cached at startup.
 
 ## Request Fields
 
-At a minimum, a **URI** must be provided. These are enough to build a
+At a minimum, a **URI** must be provided. This is enough to build a
 request with. All other request fields are optional and have reasonable
 defaults:
 
@@ -172,7 +172,7 @@ By default, a request which encounters an exception is retried up to 10
 times. If you want to change this, set another value to the
 `retries=` activity parameters.
 
-Presently, no determination is made about whether or not an errored
+Presently, no determination is made about whether an errored
 response *should* be retryable, but it is possible to configure this if
 you have a specific exception type that indicates a retryable operation.
 
@@ -200,7 +200,10 @@ Presently, this driver only does basic request-response style requests.
 Thus, adding headers which take TCP socket control away from the
 HttpClient will likely yield inconsistent (or undefined)
 results. Support may be added for long-lived connections in a future
-release.
+release. However, chunked encoding responses are supported, although they
+will be received fully before being processed further. Connecting to a long-lived
+connection that streams chunked encoding responses indefinitely will have
+undefined results.
 
 ## HTTP Activity Parameters
 
@@ -217,11 +220,11 @@ release.
   including only brief details as explained below.
 
   This setting is a selector for what level of verbosity you will get on
-  the console. If you set this to true, you'll get every request and
+  the console. If you set this to `diag=all`, you'll get every request and
   response logged to console. This is only for verifying that a test is
   configured and to spot check services before running higher scale tests.
 
-  All of the data shown in diagnostics is post-hoc, directly from the
+  All the data shown in diagnostics is post-hoc, directly from the
   response provided by the internal HTTP client in the Java runtime.
 
   If you want finer control over how much information diagnostics
@@ -229,18 +232,19 @@ release.
 
     - headers - show headers
     - stats - show basic stats of each request
+    - data - show all of each response body this setting
     - data10 - show only the first 10 characters of each response body
+      this setting supersedes `data`
     - data100 - show only the first 100 characters of each response body
       this setting supersedes `data10`
     - data1000 - show only the first 1000 characters of each response body
       this setting supersedes `data100`
-    - data - show all of each response body this setting
-      supersedes `data1000`
     - redirects - show details for interstitial request which are made
       when the client follows a redirect directive like a `location`
-      header.
+      header
     - requests - show details for requests
     - responses - show details for responses
+    - codes - shows explanatory details (high-level) of http response status codes
     - brief - Show headers, stats, requests, responses, and 10 characters
     - all - Show everything, including full payloads and redirects
     - a modulo - any number, like 3000 - causes the diagnostics to be
@@ -248,12 +252,10 @@ release.
       then you will get the brief diagnostic output for every 300th
       response.
 
-  The requests, responses, and redirects setting work intersectionally.
+  The requests, responses, and redirects settings work in combination.
   For example, if you specify responses, and redirect, but not requests,
   then you will only see the response portion of all calls made by the
-  client.
-
-  All of the diagnostic filters are incrementally added.
+  client. All available filters layer together in this way.
 
 - **timeout** - default: forever - Sets the timeout of each request in
   milliseconds.

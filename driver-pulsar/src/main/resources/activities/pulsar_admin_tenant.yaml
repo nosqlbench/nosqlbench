@@ -5,10 +5,10 @@ bindings:
 params:
   # "true" - asynchronous Pulsar Admin API
   # "false" - synchronous Pulsar Admin API
-  async_api: "true"
+  async_api: "false"
   # "true" - delete tenant
   # "false" - create tenant
-  admin_delop: "false"
+  admin_delop: "true"
 
 blocks:
   - name: create-tenant-block

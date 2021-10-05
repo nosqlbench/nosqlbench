@@ -1,5 +1,7 @@
 package io.nosqlbench.activitytype.http;
 
+import io.nosqlbench.activitytype.http.statuscodes.HttpStatusCodes;
+
 import java.io.PrintStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
@@ -39,9 +41,9 @@ public class HttpConsoleFormats {
     private final static long _DATA10 = 1L << 6;
     private final static long _DATA100 = 1L << 7;
     private final static long _DATA1000 = 1L << 8;
+    private final static long _CODES = 1L << 9;
 
     enum Diag {
-
         headers(_HEADERS),
         stats(_STATS),
         data(_DATA),
@@ -51,8 +53,9 @@ public class HttpConsoleFormats {
         redirects(_REDIRECTS),
         requests(_REQUESTS),
         responses(_RESPONSES),
+        codes(_CODES),
         brief(_HEADERS | _STATS | _REQUESTS | _RESPONSES | _DATA10),
-        all(_HEADERS | _STATS | _REDIRECTS | _REQUESTS | _RESPONSES | _DATA);
+        all(_HEADERS | _STATS | _REDIRECTS | _REQUESTS | _RESPONSES | _DATA | _CODES);
 
         private final long mask;
 
@@ -191,6 +194,10 @@ public class HttpConsoleFormats {
         out.println(RESPONSE_CUE + (caption != null ? caption : " RESPONSE") +
             " status=" + response.statusCode() + " took=" + (nanos / 1_000_000) + "ms");
 
+        if (Diag.codes.includedIn(mask)) {
+            out.println(DETAIL_CUE + "STATUS: " + HttpStatusCodes.lookup(response.statusCode()));
+        }
+
         if (e != null) {
             out.println(MESSAGE_CUE + " EXCEPTION: " + e.getMessage());
         }
@@ -218,7 +225,9 @@ public class HttpConsoleFormats {
 
             String contentLenStr = response.headers().map().getOrDefault("content-length", List.of("0")).get(0);
             Long contentLength = Long.parseLong(contentLenStr);
-            if (contentLength == 0L) {
+            String body = response.body();
+
+            if (contentLength == 0L && (body==null||body.length()==0)) {
                 return;
             }
 
@@ -230,22 +239,24 @@ public class HttpConsoleFormats {
             } else {
                 String contentType = contentTypeList.get(0).toLowerCase();
                 if (isPrintableContentType(contentType)) {
-                    toprint = response.body();
+                    if (body!=null) {
+                        toprint = body;
+                    }
                     if (toprint == null) {
                         toprint = "content-length was " + contentLength + ", but body was null";
                     }
 
                     if (Diag.data1000.includedIn(mask)) {
                         if (toprint.length() > 1000) {
-                            toprint = toprint.substring(0, 1000) + "\n--truncated at 1000 characters--\n";
+                            toprint = toprint.substring(0, 1000) + "\n^^--truncated at 1000 characters--^^\n";
                         }
                     } else if (Diag.data100.includedIn(mask)) {
                         if (toprint.length() > 100) {
-                            toprint = toprint.substring(0, 100) + "\n--truncated at 100 characters--\n";
+                            toprint = toprint.substring(0, 100) + "\n^^--truncated at 100 characters--^^\n";
                         }
                     } else if (Diag.data10.includedIn(mask)) {
                         if (toprint.length() > 10) {
-                            toprint = toprint.substring(0, 10) + "\n--truncated at 10 characters--\n";
+                            toprint = toprint.substring(0, 10) + "\n^^--truncated at 10 characters--^^\n";
                         }
                     }
                 } else {

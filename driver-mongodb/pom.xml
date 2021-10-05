@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.52-SNAPSHOT</version>
+        <version>4.15.58-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -18,23 +18,22 @@
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+          <version>4.15.58-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.52-SNAPSHOT</version>
+          <version>4.15.58-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
             <version>4.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>4.15.52-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>

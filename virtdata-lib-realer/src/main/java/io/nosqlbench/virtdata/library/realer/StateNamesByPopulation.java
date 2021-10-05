@@ -14,6 +14,6 @@ import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVSampler;
 public class StateNamesByPopulation extends CSVSampler {
     @Example("StateNamesByPopulation()")
     public StateNamesByPopulation() {
-        super("state_name","population","simplemaps/uszips");
+        super("state_name","population","data/simplemaps/uszips.csv");
     }
 }

@@ -1,0 +1,116 @@
+# nb -v run driver=mongodb yaml=mongodb-crud-dataset tags=phase:schema connection=mongodb://127.0.0.1 database=testdb dataset_file=path/to/data.json
+
+description: |
+  This workload emulates CRUD operations for the mongoDB.
+  It requires a data set file, where each line is a single JSON document to be used for writes and updates.
+  It's a counterpart of the Stargate's Documents API CRUD Dataset workflow.
+
+scenarios:
+  default:
+    schema:   run driver=mongodb tags==phase:schema threads==1 cycles==UNDEF
+    write:    run driver=mongodb tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=mongodb tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=mongodb tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=mongodb tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+
+bindings:
+  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
+  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - dummy-insert: |
+          {
+            insert: "<<collection:crud_dataset>>",
+            documents: [ { _id: "dummyyyy" } ]
+          }
+
+      - drop-collection: |
+          {
+            drop: "<<collection:crud_dataset>>"
+          }
+        tags:
+          name: drop-collection
+
+      - create-collection: |
+          {
+            create: "<<collection:crud_dataset>>"
+          }
+        tags:
+          name: create-collection
+
+      - create-indexes: |
+          {
+            createIndexes: "<<collection:crud_dataset>>",
+            indexes: <<indexes:[ { key: { dummy : 1 }, name: "dummy_idx", sparse: true } ]>>
+          }
+        tags:
+          name: create-indexes
+
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    statements:
+      - write-document: |
+          {
+            insert: "<<collection:crud_dataset>>",
+            writeConcern: { w: "majority" },
+            documents: [ { "_id": "{seq_key}", {document_json_without_id} ]
+          }
+        tags:
+          name: write-document
+    bindings:
+      document_json_without_id: ModuloLineToString('<<dataset_file>>'); ReplaceRegex('^\{', '')
+
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    statements:
+      - read-document: |
+          {
+            find: "<<collection:crud_dataset>>",
+            filter: { _id: "{random_key}" }
+          }
+        tags:
+          name: read-document
+
+  - name: main-update
+    tags:
+      phase: main
+      type: update
+    statements:
+      - update-document: |
+          {
+            update: "<<collection:crud_dataset>>",
+            writeConcern: { w: "majority" },
+            updates: [
+              {
+                q: { _id: "{random_key}" },
+                u: { "_id": "{random_key}", {document_json_without_id}
+              }
+            ]
+          }
+        tags:
+          name: update-document
+    bindings:
+      document_json_without_id: ModuloLineToString('<<dataset_file>>'); ReplaceRegex('^\{', '')
+
+  - name: main-delete
+    tags:
+      phase: main
+      type: delete
+    statements:
+      - delete-document: |
+          {
+            delete: "<<collection:crud_dataset>>",
+            deletes: [
+              {
+                q: { _id: "{seq_key}" },
+                limit: 1
+              }
+            ]
+          }

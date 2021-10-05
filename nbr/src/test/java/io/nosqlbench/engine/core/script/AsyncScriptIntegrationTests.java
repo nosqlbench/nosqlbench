@@ -179,6 +179,16 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
+    public void testExtensionCsvOutput() throws IOException {
+        ScenarioResult scenarioResult = runScenario("extension_csvoutput");
+        List<String> strings = Files.readAllLines(Paths.get(
+            "logs/csvoutputtestfile.csv"));
+        String logdata = strings.stream().collect(Collectors.joining("\n"));
+        assertThat(logdata).contains("header1,header2");
+        assertThat(logdata).contains("value1,value2");
+    }
+
+    @Test
     public void testExtensionHistogramLogger() throws IOException {
         ScenarioResult scenarioResult = runScenario("extension_histologger");
         assertThat(scenarioResult.getIOLog()).contains("stdout started logging to hdrhistodata.log");

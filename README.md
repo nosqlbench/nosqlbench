@@ -85,19 +85,27 @@ available, but more work is needed to support them fully. Here is what is suppor
 
 ## Thanks
 
-<table cellspacing="0" cellpadding="0" align="left">
+<table cellspacing="1" cellpadding="1" style="border: 0px" align="left">
   <tr>
-    <td><a href="https://datastax.com" target="_blank"><img src="https://www.datastax.com/sites/default/files/2020-12/datastax-logotype-positive.png" alt="DataStax" width="250"/></a></td>
+    <td width="20%"><a href="https://datastax.com" target="_blank"><img src="https://www.datastax.com/sites/default/files/2020-12/datastax-logotype-positive.png" alt="DataStax" width="250"/></a></td>
+     <td>This project is sponsored by <a href="https://www.datastax.com">DataStax</a> -- The Open, 
+       Multi-Cloud Stack for Modern Data Apps built on Apache Cassandra™, Kubernetes *Based*, Developer *Ready* & 
+       Cloud *Delivered* and designed from the ground up to run anywhere, on any cloud, in any datacenter, and in
+       every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
+    </td>
+  </tr>
+  <tr>
+    <td><a href="https://www.yourkit.com/"><img src="https://www.yourkit.com/images/yklogo.png" alt="YourKit Logo"></a></td>
+    <td>This project uses tools provided by YourKit, LLC. YourKit supports open source projects with its full-featured Java
+        Profiler. YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a> and
+        <a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>, innovative and intelligent tools for
+        profiling Java and .NET applications.
+    </td>
+  </tr>
+
+  <tr>
+   <td><a href="https://www.netlify.com"
+             ><img src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Deploys by Netlify"/></a></td>
+   <td>This site (soon to be) deployed by Netlify!</td>
   </tr>
 </table>
-
-This project is sponsored by [DataStax](https://www.datastax.com) -- The Open, Multi-Cloud Stack for Modern Data Apps built on
-Apache Cassandra™, Kubernetes *Based*, Developer *Ready* & Cloud *Delivered* and designed from the ground up to run anywhere,
-on any cloud, in any datacenter, and in every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
-
-![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
-
-This project uses tools provided by YourKit, LLC. YourKit supports open source projects with its full-featured Java
-Profiler. YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a> and
-<a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>, innovative and intelligent tools for
-profiling Java and .NET applications.

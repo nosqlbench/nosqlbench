@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Reader;
@@ -13,10 +14,11 @@ public class PulsarReaderMapper extends PulsarOpMapper {
 
     public PulsarReaderMapper(CommandTemplate cmdTpl,
                               PulsarSpace clientSpace,
+                              PulsarActivity pulsarActivity,
                               LongFunction<Boolean> asyncApiFunc,
                               LongFunction<Reader<?>> readerFunc)
     {
-        super(cmdTpl, clientSpace, asyncApiFunc);
+        super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc);
         this.readerFunc = readerFunc;
     }
 

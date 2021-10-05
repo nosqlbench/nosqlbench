@@ -1,5 +1,6 @@
 package io.nosqlbench.driver.pulsar.ops;
 
+import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.BooleanUtils;
@@ -24,13 +25,14 @@ public class PulsarAdminTopicMapper extends PulsarAdminMapper {
 
     public PulsarAdminTopicMapper(CommandTemplate cmdTpl,
                                   PulsarSpace clientSpace,
+                                  PulsarActivity pulsarActivity,
                                   LongFunction<Boolean> asyncApiFunc,
                                   LongFunction<Boolean> adminDelOpFunc,
                                   LongFunction<String> topicUriFunc,
                                   LongFunction<String> enablePartionFunc,
                                   LongFunction<String> partitionNumFunc)
     {
-        super(cmdTpl, clientSpace, asyncApiFunc, adminDelOpFunc);
+        super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, adminDelOpFunc);
         this.topicUriFunc = topicUriFunc;
         this.enablePartionFunc = enablePartionFunc;
         this.partitionNumFunc = partitionNumFunc;
