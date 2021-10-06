@@ -461,7 +461,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             try {
                 nsMsgDedup = pulsarAdmin.namespaces().getDeduplicationStatus(namespace);
             }
-            catch (PulsarAdminException pae) {
+            catch (Exception e) {
                 // it is fine if we're unable to check namespace level setting; use default
             }
 
@@ -471,7 +471,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             try {
                 topicMsgDedup = pulsarAdmin.topics().getDeduplicationStatus(topic);
             }
-            catch (PulsarAdminException pae) {
+            catch (Exception e) {
                 // it is fine if we're unable to check topic level setting; use default
             }
 
