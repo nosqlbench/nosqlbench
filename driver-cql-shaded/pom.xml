@@ -81,15 +81,13 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-haproxy</artifactId>
-            <version>4.1.54.Final</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-<!--            <version>4.1.47.Final</version>-->
-<!--            <classifier>linux-x86_64</classifier>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
 
         <!-- test only scope -->
 
@@ -192,14 +190,14 @@
                             <pattern>com.google.common</pattern>
                             <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
                         </relocation>
-<!--                        <relocation>-->
-<!--                            <pattern>com.datastax</pattern>-->
-<!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
-<!--                        </relocation>-->
-<!--                        <relocation>-->
-<!--                            <pattern>io.netty</pattern>-->
-<!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
-<!--                        </relocation>-->
+                        <relocation>
+                            <pattern>com.datastax</pattern>
+                            <shadedPattern>dse19.com.datastax</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>dse19.io.netty</shadedPattern>
+                        </relocation>
                     </relocations>
                     <artifactSet>
                         <includes>
