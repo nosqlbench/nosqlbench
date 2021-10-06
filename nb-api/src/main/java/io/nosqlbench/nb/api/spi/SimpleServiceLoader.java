@@ -63,6 +63,7 @@ public class SimpleServiceLoader<T> {
         providers = new LinkedHashMap<>();
 
         loader.stream().forEach(provider -> {
+            logger.trace("loading provider: " + provider.type());
             Class<? extends T> type = provider.type();
             if (!type.isAnnotationPresent(Service.class)) {
                 throw new RuntimeException(
