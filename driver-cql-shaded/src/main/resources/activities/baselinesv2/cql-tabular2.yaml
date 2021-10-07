@@ -94,7 +94,8 @@ blocks:
           create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
            part text,
            clust text,
-           data text,
+           data0 text, data1 text, data2 text, data3 text,
+           data4 text, data5 text, data6 text, data7 text,
            PRIMARY KEY (part,clust)
           );
         tags:
