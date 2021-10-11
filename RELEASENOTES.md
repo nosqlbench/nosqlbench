@@ -1,6 +1,26 @@
-- 3b674983 (HEAD -> main, origin/main) Merge pull request #362 from yabinmeng/main
-- bf98d644 Merge branch 'nosqlbench:main' into main
-- 793af965 Ignore abnormal message processing error for Shared and Key_Shared subscription type.
-- f32caf1e Merge pull request #361 from ivansenic/ise-mongo-update
-- e8b32584 add writeConcern to the mongodb crud workflows
-- retrigger release
+- 4418500d (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 21b96cfd (origin/main) Merge pull request #366 from yabinmeng/main
+- b72723b7 add some missing extension docs
+- a8929042 extend NBEnvironment tokens to other data sources
+- 8c6d0cfe new decorator API: share Scenario metadata to interested types
+- bbeee5cb new scripting extension: s3; S3 directory uploader
+- ff769c7b Add S3 URL Handler
+- e1e10bba allow session namer to use pre-defined timestamp
+- 133760d8 auto-init the last (fall-through) NBENVIRONMENT location first
+- b388a43e consolidate statedir initialization logic and docs
+- 9fccf8c2 new scripting extension: shutdown; scripted shutdown hooks
+- 8da6664f typo fix
+- 2876e102 Remove namespace and topic level dedup setting check for each run, which is too much overhead.
+- 29dafd91 Merge pull request #364 from yabinmeng/main
+- 11073cf0 Address Shooky's comment in PR#364.
+- cdfb7c32 Merge branch 'nosqlbench:main' into main
+- 1d625f41 add S3 URL Handler
+- 9c91ad71 enhance diagnostics for driver loader
+- 0df40113 re-enabled epoll dependency
+- cd1f4e2e Merge pull request #365 from lakshmi-M18/patch-1
+- 178abe67 Update schema-astra code for create table
+- 265760d1 Address Lari's comment in PR#364.
+- eb5f42f4 Fix NullPointerException of checking namespace and topic deduplication status.
+- 647bd7d4 Merge branch 'main' of https://github.com/yabinmeng/nosqlbench
+- edc43c5b reformat
+- 37150c33 only release on main branch by default
