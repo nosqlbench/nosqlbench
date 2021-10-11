@@ -11,8 +11,10 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.admin.Namespaces;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
+import org.apache.pulsar.client.admin.Topics;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
@@ -450,34 +452,11 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Supplier<Transaction>> transactionSupplierFunc =
             (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
-        LongFunction<Boolean> topicMsgDedupFunc = (l) -> {
-            String topic = topic_uri_func.apply(l);
-            String namespace = PulsarActivityUtil.getFullNamespaceName(topic);
-            PulsarAdmin pulsarAdmin = pulsarActivity.getPulsarAdmin();
-
-            // Check namespace-level deduplication setting
-            // - default to broker level deduplication setting
-            boolean nsMsgDedup = brokerMsgDupFunc.apply(l);
-            try {
-                nsMsgDedup = pulsarAdmin.namespaces().getDeduplicationStatus(namespace);
-            }
-            catch (PulsarAdminException pae) {
-                // it is fine if we're unable to check namespace level setting; use default
-            }
-
-            // Check topic-level deduplication setting
-            // - default to namespace level deduplication setting
-            boolean topicMsgDedup = nsMsgDedup;
-            try {
-                topicMsgDedup = pulsarAdmin.topics().getDeduplicationStatus(topic);
-            }
-            catch (PulsarAdminException pae) {
-                // it is fine if we're unable to check topic level setting; use default
-            }
-
-            return topicMsgDedup;
-        };
-
+        // TODO: Ignore namespace and topic level dedup check on the fly
+        //   this will impact the consumer performance significantly
+        //       Consider using caching or Memoizer in the future?
+        //   (https://www.baeldung.com/guava-memoizer)
+        LongFunction<Boolean> topicMsgDedupFunc = brokerMsgDupFunc;
 
         LongFunction<Consumer<?>> consumerFunc = (l) ->
             clientSpace.getConsumer(
