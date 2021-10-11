@@ -1,6 +1,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.NBWebServerApp;
+import io.nosqlbench.nb.api.metadata.SessionNamer;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
@@ -21,7 +22,7 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
-import io.nosqlbench.nb.api.SystemId;
+import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
@@ -93,7 +94,7 @@ public class NBCLI {
         loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
 
         NBCLIOptions globalOptions = new NBCLIOptions(args, NBCLIOptions.Mode.ParseGlobalsOnly);
-        String sessionName = new SessionNamer().format(globalOptions.getSessionName());
+        String sessionName = SessionNamer.format(globalOptions.getSessionName());
 
         loggerConfig
                 .setSessionName(sessionName)
