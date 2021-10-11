@@ -1,5 +1,6 @@
-package io.nosqlbench.nb.addins.s3urls;
+package io.nosqlbench.nb.addins.s3.s3urlhandler;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,15 @@ public class S3UrlFields {
     public final String accessKey;
     private final String endpoint;
 
+    public static S3UrlFields fromURLString(String urlString) {
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        return new S3UrlFields(url);
+    }
     public S3UrlFields(URL url) {
 
         String accessKey = null;
@@ -50,6 +60,10 @@ public class S3UrlFields {
 
     public CredentialsFingerprint credentialsFingerprint() {
         return new CredentialsFingerprint(this);
+    }
+
+    public CredentialsFingerprint getCredentialsFingerprint() {
+        return null;
     }
 
     public static class CredentialsFingerprint {

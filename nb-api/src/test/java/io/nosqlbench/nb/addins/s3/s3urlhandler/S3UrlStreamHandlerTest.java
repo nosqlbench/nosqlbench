@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.addins.s3urls;
+package io.nosqlbench.nb.addins.s3.s3urlhandler;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -16,6 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class S3UrlStreamHandlerTest {
 
+    public static String bucketName = "nb-extension-test";
+    public static String keyName = "key-name";
+    public static String testValue = "test-value";
+
     /**
      * This test requires that you have credentials already configured on your local system
      * for S3. It creates an object using the s3 client directly, then uses a generic
@@ -26,9 +30,6 @@ public class S3UrlStreamHandlerTest {
     public void sanityCheckS3UrlHandler() {
         AmazonS3 client = AmazonS3ClientBuilder.defaultClient();
 
-        String bucketName = "nb-extension-test";
-        String keyName = "key-name";
-        String testValue = "test-value";
 
         Bucket bucket = null;
 

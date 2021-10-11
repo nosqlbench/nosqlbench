@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.addins.s3urls;
+package io.nosqlbench.nb.addins.s3.s3urlhandler;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -22,7 +22,7 @@ public class S3ClientCache {
     }
 
     public AmazonS3 get(S3UrlFields fields) {
-        AmazonS3 s3 = cache.computeIfAbsent(fields.credentialsFingerprint(),
+        AmazonS3 s3 = cache.computeIfAbsent(fields.getCredentialsFingerprint(),
             cfp -> createAuthorizedClient(fields));
         return s3;
     }

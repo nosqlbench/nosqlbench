@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.addins.s3urls;
+package io.nosqlbench.nb.addins.s3.s3urlhandler;
 
 import io.nosqlbench.nb.annotations.Service;
 

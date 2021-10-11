@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.addins.s3urls;
+package io.nosqlbench.nb.addins.s3.s3urlhandler;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
