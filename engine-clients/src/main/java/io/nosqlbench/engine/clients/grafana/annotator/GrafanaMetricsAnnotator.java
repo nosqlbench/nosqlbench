@@ -6,7 +6,7 @@ import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.OnError;
-import io.nosqlbench.nb.api.SystemId;
+import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Annotator;
 import io.nosqlbench.nb.api.config.*;

@@ -25,6 +25,9 @@ import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import io.nosqlbench.nb.api.metadata.ScenarioMetadata;
+import io.nosqlbench.nb.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import org.apache.logging.log4j.LogManager;
@@ -46,10 +49,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -63,6 +63,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private State state = State.Scheduled;
     private volatile ScenarioShutdownHook scenarioShutdownHook;
     private Exception error;
+    private ScenarioMetadata scenarioMetadata;
 
 
     public enum State {
@@ -236,12 +237,23 @@ public class Scenario implements Callable<ScenarioResult> {
                 metricRegistry,
                 scriptEnv
             );
+            ScenarioMetadataAware.apply(extensionObject,getScenarioMetadata());
             logger.trace("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                 " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
+    }
 
-
+    private synchronized ScenarioMetadata getScenarioMetadata() {
+        if (this.scenarioMetadata==null) {
+            this.scenarioMetadata = new ScenarioMetadata(
+                this.startedAtMillis,
+                this.scenarioName,
+                SystemId.getNodeId(),
+                SystemId.getNodeFingerprint()
+            );
+        }
+        return scenarioMetadata;
     }
 
     public void runScenario() {
