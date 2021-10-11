@@ -367,7 +367,7 @@ public class NBCLIOptions {
 
     private Path setStatePath() {
         if (statePathAccesses.size() > 0) {
-            throw new BasicError("The statedir must be set before it is used by other\n" +
+            throw new BasicError("The state dir must be set before it is used by other\n" +
                     " options. If you want to change the statedir, be sure you do it before\n" +
                     " dependent options. These parameters were called before this --statedir:\n" +
                     statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
@@ -376,7 +376,7 @@ public class NBCLIOptions {
             return this.statepath;
         }
 
-        List<String> paths = NBEnvironment.INSTANCE.interpolate(":", statedirs);
+        List<String> paths = NBEnvironment.INSTANCE.interpolateEach(":", statedirs);
         Path selected = null;
 
         for (String pathName : paths) {
@@ -391,7 +391,7 @@ public class NBCLIOptions {
             }
         }
         if (selected == null) {
-            selected = Path.of(paths.get(0));
+            selected = Path.of(paths.get(paths.size()-1));
         }
 
         if (!Files.exists(selected)) {
