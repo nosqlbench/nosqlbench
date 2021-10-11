@@ -452,39 +452,11 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Supplier<Transaction>> transactionSupplierFunc =
             (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
-        LongFunction<Boolean> topicMsgDedupFunc = (l) -> {
-            String topicName = topic_uri_func.apply(l);
-            String nsName = PulsarActivityUtil.getFullNamespaceName(topicName);
-            PulsarAdmin pulsarAdmin = pulsarActivity.getPulsarAdmin();
-
-            // Check namespace-level deduplication setting
-            // - default to broker level deduplication setting
-            //   (as expressed in NB yaml file)
-            boolean topicMsgDedup = brokerMsgDupFunc.apply(l);
-            try {
-                Namespaces namespaces = pulsarAdmin.namespaces();
-                if (namespaces != null) {
-                    Boolean dedupStatus = namespaces.getDeduplicationStatus(nsName);
-                    if (dedupStatus != null) topicMsgDedup = dedupStatus;
-                }
-            } catch (PulsarAdminException e) {
-                // it is fine if we're unable to check namespace level setting; use default
-            }
-
-            // Check topic-level deduplication setting
-            try {
-                Topics topics = pulsarAdmin.topics();
-                if (topics != null) {
-                    Boolean dedupStatus = pulsarAdmin.topics().getDeduplicationStatus(topicName);
-                    if (dedupStatus != null) topicMsgDedup = dedupStatus;
-                }
-            } catch (PulsarAdminException e) {
-                // it is fine if we're unable to check topic level setting; use default
-            }
-
-            return topicMsgDedup;
-        };
-
+        // TODO: Ignore namespace and topic level dedup check on the fly
+        //   this will impact the consumer performance significantly
+        //       Consider using caching or Memoizer in the future?
+        //   (https://www.baeldung.com/guava-memoizer)
+        LongFunction<Boolean> topicMsgDedupFunc = brokerMsgDupFunc;
 
         LongFunction<Consumer<?>> consumerFunc = (l) ->
             clientSpace.getConsumer(
