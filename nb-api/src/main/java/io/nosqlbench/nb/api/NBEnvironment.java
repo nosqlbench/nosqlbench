@@ -1,6 +1,7 @@
 package io.nosqlbench.nb.api;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.metadata.SessionNamer;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
@@ -46,11 +47,11 @@ public class NBEnvironment {
     private final LinkedHashMap<String, String> references = new LinkedHashMap<>();
 
     private final static Map<String, String> envToProp = Map.of(
-            "PWD", "user.dir",
-            "HOME", "user.home",
-            "USERNAME", "user.name", // Win*
-            "USER", "user.name", // *n*x
-            "LOGNAME", "user.name" // *n*x
+        "PWD", "user.dir",
+        "HOME", "user.home",
+        "USERNAME", "user.name", // Win*
+        "USER", "user.name", // *n*x
+        "LOGNAME", "user.name" // *n*x
     );
 
     public NBEnvironment resetRefs() {
@@ -61,7 +62,7 @@ public class NBEnvironment {
     public void put(String propname, String value) {
         if (envToProp.containsKey(propname)) {
             throw new RuntimeException("The property you are changing should be considered immutable in this " +
-                    "process: '" + propname + "'");
+                "process: '" + propname + "'");
         }
         if (references.containsKey(propname)) {
             if (references.get(propname).equals(value)) {
@@ -70,8 +71,8 @@ public class NBEnvironment {
                 }
             } else {
                 throw new BasicError("Changing already referenced property '" + propname + "' from \n" +
-                        "'" + references.get(propname) + "' to '" + value + "' is not supported.\n" +
-                        " (maybe you can change the order of your options to set higher-level parameters first.)");
+                    "'" + references.get(propname) + "' to '" + value + "' is not supported.\n" +
+                    " (maybe you can change the order of your options to set higher-level parameters first.)");
             }
 
         }
@@ -138,7 +139,7 @@ public class NBEnvironment {
         String value = getOr(name, null);
         if (value == null) {
             throw new BasicError("No variable was found for '" + name + "' in system properties nor in the shell " +
-                    "environment.");
+                "environment.");
         }
         return value;
     }
@@ -185,14 +186,54 @@ public class NBEnvironment {
         return Optional.of(sb.toString());
     }
 
-    public List<String> interpolate(CharSequence delim, String combined) {
-        String[] split = combined.split(delim.toString());
+    public List<String> interpolateEach(CharSequence delim, String toBeRecombined) {
+        String[] split = toBeRecombined.split(delim.toString());
         List<String> mapped = new ArrayList<>();
         for (String pattern : split) {
             Optional<String> interpolated = interpolate(pattern);
             interpolated.ifPresent(mapped::add);
         }
         return mapped;
+    }
+
+    /**
+     * Interpolate system properties, environment variables, time fields, and arbitrary replacement strings
+     * into a single result. Templates such as {@code /tmp/%d-${testrun}-$System.index-SCENARIO} are supported.
+     *
+     * <hr/>
+     *
+     * The tokens found in the raw template are interpolated in the following order.
+     * <ul>
+     *     <li>Any token which exactly matches one of the keys in the provided map is substituted
+     *     directly as is. No token sigil like '$' is used here, so if you want to support that
+     *     as is, you need to provide the keys in your substitution map as such.</li>
+     *     <li>Any tokens in the form {@code %f} which is supported by the time fields in
+     *     {@link Formatter}</li> are honored and used with the timestamp provided.*
+     *     <li>System Properties: Any token in the form {@code $word.word} will be taken as the name
+     *     of a system property to be substited.</li>
+     *     <li>Environment Variables: Any token in the form {@code $name}</li> will be takens as
+     *     an environment variable to be substituted.</li>
+     * </ul>
+     *
+     * @param rawtext The template, including any of the supported token forms
+     * @param millis  The timestamp to use for any temporal tokens
+     * @param map     Any additional parameters to interpolate into the template first
+     * @return Optionally, the interpolated string, as long as all references were qualified. Error
+     * handling is contextual to the caller -- If not getting a valid result would cause a downstream error,
+     * an error should likely be thrown.
+     */
+    public final Optional<String> interpolateWithTimestamp(String rawtext, long millis, Map<String, String> map) {
+        String result = rawtext;
+        for (String key : map.keySet()) {
+            String value = map.get(key);
+            result = result.replaceAll(Pattern.quote(key), value);
+        }
+        result = SessionNamer.format(result, millis);
+        return interpolate(result);
+    }
+
+    public final Optional<String> interpolateWithTimestamp(String rawText, long millis) {
+        return interpolateWithTimestamp(rawText, millis, Map.of());
     }
 
 }
