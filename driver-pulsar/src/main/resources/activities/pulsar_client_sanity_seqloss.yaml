@@ -23,7 +23,7 @@ blocks:
         #seqerr_simu: "out_of_order"
         #seqerr_simu: "msg_loss"
         #seqerr_simu: "msg_dup"
-        seqerr_simu: "out_of_order, msg_loss"
+        #seqerr_simu: "out_of_order, msg_loss"
         msg_key:
         msg_property:
         msg_value: "{myvalue}"
@@ -36,5 +36,5 @@ blocks:
       - name: s1
         optype: msg-consume
         subscription_name: "mysub"
-        subscription_type:
+        subscription_type: "Shared"
         consumer_name:

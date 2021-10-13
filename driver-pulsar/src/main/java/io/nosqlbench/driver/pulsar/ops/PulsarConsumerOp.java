@@ -200,13 +200,15 @@ public class PulsarConsumerOp implements PulsarOp {
                         org.apache.avro.generic.GenericRecord avroGenericRecord =
                             AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
 
-                        logger.debug("Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                        logger.debug("({}) Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                            consumer.getConsumerName(),
                             message.getKey(),
                             message.getProperties(),
                             avroGenericRecord.toString());
                     }
                     else {
-                        logger.debug("Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                        logger.debug("({}) Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                            consumer.getConsumerName(),
                             message.getKey(),
                             message.getProperties(),
                             new String(message.getData()));
@@ -280,13 +282,15 @@ public class PulsarConsumerOp implements PulsarOp {
                             org.apache.avro.generic.GenericRecord avroGenericRecord =
                                 AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
 
-                            logger.debug("Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                            logger.debug("({}) Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                                consumer.getConsumerName(),
                                 message.getKey(),
                                 message.getProperties(),
                                 avroGenericRecord.toString());
                         }
                         else {
-                            logger.debug("Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                            logger.debug("({}) Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                                consumer.getConsumerName(),
                                 message.getKey(),
                                 message.getProperties(),
                                 new String(message.getData()));
@@ -315,7 +319,7 @@ public class PulsarConsumerOp implements PulsarOp {
                 });
             }
             catch (Exception e) {
-                throw new PulsarDriverUnexpectedException("Async message receiving failed");
+                throw new PulsarDriverUnexpectedException(e);
             }
         }
     }

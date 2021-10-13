@@ -138,13 +138,15 @@ public class PulsarProducerOp implements PulsarOp {
                         org.apache.avro.generic.GenericRecord avroGenericRecord =
                             AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, msgPayload);
 
-                        logger.debug("Sync message sent: msg-key={}; msg-properties={}; msg-payload={})",
+                        logger.debug("({}) Sync message sent: msg-key={}; msg-properties={}; msg-payload={})",
+                            producer.getProducerName(),
                             msgKey,
                             msgProperties,
                             avroGenericRecord.toString());
                     }
                     else {
-                        logger.debug("Sync message sent: msg-key={}; msg-properties={}; msg-payload={}",
+                        logger.debug("({}) Sync message sent; msg-key={}; msg-properties={}; msg-payload={}",
+                            producer.getProducerName(),
                             msgKey,
                             msgProperties,
                             msgPayload);
@@ -191,13 +193,15 @@ public class PulsarProducerOp implements PulsarOp {
                             org.apache.avro.generic.GenericRecord avroGenericRecord =
                                 AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, msgPayload);
 
-                            logger.debug("Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={})",
+                            logger.debug("({}) Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={})",
+                                producer.getProducerName(),
                                 msgKey,
                                 msgProperties,
                                 avroGenericRecord.toString());
                         }
                         else {
-                            logger.debug("Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={}",
+                            logger.debug("({}) Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={}",
+                                producer.getProducerName(),
                                 msgKey,
                                 msgProperties,
                                 msgPayload);
