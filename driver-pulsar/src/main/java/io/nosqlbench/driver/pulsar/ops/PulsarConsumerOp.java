@@ -22,6 +22,7 @@ public class PulsarConsumerOp implements PulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarConsumerOp.class);
 
+    private final PulsarConsumerMapper consumerMapper;
     private final PulsarActivity pulsarActivity;
 
     private final boolean asyncPulsarOp;
@@ -37,17 +38,25 @@ public class PulsarConsumerOp implements PulsarOp {
     private final boolean e2eMsgProc;
     private final long curCycleNum;
 
-    private long curMsgSeqId;
-    private long prevMsgSeqId;
-
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
     private final Timer transactionCommitTimer;
 
     // keep track of end-to-end message latency
     private final Histogram e2eMsgProcLatencyHistogram;
+    // message out-of-sequence error counter
+    private final Counter msgErrOutOfSeqCounter;
+    // message out-of-sequence error counter
+    private final Counter msgErrDuplicateCounter;
+    // message loss error counter
+    private final Counter msgErrLossCounter;
+
+    // Used for message error tracking
+    private final boolean ignoreMsgLossCheck;
+    private final boolean ignoreMsgDupCheck;
 
     public PulsarConsumerOp(
+        PulsarConsumerMapper consumerMapper,
         PulsarActivity pulsarActivity,
         boolean asyncPulsarOp,
         boolean useTransaction,
@@ -61,6 +70,7 @@ public class PulsarConsumerOp implements PulsarOp {
         long curCycleNum,
         boolean e2eMsgProc)
     {
+        this.consumerMapper = consumerMapper;
         this.pulsarActivity = pulsarActivity;
 
         this.asyncPulsarOp = asyncPulsarOp;
@@ -76,14 +86,80 @@ public class PulsarConsumerOp implements PulsarOp {
         this.curCycleNum = curCycleNum;
         this.e2eMsgProc = e2eMsgProc;
 
-        this.curMsgSeqId = 0;
-        this.prevMsgSeqId = (curCycleNum - 1);
-
         this.bytesCounter = pulsarActivity.getBytesCounter();
         this.messageSizeHistogram = pulsarActivity.getMessageSizeHistogram();
         this.transactionCommitTimer = pulsarActivity.getCommitTransactionTimer();
 
         this.e2eMsgProcLatencyHistogram = pulsarActivity.getE2eMsgProcLatencyHistogram();
+        this.msgErrOutOfSeqCounter = pulsarActivity.getMsgErrOutOfSeqCounter();
+        this.msgErrLossCounter = pulsarActivity.getMsgErrLossCounter();
+        this.msgErrDuplicateCounter = pulsarActivity.getMsgErrDuplicateCounter();
+
+        // When message deduplication configuration is not enable, ignore message
+        // duplication check
+        this.ignoreMsgDupCheck = !this.topicMsgDedup;
+
+        // Limitations of the message sequence based check:
+        // - For message out of sequence and message duplicate check, it works for
+        //   all subscription types, including "Shared" and "Key_Shared"
+        // - For message loss, it doesn't work for "Shared" and "Key_Shared"
+        //   subscription types
+        this.ignoreMsgLossCheck =
+            StringUtils.equalsAnyIgnoreCase(this.subscriptionType,
+                PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
+                PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label);
+    }
+
+    private void checkAndUpdateMessageErrorCounter(Message message) {
+        long maxMsgSeqToExpect = consumerMapper.getMaxMsgSeqToExpect();
+        if (maxMsgSeqToExpect == -1) {
+            String msgSeqTgtMaxStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_TGTMAX);
+            if (!StringUtils.isBlank(msgSeqTgtMaxStr)) {
+                consumerMapper.setMaxMsgSeqToExpect(Long.valueOf(msgSeqTgtMaxStr));
+            }
+        }
+
+        String msgSeqIdStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_ID);
+
+        if ( !StringUtils.isBlank(msgSeqIdStr) ) {
+            long prevMsgSeqId = consumerMapper.getPrevMsgSeqId();
+            long curMsgSeqId = Long.parseLong(msgSeqIdStr);
+
+            // Skip out-of-sequence check on the first received message
+            // - This is because out-of-sequence check requires at least 2
+            //   received messages for comparison
+            if ( (prevMsgSeqId != -1) && (curMsgSeqId < prevMsgSeqId) ) {
+                msgErrOutOfSeqCounter.inc();
+            }
+
+            // Similarly, when message duplicate check is needed, we also
+            // skip the first received message.
+            if ( !ignoreMsgDupCheck && (prevMsgSeqId != -1) && (curMsgSeqId == prevMsgSeqId) ) {
+                msgErrDuplicateCounter.inc();
+            }
+
+            // Note that message loss could be happened anywhere, E.g.
+            // - published messages: 0,1,2,3,4,5
+            // - message loss scenario:
+            //   * scenario 1: first set of messages are lost - received 2,3,4
+            //   * scenario 2: messages in the middle are lost - received 0,1,3,4
+            //   * scenario 3: last set of messages are lost - received 0,1,2
+            if ( !ignoreMsgLossCheck ) {
+                // This check covers message loss scenarios 1 and 2
+                if ( (curMsgSeqId - prevMsgSeqId) > 1 ){
+                    // there could be multiple published messages lost between
+                    // 2 received messages
+                    long msgLostCnt = (curMsgSeqId - prevMsgSeqId) - 1;
+                    msgErrLossCounter.inc(msgLostCnt);
+                    consumerMapper.setTotalMsgLossCnt(consumerMapper.getTotalMsgLossCnt() + msgLostCnt);
+                }
+
+                // TODO: how can we detect message loss scenario 3?
+            }
+
+            prevMsgSeqId = curMsgSeqId;
+            consumerMapper.setPrevMsgSeqId(prevMsgSeqId);
+        }
     }
 
     @Override
@@ -143,47 +219,17 @@ public class PulsarConsumerOp implements PulsarOp {
                     e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
                 }
 
-                // keep track of message ordering and message loss
-                String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
-                if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
-                    curMsgSeqId = Long.parseLong(msgSeqIdStr);
-
-                    if ( prevMsgSeqId > -1) {
-                        // normal case: message sequence id is monotonically increasing by 1
-                        if ((curMsgSeqId - prevMsgSeqId) != 1) {
-                            // abnormal case: out of ordering
-                            // - for any subscription type, this check should always hold
-                            if (curMsgSeqId < prevMsgSeqId) {
-                                throw new PulsarMsgOutOfOrderException(
-                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                            }
-                            // - this sequence based message loss and message duplicate check can't be used for
-                            //   "Shared" subscription (ignore this check)
-                            // - TODO: for Key_Shared subscription type, this logic needs to be improved on
-                            //         per-key basis
-                            else {
-                                if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
-                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
-                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
-                                    // abnormal case: message loss
-                                    if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                        throw new PulsarMsgLossException(
-                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                    } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                        throw new PulsarMsgDuplicateException(
-                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // keep track of message errors and update error counters
+                if (seqTracking) checkAndUpdateMessageErrorCounter(message);
 
                 int messageSize = message.getData().length;
                 bytesCounter.inc(messageSize);
                 messageSizeHistogram.update(messageSize);
 
-                if (useTransaction) {
+                if (!useTransaction) {
+                    consumer.acknowledge(message.getMessageId());
+                }
+                else {
                     consumer.acknowledgeAsync(message.getMessageId(), transaction).get();
 
                     // little problem: here we are counting the "commit" time
@@ -194,14 +240,12 @@ public class PulsarConsumerOp implements PulsarOp {
                         transaction.commit().get();
                     }
                 }
-                else {
-                    consumer.acknowledge(message.getMessageId());
-                }
 
             }
             catch (Exception e) {
                 logger.error(
                     "Sync message receiving failed - timeout value: {} seconds ", timeoutSeconds);
+                e.printStackTrace();
                 throw new PulsarDriverUnexpectedException("" +
                     "Sync message receiving failed - timeout value: " + timeoutSeconds + " seconds ");
             }
@@ -254,47 +298,14 @@ public class PulsarConsumerOp implements PulsarOp {
                         e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
                     }
 
-                    // keep track of message ordering, message loss, and message duplication
-                    String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
-                    if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
-                        curMsgSeqId = Long.parseLong(msgSeqIdStr);
+                    // keep track of message errors and update error counters
+                    if (seqTracking) checkAndUpdateMessageErrorCounter(message);
 
-                        if (prevMsgSeqId > -1) {
-                            // normal case: message sequence id is monotonically increasing by 1
-                            if ((curMsgSeqId - prevMsgSeqId) != 1) {
-                                // abnormal case: out of ordering
-                                // - for any subscription type, this check should always hold
-                                if (curMsgSeqId < prevMsgSeqId) {
-                                    throw new PulsarMsgOutOfOrderException(
-                                        false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                }
-                                // - this sequence based message loss and message duplicate check can't be used for
-                                //   "Shared" subscription (ignore this check)
-                                // - TODO: for Key_Shared subscription type, this logic needs to be improved on
-                                //         per-key basis
-                                else {
-                                    if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
-                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
-                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
-                                        // abnormal case: message loss
-                                        if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                            throw new PulsarMsgLossException(
-                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                        } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                            throw new PulsarMsgDuplicateException(
-                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (useTransaction) {
-                        consumer.acknowledgeAsync(message.getMessageId(), transaction);
+                    if (!useTransaction) {
+                        consumer.acknowledgeAsync(message);
                     }
                     else {
-                        consumer.acknowledgeAsync(message);
+                        consumer.acknowledgeAsync(message.getMessageId(), transaction);
                     }
 
                     timeTracker.run();

@@ -38,7 +38,6 @@ public class PulsarProducerOp implements PulsarOp {
     private final String msgKey;
     private final Map<String, String> msgProperties;
     private final String msgPayload;
-    private final boolean simulateMsgLoss;
 
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
@@ -52,8 +51,7 @@ public class PulsarProducerOp implements PulsarOp {
                              Schema<?> schema,
                              String key,
                              Map<String, String> msgProperties,
-                             String payload,
-                             boolean simulateMsgLoss) {
+                             String payload) {
         this.pulsarActivity = pulsarActivity;
 
         this.asyncPulsarOp = asyncPulsarOp;
@@ -65,7 +63,6 @@ public class PulsarProducerOp implements PulsarOp {
         this.msgKey = key;
         this.msgProperties = msgProperties;
         this.msgPayload = payload;
-        this.simulateMsgLoss = simulateMsgLoss;
 
         this.bytesCounter = pulsarActivity.getBytesCounter();
         this.messageSizeHistogram = pulsarActivity.getMessageSizeHistogram();
@@ -74,11 +71,6 @@ public class PulsarProducerOp implements PulsarOp {
 
     @Override
     public void run(Runnable timeTracker) {
-        // Skip this cycle (without sending messages) if we're doing message loss simulation
-        if (simulateMsgLoss) {
-            return;
-        }
-
         if ( StringUtils.isBlank(msgPayload)) {
             throw new PulsarDriverParamException("Message payload (\"msg-value\") can't be empty!");
         }
