@@ -38,6 +38,12 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     // Metrics for NB Pulsar driver milestone: https://github.com/nosqlbench/nosqlbench/milestone/11
     // - end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
+    // - message out of sequence error counter
+    private Counter msgErrOutOfSeqCounter;
+    // - message loss counter
+    private Counter msgErrLossCounter;
+    // - message duplicate (when dedup is enabled) error counter
+    private Counter msgErrDuplicateCounter;
 
     private PulsarSpaceCache pulsarCache;
 
@@ -76,6 +82,9 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction");
 
         e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency");
+        msgErrOutOfSeqCounter = ActivityMetrics.counter(activityDef, "err_msg_oos");
+        msgErrLossCounter = ActivityMetrics.counter(activityDef, "err_msg_loss");
+        msgErrDuplicateCounter = ActivityMetrics.counter(activityDef, "err_msg_dup");
 
         String pulsarClntConfFile =
             activityDef.getParams().getOptionalString("config").orElse("config.properties");
@@ -231,4 +240,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
 
     public Histogram getE2eMsgProcLatencyHistogram() { return e2eMsgProcLatencyHistogram; }
+    public Counter getMsgErrOutOfSeqCounter() { return msgErrOutOfSeqCounter; }
+    public Counter getMsgErrLossCounter() { return msgErrLossCounter; }
+    public Counter getMsgErrDuplicateCounter() { return msgErrDuplicateCounter; }
 }
