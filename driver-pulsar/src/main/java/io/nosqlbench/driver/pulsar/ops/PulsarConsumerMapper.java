@@ -1,15 +1,11 @@
 package io.nosqlbench.driver.pulsar.ops;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
-import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
 import java.util.function.LongFunction;
@@ -34,6 +30,14 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final LongFunction<String> subscriptionTypeFunc;
     private final boolean e2eMsProc;
 
+    // Used for message loss checking
+    private long prevMsgSeqId = -1;
+
+    // Used for early quiting when there are message loss
+    // Otherwise, sync API may unblock unnecessarily
+    private long totalMsgLossCnt = 0;
+    private long maxMsgSeqToExpect = -1;
+
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
                                 PulsarActivity pulsarActivity,
@@ -52,17 +56,33 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
         this.e2eMsProc = e2eMsgProc;
     }
 
+    public long getPrevMsgSeqId() { return prevMsgSeqId; }
+    public void setPrevMsgSeqId(long prevMsgSeqId) { this.prevMsgSeqId = prevMsgSeqId; }
+
+    public long getTotalMsgLossCnt() { return totalMsgLossCnt; }
+    public void setTotalMsgLossCnt(long totalMsgLossCnt) { this.totalMsgLossCnt = totalMsgLossCnt; }
+
+    public long getMaxMsgSeqToExpect() { return maxMsgSeqToExpect; }
+    public void setMaxMsgSeqToExpect(long maxMsgSeqToExpect) { this.maxMsgSeqToExpect = maxMsgSeqToExpect; }
+
     @Override
     public PulsarOp apply(long value) {
+        boolean seqTracking = seqTrackingFunc.apply(value);
+        if ( seqTracking && (maxMsgSeqToExpect != -1) ) {
+             if ( (value + totalMsgLossCnt) > maxMsgSeqToExpect) {
+                 return new PulsarConumerEmptyOp(pulsarActivity);
+             }
+        }
+
         Consumer<?> consumer = consumerFunc.apply(value);
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
-        boolean seqTracking = seqTrackingFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
         boolean topicMsgDedup = topicMsgDedupFunc.apply(value);
         String subscriptionType = subscriptionTypeFunc.apply(value);
 
         return new PulsarConsumerOp(
+            this,
             pulsarActivity,
             asyncApi,
             useTransaction,
