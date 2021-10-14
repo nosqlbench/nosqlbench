@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -17,23 +19,23 @@
         into a pulsar system via JMS 2.0 compatibile APIs.
 
         NOTE: this is JMS compatible driver from DataStax that allows using a Pulsar cluster
-               as the potential JMS Destination
+        as the potential JMS Destination
     </description>
 
-<!--    <repositories>-->
-<!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
-<!--        <repository>-->
-<!--            <id>datastax-releases-local</id>-->
-<!--            <name>DataStax Local Releases</name>-->
-<!--            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>-->
-<!--            <releases>-->
-<!--                <enabled>false</enabled>-->
-<!--            </releases>-->
-<!--            <snapshots>-->
-<!--                <enabled>true</enabled>-->
-<!--            </snapshots>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+    <!--    <repositories>-->
+    <!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
+    <!--        <repository>-->
+    <!--            <id>datastax-releases-local</id>-->
+    <!--            <name>DataStax Local Releases</name>-->
+    <!--            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>-->
+    <!--            <releases>-->
+    <!--                <enabled>false</enabled>-->
+    <!--            </releases>-->
+    <!--            <snapshots>-->
+    <!--                <enabled>true</enabled>-->
+    <!--            </snapshots>-->
+    <!--        </repository>-->
+    <!--    </repositories>-->
 
     <dependencies>
         <!-- core dependencies -->

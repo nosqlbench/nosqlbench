@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -37,27 +39,27 @@
         <!-- https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer -->
         <dependency>
             <groupId>io.confluent</groupId>
-          <artifactId>kafka-avro-serializer</artifactId>
-          <version>5.5.1</version>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>5.5.1</version>
         </dependency>
 
-      <dependency>
-        <groupId>io.nosqlbench</groupId>
-        <artifactId>engine-api</artifactId>
-          <version>4.15.59-SNAPSHOT</version>
-      </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>4.15.59-SNAPSHOT</version>
+        </dependency>
 
-      <dependency>
-        <groupId>io.nosqlbench</groupId>
-        <artifactId>driver-stdout</artifactId>
-          <version>4.15.59-SNAPSHOT</version>
-      </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-stdout</artifactId>
+            <version>4.15.59-SNAPSHOT</version>
+        </dependency>
 
-      <!--        <dependency>-->
-      <!--            <groupId>org.slf4j</groupId>-->
-      <!--            <artifactId>slf4j-api</artifactId>-->
-      <!--            <version>1.7.25</version>-->
-      <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.slf4j</groupId>-->
+        <!--            <artifactId>slf4j-api</artifactId>-->
+        <!--            <version>1.7.25</version>-->
+        <!--        </dependency>-->
 
     </dependencies>
     <repositories>
@@ -71,23 +73,23 @@
             </snapshots>
         </repository>
     </repositories>
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>shade</id>-->
-<!--            <activation>-->
-<!--                <activeByDefault>true</activeByDefault>-->
-<!--            </activation>-->
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <artifactId>maven-shade-plugin</artifactId>-->
-<!--                        <configuration>-->
-<!--                            <finalName>${project.artifactId}</finalName>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
-<!--        </profile>-->
-<!--    </profiles>-->
+    <!--    <profiles>-->
+    <!--        <profile>-->
+    <!--            <id>shade</id>-->
+    <!--            <activation>-->
+    <!--                <activeByDefault>true</activeByDefault>-->
+    <!--            </activation>-->
+    <!--            <build>-->
+    <!--                <plugins>-->
+    <!--                    <plugin>-->
+    <!--                        <artifactId>maven-shade-plugin</artifactId>-->
+    <!--                        <configuration>-->
+    <!--                            <finalName>${project.artifactId}</finalName>-->
+    <!--                        </configuration>-->
+    <!--                    </plugin>-->
+    <!--                </plugins>-->
+    <!--            </build>-->
+    <!--        </profile>-->
+    <!--    </profiles>-->
 
 </project>

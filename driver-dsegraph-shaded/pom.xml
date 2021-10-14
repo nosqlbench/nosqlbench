@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -78,12 +80,12 @@
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
 
-    <!--        <dependency>-->
-    <!--            <groupId>io.netty</groupId>-->
-    <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-    <!--            <version>4.1.47.Final</version>-->
-    <!--            <classifier>linux-x86_64</classifier>-->
-    <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.netty</groupId>-->
+        <!--            <artifactId>netty-transport-native-epoll</artifactId>-->
+        <!--            <version>4.1.47.Final</version>-->
+        <!--            <classifier>linux-x86_64</classifier>-->
+        <!--        </dependency>-->
 
         <!-- test only scope -->
 
@@ -224,14 +226,14 @@
                             <pattern>com.google.common</pattern>
                             <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
                         </relocation>
-            <!--                        <relocation>-->
-            <!--                            <pattern>com.datastax</pattern>-->
-            <!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
-            <!--                        </relocation>-->
-            <!--                        <relocation>-->
-            <!--                            <pattern>io.netty</pattern>-->
-            <!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
-            <!--                        </relocation>-->
+                        <!--                        <relocation>-->
+                        <!--                            <pattern>com.datastax</pattern>-->
+                        <!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
+                        <!--                        </relocation>-->
+                        <!--                        <relocation>-->
+                        <!--                            <pattern>io.netty</pattern>-->
+                        <!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
+                        <!--                        </relocation>-->
                     </relocations>
                     <artifactSet>
                         <includes>
@@ -239,7 +241,8 @@
                         </includes>
                     </artifactSet>
                     <transformers combine.children="append">
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer
+                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
                     </transformers>
