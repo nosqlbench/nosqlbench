@@ -3,6 +3,7 @@ package io.nosqlbench.nb.api;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +24,16 @@ public class NBEnvironmentTest {
         long millis = 1633964892320L;
         String time1 = env.interpolateWithTimestamp("word WOO %td %% end", millis, Map.of("WOO","WOW")).orElse(null);
         assertThat(time1).isEqualTo("word WOW 11 % end");
+    }
 
+    @Test
+    public void testInterpolationPrecedence() {
+        NBEnvironment env = new NBEnvironment();
+        Optional<String> superseded = env.interpolate("$TEST_KEY, $USER", Map.of("TEST_KEY", "supersedes1", "USER", "supersedes2"));
+        assertThat(superseded).contains("supersedes1, supersedes2");
+        superseded = env.interpolate("$USER", Map.of("TEST_KEY", "supersedes1"));
+        assertThat(superseded).isPresent();
+        assertThat(superseded.get()).isNotEqualTo("supersedes2");
     }
 
 }

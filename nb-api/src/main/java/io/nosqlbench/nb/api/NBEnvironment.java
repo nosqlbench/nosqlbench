@@ -92,16 +92,26 @@ public class NBEnvironment {
      * @param defaultValue The value to return if the name is not found
      * @return the system property or environment variable's value, or the default value
      */
-    public String getOr(String name, String defaultValue) {
-        String value = peek(name);
+    public String getOr(String name, String defaultValue, Map<String,String> supplemental) {
+        String value = peek(name, supplemental);
         if (value == null) {
             value = defaultValue;
         }
         return reference(name, value);
     }
 
-    private String peek(String name) {
+    public String getOr(String name, String defaultValue) {
+        return getOr(name, defaultValue, Map.of());
+    }
+
+    private String peek(String name, Map<String,String> supplemental) {
         String value = null;
+        if (supplemental.containsKey(name)) {
+            value = supplemental.get(name);
+            if (value!=null) {
+                return value;
+            }
+        }
         if (name.contains(".")) {
             value = System.getProperty(name.toLowerCase());
             if (value != null) {
@@ -145,7 +155,11 @@ public class NBEnvironment {
     }
 
     public boolean containsKey(String name) {
-        String value = peek(name);
+        return containsKey(name, Map.of());
+    }
+
+    public boolean containsKey(String name, Map<String,String> supplemental) {
+        String value = peek(name, supplemental);
         return (value != null);
     }
 
@@ -162,7 +176,7 @@ public class NBEnvironment {
      * @param word The word to interpolate the environment values into
      * @return The interpolated value, after substitutions, or null if any lookup failed
      */
-    public Optional<String> interpolate(String word) {
+    public Optional<String> interpolate(String word, Map<String,String> supplemental) {
         Pattern envpattern = Pattern.compile("(\\$(?<env1>[a-zA-Z_][A-Za-z0-9_.]+)|\\$\\{(?<env2>[^}]+)\\})");
         Matcher matcher = envpattern.matcher(word);
         StringBuilder sb = new StringBuilder();
@@ -171,7 +185,7 @@ public class NBEnvironment {
             if (envvar == null) {
                 envvar = matcher.group("env2");
             }
-            String value = peek(envvar);
+            String value = peek(envvar,supplemental);
             if (value == null) {
                 if (logger != null) {
                     logger.debug("no value found for '" + envvar + "', returning Optional.empty() for '" + word + "'");
@@ -184,6 +198,10 @@ public class NBEnvironment {
         }
         matcher.appendTail(sb);
         return Optional.of(sb.toString());
+    }
+
+    public Optional<String> interpolate(String word) {
+        return interpolate(word,Map.of());
     }
 
     public List<String> interpolateEach(CharSequence delim, String toBeRecombined) {
@@ -224,12 +242,8 @@ public class NBEnvironment {
      */
     public final Optional<String> interpolateWithTimestamp(String rawtext, long millis, Map<String, String> map) {
         String result = rawtext;
-        for (String key : map.keySet()) {
-            String value = map.get(key);
-            result = result.replaceAll(Pattern.quote(key), value);
-        }
         result = SessionNamer.format(result, millis);
-        return interpolate(result);
+        return interpolate(result,map);
     }
 
     public final Optional<String> interpolateWithTimestamp(String rawText, long millis) {

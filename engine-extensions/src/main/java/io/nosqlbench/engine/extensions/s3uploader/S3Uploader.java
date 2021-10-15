@@ -18,6 +18,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class S3Uploader implements ScenarioMetadataAware {
@@ -32,19 +33,25 @@ public class S3Uploader implements ScenarioMetadataAware {
         this.scriptContext = scriptContext;
     }
 
+    /**
+     * Upload the local file path to the specified S3 URL, then return the URL of the bucket
+     * in its fully expanded form. See the details on token expansions in the s3.md help docs.
+     * @param localFilePath The path to the local directory
+     * @param urlTemplate A template that is expanded to a valid S3 URL
+     * @return The fully expanded name of the URL used for upload
+     */
     public String uploadDirToUrl(String localFilePath, String urlTemplate) {
         return uploadDirToUrlTokenized(localFilePath, urlTemplate, Map.of());
     }
 
     /**
-     * Upload the local file path to the specified URL, and then return the URL of the
-     * bucket in its fully expanded form.
-     * This requires you to specify a valid S3 url with place-holder tokens, such as
-     * <pre>{@code s3://bucketname/prefix1/prefix2/DATA}</pre>
-     * Before processing, some tokens will be automatically expanded based on local node
-     * info. These tokens include:
-     *
-     * @return The bucket URL of the expaneded name.
+     * Upload the local file path to the specified S3 URL, then return the URL of the bucket
+     * in its fully expanded form. See the details on token expansions in the s3.md help docs.
+     * Any params which are provided supersede the normally provided values from the system.
+     * @param localFilePath The path to the local directory
+     * @param urlTemplate A template that is expanded to a valid S3 URL
+     * @param params Additional token expansions which will take precedence over other available values.
+     * @return The fully expanded name of the URL used for upload
      */
     public String uploadDirToUrlTokenized(String localFilePath, String urlTemplate, Map<String,String> params) {
 
@@ -58,9 +65,16 @@ public class S3Uploader implements ScenarioMetadataAware {
         }
         File sourceDir = sourcePath.toFile();
 
-        String url = NBEnvironment.INSTANCE
-            .interpolateWithTimestamp(urlTemplate,scenarioMetadata.getStartedAt(),params)
+        Map<String,String> combined = new LinkedHashMap<>(params);
+        combined.putAll(scenarioMetadata.asMap());
+        String url = NBEnvironment.INSTANCE.interpolateWithTimestamp(
+            urlTemplate,
+                scenarioMetadata.getStartedAt(),
+                combined
+            )
             .orElseThrow();
+        logger.debug("S3 composite URL is '" + url + "'");
+
         S3UrlFields fields = S3UrlFields.fromURLString(url);
         S3ClientCache s3ClientCache = new S3ClientCache();
         AmazonS3 s3 = s3ClientCache.get(fields);

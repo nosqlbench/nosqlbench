@@ -26,9 +26,11 @@ public class S3UploaderDemo {
         if (!FileSystems.getDefault().equals(sourcePath.getFileSystem())) {
             throw new RuntimeException("The file must reside on the default filesystem to be uploaded by S3.");
         }
+
         if (!Files.isDirectory(sourcePath, LinkOption.NOFOLLOW_LINKS)) {
             throw new RuntimeException("path '" + sourcePath + "' is not a directory.");
         }
+
         TransferManager tm = TransferManagerBuilder.defaultTransferManager();
         MultipleFileUpload mfu = tm.uploadDirectory(bucket, prefix, sourcePath.toFile(), true);
         try {
