@@ -22,8 +22,8 @@ public class NBEnvironmentTest {
     public void testInterpolationWithTimestamp() {
         NBEnvironment env = new NBEnvironment();
         long millis = 1633964892320L;
-        String time1 = env.interpolateWithTimestamp("word WOO %td %% end", millis, Map.of("WOO","WOW")).orElse(null);
-        assertThat(time1).isEqualTo("word WOW 11 % end");
+        String time1 = env.interpolateWithTimestamp("word WOO$WOO %td %% end", millis, Map.of("WOO","WOW")).orElse(null);
+        assertThat(time1).isEqualTo("word WOOWOW 11 % end");
     }
 
     @Test
