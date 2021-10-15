@@ -1,1 +1,4 @@
-- 2fdbf8ec (HEAD -> main) fix for broken shade relocation with driver=cql
+- e53af8bf (HEAD -> main) improve NBEnvironment and S3 interaction
+- cb477996 merge fixups
+- e77bfea0 (origin/main) Merge pull request #367 from yabinmeng/main
+- 6569fa52 reformat all pom.xml files
