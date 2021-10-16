@@ -7,6 +7,8 @@ import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,9 +18,6 @@ import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Reader;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -352,10 +351,10 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         // check if we're going to simulate producer message out-of-sequence error
         // - message ordering
         // - message loss
-        LongFunction<String> seqErrSimuTypeFunc = (l) -> null;
+        Set<PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE> seqErrSimuTypes = Collections.emptySet();
         if (cmdTpl.containsKey("seqerr_simu")) {
             if (cmdTpl.isStatic("seqerr_simu")) {
-                seqErrSimuTypeFunc = (l) -> cmdTpl.getStatic("seqerr_simu");
+                seqErrSimuTypes = parseSimulatedErrorTypes(cmdTpl.getStatic("seqerr_simu"));
             } else {
                 throw new PulsarDriverParamException("[resolveMsgSend()] \"seqerr_simu\" parameter cannot be dynamic!");
             }
@@ -403,10 +402,21 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             seqTrackingFunc,
             transactionSupplierFunc,
             producerFunc,
-            seqErrSimuTypeFunc,
+            seqErrSimuTypes,
             keyFunc,
             propFunc,
             valueFunc);
+    }
+
+    private Set<PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE> parseSimulatedErrorTypes(String sequenceErrorSimulatedTypeString) {
+        if (StringUtils.isBlank(sequenceErrorSimulatedTypeString)) {
+            return Collections.emptySet();
+        }
+        return Arrays.stream(StringUtils.split(sequenceErrorSimulatedTypeString, ','))
+            .map(PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE::parseSimuType)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toSet());
     }
 
     private LongFunction<PulsarOp> resolveMsgConsume(

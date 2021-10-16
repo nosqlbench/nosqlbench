@@ -3,6 +3,8 @@ package io.nosqlbench.driver.pulsar.ops;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
@@ -30,14 +32,6 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final LongFunction<String> subscriptionTypeFunc;
     private final boolean e2eMsProc;
 
-    // Used for message loss checking
-    private long prevMsgSeqId = -1;
-
-    // Used for early quiting when there are message loss
-    // Otherwise, sync API may unblock unnecessarily
-    private long totalMsgLossCnt = 0;
-    private long maxMsgSeqToExpect = -1;
-
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
                                 PulsarActivity pulsarActivity,
@@ -56,24 +50,9 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
         this.e2eMsProc = e2eMsgProc;
     }
 
-    public long getPrevMsgSeqId() { return prevMsgSeqId; }
-    public void setPrevMsgSeqId(long prevMsgSeqId) { this.prevMsgSeqId = prevMsgSeqId; }
-
-    public long getTotalMsgLossCnt() { return totalMsgLossCnt; }
-    public void setTotalMsgLossCnt(long totalMsgLossCnt) { this.totalMsgLossCnt = totalMsgLossCnt; }
-
-    public long getMaxMsgSeqToExpect() { return maxMsgSeqToExpect; }
-    public void setMaxMsgSeqToExpect(long maxMsgSeqToExpect) { this.maxMsgSeqToExpect = maxMsgSeqToExpect; }
-
     @Override
     public PulsarOp apply(long value) {
         boolean seqTracking = seqTrackingFunc.apply(value);
-        if ( seqTracking && (maxMsgSeqToExpect != -1) ) {
-             if ( (value + totalMsgLossCnt) > maxMsgSeqToExpect) {
-                 return new PulsarConumerEmptyOp(pulsarActivity);
-             }
-        }
-
         Consumer<?> consumer = consumerFunc.apply(value);
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
@@ -94,6 +73,23 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
             value,
-            e2eMsProc);
+            e2eMsProc,
+            this::getReceivedMessageSequenceTracker);
     }
+
+
+    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(String topicName) {
+        return receivedMessageSequenceTrackersForTopicThreadLocal.get()
+            .computeIfAbsent(topicName, k -> createReceivedMessageSequenceTracker());
+    }
+
+    private ReceivedMessageSequenceTracker createReceivedMessageSequenceTracker() {
+        return new ReceivedMessageSequenceTracker(pulsarActivity.getMsgErrOutOfSeqCounter(),
+            pulsarActivity.getMsgErrDuplicateCounter(),
+            pulsarActivity.getMsgErrLossCounter());
+    }
+
+    private ThreadLocal<Map<String, ReceivedMessageSequenceTracker>> receivedMessageSequenceTrackersForTopicThreadLocal =
+        ThreadLocal.withInitial(HashMap::new);
+
 }

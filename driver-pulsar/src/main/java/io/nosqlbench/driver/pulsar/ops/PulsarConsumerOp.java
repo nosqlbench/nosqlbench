@@ -7,6 +7,7 @@ import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.exception.*;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,16 +45,7 @@ public class PulsarConsumerOp implements PulsarOp {
 
     // keep track of end-to-end message latency
     private final Histogram e2eMsgProcLatencyHistogram;
-    // message out-of-sequence error counter
-    private final Counter msgErrOutOfSeqCounter;
-    // message out-of-sequence error counter
-    private final Counter msgErrDuplicateCounter;
-    // message loss error counter
-    private final Counter msgErrLossCounter;
-
-    // Used for message error tracking
-    private final boolean ignoreMsgLossCheck;
-    private final boolean ignoreMsgDupCheck;
+    private final Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic;
 
     public PulsarConsumerOp(
         PulsarConsumerMapper consumerMapper,
@@ -68,7 +60,8 @@ public class PulsarConsumerOp implements PulsarOp {
         Schema<?> schema,
         int timeoutSeconds,
         long curCycleNum,
-        boolean e2eMsgProc)
+        boolean e2eMsgProc,
+        Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic)
     {
         this.consumerMapper = consumerMapper;
         this.pulsarActivity = pulsarActivity;
@@ -91,74 +84,16 @@ public class PulsarConsumerOp implements PulsarOp {
         this.transactionCommitTimer = pulsarActivity.getCommitTransactionTimer();
 
         this.e2eMsgProcLatencyHistogram = pulsarActivity.getE2eMsgProcLatencyHistogram();
-        this.msgErrOutOfSeqCounter = pulsarActivity.getMsgErrOutOfSeqCounter();
-        this.msgErrLossCounter = pulsarActivity.getMsgErrLossCounter();
-        this.msgErrDuplicateCounter = pulsarActivity.getMsgErrDuplicateCounter();
-
-        // When message deduplication configuration is not enable, ignore message
-        // duplication check
-        this.ignoreMsgDupCheck = !this.topicMsgDedup;
-
-        // Limitations of the message sequence based check:
-        // - For message out of sequence and message duplicate check, it works for
-        //   all subscription types, including "Shared" and "Key_Shared"
-        // - For message loss, it doesn't work for "Shared" and "Key_Shared"
-        //   subscription types
-        this.ignoreMsgLossCheck =
-            StringUtils.equalsAnyIgnoreCase(this.subscriptionType,
-                PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
-                PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label);
+        this.receivedMessageSequenceTrackerForTopic = receivedMessageSequenceTrackerForTopic;
     }
 
     private void checkAndUpdateMessageErrorCounter(Message message) {
-        long maxMsgSeqToExpect = consumerMapper.getMaxMsgSeqToExpect();
-        if (maxMsgSeqToExpect == -1) {
-            String msgSeqTgtMaxStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_TGTMAX);
-            if (!StringUtils.isBlank(msgSeqTgtMaxStr)) {
-                consumerMapper.setMaxMsgSeqToExpect(Long.valueOf(msgSeqTgtMaxStr));
-            }
-        }
-
-        String msgSeqIdStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_ID);
+        String msgSeqIdStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_NUMBER);
 
         if ( !StringUtils.isBlank(msgSeqIdStr) ) {
-            long prevMsgSeqId = consumerMapper.getPrevMsgSeqId();
-            long curMsgSeqId = Long.parseLong(msgSeqIdStr);
-
-            // Skip out-of-sequence check on the first received message
-            // - This is because out-of-sequence check requires at least 2
-            //   received messages for comparison
-            if ( (prevMsgSeqId != -1) && (curMsgSeqId < prevMsgSeqId) ) {
-                msgErrOutOfSeqCounter.inc();
-            }
-
-            // Similarly, when message duplicate check is needed, we also
-            // skip the first received message.
-            if ( !ignoreMsgDupCheck && (prevMsgSeqId != -1) && (curMsgSeqId == prevMsgSeqId) ) {
-                msgErrDuplicateCounter.inc();
-            }
-
-            // Note that message loss could be happened anywhere, E.g.
-            // - published messages: 0,1,2,3,4,5
-            // - message loss scenario:
-            //   * scenario 1: first set of messages are lost - received 2,3,4
-            //   * scenario 2: messages in the middle are lost - received 0,1,3,4
-            //   * scenario 3: last set of messages are lost - received 0,1,2
-            if ( !ignoreMsgLossCheck ) {
-                // This check covers message loss scenarios 1 and 2
-                if ( (curMsgSeqId - prevMsgSeqId) > 1 ){
-                    // there could be multiple published messages lost between
-                    // 2 received messages
-                    long msgLostCnt = (curMsgSeqId - prevMsgSeqId) - 1;
-                    msgErrLossCounter.inc(msgLostCnt);
-                    consumerMapper.setTotalMsgLossCnt(consumerMapper.getTotalMsgLossCnt() + msgLostCnt);
-                }
-
-                // TODO: how can we detect message loss scenario 3?
-            }
-
-            prevMsgSeqId = curMsgSeqId;
-            consumerMapper.setPrevMsgSeqId(prevMsgSeqId);
+            long sequenceNumber = Long.parseLong(msgSeqIdStr);
+            ReceivedMessageSequenceTracker receivedMessageSequenceTracker = receivedMessageSequenceTrackerForTopic.apply(message.getTopicName());
+            receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
         }
     }
 
@@ -323,4 +258,5 @@ public class PulsarConsumerOp implements PulsarOp {
             }
         }
     }
+
 }
