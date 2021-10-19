@@ -1,6 +1,4 @@
-- feb0fda1 (HEAD -> main) fix broken test
-- 49207a44 (origin/main) fix release for s3 and pulsar testing features
-- e53af8bf improve NBEnvironment and S3 interaction
-- cb477996 merge fixups
-- e77bfea0 Merge pull request #367 from yabinmeng/main
-- 6569fa52 reformat all pom.xml files
+- bdb577f2 (HEAD -> main, origin/main) Merge pull request #368 from lhotari/lh-threadlocal-sequence-tracking
+- b82b4b1a Merge pull request #369 from lhotari/lh-rate-limit-per-thread
+- 7a6ec965 Pulsar: Use thread local and topic based sequence tracking
+- e6608234 Make ratelimiter instance thread specific for PulsarActivity
