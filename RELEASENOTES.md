@@ -1,4 +1,2 @@
-- bdb577f2 (HEAD -> main, origin/main) Merge pull request #368 from lhotari/lh-threadlocal-sequence-tracking
-- b82b4b1a Merge pull request #369 from lhotari/lh-rate-limit-per-thread
-- 7a6ec965 Pulsar: Use thread local and topic based sequence tracking
-- e6608234 Make ratelimiter instance thread specific for PulsarActivity
+- 8c8801b0 (HEAD -> main, origin/main) Merge pull request #371 from nosqlbench/nosqlbench-370
+- 9ea60914 (origin/nosqlbench-370, nosqlbench-370) nosqlbench-370 Specifying full path to the yaml workload crashes
