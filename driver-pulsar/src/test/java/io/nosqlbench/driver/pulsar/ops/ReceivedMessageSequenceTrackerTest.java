@@ -149,4 +149,43 @@ class ReceivedMessageSequenceTrackerTest {
         assertEquals(1, msgErrLossCounter.getCount());
     }
 
+    @Test
+    void shouldDetectGapAndMessageDuplication() {
+        // when
+        for (long l = 0; l < 100L; l++) {
+            if (l != 11L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == 12L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(0, msgErrOutOfSeqCounter.getCount());
+        assertEquals(1, msgErrDuplicateCounter.getCount());
+        assertEquals(1, msgErrLossCounter.getCount());
+    }
+
+    @Test
+    void shouldDetectGapAndMessageDuplicationTimes2() {
+        // when
+        for (long l = 0; l < 100L; l++) {
+            if (l != 11L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == 12L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(0, msgErrOutOfSeqCounter.getCount());
+        assertEquals(2, msgErrDuplicateCounter.getCount());
+        assertEquals(1, msgErrLossCounter.getCount());
+    }
+
 }

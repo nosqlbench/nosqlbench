@@ -16,13 +16,12 @@ class ReceivedMessageSequenceTracker implements AutoCloseable{
     public static final int MAX_TRACK_OUT_OF_ORDER_SEQUENCE_NUMBERS = 20;
     // message out-of-sequence error counter
     private final Counter msgErrOutOfSeqCounter;
-    // message out-of-sequence error counter
+    // duplicate message error counter
     private final Counter msgErrDuplicateCounter;
     // message loss error counter
     private final Counter msgErrLossCounter;
-    long expectedNumber = -1;
-
-    SortedSet<Long> pendingOutOfSeqNumbers = new TreeSet<>();
+    private final SortedSet<Long> pendingOutOfSeqNumbers = new TreeSet<>();
+    private long expectedNumber = -1;
 
 
     ReceivedMessageSequenceTracker(Counter msgErrOutOfSeqCounter, Counter msgErrDuplicateCounter, Counter msgErrLossCounter) {
@@ -50,9 +49,11 @@ class ReceivedMessageSequenceTracker implements AutoCloseable{
         boolean messagesSkipped = false;
         if (sequenceNumber > expectedNumber) {
             if (pendingOutOfSeqNumbers.size() == MAX_TRACK_OUT_OF_ORDER_SEQUENCE_NUMBERS) {
-                messagesSkipped = processEarliestPendingOutOfSequenceNumber();
+                messagesSkipped = processLowestPendingOutOfSequenceNumber();
             }
-            pendingOutOfSeqNumbers.add(sequenceNumber);
+            if(!pendingOutOfSeqNumbers.add(sequenceNumber)) {
+                msgErrDuplicateCounter.inc();
+            }
         } else {
             // sequenceNumber == expectedNumber
             expectedNumber++;
@@ -61,15 +62,15 @@ class ReceivedMessageSequenceTracker implements AutoCloseable{
         cleanUpTooFarBehindOutOfSequenceNumbers();
     }
 
-    private boolean processEarliestPendingOutOfSequenceNumber() {
-        // remove the earliest pending out of sequence number
-        Long earliestOutOfSeqNumber = pendingOutOfSeqNumbers.first();
-        pendingOutOfSeqNumbers.remove(earliestOutOfSeqNumber);
-        if (earliestOutOfSeqNumber > expectedNumber) {
-            // skip the expected number ahead to the number after the earliest sequence number
+    private boolean processLowestPendingOutOfSequenceNumber() {
+        // remove the lowest pending out of sequence number
+        Long lowestOutOfSeqNumber = pendingOutOfSeqNumbers.first();
+        pendingOutOfSeqNumbers.remove(lowestOutOfSeqNumber);
+        if (lowestOutOfSeqNumber > expectedNumber) {
+            // skip the expected number ahead to the number after the lowest sequence number
             // increment the counter with the amount of sequence numbers that got skipped
-            msgErrLossCounter.inc(earliestOutOfSeqNumber - expectedNumber);
-            expectedNumber = earliestOutOfSeqNumber + 1;
+            msgErrLossCounter.inc(lowestOutOfSeqNumber - expectedNumber);
+            expectedNumber = lowestOutOfSeqNumber + 1;
             return true;
         } else {
             msgErrLossCounter.inc();
@@ -107,7 +108,7 @@ class ReceivedMessageSequenceTracker implements AutoCloseable{
     @Override
     public void close() {
         while (!pendingOutOfSeqNumbers.isEmpty()) {
-            processPendingOutOfSequenceNumbers(processEarliestPendingOutOfSequenceNumber());
+            processPendingOutOfSequenceNumbers(processLowestPendingOutOfSequenceNumber());
         }
     }
 }
