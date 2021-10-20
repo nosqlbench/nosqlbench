@@ -4,6 +4,7 @@ import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
         assertThat(cmds.get(0).getArg("cycles")).isEqualTo("10");
-        assertThat(cmds.get(0).getArg("workload")).isEqualTo("target/test-classes/activities/scenario-test.yaml");
+        assertThat(cmds.get(0).getArg("workload")).isEqualTo("scenario-test");
     }
 
     @Test
@@ -87,7 +88,7 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
         assertThat(cmds.get(0).getArg("cycles")).isEqualTo("20");
         assertThat(cmds.get(0).getArg("cycles-test")).isEqualTo("20");
-        assertThat(cmds.get(0).getArg("workload")).isEqualTo("target/test-classes/activities/scenario-test.yaml");
+        assertThat(cmds.get(0).getArg("workload")).isEqualTo("scenario-test");
     }
 
     @Test
@@ -100,9 +101,23 @@ public class NBCLIScenarioParserTest {
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
         assertThat(cmds1.get(0).getArg("cycles-test")).isNull();
-
     }
 
+    @Test
+    public void testThatFullyQualifiedScenarioFilesAreSupported() {
+        Path cwd = Path.of(".").toAbsolutePath();
+        System.out.println("cwd: '" + cwd + "'");
+
+        Path rel = Path.of("src/test/resources/activities/scenario-test.yaml");
+
+        assertThat(rel).exists();
+        Path absolute = rel.toAbsolutePath();
+        assertThat(absolute).exists();
+
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ absolute.toString(), "schema-only", "cycles-test=20"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isGreaterThan(0);
+    }
 
     @Test
     public void testSanitizer() {
