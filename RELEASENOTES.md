@@ -1,2 +1,5 @@
-- 8c8801b0 (HEAD -> main, origin/main) Merge pull request #371 from nosqlbench/nosqlbench-370
-- 9ea60914 (origin/nosqlbench-370, nosqlbench-370) nosqlbench-370 Specifying full path to the yaml workload crashes
+- fa78ca54 (HEAD -> main, origin/main) Merge pull request #372 from lhotari/lh-detect-duplicates-after-gap
+- 71c3b190 Detect delayed out-of-order delivery
+- e694eaec Merge pull request #373 from lhotari/lh-upgrade-pulsar-2.8.1
+- 85e1f8a6 Upgrade Pulsar client to 2.8.1 version
+- 6b50060a Detect duplicates after a gap
