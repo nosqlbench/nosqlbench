@@ -11,7 +11,7 @@ class ReceivedMessageSequenceTrackerTest {
     Counter msgErrOutOfSeqCounter = new Counter();
     Counter msgErrDuplicateCounter = new Counter();
     Counter msgErrLossCounter = new Counter();
-    ReceivedMessageSequenceTracker messageSequenceTracker = new ReceivedMessageSequenceTracker(msgErrOutOfSeqCounter, msgErrDuplicateCounter, msgErrLossCounter);
+    ReceivedMessageSequenceTracker messageSequenceTracker = new ReceivedMessageSequenceTracker(msgErrOutOfSeqCounter, msgErrDuplicateCounter, msgErrLossCounter, 20, 20);
 
     @Test
     void shouldCountersBeZeroWhenSequenceDoesntContainGaps() {
@@ -83,7 +83,7 @@ class ReceivedMessageSequenceTrackerTest {
         if (totalMessages % 2 == 0) {
             messageSequenceTracker.sequenceNumberReceived(totalMessages);
         }
-        if (totalMessages < 2 * ReceivedMessageSequenceTracker.MAX_TRACK_OUT_OF_ORDER_SEQUENCE_NUMBERS) {
+        if (totalMessages < 2 * messageSequenceTracker.getMaxTrackOutOfOrderSequenceNumbers()) {
             messageSequenceTracker.close();
         }
 
@@ -149,4 +149,82 @@ class ReceivedMessageSequenceTrackerTest {
         assertEquals(1, msgErrLossCounter.getCount());
     }
 
+    @Test
+    void shouldDetectGapAndMessageDuplication() {
+        // when
+        for (long l = 0; l < 100L; l++) {
+            if (l != 11L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == 12L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(0, msgErrOutOfSeqCounter.getCount());
+        assertEquals(1, msgErrDuplicateCounter.getCount());
+        assertEquals(1, msgErrLossCounter.getCount());
+    }
+
+    @Test
+    void shouldDetectGapAndMessageDuplicationTimes2() {
+        // when
+        for (long l = 0; l < 100L; l++) {
+            if (l != 11L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == 12L) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(0, msgErrOutOfSeqCounter.getCount());
+        assertEquals(2, msgErrDuplicateCounter.getCount());
+        assertEquals(1, msgErrLossCounter.getCount());
+    }
+
+
+    @Test
+    void shouldDetectDelayedOutOfOrderDelivery() {
+        // when
+        for (long l = 0; l < 5 * messageSequenceTracker.getMaxTrackOutOfOrderSequenceNumbers(); l++) {
+            if (l != 10) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == messageSequenceTracker.getMaxTrackOutOfOrderSequenceNumbers() * 2) {
+                messageSequenceTracker.sequenceNumberReceived(10);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(1, msgErrOutOfSeqCounter.getCount());
+        assertEquals(0, msgErrDuplicateCounter.getCount());
+        assertEquals(0, msgErrLossCounter.getCount());
+    }
+
+    @Test
+    void shouldDetectDelayedOutOfOrderDeliveryOf2ConsecutiveSequenceNumbers() {
+        // when
+        for (long l = 0; l < 5 * messageSequenceTracker.getMaxTrackOutOfOrderSequenceNumbers(); l++) {
+            if (l != 10 && l != 11) {
+                messageSequenceTracker.sequenceNumberReceived(l);
+            }
+            if (l == messageSequenceTracker.getMaxTrackOutOfOrderSequenceNumbers() * 2) {
+                messageSequenceTracker.sequenceNumberReceived(10);
+                messageSequenceTracker.sequenceNumberReceived(11);
+            }
+        }
+        messageSequenceTracker.close();
+
+        // then
+        assertEquals(2, msgErrOutOfSeqCounter.getCount());
+        assertEquals(0, msgErrDuplicateCounter.getCount());
+        assertEquals(0, msgErrLossCounter.getCount());
+    }
 }
