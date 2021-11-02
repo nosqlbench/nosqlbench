@@ -40,6 +40,15 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     // Metrics for NB Pulsar driver milestone: https://github.com/nosqlbench/nosqlbench/milestone/11
     // - end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
+
+    /**
+     * A histogram that tracks payload round-trip-time, based on a user-defined field in some sender
+     * system which can be interpreted as millisecond epoch time in the system's local time zone.
+     * This is paired with a field name of the same type to be extracted and reported in a meteric
+     * named 'payload-rtt'.
+     */
+    private Histogram payloadRttHistogram;
+
     // - message out of sequence error counter
     private Counter msgErrOutOfSeqCounter;
     // - message loss counter
@@ -85,6 +94,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction");
 
         e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency");
+        payloadRttHistogram = ActivityMetrics.histogram(activityDef, "payload_rtt");
+
         msgErrOutOfSeqCounter = ActivityMetrics.counter(activityDef, "err_msg_oos");
         msgErrLossCounter = ActivityMetrics.counter(activityDef, "err_msg_loss");
         msgErrDuplicateCounter = ActivityMetrics.counter(activityDef, "err_msg_dup");
@@ -257,6 +268,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer getCreateTransactionTimer() { return createTransactionTimer; }
     public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
 
+    public Histogram getPayloadRttHistogram() {return payloadRttHistogram;}
     public Histogram getE2eMsgProcLatencyHistogram() { return e2eMsgProcLatencyHistogram; }
     public Counter getMsgErrOutOfSeqCounter() { return msgErrOutOfSeqCounter; }
     public Counter getMsgErrLossCounter() { return msgErrLossCounter; }
