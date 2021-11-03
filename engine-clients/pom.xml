@@ -1,42 +1,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
 
-  <parent>
-    <artifactId>mvn-defaults</artifactId>
-    <groupId>io.nosqlbench</groupId>
-    <version>4.15.58-SNAPSHOT</version>
-    <relativePath>../mvn-defaults</relativePath>
-  </parent>
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+    <version>4.15.64-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
 
-  <artifactId>engine-clients</artifactId>
-  <packaging>jar</packaging>
-  <name>${project.artifactId}</name>
-  <description>
-    A set of clients for calling nosqlbench and related services.
-  </description>
+    <artifactId>engine-clients</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>
+        A set of clients for calling nosqlbench and related services.
+    </description>
 
-  <dependencies>
+    <dependencies>
 
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>engine-api</artifactId>
-        <version>4.15.58-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+        <version>4.15.64-SNAPSHOT</version>
+        </dependency>
 
-  </dependencies>
+    </dependencies>
 
-  <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <includes>
-          <include>examples/**</include>
-          <include />
-        </includes>
-      </testResource>
-    </testResources>
-  </build>
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>examples/**</include>
+                    <include />
+                </includes>
+            </testResource>
+        </testResources>
+    </build>
 
 
 </project>

@@ -1,3 +1,8 @@
+- fa78ca54 (HEAD -> main, origin/main) Merge pull request #372 from lhotari/lh-detect-duplicates-after-gap
+- 71c3b190 Detect delayed out-of-order delivery
+- e694eaec Merge pull request #373 from lhotari/lh-upgrade-pulsar-2.8.1
+- 85e1f8a6 Upgrade Pulsar client to 2.8.1 version
+- 6b50060a Detect duplicates after a gap
 - 3b674983 (HEAD -> main, origin/main) Merge pull request #362 from yabinmeng/main
 - bf98d644 Merge branch 'nosqlbench:main' into main
 - 793af965 Ignore abnormal message processing error for Shared and Key_Shared subscription type.

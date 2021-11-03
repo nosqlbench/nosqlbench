@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.58-SNAPSHOT</version>
+        <version>4.15.64-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -23,13 +23,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-          <version>4.15.58-SNAPSHOT</version>
+          <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.58-SNAPSHOT</version>
+          <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -81,15 +81,13 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-haproxy</artifactId>
-            <version>4.1.54.Final</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-<!--            <version>4.1.47.Final</version>-->
-<!--            <classifier>linux-x86_64</classifier>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
 
         <!-- test only scope -->
 
@@ -185,21 +183,11 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                     <createSourcesJar>true</createSourcesJar>
-                    <!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
-                    <!--          <shadedClassifierName>shaded</shadedClassifierName>-->
                     <relocations>
                         <relocation>
                             <pattern>com.google.common</pattern>
                             <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
                         </relocation>
-<!--                        <relocation>-->
-<!--                            <pattern>com.datastax</pattern>-->
-<!--                            <shadedPattern>dse19.com.datastax</shadedPattern>-->
-<!--                        </relocation>-->
-<!--                        <relocation>-->
-<!--                            <pattern>io.netty</pattern>-->
-<!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
-<!--                        </relocation>-->
                     </relocations>
                     <artifactSet>
                         <includes>
@@ -212,7 +200,6 @@
                         </transformer>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                     </transformers>
-                    <!--          <finalName>${project.artifactId}</finalName>-->
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>

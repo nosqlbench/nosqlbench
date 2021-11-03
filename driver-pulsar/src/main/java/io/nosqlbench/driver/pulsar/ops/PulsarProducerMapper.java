@@ -4,17 +4,16 @@ import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import org.apache.commons.lang3.RandomUtils;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.LongFunction;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.transaction.Transaction;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.LongFunction;
-import java.util.function.Supplier;
 
 /**
  * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
@@ -31,7 +30,7 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
     private final static Logger logger = LogManager.getLogger(PulsarProducerMapper.class);
 
     private final LongFunction<Producer<?>> producerFunc;
-    private final LongFunction<String> seqErrSimuTypeFunc;
+    private final Set<PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE> seqErrSimuTypes;
     private final LongFunction<String> keyFunc;
     private final LongFunction<String> propFunc;
     private final LongFunction<String> payloadFunc;
@@ -44,14 +43,14 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
                                 LongFunction<Boolean> seqTrackingFunc,
                                 LongFunction<Supplier<Transaction>> transactionSupplierFunc,
                                 LongFunction<Producer<?>> producerFunc,
-                                LongFunction<String> seqErrSimuTypeFunc,
+                                Set<PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE> seqErrSimuTypes,
                                 LongFunction<String> keyFunc,
                                 LongFunction<String> propFunc,
                                 LongFunction<String> payloadFunc) {
         super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, useTransactionFunc, seqTrackingFunc, transactionSupplierFunc);
 
         this.producerFunc = producerFunc;
-        this.seqErrSimuTypeFunc = seqErrSimuTypeFunc;
+        this.seqErrSimuTypes = seqErrSimuTypes;
         this.keyFunc = keyFunc;
         this.propFunc = propFunc;
         this.payloadFunc = payloadFunc;
@@ -61,24 +60,9 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
     public PulsarOp apply(long value) {
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
-        boolean seqTracking = seqTrackingFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
 
         Producer<?> producer = producerFunc.apply(value);
-
-        // Simulate error 10% of the time
-        float rndVal = RandomUtils.nextFloat(0, 1.0f);
-        boolean simulationError = (rndVal >= 0) && (rndVal < 0.1f);
-        String seqErrSimuType = seqErrSimuTypeFunc.apply(value);
-        boolean simulateMsgOutofOrder = simulationError &&
-            !StringUtils.isBlank(seqErrSimuType) &&
-            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.OutOfOrder.label);
-        boolean simulateMsgLoss = simulationError &&
-            !StringUtils.isBlank(seqErrSimuType) &&
-            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.MsgLoss.label);
-        boolean simulateMsgDup = simulationError &&
-            !StringUtils.isBlank(seqErrSimuType) &&
-            StringUtils.equalsIgnoreCase(seqErrSimuType, PulsarActivityUtil.SEQ_ERROR_SIMU_TYPE.MsgDup.label);
 
         String msgKey = keyFunc.apply(value);
         String msgPayload = payloadFunc.apply(value);
@@ -99,24 +83,11 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
             }
         }
 
-        // Set message sequence tracking property
-        if (seqTracking) {
-            // normal case
-            if (!simulateMsgOutofOrder && !simulateMsgDup) {
-                msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value));
-            }
-            // simulate message out of order
-            else if ( simulateMsgOutofOrder ) {
-                int rndmOffset = 2;
-                msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID,
-                    String.valueOf((value > rndmOffset) ? (value-rndmOffset) : value));
-            }
-            // simulate message duplication
-            else {
-                msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_ID, String.valueOf(value-1));
-            }
-            // message loss simulation is not done by message property
-            // we simply skip sending message in the current NB cycle
+        boolean sequenceTrackingEnabled = seqTrackingFunc.apply(value);
+        if (sequenceTrackingEnabled) {
+            long nextSequenceNumber = getMessageSequenceNumberSendingHandler(producer.getTopic())
+                .getNextSequenceNumber(seqErrSimuTypes);
+            msgProperties.put(PulsarActivityUtil.MSG_SEQUENCE_NUMBER, String.valueOf(nextSequenceNumber));
         }
 
         return new PulsarProducerOp(
@@ -128,7 +99,15 @@ public class PulsarProducerMapper extends PulsarTransactOpMapper {
             clientSpace.getPulsarSchema(),
             msgKey,
             msgProperties,
-            msgPayload,
-            simulateMsgLoss);
+            msgPayload);
     }
+
+    private MessageSequenceNumberSendingHandler getMessageSequenceNumberSendingHandler(String topicName) {
+        return MessageSequenceNumberSendingHandlersThreadLocal.get()
+            .computeIfAbsent(topicName, k -> new MessageSequenceNumberSendingHandler());
+    }
+
+    private final ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
+        ThreadLocal.withInitial(HashMap::new);
+
 }

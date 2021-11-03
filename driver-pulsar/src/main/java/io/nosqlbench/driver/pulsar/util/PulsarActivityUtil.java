@@ -1,6 +1,7 @@
 package io.nosqlbench.driver.pulsar.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,9 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,8 +46,7 @@ public class PulsarActivityUtil {
         return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
 
-    public static final String MSG_SEQUENCE_ID = "sequence_id";
-    public static final String MSG_SEQUENCE_TGTMAX = "sequence_tgtmax";
+    public static final String MSG_SEQUENCE_NUMBER = "sequence_number";
 
     ///////
     // Valid document level parameters for Pulsar NB yaml file
@@ -313,6 +310,23 @@ public class PulsarActivityUtil {
 
         SEQ_ERROR_SIMU_TYPE(String label) {
             this.label = label;
+        }
+
+        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
+
+        static {
+            for (SEQ_ERROR_SIMU_TYPE simuType : values()) {
+                MAPPING.put(simuType.label, simuType);
+                MAPPING.put(simuType.label.toLowerCase(), simuType);
+                MAPPING.put(simuType.label.toUpperCase(), simuType);
+                MAPPING.put(simuType.name(), simuType);
+                MAPPING.put(simuType.name().toLowerCase(), simuType);
+                MAPPING.put(simuType.name().toUpperCase(), simuType);
+            }
+        }
+
+        public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
+            return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
         }
     }
     public static boolean isValidSeqErrSimuType(String item) {

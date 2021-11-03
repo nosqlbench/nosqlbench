@@ -1,4 +1,4 @@
-package io.nosqlbench.nb.api;
+package io.nosqlbench.nb.api.metadata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,10 +7,25 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class SystemId {
 
+    /**
+     * Return the address of a node which is likely to be unique enough to identify
+     * it within a given subnet, after filtering out all local addresses. This is useful
+     * when you are managing configuration or results for a set of systems which
+     * share a common IP addressing scheme. This identifier should be stable as long
+     * as the node's addresses do not change.
+     *
+     * If you are needing an identifier for a node but wish to expose any address data,
+     * you can use the {@link #getNodeFingerprint()} which takes this value and hashes
+     * it with SHA-1 to produce a hex string.
+     * @return A address for the node, likely to be unique and stable for its lifetime
+     */
     public static String getNodeId() {
         SystemInfo sysinfo = new SystemInfo();
         HardwareAbstractionLayer hal = sysinfo.getHardware();
@@ -36,6 +51,28 @@ public class SystemId {
             .findFirst();
         String systemID = first.orElse("UNKNOWN_SYSTEM_ID");
         return systemID;
+    }
+
+    /**
+     * Produce a stable string identifier consisting of hexadecimal characters.
+     * The internal data used for this value is based on a stable ordering of non-local
+     * ip addresses available on the system.
+     * @return A stable node identifier
+     */
+    public static String getNodeFingerprint() {
+        String addrId = getNodeId();
+        try {
+            MessageDigest sha1_digest = MessageDigest.getInstance("SHA-1");
+            byte[] addrBytes = sha1_digest.digest(addrId.getBytes(StandardCharsets.UTF_8));
+            String fingerprint = "";
+            for (int i=0; i < addrBytes.length; i++) {
+                fingerprint +=
+                    Integer.toString( ( addrBytes[i] & 0xff ) + 0x100, 16).substring( 1 );
+            }
+            return fingerprint.toUpperCase(Locale.ROOT);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getHostSummary() {

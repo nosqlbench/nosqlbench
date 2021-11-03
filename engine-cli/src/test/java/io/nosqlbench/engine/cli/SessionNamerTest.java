@@ -17,6 +17,7 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.nb.api.metadata.SessionNamer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,18 +27,18 @@ public class SessionNamerTest {
     @Test
     public void testDefaultFormat() {
         SessionNamer namer = new SessionNamer();
-        String name1 = namer.format(null);
+        String name1 = SessionNamer.format(null);
         assertThat(name1).matches("scenario_\\d{8}_\\d{6}_\\d{3}");
-        String name2 = namer.format("");
+        String name2 = SessionNamer.format("");
         assertThat(name2).matches("scenario_\\d{8}_\\d{6}_\\d{3}");
     }
 
     @Test
     public void testCustomFormat() {
         SessionNamer namer = new SessionNamer();
-        String name1 = namer.format("Custom_session_name");
+        String name1 = SessionNamer.format("Custom_session_name");
         assertThat(name1).matches("Custom_session_name");
-        String name2 = namer.format("TEST--%tQ");
+        String name2 = SessionNamer.format("TEST--%tQ");
         assertThat(name2).matches("TEST--\\d{13}");
     }
 

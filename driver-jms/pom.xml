@@ -4,7 +4,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.58-SNAPSHOT</version>
+        <version>4.15.64-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -17,36 +17,36 @@
         into a pulsar system via JMS 2.0 compatibile APIs.
 
         NOTE: this is JMS compatible driver from DataStax that allows using a Pulsar cluster
-               as the potential JMS Destination
+        as the potential JMS Destination
     </description>
 
-<!--    <repositories>-->
-<!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
-<!--        <repository>-->
-<!--            <id>datastax-releases-local</id>-->
-<!--            <name>DataStax Local Releases</name>-->
-<!--            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>-->
-<!--            <releases>-->
-<!--                <enabled>false</enabled>-->
-<!--            </releases>-->
-<!--            <snapshots>-->
-<!--                <enabled>true</enabled>-->
-<!--            </snapshots>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+    <!--    <repositories>-->
+    <!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
+    <!--        <repository>-->
+    <!--            <id>datastax-releases-local</id>-->
+    <!--            <name>DataStax Local Releases</name>-->
+    <!--            <url>https://repo.sjc.dsinternal.org/artifactory/datastax-snapshots-local/</url>-->
+    <!--            <releases>-->
+    <!--                <enabled>false</enabled>-->
+    <!--            </releases>-->
+    <!--            <snapshots>-->
+    <!--                <enabled>true</enabled>-->
+    <!--            </snapshots>-->
+    <!--        </repository>-->
+    <!--    </repositories>-->
 
     <dependencies>
         <!-- core dependencies -->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.58-SNAPSHOT</version>
+            <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-stdout</artifactId>
-            <version>4.15.58-SNAPSHOT</version>
+            <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->

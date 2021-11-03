@@ -238,6 +238,14 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
+    public void testShutdownHook() {
+        ScenarioResult scenarioResult = runScenario("extension_shutdown_hook");
+        assertThat(scenarioResult.getIOLog()).doesNotContain("shutdown hook running").describedAs(
+            "shutdown hooks should not run in the same IO context as the main scenario"
+        );
+    }
+
+    @Test
     public void testExceptionPropagationFromMotorThread() {
         ScenarioResult scenarioResult = runScenario("activityerror");
         assertThat(scenarioResult.getException()).isPresent();

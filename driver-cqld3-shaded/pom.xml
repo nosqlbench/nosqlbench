@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.58-SNAPSHOT</version>
+        <version>4.15.64-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,13 +24,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-          <version>4.15.58-SNAPSHOT</version>
+          <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.58-SNAPSHOT</version>
+          <version>4.15.64-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -71,15 +71,14 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-haproxy</artifactId>
-            <version>4.1.54.Final</version>
         </dependency>
 
-      <!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-transport-native-epoll</artifactId>-->
-<!--            <version>4.1.47.Final</version>-->
-<!--            <classifier>linux-x86_64</classifier>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+
+        </dependency>
 
         <!-- test only scope -->
 
@@ -198,10 +197,10 @@
                             <pattern>io.nosqlbench.generators.cql</pattern>
                             <shadedPattern>io.nosqlbench.generators.cql3.shaded</shadedPattern>
                         </relocation>
-<!--                        <relocation>-->
-<!--                            <pattern>io.netty</pattern>-->
-<!--                            <shadedPattern>dse19.io.netty</shadedPattern>-->
-<!--                        </relocation>-->
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>dse19.io.netty</shadedPattern>
+                        </relocation>
                     </relocations>
                     <artifactSet>
                         <includes>

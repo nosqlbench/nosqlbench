@@ -31,7 +31,7 @@ public class ActivityTypeLoader {
 
     public ActivityTypeLoader() {
 
-        List<String> libpaths = NBEnvironment.INSTANCE.interpolate(":", "$" + NBEnvironment.NBLIBS);
+        List<String> libpaths = NBEnvironment.INSTANCE.interpolateEach(":", "$" + NBEnvironment.NBLIBS);
         Set<URL> urlsToAdd = new HashSet<>();
 
         for (String libpaths_entry : libpaths) {

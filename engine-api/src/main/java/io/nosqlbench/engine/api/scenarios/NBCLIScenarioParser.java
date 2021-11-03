@@ -145,10 +145,12 @@ public class NBCLIScenarioParser {
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
-                    String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
-                    relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
-                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
-                    buildingCmd.put("workload", "workload=" + relativeWorkloadPathFromRoot);
+// The logic to remove the leading slash was likely used to fix a nuisance bug before,
+// although it is clearly not correct as-is. Leaving temporarily for context.
+//                    String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
+//                    relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
+//                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
+                    buildingCmd.put("workload", "workload=" + workloadName);
                 }
 
                 if (!buildingCmd.containsKey("alias")) {

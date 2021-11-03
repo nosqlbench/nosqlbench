@@ -1,15 +1,13 @@
 package io.nosqlbench.driver.pulsar.ops;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
-import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
 import java.util.function.LongFunction;
@@ -54,15 +52,16 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
 
     @Override
     public PulsarOp apply(long value) {
+        boolean seqTracking = seqTrackingFunc.apply(value);
         Consumer<?> consumer = consumerFunc.apply(value);
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
-        boolean seqTracking = seqTrackingFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
         boolean topicMsgDedup = topicMsgDedupFunc.apply(value);
         String subscriptionType = subscriptionTypeFunc.apply(value);
 
         return new PulsarConsumerOp(
+            this,
             pulsarActivity,
             asyncApi,
             useTransaction,
@@ -74,6 +73,23 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
             value,
-            e2eMsProc);
+            e2eMsProc,
+            this::getReceivedMessageSequenceTracker);
     }
+
+
+    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(String topicName) {
+        return receivedMessageSequenceTrackersForTopicThreadLocal.get()
+            .computeIfAbsent(topicName, k -> createReceivedMessageSequenceTracker());
+    }
+
+    private ReceivedMessageSequenceTracker createReceivedMessageSequenceTracker() {
+        return new ReceivedMessageSequenceTracker(pulsarActivity.getMsgErrOutOfSeqCounter(),
+            pulsarActivity.getMsgErrDuplicateCounter(),
+            pulsarActivity.getMsgErrLossCounter());
+    }
+
+    private final ThreadLocal<Map<String, ReceivedMessageSequenceTracker>> receivedMessageSequenceTrackersForTopicThreadLocal =
+        ThreadLocal.withInitial(HashMap::new);
+
 }

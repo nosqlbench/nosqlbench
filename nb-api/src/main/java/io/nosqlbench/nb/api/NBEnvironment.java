@@ -1,6 +1,7 @@
 package io.nosqlbench.nb.api;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.metadata.SessionNamer;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
@@ -107,12 +108,17 @@ public class NBEnvironment {
      * @param defaultValue The value to return if the name is not found
      * @return the system property or environment variable's value, or the default value
      */
-    public String getOr(String name, String defaultValue) {
-        String value = peek(name);
+    public String getOr(String name, String defaultValue, Map<String,String> supplemental) {
+        String value = peek(name, supplemental);
         if (value == null) {
             value = defaultValue;
         }
         return reference(name, value);
+    }
+
+
+    public String getOr(String name, String defaultValue) {
+        return getOr(name, defaultValue, Map.of());
     }
 
     /**
@@ -122,8 +128,14 @@ public class NBEnvironment {
      * @param name The parameter name
      * @return A value, or null if none was found
      */
-    private String peek(String name) {
+    private String peek(String name, Map<String,String> supplemental) {
         String value = null;
+        if (supplemental.containsKey(name)) {
+            value = supplemental.get(name);
+            if (value!=null) {
+                return value;
+            }
+        }
         if (name.contains(".")) {
             value = System.getProperty(name.toLowerCase());
             if (value != null) {
@@ -167,7 +179,11 @@ public class NBEnvironment {
     }
 
     public boolean containsKey(String name) {
-        String value = peek(name);
+        return containsKey(name, Map.of());
+    }
+
+    public boolean containsKey(String name, Map<String,String> supplemental) {
+        String value = peek(name, supplemental);
         return (value != null);
     }
 
@@ -184,7 +200,7 @@ public class NBEnvironment {
      * @param word The word to interpolate the environment values into
      * @return The interpolated value, after substitutions, or null if any lookup failed
      */
-    public Optional<String> interpolate(String word) {
+    public Optional<String> interpolate(String word, Map<String,String> supplemental) {
         Pattern envpattern = Pattern.compile("(\\$(?<env1>[a-zA-Z_][A-Za-z0-9_.]+)|\\$\\{(?<env2>[^}]+)\\})");
         Matcher matcher = envpattern.matcher(word);
         StringBuilder sb = new StringBuilder();
@@ -193,7 +209,7 @@ public class NBEnvironment {
             if (envvar == null) {
                 envvar = matcher.group("env2");
             }
-            String value = peek(envvar);
+            String value = peek(envvar,supplemental);
             if (value == null) {
                 if (logger != null) {
                     logger.debug("no value found for '" + envvar + "', returning Optional.empty() for '" + word + "'");
@@ -208,14 +224,54 @@ public class NBEnvironment {
         return Optional.of(sb.toString());
     }
 
-    public List<String> interpolate(CharSequence delim, String combined) {
-        String[] split = combined.split(delim.toString());
+    public Optional<String> interpolate(String word) {
+        return interpolate(word,Map.of());
+    }
+
+    public List<String> interpolateEach(CharSequence delim, String toBeRecombined) {
+        String[] split = toBeRecombined.split(delim.toString());
         List<String> mapped = new ArrayList<>();
         for (String pattern : split) {
             Optional<String> interpolated = interpolate(pattern);
             interpolated.ifPresent(mapped::add);
         }
         return mapped;
+    }
+
+    /**
+     * Interpolate system properties, environment variables, time fields, and arbitrary replacement strings
+     * into a single result. Templates such as {@code /tmp/%d-${testrun}-$System.index-SCENARIO} are supported.
+     *
+     * <hr/>
+     *
+     * The tokens found in the raw template are interpolated in the following order.
+     * <ul>
+     *     <li>Any token which exactly matches one of the keys in the provided map is substituted
+     *     directly as is. No token sigil like '$' is used here, so if you want to support that
+     *     as is, you need to provide the keys in your substitution map as such.</li>
+     *     <li>Any tokens in the form {@code %f} which is supported by the time fields in
+     *     {@link Formatter}</li> are honored and used with the timestamp provided.*
+     *     <li>System Properties: Any token in the form {@code $word.word} will be taken as the name
+     *     of a system property to be substited.</li>
+     *     <li>Environment Variables: Any token in the form {@code $name}</li> will be takens as
+     *     an environment variable to be substituted.</li>
+     * </ul>
+     *
+     * @param rawtext The template, including any of the supported token forms
+     * @param millis  The timestamp to use for any temporal tokens
+     * @param map     Any additional parameters to interpolate into the template first
+     * @return Optionally, the interpolated string, as long as all references were qualified. Error
+     * handling is contextual to the caller -- If not getting a valid result would cause a downstream error,
+     * an error should likely be thrown.
+     */
+    public final Optional<String> interpolateWithTimestamp(String rawtext, long millis, Map<String, String> map) {
+        String result = rawtext;
+        result = SessionNamer.format(result, millis);
+        return interpolate(result,map);
+    }
+
+    public final Optional<String> interpolateWithTimestamp(String rawText, long millis) {
+        return interpolateWithTimestamp(rawText, millis, Map.of());
     }
 
 }

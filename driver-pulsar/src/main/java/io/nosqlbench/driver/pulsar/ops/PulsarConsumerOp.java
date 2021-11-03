@@ -7,6 +7,7 @@ import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.exception.*;
 import io.nosqlbench.driver.pulsar.util.AvroUtil;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ public class PulsarConsumerOp implements PulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarConsumerOp.class);
 
+    private final PulsarConsumerMapper consumerMapper;
     private final PulsarActivity pulsarActivity;
 
     private final boolean asyncPulsarOp;
@@ -37,17 +39,16 @@ public class PulsarConsumerOp implements PulsarOp {
     private final boolean e2eMsgProc;
     private final long curCycleNum;
 
-    private long curMsgSeqId;
-    private long prevMsgSeqId;
-
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
     private final Timer transactionCommitTimer;
 
     // keep track of end-to-end message latency
     private final Histogram e2eMsgProcLatencyHistogram;
+    private final Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic;
 
     public PulsarConsumerOp(
+        PulsarConsumerMapper consumerMapper,
         PulsarActivity pulsarActivity,
         boolean asyncPulsarOp,
         boolean useTransaction,
@@ -59,8 +60,10 @@ public class PulsarConsumerOp implements PulsarOp {
         Schema<?> schema,
         int timeoutSeconds,
         long curCycleNum,
-        boolean e2eMsgProc)
+        boolean e2eMsgProc,
+        Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic)
     {
+        this.consumerMapper = consumerMapper;
         this.pulsarActivity = pulsarActivity;
 
         this.asyncPulsarOp = asyncPulsarOp;
@@ -76,14 +79,22 @@ public class PulsarConsumerOp implements PulsarOp {
         this.curCycleNum = curCycleNum;
         this.e2eMsgProc = e2eMsgProc;
 
-        this.curMsgSeqId = 0;
-        this.prevMsgSeqId = (curCycleNum - 1);
-
         this.bytesCounter = pulsarActivity.getBytesCounter();
         this.messageSizeHistogram = pulsarActivity.getMessageSizeHistogram();
         this.transactionCommitTimer = pulsarActivity.getCommitTransactionTimer();
 
         this.e2eMsgProcLatencyHistogram = pulsarActivity.getE2eMsgProcLatencyHistogram();
+        this.receivedMessageSequenceTrackerForTopic = receivedMessageSequenceTrackerForTopic;
+    }
+
+    private void checkAndUpdateMessageErrorCounter(Message message) {
+        String msgSeqIdStr = message.getProperty(PulsarActivityUtil.MSG_SEQUENCE_NUMBER);
+
+        if ( !StringUtils.isBlank(msgSeqIdStr) ) {
+            long sequenceNumber = Long.parseLong(msgSeqIdStr);
+            ReceivedMessageSequenceTracker receivedMessageSequenceTracker = receivedMessageSequenceTrackerForTopic.apply(message.getTopicName());
+            receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
+        }
     }
 
     @Override
@@ -124,13 +135,15 @@ public class PulsarConsumerOp implements PulsarOp {
                         org.apache.avro.generic.GenericRecord avroGenericRecord =
                             AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
 
-                        logger.debug("Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                        logger.debug("({}) Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                            consumer.getConsumerName(),
                             message.getKey(),
                             message.getProperties(),
                             avroGenericRecord.toString());
                     }
                     else {
-                        logger.debug("Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                        logger.debug("({}) Sync message received: msg-key={}; msg-properties={}; msg-payload={}",
+                            consumer.getConsumerName(),
                             message.getKey(),
                             message.getProperties(),
                             new String(message.getData()));
@@ -143,47 +156,17 @@ public class PulsarConsumerOp implements PulsarOp {
                     e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
                 }
 
-                // keep track of message ordering and message loss
-                String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
-                if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
-                    curMsgSeqId = Long.parseLong(msgSeqIdStr);
-
-                    if ( prevMsgSeqId > -1) {
-                        // normal case: message sequence id is monotonically increasing by 1
-                        if ((curMsgSeqId - prevMsgSeqId) != 1) {
-                            // abnormal case: out of ordering
-                            // - for any subscription type, this check should always hold
-                            if (curMsgSeqId < prevMsgSeqId) {
-                                throw new PulsarMsgOutOfOrderException(
-                                    false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                            }
-                            // - this sequence based message loss and message duplicate check can't be used for
-                            //   "Shared" subscription (ignore this check)
-                            // - TODO: for Key_Shared subscription type, this logic needs to be improved on
-                            //         per-key basis
-                            else {
-                                if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
-                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
-                                    PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
-                                    // abnormal case: message loss
-                                    if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                        throw new PulsarMsgLossException(
-                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                    } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                        throw new PulsarMsgDuplicateException(
-                                            false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // keep track of message errors and update error counters
+                if (seqTracking) checkAndUpdateMessageErrorCounter(message);
 
                 int messageSize = message.getData().length;
                 bytesCounter.inc(messageSize);
                 messageSizeHistogram.update(messageSize);
 
-                if (useTransaction) {
+                if (!useTransaction) {
+                    consumer.acknowledge(message.getMessageId());
+                }
+                else {
                     consumer.acknowledgeAsync(message.getMessageId(), transaction).get();
 
                     // little problem: here we are counting the "commit" time
@@ -194,14 +177,12 @@ public class PulsarConsumerOp implements PulsarOp {
                         transaction.commit().get();
                     }
                 }
-                else {
-                    consumer.acknowledge(message.getMessageId());
-                }
 
             }
             catch (Exception e) {
                 logger.error(
                     "Sync message receiving failed - timeout value: {} seconds ", timeoutSeconds);
+                e.printStackTrace();
                 throw new PulsarDriverUnexpectedException("" +
                     "Sync message receiving failed - timeout value: " + timeoutSeconds + " seconds ");
             }
@@ -236,13 +217,15 @@ public class PulsarConsumerOp implements PulsarOp {
                             org.apache.avro.generic.GenericRecord avroGenericRecord =
                                 AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
 
-                            logger.debug("Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                            logger.debug("({}) Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                                consumer.getConsumerName(),
                                 message.getKey(),
                                 message.getProperties(),
                                 avroGenericRecord.toString());
                         }
                         else {
-                            logger.debug("Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                            logger.debug("({}) Async message received: msg-key={}; msg-properties={}; msg-payload={})",
+                                consumer.getConsumerName(),
                                 message.getKey(),
                                 message.getProperties(),
                                 new String(message.getData()));
@@ -254,47 +237,14 @@ public class PulsarConsumerOp implements PulsarOp {
                         e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
                     }
 
-                    // keep track of message ordering, message loss, and message duplication
-                    String msgSeqIdStr = message.getProperties().get(PulsarActivityUtil.MSG_SEQUENCE_ID);
-                    if ( (seqTracking) && !StringUtils.isBlank(msgSeqIdStr) ) {
-                        curMsgSeqId = Long.parseLong(msgSeqIdStr);
+                    // keep track of message errors and update error counters
+                    if (seqTracking) checkAndUpdateMessageErrorCounter(message);
 
-                        if (prevMsgSeqId > -1) {
-                            // normal case: message sequence id is monotonically increasing by 1
-                            if ((curMsgSeqId - prevMsgSeqId) != 1) {
-                                // abnormal case: out of ordering
-                                // - for any subscription type, this check should always hold
-                                if (curMsgSeqId < prevMsgSeqId) {
-                                    throw new PulsarMsgOutOfOrderException(
-                                        false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                }
-                                // - this sequence based message loss and message duplicate check can't be used for
-                                //   "Shared" subscription (ignore this check)
-                                // - TODO: for Key_Shared subscription type, this logic needs to be improved on
-                                //         per-key basis
-                                else {
-                                    if ( !StringUtils.equalsAnyIgnoreCase(subscriptionType,
-                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Shared.label,
-                                        PulsarActivityUtil.SUBSCRIPTION_TYPE.Key_Shared.label)) {
-                                        // abnormal case: message loss
-                                        if ((curMsgSeqId - prevMsgSeqId) > 1) {
-                                            throw new PulsarMsgLossException(
-                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                        } else if (topicMsgDedup && (curMsgSeqId == prevMsgSeqId)) {
-                                            throw new PulsarMsgDuplicateException(
-                                                false, curCycleNum, curMsgSeqId, prevMsgSeqId);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (useTransaction) {
-                        consumer.acknowledgeAsync(message.getMessageId(), transaction);
+                    if (!useTransaction) {
+                        consumer.acknowledgeAsync(message);
                     }
                     else {
-                        consumer.acknowledgeAsync(message);
+                        consumer.acknowledgeAsync(message.getMessageId(), transaction);
                     }
 
                     timeTracker.run();
@@ -304,8 +254,9 @@ public class PulsarConsumerOp implements PulsarOp {
                 });
             }
             catch (Exception e) {
-                throw new PulsarDriverUnexpectedException("Async message receiving failed");
+                throw new PulsarDriverUnexpectedException(e);
             }
         }
     }
+
 }

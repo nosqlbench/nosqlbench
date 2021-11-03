@@ -2,6 +2,10 @@ package io.nosqlbench.nb.api.content;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
@@ -255,6 +259,22 @@ public class NBIOTest {
         assertThat(validSearch1.list()).hasSize(1);
         assertThat(validSearch2.list()).hasSize(1);
 
+    }
+
+    @Test
+    public void matchFullyQualifiedPathCorrectly() {
+        Path tmpdir = Paths.get("/tmp");
+        if (!Files.isDirectory(tmpdir)) return;
+        try {
+            File tempFile = File.createTempFile(tmpdir.toString(), "testfile.csv");
+            tempFile.deleteOnExit();
+            String fullpath = tempFile.getAbsolutePath();
+            Files.write(Path.of(fullpath), "COL1,COL2\n\"val1\",\"val2\"\n".getBytes(StandardCharsets.UTF_8));
+            List<Content<?>> results = NBIO.all().name(fullpath).list();
+            assertThat(results.size()).isEqualTo(1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

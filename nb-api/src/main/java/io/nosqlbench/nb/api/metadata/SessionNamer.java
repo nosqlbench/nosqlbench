@@ -15,11 +15,13 @@
  * /
  */
 
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.nb.api.metadata;
+
+import java.util.Arrays;
 
 public class SessionNamer {
 
-    public String format(String sessionName) {
+    public static String format(String sessionName, long sessionTimeMillis) {
         String nameTemplate = sessionName;
         if (nameTemplate==null || nameTemplate.isEmpty()) {
             nameTemplate = "scenario_%tY%tm%td_%tH%tM%tS_%tL";
@@ -27,11 +29,14 @@ public class SessionNamer {
 
         int splits = nameTemplate.split("%").length -1;
         Long[] times = new Long[splits];
-        long now = System.currentTimeMillis();
-        for (int i = 0; i < times.length; i++) times[i] = now;
+        Arrays.fill(times, sessionTimeMillis);
 
         sessionName = String.format(nameTemplate, (Object[]) times);
 
         return sessionName;
+    }
+
+    public static String format(String sessionName) {
+        return format(sessionName, System.currentTimeMillis());
     }
 }

@@ -5,7 +5,7 @@ import io.nosqlbench.engine.clients.grafana.GStitcher;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
-import io.nosqlbench.nb.api.SystemId;
+import io.nosqlbench.nb.api.metadata.SystemId;
 
 import java.nio.file.Path;
 import java.time.Instant;

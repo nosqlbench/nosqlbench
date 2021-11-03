@@ -10,6 +10,8 @@ import io.nosqlbench.driver.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -38,6 +40,12 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     // Metrics for NB Pulsar driver milestone: https://github.com/nosqlbench/nosqlbench/milestone/11
     // - end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
+    // - message out of sequence error counter
+    private Counter msgErrOutOfSeqCounter;
+    // - message loss counter
+    private Counter msgErrLossCounter;
+    // - message duplicate (when dedup is enabled) error counter
+    private Counter msgErrDuplicateCounter;
 
     private PulsarSpaceCache pulsarCache;
 
@@ -51,6 +59,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     private NBErrorHandler errorHandler;
     private OpSequence<OpDispenser<PulsarOp>> sequencer;
     private volatile Throwable asyncOperationFailure;
+    private boolean cycleratePerThread;
 
     public PulsarActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -76,6 +85,9 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction");
 
         e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency");
+        msgErrOutOfSeqCounter = ActivityMetrics.counter(activityDef, "err_msg_oos");
+        msgErrLossCounter = ActivityMetrics.counter(activityDef, "err_msg_loss");
+        msgErrDuplicateCounter = ActivityMetrics.counter(activityDef, "err_msg_dup");
 
         String pulsarClntConfFile =
             activityDef.getParams().getOptionalString("config").orElse("config.properties");
@@ -99,11 +111,26 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
             this::getExceptionMetrics
         );
+
+        cycleratePerThread = activityDef.getParams().takeBoolOrDefault("cyclerate_per_thread", false);
     }
 
+    private final ThreadLocal<RateLimiter> cycleLimiterThreadLocal = ThreadLocal.withInitial(() -> {
+        if (super.getCycleLimiter() != null) {
+            return RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", null,
+                super.getCycleLimiter().getRateSpec());
+        } else {
+            return null;
+        }
+    });
+
     @Override
-    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
-        super.onActivityDefUpdate(activityDef);
+    public RateLimiter getCycleLimiter() {
+        if (cycleratePerThread) {
+            return cycleLimiterThreadLocal.get();
+        } else {
+            return super.getCycleLimiter();
+        }
     }
 
     public NBErrorHandler getErrorHandler() { return errorHandler; }
@@ -231,4 +258,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
 
     public Histogram getE2eMsgProcLatencyHistogram() { return e2eMsgProcLatencyHistogram; }
+    public Counter getMsgErrOutOfSeqCounter() { return msgErrOutOfSeqCounter; }
+    public Counter getMsgErrLossCounter() { return msgErrLossCounter; }
+    public Counter getMsgErrDuplicateCounter() { return msgErrDuplicateCounter; }
 }
