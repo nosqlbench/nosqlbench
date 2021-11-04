@@ -88,11 +88,11 @@ public class SSLKsFactory {
                 }
 
                 final char[] keyStorePassword = def.getParams().getOptionalString("kspass")
-                                             .map(String::toCharArray)
-                                             .orElse(null);
+                    .map(String::toCharArray)
+                    .orElse(null);
                 keyPassword = def.getParams().getOptionalString("keyPassword")
-                                 .map(String::toCharArray)
-                                 .orElse(keyStorePassword);
+                    .map(String::toCharArray)
+                    .orElse(keyStorePassword);
 
                 keyStore = def.getParams().getOptionalString("keystore").map(ksPath -> {
                     try {
@@ -105,9 +105,9 @@ public class SSLKsFactory {
                 trustStore = def.getParams().getOptionalString("truststore").map(tsPath -> {
                     try {
                         return KeyStore.getInstance(new File(tsPath),
-                                                    def.getParams().getOptionalString("tspass")
-                                                       .map(String::toCharArray)
-                                                       .orElse(null));
+                            def.getParams().getOptionalString("tspass")
+                                .map(String::toCharArray)
+                                .orElse(null));
                     } catch (Exception e) {
                         throw new RuntimeException("Unable to load the truststore. Please check.", e);
                     }
@@ -124,9 +124,10 @@ public class SSLKsFactory {
                         try (InputStream is = new ByteArrayInputStream(loadCertFromPem(new File(certFilePath)))) {
                             return cf.generateCertificate(is);
                         } catch (Exception e) {
-                            throw new RuntimeException(String.format("Unable to load cert from %s. Please check.",
-                                                                     certFilePath),
-                                                       e);
+                            throw new RuntimeException(
+                                String.format("Unable to load cert from %s. Please check.", certFilePath),
+                                e
+                            );
                         }
                     }).orElse(null);
 
@@ -134,21 +135,21 @@ public class SSLKsFactory {
                         keyStore.setCertificateEntry("certFile", cert);
 
                     File keyFile = def.getParams().getOptionalString("keyFilePath").map(File::new)
-                                      .orElse(null);
+                        .orElse(null);
                     if (keyFile != null) {
                         try {
                             keyPassword = def.getParams().getOptionalString("keyPassword")
-                                             .map(String::toCharArray)
-                                             .orElse("temp_key_password".toCharArray());
+                                .map(String::toCharArray)
+                                .orElse("temp_key_password".toCharArray());
 
                             KeyFactory kf = KeyFactory.getInstance("RSA");
                             PrivateKey key = kf.generatePrivate(new PKCS8EncodedKeySpec(loadKeyFromPem(keyFile)));
                             keyStore.setKeyEntry("key", key, keyPassword,
-                                                 cert != null ? new Certificate[]{ cert } : null);
+                                cert != null ? new Certificate[]{cert} : null);
                         } catch (Exception e) {
                             throw new RuntimeException(String.format("Unable to load key from %s. Please check.",
-                                                                     keyFile),
-                                                       e);
+                                keyFile),
+                                e);
                         }
                     }
 
@@ -162,8 +163,8 @@ public class SSLKsFactory {
                             return ts;
                         } catch (Exception e) {
                             throw new RuntimeException(String.format("Unable to load caCert from %s. Please check.",
-                                                                     caCertFilePath),
-                                                       e);
+                                caCertFilePath),
+                                e);
                         }
                     }).orElse(null);
 
