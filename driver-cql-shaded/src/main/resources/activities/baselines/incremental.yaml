@@ -1,5 +1,6 @@
-description:
+description: |
   This is a workload which creates an incrementally growing dataset over cycles.
+
   Rows will be added incrementally in both rampup and main phases. However, during
   the main phase, reads will also occur at the same rate, with the read patterns
   selecting from the size of data written up to that point.

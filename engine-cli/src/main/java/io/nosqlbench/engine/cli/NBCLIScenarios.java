@@ -6,11 +6,14 @@ import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import java.util.List;
 
 public class NBCLIScenarios {
-    public static void printWorkloads(boolean includeScenarios,
-                                      String... includes) {
+
+    public static void printWorkloads(
+        boolean includeScenarios,
+        String... includes
+    ) {
         List<WorkloadDesc> workloads = List.of();
         try {
-             workloads= NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
+            workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
         } catch (Exception e) {
             throw new RuntimeException("Error while getting workloads:" + e.getMessage(), e);
 
@@ -24,7 +27,7 @@ public class NBCLIScenarios {
         }
 
         System.out.println(
-                "## To include examples, add --include=examples\n" +
+            "## To include examples, add --include=examples\n" +
                 "## To copy any of these to your local directory, use\n" +
                 "## --include=examples --copy=examplename\n"
         );
