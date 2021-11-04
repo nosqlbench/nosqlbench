@@ -82,13 +82,13 @@ public class NBCLIScenarioParserTest {
     }
 
     @Test
-    public void testThatTemplatesAreExpandedOverride() {
+    public void testThatTemplateParamsAreExpandedAndRemovedOverride() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
         assertThat(cmds.get(0).getArg("cycles")).isEqualTo("20");
-        assertThat(cmds.get(0).getArg("cycles-test")).isEqualTo("20");
+        assertThat(cmds.get(0).getArg("cycles-test")).isNull();
         assertThat(cmds.get(0).getArg("workload")).isEqualTo("scenario-test");
     }
 
