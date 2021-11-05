@@ -129,17 +129,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         }
         logger.info("seq_tracking: {}", seqTrackingFunc.apply(0));
 
-        // Doc-level parameter: msg_dedup_broker
-        LongFunction<Boolean> brokerMsgDedupFunc = (l) -> false;
-        if (cmdTpl.containsKey(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label)) {
-            if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label))
-                brokerMsgDedupFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label));
-            else
-                throw new PulsarDriverParamException("[resolve()] \"" + PulsarActivityUtil.DOC_LEVEL_PARAMS.MSG_DEDUP_BROKER.label + "\" parameter cannot be dynamic!");
-        }
-        logger.info("msg_dedup_broker: {}", seqTrackingFunc.apply(0));
-
-
         // TODO: Complete implementation for websocket-producer and managed-ledger
         // Admin operation: create/delete tenant
         if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TENANT.label) ) {
@@ -165,7 +154,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                brokerMsgDedupFunc,
                 false);
         }
         // Regular/non-admin operation: single message consuming from multiple-topics (consumer)
@@ -175,8 +163,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 topicUriFunc,
                 asyncApiFunc,
                 useTransactionFunc,
-                seqTrackingFunc,
-                brokerMsgDedupFunc);
+                seqTrackingFunc);
         }
         // Regular/non-admin operation: single message consuming a single topic (reader)
         else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
@@ -206,7 +193,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                brokerMsgDedupFunc,
                 true);
         }
         // Invalid operation type
@@ -425,7 +411,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> async_api_func,
         LongFunction<Boolean> useTransactionFunc,
         LongFunction<Boolean> seqTrackingFunc,
-        LongFunction<Boolean> brokerMsgDupFunc,
         boolean e2eMsgProc
     ) {
         LongFunction<String> subscription_name_func;
@@ -458,12 +443,6 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Supplier<Transaction>> transactionSupplierFunc =
             (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
-        // TODO: Ignore namespace and topic level dedup check on the fly
-        //   this will impact the consumer performance significantly
-        //       Consider using caching or Memoizer in the future?
-        //   (https://www.baeldung.com/guava-memoizer)
-        LongFunction<Boolean> topicMsgDedupFunc = brokerMsgDupFunc;
-
         LongFunction<Consumer<?>> consumerFunc = (l) ->
             clientSpace.getConsumer(
                 topic_uri_func.apply(l),
@@ -480,9 +459,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             useTransactionFunc,
             seqTrackingFunc,
             transactionSupplierFunc,
-            topicMsgDedupFunc,
             consumerFunc,
-            subscription_type_func,
             e2eMsgProc);
     }
 
@@ -491,8 +468,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<String> topic_uri_func,
         LongFunction<Boolean> async_api_func,
         LongFunction<Boolean> useTransactionFunc,
-        LongFunction<Boolean> seqTrackingFunc,
-        LongFunction<Boolean> brokerMsgDupFunc
+        LongFunction<Boolean> seqTrackingFunc
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
@@ -562,17 +538,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             useTransactionFunc,
             seqTrackingFunc,
             transactionSupplierFunc,
-            // For multi-topic subscription message consumption,
-            // - Only consider broker-level message deduplication setting
-            // - Ignore namespace- and topic-level message deduplication setting
-            //
-            // This is because Pulsar is able to specify a list of topics from
-            // different namespaces. In theory, we can get topic deduplication
-            // status from each message, but this will be too much overhead.
-            // e.g. pulsarAdmin.getPulsarAdmin().topics().getDeduplicationStatus(message.getTopicName())
-            brokerMsgDupFunc,
             mtConsumerFunc,
-            subscription_type_func,
             false);
     }
 
