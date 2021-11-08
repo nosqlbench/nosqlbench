@@ -78,6 +78,10 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     public void shutdownActivity() {
         super.shutdownActivity();
 
+        if (pulsarCache == null) {
+            return;
+        }
+
         for (PulsarSpace pulsarSpace : pulsarCache.getAssociatedPulsarSpace()) {
             pulsarSpace.shutdownPulsarSpace();
         }
