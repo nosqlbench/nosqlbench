@@ -9,11 +9,12 @@ description: |
 scenarios:
   schema:         run driver=http tags==phase:schema threads==<<threads:1>> cycles==UNDEF
   rampup-write:   run driver=http tags==phase:rampup-write cycles===TEMPLATE(docscount,10000000) docsize=TEMPLATE(docsize,15) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
-  rampup-read:    run driver=http tags==phase:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) threads=<<threads:auto>> errors=timer,warn
-  read-eq:        run driver=http tags==phase:main,type:write cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields, UNSET) threads=auto errors=timer,warn
-  # read-lt:  run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) match-ratio=TEMPLATE(match-ratio,0.01) fields=TEMPLATE(fields, UNSET) threads=auto errors=timer,warn
-  # read-and: run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) match-ratio=TEMPLATE(match-ratio,0.01) fields=TEMPLATE(fields, UNSET) threads=auto errors=timer,warn
-  # read-or:  run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) match-ratio=TEMPLATE(match-ratio,0.01) fields=TEMPLATE(fields, UNSET) threads=auto errors=timer,warn
+  rampup-read:    run driver=http tags==phase:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main:           run driver=http tags==phase:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-eq:        run driver=http tags==phase:main,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-lt:        run driver=http tags==phase:main,filter:lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-and:       run driver=http tags==phase:main,filter:and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-or:        run driver=http tags==phase:main,filter:or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -40,7 +41,7 @@ bindings:
   friend_id: Add(-1); ToHashedUUID(); ToString() -> String
 
   match1: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return 0; } return (int)(Math.random() * 10000 + 1000);') -> long
-  match2: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return "match" } return "no match";') -> String
+  match2: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return "true" } return "false";') -> String
   additional_fields: Expr('str="";for (int i=0; i < TEMPLATE(docsize,15) - 15; i++) { if (str == "") { str = "," }; str+="\"value"+i+"\":0"; if (i < TEMPLATE(docsize,15) - 16) {str += ","}} return str;') -> String
 
 blocks:
@@ -113,7 +114,8 @@ blocks:
             ],
             "debt":         null,
             "match1":       {match1},
-            "match2":       "{match2}"
+            "match2":       "{match2}",
+            "match3":       {match2},
             {additional_fields}
           }
         tags:
@@ -124,7 +126,7 @@ blocks:
       phase: rampup-read
       filter: eq
     statements:
-      - rampup-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24eq%22%3A0%7D%7D&page-size=<<page-size,3>>
+      - rampup-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -137,7 +139,7 @@ blocks:
       phase: rampup-read
       filter: lt
     statements:
-      - rampup-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24eq%22%3A1%7D%7D&page-size=<<page-size,3>>
+      - rampup-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -150,7 +152,7 @@ blocks:
       phase:  rampup-read
       filter: and
     statements:
-      - rampup-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%2C%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%7D&page-size=<<page-size,3>>
+      - rampup-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%2C%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%2C%22match3%22%3A%7B%22%24eq%22%3A%20true%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -163,10 +165,62 @@ blocks:
       phase:  rampup-read
       filter: or
     statements:
-      - rampup-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%7D%5D%7D&page-size=<<page-size,3>>
+      - rampup-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%7D%2C%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         tags:
           name: rampup-or
+
+  - name: main-eq
+    tags:
+      phase: main
+      filter: eq
+    statements:
+      - rampup-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-eq
+  
+  - name: main-lt
+    tags:
+      phase: main
+      filter: lt
+    statements:
+      - rampup-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-lt
+
+  - name: main-and
+    tags:
+      phase:  main
+      filter: and
+    statements:
+      - rampup-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%2C%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%2C%22match3%22%3A%7B%22%24eq%22%3A%20true%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-and
+
+  - name: main-or
+    tags:
+      phase:  main
+      filter: or
+    statements:
+      - rampup-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match2%22%3A%7B%22%24eq%22%3A%22match%22%7D%7D%2C%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        tags:
+          name: main-or
