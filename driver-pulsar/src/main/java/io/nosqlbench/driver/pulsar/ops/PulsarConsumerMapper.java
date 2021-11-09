@@ -28,8 +28,6 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final static Logger logger = LogManager.getLogger(PulsarProducerMapper.class);
 
     private final LongFunction<Consumer<?>> consumerFunc;
-    private final LongFunction<Boolean> topicMsgDedupFunc;
-    private final LongFunction<String> subscriptionTypeFunc;
     private final boolean e2eMsProc;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
@@ -39,14 +37,10 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
                                 LongFunction<Boolean> useTransactionFunc,
                                 LongFunction<Boolean> seqTrackingFunc,
                                 LongFunction<Supplier<Transaction>> transactionSupplierFunc,
-                                LongFunction<Boolean> topicMsgDedupFunc,
                                 LongFunction<Consumer<?>> consumerFunc,
-                                LongFunction<String> subscriptionTypeFunc,
                                 boolean e2eMsgProc) {
         super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, useTransactionFunc, seqTrackingFunc, transactionSupplierFunc);
         this.consumerFunc = consumerFunc;
-        this.topicMsgDedupFunc = topicMsgDedupFunc;
-        this.subscriptionTypeFunc = subscriptionTypeFunc;
         this.e2eMsProc = e2eMsgProc;
     }
 
@@ -57,22 +51,16 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
-        boolean topicMsgDedup = topicMsgDedupFunc.apply(value);
-        String subscriptionType = subscriptionTypeFunc.apply(value);
 
         return new PulsarConsumerOp(
-            this,
             pulsarActivity,
             asyncApi,
             useTransaction,
             seqTracking,
             transactionSupplier,
-            topicMsgDedup,
             consumer,
-            subscriptionType,
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
-            value,
             e2eMsProc,
             this::getReceivedMessageSequenceTracker);
     }

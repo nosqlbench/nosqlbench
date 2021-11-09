@@ -23,7 +23,6 @@ public class PulsarConsumerOp implements PulsarOp {
 
     private final static Logger logger = LogManager.getLogger(PulsarConsumerOp.class);
 
-    private final PulsarConsumerMapper consumerMapper;
     private final PulsarActivity pulsarActivity;
 
     private final boolean asyncPulsarOp;
@@ -31,13 +30,10 @@ public class PulsarConsumerOp implements PulsarOp {
     private final boolean seqTracking;
     private final Supplier<Transaction> transactionSupplier;
 
-    private final boolean topicMsgDedup;
     private final Consumer<?> consumer;
-    private final String subscriptionType;
     private final Schema<?> pulsarSchema;
     private final int timeoutSeconds;
     private final boolean e2eMsgProc;
-    private final long curCycleNum;
 
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
@@ -48,22 +44,17 @@ public class PulsarConsumerOp implements PulsarOp {
     private final Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic;
 
     public PulsarConsumerOp(
-        PulsarConsumerMapper consumerMapper,
         PulsarActivity pulsarActivity,
         boolean asyncPulsarOp,
         boolean useTransaction,
         boolean seqTracking,
         Supplier<Transaction> transactionSupplier,
-        boolean topicMsgDedup,
         Consumer<?> consumer,
-        String subscriptionType,
         Schema<?> schema,
         int timeoutSeconds,
-        long curCycleNum,
         boolean e2eMsgProc,
         Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic)
     {
-        this.consumerMapper = consumerMapper;
         this.pulsarActivity = pulsarActivity;
 
         this.asyncPulsarOp = asyncPulsarOp;
@@ -71,12 +62,9 @@ public class PulsarConsumerOp implements PulsarOp {
         this.seqTracking = seqTracking;
         this.transactionSupplier = transactionSupplier;
 
-        this.topicMsgDedup = topicMsgDedup;
         this.consumer = consumer;
-        this.subscriptionType = subscriptionType;
         this.pulsarSchema = schema;
         this.timeoutSeconds = timeoutSeconds;
-        this.curCycleNum = curCycleNum;
         this.e2eMsgProc = e2eMsgProc;
 
         this.bytesCounter = pulsarActivity.getBytesCounter();
