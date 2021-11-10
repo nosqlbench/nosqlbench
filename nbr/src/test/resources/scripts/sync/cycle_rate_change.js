@@ -30,7 +30,7 @@ print('started');
 print('cyclerate at 0ms:' + activities.cycle_rate.cyclerate);
 scenario.waitMillis(1000);
 activities.cycle_rate.cyclerate='50000';
-print("measured cycle increment per second is expected to adjust to 50000");
+print("measured cycle increment per second is expected to adjust to 5000");
 print('cyclerate now:' + activities.cycle_rate.cyclerate);
 
 var lastcount=metrics.cycle_rate.cycles.servicetime.count;
@@ -40,7 +40,7 @@ for(i=0;i<10;i++) {
     var cycles = (nextcount - lastcount);
     print("new this second: " + (nextcount - lastcount));
     lastcount=nextcount;
-    if (cycles>49000 && cycles<51000) {
+    if (cycles>4700 && cycles<5300) {
         print("cycles adjusted, exiting on iteration " + i)
         break;
     }

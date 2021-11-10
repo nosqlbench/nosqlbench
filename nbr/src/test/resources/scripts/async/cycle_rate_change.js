@@ -30,8 +30,8 @@ scenario.start(activitydef);
 print('started');
 print('cyclerate at 0ms:' + activities.cycle_rate_change.cyclerate);
 scenario.waitMillis(1000);
-activities.cycle_rate_change.cyclerate='50000';
-print("measured cycle increment per second is expected to adjust to 50000");
+activities.cycle_rate_change.cyclerate='5000';
+print("measured cycle increment per second is expected to adjust to 5000");
 
 print('cyclerate now:' + activities.cycle_rate_change.cyclerate);
 
@@ -43,7 +43,7 @@ for(i=0;i<20;i++) {
     print("new this second: " + (nextcount - lastcount));
     print(" waittime: " + metrics.cycle_rate_change.cycles.waittime.value);
     lastcount=nextcount;
-    if (cycles>49000 && cycles<51000) {
+    if (cycles>4700 && cycles<5300) {
         print("cycles adjusted, exiting on iteration " + i);
         break;
     }
