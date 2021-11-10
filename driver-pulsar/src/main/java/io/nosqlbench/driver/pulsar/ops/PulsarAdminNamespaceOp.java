@@ -44,7 +44,7 @@ public class PulsarAdminNamespaceOp extends PulsarAdminOp {
                     future.whenComplete((unused, throwable) ->
                         logger.trace("Successfully created namespace \"" + fullNsName + "\" asynchronously!"))
                     .exceptionally(ex -> {
-                        logger.error("Failed to create namespace \"" + fullNsName + "\" asynchronously!");
+                        logger.error("Failed to create namespace \"" + fullNsName + "\" asynchronously!:" + ex.getMessage());
                         return null;
                     });
                 }

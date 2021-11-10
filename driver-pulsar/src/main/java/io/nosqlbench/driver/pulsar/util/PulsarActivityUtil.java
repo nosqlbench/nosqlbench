@@ -1,7 +1,6 @@
 package io.nosqlbench.driver.pulsar.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -462,7 +462,7 @@ public class PulsarActivityUtil {
                     Path filePath = Paths.get(URI.create(schemaDefinitionStr));
                     schemaDefinitionStr = Files.readString(filePath, StandardCharsets.US_ASCII);
                 } catch (IOException ioe) {
-                    throw new RuntimeException("Error reading the specified \"Avro\" schema definition file: " + definitionStr);
+                    throw new RuntimeException("Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
                 }
             }
 
