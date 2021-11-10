@@ -79,7 +79,7 @@ public class PulsarConfig {
             logger.error("Can't read the specified config properties file: " + fileName);
             ioe.printStackTrace();
         } catch (ConfigurationException cex) {
-            logger.error("Error loading configuration items from the specified config properties file: " + fileName);
+            logger.error("Error loading configuration items from the specified config properties file: " + fileName + ":" + cex.getMessage());
             cex.printStackTrace();
         }
     }

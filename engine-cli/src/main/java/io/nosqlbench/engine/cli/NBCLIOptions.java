@@ -34,10 +34,11 @@ public class NBCLIOptions {
 
 
     private static final String METRICS_PREFIX = "--metrics-prefix";
-
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
-    private static final String DEFAULT_ANNOTATORS = "all";
+
+    // Enabled if the TERM env var is provided
+    private final static String ANSI = "--ansi";
 
     private final static String DEFAULT_CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
@@ -81,6 +82,9 @@ public class NBCLIOptions {
     private final static String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION_.summary";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
+    private static final String LOGGING_PATTERN = "--logging-pattern";
+    private static final String CONSOLE_PATTERN = "--console-pattern";
+    private static final String LOGFILE_PATTERN = "--logfile-pattern";
     private static final String LOG_HISTOGRAMS = "--log-histograms";
     private static final String LOG_HISTOSTATS = "--log-histostats";
     private static final String CLASSIC_HISTOGRAMS = "--classic-histograms";
@@ -97,7 +101,8 @@ public class NBCLIOptions {
     private static final String NASHORN_ENGINE = "--nashorn";
     private static final String GRAALJS_COMPAT = "--graaljs-compat";
 
-    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%7r %-5level [%t] %-12logger{0} %msg%n%throwable";
+    private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
+    private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -128,7 +133,8 @@ public class NBCLIOptions {
     private boolean wantsMarkerTypes = false;
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
-    private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
+    private String consoleLoggingPattern = DEFAULT_CONSOLE_PATTERN;
+    private String logfileLoggingPattern = DEFAULT_LOGFILE_PATTERN;
     private NBLogLevel logsLevel = NBLogLevel.INFO;
     private Map<String, String> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
@@ -155,6 +161,7 @@ public class NBCLIOptions {
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
     private String dockerPromRetentionDays = "183d";
     private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
+    private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -175,6 +182,14 @@ public class NBCLIOptions {
 
     public void setWantsStackTraces(boolean wantsStackTraces) {
         this.showStackTraces=wantsStackTraces;
+    }
+
+    public boolean isEnableAnsi() {
+        return enableAnsi;
+    }
+
+    public String getLogfileLoggingPattern() {
+        return logfileLoggingPattern;
     }
 
     public enum Mode {
@@ -271,6 +286,11 @@ public class NBCLIOptions {
                     }
                     arglist = argsfile.process(arglist);
                     break;
+                case ANSI:
+                    arglist.removeFirst();
+                    String doEnableAnsi = readWordOrThrow(arglist, "enable/disable ansi codes");
+                    enableAnsi=doEnableAnsi.toLowerCase(Locale.ROOT).matches("enabled|enable|true");
+                    break;
                 case DASH_V_INFO:
                     consoleLevel = NBLogLevel.INFO;
                     arglist.removeFirst();
@@ -353,9 +373,20 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     logLevelsOverrides = parseLogLevelOverrides(readWordOrThrow(arglist, "log levels in name:LEVEL,... format"));
                     break;
-                case WITH_LOGGING_PATTERN:
+                case CONSOLE_PATTERN:
                     arglist.removeFirst();
-                    consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
+                    consoleLoggingPattern =readWordOrThrow(arglist, "console pattern");
+                    break;
+                case LOGFILE_PATTERN:
+                    arglist.removeFirst();
+                    logfileLoggingPattern =readWordOrThrow(arglist, "logfile pattern");
+                    break;
+                case WITH_LOGGING_PATTERN:
+                case LOGGING_PATTERN:
+                    arglist.removeFirst();
+                    String pattern = readWordOrThrow(arglist, "console and logfile pattern");
+                    consoleLoggingPattern = pattern;
+                    logfileLoggingPattern = pattern;
                     break;
                 case SHOW_STACKTRACES:
                     arglist.removeFirst();

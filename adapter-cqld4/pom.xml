@@ -24,6 +24,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>4.15.64-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
             <version>4.15.64-SNAPSHOT</version>
         </dependency>

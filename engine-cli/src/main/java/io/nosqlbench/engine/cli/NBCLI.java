@@ -102,14 +102,16 @@ public class NBCLI {
         String sessionName = SessionNamer.format(globalOptions.getSessionName());
 
         loggerConfig
-                .setSessionName(sessionName)
-                .setConsoleLevel(globalOptions.getConsoleLogLevel())
-                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
-                .setLogfileLevel(globalOptions.getScenarioLogLevel())
-                .getLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
-                .setMaxLogs(globalOptions.getLogsMax())
-                .setLogsDirectory(globalOptions.getLogsDirectory())
-                .activate();
+            .setSessionName(sessionName)
+            .setConsoleLevel(globalOptions.getConsoleLogLevel())
+            .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+            .setLogfileLevel(globalOptions.getScenarioLogLevel())
+            .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
+            .getLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+            .setMaxLogs(globalOptions.getLogsMax())
+            .setLogsDirectory(globalOptions.getLogsDirectory())
+            .setAnsiEnabled(globalOptions.isEnableAnsi())
+            .activate();
         ConfigurationFactory.setConfigurationFactory(loggerConfig);
 
         logger = LogManager.getLogger("NBCLI");
@@ -124,7 +126,7 @@ public class NBCLI {
         }
 
         logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
-        logger.info("command-line: "+Arrays.stream(args).collect(Collectors.joining(" ")));
+        logger.info("command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
         logger.info("client-hardware: " + SystemId.getHostSummary());
 
         boolean dockerMetrics = globalOptions.wantsDockerMetrics();
@@ -135,10 +137,10 @@ public class NBCLI {
         int mOpts = (dockerMetrics ? 1 : 0) + (dockerMetricsAt != null ? 1 : 0) + (reportGraphiteTo != null ? 1 : 0);
         if (mOpts > 1 && (reportGraphiteTo == null || annotatorsConfig == null)) {
             throw new BasicError("You have multiple conflicting options which attempt to set\n" +
-                    " the destination for metrics and annotations. Please select only one of\n" +
-                    " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
-                    " --report-graphite-to <addr> and --annotators <config>\n" +
-                    " For more details, see run 'nb help docker-metrics'");
+                " the destination for metrics and annotations. Please select only one of\n" +
+                " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
+                " --report-graphite-to <addr> and --annotators <config>\n" +
+                " For more details, see run 'nb help docker-metrics'");
         }
 
         String metricsAddr = null;
@@ -148,13 +150,13 @@ public class NBCLI {
             logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             DockerMetricsManager dmh = new DockerMetricsManager();
             Map<String, String> dashboardOptions = Map.of(
-                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
-                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
-                    DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays())
+                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
+                DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
+                DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays())
             );
             dmh.startMetrics(dashboardOptions);
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             logger.warn(warn);
             metricsAddr = "localhost";
         } else if (dockerMetricsAt != null) {
@@ -164,8 +166,8 @@ public class NBCLI {
         if (metricsAddr != null) {
             reportGraphiteTo = metricsAddr + ":9109";
             annotatorsConfig = "[{type:'log',level:'info'},{type:'grafana',baseurl:'http://" + metricsAddr + ":3000" +
-                    "/'," +
-                    "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
+                "/'," +
+                "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
         } else {
             annotatorsConfig = "[{type:'log',level:'info'}]";
         }
@@ -230,22 +232,22 @@ public class NBCLI {
             logger.debug("user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                    .prefix("activities")
-                    .prefix(options.wantsIncludes())
-                    .name(resourceToCopy).extension(RawStmtsLoader.YAML_EXTENSIONS).first();
+                .prefix("activities")
+                .prefix(options.wantsIncludes())
+                .name(resourceToCopy).extension(RawStmtsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) {
 
                 tocopy = NBIO.classpath()
-                        .prefix().prefix(options.wantsIncludes())
-                        .prefix(options.wantsIncludes())
-                        .name(resourceToCopy).first();
+                    .prefix().prefix(options.wantsIncludes())
+                    .prefix(options.wantsIncludes())
+                    .name(resourceToCopy).first();
             }
 
             Content<?> data = tocopy.orElseThrow(
-                    () -> new BasicError(
-                            "Unable to find " + resourceToCopy +
-                                    " in classpath to copy out")
+                () -> new BasicError(
+                    "Unable to find " + resourceToCopy +
+                        " in classpath to copy out")
             );
 
             Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -285,7 +287,7 @@ public class NBCLI {
         if (options.wantsTopicalHelp()) {
             Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             System.exit(0);
         }
@@ -333,15 +335,15 @@ public class NBCLI {
         }
 
         for (
-                NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
+            NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         }
         for (
-                NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
+            NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
         for (
-                NBCLIOptions.LoggerConfigData classicConfigs : options.getClassicHistoConfigs()) {
+            NBCLIOptions.LoggerConfigData classicConfigs : options.getClassicHistoConfigs()) {
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
         }
 

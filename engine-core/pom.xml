@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.64-SNAPSHOT</version>
+        <version>4.15.65-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -28,13 +28,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.64-SNAPSHOT</version>
+            <version>4.15.65-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-            <version>4.15.64-SNAPSHOT</version>
+            <version>4.15.65-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -77,15 +77,15 @@
             <artifactId>profiler</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.graalvm.tools</groupId>
-            <artifactId>chromeinspector</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.tools</groupId>-->
+<!--            <artifactId>chromeinspector</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-clients</artifactId>
-          <version>4.15.64-SNAPSHOT</version>
+          <version>4.15.65-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

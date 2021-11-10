@@ -3,13 +3,13 @@ package io.nosqlbench.driver.pulsar.ops;
 import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -28,9 +28,8 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final static Logger logger = LogManager.getLogger(PulsarProducerMapper.class);
 
     private final LongFunction<Consumer<?>> consumerFunc;
-    private final LongFunction<Boolean> topicMsgDedupFunc;
-    private final LongFunction<String> subscriptionTypeFunc;
     private final boolean e2eMsProc;
+    private final LongFunction<String> payloadRttFieldFunc;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
                                 PulsarSpace clientSpace,
@@ -39,15 +38,13 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
                                 LongFunction<Boolean> useTransactionFunc,
                                 LongFunction<Boolean> seqTrackingFunc,
                                 LongFunction<Supplier<Transaction>> transactionSupplierFunc,
-                                LongFunction<Boolean> topicMsgDedupFunc,
                                 LongFunction<Consumer<?>> consumerFunc,
-                                LongFunction<String> subscriptionTypeFunc,
-                                boolean e2eMsgProc) {
+                                boolean e2eMsgProc,
+                                LongFunction<String> payloadRttFieldFunc) {
         super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, useTransactionFunc, seqTrackingFunc, transactionSupplierFunc);
         this.consumerFunc = consumerFunc;
-        this.topicMsgDedupFunc = topicMsgDedupFunc;
-        this.subscriptionTypeFunc = subscriptionTypeFunc;
         this.e2eMsProc = e2eMsgProc;
+        this.payloadRttFieldFunc = payloadRttFieldFunc;
     }
 
     @Override
@@ -57,24 +54,20 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
         boolean asyncApi = asyncApiFunc.apply(value);
         boolean useTransaction = useTransactionFunc.apply(value);
         Supplier<Transaction> transactionSupplier = transactionSupplierFunc.apply(value);
-        boolean topicMsgDedup = topicMsgDedupFunc.apply(value);
-        String subscriptionType = subscriptionTypeFunc.apply(value);
+        String payloadRttFieldFunc = this.payloadRttFieldFunc.apply(value);
 
         return new PulsarConsumerOp(
-            this,
             pulsarActivity,
             asyncApi,
             useTransaction,
             seqTracking,
             transactionSupplier,
-            topicMsgDedup,
             consumer,
-            subscriptionType,
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
-            value,
             e2eMsProc,
-            this::getReceivedMessageSequenceTracker);
+            this::getReceivedMessageSequenceTracker,
+            payloadRttFieldFunc);
     }
 
 

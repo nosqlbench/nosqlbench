@@ -137,9 +137,10 @@ public class SSLKsFactory implements NBMapConfigurable {
                         try (InputStream is = new ByteArrayInputStream(loadCertFromPem(new File(certFilePath)))) {
                             return cf.generateCertificate(is);
                         } catch (Exception e) {
-                            throw new RuntimeException(String.format("Unable to load cert from %s. Please check.",
-                                certFilePath),
-                                e);
+                            throw new RuntimeException(
+                                String.format("Unable to load cert from %s. Please check.", certFilePath),
+                                e
+                            );
                         }
                     }).orElse(null);
 

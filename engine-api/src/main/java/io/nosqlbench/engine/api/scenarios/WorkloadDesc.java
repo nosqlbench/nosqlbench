@@ -64,7 +64,7 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
 
         if (!description.isEmpty()) {
 //            sb.append("# description:\n");
-            String formattedDesc = "# "+ description.split("\n")[0];
+            String formattedDesc = "# "+ description.split("[\n.;]")[0];
             sb.append(formattedDesc).append("\n");
             while (sb.toString().endsWith("\n\n")) {
                 sb.setLength(sb.length() - 1);

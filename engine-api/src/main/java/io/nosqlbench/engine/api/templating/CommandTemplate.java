@@ -308,4 +308,19 @@ public class CommandTemplate {
         }
         return true;
     }
+
+    /**
+     * This should only be used to provide a view of a field definition, never for actual use in a payload.
+     * @param varname The field name which you want to explain
+     * @return A string representation of the field name
+     */
+    public String getFieldDescription(String varname) {
+        if (this.isDynamic(varname)) {
+            return "dynamic: " + this.dynamics.get(varname).toString();
+        } else if (this.isStatic(varname)) {
+            return "static: " + this.getStatic(varname);
+        } else {
+            return "UNDEFINED";
+        }
+    }
 }

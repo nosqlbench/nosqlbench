@@ -8,7 +8,7 @@ params:
   topic_uri: "persistent://{tenant}/{namespace}/{core_topic_name}"
   # "true" - asynchronous Pulsar Admin API
   # "false" - synchronous Pulsar Admin API
-  async_api: "true"
+  async_api: "false"
   # "true" - delete topic
   # "false" - create topic
   admin_delop: "false"
