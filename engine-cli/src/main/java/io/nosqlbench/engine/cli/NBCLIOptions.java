@@ -37,7 +37,9 @@ public class NBCLIOptions {
 
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
-    private static final String DEFAULT_ANNOTATORS = "all";
+
+    // Enabled if the TERM env var is provided
+    private final static String ANSI = "--ansi";
 
     private final static String DEFAULT_CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
@@ -155,6 +157,7 @@ public class NBCLIOptions {
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
     private String dockerPromRetentionDays = "183d";
     private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
+    private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -175,6 +178,14 @@ public class NBCLIOptions {
 
     public void setWantsStackTraces(boolean wantsStackTraces) {
         this.showStackTraces=wantsStackTraces;
+    }
+
+    public boolean isEnableAnsi() {
+        return enableAnsi;
+    }
+
+    public String getLogfileLoggingPattern() {
+        return logfileLoggingPattern;
     }
 
     public enum Mode {
@@ -270,6 +281,11 @@ public class NBCLIOptions {
                         setStatePath();
                     }
                     arglist = argsfile.process(arglist);
+                    break;
+                case ANSI:
+                    arglist.removeFirst();
+                    String doEnableAnsi = readWordOrThrow(arglist, "enable/disable ansi codes");
+                    enableAnsi=doEnableAnsi.toLowerCase(Locale.ROOT).matches("enabled|enable|true");
                     break;
                 case DASH_V_INFO:
                     consoleLevel = NBLogLevel.INFO;
