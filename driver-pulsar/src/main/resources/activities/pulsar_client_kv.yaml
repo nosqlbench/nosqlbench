@@ -1,6 +1,6 @@
 bindings:
   # message key, property and value
-  mykey:
+  mykey: NumberNameToString()
   int_prop_val: ToString(); Prefix("IntProp_")
   text_prop_val: AlphaNumericString(10); Prefix("TextProp_")
   myvalue: NumberNameToString()  #AlphaNumericString(20)
@@ -85,7 +85,7 @@ blocks:
 
 #  - websocket-producer:
 #    tags:
-#      type: websocket-produer
+#      type: websocket-producer
 #    statements:
 #      - websocket-producer-stuff:
 #
