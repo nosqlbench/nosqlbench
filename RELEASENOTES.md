@@ -1,5 +1,20 @@
-- fa78ca54 (HEAD -> main, origin/main) Merge pull request #372 from lhotari/lh-detect-duplicates-after-gap
-- 71c3b190 Detect delayed out-of-order delivery
-- e694eaec Merge pull request #373 from lhotari/lh-upgrade-pulsar-2.8.1
-- 85e1f8a6 Upgrade Pulsar client to 2.8.1 version
-- 6b50060a Detect duplicates after a gap
+- 1c98935d1 (HEAD -> main) post-merge fixups
+- c4ee38d22 squelch invalid parts of summary
+- d223e4c6c enable separate configuration of logging patterns
+- c3544094b add global option to enable or disable ansi
+- 574e297e1 add exception message to some errors
+- e5715e17a init pulsar cache early to avoid NPE on initialization error
+- 6f29b9005 update missing field
+- cbfbe9f77 logging library updates
+- 0798b9a8b minor doc updates
+- 9bb13604c (origin/main) Merge pull request #377 from yabinmeng/main
+- 591f21b35 README and code cleanup
+- d94594a4e qualify and update antlr4-maven-plugin version
+- fea9cce43 add clock-based temporal binding functions
+- 6a5e9616b minor formatting improvements
+- 3688dc9f3 pulsar.md readability formatting for console views
+- b0c30a7cc split description on periods or semicolons
+- 16f4c183d minor formatting
+- 6a1c9337f fix incorrect pom versions
+- 9e7555727 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- e139f1269 cleanup extraneous files
