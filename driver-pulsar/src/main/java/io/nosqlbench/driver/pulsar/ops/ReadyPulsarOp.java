@@ -1,28 +1,32 @@
 package io.nosqlbench.driver.pulsar.ops;
 
-import io.nosqlbench.driver.pulsar.*;
+import io.nosqlbench.driver.pulsar.PulsarActivity;
+import io.nosqlbench.driver.pulsar.PulsarSpace;
+import io.nosqlbench.driver.pulsar.PulsarSpaceCache;
 import io.nosqlbench.driver.pulsar.exception.PulsarDriverParamException;
 import io.nosqlbench.driver.pulsar.exception.PulsarDriverUnsupportedOpException;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Consumer;
+import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.Reader;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
+import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
+    // TODO: Add this to the pulsar driver docs
+    public static final String RTT_TRACKING_FIELD = "payload-tracking-field";
     private final static Logger logger = LogManager.getLogger(ReadyPulsarOp.class);
 
     private final OpTemplate opTpl;
@@ -129,6 +133,17 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         }
         logger.info("seq_tracking: {}", seqTrackingFunc.apply(0));
 
+        // TODO: Collapse this pattern into a simple version and flatten out all call sites
+        LongFunction<String> payloadRttFieldFunc = (l) -> "";
+        if (cmdTpl.isStatic(RTT_TRACKING_FIELD)) {
+            payloadRttFieldFunc = l -> cmdTpl.getStatic(RTT_TRACKING_FIELD);
+            logger.info("payload_rtt_field: {}", cmdTpl.getStatic(RTT_TRACKING_FIELD));
+        } else if (cmdTpl.isDynamic(RTT_TRACKING_FIELD)) {
+            payloadRttFieldFunc = l -> cmdTpl.getDynamic(RTT_TRACKING_FIELD,l);
+            logger.info("payload_rtt_field: {}", cmdTpl.getFieldDescription(RTT_TRACKING_FIELD));
+        }
+        logger.info("payload_rtt_field_func: {}", payloadRttFieldFunc.toString());
+
         // TODO: Complete implementation for websocket-producer and managed-ledger
         // Admin operation: create/delete tenant
         if ( StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.ADMIN_TENANT.label) ) {
@@ -154,7 +169,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                false);
+                false,
+                payloadRttFieldFunc);
         }
         // Regular/non-admin operation: single message consuming from multiple-topics (consumer)
         else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_MULTI_CONSUME.label)) {
@@ -163,7 +179,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 topicUriFunc,
                 asyncApiFunc,
                 useTransactionFunc,
-                seqTrackingFunc);
+                seqTrackingFunc,
+                payloadRttFieldFunc);
         }
         // Regular/non-admin operation: single message consuming a single topic (reader)
         else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
@@ -193,7 +210,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                true);
+                true,
+                payloadRttFieldFunc);
         }
         // Invalid operation type
         else {
@@ -411,7 +429,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> async_api_func,
         LongFunction<Boolean> useTransactionFunc,
         LongFunction<Boolean> seqTrackingFunc,
-        boolean e2eMsgProc
+        boolean e2eMsgProc,
+        LongFunction<String> rttTrackingFieldFunc
     ) {
         LongFunction<String> subscription_name_func;
         if (cmdTpl.isStatic("subscription_name")) {
@@ -460,7 +479,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             seqTrackingFunc,
             transactionSupplierFunc,
             consumerFunc,
-            e2eMsgProc);
+            e2eMsgProc,
+            rttTrackingFieldFunc);
     }
 
     private LongFunction<PulsarOp> resolveMultiTopicMsgConsume(
@@ -468,7 +488,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<String> topic_uri_func,
         LongFunction<Boolean> async_api_func,
         LongFunction<Boolean> useTransactionFunc,
-        LongFunction<Boolean> seqTrackingFunc
+        LongFunction<Boolean> seqTrackingFunc,
+        LongFunction<String> payloadRttFieldFunc
     ) {
         // Topic list (multi-topic)
         LongFunction<String> topic_names_func;
@@ -539,7 +560,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             seqTrackingFunc,
             transactionSupplierFunc,
             mtConsumerFunc,
-            false);
+            false,
+            payloadRttFieldFunc);
     }
 
     private LongFunction<PulsarOp> resolveMsgRead(

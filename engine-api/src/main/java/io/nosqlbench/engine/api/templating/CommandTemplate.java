@@ -105,7 +105,7 @@ public class CommandTemplate {
             for (Function<String, Map<String, String>> parser : parserlist) {
                 Map<String, String> parsed = parser.apply(oneline);
                 if (parsed != null) {
-                    logger.debug("parsed request: " + parsed.toString());
+                    logger.debug("parsed request: " + parsed);
                     cmd.putAll(parsed);
                     didParse = true;
                     break;
@@ -290,5 +290,20 @@ public class CommandTemplate {
             }
         }
         return true;
+    }
+
+    /**
+     * This should only be used to provide a view of a field definition, never for actual use in a payload.
+     * @param varname The field name which you want to explain
+     * @return A string representation of the field name
+     */
+    public String getFieldDescription(String varname) {
+        if (this.isDynamic(varname)) {
+            return "dynamic: " + this.dynamics.get(varname).toString();
+        } else if (this.isStatic(varname)) {
+            return "static: " + this.getStatic(varname);
+        } else {
+            return "UNDEFINED";
+        }
     }
 }
