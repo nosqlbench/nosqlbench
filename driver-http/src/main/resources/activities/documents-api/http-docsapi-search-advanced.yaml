@@ -16,7 +16,7 @@ description: |
 # complex3: (match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)
 scenarios:
   schema:             run driver=http tags==phase:schema threads==<<threads:1>> cycles==UNDEF
-  rampup-write:       run driver=http tags==phase:rampup-write cycles===TEMPLATE(docscount,10000000) docsize=TEMPLATE(docsize,15) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
+  rampup-write:       run driver=http tags==phase:rampup-write cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,15) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
   rampup-read:        run driver=http tags==phase:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
   main:               run driver=http tags==phase:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
   main-in:            run driver=http tags==phase:main,filter:in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
@@ -50,11 +50,11 @@ bindings:
   lng: Hash() -> long; Uniform(-180d, 180d)
   friend_id: Add(-1); ToHashedUUID(); ToString() -> String
 
-  match1: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return 0; } return (int)(Math.random() * 10000 + 1000);') -> long
-  match2: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return "true" } return "false";') -> String
-  match3: Expr('if (cycle % (int)(1 / <<match-ratio>>) == 0) { return "true" } return "false";') -> String
+  match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
+  match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
+  match3: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
   
-  additional_fields: Expr('str="";for (int i=0; i < TEMPLATE(docsize,15) - 15; i++) { if (str == "") { str = "," }; str+="\"value"+i+"\":0"; if (i < TEMPLATE(docsize,15) - 16) {str += ","}} return str;') -> String
+  additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
 
 blocks:
   - tags:
