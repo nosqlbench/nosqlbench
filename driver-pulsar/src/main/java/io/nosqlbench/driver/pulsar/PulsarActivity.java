@@ -77,6 +77,8 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     @Override
     public void initActivity() {
         super.initActivity();
+        pulsarCache = new PulsarSpaceCache(this);
+
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
         messageSizeHistogram = ActivityMetrics.histogram(activityDef, "message_size");
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
@@ -101,7 +103,6 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         initPulsarAdminAndClientObj();
         createPulsarSchemaFromConf();
 
-        pulsarCache = new PulsarSpaceCache(this);
 
         this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this));
         setDefaultsFromOpSequence(sequencer);
