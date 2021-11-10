@@ -6,7 +6,7 @@ bindings:
 params:
   # "true" - asynchronous Pulsar Admin API
   # "false" - synchronous Pulsar Admin API
-  async_api: "true"
+  async_api: "false"
   # "true" - delete namespace
   # "false" - create namespace
   admin_delop: "false"
