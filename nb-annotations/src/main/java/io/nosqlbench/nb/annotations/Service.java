@@ -31,4 +31,5 @@ import java.lang.annotation.Target;
 public @interface Service {
     Class<?> value();
     String selector();
+    Stability maturity() default Stability.Unspecified;
 }
