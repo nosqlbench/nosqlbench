@@ -1,4 +1,9 @@
-- 1c98935d1 (HEAD -> main) post-merge fixups
+- d9ce62435 (HEAD -> main, origin/main) Merge pull request #374 from nosqlbench/pulsar-payload-rtt
+- d47843b04 release: logging improvements, summary fixes, pulsar driver updates
+- 8353a9d84 (origin/pulsar-payload-rtt) Extract payload rtt field from Avro record if it exists
+- c15bd97c9 Avoid NullPointerException if pulsarCache hasn't been initialized.
+- 2fbf0b4ad add instrumentation scaffold for payloadRtt
+- 1c98935d1 post-merge fixups
 - c4ee38d22 squelch invalid parts of summary
 - d223e4c6c enable separate configuration of logging patterns
 - c3544094b add global option to enable or disable ansi
@@ -7,7 +12,7 @@
 - 6f29b9005 update missing field
 - cbfbe9f77 logging library updates
 - 0798b9a8b minor doc updates
-- 9bb13604c (origin/main) Merge pull request #377 from yabinmeng/main
+- 9bb13604c Merge pull request #377 from yabinmeng/main
 - 591f21b35 README and code cleanup
 - d94594a4e qualify and update antlr4-maven-plugin version
 - fea9cce43 add clock-based temporal binding functions
