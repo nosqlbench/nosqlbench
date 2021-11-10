@@ -54,7 +54,7 @@
         <module>driver-pulsar</module>
         <module>driver-jms</module>
         <module>driver-grpc</module>
-        <module>driver-directapi</module>
+<!--        <module>driver-directapi</module>-->
 
         <!-- VIRTDATA MODULES -->
 

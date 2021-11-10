@@ -28,6 +28,7 @@ Each of these provides an place for a user to specify the behavior of NoSQLBench
 * In YAML template variables, `<<name:value>>` or `TEMPLATE(name,value)` are supported
 * In HTTP driver URl patterns, `E[[...]]` is taken as a URL-Encoded section.
 
+
 All of these are different types of indirection, and should be distinct in some cases. Yet, there is room for simplification.
 
 ## Conventions
@@ -48,5 +49,12 @@ users.
 ## Controlling Indirection
 
 You should be able to turn some methods on or off, like environment variables.
+
+## Proposed Universal Form
+
+- `${{<varname>}}`
+- `${{<provider>:<varname>}}`
+
+
 
 
