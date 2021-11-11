@@ -50,18 +50,19 @@ The example JSON looks like:
 ## Filters tested
 
 The advanced search workload can test the following `where` clauses:
-- in: match1 IN [0]
-- not-in: match2 NOT IN ["false"]
-- mem-and: match2 EQ "true" AND match3 NOT EQ false
-- mem-or: match1 LT 1 OR match3 EXISTS
-- complex1: match1 EQ 0 AND (match2 EQ "true" OR match3 EQ false)
-- complex2: (match1 LTE 0 OR match2 EQ "false") AND (match2 EQ "false" OR match3 EQ true)
-- complex3: (match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)
+- in: `match1 IN [0]`
+- not-in: `match2 NOT IN ["false"]`
+- mem-and: `match2 EQ "true" AND match3 NOT EQ false`
+- mem-or: `match1 LT 1 OR match3 EXISTS`
+- complex1: `match1 EQ 0 AND (match2 EQ "true" OR match3 EQ false)`
+- complex2: `(match1 LTE 0 OR match2 EQ "false") AND (match2 EQ "false" OR match3 EQ true)`
+- complex3: `(match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)`
 
 ## Workload Parameters
 
 - `docscount` - the number of documents to write during rampup (default: `10_000_000`)
 - `docpadding` - the number of fields to add to each document; useful for writing larger documents. A value of e.g. `5` would make each document have 20 leaf values, instead of 15. (default: `0`)
 - `match-ratio` - a value between 0 and 1 detailing what ratio of the documents written should match the search parameters. If match-ratio is e.g. `0.1` then approximately one-tenth of the documents will have `match1`, `match2`, and `match3` values that are `0`, `"true"`, and `true`, respectively. (default: `0.01`)
+- `fields` - the URL-encoded value for `fields` that you would send to the Docs API. This restricts the fields returned during benchmarking.
 
 

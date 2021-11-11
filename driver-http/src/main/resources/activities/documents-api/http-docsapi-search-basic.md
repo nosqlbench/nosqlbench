@@ -50,11 +50,11 @@ The example JSON looks like:
 ## Filters tested
 
 The basic search workload can test the following `where` clauses:
-- eq: match3 EQ true
-- lt: match1 LT 1
-- and: match1 LT 1 AND match2 EQ "true"
-- or: match1 LT 1 OR match2 EQ "true" or match3 EQ true
-- or-single-match: match1 LT 1 OR match2 EQ "notamatch"
+- eq: `match3 EQ true`
+- lt: `match1 LT 1`
+- and: `match1 LT 1 AND match2 EQ "true"`
+- or: `match1 LT 1 OR match2 EQ "true" or match3 EQ true`
+- or-single-match: `match1 LT 1 OR match2 EQ "notamatch"`
 
 ## Workload Parameters
 
