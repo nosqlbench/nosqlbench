@@ -126,7 +126,7 @@ blocks:
       filter: eq
     statements:
       # where={"match3":{"$eq":true}}
-      - rampup-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - rampup-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match3":{"$eq":true}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -140,7 +140,7 @@ blocks:
       filter: lt
     statements:
       # where={"match1":{"$lt":1}}
-      - rampup-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - rampup-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -154,7 +154,7 @@ blocks:
       filter: and
     statements:
       # where={"match1":{"$lt":1},"match2":{"$eq":"true"}}
-      - rampup-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%2C%22match2%22%3A%7B%22%24eq%22%3A%22true%22%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - rampup-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1},"match2":{"$eq":"true"}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -168,7 +168,7 @@ blocks:
       filter: or
     statements:
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}
-      - rampup-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - rampup-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -182,7 +182,7 @@ blocks:
       filter: or-single-match
     statements:
       # where={"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}
-      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match2%22%3A%7B%22%24eq%22%3A%22notamatch%22%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -196,7 +196,7 @@ blocks:
       filter: eq
     statements:
       # where={"match3":{"$eq":true}}
-      - main-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-eq: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match3":{"$eq":true}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -210,7 +210,7 @@ blocks:
       filter: lt
     statements:
       # where={"match1":{"$lt":1}}
-      - main-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-lt: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -224,7 +224,7 @@ blocks:
       filter: and
     statements:
       # where={"match1":{"$lt":1},"match2":{"$eq":"true"}}
-      - main-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%2C%22match2%22%3A%7B%22%24eq%22%3A%22true%22%7D%2C%22match3%22%3A%7B%22%24eq%22%3A%20true%7D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1},"match2":{"$eq":"true"}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -238,7 +238,7 @@ blocks:
       filter: or
     statements:
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}
-      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match3%22%3A%7B%22%24eq%22%3Atrue%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -252,7 +252,7 @@ blocks:
       filter: or-single-match
     statements:
       # where={"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}
-      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=%7B%22%24or%22%3A%5B%7B%22match1%22%3A%7B%22%24lt%22%3A1%7D%7D%2C%7B%22match2%22%3A%7B%22%24eq%22%3A%22notamatch%22%7D%7D%5D%7D&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      - main-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_basic>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
