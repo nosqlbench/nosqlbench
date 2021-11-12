@@ -47,6 +47,7 @@ public class FDocFuncs implements Iterable<FDocFunc> {
 
         if (cdocs.size()!=1) {
             logger.warn("There were " + cdocs.size() + " class docs found for types named " + getFunctionName());
+            functionsByPackage.keySet().forEach(k -> logger.warn(" package: " + k));
         }
 
         return String.join("\n\n",cdocs);
