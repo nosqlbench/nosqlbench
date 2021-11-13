@@ -4,16 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Category;
-import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
 import io.nosqlbench.virtdata.api.processors.DocFuncData;
+import io.nosqlbench.virtdata.core.bindings.VirtDataDocs;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDoc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocCat;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFunc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFuncs;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +57,7 @@ public class VirtDataGenDocsApp implements Runnable {
 
     public void run() {
         LinkedList<String> largs = new LinkedList<>(Arrays.asList(args));
-        if (args.length>0 && args[0].contains("help")) {
+        if (args.length > 0 && args[0].contains("help")) {
             System.out.println(
                 "usage:\n" +
                     "[basefile <name>] [basedir <dir>] [categories combined|split] [format json|markdown] " +
@@ -66,7 +68,7 @@ public class VirtDataGenDocsApp implements Runnable {
         while (largs.peekFirst() != null) {
             String argtype = largs.removeFirst();
             if (largs.peekFirst() == null) {
-                throw new RuntimeException(VirtDataGenDocsApp.class.toString() + " expects args in param value couplets.");
+                throw new RuntimeException(VirtDataGenDocsApp.class + " expects args in param value couplets.");
             }
 
             String argval = largs.removeFirst().toLowerCase();
@@ -136,7 +138,7 @@ public class VirtDataGenDocsApp implements Runnable {
             try {
                 outputname = basedir.isEmpty() ? outputname : basedir + "/" + outputname;
                 Path parent = Path.of(outputname).getParent();
-                if (parent!=null) {
+                if (parent != null) {
                     Files.createDirectories(parent);
                 }
                 fileWriter = new FileWriter(outputname, false);
@@ -144,7 +146,7 @@ public class VirtDataGenDocsApp implements Runnable {
 
                 String[] blurbsdirs = blurbsDirs.split(":");
                 for (String blurbsdir : blurbsdirs) {
-                    Optional<Path> bdir = NBIO.findFirstLocalPath(blurbsdir+"/");
+                    Optional<Path> bdir = NBIO.findFirstLocalPath(blurbsdir + "/");
                     if (bdir.isPresent()) {
                         Path blurbsFile = bdir.get().resolve(Path.of(outputname).getFileName().toString());
                         if (Files.exists(blurbsFile)) {
@@ -167,8 +169,25 @@ public class VirtDataGenDocsApp implements Runnable {
         List<DocFuncData> allDocs = VirtDataDocs.getAllDocs();
         for (DocFuncData docFuncData : allDocs) {
             FDocFunc fDocFunc = new FDocFunc(docFuncData);
-            Set<Category> categories =
-                    fDocFunc.getCategories().size()==0 ? Set.of(Category.general) : fDocFunc.getCategories();
+            Set<Category> categories = fDocFunc.getCategories();
+            if (categories.size() == 0) {
+                for (FDocCat knownCategoriy : docsinfo) {
+                    for (FDocFuncs knownFunctionDocs : knownCategoriy) {
+                        if (knownFunctionDocs.getFunctionName().equals(fDocFunc.getFuncName())) {
+                            categories = knownFunctionDocs.iterator().next().getCategories();
+                            break;
+                        }
+                    }
+                    if (categories.size() > 0) {
+                        break;
+                    }
+                }
+            }
+            if (categories.size()==0) {
+                categories = Set.of(Category.general);
+                logger.warn("Assigned generic category to " + fDocFunc.getFuncName());
+            }
+
             for (Category categoryName : categories) {
                 FDocCat fDocCat = docsinfo.addCategory(categoryName.toString());
                 fDocCat.addFunctionDoc(fDocFunc);
