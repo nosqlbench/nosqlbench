@@ -9,9 +9,6 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.function.LongFunction;
 
-/**
- * Show diagnostic values for the thread-local variable map.
- */
 @ThreadSafeMapper
 @Categories({Category.state,Category.diagnostics})
 public class Show implements LongFunction<String> {

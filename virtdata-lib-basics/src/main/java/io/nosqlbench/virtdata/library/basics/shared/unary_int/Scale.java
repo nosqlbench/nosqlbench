@@ -5,7 +5,8 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.util.function.IntUnaryOperator;
 
 /**
- * Scale the input to the
+ * Scale the input by the factor provided.
+ * @deprecated use Mul(...) instead
  */
 @ThreadSafeMapper
 public class Scale implements IntUnaryOperator {

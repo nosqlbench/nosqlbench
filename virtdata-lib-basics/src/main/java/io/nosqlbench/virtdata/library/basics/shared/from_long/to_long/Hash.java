@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -14,9 +16,10 @@ import java.util.function.LongUnaryOperator;
  * This is to make it play nice with users and other libraries.
  */
 @ThreadSafeMapper
+@Categories({Category.general, Category.general})
 public class Hash implements LongUnaryOperator {
 
-    private ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
 
     @Override
     public long applyAsLong(long value) {

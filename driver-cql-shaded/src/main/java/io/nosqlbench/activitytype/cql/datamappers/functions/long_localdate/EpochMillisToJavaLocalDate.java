@@ -1,5 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_localdate;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -22,6 +24,7 @@ import java.util.function.LongFunction;
  * Any timezone specifier may be used which can be read by {@link ZoneId#of(String)}
  */
 @ThreadSafeMapper
+@Categories({Category.datetime})
 public class EpochMillisToJavaLocalDate implements LongFunction<LocalDate> {
 
     ZoneId timezone;

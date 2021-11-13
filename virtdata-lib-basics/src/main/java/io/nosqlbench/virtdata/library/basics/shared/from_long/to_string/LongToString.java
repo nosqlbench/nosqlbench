@@ -25,6 +25,7 @@ import java.util.function.LongFunction;
 
 /**
  * Return the string representation of the provided long.
+ * @deprecated use ToString() instead
  */
 @ThreadSafeMapper
 @DeprecatedFunction("This function is being replaced by ToString() for naming consistency.")

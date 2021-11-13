@@ -9,12 +9,6 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.function.LongFunction;
 
-/**
- * Load a named value from the per-thread state map.
- * The previous input value will be stored in the named value, and the previously
- * stored value will be returned. A default value to return may be provided
- * in case there was no previously stored value under the given name.
- */
 @ThreadSafeMapper
 @Categories({Category.state})
 public class Swap implements LongFunction<Object> {

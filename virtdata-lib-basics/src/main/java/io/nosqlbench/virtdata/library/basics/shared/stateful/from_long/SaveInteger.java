@@ -9,13 +9,6 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
-/**
- * Save a value to a named thread-local variable, where the variable
- * name is fixed or a generated variable name from a provided function.
- * Note that the input type is not that suitable for constructing names,
- * so this is more likely to be used in an indirect naming pattern like
- * SaveInteger(Load('id'))
- */
 @Categories(Category.state)
 @ThreadSafeMapper
 public class SaveInteger implements LongToIntFunction {

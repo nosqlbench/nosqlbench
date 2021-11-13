@@ -2,14 +2,20 @@ package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
 //import com.datastax.driver.dse.geometry.Point;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;
 import java.util.function.LongToIntFunction;
 
+/**
+ * Create a com.datastax.driver.dse.geometry.LineString
+ */
 @SuppressWarnings("Duplicates")
 @ThreadSafeMapper
+@Categories({Category.objects})
 public class LineString implements LongFunction<com.datastax.driver.dse.geometry.LineString> {
 
     private final LongFunction<com.datastax.driver.dse.geometry.Point> pointfunc;

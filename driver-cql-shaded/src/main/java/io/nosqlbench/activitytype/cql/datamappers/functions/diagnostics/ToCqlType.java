@@ -4,6 +4,8 @@ import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.math.BigDecimal;
@@ -20,6 +22,7 @@ import java.util.function.Function;
  * Shows the compatible CQL type most associated with the incoming Java type.
  */
 @ThreadSafeMapper
+@Categories({Category.diagnostics})
 public class ToCqlType implements Function<Object, String> {
 
     private final static Map<String, String> typemap = new HashMap<String, String>() {{

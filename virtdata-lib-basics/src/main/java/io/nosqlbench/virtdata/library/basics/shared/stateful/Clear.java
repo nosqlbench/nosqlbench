@@ -9,9 +9,6 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.function.Function;
 
-/**
- * Clears the per-thread map which is used by the Expr function.
- */
 @ThreadSafeMapper
 @Categories({Category.state})
 public class Clear implements Function<Object,Object> {

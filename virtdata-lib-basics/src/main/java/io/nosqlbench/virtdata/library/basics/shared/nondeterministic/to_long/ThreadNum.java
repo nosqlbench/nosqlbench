@@ -18,23 +18,20 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Matches a digit sequence in the current thread name and caches it in a thread local.
- * This allows you to use any intentionally indexed thread factories to provide an analogue for
- * concurrency. Note that once the thread number is cached, it will not be refreshed. This means
- * you can't change the thread name and get an updated value.
- */
 @ThreadSafeMapper
+@Categories({Category.state})
 public class ThreadNum implements LongUnaryOperator {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
-    private ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
+    private final ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
         @Override
         protected Long initialValue() {
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());

@@ -20,13 +20,15 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.long_string;
 
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.ModuloLineToString;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +38,12 @@ import java.util.function.LongFunction;
 /**
  * Select a value from a CSV file line by modulo division against the number
  * of lines in the file. The second parameter is the field name, and this must
- * be provided in the CSV header line as written.
+ * be provided in the CSV header line as written. This version of the function is
+ * a type-safe getter for UUID values.
+ * @deprecated Use ModuloCSVLineToString(); ToUUID() instead
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ModuloCSVLineToUUID implements LongFunction<UUID> {
     private final static Logger logger = LogManager.getLogger(ModuloLineToString.class);
 

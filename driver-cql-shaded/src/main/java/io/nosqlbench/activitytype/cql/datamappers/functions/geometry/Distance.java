@@ -1,6 +1,8 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
 import com.datastax.driver.dse.geometry.Point;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
@@ -11,6 +13,7 @@ import java.util.function.LongToDoubleFunction;
  * com.datastax.driver.dse.geometry.Distance objects.
  */
 @ThreadSafeMapper
+@Categories({Category.objects})
 public class Distance implements LongFunction<com.datastax.driver.dse.geometry.Distance> {
 
     private final io.nosqlbench.activitytype.cql.datamappers.functions.geometry.Point pointfunc;

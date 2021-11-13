@@ -1,5 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.collections;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
@@ -18,10 +20,11 @@ import java.util.function.LongFunction;
  *
  */
 @ThreadSafeMapper
+@Categories({Category.collections})
 public class ListMapper implements LongFunction<List<?>> {
 
-    private int size;
-    private DataMapper<String> elementMapper;
+    private final int size;
+    private final DataMapper<String> elementMapper;
 
     @Example({"ListMapper(5,NumberNameToString())","creates a list of number names"})
     public ListMapper(int size, String genSpec) {

@@ -9,11 +9,6 @@ import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import java.util.HashMap;
 import java.util.function.Function;
 
-/**
- * Load a value from a named thread-local variable, where the variable
- * name is fixed or a generated variable name from a provided function.
- * If the named variable is not defined, then the default value is returned.
- */
 @Categories(Category.state)
 @ThreadSafeMapper
 public class LoadDouble implements Function<Object,Double> {

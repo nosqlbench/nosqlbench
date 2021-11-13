@@ -8,5 +8,9 @@ public enum Category {
     conversion,
     collections,
     premade,
-    nulls, functional, general
+    nulls,
+    functional,
+    statistics,
+    general,
+    objects
 }

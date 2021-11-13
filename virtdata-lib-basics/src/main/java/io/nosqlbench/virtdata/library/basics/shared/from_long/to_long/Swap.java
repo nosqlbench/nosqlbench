@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
@@ -9,6 +11,7 @@ import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.state})
 public class Swap implements LongUnaryOperator {
 
     private final String name;

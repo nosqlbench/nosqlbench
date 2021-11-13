@@ -2,6 +2,8 @@ package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
 import com.datastax.driver.dse.geometry.Point;
 import com.datastax.driver.dse.geometry.Polygon;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.curves4.discrete.long_int.Uniform;
@@ -25,6 +27,7 @@ import java.util.function.LongFunction;
  */
 @SuppressWarnings("ALL")
 @ThreadSafeMapper
+@Categories({Category.objects})
 public class PolygonOnGrid implements LongFunction<Polygon> {
 
     private final double rows;

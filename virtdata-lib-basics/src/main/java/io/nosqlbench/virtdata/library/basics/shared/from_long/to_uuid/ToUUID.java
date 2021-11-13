@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.UUID;
@@ -16,6 +18,7 @@ import java.util.function.LongFunction;
  * specify a different long value to pre-fill it with.
  */
 @ThreadSafeMapper
+@Categories({Category.conversion})
 public class ToUUID implements LongFunction<UUID> {
 
     private final long msbs;

@@ -7,6 +7,9 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.nio.CharBuffer;
 import java.util.function.Function;
 
+/**
+ * Convert the input string to a character buffer
+ */
 @ThreadSafeMapper
 @Categories(Category.conversion)
 public class ToCharBuffer implements Function<String, CharBuffer> {

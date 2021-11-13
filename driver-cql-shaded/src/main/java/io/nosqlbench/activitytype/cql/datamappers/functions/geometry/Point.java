@@ -1,5 +1,7 @@
 package io.nosqlbench.activitytype.cql.datamappers.functions.geometry;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
@@ -10,6 +12,7 @@ import java.util.function.LongToDoubleFunction;
  * objects.
  */
 @ThreadSafeMapper
+@Categories({Category.objects})
 public class Point implements LongFunction<com.datastax.driver.dse.geometry.Point> {
 
     private final LongToDoubleFunction xfunc;

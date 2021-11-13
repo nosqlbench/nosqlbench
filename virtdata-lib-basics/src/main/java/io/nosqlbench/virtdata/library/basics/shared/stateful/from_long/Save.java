@@ -10,10 +10,6 @@ import java.util.HashMap;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
-/**
- * Save the current input value at this point in the function chain to a thread-local variable name.
- * The input value is unchanged, and available for the next function in the chain to use as-is.
- */
 @ThreadSafeMapper
 @Categories({Category.state})
 public class Save implements LongUnaryOperator {

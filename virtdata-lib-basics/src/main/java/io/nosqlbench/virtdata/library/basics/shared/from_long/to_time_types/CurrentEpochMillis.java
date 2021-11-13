@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -9,6 +11,7 @@ import java.util.function.LongUnaryOperator;
  * CAUTION: This does not produce deterministic test data.
  */
 @ThreadSafeMapper
+@Categories({Category.datetime})
 public class CurrentEpochMillis implements LongUnaryOperator {
     @Override
     public long applyAsLong(long operand) {

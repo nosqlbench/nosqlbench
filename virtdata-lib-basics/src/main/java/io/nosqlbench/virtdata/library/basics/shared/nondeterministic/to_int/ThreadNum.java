@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongToIntFunction;
@@ -31,11 +33,12 @@ import java.util.regex.Pattern;
  * you can't change the thread name and get an updated value.
  */
 @ThreadSafeMapper
+@Categories({Category.state})
 public class ThreadNum implements LongToIntFunction {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
 
-    private ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
+    private final ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());

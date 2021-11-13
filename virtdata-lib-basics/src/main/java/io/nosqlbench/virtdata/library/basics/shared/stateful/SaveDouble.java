@@ -10,13 +10,6 @@ import java.util.HashMap;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
-/**
- * Save a value to a named thread-local variable, where the variable
- * name is fixed or a generated variable name from a provided function.
- * Note that the input type is not that suitable for constructing names,
- * so this is more likely to be used in an indirect naming pattern like
- * SaveDouble(Load('id'))
- */
 @Categories(Category.state)
 @ThreadSafeMapper
 public class SaveDouble implements DoubleUnaryOperator {
