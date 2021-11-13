@@ -63,15 +63,21 @@ import java.util.function.IntToDoubleFunction;
  */
 public class IntToDoubleContinuousCurve implements IntToDoubleFunction {
 
-    private ContinuousDistribution distribution;
-    private IntToDoubleFunction function;
+    private final ContinuousDistribution distribution;
+    private final IntToDoubleFunction function;
 
     public final static String COMPUTE="compute";
     public final static String INTERPOLATE="interpolate";
+
     public final static String MAP="map";
     public final static String HASH="hash";
+
     public final static String CLAMP="clamp";
     public final static String NOCLAMP="noclamp";
+
+    public final static String INFINITE ="infinite";
+    public final static String FINITE = "finite";
+
 
     private final static HashSet<String> validModifiers = new HashSet<String>() {{
         add(COMPUTE);
@@ -80,6 +86,8 @@ public class IntToDoubleContinuousCurve implements IntToDoubleFunction {
         add(HASH);
         add(CLAMP);
         add(NOCLAMP);
+        add(INFINITE);
+        add(FINITE);
     }};
 
     public IntToDoubleContinuousCurve(ContinuousDistribution distribution, String... modslist) {
@@ -97,19 +105,24 @@ public class IntToDoubleContinuousCurve implements IntToDoubleFunction {
         if (mods.contains(CLAMP) && mods.contains(NOCLAMP)) {
             throw new RuntimeException("mods must not contain both "+CLAMP+" and "+NOCLAMP+".");
         }
+        if (mods.contains(INFINITE) && mods.contains(FINITE)) {
+            throw new RuntimeException("mods must not contain both "+ INFINITE +" and "+FINITE+".");
+        }
+
 
         for (String s : modslist) {
             if (!validModifiers.contains(s)) {
-                throw new RuntimeException("modifier '" + s + "' is not a valid modifier. Use one of " + validModifiers.toString() + " instead.");
+                throw new RuntimeException("modifier '" + s + "' is not a valid modifier. Use one of " + validModifiers + " instead.");
             }
         }
 
         boolean hash = ( mods.contains(HASH) || !mods.contains(MAP));
         boolean interpolate = ( mods.contains(INTERPOLATE) || !mods.contains(COMPUTE));
         boolean clamp = ( mods.contains(CLAMP) || !mods.contains(NOCLAMP));
+        boolean finite = ( mods.contains(FINITE) || !mods.contains(INFINITE));
 
         function = interpolate ?
-                new InterpolatingIntDoubleSampler(icdSource, 1000, hash, clamp, (double) Long.MAX_VALUE)
+                new InterpolatingIntDoubleSampler(icdSource, 1000, hash, clamp, Integer.MIN_VALUE, Long.MAX_VALUE, finite)
                 :
                 new RealIntDoubleSampler(icdSource, hash, clamp, (double) Long.MAX_VALUE);
 

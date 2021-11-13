@@ -63,15 +63,20 @@ import java.util.function.LongToDoubleFunction;
  */
 public class LongToDoubleContinuousCurve implements LongToDoubleFunction {
 
-    private ContinuousDistribution distribution;
-    private LongToDoubleFunction function;
+    private final ContinuousDistribution distribution;
+    private final LongToDoubleFunction function;
 
     public final static String COMPUTE="compute";
     public final static String INTERPOLATE="interpolate";
+
     public final static String MAP="map";
     public final static String HASH="hash";
+
     public final static String CLAMP="clamp";
     public final static String NOCLAMP="noclamp";
+
+    public final static String INFINITE ="infinite";
+    public final static String FINITE = "finite";
 
     private final static HashSet<String> validModifiers = new HashSet<String>() {{
         add(COMPUTE);
@@ -80,6 +85,8 @@ public class LongToDoubleContinuousCurve implements LongToDoubleFunction {
         add(HASH);
         add(CLAMP);
         add(NOCLAMP);
+        add(INFINITE);
+        add(FINITE);
     }};
 
 
@@ -99,18 +106,23 @@ public class LongToDoubleContinuousCurve implements LongToDoubleFunction {
             throw new RuntimeException("mods must not contain both "+CLAMP+" and "+NOCLAMP+".");
         }
 
+        if (mods.contains(INFINITE) && mods.contains(FINITE)) {
+            throw new RuntimeException("mods must not contain both "+ INFINITE +" and "+FINITE+".");
+        }
+
         for (String s : modslist) {
             if (!validModifiers.contains(s)) {
-                throw new RuntimeException("modifier '" + s + "' is not a valid modifier. Use one of " + validModifiers.toString() + " instead.");
+                throw new RuntimeException("modifier '" + s + "' is not a valid modifier. Use one of " + validModifiers + " instead.");
             }
         }
 
         boolean hash = ( mods.contains(HASH) || !mods.contains(MAP));
         boolean interpolate = ( mods.contains(INTERPOLATE) || !mods.contains(COMPUTE));
         boolean clamp = ( mods.contains(CLAMP) || !mods.contains(NOCLAMP));
+        boolean finite = ( mods.contains(FINITE) || !mods.contains(INFINITE));
 
         function = interpolate ?
-                new InterpolatingLongDoubleSampler(icdSource, 1000, hash, clamp, (double) Long.MAX_VALUE)
+                new InterpolatingLongDoubleSampler(icdSource, 1000, hash, clamp, Long.MIN_VALUE, Long.MAX_VALUE, finite)
                 :
                 new RealLongDoubleSampler(icdSource, hash, clamp, (double) Long.MAX_VALUE);
 
