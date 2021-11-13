@@ -67,6 +67,27 @@ result is shared among all threads as a look-up-table for interpolation. This ma
 perform nearly identically at runtime (after initialization, a one time cost). This does have the minor side effect of a
 little loss in accuracy, but the difference is generally negligible for nearly all performance testing cases.
 
+#### Infinite or Finite
+
+For interpolated samples, you also have the option of including or excluding infinite values
+which may occur in some distributions. If you want to include them, use `infinite`, or `finite`
+to explicitly avoid them (the default). Specifying 'infinite' doesn't guarantee that you will
+see +Infinity or -Infinity, only that they are allowed. The Normal distribution often contains
+-Infinity and +Infinity, for example, due to the function used to estimate its cumulative
+distribution. These values can often be valuable in finding corner cases which should be treated
+uniformly according to [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754).
+
+#### Clamp or Noclamp
+
+For interpolated samples, you also have the option of clamping the allowed values to the valid
+range for the integral data type used as input. To clamp the output values to the range
+(Long.MIN_VALUE,Long.MAX_VALUE) for long->double functions, or to (Integer.MIN_VALUE,Integer.
+MAX_VALUE) for int-double functions, specify `clamp`, which is also the default. To explicitly
+disable this, use `noclamp`. This is useful when you know the downstream functions will only
+work with a certain range of values without truncating conversions. When you are using double
+values natively on the downstream functions, use `noclamp` to avoid limiting the domain of
+values in your test data. (In this case, you might also consider `infinite`).
+
 ### Computed Samples
 
 Conversely, `compute` mode sampling calls the sampling function every time a sample is needed. This affords a little
