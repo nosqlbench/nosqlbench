@@ -1,57 +1,31 @@
-- d9ce62435 (HEAD -> main, origin/main) Merge pull request #374 from nosqlbench/pulsar-payload-rtt
-- d47843b04 release: logging improvements, summary fixes, pulsar driver updates
-- 8353a9d84 (origin/pulsar-payload-rtt) Extract payload rtt field from Avro record if it exists
-- c15bd97c9 Avoid NullPointerException if pulsarCache hasn't been initialized.
-- 2fbf0b4ad add instrumentation scaffold for payloadRtt
-- 1c98935d1 post-merge fixups
-- c4ee38d22 squelch invalid parts of summary
-- d223e4c6c enable separate configuration of logging patterns
-- c3544094b add global option to enable or disable ansi
-- 574e297e1 add exception message to some errors
-- e5715e17a init pulsar cache early to avoid NPE on initialization error
-- 6f29b9005 update missing field
-- cbfbe9f77 logging library updates
-- 0798b9a8b minor doc updates
-- 9bb13604c Merge pull request #377 from yabinmeng/main
-- 591f21b35 README and code cleanup
-- d94594a4e qualify and update antlr4-maven-plugin version
-- fea9cce43 add clock-based temporal binding functions
-- 6a5e9616b minor formatting improvements
-- 3688dc9f3 pulsar.md readability formatting for console views
-- b0c30a7cc split description on periods or semicolons
-- 16f4c183d minor formatting
-- 6a1c9337f fix incorrect pom versions
-- 9e7555727 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- e139f1269 cleanup extraneous files
-- fa78ca54 (HEAD -> main, origin/main) Merge pull request #372 from lhotari/lh-detect-duplicates-after-gap
-- 71c3b190 Detect delayed out-of-order delivery
-- e694eaec Merge pull request #373 from lhotari/lh-upgrade-pulsar-2.8.1
-- 85e1f8a6 Upgrade Pulsar client to 2.8.1 version
-- 6b50060a Detect duplicates after a gap
-- 3b674983 (HEAD -> main, origin/main) Merge pull request #362 from yabinmeng/main
-- bf98d644 Merge branch 'nosqlbench:main' into main
-- 793af965 Ignore abnormal message processing error for Shared and Key_Shared subscription type.
-- f32caf1e Merge pull request #361 from ivansenic/ise-mongo-update
-- e8b32584 add writeConcern to the mongodb crud workflows
-- retrigger release
-- 663e3010 (HEAD -> main) correct test for current functional APIs
-- e981f808 (origin/main) General improvements and bug-fixes. Thanks to @XN137
-- 5b4a695f update ANTLR to 4.2.9 in all places
-- 3b74ae20 General improvements and bug-fixes. Thanks to @XN137
-- 7c7ea039 post-merge fixups
-- 9403f51f improve ToDate semantics and docs
-- 0edbfb1f fix test for TagFilter
-- 365ad619 remove extraneous var in ActivityExecutor
-- 34855a39 Merge pull request #336 from XN137/fix-errorprone-errors
-- 60ff1d9c Merge pull request #335 from XN137/avoid-threadsafety-warnings
-- c5caf51a Merge pull request #334 from XN137/remove-junit4-dependency
-- a02df22d Merge pull request #333 from XN137/jdk-string-join
-- 950b31fb fix errors found by errorprone
-- b98451ab upgrade antlr4-maven-plugin to v4.9.2 avoid threadsafety warnings
-- 5e8e6bf1 use assertj v3.19.0
-- 8dcac028 use junit5 v5.7.2 with proper scoping
-- 2cd393ae use junit5 apis to remove junit4 dependency
-- 0e68abf1 prefer jdk over lib internals for String join
-- dc1c6c5e Merge pull request #332 from XN137/fix-virtdata-api-test-folder
-- 6232edff move virtdata-api tests to correct folder
-- re-run of github actions due to storage error
+- 39cc61ac6 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 44b8119b3 update categories for functions
+- cda5218aa (origin/main) Merge pull request #382 from EricBorczuk/mongo-search-workload
+- e49d07474 Merge pull request #383 from yabinmeng/main
+- b8295eb54 update flexmark version
+- 75244e01e remove WrappedClustering to be replaced with something else. No examples of its use were found.
+- 4076f79b6 README update
+- f8d99c086 update docs and categories for functions
+- cff147efa provide a moving aggregate of statistics on generated values
+- bf662f522 support function adapters for DoubleUnaryOperator
+- 533226481 support +-Infinity suppression, and int or long value clamping in distribution functions
+- 79547218d assign function categories based on extant example
+- f599f6651 update function docs for distribution options
+- 9074676d9 Add basic mongo search workload
+- 99f79d68e Merge pull request #378 from EricBorczuk/search-docs-workloads
+- 1753ee8bc Use URLENCODE[[...]]
+- bfdba82e5 Review comments
+- 08e4ff095 Add README, remove all expr
+- 082e12859 Ivan's review comments
+- 02233fb29 Add advanced search case workload
+- 44204f9cf Complete main phase for basic search
+- 32fef39d4 Schema and rampup phase working
+- 0533214df derive doc categories from single annotated function name
+- 342976528 Merge pull request #381 from lhotari/lh-workaround-ordering-bug
+- b42f354db Pulsar: Workaround an ordering bug in the Pulsar client
+- e25ea736c adjust cyclerate test to accommodate weak runners in github actions
+- d6d75630c add SPI component stability metadata
+- 123c41a9b cleanups
+- 3f607e0e8 build fixes
+- b7967bd0c (origin/driver-api, driver-api) update versions post-merge
+- e6f1707d3 post-merge fixups
