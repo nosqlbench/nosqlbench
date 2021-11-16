@@ -165,14 +165,16 @@ public class VirtDataGenDocsApp implements Runnable {
     }
 
     private FDoc loadAllDocs() {
+        List<String> errors = new ArrayList<>();
         FDoc docsinfo = new FDoc();
         List<DocFuncData> allDocs = VirtDataDocs.getAllDocs();
+
         for (DocFuncData docFuncData : allDocs) {
             FDocFunc fDocFunc = new FDocFunc(docFuncData);
             Set<Category> categories = fDocFunc.getCategories();
             if (categories.size() == 0) {
-                for (FDocCat knownCategoriy : docsinfo) {
-                    for (FDocFuncs knownFunctionDocs : knownCategoriy) {
+                for (FDocCat knownCategory : docsinfo) {
+                    for (FDocFuncs knownFunctionDocs : knownCategory) {
                         if (knownFunctionDocs.getFunctionName().equals(fDocFunc.getFuncName())) {
                             categories = knownFunctionDocs.iterator().next().getCategories();
                             break;
@@ -183,15 +185,21 @@ public class VirtDataGenDocsApp implements Runnable {
                     }
                 }
             }
+
             if (categories.size()==0) {
                 categories = Set.of(Category.general);
-                logger.warn("Assigned generic category to " + fDocFunc.getFuncName());
+                errors.add("function " + fDocFunc.getFuncName() + " had no categories assigned.");
+
             }
 
             for (Category categoryName : categories) {
                 FDocCat fDocCat = docsinfo.addCategory(categoryName.toString());
                 fDocCat.addFunctionDoc(fDocFunc);
             }
+        }
+        if (errors.size()>0) {
+            errors.forEach(System.out::println);
+            System.exit(2);
         }
         return docsinfo;
     }

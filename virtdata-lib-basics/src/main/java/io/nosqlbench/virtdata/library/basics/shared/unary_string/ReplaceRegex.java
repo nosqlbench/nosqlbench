@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -12,6 +14,7 @@ import java.util.regex.Pattern;
  * Note, this is much less efficient than using the simple ReplaceAll for most cases.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ReplaceRegex implements Function<String, String> {
 
     private final String replacement;

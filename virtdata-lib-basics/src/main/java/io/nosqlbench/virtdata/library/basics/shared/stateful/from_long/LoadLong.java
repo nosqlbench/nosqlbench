@@ -10,18 +10,13 @@ import java.util.HashMap;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
-/**
- * Load a value from a named thread-local variable, where the variable
- * name is fixed or a generated variable name from a provided function.
- * If the named variable is not defined, then the default value is returned.
- */
 @Categories(Category.state)
 @ThreadSafeMapper
 public class LoadLong implements LongUnaryOperator {
 
     private final String name;
     private final LongFunction<Object> nameFunc;
-    private long defaultValue;
+    private final long defaultValue;
 
     @Example({"LoadLong('foo',42L)","for the current thread, load a long value from the named variable."})
     public LoadLong(String name) {

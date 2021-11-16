@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -13,9 +15,10 @@ import java.util.regex.Pattern;
  * If no matches occur, then the original value is passed through unchanged.
  * Patterns and replacements are passed as even,odd pairs indexed from the
  * 0th position. Back-references to matching groups are supported.
- *
+
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class MatchRegex implements Function<String,String>  {
 
     private final MatchEntry[] entries;
@@ -29,7 +32,7 @@ public class MatchRegex implements Function<String,String>  {
         }
         entries = new MatchEntry[specs.length/2];
         for (int i = 0; i < specs.length; i+=2) {
-            String pattern = specs[i].toString();
+            String pattern = specs[i];
             String replacement = specs[i+1];
             entries[i/2]=new MatchEntry(pattern, replacement);
         }

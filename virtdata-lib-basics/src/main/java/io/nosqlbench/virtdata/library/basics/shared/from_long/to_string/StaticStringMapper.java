@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
@@ -26,6 +28,7 @@ import java.util.function.LongFunction;
  * Return a static String value.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class StaticStringMapper implements LongFunction<String> {
 
     private final String string;

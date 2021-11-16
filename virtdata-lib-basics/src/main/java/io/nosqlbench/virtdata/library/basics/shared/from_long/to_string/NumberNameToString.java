@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import uk.ydubey.formatter.numtoword.NumberInWordsFormatter;
 
@@ -30,6 +32,7 @@ import java.util.function.LongFunction;
  * The maximum value is limited at 999,999,999.
  */
 @ThreadSafeMapper
+@Categories({Category.general,Category.premade})
 public class NumberNameToString implements LongFunction<String> {
 
     private final static ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);

@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
 
@@ -15,12 +17,13 @@ import java.util.function.LongFunction;
  * to add up to any particular value.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class WeightedStrings implements LongFunction<String> {
 
     private final String valuesAndWeights;
     private double[] unitWeights; // Positional weights after parsing and unit weight normalization
     private double[] cumulativeWeights;
-    private HashedDoubleRange unitRange = new HashedDoubleRange(0.0D, 1.0D);
+    private final HashedDoubleRange unitRange = new HashedDoubleRange(0.0D, 1.0D);
     private String[] values;
 
     public WeightedStrings(String valuesAndWeights) {

@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
@@ -29,6 +31,7 @@ import java.util.function.LongFunction;
  * boundary;
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedToByteBuffer implements LongFunction<ByteBuffer> {
 
     private final Hash hash;

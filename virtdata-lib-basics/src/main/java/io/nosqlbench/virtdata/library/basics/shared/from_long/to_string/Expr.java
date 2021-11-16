@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
@@ -10,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
-import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.functional})
 public class Expr implements LongFunction<String> {
 
     private final String expr;

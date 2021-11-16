@@ -12,5 +12,6 @@ public enum Category {
     functional,
     statistics,
     general,
-    objects
+    objects,
+    experimental
 }

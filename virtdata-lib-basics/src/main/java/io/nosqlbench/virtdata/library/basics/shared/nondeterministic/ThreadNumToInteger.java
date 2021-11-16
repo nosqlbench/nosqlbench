@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -33,11 +35,12 @@ import java.util.regex.Pattern;
  */
 @ThreadSafeMapper
 @DeprecatedFunction("This is being replaced by ThreadNum() for naming consistency.")
+@Categories({Category.general})
 public class ThreadNumToInteger implements LongFunction<Integer> {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
 
-    private ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
+    private final ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());

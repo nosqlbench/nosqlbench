@@ -8,13 +8,6 @@ import io.nosqlbench.virtdata.murmur.Murmur3F;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
-/**
- * This uses the Murmur3F (64-bit optimized) version of Murmur3,
- * not as a checksum, but as a simple hash. It doesn't bother
- * pushing the high-64 bits of input, since it only uses the lower
- * 64 bits of output. It does, however, return the absolute value.
- * This is to make it play nice with users and other libraries.
- */
 @ThreadSafeMapper
 @Categories({Category.general})
 public class Hash implements IntUnaryOperator {

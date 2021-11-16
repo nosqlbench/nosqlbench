@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
@@ -30,11 +32,12 @@ import java.util.function.LongFunction;
  * with the specified divisor to long and then converting the value to String.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 @DeprecatedFunction("This function is easily replaced with other simpler functions.")
 public class Murmur3DivToString implements LongFunction<String> {
 
-    private ThreadLocal<Murmur3F> murmur3F_TL = ThreadLocal.withInitial(Murmur3F::new);
-    private DivideToLong divideToLongMapper;
+    private final ThreadLocal<Murmur3F> murmur3F_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final DivideToLong divideToLongMapper;
 
     public Murmur3DivToString(long divisor) {
         this.divideToLongMapper = new DivideToLong(divisor);

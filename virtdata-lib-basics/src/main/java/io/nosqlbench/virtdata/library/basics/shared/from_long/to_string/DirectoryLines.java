@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +25,7 @@ import java.util.regex.Pattern;
  * from a set of files as input to a test or simulation.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class DirectoryLines implements LongFunction<String> {
 
     private final static Logger logger  = LogManager.getLogger(DirectoryLines.class);
@@ -78,7 +81,7 @@ public class DirectoryLines implements LongFunction<String> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.debug("File reader: " + fileList.toString() + " in path: " + Paths.get(basepath).getFileName());
+        logger.debug("File reader: " + fileList + " in path: " + Paths.get(basepath).getFileName());
         fileList.paths.sort(Path::compareTo);
         return fileList.paths;
     }

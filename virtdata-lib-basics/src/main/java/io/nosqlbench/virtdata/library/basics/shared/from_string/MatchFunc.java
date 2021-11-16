@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.core.composers.FunctionAssembly;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
  * String value may be provided as the associated output value.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class MatchFunc implements Function<String,String>  {
 
     private final MatchEntry[] entries;

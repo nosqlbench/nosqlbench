@@ -14,9 +14,7 @@
  */
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
-import io.nosqlbench.virtdata.api.annotations.Description;
-import io.nosqlbench.virtdata.api.annotations.Example;
-import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.annotations.*;
 import io.nosqlbench.virtdata.library.basics.core.lfsrs.MetaShift;
 
 /**
@@ -34,6 +32,7 @@ import io.nosqlbench.virtdata.library.basics.core.lfsrs.MetaShift;
  * This function *does* yield values that are deterministic.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 @Description("Provides virtual shuffling extremely large numbers.")
 public class Shuffle extends MetaShift.Func {
 

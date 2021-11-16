@@ -10,11 +10,6 @@ import java.util.HashMap;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
-/**
- * Load a value from a named thread-local variable, where the variable
- * name is fixed or a generated variable name from a provided function.
- * If the named variable is not defined, then the default value is returned.
- */
 @Categories(Category.state)
 @ThreadSafeMapper
 public class LoadInteger implements LongToIntFunction {

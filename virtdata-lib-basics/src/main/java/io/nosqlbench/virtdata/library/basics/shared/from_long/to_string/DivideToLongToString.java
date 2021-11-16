@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -30,6 +32,7 @@ import java.util.function.LongFunction;
  * as it is easily replaced by other functions.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 @DeprecatedFunction("This function is easily replace by simpler functions.")
 public class DivideToLongToString implements LongFunction<String> {
 

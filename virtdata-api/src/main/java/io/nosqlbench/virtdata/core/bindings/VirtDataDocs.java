@@ -34,13 +34,13 @@ public class VirtDataDocs {
                 MethodHandle constructor = lookup.findConstructor(aClass, MethodType.methodType(Void.TYPE));
                 Object o = constructor.invoke();
                 if (DocFuncData.class.isAssignableFrom(o.getClass())) {
-                    docs.add(DocFuncData.class.cast(o));
+                    docs.add((DocFuncData) o);
                 } else {
                     throw new RuntimeException("class " + o.getClass() + " could not be assigned to " + DocFuncData.class.getSimpleName());
                 }
             }
         } catch (Throwable e) {
-            throw new RuntimeException("Error while loading doc models:" + e.toString());
+            throw new RuntimeException("Error while loading doc models:" + e);
         }
         return docs;
 

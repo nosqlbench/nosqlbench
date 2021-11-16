@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +30,7 @@ import java.util.function.LongUnaryOperator;
  * Return a long value as the result of modulo division with the specified divisor.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ModuloToLong implements LongUnaryOperator {
     private final static Logger logger  = LogManager.getLogger(ModuloToLong.class);
     private final long modulo;

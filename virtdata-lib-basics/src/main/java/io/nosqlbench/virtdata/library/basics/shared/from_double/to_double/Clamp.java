@@ -1,11 +1,14 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_double.to_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.DoubleUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Clamp implements DoubleUnaryOperator {
 
     private final double min;

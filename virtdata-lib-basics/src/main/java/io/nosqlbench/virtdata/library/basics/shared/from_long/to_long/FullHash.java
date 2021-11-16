@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -16,9 +18,10 @@ import java.util.function.LongUnaryOperator;
  * It does not return the absolute value, as {@link Hash} does.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class FullHash implements LongUnaryOperator {
 
-    private ThreadLocal<State> state_TL = ThreadLocal.withInitial(State::new);
+    private final ThreadLocal<State> state_TL = ThreadLocal.withInitial(State::new);
 
     @Override
     public long applyAsLong(long value) {

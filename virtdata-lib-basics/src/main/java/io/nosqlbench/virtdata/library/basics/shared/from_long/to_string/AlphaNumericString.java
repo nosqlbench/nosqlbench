@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
@@ -9,6 +11,7 @@ import java.util.function.LongFunction;
  * Create an alpha-numeric string of the specified length, character-by-character.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class AlphaNumericString implements LongFunction<String> {
     private static final String AVAILABLE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);

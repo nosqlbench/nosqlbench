@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -7,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.function.LongToIntFunction;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class SignedHash implements LongToIntFunction {
 
     ThreadLocal<ByteBuffer> bb_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocate(Long.BYTES));

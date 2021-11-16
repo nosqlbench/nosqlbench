@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.HashedLineToStringStringMap;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
  * in the specified file, ranging in size between zero and the specified maximum.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedLinesToKeyValueString implements LongFunction<String> {
     private static final Logger logger = LogManager.getLogger(HashedLinesToKeyValueString.class);
 

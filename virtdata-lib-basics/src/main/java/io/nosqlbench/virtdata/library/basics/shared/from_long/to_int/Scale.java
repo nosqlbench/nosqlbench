@@ -1,14 +1,14 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongToIntFunction;
 
-/**
- * Scale the input by the factor provided
- * @deprecated Use Mul(...) instead
- */
 @ThreadSafeMapper
+@Deprecated
+@Categories({Category.general})
 public class Scale implements LongToIntFunction {
 
     private final double scaleFactor;

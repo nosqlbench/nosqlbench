@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
@@ -26,6 +28,7 @@ import java.util.function.LongFunction;
  * Return an integer value as the result of modulo division with the specified divisor.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ModuloToInteger implements LongFunction<Integer> {
 
     private final int modulo;

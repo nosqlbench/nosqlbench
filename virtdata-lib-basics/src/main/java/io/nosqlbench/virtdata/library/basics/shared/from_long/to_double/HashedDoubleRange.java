@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
@@ -30,6 +32,7 @@ import java.util.function.LongToDoubleFunction;
  * expense of some precision at extremely large values.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedDoubleRange implements LongToDoubleFunction {
 
     private final double min;

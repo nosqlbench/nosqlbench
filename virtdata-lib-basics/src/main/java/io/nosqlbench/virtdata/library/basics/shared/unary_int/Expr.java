@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.function.IntUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.functional})
 public class Expr implements IntUnaryOperator {
 
     private final String expr;

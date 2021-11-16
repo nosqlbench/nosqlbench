@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -15,6 +17,7 @@ import java.util.function.LongToIntFunction;
  * between elements.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ListTemplate implements LongFunction<List<String>> {
 
     private final LongToIntFunction sizeFunc;

@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.util.CharsetMapping;
@@ -22,6 +24,7 @@ import java.util.function.LongFunction;
  * which can be represented in a long value. (This is a very high number).
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Combinations implements LongFunction<String> {
 
     private final char[][] charsets;

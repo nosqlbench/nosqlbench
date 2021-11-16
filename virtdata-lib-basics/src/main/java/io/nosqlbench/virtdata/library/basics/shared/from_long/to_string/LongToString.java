@@ -18,6 +18,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -29,6 +31,7 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 @DeprecatedFunction("This function is being replaced by ToString() for naming consistency.")
+@Categories({Category.general})
 public class LongToString implements LongFunction<String> {
 
     @Override

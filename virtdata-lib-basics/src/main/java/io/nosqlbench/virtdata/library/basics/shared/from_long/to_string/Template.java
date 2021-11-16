@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
@@ -37,6 +39,7 @@ import java.util.regex.Pattern;
  * and then stitched together according to the template provided.</p>
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Template implements LongFunction<String> {
     private final static Logger logger  = LogManager.getLogger(Template.class);
     private static final String EXPR_BEGIN = "[[";

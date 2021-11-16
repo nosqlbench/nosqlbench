@@ -1,6 +1,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -13,9 +15,10 @@ import java.util.function.LongToIntFunction;
  * Each line in the file must contain one parsable integer value.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedLineToInt implements LongToIntFunction {
     private final static Logger logger  = LogManager.getLogger(HashedLineToInt.class);
-    private int[] values;
+    private final int[] values;
     private final String filename;
     private final Hash intHash;
 

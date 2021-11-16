@@ -19,6 +19,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -32,11 +34,12 @@ import java.util.function.LongFunction;
  * of lines in the file.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ModuloLineToString implements LongFunction<String> {
     private final static Logger logger  = LogManager.getLogger(ModuloLineToString.class);
     private List<String> lines = new ArrayList<>();
 
-    private String filename;
+    private final String filename;
 
     public ModuloLineToString(String filename) {
         this.filename = filename;

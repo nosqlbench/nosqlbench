@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
@@ -14,6 +16,7 @@ import java.util.function.LongToDoubleFunction;
  * stable for a given input value.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedRangedToNonuniformDouble implements LongToDoubleFunction {
 
     private final long min;

@@ -4,6 +4,8 @@ import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -18,6 +20,7 @@ import java.util.function.Function;
  * by the provided variable name.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class LoadElement implements Function<Object,Object>, NBMapConfigurable {
 
     private final String varname;

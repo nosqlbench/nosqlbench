@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_double.to_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
@@ -10,10 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleUnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ThreadSafeMapper
+@Categories({Category.functional})
 public class Expr implements DoubleUnaryOperator {
 
     private final String expr;

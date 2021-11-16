@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +15,7 @@ import java.util.function.Function;
  * a string with the same delimiter containing only the specified fields.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class FieldExtractor implements Function<String,String> {
 
     private final static Logger logger  = LogManager.getLogger(FieldExtractor.class);
@@ -21,8 +24,8 @@ public class FieldExtractor implements Function<String,String> {
     private final String splitDelim;
     private final String printDelim;
     private final int maxIdx;
-    private int[] indexes;
-    private ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
+    private final int[] indexes;
+    private final ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
 
     @Example({"FieldExtractor('|,2,16')","extract fields 2 and 16 from the input data with '|' as the delimiter"})
     public FieldExtractor(String fields) {

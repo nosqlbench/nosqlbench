@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -11,6 +13,7 @@ import java.util.function.LongUnaryOperator;
  * specified delimiter and optional prefix and suffix.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class JoinTemplate extends Template implements LongFunction<String>  {
 
     @Example({"JoinTemplate('--',NumberNameToString(),NumberNameToString())","create values like `one--one`, `two-two`, ..."})

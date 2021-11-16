@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
@@ -11,9 +13,10 @@ import java.util.function.LongFunction;
  * a version 4 (Random) UUID.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class ToHashedUUID implements LongFunction<UUID> {
 
-    private Hash longHash = new Hash();
+    private final Hash longHash = new Hash();
 
     @Override
     public UUID apply(long value) {

@@ -20,6 +20,8 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashInterval;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +36,7 @@ import java.util.function.LongFunction;
  * the specified file.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashedLineToString implements LongFunction<String> {
     private final static Logger logger = LogManager.getLogger(HashedLineToString.class);
     private final HashInterval indexRange;

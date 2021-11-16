@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.MVELExpr;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
@@ -22,6 +24,7 @@ import java.util.function.LongToIntFunction;
  * are preceding functions which modify the input value.
  */
 @ThreadSafeMapper
+@Categories({Category.functional})
 public class Expr implements LongToIntFunction {
 
     private final String expr;
