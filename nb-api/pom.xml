@@ -38,12 +38,12 @@
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-ext-yaml-front-matter</artifactId>
-            <version>0.61.6</version>
+            <version>0.62.2</version>
         </dependency>
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-html2md-converter</artifactId>
-            <version>0.61.6</version>
+            <version>0.62.2</version>
         </dependency>
 
 
