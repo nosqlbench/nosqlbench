@@ -10,7 +10,6 @@ params:
   # - used for message ordering and message loss check
   async_api: "true"
   seq_tracking: "true"
-  msg_dedup_broker: "true"
 
 blocks:
   - name: producer-block
