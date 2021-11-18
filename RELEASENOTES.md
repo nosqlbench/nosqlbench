@@ -1,6 +1,13 @@
-- 39cc61ac6 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- e4252bdfd (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- ff142fd0b refactor/improve stat samplers for efficiency and correctness
+- 9c86ec915 (origin/main) Merge pull request #385 from tjake/scenario-urls
+- f6bf8a565 switch to official repo for test url
+- af83ca6d6 add support for scenarios from a http service
+- d31fbd45f fix broken github flow from merge
+- ee94944a4 release: stat curve improvements, docs categories, more workloads, pulsar improvements
+- 39cc61ac6 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 44b8119b3 update categories for functions
-- cda5218aa (origin/main) Merge pull request #382 from EricBorczuk/mongo-search-workload
+- cda5218aa Merge pull request #382 from EricBorczuk/mongo-search-workload
 - e49d07474 Merge pull request #383 from yabinmeng/main
 - b8295eb54 update flexmark version
 - 75244e01e remove WrappedClustering to be replaced with something else. No examples of its use were found.
