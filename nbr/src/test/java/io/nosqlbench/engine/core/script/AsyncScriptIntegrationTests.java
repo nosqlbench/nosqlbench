@@ -105,7 +105,7 @@ public class AsyncScriptIntegrationTests {
 
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
-        double rate = Double.valueOf(digits);
+        double rate = Double.parseDouble(digits);
         assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
     }
 
