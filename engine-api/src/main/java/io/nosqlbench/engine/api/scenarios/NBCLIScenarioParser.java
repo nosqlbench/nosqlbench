@@ -98,7 +98,7 @@ public class NBCLIScenarioParser {
                 .prefix(includes)
                 .name(workloadName)
                 .extension(RawStmtsLoader.YAML_EXTENSIONS)
-                .one();
+                .first().orElseThrow();
 
             StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userParams);
 
