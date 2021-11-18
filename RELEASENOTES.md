@@ -1,6 +1,9 @@
-- e4252bdfd (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- eeb6f97c1 (HEAD -> main, origin/main) relax rate test for slow github nodes
+- 11dd8f62d add LERP visualization
+- 5d8c08e44 release: bugfixes, stat improvements
+- e4252bdfd Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - ff142fd0b refactor/improve stat samplers for efficiency and correctness
-- 9c86ec915 (origin/main) Merge pull request #385 from tjake/scenario-urls
+- 9c86ec915 Merge pull request #385 from tjake/scenario-urls
 - f6bf8a565 switch to official repo for test url
 - af83ca6d6 add support for scenarios from a http service
 - d31fbd45f fix broken github flow from merge
