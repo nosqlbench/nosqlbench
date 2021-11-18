@@ -126,6 +126,16 @@ public class NBCLIScenarioParserTest {
     }
 
     @Test
+    public void testThatScenarioUrlsAreSupported() {
+        //TODO: This might change?
+        String urlScenario = "https://gist.githubusercontent.com/tjake/0106848762e078f0ef886c1a097b3433/raw/4302fd0ab2d34bd088d973cdd52ed7711782f757/scenario-test.yaml?foo=bar";
+
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ urlScenario, "schema-only", "cycles-test=20"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isGreaterThan(0);
+    }
+
+    @Test
     public void testSanitizer() {
         String sanitized = NBCLIScenarioParser.sanitize("A-b,c_d");
         assertThat(sanitized).isEqualTo("Abcd");

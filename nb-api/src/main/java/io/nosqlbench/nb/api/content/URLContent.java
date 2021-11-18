@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,7 +74,7 @@ public class URLContent implements Content<URL> {
 
     @Override
     public Path asPath() {
-        return null;
+        return Paths.get(url.getPath());
     }
 
     public String toString() {
