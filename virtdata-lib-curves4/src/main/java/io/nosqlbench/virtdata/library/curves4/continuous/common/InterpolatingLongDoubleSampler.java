@@ -6,14 +6,30 @@ import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.LongToDoubleFunction;
 
+/**
+ * See {@link io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate} for
+ * details on implementation.
+ *
+ * For the 6 implementations of interpolating samplers which use inverse cumulative distribution tables,
+ * care should be given to the following:
+ * <UL>
+ *     <LI>Input Ranging - ensure that the input type is appropriate for the curve; pre-scaling needs to be matched
+ *     to the input type</LI>
+ *     <LI>resolution, scale, and LUT length; T</LI>
+ *     <LI>+1 LUT padding for U=1.0</LI>
+ *     <LI>Uniform LERP code in main function</LI>
+ * </UL>>
+ */
 public class InterpolatingLongDoubleSampler implements LongToDoubleFunction {
+
+    private static final double MAX_LONG_AS_DOUBLE = Long.MAX_VALUE;
 
     private final double[] lut;
     private final DoubleUnaryOperator f;
-    private final int resolution;
     private final boolean clamp;
     private final double clampMin;
     private final double clampMax;
+    private final double scaleToLong;
     private ThreadSafeHash hash;
 
     public InterpolatingLongDoubleSampler(DoubleUnaryOperator icdSource, int resolution, boolean hash, boolean clamp, double clampMin, double clampMax, boolean finite) {
@@ -24,44 +40,41 @@ public class InterpolatingLongDoubleSampler implements LongToDoubleFunction {
         this.clamp=clamp;
         this.clampMin=clampMin;
         this.clampMax=clampMax;
-        double[] lut = precompute(resolution);
+        double[] computed = precompute(resolution);
         if (finite) {
-            while (lut.length>0 && Double.isInfinite(lut[0])) {
-                lut = Arrays.copyOfRange(lut,1,lut.length-1);
+            while (computed.length>0 && Double.isInfinite(computed[0])) {
+                computed = Arrays.copyOfRange(computed,1,computed.length-1);
             }
-            while (lut.length>0 && Double.isInfinite(lut[lut.length-1])) {
-                lut = Arrays.copyOfRange(lut,0,lut.length-2);
+            while (computed.length>0 && Double.isInfinite(computed[computed.length-1])) {
+                computed = Arrays.copyOfRange(computed,0,computed.length-2);
             }
         }
-        this.lut = lut;
-        this.resolution = lut.length-1;
+        double[] padded = new double[computed.length+1];
+        System.arraycopy(computed,0,padded,0,computed.length);
+        this.scaleToLong = (1.0d / (double) Long.MAX_VALUE) * (padded.length-2);
+        this.lut = padded;
     }
 
     private double[] precompute(int resolution) {
-        double[] precomputed = new double[resolution+1];
-        for (int s = 0; s <= resolution; s++) { // not a ranging error
+        double[] precomputed = new double[resolution];
+        for (int s = 0; s < resolution; s++) { // not a ranging error
             double rangedToUnit = (double) s / (double) resolution;
-            double sampleValue = clamp ? Double.max(clampMin,Double.min(clampMax,f.applyAsDouble(rangedToUnit))) : f.applyAsDouble(rangedToUnit);
+            double sampleValue = f.applyAsDouble(rangedToUnit);
+            sampleValue = clamp ? Double.max(clampMin,Double.min(clampMax,sampleValue)) : sampleValue ;
             precomputed[s] =  sampleValue;
         }
-        precomputed[precomputed.length-1]=precomputed[precomputed.length-2]; // only for right of max, when S==Max in the rare case
         return precomputed;
     }
 
     @Override
-    public double applyAsDouble(long value) {
+    public double applyAsDouble(long input) {
         if (hash!=null) {
-            value = hash.applyAsLong(value);
+            input = hash.applyAsLong(input);
         }
-        double unit = (double) value / (double) Long.MAX_VALUE;
-        double samplePoint = unit * resolution;
-        int leftidx = (int) samplePoint;
-        double leftPartial = samplePoint - leftidx;
-
-        double leftComponent=(lut[leftidx] * (1.0-leftPartial));
-        double rightComponent = (lut[leftidx+1] * leftPartial);
-
-        double sample = leftComponent + rightComponent;
+        double samplePoint = scaleToLong * input;
+        int leftidx = (int)samplePoint;
+        double fractional = samplePoint - leftidx;
+        double sample = (lut[leftidx]* (1.0d-fractional)) + (lut[leftidx+1] * fractional);
         return sample;
     }
 }

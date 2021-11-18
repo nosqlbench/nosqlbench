@@ -7,43 +7,41 @@ public class InterpolatingLongIntSampler implements LongToIntFunction {
 
     private final double[] lut;
     private final DoubleToIntFunction f;
-    private int resolution;
     private ThreadSafeHash hash;
+    private final double scaleToLong;
 
     public InterpolatingLongIntSampler(DoubleToIntFunction icdSource, int resolution, boolean hash) {
         this.f = icdSource;
-        this.resolution = resolution;
         if (hash) {
             this.hash = new ThreadSafeHash();
         }
-        this.lut = precompute();
+        double[] computed = precompute(resolution);
+        double[] padded = new double[computed.length+1];
+        System.arraycopy(computed,0,padded,0,computed.length);
+        padded[padded.length-1] = padded[padded.length-2];
+        scaleToLong=(1.0d/Long.MAX_VALUE) * (padded.length-2);
+        this.lut=padded;
     }
 
-    private double[] precompute() {
-        double[] precomputed = new double[resolution+2];
-        for (int s = 0; s <= resolution; s++) { // not a ranging error
+    private double[] precompute(int resolution) {
+        double[] precomputed = new double[resolution];
+        for (int s = 0; s < resolution; s++) { // not a ranging error
             double rangedToUnit = (double) s / (double) resolution;
             int sampleValue = f.applyAsInt(rangedToUnit);
             precomputed[s] =  sampleValue;
         }
-        precomputed[precomputed.length-1]=0.0D; // only for right of max, when S==Max in the rare case
         return precomputed;
     }
 
     @Override
-    public int applyAsInt(long value) {
+    public int applyAsInt(long input) {
         if (hash!=null) {
-            value = hash.applyAsLong(value);
+            input = hash.applyAsLong(input);
         }
-        double unit = (double) value / (double) Long.MAX_VALUE;
-        double samplePoint = unit * resolution;
-        int leftidx = (int) samplePoint;
-        double leftPartial = samplePoint - leftidx;
-
-        double leftComponent=(lut[leftidx] * (1.0-leftPartial));
-        double rightComponent = (lut[leftidx+1] * leftPartial);
-
-        double sample = leftComponent + rightComponent;
-        return (int) sample;
+        double samplePoint = scaleToLong * input;
+        int leftidx = (int)samplePoint;
+        double fractional = samplePoint - leftidx;
+        double sample = (lut[leftidx]* (1.0d-fractional)) + (lut[leftidx+1] * fractional);
+        return (int)sample;
     }
 }

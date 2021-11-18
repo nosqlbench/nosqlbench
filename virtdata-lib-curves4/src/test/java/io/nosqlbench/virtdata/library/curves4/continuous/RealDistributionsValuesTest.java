@@ -17,7 +17,7 @@ public class RealDistributionsValuesTest {
 
     @Test
     public void testComputedNormal() {
-        RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"compute"), 1000000);
+        RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"compute"), 1000000,1);
         System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
@@ -29,7 +29,7 @@ public class RealDistributionsValuesTest {
 
     @Test
     public void testInterpolatedNormal() {
-        RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"interpolate"), 1000000);
+        RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"interpolate"), 1000000,1);
         System.out.println(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
@@ -41,7 +41,7 @@ public class RealDistributionsValuesTest {
 
     @Test
     public void testComputedUniform() {
-        RunData runData = iterateMapperDouble(new Uniform(0.0,100.0,"compute"), 1000000);
+        RunData runData = iterateMapperDouble(new Uniform(0.0,100.0,"compute"), 1000000,1);
         assertThat(runData.getFractionalPercentile(0.33D))
                 .isCloseTo(33.33D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.5D))
@@ -53,7 +53,7 @@ public class RealDistributionsValuesTest {
 
     @Test
     public void testInterpolatedUniform() {
-        RunData runData = iterateMapperDouble(new Uniform(0.0,100.0,"interpolate"), 1000000);
+        RunData runData = iterateMapperDouble(new Uniform(0.0,100.0,"interpolate"), 1000000,1);
         assertThat(runData.getFractionalPercentile(0.33D))
                 .isCloseTo(33.33D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.5D))
@@ -66,22 +66,27 @@ public class RealDistributionsValuesTest {
     @Test
     public void testInterpolatedMappedUniform() {
         Uniform mapper = new Uniform(0.0, 100.0, "map", "interpolate");
-        RunData runData = iterateMapperDouble(mapper,10000000);
+        RunData runData = iterateMapperDouble(mapper,10000000,Long.MAX_VALUE/10000000L);
+
+        assertThat(runData.getFractionalPercentile(0.001D))
+            .isCloseTo(0.0D, Offset.offset(1.0D));
+
         assertThat(runData.getFractionalPercentile(0.999D))
-                .isCloseTo(0.0D, Offset.offset(1.0D));
+                .isCloseTo(099.99D, Offset.offset(1.0D));
 
         assertThat(mapper.applyAsDouble(Long.MAX_VALUE)).isCloseTo(100.0D, Offset.offset(1.0D));
 
+        System.out.println(runData);
     }
 
-    private RunData iterateMapperDouble(LongToDoubleFunction mapper, int iterations) {
+    private RunData iterateMapperDouble(LongToDoubleFunction mapper, int iterations, long funcstep) {
         assertThat(mapper).isNotNull();
 
         double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
-            samples[i] = mapper.applyAsDouble(i);
+            samples[i] = mapper.applyAsDouble(i*funcstep);
         }
         long time_generated = System.nanoTime();
 

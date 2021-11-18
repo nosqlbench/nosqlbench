@@ -124,7 +124,7 @@ public class LongToDoubleContinuousCurve implements LongToDoubleFunction {
         function = interpolate ?
                 new InterpolatingLongDoubleSampler(icdSource, 1000, hash, clamp, Long.MIN_VALUE, Long.MAX_VALUE, finite)
                 :
-                new RealLongDoubleSampler(icdSource, hash, clamp, (double) Long.MAX_VALUE);
+                new RealLongDoubleSampler(icdSource, hash, clamp, Long.MIN_VALUE, Long.MAX_VALUE, true);
 
     }
 

@@ -46,7 +46,7 @@ public class IntegerDistributionsConcurrencyTest {
         // threshold test against CDF
         expected = mapper.get((long) (0.03515d * (double) Long.MAX_VALUE));
         assertThat(expected).isEqualTo(1);
-        expected = mapper.get((long) (0.03600d * (double) Long.MAX_VALUE));
+        expected = mapper.get((long) (0.03700d * (double) Long.MAX_VALUE));
         assertThat(expected).isEqualTo(2);
     }
 

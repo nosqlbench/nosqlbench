@@ -1,10 +1,31 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InterpolateTest {
+
+    @Test
+    public void testRanging() {
+        io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate interpolate =
+            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate (0.0d, 1.0d);
+        Hash hf = new Hash();
+        DescriptiveStatistics dss = new DescriptiveStatistics();
+        long count=10000000;
+        for (long i = 0; i < count; i++) {
+            long input = (long) (Long.MAX_VALUE * ((double)i/(double)count));
+            long prn = hf.applyAsLong(input);
+            double v = interpolate.applyAsDouble(prn);
+            dss.addValue(v);
+        }
+        assertThat(dss.getPercentile(0.000001)).isCloseTo(0.0, Offset.offset(0.01));
+        assertThat(dss.getPercentile(99.99999)).isCloseTo(1.0, Offset.offset(0.01));
+    }
+
+
 
     @Test
     public void testDeciles() {
@@ -26,6 +47,7 @@ public class InterpolateTest {
         long highvalue = (long) (Long.MAX_VALUE * 0.98d);
         long high = f.applyAsLong(highvalue);
         assertThat(high).isEqualTo(expected);
+        System.out.println(" -> was " + high);
 
         long highervalue = (long) (Long.MAX_VALUE * 0.9999d);
         long higher = f.applyAsLong(highervalue);

@@ -1,6 +1,6 @@
 package io.nosqlbench.virtdata.library.curves4.continuous.common;
 
-import io.nosqlbench.virtdata.library.curves4.discrete.common.ThreadSafeHash;
+import io.nosqlbench.virtdata.library.basics.shared.unary_int.Hash;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -10,11 +10,11 @@ public class InterpolatingIntDoubleSampler implements IntToDoubleFunction{
 
     private final double[] lut;
     private final DoubleUnaryOperator f;
-    private final int resolution;
     private final boolean clamp;
     private final double clampMin;
     private final double clampMax;
-    private ThreadSafeHash hash;
+    private final double scaleToIntRanged;
+    private Hash hash;
 
     public InterpolatingIntDoubleSampler(DoubleUnaryOperator icdSource, int resolution, boolean hash, boolean clamp, double clampMin, double clampMax, boolean finite) {
         this.f = icdSource;
@@ -22,47 +22,43 @@ public class InterpolatingIntDoubleSampler implements IntToDoubleFunction{
         this.clampMin = clampMin;
         this.clampMax = clampMax;
         if (hash) {
-            this.hash = new ThreadSafeHash();
+            this.hash = new Hash();
         }
-        double[] lut = precompute(resolution);
+        double[] computed = precompute(resolution);
         if (finite) {
-            while (lut.length>0 && Double.isInfinite(lut[0])) {
-                lut = Arrays.copyOfRange(lut,1,lut.length-1);
+            while (computed.length>0 && Double.isInfinite(computed[0])) {
+                computed = Arrays.copyOfRange(computed,1,computed.length-1);
             }
-            while (lut.length>0 && Double.isInfinite(lut[lut.length-1])) {
-                lut = Arrays.copyOfRange(lut,0,lut.length-2);
+            while (computed.length>0 && Double.isInfinite(computed[computed.length-1])) {
+                computed = Arrays.copyOfRange(computed,0,computed.length-2);
             }
         }
-        this.lut = lut;
-        this.resolution=lut.length-1;
+        double[] padded = new double[computed.length+1];
+        System.arraycopy(computed,0,padded,0,computed.length);
+        this.scaleToIntRanged = (1.0d/(double)Integer.MAX_VALUE) * ((padded.length-2));
+        this.lut = padded;
     }
 
     private double[] precompute(int resolution) {
-        double[] precomputed = new double[resolution+1];
-        for (int s = 0; s <= resolution; s++) { // not a ranging error
+        double[] precomputed = new double[resolution];
+        for (int s = 0; s < resolution; s++) { // not a ranging error
             double rangedToUnit = (double) s / (double) resolution;
-            double sampleValue = clamp ? Double.max(clampMin,Double.min(clampMax,f.applyAsDouble(rangedToUnit))) : f.applyAsDouble(rangedToUnit);
+            double sampleValue = f.applyAsDouble(rangedToUnit);
+            sampleValue = clamp ? Double.max(clampMin,Double.min(clampMax,sampleValue)) : sampleValue;
             precomputed[s] =  sampleValue;
         }
-        precomputed[precomputed.length-1]=precomputed[precomputed.length-2]; // only for right of max, when S==Max in the rare case
         return precomputed;
     }
 
     @Override
     public double applyAsDouble(int input) {
-        long value = input;
         if (hash!=null) {
-            value = hash.applyAsLong(value);
+            input = hash.applyAsInt(input);
         }
-        double unit = (double) value / (double) Long.MAX_VALUE;
-        double samplePoint = unit * resolution;
-        int leftidx = (int) samplePoint;
-        double leftPartial = samplePoint - leftidx;
-
-        double leftComponent=(lut[leftidx] * (1.0-leftPartial));
-        double rightComponent = (lut[leftidx+1] * leftPartial);
-
-        double sample = leftComponent + rightComponent;
+        double samplePoint = scaleToIntRanged * input;
+        int leftidx = (int)samplePoint;
+        double fractional = samplePoint - leftidx;
+        double sample = (lut[leftidx]* (1.0d-fractional)) + (lut[leftidx+1] * fractional);
         return sample;
     }
 }

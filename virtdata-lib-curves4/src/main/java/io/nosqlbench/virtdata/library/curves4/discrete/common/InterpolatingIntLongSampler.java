@@ -1,5 +1,7 @@
 package io.nosqlbench.virtdata.library.curves4.discrete.common;
 
+import io.nosqlbench.virtdata.library.basics.shared.unary_int.Hash;
+
 import java.util.function.DoubleToIntFunction;
 import java.util.function.IntToLongFunction;
 
@@ -7,46 +9,40 @@ public class InterpolatingIntLongSampler implements IntToLongFunction {
 
     private final double[] lut;
     private final DoubleToIntFunction f;
-    private int resolution;
-    private ThreadSafeHash hash;
+    private Hash hash;
+    private final double scaleToIntRanged;
 
     public InterpolatingIntLongSampler(DoubleToIntFunction icdSource, int resolution, boolean hash) {
         this.f = icdSource;
-        this.resolution = resolution;
         if (hash) {
-            this.hash = new ThreadSafeHash();
+            this.hash = new Hash();
         }
-        this.lut = precompute();
+        double[] computed = precompute(resolution);
+        double[] padded = new double[computed.length+1];
+        System.arraycopy(computed,0,padded,0,computed.length);
+        this.scaleToIntRanged = (1.0d / Integer.MAX_VALUE) * (padded.length-2);
+        this.lut=padded;
     }
 
-    private double[] precompute() {
-        double[] precomputed = new double[resolution+2];
-        for (int s = 0; s <= resolution; s++) { // not a ranging error
+    private double[] precompute(int resolution) {
+        double[] precomputed = new double[resolution];
+        for (int s = 0; s < resolution; s++) { // not a ranging error
             double rangedToUnit = (double) s / (double) resolution;
             int sampleValue = f.applyAsInt(rangedToUnit);
             precomputed[s] =  sampleValue;
         }
-        precomputed[precomputed.length-1]=0.0D; // only for right of max, when S==Max in the rare case
         return precomputed;
     }
 
     @Override
     public long applyAsLong(int input) {
-        int value = input;
-
         if (hash!=null) {
-            value = (int) (hash.applyAsLong(input) % Integer.MAX_VALUE);
+            input = hash.applyAsInt(input);
         }
-
-        double unit = (double) value / (double) Integer.MAX_VALUE;
-        double samplePoint = unit * resolution;
-        int leftidx = (int) samplePoint;
-        double leftPartial = samplePoint - leftidx;
-
-        double leftComponent=(lut[leftidx] * (1.0-leftPartial));
-        double rightComponent = (lut[leftidx+1] * leftPartial);
-
-        double sample = leftComponent + rightComponent;
+        double samplePoint = scaleToIntRanged * input;
+        int leftidx = (int)samplePoint;
+        double fractional = samplePoint - leftidx;
+        double sample = (lut[leftidx]* (1.0d-fractional)) + (lut[leftidx+1] * fractional);
         return (long) sample;
     }
 }

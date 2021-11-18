@@ -11,7 +11,7 @@ public class LevyTest {
     @Test
     public void testLevy() {
         Levy levy = new Levy(2.3d, 1.0d);
-        assertThat(levy.applyAsDouble(10L)).isCloseTo(2.938521849905433, Offset.offset(0.000001d));
+        assertThat(levy.applyAsDouble(10L)).isCloseTo(2.9379325000660304, Offset.offset(0.000001d));
     }
 
 }

@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegerDistributionsValuesTest {
 
+
     @Disabled
     @Test
     public void testComputedZipf() {
@@ -71,12 +72,18 @@ public class IntegerDistributionsValuesTest {
     }
 
     @Test
+    public void testMaximumValue() {
+        Uniform mapper = new Uniform(0.0d, 100.0d, "interpolate", "map");
+        assertThat(mapper.applyAsDouble(Long.MAX_VALUE)).isCloseTo(100.0d,Offset.offset(0.1D));
+    }
+
+    @Test
     public void testInterpolatedMappedUniform() {
         Uniform mapper = new Uniform(0.0d, 100.0d, "interpolate", "map");
         RunData runData = iterateMapperDouble(mapper,10000000);
         assertThat(runData.getFractionalPercentile(0.999D))
                 .isCloseTo(0.0D, Offset.offset(1.0D));
-        assertThat(mapper.applyAsDouble(Long.MAX_VALUE)).isCloseTo(100.0d,Offset.offset(0.0001D));
+        assertThat(mapper.applyAsDouble(Long.MAX_VALUE)).isCloseTo(100.0d,Offset.offset(0.1D));
 
     }
 
@@ -101,7 +108,11 @@ public class IntegerDistributionsValuesTest {
         double[] samples = new double[iterations];
 
         long time_generating = System.nanoTime();
+        int readout = iterations/10;
         for (int i = 0; i < iterations; i++) {
+            if ((i%readout)==0) {
+                System.out.println("i="+i+"/"+iterations);
+            }
             samples[i] = mapper.applyAsDouble(i);
         }
         long time_generated = System.nanoTime();

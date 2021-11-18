@@ -109,7 +109,6 @@ public class IntToDoubleContinuousCurve implements IntToDoubleFunction {
             throw new RuntimeException("mods must not contain both "+ INFINITE +" and "+FINITE+".");
         }
 
-
         for (String s : modslist) {
             if (!validModifiers.contains(s)) {
                 throw new RuntimeException("modifier '" + s + "' is not a valid modifier. Use one of " + validModifiers + " instead.");
@@ -122,9 +121,9 @@ public class IntToDoubleContinuousCurve implements IntToDoubleFunction {
         boolean finite = ( mods.contains(FINITE) || !mods.contains(INFINITE));
 
         function = interpolate ?
-                new InterpolatingIntDoubleSampler(icdSource, 1000, hash, clamp, Integer.MIN_VALUE, Long.MAX_VALUE, finite)
+                new InterpolatingIntDoubleSampler(icdSource, 1000, hash, clamp, Integer.MIN_VALUE, Integer.MAX_VALUE, finite)
                 :
-                new RealIntDoubleSampler(icdSource, hash, clamp, (double) Long.MAX_VALUE);
+                new RealIntDoubleSampler(icdSource, hash, clamp, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
     }
 
