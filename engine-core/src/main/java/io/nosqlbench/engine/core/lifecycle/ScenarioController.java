@@ -16,6 +16,7 @@ package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
@@ -177,6 +178,12 @@ public class ScenarioController {
         if (activityExecutor == null) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
         }
+        RunState runstate = activityExecutor.getActivity().getRunState();
+        if (runstate != RunState.Running) {
+            logger.warn("NOT stopping activity '" + activityExecutor.getActivity().getAlias() + "' because it is in state '" + runstate + "'");
+            return;
+        }
+
         scenariologger.debug("STOP " + activityDef.getAlias());
         activityExecutor.stopActivity();
     }
@@ -204,7 +211,10 @@ public class ScenarioController {
     public synchronized void stop(String spec) {
         logger.debug("request->STOP '" + spec + "'");
         List<String> aliases = Arrays.asList(spec.split("[,; ]"));
-        List<String> matched = aliases.stream().flatMap(a -> getMatchingAliases(a).stream()).collect(Collectors.toList());
+        List<String> matched = aliases.stream()
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
         for (String alias : matched) {
             ActivityDef adef = aliasToDef(alias);
             scenariologger.debug("STOP " + adef.getAlias());
@@ -286,7 +296,7 @@ public class ScenarioController {
     private List<String> getMatchingAliases(String pattern) {
         Pattern matcher;
         // If the pattern is an alphanumeric name, the require it to match as a fully-qualified literal
-        if (pattern.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+        if (pattern.matches("[a-zA-Z_][a-zA-Z0-9_.]*")) {
             matcher = Pattern.compile("^" + pattern + "$");
         } else { // It is not, so the user is wanting to do a flexible match
             matcher = Pattern.compile(pattern);
