@@ -54,7 +54,7 @@ public class MetricMap implements ProxyObject {
                 MetricMap newMap = new MetricMap(edgeName,this.name);
                 current.map.put(edgeName, newMap);
                 current = newMap;
-                logger.debug("adding edge:" + edgeName);
+                logger.trace("adding edge:" + edgeName);
             }
         }
         return current;
