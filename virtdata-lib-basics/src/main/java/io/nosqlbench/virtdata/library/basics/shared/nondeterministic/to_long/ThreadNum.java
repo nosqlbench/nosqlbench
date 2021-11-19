@@ -18,6 +18,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_long;
 
+import io.nosqlbench.nb.api.metadata.Indexed;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
@@ -34,6 +35,10 @@ public class ThreadNum implements LongUnaryOperator {
     private final ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
         @Override
         protected Long initialValue() {
+            if (Thread.currentThread() instanceof Indexed) {
+                return (long) ((Indexed)Thread.currentThread()).getIndex();
+            }
+
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());
             if (matcher.matches()) {
                 return Long.valueOf(matcher.group(1));

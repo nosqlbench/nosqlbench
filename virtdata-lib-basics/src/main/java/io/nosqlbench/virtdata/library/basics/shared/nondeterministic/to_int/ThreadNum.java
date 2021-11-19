@@ -18,6 +18,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_int;
 
+import io.nosqlbench.nb.api.metadata.Indexed;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
@@ -41,6 +42,10 @@ public class ThreadNum implements LongToIntFunction {
     private final ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
+            if (Thread.currentThread() instanceof Indexed ) {
+                return ((Indexed)Thread.currentThread()).getIndex();
+            }
+
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());
             if (matcher.matches()) {
                 return Integer.valueOf(matcher.group(1));

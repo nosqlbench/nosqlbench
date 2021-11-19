@@ -18,6 +18,8 @@
 
 package io.nosqlbench.engine.core.lifecycle;
 
+import io.nosqlbench.nb.api.metadata.Indexed;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,7 +38,7 @@ public class IndexedThreadFactory implements ThreadFactory {
         this.uncaughtExceptionHandler = exceptionHandler;
     }
 
-    public class IndexedThread extends Thread {
+    public class IndexedThread extends Thread implements Indexed {
 
         private final int threadIndex;
         private String metricName = "default-name-" + Thread.currentThread().getName();
@@ -46,16 +48,17 @@ public class IndexedThreadFactory implements ThreadFactory {
             this.threadIndex = threadIndex;
         }
 
-        public int getThreadIndex() {
-            return threadIndex;
-        }
-
         public void setMetricName(String metricName) {
             this.metricName = metricName;
         }
 
         public String getMetricName() {
             return metricName;
+        }
+
+        @Override
+        public int getIndex() {
+            return threadIndex;
         }
     }
 
