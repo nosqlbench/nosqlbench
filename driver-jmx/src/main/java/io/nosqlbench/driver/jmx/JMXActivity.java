@@ -7,6 +7,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import javax.net.ssl.SSLContext;
 
@@ -24,7 +25,8 @@ public class JMXActivity extends SimpleActivity implements Activity {
         super.initActivity();
         this.sequence = createOpSequenceFromCommands(ReadyJmxOp::new);
         setDefaultsFromOpSequence(sequence);
-        this.sslContext= SSLKsFactory.get().getContext(activityDef.getParams());
+        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+        this.sslContext= SSLKsFactory.get().getContext(sslCfg);
 
         // TODO: Require qualified default with an op sequence as the input
     }

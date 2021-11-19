@@ -16,6 +16,7 @@ import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.ExprEvaluator;
 import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
@@ -236,7 +237,9 @@ public class CQLSessionCache implements Shutdownable {
             .ifPresent(builder::withCompression);
 
 
-        SSLContext context = SSLKsFactory.get().getContext(activityDef.getParams());
+        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+        SSLContext context = SSLKsFactory.get().getContext(sslCfg);
+
         if (context != null) {
             builder.withSSL(RemoteEndpointAwareJdkSSLOptions.builder().withSSLContext(context).build());
         }

@@ -61,10 +61,6 @@ public class SSLKsFactory implements NBMapConfigurable {
         return instance;
     }
 
-    public ServerSocketFactory createSSLServerSocketFactory(Map<String, Object> cfgmap) {
-        return createSSLServerSocketFactory(getConfigModel().apply(cfgmap));
-    }
-
     public ServerSocketFactory createSSLServerSocketFactory(NBConfiguration cfg) {
         SSLContext context = getContext(cfg);
         if (context == null) {
@@ -73,20 +69,12 @@ public class SSLKsFactory implements NBMapConfigurable {
         return context.getServerSocketFactory();
     }
 
-    public SocketFactory createSocketFactory(Map<String, Object> cfgmap) {
-        return createSocketFactory(getConfigModel().apply(cfgmap));
-    }
-
     public SocketFactory createSocketFactory(NBConfiguration cfg) {
         SSLContext context = getContext(cfg);
         if (context == null) {
             throw new IllegalArgumentException("SSL is not enabled.");
         }
         return context.getSocketFactory();
-    }
-
-    public SSLContext getContext(Map<String, Object> cfgmap) {
-        return getContext(getConfigModel().apply(cfgmap));
     }
 
     public SSLContext getContext(NBConfiguration cfg) {

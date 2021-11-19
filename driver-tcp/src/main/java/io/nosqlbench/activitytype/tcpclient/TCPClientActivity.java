@@ -20,8 +20,9 @@ package io.nosqlbench.activitytype.tcpclient;
 import io.nosqlbench.activitytype.stdout.StdoutActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
@@ -46,7 +47,8 @@ public class TCPClientActivity extends StdoutActivity {
         SocketFactory socketFactory = SocketFactory.getDefault();
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
         if (sslEnabled) {
-            socketFactory = SSLKsFactory.get().createSocketFactory(activityDef.getParams());
+            NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+            socketFactory = SSLKsFactory.get().createSocketFactory(sslCfg);
         }
 
         String host = getActivityDef().getParams().getOptionalString("host").orElse("localhost");

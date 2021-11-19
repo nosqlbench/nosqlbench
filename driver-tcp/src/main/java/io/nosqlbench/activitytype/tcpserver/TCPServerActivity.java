@@ -20,8 +20,9 @@ package io.nosqlbench.activitytype.tcpserver;
 import io.nosqlbench.activitytype.stdout.StdoutActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -56,7 +57,9 @@ public class TCPServerActivity extends StdoutActivity {
         queue = new LinkedBlockingQueue<>(capacity);
 
         if (sslEnabled) {
-            socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef.getParams());
+
+            NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+            socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(sslCfg);
         } else {
             socketFactory = ServerSocketFactory.getDefault();
         }

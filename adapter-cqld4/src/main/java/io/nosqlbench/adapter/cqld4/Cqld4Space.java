@@ -92,7 +92,8 @@ public class Cqld4Space {
         }
 
 
-        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extract(cfg);
+        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(cfg);
+
         SSLContext ctx = SSLKsFactory.get().getContext(sslCfg);
         if (ctx != null) {
             builder.withSslContext(ctx);
