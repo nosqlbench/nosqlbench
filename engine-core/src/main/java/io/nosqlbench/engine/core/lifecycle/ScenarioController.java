@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -196,10 +197,19 @@ public class ScenarioController {
      * activity to stop all threads, but keeps the thread objects handy for starting again. This can be useful
      * for certain testing scenarios in which you want to stop some workloads and start others based on other conditions.
      *
-     * @param alias The name of the activity that is already known to the scenario
+     * Alternately, you can provide one or more aliases in the same command, and all matching names will be stopped.
+     *
+     * @param spec The name of the activity that is already known to the scenario
      */
-    public synchronized void stop(String alias) {
-        stop(aliasToDef(alias));
+    public synchronized void stop(String spec) {
+        logger.debug("request->STOP '" + spec + "'");
+        List<String> aliases = Arrays.asList(spec.split("[,; ]"));
+        List<String> matched = aliases.stream().flatMap(a -> getMatchingAliases(a).stream()).collect(Collectors.toList());
+        for (String alias : matched) {
+            ActivityDef adef = aliasToDef(alias);
+            scenariologger.debug("STOP " + adef.getAlias());
+            stop(adef);
+        }
     }
 
     /**
@@ -271,6 +281,22 @@ public class ScenarioController {
             () -> new RuntimeException("ActivityExecutor for alias " + activityAlias + " not found.")
         );
 
+    }
+
+    private List<String> getMatchingAliases(String pattern) {
+        Pattern matcher;
+        // If the pattern is an alphanumeric name, the require it to match as a fully-qualified literal
+        if (pattern.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+            matcher = Pattern.compile("^" + pattern + "$");
+        } else { // It is not, so the user is wanting to do a flexible match
+            matcher = Pattern.compile(pattern);
+        }
+
+        List<String> matching = activityExecutors.keySet().stream()
+            .filter(a -> Pattern.matches(pattern, a))
+            .peek(p -> logger.debug("MATCH " + pattern + " -> " + p))
+            .collect(Collectors.toList());
+        return matching;
     }
 
     private ActivityExecutor getActivityExecutor(ActivityDef activityDef, boolean createIfMissing) {
@@ -356,10 +382,14 @@ public class ScenarioController {
      *
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
-    public void forceStopScenario(int waitTimeMillis, boolean rethrow) {
+    public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
         logger.debug("Scenario force stopped.");
         activityExecutors.values().forEach(a -> a.forceStopScenarioAndThrow(waitTimeMillis, rethrow));
     }
+
+//    public synchronized void stopAll() {
+//        this.forceStopScenario(5000,false);
+//    }
 
     /**
      * Await completion of all running activities, but do not force shutdownActivity. This method is meant to provide

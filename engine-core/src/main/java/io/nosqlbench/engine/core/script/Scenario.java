@@ -282,7 +282,7 @@ public class Scenario implements Callable<ScenarioResult> {
                     CompiledScript compiled = compilableEngine.compile(script);
                     logger.debug("-> invoking main scenario script (compiled)");
                     result = compiled.eval();
-                    logger.debug("<- scenario completed (compiled)");
+                    logger.debug("<- scenario script completed (compiled)");
                 } else {
                     if (scriptfile != null && !scriptfile.isEmpty()) {
 
@@ -297,12 +297,12 @@ public class Scenario implements Callable<ScenarioResult> {
                         );
                         BufferedReader reader = Files.newBufferedReader(written);
                         scriptEngine.eval(reader);
-                        logger.debug("<- scenario completed (interpreted " +
+                        logger.debug("<- scenario control script completed (interpreted) " +
                             "from " + filename + ")");
                     } else {
                         logger.debug("-> invoking main scenario script (interpreted)");
                         result = scriptEngine.eval(script);
-                        logger.debug("<- scenario completed (interpreted)");
+                        logger.debug("<- scenario control script completed (interpreted)");
                     }
                 }
 
@@ -324,7 +324,7 @@ public class Scenario implements Callable<ScenarioResult> {
             }
         }
         long awaitCompletionTime = 86400 * 365 * 1000L;
-        logger.debug("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
+        logger.debug("Awaiting completion of scenario and activities for " + awaitCompletionTime + " millis.");
         scenarioController.awaitCompletion(awaitCompletionTime);
         //TODO: Ensure control flow covers controller shutdown in event of internal error.
 
