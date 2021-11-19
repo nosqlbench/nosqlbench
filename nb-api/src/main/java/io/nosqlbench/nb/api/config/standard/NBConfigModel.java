@@ -37,8 +37,19 @@ public interface NBConfigModel {
      * @param sharedConfig A config map which can provide fields to multiple models
      * @return A new configuration for the extracted fields only.
      */
-    NBConfiguration extract(Map<String, ?> sharedConfig);
-    NBConfiguration extract(NBConfiguration cfg);
+    NBConfiguration extractConfig(Map<String, ?> sharedConfig);
+
+    /**
+     * Extract the fields from the shared config into a separate config,
+     * removing those that are defined in this model and leaving
+     * extraneous config fields in the provided model.
+     *
+     * <em>This method mutates the map that is provided.</em>
+     *
+     * @param cfg A config map which can provide fields to multiple models
+     * @return A new configuration for the extracted fields only.
+     */
+    NBConfiguration extractConfig(NBConfiguration cfg);
 
     NBConfigModel add(NBConfigModel otherModel);
 

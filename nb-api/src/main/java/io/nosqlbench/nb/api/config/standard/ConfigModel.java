@@ -111,7 +111,7 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
-    public NBConfiguration extract(Map<String, ?> sharedConfig) {
+    public NBConfiguration extractConfig(Map<String, ?> sharedConfig) {
         LinkedHashMap<String, Object> extracted = new LinkedHashMap<>();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (getNamedParams().containsKey(providedCfgField)) {
@@ -122,8 +122,8 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
-    public NBConfiguration extract(NBConfiguration cfg) {
-        return extract(cfg.getMap());
+    public NBConfiguration extractConfig(NBConfiguration cfg) {
+        return extractConfig(cfg.getMap());
     }
 
     private void assertDistinctSynonyms(Map<String, ?> config) {
