@@ -1,41 +1,12 @@
-- eeb6f97c1 (HEAD -> main, origin/main) relax rate test for slow github nodes
-- 11dd8f62d add LERP visualization
-- 5d8c08e44 release: bugfixes, stat improvements
-- e4252bdfd Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- ff142fd0b refactor/improve stat samplers for efficiency and correctness
-- 9c86ec915 Merge pull request #385 from tjake/scenario-urls
-- f6bf8a565 switch to official repo for test url
-- af83ca6d6 add support for scenarios from a http service
-- d31fbd45f fix broken github flow from merge
-- ee94944a4 release: stat curve improvements, docs categories, more workloads, pulsar improvements
-- 39cc61ac6 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 44b8119b3 update categories for functions
-- cda5218aa Merge pull request #382 from EricBorczuk/mongo-search-workload
-- e49d07474 Merge pull request #383 from yabinmeng/main
-- b8295eb54 update flexmark version
-- 75244e01e remove WrappedClustering to be replaced with something else. No examples of its use were found.
-- 4076f79b6 README update
-- f8d99c086 update docs and categories for functions
-- cff147efa provide a moving aggregate of statistics on generated values
-- bf662f522 support function adapters for DoubleUnaryOperator
-- 533226481 support +-Infinity suppression, and int or long value clamping in distribution functions
-- 79547218d assign function categories based on extant example
-- f599f6651 update function docs for distribution options
-- 9074676d9 Add basic mongo search workload
-- 99f79d68e Merge pull request #378 from EricBorczuk/search-docs-workloads
-- 1753ee8bc Use URLENCODE[[...]]
-- bfdba82e5 Review comments
-- 08e4ff095 Add README, remove all expr
-- 082e12859 Ivan's review comments
-- 02233fb29 Add advanced search case workload
-- 44204f9cf Complete main phase for basic search
-- 32fef39d4 Schema and rampup phase working
-- 0533214df derive doc categories from single annotated function name
-- 342976528 Merge pull request #381 from lhotari/lh-workaround-ordering-bug
-- b42f354db Pulsar: Workaround an ordering bug in the Pulsar client
-- e25ea736c adjust cyclerate test to accommodate weak runners in github actions
-- d6d75630c add SPI component stability metadata
-- 123c41a9b cleanups
-- 3f607e0e8 build fixes
-- b7967bd0c (origin/driver-api, driver-api) update versions post-merge
-- e6f1707d3 post-merge fixups
+- 9fd9c7e19 (HEAD -> main) document stopping multiple activities
+- 87c404bdb make stopping multiple activities more robust
+- 3e3d04211 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 6549768b5 (origin/main) Merge pull request #386 from nosqlbench/dependabot/maven/driver-dsegraph-shaded/org.yaml-snakeyaml-1.26
+- 5f850598f Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 5f5f873ea allow scenario.stop to match regex
+- af5c51674 NBConfiguration docs
+- 00047164a always use NBConfiguration on SSL Factory
+- f71f98f04 typo fixes
+- 2b3c897d6 squelch metrics graph construction to trace
+- c04e3c098 add typed Indexed property to fix ThreadNum
+- 81c0577ec (origin/dependabot/maven/driver-dsegraph-shaded/org.yaml-snakeyaml-1.26) Bump snakeyaml from 1.23 to 1.26 in /driver-dsegraph-shaded
