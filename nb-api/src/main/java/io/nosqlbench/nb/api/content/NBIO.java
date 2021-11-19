@@ -144,7 +144,7 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     private final static Pattern extensionPattern = Pattern.compile("\\.[a-zA-Z]+");
-    private final static Pattern wilcardsPattern = Pattern.compile(".*?[^?+*][\\?\\+\\*].*");
+    private final static Pattern wildcardsPattern = Pattern.compile(".*?[^?+*][\\?\\+\\*].*");
 
     @Override
     public NBPathsAPI.DoSearch search(String... searches) {
@@ -171,7 +171,7 @@ public class NBIO implements NBPathsAPI.Facets {
                 if (literalsTill>= parts.length-1) {
                     break;
                 }
-                if (wilcardsPattern.matcher(parts[literalsTill]).matches()) {
+                if (wildcardsPattern.matcher(parts[literalsTill]).matches()) {
                     break;
                 }
                 literalsTill++;
