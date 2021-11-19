@@ -53,6 +53,15 @@ activities with a meaningful alias.
 Stop an activity with the given alias. This is synchronous, and causes the scenario to pause until the activity is
 stopped. This means that all threads for the activity have completed and signalled that they're in a stopped state.
 
+You can stop a single activity alias, or any which match a regex pattern. If the value provided
+contains spaces, semicolons or commas, then it is split into words and each word is used as if
+the stop command had been called on it in turn.
+
+If the alias name you supply follows matches the regular expression `[a-zA-Z_][a-zA-Z0-9_.]*`, i.e. an alphanumeric
+name with dots or underscores and no leading digit, then it is taken as a literal name and only
+matches the same literal alias. However, if there are any other characters, it is presumed to be
+a regular expression and matched as such against all currently running activities.
+
 ### await an activity
 
 `await <alias>`
@@ -87,7 +96,8 @@ Add the contents of the named file to the scenario script buffer.
 
 `fragment <script text>`
 
-Add the contents of the next argument to the scenario script buffer.
+Add the contents of the next argument to the scenario script buffer. If the last character is a
+semicolon, then a newline is also added immediately after.
 
 # An example CLI script
 
