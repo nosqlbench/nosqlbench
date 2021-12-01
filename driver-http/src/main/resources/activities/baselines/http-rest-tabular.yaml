@@ -8,7 +8,7 @@ description: |
 
 scenarios:
   default:
-    - run driver=cql tags==phase:schema threads==1 cycles==UNDEF
+    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
     - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
 bindings:
