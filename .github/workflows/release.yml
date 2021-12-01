@@ -274,23 +274,24 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
           git remote -v
 
-      - name: push changes
-        env:
-          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-        run: |
-          rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
-          echo "docs.nosqlbench.io" > nosqlbench-docs/docs/CNAME
-          cd nosqlbench-docs
-          git add docs
-          git add -u
-          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
-          echo "found $CHANGES to push for doc updates"
-          if (( $CHANGES > 0 ))
-          then
-            git commit -m"docs update for $GITHUB_REF"
-            git push
-          fi
+#      Disabling this because it will be replaced soon.
+#      - name: push changes
+#        env:
+#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+#        run: |
+#          rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
+#          echo "docs.nosqlbench.io" > nosqlbench-docs/docs/CNAME
+#          cd nosqlbench-docs
+#          git add docs
+#          git add -u
+#          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+#          echo "found $CHANGES to push for doc updates"
+#          if (( $CHANGES > 0 ))
+#          then
+#            git commit -m"docs update for $GITHUB_REF"
+#            git push
+#          fi
 
 
 

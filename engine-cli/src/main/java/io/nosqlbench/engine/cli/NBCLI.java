@@ -1,8 +1,6 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.NBWebServerApp;
-import io.nosqlbench.nb.api.metadata.SessionNamer;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
@@ -19,7 +17,6 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
-import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
@@ -27,6 +24,8 @@ import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.markdown.exporter.MarkdownExporter;
+import io.nosqlbench.nb.api.metadata.SessionNamer;
+import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,10 +38,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
@@ -60,7 +56,9 @@ public class NBCLI {
 
     public NBCLI(String commandName) {
         this.commandName = commandName;
+
     }
+
 
     public static void main(String[] args) {
         try {

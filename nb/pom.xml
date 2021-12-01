@@ -204,17 +204,17 @@
                             <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>build-static-guidebook</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <basedir>${project.basedir}</basedir>
-                            <executable>${project.basedir}/gendocs.sh</executable>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>build-static-guidebook</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <basedir>${project.basedir}</basedir>-->
+<!--                            <executable>${project.basedir}/gendocs.sh</executable>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
 
