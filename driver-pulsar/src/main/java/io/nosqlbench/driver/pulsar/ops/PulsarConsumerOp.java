@@ -39,7 +39,7 @@ public class PulsarConsumerOp implements PulsarOp {
     private final Consumer<?> consumer;
     private final Schema<?> pulsarSchema;
     private final int timeoutSeconds;
-    private final boolean e2eMsgProc;
+    private final EndToEndStartingTimeSource endToEndStartingTimeSource;
 
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
@@ -61,7 +61,7 @@ public class PulsarConsumerOp implements PulsarOp {
         Consumer<?> consumer,
         Schema<?> schema,
         int timeoutSeconds,
-        boolean e2eMsgProc,
+        EndToEndStartingTimeSource endToEndStartingTimeSource,
         Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic,
         String payloadRttTrackingField)
     {
@@ -75,7 +75,7 @@ public class PulsarConsumerOp implements PulsarOp {
         this.consumer = consumer;
         this.pulsarSchema = schema;
         this.timeoutSeconds = timeoutSeconds;
-        this.e2eMsgProc = e2eMsgProc;
+        this.endToEndStartingTimeSource = endToEndStartingTimeSource;
 
         this.bytesCounter = pulsarActivity.getBytesCounter();
         this.messageSizeHistogram = pulsarActivity.getMessageSizeHistogram();
@@ -211,9 +211,24 @@ public class PulsarConsumerOp implements PulsarOp {
         }
 
         // keep track end-to-end message processing latency
-        if (e2eMsgProc) {
-            long e2eMsgLatency = System.currentTimeMillis() - message.getPublishTime();
-            e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+        if (endToEndStartingTimeSource != EndToEndStartingTimeSource.NONE) {
+            long startTimeStamp = 0L;
+            switch (endToEndStartingTimeSource) {
+                case MESSAGE_PUBLISH_TIME:
+                    startTimeStamp = message.getPublishTime();
+                    break;
+                case MESSAGE_EVENT_TIME:
+                    startTimeStamp = message.getEventTime();
+                    break;
+                case MESSAGE_PROPERTY_E2E_STARTING_TIME:
+                    String startingTimeProperty = message.getProperty("e2e_starting_time");
+                    startTimeStamp = startingTimeProperty != null ? Long.parseLong(startingTimeProperty) : 0L;
+                    break;
+            }
+            if (startTimeStamp != 0L) {
+                long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
+                e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+            }
         }
 
         // keep track of message errors and update error counters

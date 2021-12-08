@@ -28,7 +28,7 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
     private final static Logger logger = LogManager.getLogger(PulsarProducerMapper.class);
 
     private final LongFunction<Consumer<?>> consumerFunc;
-    private final boolean e2eMsProc;
+    private final EndToEndStartingTimeSource endToEndStartingTimeSource;
     private final LongFunction<String> payloadRttFieldFunc;
 
     public PulsarConsumerMapper(CommandTemplate cmdTpl,
@@ -39,11 +39,11 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
                                 LongFunction<Boolean> seqTrackingFunc,
                                 LongFunction<Supplier<Transaction>> transactionSupplierFunc,
                                 LongFunction<Consumer<?>> consumerFunc,
-                                boolean e2eMsgProc,
+                                EndToEndStartingTimeSource endToEndStartingTimeSource,
                                 LongFunction<String> payloadRttFieldFunc) {
         super(cmdTpl, clientSpace, pulsarActivity, asyncApiFunc, useTransactionFunc, seqTrackingFunc, transactionSupplierFunc);
         this.consumerFunc = consumerFunc;
-        this.e2eMsProc = e2eMsgProc;
+        this.endToEndStartingTimeSource = endToEndStartingTimeSource;
         this.payloadRttFieldFunc = payloadRttFieldFunc;
     }
 
@@ -65,7 +65,7 @@ public class PulsarConsumerMapper extends PulsarTransactOpMapper {
             consumer,
             clientSpace.getPulsarSchema(),
             clientSpace.getPulsarClientConf().getConsumerTimeoutSeconds(),
-            e2eMsProc,
+            endToEndStartingTimeSource,
             this::getReceivedMessageSequenceTracker,
             payloadRttFieldFunc);
     }
