@@ -10,3 +10,5 @@
 - 261397f79 disable guidebook generation for new docs site
 - 0b5daae5e fix http driver default scenarios
 - trigger release rebuild
+- 7f93159be (HEAD -> main) fix release to avoid docs deployment
+- 7d52173f3 (origin/main) pulsar update release
