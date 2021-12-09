@@ -14,3 +14,7 @@
 - 7d52173f3 (origin/main) pulsar update release
 - da7865751 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - efb9298ca update release workflow
+- b318225ca (HEAD -> main) minor async itest update
+- 831efb663 (origin/main) release workflow updates
+- da7865751 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- efb9298ca update release workflow
