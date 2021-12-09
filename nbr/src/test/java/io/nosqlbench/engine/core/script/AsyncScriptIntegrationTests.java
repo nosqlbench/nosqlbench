@@ -196,7 +196,7 @@ public class AsyncScriptIntegrationTests {
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
-        assertThat(logdata.split("Tag=testhistologger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);
+        assertThat(logdata.split("Tag=testhistologger.cycles.servicetime,").length).isGreaterThanOrEqualTo(2);
     }
 
     @Test
