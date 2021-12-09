@@ -144,18 +144,18 @@ jobs:
         run: |
           docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }} --version
 
-      - name: bundle integration test logs
-        run: |
-          pwd
-          find nb
-          mkdir -p itlogs/nb
-          cp -R nb/logs itlogs/nb
-
-      - name: upload integration test logs
-        uses: actions/upload-artifact@v1
-        with:
-          name: itlogs
-          path: itlogs
+#      - name: bundle integration test logs
+#        run: |
+#          pwd
+#          find nb
+#          mkdir -p itlogs/nb
+#          cp -R nb/logs itlogs/nb
+#
+#      - name: upload integration test logs
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: itlogs
+#          path: itlogs
 
       - name: perform Maven release
         run: scripts/release-perform.sh
