@@ -12,3 +12,5 @@
 - trigger release rebuild
 - 7f93159be (HEAD -> main) fix release to avoid docs deployment
 - 7d52173f3 (origin/main) pulsar update release
+- da7865751 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- efb9298ca update release workflow
