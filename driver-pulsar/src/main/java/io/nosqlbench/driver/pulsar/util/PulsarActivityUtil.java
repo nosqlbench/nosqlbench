@@ -42,6 +42,8 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
+
+
     public static boolean isValidClientType(String type) {
         return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
     }
@@ -56,7 +58,8 @@ public class PulsarActivityUtil {
         USE_TRANSACTION("use_transaction"),
         ADMIN_DELOP("admin_delop"),
         SEQ_TRACKING("seq_tracking"),
-        MSG_DEDUP_BROKER("msg_dedup_broker");
+        MSG_DEDUP_BROKER("msg_dedup_broker"),
+        E2E_STARTING_TIME_SOURCE("e2e_starting_time_source");
 
         public final String label;
 

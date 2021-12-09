@@ -116,7 +116,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                false,
+                parseEndToEndStartingTimeSourceParameter(EndToEndStartingTimeSource.NONE),
                 payloadRttFieldFunc);
         }
         // Regular/non-admin operation: single message consuming from multiple-topics (consumer)
@@ -157,13 +157,22 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 asyncApiFunc,
                 useTransactionFunc,
                 seqTrackingFunc,
-                true,
+                parseEndToEndStartingTimeSourceParameter(
+                    EndToEndStartingTimeSource.MESSAGE_PUBLISH_TIME),
                 payloadRttFieldFunc);
         }
         // Invalid operation type
         else {
             throw new PulsarDriverUnsupportedOpException();
         }
+    }
+
+    private EndToEndStartingTimeSource parseEndToEndStartingTimeSourceParameter(EndToEndStartingTimeSource defaultValue) {
+        EndToEndStartingTimeSource endToEndStartingTimeSource = defaultValue;
+        if (cmdTpl.isStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label)) {
+            endToEndStartingTimeSource = EndToEndStartingTimeSource.valueOf(cmdTpl.getStatic(PulsarActivityUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label).toUpperCase());
+        }
+        return endToEndStartingTimeSource;
     }
 
     // Admin API: create tenant
@@ -304,7 +313,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
         LongFunction<Boolean> async_api_func,
         LongFunction<Boolean> useTransactionFunc,
         LongFunction<Boolean> seqTrackingFunc,
-        boolean e2eMsgProc,
+        EndToEndStartingTimeSource endToEndStartingTimeSource,
         LongFunction<String> rttTrackingFieldFunc
     ) {
         LongFunction<String> subscription_name_func = lookupParameterFunc("subscription_name");
@@ -333,7 +342,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             seqTrackingFunc,
             transactionSupplierFunc,
             consumerFunc,
-            e2eMsgProc,
+            endToEndStartingTimeSource,
             rttTrackingFieldFunc);
     }
 
@@ -379,7 +388,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
             seqTrackingFunc,
             transactionSupplierFunc,
             mtConsumerFunc,
-            false,
+            parseEndToEndStartingTimeSourceParameter(EndToEndStartingTimeSource.NONE),
             payloadRttFieldFunc);
     }
 
