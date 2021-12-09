@@ -139,6 +139,11 @@ Currently, the following configuration parameters are available at this level:
 * **use_transaction**: Whether to simulate Pulsar transaction. This can only be statically bound.
 * **admin_delop**: For Admin tasks, whether to execute delete operation instead of the default create operation. This can only be statically bound.
 * **seq_tracking**: Whether to do message sequence tracking. This is used for abnormal message processing error detection such as message loss, message duplication, or message out-of-order. This can only be statically bound.
+* **e2e_starting_time_source**: Starting timestamp for end-to-end operation. When specified, will update the `e2e_msg_latency` histogram with the calculated end-to-end latency. The latency is calculated by subtracting the starting time from the current time. The starting time is determined from a configured starting time source. The unit of the starting time is milliseconds since epoch.  The possible values for `e2e_starting_time_source`:
+  * `message_publish_time` - uses the message publishing timestamp as the starting time
+  * `message_event_time` - uses the message event timestamp as the starting time
+  * `message_property_e2e_starting_time` - uses a message property `e2e_starting_time` as the starting time.
+
 
 ## 3.3. Statement Level Parameters
 **Statement Level** parameters are set within the NB yaml file under different statement blocks. Each workload type/statement block has its own set of statement level configuration parameters. We'll cover these parameters in section 5.
