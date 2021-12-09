@@ -50,9 +50,6 @@ jobs:
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
 
-
-
-
       - name: free disk space
         run: |
           sudo swapoff -a
@@ -200,14 +197,15 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_TAGS }}
 
-      - name: bundle guidebook
-        run: mkdir guidebook && cp -R nb/target/guidebook guidebook
-
-      - name: upload guidebook
-        uses: actions/upload-artifact@v1
-        with:
-          name: guidebook
-          path: guidebook
+#      - name: bundle guidebook
+#        run: mkdir guidebook && cp -R nb/target/guidebook guidebook
+#
+#      - name: upload guidebook
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: guidebook
+#          path: guidebook
+#
 
       - name: create github release
         id: create_github_release
@@ -243,37 +241,37 @@ jobs:
           asset_name: nb
           asset_content_type: application/octet-stream
 
-  docs:
-    needs: release
-    runs-on: ubuntu-18.04
-    steps:
-
-      - name: set git username
-        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-
-      - name: set git email
-        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-
-      - name: download guidebook
-        uses: actions/download-artifact@v1
-        with:
-          name: guidebook
-          path: guidebook
-
-      - run: ls -la
-
-      - name: clone nosqlbench-docs
-        env:
-          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-        run: |
-          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
-          cd nosqlbench-docs
-          echo "files listing"
-          find .
-          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
-          git remote -v
-
+#  docs:
+#    needs: release
+#    runs-on: ubuntu-18.04
+#    steps:
+#
+#      - name: set git username
+#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+#
+#      - name: set git email
+#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+#
+#      - name: download guidebook
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: guidebook
+#          path: guidebook
+#
+#      - run: ls -la
+#
+#      - name: clone nosqlbench-docs
+#        env:
+#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+#        run: |
+#          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+#          cd nosqlbench-docs
+#          echo "files listing"
+#          find .
+#          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
+#          git remote -v
+#
 #      Disabling this because it will be replaced soon.
 #      - name: push changes
 #        env:
