@@ -228,6 +228,12 @@ public class ScenariosExecutor {
         return name;
     }
 
+    public synchronized void shutdownNow() {
+        if (!executor.isShutdown()) {
+            executor.shutdownNow();
+        }
+    }
+
     private static class SubmittedScenario {
         private final Scenario scenario;
         private final Future<ScenarioResult> resultFuture;

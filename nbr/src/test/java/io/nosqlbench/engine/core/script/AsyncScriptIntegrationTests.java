@@ -51,7 +51,7 @@ public class AsyncScriptIntegrationTests {
         }
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
-        ScenariosExecutor e = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
+        ScenariosExecutor executor = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300");
 
         s.addScenarioScriptParams(paramsMap);
@@ -67,9 +67,10 @@ public class AsyncScriptIntegrationTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        e.execute(s);
-        ScenariosResults scenariosResults = e.awaitAllResults();
+        executor.execute(s);
+        ScenariosResults scenariosResults = executor.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
+        executor.shutdownNow();
         return scenarioResult;
     }
 
