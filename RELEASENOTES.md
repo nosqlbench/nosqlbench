@@ -9,3 +9,4 @@
 - 725b1473e Merge pull request #387 from XN137/fix-http-default-scenarios
 - 261397f79 disable guidebook generation for new docs site
 - 0b5daae5e fix http driver default scenarios
+- trigger release rebuild
