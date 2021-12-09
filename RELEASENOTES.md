@@ -1,12 +1,11 @@
-- 9fd9c7e19 (HEAD -> main) document stopping multiple activities
-- 87c404bdb make stopping multiple activities more robust
-- 3e3d04211 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 6549768b5 (origin/main) Merge pull request #386 from nosqlbench/dependabot/maven/driver-dsegraph-shaded/org.yaml-snakeyaml-1.26
-- 5f850598f Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 5f5f873ea allow scenario.stop to match regex
-- af5c51674 NBConfiguration docs
-- 00047164a always use NBConfiguration on SSL Factory
-- f71f98f04 typo fixes
-- 2b3c897d6 squelch metrics graph construction to trace
-- c04e3c098 add typed Indexed property to fix ThreadNum
-- 81c0577ec (origin/dependabot/maven/driver-dsegraph-shaded/org.yaml-snakeyaml-1.26) Bump snakeyaml from 1.23 to 1.26 in /driver-dsegraph-shaded
+- 8ea6530d2 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 8955920a6 minor fixes on cqld4
+- 95732c1a6 (origin/main) Merge pull request #390 from lhotari/lh-e2e-latency-event-time
+- b0b79f6be Add docs
+- caceaed63 Add way to calculate end-to-end latency from event time
+- fb30deb1f Reduce code duplication in PulsarConsumerOp
+- 333e277b2 Merge pull request #389 from lhotari/lh-cleanup-pulsar-driver-parameter-parsing
+- 72e32acd4 Cleanup parameter parsing in ReadyPulsarOp
+- 725b1473e Merge pull request #387 from XN137/fix-http-default-scenarios
+- 261397f79 disable guidebook generation for new docs site
+- 0b5daae5e fix http driver default scenarios
