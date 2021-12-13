@@ -1,20 +1,5 @@
-- 8ea6530d2 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 8955920a6 minor fixes on cqld4
-- 95732c1a6 (origin/main) Merge pull request #390 from lhotari/lh-e2e-latency-event-time
-- b0b79f6be Add docs
-- caceaed63 Add way to calculate end-to-end latency from event time
-- fb30deb1f Reduce code duplication in PulsarConsumerOp
-- 333e277b2 Merge pull request #389 from lhotari/lh-cleanup-pulsar-driver-parameter-parsing
-- 72e32acd4 Cleanup parameter parsing in ReadyPulsarOp
-- 725b1473e Merge pull request #387 from XN137/fix-http-default-scenarios
-- 261397f79 disable guidebook generation for new docs site
-- 0b5daae5e fix http driver default scenarios
-- trigger release rebuild
-- 7f93159be (HEAD -> main) fix release to avoid docs deployment
-- 7d52173f3 (origin/main) pulsar update release
-- da7865751 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- efb9298ca update release workflow
-- b318225ca (HEAD -> main) minor async itest update
-- 831efb663 (origin/main) release workflow updates
-- da7865751 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- efb9298ca update release workflow
+- 3d5c45f54 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 24245bc79 (origin/main) Merge pull request #393 from EricBorczuk/bump-mongodriver-version
+- 52db6d10d Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 78913a18e update log4j versions to 2.15.0
+- 2145b7683 Update mongo-driver-sync to 4.4.0
