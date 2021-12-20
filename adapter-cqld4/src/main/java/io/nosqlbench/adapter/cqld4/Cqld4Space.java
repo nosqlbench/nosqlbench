@@ -204,7 +204,7 @@ public class Cqld4Space {
     }
 
     public static NBConfigModel getConfigModel() {
-        return ConfigModel.of(Cqld4DriverAdapter.class)
+        return ConfigModel.of(Cqld4Space.class)
             .add(Param.optional("localdc"))
             .add(Param.optional("secureconnectbundle"))
             .add(Param.optional("hosts"))
