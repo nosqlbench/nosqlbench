@@ -84,6 +84,15 @@
             </modules>
         </profile>
         <profile>
+            <id>with-dynamodb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-dynamodb</module>
+            </modules>
+        </profile>
+        <profile>
             <id>with-mongodb</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

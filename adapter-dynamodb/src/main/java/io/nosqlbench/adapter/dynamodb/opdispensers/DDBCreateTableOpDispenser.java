@@ -1,0 +1,152 @@
+package io.nosqlbench.adapter.dynamodb.opdispensers;
+
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.model.*;
+import io.nosqlbench.adapter.dynamodb.optypes.DDBCreateTableOp;
+import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.templating.ParsedOp;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.LongFunction;
+
+/**
+ * <pre>{@code
+ * Request Syntax
+ * {
+ *    "AttributeDefinitions": [
+ *       {
+ *          "AttributeName": "string",
+ *          "AttributeType": "string"
+ *       }
+ *    ],
+ *    "BillingMode": "string",
+ *    "GlobalSecondaryIndexes": [
+ *       {
+ *          "IndexName": "string",
+ *          "KeySchema": [
+ *             {
+ *                "AttributeName": "string",
+ *                "KeyType": "string"
+ *             }
+ *          ],
+ *          "Projection": {
+ *             "NonKeyAttributes": [ "string" ],
+ *             "ProjectionType": "string"
+ *          },
+ *          "ProvisionedThroughput": {
+ *             "ReadCapacityUnits": number,
+ *             "WriteCapacityUnits": number
+ *          }
+ *       }
+ *    ],
+ *    "KeySchema": [
+ *       {
+ *          "AttributeName": "string",
+ *          "KeyType": "string"
+ *       }
+ *    ],
+ *    "LocalSecondaryIndexes": [
+ *       {
+ *          "IndexName": "string",
+ *          "KeySchema": [
+ *             {
+ *                "AttributeName": "string",
+ *                "KeyType": "string"
+ *             }
+ *          ],
+ *          "Projection": {
+ *             "NonKeyAttributes": [ "string" ],
+ *             "ProjectionType": "string"
+ *          }
+ *       }
+ *    ],
+ *    "ProvisionedThroughput": {
+ *       "ReadCapacityUnits": number,
+ *       "WriteCapacityUnits": number
+ *    },
+ *    "SSESpecification": {
+ *       "Enabled": boolean,
+ *       "KMSMasterKeyId": "string",
+ *       "SSEType": "string"
+ *    },
+ *    "StreamSpecification": {
+ *       "StreamEnabled": boolean,
+ *       "StreamViewType": "string"
+ *    },
+ *    "TableClass": "string",
+ *    "TableName": "string",
+ *    "Tags": [
+ *       {
+ *          "Key": "string",
+ *          "Value": "string"
+ *       }
+ *    ]
+ * }
+ * }</pre>
+ */
+public class DDBCreateTableOpDispenser implements OpDispenser<DynamoDBOp> {
+
+    private final DynamoDB ddb;
+    private final LongFunction<String> tableNameFunc;
+    private final LongFunction<Collection<KeySchemaElement>> keySchemaFunc;
+    private final LongFunction<Collection<AttributeDefinition>> attributeDefsFunc;
+    private final LongFunction<String> readCapacityFunc;
+    private final LongFunction<String> writeCapacityFunc;
+    private final LongFunction<String> billingModeFunc;
+
+    public DDBCreateTableOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
+        this.ddb = ddb;
+        this.tableNameFunc = l -> targetFunc.apply(l).toString();
+        this.keySchemaFunc = resolveKeySchemaFunction(cmd);
+        this.attributeDefsFunc = resolveAttributeDefinitionFunction(cmd);
+        this.billingModeFunc = cmd.getAsFunctionOr("BillingMode", BillingMode.PROVISIONED.name());
+        this.readCapacityFunc = cmd.getAsFunctionOr("ReadCapacityUnits", "10");
+        this.writeCapacityFunc = cmd.getAsFunctionOr("WriteCapacityUnits", "10");
+    }
+
+    @Override
+    public DDBCreateTableOp apply(long cycle) {
+        CreateTableRequest rq = new CreateTableRequest();
+        rq.setTableName(tableNameFunc.apply(cycle));
+        rq.setKeySchema(keySchemaFunc.apply(cycle));
+        rq.setAttributeDefinitions(attributeDefsFunc.apply(cycle));
+        rq.setBillingMode(BillingMode.valueOf(billingModeFunc.apply(cycle)).name());
+        if (rq.getBillingMode().equals(BillingMode.PROVISIONED.name())) {
+            rq.setProvisionedThroughput(
+                new ProvisionedThroughput(
+                    Long.parseLong(readCapacityFunc.apply(cycle)),
+                    Long.parseLong(writeCapacityFunc.apply(cycle)))
+            );
+        }
+        return new DDBCreateTableOp(ddb, rq);
+    }
+
+    private LongFunction<Collection<AttributeDefinition>> resolveAttributeDefinitionFunction(ParsedOp cmd) {
+        LongFunction<? extends Map> attrsmap = cmd.getAsRequiredFunction("Attributes", Map.class);
+        return (long l) -> {
+            List<AttributeDefinition> defs = new ArrayList<>();
+            attrsmap.apply(l).forEach((k, v) -> {
+                defs.add(new AttributeDefinition(k.toString(), ScalarAttributeType.valueOf(v.toString())));
+            });
+            return defs;
+        };
+    }
+
+    private LongFunction<Collection<KeySchemaElement>> resolveKeySchemaFunction(ParsedOp cmd) {
+        LongFunction<? extends Map> keysmap = cmd.getAsRequiredFunction("Keys", Map.class);
+
+        return (long l) -> {
+            List<KeySchemaElement> elems = new ArrayList<>();
+            keysmap.apply(l).forEach((k, v) -> {
+                elems.add(new KeySchemaElement(k.toString(), KeyType.valueOf(v.toString())));
+            });
+            return elems;
+        };
+    }
+
+
+}
