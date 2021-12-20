@@ -75,6 +75,15 @@ public class UniformWorkloadSpecificationTest {
     }
 
     @Test
+    public void testTemplatedOperationVariations() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("templated_operation_variations.md")
+                .one().asPath()
+        );
+    }
+
+    @Test
     public void testTemplateVariables() {
         testSpecPath(
             NBIO.fs().prefix("target/classes/workload_definition/")

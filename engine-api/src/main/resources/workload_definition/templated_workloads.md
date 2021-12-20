@@ -56,7 +56,7 @@ intervening content:
 # some yaml here
 ```
 
-*json*
+*json:*
 
 ```
 []
@@ -208,6 +208,38 @@ should only be changeable for some steps.
 # The user is not allowed to change the value for the alias parameter, and attempting to do so
 # will cause an error to be thrown and the scenario halted.
 scenarios:
+  default: run alias==first driver=diag cycles=10
+```
+
+*json:*
+
+```json5
+{
+  "scenarios": {
+    "default": "run alias==first driver=diag cycles=10"
+  }
+}
+```
+
+*ops:*
+
+```json5
+[]
+```
+
+### verbose locked step parameters
+
+For scenario steps which should not be overridable by user parameters on the command line, a triple
+equals is used to indicate that changing these parameters is not allowed. If a user tries to
+override a verbose locked parameter, an error is thrown and the scenario is not allowed to run. This
+can be useful when you want to clearly indicate that a parameter must remain as it is.
+
+*yaml:*
+
+```yaml
+# The user is not allowed to change the value for the alias parameter, and attempting to do so
+# will cause an error to be thrown and the scenario halted.
+scenarios:
   default: run alias===first driver=diag cycles=10
 ```
 
@@ -226,14 +258,6 @@ scenarios:
 ```json5
 []
 ```
-
-### verbose locked step parameters
-
-For scenario steps which should not be overridable by user parameters on the command line, a triple
-equals is used to indicate that changing these parameters is not allowed. If a user tries to
-override a verbose locked parameter, an error is thrown and the scenario is not allowed to run. This
-can be useful when you want to clearly indicate that a parameter must remain as it is.
-
 
 ---
 
