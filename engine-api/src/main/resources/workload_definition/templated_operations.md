@@ -315,7 +315,7 @@ ops:
       "stmt": "select * from ks1.tb1;"
     },
     "params": {
-      "prepated": false
+      "prepared": false
     },
     "tags": {
       "phase": "schema",

@@ -39,10 +39,9 @@ public class DDBGetItemOpDispenser implements OpDispenser<DynamoDBOp> {
             });
             return pk;
         };
-
-        Optional<LongFunction<String>> projection_func = cmd.getAsOptionalFunction("projection",String.class);
         LongFunction<GetItemSpec> gis = l -> new GetItemSpec().withPrimaryKey(pk_func.apply(l));
 
+        Optional<LongFunction<String>> projection_func = cmd.getAsOptionalFunction("projection",String.class);
         if (projection_func.isPresent()) {
             LongFunction<GetItemSpec> finalGis = gis;
             gis = l -> {
@@ -50,6 +49,16 @@ public class DDBGetItemOpDispenser implements OpDispenser<DynamoDBOp> {
                 return finalGis.apply(l).withProjectionExpression(pj.apply(1));
             };
         }
+
+        Optional<LongFunction<Boolean>> consistentRead = cmd.getAsOptionalFunction("ConsistentRead", boolean.class);
+        if (consistentRead.isPresent()) {
+            LongFunction<GetItemSpec> finalGis = gis;
+            gis = l -> {
+                LongFunction<Boolean> consistentReadFunc = consistentRead.get();
+                return finalGis.apply(l).withConsistentRead(consistentReadFunc.apply(l));
+            };
+        }
+
         return gis;
 
     }

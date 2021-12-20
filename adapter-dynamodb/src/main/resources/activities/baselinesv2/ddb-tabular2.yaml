@@ -1,0 +1,181 @@
+scenarios:
+  schema: run driver=dynamodb tags=phase:schema region=us-east-1
+  rampup: run driver=dynamodb tags=phase:rampup region=us-east-1
+  read: run driver=dynamodb tags=phase:read region=us-east-1
+  main: run driver=dynamodb tags=phase:main region=us-east-1
+
+bindings:
+
+  # for ramp-up and verify phases
+  #
+  part_layout: Div(<<partsize:1000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000>>); ToString() -> String
+  # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
+  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9,11); EscapeJSON();
+  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18,22); EscapeJSON();
+  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27,33); EscapeJSON();
+  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45,55); EscapeJSON();
+  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72,88); EscapeJSON();
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107,143); EscapeJSON();
+  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189,231); EscapeJSON();
+  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306,374); EscapeJSON();
+
+  # for main phase
+  # for write
+  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
+
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    ops:
+      create-table:
+        op:
+          CreateTable: TEMPLATE(table,tabular)
+          Keys:
+            part: HASH
+            clust: RANGE
+          Attributes:
+            part: S
+            clust: S
+          BillingMode: PROVISIONED
+          ReadCapacityUnits: "10"
+          WriteCapacityUnits: "10"
+#          BillingMode: PAY_PER_REQUEST
+  - name: rampup
+    tags:
+      phase: rampup
+    ops:
+      put-items:
+        op:
+          PutItem: TEMPLATE(table,tabular)
+          json: |
+            {
+             "part": "{part_layout}",
+             "clust": "{clust_layout}",
+             "data0": "{data0}",
+             "data1": "{data1}",
+             "data2": "{data2}",
+             "data3": "{data3}",
+             "data4": "{data4}",
+             "data5": "{data5}",
+             "data6": "{data6}",
+             "data7": "{data7}"
+            }
+  - name: read
+    tags:
+      phase: read
+    params:
+      ratio: 1
+    ops:
+      read-all:
+        op:
+          PutItem: TEMPLATE(table,tabular)
+          json: |
+            {
+             "part": "{part_layout}",
+             "clust": "{clust_layout}",
+             "data0": "{data0}",
+             "data1": "{data1}",
+             "data2": "{data2}",
+             "data3": "{data3}",
+             "data4": "{data4}",
+             "data5": "{data5}",
+             "data6": "{data6}",
+             "data7": "{data7}"
+            }
+  - name: main
+    tags:
+      phase: main
+    params:
+      ratio: 1
+    ops:
+      main-write-all:
+        params:
+          ratio: 8
+        op:
+          PutItem: TEMPLATE(table,tabular)
+          json: |
+            {
+             "part": "{part_layout}",
+             "clust": "{clust_layout}",
+             "data0": "{data0}",
+             "data1": "{data1}",
+             "data2": "{data2}",
+             "data3": "{data3}",
+             "data4": "{data4}",
+             "data5": "{data5}",
+             "data6": "{data6}",
+             "data7": "{data7}"
+            }
+      main-read-all:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          # no projection means "all" implicitly
+
+      main-read-01:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data0, data1
+
+      main-read-0246:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data0, data2, data4, data6
+
+      main-read-1357:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data1, data3, data5, data7
+
+      main-read-0123:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data0, data1, data2, data3
+
+      main-read-4567:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data4, data5, data6, data7
+
+      main-read-01234567:
+        op:
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data0, data1, data2, data3, data4, data5, data6, data7
+
