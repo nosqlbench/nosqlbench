@@ -159,6 +159,7 @@ public class ConfigModel implements NBConfigModel {
                 }
             }
             if (cval == null && param.isRequired()) {
+                activename = param.getNames().get(0);
                 cval = param.getDefaultValue();  // We know this will be valid. It was validated, correct?
             }
             if (cval != null) {
