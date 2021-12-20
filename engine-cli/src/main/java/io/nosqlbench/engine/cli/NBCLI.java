@@ -67,8 +67,9 @@ public class NBCLI {
         } catch (Exception e) {
             boolean showStackTraces = false;
             for (String arg : args) {
-                if (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces")) {
-                    showStackTraces=true;
+
+                if (arg.toLowerCase(Locale.ROOT).startsWith("-v") || (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces"))) {
+                    showStackTraces = true;
                 }
             }
 
