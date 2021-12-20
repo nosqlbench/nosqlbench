@@ -20,6 +20,7 @@ import java.util.function.Function;
  * to this when possible.
  *
  * @param <R> A type of runnable which wraps the operations for this type of driver.
+ * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
 public class StandardActivity<R extends Op,S> extends SimpleActivity {
 

@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
@@ -204,17 +206,17 @@
                             <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>build-static-guidebook</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>exec</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <basedir>${project.basedir}</basedir>-->
-<!--                            <executable>${project.basedir}/gendocs.sh</executable>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+                    <!--                    <execution>-->
+                    <!--                        <id>build-static-guidebook</id>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>exec</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <configuration>-->
+                    <!--                            <basedir>${project.basedir}</basedir>-->
+                    <!--                            <executable>${project.basedir}/gendocs.sh</executable>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
                 </executions>
             </plugin>
 
@@ -264,7 +266,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-cqld4</artifactId>
-                    <version>4.15.65-SNAPSHOT</version>
+                    <version>4.15.71-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -277,6 +279,19 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-mongodb</artifactId>
+                    <version>4.15.71-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>with-dynamodb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-dynamodb</artifactId>
                     <version>4.15.71-SNAPSHOT</version>
                 </dependency>
             </dependencies>
@@ -331,7 +346,7 @@
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <configuration>
                             <rules>
-                                <dependencyConvergence />
+                                <dependencyConvergence/>
                             </rules>
                         </configuration>
                     </plugin>

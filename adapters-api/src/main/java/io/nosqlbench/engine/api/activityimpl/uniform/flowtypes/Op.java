@@ -9,7 +9,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  * <ul>
  *  <li>{@link CycleOp}</li> - An interface that will called if there is nothing to consume
  *  the result type from your operation. In some cases preparing a result body to
- *  hand down the chain is more costly, so implementing this interface allows
+ *  hand down the chain is more costly, so implementing this interface allows ...
  * </ul>
  *
  * either {@link CycleOp} or {@link ChainingOp} (but not both!)

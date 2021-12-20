@@ -126,6 +126,5 @@ public interface DriverAdapter<R extends Op, S> {
         return n -> null;
     }
 
-
     NBConfiguration getConfiguration();
 }
