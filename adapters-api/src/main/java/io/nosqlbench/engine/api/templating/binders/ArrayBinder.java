@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.api.templating.binders;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
@@ -17,7 +17,7 @@ public class ArrayBinder implements LongFunction<Object[]> {
     private final LongFunction<?>[] mapperary;
     private final int[] dindexes;
 
-    public ArrayBinder(ParsedOp cmd, String[] fields) {
+    public ArrayBinder(ParsedTemplateMap cmd, String[] fields) {
         this.protoary = new Object[fields.length];
         this.mapperary = new LongFunction<?>[fields.length];
         int[] indexes = new int[fields.length];
@@ -37,7 +37,7 @@ public class ArrayBinder implements LongFunction<Object[]> {
         this.dindexes = Arrays.copyOf(indexes, nextIndex);
     }
 
-    public ArrayBinder(ParsedOp cmd, List<String> fields) {
+    public ArrayBinder(ParsedTemplateMap cmd, List<String> fields) {
         this(cmd, fields.toArray(new String[0]));
     }
 

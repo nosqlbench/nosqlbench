@@ -1,6 +1,6 @@
     package io.nosqlbench.engine.api.templating.binders;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class ListBinder implements LongFunction<List<Object>> {
     private final ArrayList<LongFunction<?>> mapperlist;
     private final int[] dindexes;
 
-    public ListBinder(ParsedOp cmd, String... fields) {
+    public ListBinder(ParsedTemplateMap cmd, String... fields) {
         this.protolist = new ArrayList<>(fields.length);
         this.mapperlist = new ArrayList<>(fields.length);
         int[] indexes = new int[fields.length];
@@ -36,7 +36,7 @@ public class ListBinder implements LongFunction<List<Object>> {
         this.dindexes = Arrays.copyOf(indexes,lastIndex);
     }
 
-    public ListBinder(ParsedOp cmd, List<String> fields) {
+    public ListBinder(ParsedTemplateMap cmd, List<String> fields) {
         this(cmd,fields.toArray(new String[0]));
     }
 

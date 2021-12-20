@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.api.templating.binders;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.HashMap;
@@ -13,7 +13,7 @@ public class OrderedMapBinder implements LongFunction<Map<String, Object>> {
     private final Map<String,Object> protomap = new LinkedHashMap<>();
     private final Map<String,LongFunction<?>> bindermap = new HashMap<>();
 
-    public OrderedMapBinder(ParsedOp cmd, String... fields) {
+    public OrderedMapBinder(ParsedTemplateMap cmd, String... fields) {
         for (String field : fields) {
             if (cmd.isStatic(field)) {
                 protomap.put(field,cmd.getStaticValue(field));
