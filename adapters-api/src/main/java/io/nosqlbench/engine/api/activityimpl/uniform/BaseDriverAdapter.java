@@ -14,14 +14,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op,S>
-    implements DriverAdapter<R,S>, NBConfigurable {
+public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable {
 
-    private final DriverSpaceCache<? extends S> spaceCache;
+    private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
 
     protected BaseDriverAdapter() {
-        this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
     }
 
     /**
@@ -83,7 +81,10 @@ public abstract class BaseDriverAdapter<R extends Op,S>
     }
 
     @Override
-    public final DriverSpaceCache<? extends S> getSpaceCache() {
+    public synchronized final DriverSpaceCache<? extends S> getSpaceCache() {
+        if (spaceCache==null) {
+            spaceCache=new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
+        }
         return spaceCache;
     }
 
