@@ -1,5 +1,8 @@
-- 3d5c45f54 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 24245bc79 (origin/main) Merge pull request #393 from EricBorczuk/bump-mongodriver-version
-- 52db6d10d Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 78913a18e update log4j versions to 2.15.0
-- 2145b7683 Update mongo-driver-sync to 4.4.0
+- f71240558 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #396 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.0
+- 3ce865642 Merge pull request #397 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.0
+- eff9104c6 Bump log4j-core from 2.16.0 to 2.17.0 in /mvn-defaults
+- 6db334398 Bump log4j-api from 2.16.0 to 2.17.0 in /mvn-defaults
+- 40bd771e1 Merge pull request #394 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.16.0
+- 8b7636851 Merge pull request #395 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.16.0
+- 2804ab7e7 Bump log4j-core from 2.15.0 to 2.16.0 in /mvn-defaults
+- 378a37aa2 Bump log4j-api from 2.15.0 to 2.16.0 in /mvn-defaults
