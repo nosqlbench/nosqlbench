@@ -23,6 +23,9 @@ public class ConfigModel implements NBConfigModel {
     public static ConfigModel of(Class<?> ofType, Param<?>... params) {
         return new ConfigModel(ofType, params);
     }
+    public static ConfigModel of(Class<?> ofType) {
+        return new ConfigModel(ofType);
+    }
 
     public <T> ConfigModel add(Param<T> param) {
         this.params.add(param);
