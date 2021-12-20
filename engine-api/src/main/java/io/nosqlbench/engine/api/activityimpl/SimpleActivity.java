@@ -504,7 +504,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 planner.addOp(driverSpecificReadyOp, ratio);
             }
         } catch (Exception e) {
-            throw new OpConfigError("error while configuring op",workloadSource,e);
+            throw new OpConfigError(e.getMessage(),workloadSource,e);
         }
 
         return planner.resolve();
