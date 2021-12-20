@@ -11,7 +11,7 @@ public class StdoutOpDispenser implements OpDispenser<StdoutOp> {
     private final LongFunction<?> objectFunction;
 
     public StdoutOpDispenser(ParsedOp cmd, LongFunction<StdoutSpace> ctxfunc) {
-        objectFunction = cmd.getAsFunction("stmt", Object.class);
+        objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         this.ctxfunc = ctxfunc;
     }
 

@@ -20,7 +20,7 @@ public class DirectOpMapper implements OpMapper<DirectCall> {
     @Override
     public OpDispenser<DirectCall> apply(ParsedOp cmd) {
 
-        String pkg = cmd.getOptionalValue("package", String.class).orElse("java.lang");
+        String pkg = cmd.getOptionalStaticValue("package", String.class).orElse("java.lang");
         String cls = cmd.getStaticValue("class");
         String fq = pkg + "." + cls;
         Class<?> clazz = null;
@@ -30,7 +30,7 @@ public class DirectOpMapper implements OpMapper<DirectCall> {
 
             Class<?> finalClazz = clazz;
             Optional<Field> staticfield =
-                cmd.getOptionalValue("staticfield", String.class)
+                cmd.getOptionalStaticValue("staticfield", String.class)
                     .map(name -> {
                         try {
                             return finalClazz.getDeclaredField(name);
