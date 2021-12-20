@@ -22,7 +22,7 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4Op, Cqld4Space> {
 
     @Override
     public Function<String, ? extends Cqld4Space> getSpaceInitializer(NBConfiguration cfg) {
-        return s -> new Cqld4Space(cfg);
+        return s -> new Cqld4Space(s,cfg);
     }
 
     @Override

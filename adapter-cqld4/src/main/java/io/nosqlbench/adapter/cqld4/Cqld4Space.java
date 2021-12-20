@@ -24,10 +24,12 @@ import java.util.stream.Collectors;
 
 public class Cqld4Space {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
+    private final String space;
 
     CqlSession session;
 
-    public Cqld4Space(NBConfiguration cfg) {
+    public Cqld4Space(String space,NBConfiguration cfg) {
+        this.space = space;
         session = createSession(cfg);
     }
 
