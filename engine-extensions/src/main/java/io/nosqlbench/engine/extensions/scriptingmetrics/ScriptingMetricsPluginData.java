@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(value = ScriptingPluginInfo.class, selector = "scriptingmetrics")
+@Service(value= ScriptingPluginInfo.class, selector="scriptingmetrics")
 public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
 
     @Override

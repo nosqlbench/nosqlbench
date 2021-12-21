@@ -44,7 +44,7 @@ import static io.nosqlbench.engine.api.util.Colors.*;
  * retrofitted for J11.
  * </p>
  */
-@Service(value = TokenPool.class, selector = "threaded")
+@Service(value= TokenPool.class, selector="threaded")
 public class ThreadDrivenTokenPool implements TokenPool {
 
     private final static Logger logger = LogManager.getLogger(ThreadDrivenTokenPool.class);

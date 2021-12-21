@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service(value = WebServiceObject.class, selector = "workspaces")
+@Service(value= WebServiceObject.class, selector="workspaces")
 @Path("/services/workspaces")
 @Singleton
 public class WorkspacesEndpoint implements WebServiceObject {

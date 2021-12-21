@@ -59,14 +59,25 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param activityCfg   The activity configuration, used to resolve nested config parameters
      * @param preprocessors Map->Map transformers.
      */
-    public ParsedOp(OpTemplate opTemplate, NBConfiguration activityCfg, List<Function<Map<String, Object>, Map<String, Object>>> preprocessors) {
+    public ParsedOp(
+        OpTemplate opTemplate,
+        NBConfiguration activityCfg,
+        List<Function<Map<String, Object>, Map<String, Object>>> preprocessors
+    ) {
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
+
         Map<String, Object> map = opTemplate.getOp().orElseThrow();
         for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
             map = preprocessor.apply(map);
         }
-        this.tmap = new ParsedTemplateMap(map,opTemplate.getBindings(),List.of(opTemplate.getParams(),activityCfg.getMap()));
+
+        this.tmap = new ParsedTemplateMap(
+            map,
+            opTemplate.getBindings(),
+            List.of(opTemplate.getParams(),
+            activityCfg.getMap())
+        );
 
     }
 
@@ -99,7 +110,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     }
 
     public boolean isStatic(String field, Class<?> type) {
-        return tmap.isStatic(field,type);
+        return tmap.isStatic(field, type);
     }
 
     /**
@@ -216,7 +227,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      */
     @Override
     public <T> T get(String field, long input) {
-        return tmap.get(field,input);
+        return tmap.get(field, input);
     }
 
     /**
@@ -253,7 +264,6 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     }
 
 
-
     /**
      * Get a LongFunction which returns either the static value, the dynamic value, or the default value,
      * in that order, depending on where it is found first.
@@ -279,7 +289,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return A caching function which chains to the init function, with caching
      */
     public <V> LongFunction<V> getAsCachedFunctionOr(String fieldname, String defaultValue, Function<String, V> init) {
-        return tmap.getAsCachedFunctionOr(fieldname,defaultValue,init);
+        return tmap.getAsCachedFunctionOr(fieldname, defaultValue, init);
     }
 
     /**
@@ -307,7 +317,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      */
     @Override
     public boolean isDefined(String field, Class<?> type) {
-        return tmap.isDefined(field,type);
+        return tmap.isDefined(field, type);
     }
 
     /**

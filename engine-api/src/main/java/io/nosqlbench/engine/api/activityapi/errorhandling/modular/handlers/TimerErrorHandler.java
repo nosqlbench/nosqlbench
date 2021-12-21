@@ -8,7 +8,7 @@ import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Supplier;
 
-@Service(value = ErrorHandler.class, selector = "timer")
+@Service(value= ErrorHandler.class, selector="timer")
 public class TimerErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
 
 
