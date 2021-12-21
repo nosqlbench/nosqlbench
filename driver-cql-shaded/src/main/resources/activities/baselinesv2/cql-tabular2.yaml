@@ -156,7 +156,7 @@ blocks:
         tags:
           name: main-select-01234567
       - main-select: |
-          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
+          select data0,data1,data2,data3,data4,data5,data6,data7 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
         tags:
           name: main-select
   - name: main-write
