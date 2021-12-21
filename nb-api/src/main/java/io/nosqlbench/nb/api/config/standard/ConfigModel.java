@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.config.standard;
 
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.math.BigDecimal;
@@ -25,6 +26,14 @@ public class ConfigModel implements NBConfigModel {
     }
     public static ConfigModel of(Class<?> ofType) {
         return new ConfigModel(ofType);
+    }
+
+    public static NBConfiguration defacto(ActivityDef def) {
+        ConfigModel configModel = new ConfigModel(Object.class);
+        for (Map.Entry<String, Object> entry : def.getParams().entrySet()) {
+            configModel.add(Param.defaultTo(entry.getKey(),entry.getValue().toString()));
+        }
+        return configModel.apply(def.getParams());
     }
 
     public <T> ConfigModel add(Param<T> param) {

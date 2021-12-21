@@ -25,6 +25,10 @@ public class NBConfiguration {
         this.model = model;
     }
 
+    public static NBConfiguration empty() {
+        return new NBConfiguration(ConfigModel.of(Object.class).asReadOnly(),new LinkedHashMap<>());
+    }
+
     /**
      * Returns the value of the named parameter as {@link #getOptional(String)}, so long
      * as no env vars were reference OR all env var references were found.
