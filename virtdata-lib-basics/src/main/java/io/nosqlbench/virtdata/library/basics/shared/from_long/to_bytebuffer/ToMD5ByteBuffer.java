@@ -18,7 +18,7 @@ import java.util.function.LongFunction;
 public class ToMD5ByteBuffer implements LongFunction<ByteBuffer> {
 
     private final MessageDigest md5;
-    private static final ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
+    private transient static final ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
 
     @Example({"MD5ByteBuffer()","convert the a input to an md5 digest of its bytes"})
     public ToMD5ByteBuffer() {

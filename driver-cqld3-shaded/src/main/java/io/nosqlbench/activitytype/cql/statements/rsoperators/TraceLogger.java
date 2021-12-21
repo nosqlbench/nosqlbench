@@ -24,7 +24,7 @@ public class TraceLogger implements ResultSetCycleOperator, StatementModifier {
     private final long modulo;
     private final String filename;
     private final FileWriter writer;
-    private final ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
+    private final transient ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
 
     public TraceLogger(SimpleConfig conf) {
         this(

@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class ThreadNumToLong implements LongUnaryOperator {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
-    private final ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
+    private final transient ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
         @Override
         protected Long initialValue() {
             Matcher matcher = pattern.matcher(Thread.currentThread().getName());

@@ -19,7 +19,7 @@ import java.util.function.LongUnaryOperator;
 @Categories({Category.general, Category.general})
 public class Hash implements LongUnaryOperator {
 
-    private final ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final transient ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
 
     @Override
     public long applyAsLong(long value) {

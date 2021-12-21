@@ -10,8 +10,8 @@ import java.util.concurrent.CompletableFuture;
 public class PulsarBatchProducerStartOp extends SyncPulsarOp {
 
     // TODO: ensure sane container lifecycle management
-    public final static ThreadLocal<List<CompletableFuture<MessageId>>> threadLocalBatchMsgContainer = new ThreadLocal<>();
-    public final static ThreadLocal<Producer<?>> threadLocalProducer = new ThreadLocal<>();
+    public final transient static ThreadLocal<List<CompletableFuture<MessageId>>> threadLocalBatchMsgContainer = new ThreadLocal<>();
+    public final transient static ThreadLocal<Producer<?>> threadLocalProducer = new ThreadLocal<>();
 
     public PulsarBatchProducerStartOp(Producer<?> batchProducer) {
         threadLocalProducer.set(batchProducer);

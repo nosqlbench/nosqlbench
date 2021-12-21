@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public class ThreadNum implements LongUnaryOperator {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
-    private final ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
+    private final transient ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
         @Override
         protected Long initialValue() {
             if (Thread.currentThread() instanceof Indexed) {

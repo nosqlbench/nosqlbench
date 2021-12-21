@@ -26,7 +26,7 @@ import java.util.function.LongToIntFunction;
 public class HashedByteBufferExtract implements LongFunction<ByteBuffer> {
 
     private final LongToIntFunction sizefunc;
-    private final ThreadLocal<ByteBuffer> bbaccessor;
+    private final transient ThreadLocal<ByteBuffer> bbaccessor;
     private final Hash inthash = new Hash();
 
     public HashedByteBufferExtract(Object initFunc, Object sizeFunc) {

@@ -19,7 +19,7 @@ public class HashedCQLErrorHandler extends HashedErrorHandler<Throwable, ErrorSt
 //        add(ResultSetVerificationException.class);
 //    }};
     private final ExceptionCountMetrics exceptionCountMetrics;
-    private static final ThreadLocal<Integer> tlResultCode = ThreadLocal.withInitial(() -> (0));
+    private transient static final ThreadLocal<Integer> tlResultCode = ThreadLocal.withInitial(() -> (0));
 
     public HashedCQLErrorHandler(ExceptionCountMetrics exceptionCountMetrics) {
         this.exceptionCountMetrics = exceptionCountMetrics;

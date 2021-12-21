@@ -56,7 +56,7 @@ public class ReadyGraphStatementTemplate {
             implements ValuesBinder<SimpleGraphStatement, SimpleGraphStatement> {
         private final String[] fields;
         private final Map valuesMap = new HashMap();
-        private final ThreadLocal<Map<String, Object>> mapTL;
+        private final transient ThreadLocal<Map<String, Object>> mapTL;
 
         public ParameterizedGraphStatementValuesBinder(String[] fields) {
             this.fields = fields;

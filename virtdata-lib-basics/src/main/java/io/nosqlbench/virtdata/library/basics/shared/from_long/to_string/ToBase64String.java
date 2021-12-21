@@ -16,7 +16,7 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 public class ToBase64String implements LongFunction<String> {
 
-    private final static ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
+    private final transient static ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
 
     @Example({"ToBase64String()","Convert the bytes of a long input into a base64 String"})
     public ToBase64String() {

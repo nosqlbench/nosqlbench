@@ -14,7 +14,7 @@ import java.util.function.LongFunction;
 public class Show implements LongFunction<String> {
 
     private final String[] names;
-    private final ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
+    private final transient ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
 
     @Example({"Show()","Show all values in a json-like format"})
     public Show() {

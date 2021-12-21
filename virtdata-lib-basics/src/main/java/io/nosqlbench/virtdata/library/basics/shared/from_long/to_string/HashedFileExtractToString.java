@@ -48,7 +48,7 @@ public class HashedFileExtractToString implements LongFunction<String> {
     private final CharBuffer buf;
     private final LongToIntFunction sizeFunc;
     private final LongToIntFunction positionRange = new HashRange(0, Integer.MAX_VALUE);
-    private final static ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
+    private final static transient ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
     private final String filename;
 
     @Example({"HashedFileExtractToString('data/adventures.txt',100,200)", "return a fragment from adventures.txt between 100 and 200 characters long"})
