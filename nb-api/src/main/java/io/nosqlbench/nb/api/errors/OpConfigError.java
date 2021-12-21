@@ -46,6 +46,10 @@ public class OpConfigError extends ActivityInitError {
             sb.append(" [from:" + configSource + "] ");
         }
 
+        if (getCause()!=null) {
+            sb.append("cause: " + getCause().getMessage());
+        }
+
 //        if (getCause()!=null) {
 //            StackTraceElement causeFrame = getCause().getStackTrace()[0];
 //            sb.append("\n\t caused by ")
