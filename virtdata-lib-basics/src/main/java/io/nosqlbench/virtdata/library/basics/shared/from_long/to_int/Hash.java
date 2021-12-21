@@ -12,8 +12,8 @@ import java.util.function.LongToIntFunction;
 @Categories({Category.general})
 public class Hash implements LongToIntFunction {
 
-    ThreadLocal<ByteBuffer> bb_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocate(Long.BYTES));
-    ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final transient ThreadLocal<ByteBuffer> bb_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocate(Long.BYTES));
+    private final transient ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
 
     @Override
     public int applyAsInt(long value) {

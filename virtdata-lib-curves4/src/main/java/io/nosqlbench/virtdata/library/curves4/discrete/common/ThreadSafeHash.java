@@ -16,7 +16,7 @@ public class ThreadSafeHash implements LongUnaryOperator {
 
 //    private ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
 //    private Murmur3F murmur3F= new Murmur3F();
-    private static ThreadLocal<HashState> tlstate = ThreadLocal.withInitial(HashState::new);
+    private final transient static ThreadLocal<HashState> tlstate = ThreadLocal.withInitial(HashState::new);
 
     @Override
     public long applyAsLong(long value) {

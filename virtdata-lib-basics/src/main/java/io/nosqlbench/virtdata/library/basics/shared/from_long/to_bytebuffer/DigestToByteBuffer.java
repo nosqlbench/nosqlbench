@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @ThreadSafeMapper
 public class DigestToByteBuffer implements LongFunction<ByteBuffer> {
 
-    private static ThreadLocal<TL_State> tl_state;
+    private transient static ThreadLocal<TL_State> tl_state;
 
     public DigestToByteBuffer(String digestType) {
 

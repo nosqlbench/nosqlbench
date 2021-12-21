@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SaveThreadVars implements RowCycleOperator {
 
-    ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
+    private final transient ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 
     @Override
     public int apply(Row row, long cycle) {

@@ -35,8 +35,7 @@ import java.util.function.LongFunction;
 @Categories({Category.general,Category.premade})
 public class NumberNameToString implements LongFunction<String> {
 
-
-    private final static ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
+    private final transient static ThreadLocal<StringBuilder> tlsb = ThreadLocal.withInitial(StringBuilder::new);
 
     private final static String THOUSAND = "thousand";
     private final static String MILLION = "million";

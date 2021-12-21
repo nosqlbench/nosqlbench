@@ -16,7 +16,7 @@ public class ThreadLocalNamedTimers {
 
     private final static Logger logger = LogManager.getLogger(ThreadLocalNamedTimers.class);
 
-    public final static ThreadLocal<ThreadLocalNamedTimers> TL_INSTANCE = ThreadLocal.withInitial(ThreadLocalNamedTimers::new);
+    public transient final static ThreadLocal<ThreadLocalNamedTimers> TL_INSTANCE = ThreadLocal.withInitial(ThreadLocalNamedTimers::new);
     private final static Map<String, Timer> timers = new HashMap<>();
     private final Map<String, Timer.Context> contexts = new HashMap<>();
 

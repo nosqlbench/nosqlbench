@@ -36,7 +36,7 @@ import java.util.function.LongFunction;
 @DeprecatedFunction("This function is easily replaced with other simpler functions.")
 public class Murmur3DivToString implements LongFunction<String> {
 
-    private final ThreadLocal<Murmur3F> murmur3F_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final transient ThreadLocal<Murmur3F> murmur3F_TL = ThreadLocal.withInitial(Murmur3F::new);
     private final DivideToLong divideToLongMapper;
 
     public Murmur3DivToString(long divisor) {

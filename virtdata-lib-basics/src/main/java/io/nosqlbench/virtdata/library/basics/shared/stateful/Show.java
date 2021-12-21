@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class Show implements Function<Object,String> {
 
     private final String[] names;
-    private final ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
+    private final transient ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
 
     @Example({"Show()","Show all values in a json-like format"})
     public Show() {

@@ -12,7 +12,7 @@ import java.util.function.IntUnaryOperator;
 @Categories({Category.general})
 public class Hash implements IntUnaryOperator {
 
-    private final ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
+    private final transient ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
 
     @Override
     public int applyAsInt(int operand) {

@@ -20,7 +20,7 @@ import java.util.function.LongFunction;
 public class MD5HexString implements LongFunction<String> {
 
     private final MessageDigest md5;
-    private static final ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
+    private static final transient ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
 
     @Example({"MD5String()","Convert a long input to an md5 digest over its bytes, and then to a hexadecimal string."})
     public MD5HexString() {

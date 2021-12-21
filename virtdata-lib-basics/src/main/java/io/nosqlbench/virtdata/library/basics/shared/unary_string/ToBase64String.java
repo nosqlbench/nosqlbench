@@ -14,7 +14,7 @@ import java.util.function.Function;
 @ThreadSafeMapper
 public class ToBase64String implements Function<String,String> {
 
-    private final static ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
+    private final transient static ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
 
     @Example({"ToBase64String()","encode any input as Base64"})
     public ToBase64String() {

@@ -37,9 +37,9 @@ import java.util.*;
  */
 public class Bindings {
     private final static Logger logger  = LogManager.getLogger(Bindings.class);
-    private BindingsTemplate template;
+    private final BindingsTemplate template;
     private List<DataMapper<?>> dataMappers = new ArrayList<DataMapper<?>>();
-    private ThreadLocal<Map<String, DataMapper<?>>> nameCache;
+    private final transient ThreadLocal<Map<String, DataMapper<?>>> nameCache;
 
     public Bindings(BindingsTemplate template, List<DataMapper<?>> dataMappers) {
         this.template = template;
@@ -346,7 +346,7 @@ public class Bindings {
         return new LazyValuesMap(this, input);
     }
 
-    public static interface FieldSetter {
+    public interface FieldSetter {
         void setField(String name, Object value);
     }
 

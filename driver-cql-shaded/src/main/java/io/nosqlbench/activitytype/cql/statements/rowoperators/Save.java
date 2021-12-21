@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class Save implements RowCycleOperator {
     private final static Logger logger = LogManager.getLogger(Save.class);
 
-    ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
+    private final transient ThreadLocal<HashMap<String, Object>> tl_objectMap = SharedState.tl_ObjectMap;
 
     private final String[] varnames;
 

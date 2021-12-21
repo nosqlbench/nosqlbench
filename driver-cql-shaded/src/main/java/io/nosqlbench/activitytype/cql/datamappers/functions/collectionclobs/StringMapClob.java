@@ -27,7 +27,7 @@ import java.util.function.LongToIntFunction;
 @ThreadSafeMapper
 public class StringMapClob implements LongFunction<String> {
 
-    private final static ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
+    private transient final static ThreadLocal<StringBuilder> tl_sb = ThreadLocal.withInitial(StringBuilder::new);
 
     private final LongToIntFunction sizeFunc;
     private final LongFunction[] keyFuncs;

@@ -38,8 +38,7 @@ import java.util.regex.Pattern;
 public class ThreadNum implements LongToIntFunction {
 
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
-
-    private final ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
+    private final transient ThreadLocal<Integer> threadLocalInt = new ThreadLocal<Integer>() {
         @Override
         protected Integer initialValue() {
             if (Thread.currentThread() instanceof Indexed ) {
