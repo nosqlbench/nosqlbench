@@ -27,7 +27,7 @@ public class StandardActivity<R extends Op,S> extends SimpleActivity {
     private final DriverAdapter<R,S> adapter;
     private final OpSource<R> opsource;
     private NBErrorHandler errorHandler;
-    OpSequence<OpDispenser<R>> sequence;
+    private final OpSequence<OpDispenser<R>> sequence;
 
     public StandardActivity(DriverAdapter<R,S> adapter, ActivityDef activityDef) {
         super(activityDef);
@@ -51,6 +51,10 @@ public class StandardActivity<R extends Op,S> extends SimpleActivity {
     public void initActivity() {
         super.initActivity();
         setDefaultsFromOpSequence(sequence);
+    }
+
+    public OpSequence<OpDispenser<R>> getOpSequence() {
+        return sequence;
     }
 
     public OpSource<R> getOpSource() {

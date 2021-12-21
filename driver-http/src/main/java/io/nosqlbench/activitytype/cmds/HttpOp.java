@@ -1,9 +1,11 @@
 package io.nosqlbench.activitytype.cmds;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+
 import java.net.http.HttpRequest;
 import java.util.regex.Pattern;
 
-public class HttpOp {
+public class HttpOp implements Op {
 
     public final Pattern ok_status;
     public final Pattern ok_body;

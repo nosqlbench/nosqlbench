@@ -18,4 +18,8 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  * so long as an Op implements one of them.
  */
 public interface Op {
+
+    default long getResultSize() {
+        return 0;
+    }
 }

@@ -3,13 +3,13 @@ package io.nosqlbench.driver.jms;
 import io.nosqlbench.driver.jms.ops.JmsOp;
 import io.nosqlbench.driver.jms.util.JmsUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.function.LongFunction;
 
-abstract public class ReadyJmsOp implements OpDispenser<JmsOp> {
+abstract public class ReadyJmsOp extends BaseOpDispenser<JmsOp> {
 
     protected final OpTemplate optpl;
     protected final CommandTemplate cmdTpl;
@@ -22,6 +22,7 @@ abstract public class ReadyJmsOp implements OpDispenser<JmsOp> {
     protected final LongFunction<JmsOp> opFunc;
 
     public ReadyJmsOp(OpTemplate opTemplate, JmsActivity jmsActivity) {
+        super(opTemplate);
         this.optpl = opTemplate;
         this.cmdTpl = new CommandTemplate(optpl);
         this.jmsActivity = jmsActivity;

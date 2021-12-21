@@ -6,8 +6,9 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
-import io.nosqlbench.engine.api.activityapi.planning.OpSource;
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> implements SyncAction, ActivityDefObserver {
 
     private final A activity;
-    private final OpSource<R> opsource;
     private final int slot;
     private final Timer executeTimer;
     private final Histogram triesHistogram;
@@ -33,10 +33,11 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer resultTimer;
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
+    private final OpSequence<OpDispenser<R>> opsequence;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
-        this.opsource = activity.getOpSource();
+        this.opsequence = activity.getOpSequence();
         this.slot = slot;
         bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
         executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();
@@ -49,9 +50,11 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     @Override
     public int runCycle(long cycle) {
 
+        OpDispenser<R> dispenser;
         Op op = null;
         try (Timer.Context ct = bindTimer.time()) {
-            op = opsource.apply(cycle);
+            dispenser = opsequence.apply(cycle);
+            op = dispenser.apply(cycle);
         }
 
         int tries = 0;
@@ -63,8 +66,9 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
             long startedAt = System.nanoTime();
 
             try (Timer.Context ct = executeTimer.time()) {
-
-                if (op instanceof CycleOp<?>) {
+                if (op instanceof RunnableOp) {
+                    ((RunnableOp)op).run();
+                } else if (op instanceof CycleOp<?>) {
                     result = ((CycleOp) op).apply(cycle);
                 } else if (op instanceof ChainingOp) {
                     result = ((ChainingOp) op).apply(result);
@@ -72,7 +76,6 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                         "either InitialCycleFunction or ChainedCycleFunction");
                 }
-
                 if (op instanceof OpGenerator) {
                     op = ((OpGenerator) op).getNextOp();
                 } else {
@@ -86,8 +89,10 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                 resultTimer.update(nanos, TimeUnit.NANOSECONDS);
                 if (error == null) {
                     resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
+                    dispenser.onSuccess(cycle,nanos,op.getResultSize());
                 } else {
                     ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
+                    dispenser.onError(cycle,nanos,error);
                     code = detail.resultCode;
                     if (!detail.isRetryable()) {
                         break;

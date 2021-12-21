@@ -5,15 +5,15 @@ import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import io.nosqlbench.adapter.cqld4.Cqld4Op;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4PreparedStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4PreparedStatement;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser implements OpDispenser<Cqld4Op> {
+public class Cqld4PreparedStmtDispenser extends BaseOpDispenser<Cqld4Op> {
 
     private final CqlSession session;
 
@@ -25,6 +25,7 @@ public class Cqld4PreparedStmtDispenser implements OpDispenser<Cqld4Op> {
     private final RSProcessors processors;
 
     public Cqld4PreparedStmtDispenser(CqlSession session, ParsedOp cmd, RSProcessors processors) {
+        super(cmd);
         this.session = session;
         this.processors = processors;
 

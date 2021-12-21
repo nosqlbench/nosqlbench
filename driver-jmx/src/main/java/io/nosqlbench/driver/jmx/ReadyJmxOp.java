@@ -4,7 +4,7 @@ import io.nosqlbench.driver.jmx.ops.JMXExplainOperation;
 import io.nosqlbench.driver.jmx.ops.JMXPrintOperation;
 import io.nosqlbench.driver.jmx.ops.JMXReadOperation;
 import io.nosqlbench.driver.jmx.ops.JmxOp;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 
 import javax.management.MalformedObjectNameException;
@@ -18,11 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ReadyJmxOp implements OpDispenser<JmxOp> {
+public class ReadyJmxOp extends BaseOpDispenser<JmxOp> {
 
     private final CommandTemplate command;
 
     public ReadyJmxOp(CommandTemplate command) {
+        super(command);
         this.command = command;
     }
 
@@ -53,7 +54,7 @@ public class ReadyJmxOp implements OpDispenser<JmxOp> {
             return new JMXExplainOperation(connector, objectName);
         }
 
-        throw new RuntimeException("No valid form of JMX operation was determined from the provided command details:" + cmdmap.toString());
+        throw new RuntimeException("No valid form of JMX operation was determined from the provided command details:" + cmdmap);
     }
 
     private JMXConnector bindConnector(Map<String, String> cmdmap) {

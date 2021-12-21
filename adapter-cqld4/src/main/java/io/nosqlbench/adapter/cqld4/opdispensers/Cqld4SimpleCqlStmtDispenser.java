@@ -5,10 +5,10 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import io.nosqlbench.adapter.cqld4.Cqld4Op;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4SimpleCqlStatement;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
-public class Cqld4SimpleCqlStmtDispenser implements OpDispenser<Cqld4Op> {
+public class Cqld4SimpleCqlStmtDispenser extends BaseOpDispenser<Cqld4Op> {
 
     private final CqlSession session;
     private final ParsedOp cmd;
@@ -17,6 +17,7 @@ public class Cqld4SimpleCqlStmtDispenser implements OpDispenser<Cqld4Op> {
     private final Cqld4OpMetrics metrics;
 
     public Cqld4SimpleCqlStmtDispenser(CqlSession session, ParsedOp cmd) {
+        super(cmd);
         this.session = session;
         this.cmd = cmd;
         this.maxpages = cmd.getStaticConfigOr("maxpages",1);

@@ -10,6 +10,13 @@ import java.util.function.LongFunction;
  * in NoSQLBench.</p>
  * <hr/>
  * <p>
+ * <H2>BaseOpDispenser</H2>
+ * </p>
+ * Some common behaviors which are intended to be portable across all op
+ * dispenser types are implemented in {@link BaseOpDispenser}. It is
+ * <em>strongly</em> recommended that you use this as your base type when
+ * implementing op dispensers.
+ * <p>
  * <H2>Concepts</H2>
  * Op Synthesis is the process of building a specific and executable
  * operation for some (low level driver) API by combining the
@@ -43,7 +50,7 @@ import java.util.function.LongFunction;
  *            to hold all the details for executing an operation,
  *            something that implements {@link Runnable}.
  */
-public interface OpDispenser<T> extends LongFunction<T> {
+public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
 
     /**
      * The apply method in an op dispenser should do all the work of
@@ -56,6 +63,6 @@ public interface OpDispenser<T> extends LongFunction<T> {
      *              generated op fields to be bound into an operation.
      * @return an executable operation
      */
-    @Override
+
     T apply(long value);
 }
