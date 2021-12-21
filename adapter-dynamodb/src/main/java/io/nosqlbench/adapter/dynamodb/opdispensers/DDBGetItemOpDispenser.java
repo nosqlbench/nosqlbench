@@ -6,19 +6,20 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBGetItemOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DDBGetItemOpDispenser implements OpDispenser<DynamoDBOp> {
+public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp> {
     private final DynamoDB ddb;
     private final LongFunction<Table> targetTableFunction;
     private final LongFunction<GetItemSpec> getItemSpecFunc;
 
     public DDBGetItemOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunction) {
+        super(cmd);
         this.ddb = ddb;
         this.targetTableFunction = l -> ddb.getTable(targetFunction.apply(l).toString());
         this.getItemSpecFunc = resolveGetItemSpecFunction(cmd);

@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBCreateTableOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ import java.util.function.LongFunction;
  * }
  * }</pre>
  */
-public class DDBCreateTableOpDispenser implements OpDispenser<DynamoDBOp> {
+public class DDBCreateTableOpDispenser extends BaseOpDispenser<DynamoDBOp> {
 
     private final DynamoDB ddb;
     private final LongFunction<String> tableNameFunc;
@@ -99,6 +99,7 @@ public class DDBCreateTableOpDispenser implements OpDispenser<DynamoDBOp> {
     private final LongFunction<String> billingModeFunc;
 
     public DDBCreateTableOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
+        super(cmd);
         this.ddb = ddb;
         this.tableNameFunc = l -> targetFunc.apply(l).toString();
         this.keySchemaFunc = resolveKeySchemaFunction(cmd);

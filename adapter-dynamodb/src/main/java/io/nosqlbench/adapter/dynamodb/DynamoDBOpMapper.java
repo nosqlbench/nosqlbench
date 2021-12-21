@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import io.nosqlbench.adapter.dynamodb.opdispensers.DDBCreateTableOpDispenser;
 import io.nosqlbench.adapter.dynamodb.opdispensers.DDBGetItemOpDispenser;
 import io.nosqlbench.adapter.dynamodb.opdispensers.DDBPutItemOpDispenser;
+import io.nosqlbench.adapter.dynamodb.opdispensers.DDBQueryOpDispenser;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
@@ -40,11 +41,14 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
             NamedTarget<DynamoDBCmdType> cmdType = cmd.getRequiredTypeFromEnum(DynamoDBCmdType.class);
             switch (cmdType.enumId) {
                 case CreateTable:
-                    return new DDBCreateTableOpDispenser(ddb,cmd,cmdType.targetFunction);
+                    return new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case PutItem:
-                    return new DDBPutItemOpDispenser(ddb,cmd,cmdType.targetFunction);
+                    return new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case GetItem:
-                    return new DDBGetItemOpDispenser(ddb,cmd,cmdType.targetFunction);
+                    return new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case Query:
+                    return new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);
+
                 default:
                     throw new OpConfigError("No implementation for " + cmdType.toString());
             }

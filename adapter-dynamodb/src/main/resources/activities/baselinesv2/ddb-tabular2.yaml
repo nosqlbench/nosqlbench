@@ -3,6 +3,7 @@ scenarios:
   rampup: run driver=dynamodb tags=phase:rampup region=us-east-1
   read: run driver=dynamodb tags=phase:read region=us-east-1
   main: run driver=dynamodb tags=phase:main region=us-east-1
+  read01: run driver=dynamodb tags=stmt:read01 region=us-east-1
 
 bindings:
 
@@ -31,6 +32,8 @@ bindings:
   part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
   clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
 
+params:
+  instrument: true
 
 blocks:
   - name: schema
@@ -78,20 +81,11 @@ blocks:
     ops:
       read-all:
         op:
-          PutItem: TEMPLATE(table,tabular)
-          json: |
-            {
-             "part": "{part_layout}",
-             "clust": "{clust_layout}",
-             "data0": "{data0}",
-             "data1": "{data1}",
-             "data2": "{data2}",
-             "data3": "{data3}",
-             "data4": "{data4}",
-             "data5": "{data5}",
-             "data6": "{data6}",
-             "data7": "{data7}"
-            }
+          GetItem: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+
   - name: main
     tags:
       phase: main
@@ -118,64 +112,82 @@ blocks:
             }
       main-read-all:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
-          # no projection means "all" implicitly
+          Limit: "{limit}"
+          # no attributes means "all" implicitly
 
       main-read-01:
+        tags:
+          stmt: read01
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data0, data1
+          Limit: "{limit}"
 
       main-read-0246:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data0, data2, data4, data6
+          Limit: "{limit}"
 
       main-read-1357:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data1, data3, data5, data7
+          Limit: "{limit}"
 
       main-read-0123:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data0, data1, data2, data3
+          Limit: "{limit}"
 
       main-read-4567:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data4, data5, data6, data7
+          Limit: "{limit}"
+
+      main-read-67:
+        op:
+          Query: TEMPLATE(table,tabular)
+          key:
+            part: "{part_read}"
+            clust: "{clust_read}"
+          ConsistentRead: true
+          projection: data6, data7
+          Limit: "{limit}"
 
       main-read-01234567:
         op:
-          GetItem: TEMPLATE(table,tabular)
+          Query: TEMPLATE(table,tabular)
           key:
             part: "{part_read}"
             clust: "{clust_read}"
           ConsistentRead: true
           projection: data0, data1, data2, data3, data4, data5, data6, data7
-
+          Limit: "{limit}"
