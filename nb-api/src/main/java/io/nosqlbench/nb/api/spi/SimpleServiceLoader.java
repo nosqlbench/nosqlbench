@@ -43,8 +43,17 @@ public class SimpleServiceLoader<T> {
 
     public Optional<T> get(String implName) {
         List<Component<? extends T>> namedProviders = getNamedProviders();
-        ServiceLoader.Provider<? extends T> providers = namedProviders.stream().filter(n -> n.selector.equals(implName)).findFirst().get().provider;
-        return Optional.ofNullable(providers == null ? null : providers.get());
+        if (namedProviders==null) {
+            return Optional.empty();
+        }
+        List<Component<? extends T>> components = namedProviders.stream().filter(n -> n.selector.equals(implName)).toList();
+        if (components.size()>1) {
+            throw new RuntimeException("Found multiple components matching '" + implName +"',");
+        }
+        if (components.size()==0) {
+            return Optional.empty();
+        }
+        return Optional.of(components.get(0).provider.get());
     }
 
     public T getOrThrow(String implName) {
