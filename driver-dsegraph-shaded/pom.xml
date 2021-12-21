@@ -185,8 +185,7 @@
                     </sourceDirectory>
                     <arguments>
                         <argument>-package</argument>
-                        <argument>io.nosqlbench.generators.cql.generated
-                        </argument>
+                        <argument>io.nosqlbench.generators.cql.generated</argument>
                     </arguments>
                     <outputDirectory>
                         src/main/java/io/nosqlbench/generators/cql/generated
