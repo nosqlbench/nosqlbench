@@ -10,7 +10,7 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>driver-cqld4</artifactId>
+    <artifactId>adapter-cqld4</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
