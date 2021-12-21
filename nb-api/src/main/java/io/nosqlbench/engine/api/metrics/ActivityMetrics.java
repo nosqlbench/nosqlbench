@@ -125,6 +125,17 @@ public class ActivityMetrics {
         return registeredTimer;
     }
 
+    public static Timer timer(String fullMetricName) {
+        NicerTimer timer = get().register(fullMetricName, new NicerTimer(
+            fullMetricName,
+            new DeltaHdrHistogramReservoir(
+                fullMetricName,
+                _HDRDIGITS
+            ))
+        );
+        return timer;
+    }
+
     /**
      * <p>Create an HDR histogram associated with an activity.</p>
      *
@@ -149,6 +160,17 @@ public class ActivityMetrics {
                                 activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
                         )
                 ));
+    }
+
+    public static Histogram histogram(String fullname) {
+        NicerHistogram histogram = get().register(fullname, new NicerHistogram(
+            fullname,
+            new DeltaHdrHistogramReservoir(
+                fullname,
+                _HDRDIGITS
+            )
+        ));
+        return histogram;
     }
 
     /**
