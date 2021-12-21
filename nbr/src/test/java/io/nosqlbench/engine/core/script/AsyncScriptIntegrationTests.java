@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
+import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,7 +53,7 @@ public class AsyncScriptIntegrationTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
         ScenariosExecutor executor = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
-        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300");
+        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
 
         s.addScenarioScriptParams(paramsMap);
 

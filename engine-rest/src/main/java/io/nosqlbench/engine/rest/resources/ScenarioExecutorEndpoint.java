@@ -13,6 +13,7 @@ import io.nosqlbench.engine.rest.services.WorkspaceFinder;
 import io.nosqlbench.engine.rest.transfertypes.LiveScenarioView;
 import io.nosqlbench.engine.rest.transfertypes.RunScenarioRequest;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.annotations.Maturity;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -119,8 +120,8 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
             false,
             "",
             cmdList.toString(),
-            (java.nio.file.Path) config.getProperties().get("logpath")
-        );
+            (java.nio.file.Path) config.getProperties().get("logpath"),
+            Maturity.Unspecified);
 
         scenario.addScriptText(buffer.getParsedScript());
 

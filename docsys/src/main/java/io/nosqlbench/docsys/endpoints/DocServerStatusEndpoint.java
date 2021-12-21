@@ -3,6 +3,7 @@ package io.nosqlbench.docsys.endpoints;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.core.NBWebServer;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.annotations.Maturity;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -13,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = WebServiceObject.class, selector = "docserver-status")
+@Service(value = WebServiceObject.class, selector = "docserver-status", maturity = Maturity.Deprecated)
 @Singleton
 @Path("_")
 public class DocServerStatusEndpoint implements WebServiceObject {

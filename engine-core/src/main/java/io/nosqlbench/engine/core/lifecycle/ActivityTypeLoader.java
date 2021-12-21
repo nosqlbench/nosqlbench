@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.content.Content;
@@ -25,9 +26,14 @@ import java.util.stream.Collectors;
 public class ActivityTypeLoader {
 
     private static final Logger logger = LogManager.getLogger(ActivityTypeLoader.class);
-    private static final SimpleServiceLoader<ActivityType> ACTIVITYTYPE_SPI_FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class);
-    private static final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class);
+    private final SimpleServiceLoader<ActivityType> ACTIVITYTYPE_SPI_FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class, Maturity.Any);
+    private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
     private final Set<URL> jarUrls = new HashSet<>();
+
+    public ActivityTypeLoader setMaturity(Maturity maturity) {
+        ACTIVITYTYPE_SPI_FINDER.setMaturity(maturity);
+        return this;
+    }
 
     public ActivityTypeLoader() {
 
@@ -154,11 +160,11 @@ public class ActivityTypeLoader {
         .asReadOnly();
 
     public Set<String> getAllSelectors() {
-        List<String> allSelectors = ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
-        List<String> allDrivers = DRIVERADAPTER_SPI_FINDER.getAllSelectors();
-        Set<String> all = new HashSet<>();
-        all.addAll(allSelectors);
-        all.addAll(allDrivers);
+        Map<String, Maturity> allSelectors = ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
+        Map<String, Maturity> addAdapters = DRIVERADAPTER_SPI_FINDER.getAllSelectors();
+        Set<String> all = new LinkedHashSet<>();
+        all.addAll(allSelectors.keySet());
+        all.addAll(addAdapters.keySet());
         return all;
     }
 }

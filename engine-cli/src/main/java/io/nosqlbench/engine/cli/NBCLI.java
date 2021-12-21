@@ -17,6 +17,7 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
@@ -56,9 +57,7 @@ public class NBCLI {
 
     public NBCLI(String commandName) {
         this.commandName = commandName;
-
     }
-
 
     public static void main(String[] args) {
         try {
@@ -264,12 +263,12 @@ public class NBCLI {
         }
 
         if (options.wantsInputTypes()) {
-            InputType.FINDER.getAllSelectors().forEach(System.out::println);
+            InputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
             System.exit(0);
         }
 
         if (options.wantsMarkerTypes()) {
-            OutputType.FINDER.getAllSelectors().forEach(System.out::println);
+            OutputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
             System.exit(0);
         }
 
@@ -365,8 +364,8 @@ public class NBCLI {
             options.wantsCompileScript(),
             options.getReportSummaryTo(),
             String.join("\n", args),
-            options.getLogsDirectory()
-        );
+            options.getLogsDirectory(),
+            Maturity.Unspecified);
 
         ScriptBuffer buffer = new BasicScriptBuffer()
             .add(options.getCommands()

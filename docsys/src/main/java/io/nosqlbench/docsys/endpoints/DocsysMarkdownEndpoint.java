@@ -7,6 +7,7 @@ import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.core.DocsysPathLoader;
 import io.nosqlbench.docsys.core.PathWalker;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.annotations.Maturity;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,7 +21,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Service(value = WebServiceObject.class, selector = "docsys-markdown")
+@Service(value = WebServiceObject.class, selector = "docsys-markdown",maturity = Maturity.Deprecated)
 @Singleton
 @Path("/services/docs/")
 public class DocsysMarkdownEndpoint implements WebServiceObject {

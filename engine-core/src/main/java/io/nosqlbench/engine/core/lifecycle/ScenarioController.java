@@ -22,6 +22,7 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -44,9 +45,11 @@ public class ScenarioController {
 
     private final Map<String, ActivityExecutor> activityExecutors = new ConcurrentHashMap<>();
     private final String sessionId;
+    private final Maturity minMaturity;
 
-    public ScenarioController(String sessionId) {
+    public ScenarioController(String sessionId, Maturity minMaturity) {
         this.sessionId = sessionId;
+        this.minMaturity = minMaturity;
     }
 
     /**
@@ -315,9 +318,12 @@ public class ScenarioController {
 
             if (executor == null && createIfMissing) {
 
-                ActivityType<?> activityType = new ActivityTypeLoader().load(activityDef).orElseThrow(
-                    () -> new RuntimeException("Could not load Driver for " + activityDef + "'")
-                );
+                ActivityType<?> activityType = new ActivityTypeLoader()
+                    .setMaturity(this.minMaturity)
+                    .load(activityDef)
+                    .orElseThrow(
+                        () -> new RuntimeException("Could not load Driver for " + activityDef + "'")
+                    );
 
                 executor = new ActivityExecutor(
                     activityType.getAssembledActivity(
@@ -333,7 +339,7 @@ public class ScenarioController {
     }
 
     /**
-     * Wait for a bit. This is not the best approach, and will be replace with a different system in the future.
+     * Wait for a bit. This is not the best approach, and will be replaced with a different system in the future.
      *
      * @param waitMillis time to wait, in milliseconds
      */
