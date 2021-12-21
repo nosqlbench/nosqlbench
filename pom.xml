@@ -37,14 +37,16 @@
         <module>adapters-api</module>
 
         <!-- driver modules -->
+        <module>adapter-cqld4</module>
+        <module>adapter-dynamodb</module>
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
         <module>driver-http</module>
-        <module>driver-dsegraph-shaded</module>
-        <module>driver-cql-shaded</module>
-        <module>driver-cqld3-shaded</module>
-        <module>driver-cqlverify</module>
+<!--        <module>driver-dsegraph-shaded</module>-->
+<!--        <module>driver-cql-shaded</module>-->
+<!--        <module>driver-cqlverify</module>-->
+<!--        <module>driver-cqld3-shaded</module>-->
         <module>driver-web</module>
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
@@ -54,7 +56,7 @@
         <module>driver-pulsar</module>
         <module>driver-jms</module>
         <module>driver-grpc</module>
-<!--        <module>driver-directapi</module>-->
+
 
         <!-- VIRTDATA MODULES -->
 
@@ -65,33 +67,14 @@
         <module>virtdata-lib-random</module>
         <module>virtdata-lib-curves4</module>
         <module>virtdata-lib-realer</module>
-
         <module>virtdata-userlibs</module>
 
         <!-- Documentation -->
-        <module>docsys</module>
+<!--        <module>docsys</module>-->
 
     </modules>
 
     <profiles>
-        <profile>
-            <id>with-cql-d4</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>adapter-cqld4</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>with-dynamodb</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>adapter-dynamodb</module>
-            </modules>
-        </profile>
         <profile>
             <id>with-mongodb</id>
             <activation>
