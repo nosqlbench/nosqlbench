@@ -108,7 +108,7 @@ jobs:
         run: scripts/release-prepare.sh
         env:
           RELEASE_BRANCH_PATTERN: "main"
-          PRERELEASE_BRANCH_PATTERN: "prerelease"
+          PRERELEASE_BRANCH_PATTERN: "preview"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
@@ -162,7 +162,7 @@ jobs:
         continue-on-error: true
         env:
           RELEASE_BRANCH_PATTERN: "main"
-          PRERELEASE_BRANCH_PATTERN: "prerelease"
+          PRERELEASE_BRANCH_PATTERN: "preview"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
