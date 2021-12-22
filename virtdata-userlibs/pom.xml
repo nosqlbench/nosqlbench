@@ -50,12 +50,11 @@
             <version>4.15.71-SNAPSHOT</version>
             <artifactId>virtdata-lib-curves4</artifactId>
         </dependency>
-
-        <!-- TODO: remove this after pivoting deps to core nb-api doc manifest -->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
             <version>4.15.71-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

@@ -70,7 +70,7 @@
         <module>virtdata-userlibs</module>
 
         <!-- Documentation -->
-<!--        <module>docsys</module>-->
+        <module>docsys</module>
 
     </modules>
 

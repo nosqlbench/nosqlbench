@@ -37,12 +37,6 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-docs</artifactId>
-            <version>4.15.71-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
             <version>4.15.71-SNAPSHOT</version>
         </dependency>
