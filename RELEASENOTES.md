@@ -1,5 +1,6 @@
-- 3d5c45f54 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 24245bc79 (origin/main) Merge pull request #393 from EricBorczuk/bump-mongodriver-version
+- ebd0ab7a4 (origin/main, main) bugfix release for log4j
+- 3d5c45f54 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 24245bc79 Merge pull request #393 from EricBorczuk/bump-mongodriver-version
 - 52db6d10d Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 78913a18e update log4j versions to 2.15.0
 - 2145b7683 Update mongo-driver-sync to 4.4.0
