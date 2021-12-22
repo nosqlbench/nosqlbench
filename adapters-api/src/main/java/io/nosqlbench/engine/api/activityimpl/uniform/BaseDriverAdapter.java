@@ -2,10 +2,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +92,8 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      */
     @Override
     public NBConfigModel getConfigModel() {
-        return ConfigModel.of(this.getClass());
+        return ConfigModel.of(this.getClass())
+            .add(Param.defaultTo("errors","stop","Configure the error handler"));
     }
 
     @Override

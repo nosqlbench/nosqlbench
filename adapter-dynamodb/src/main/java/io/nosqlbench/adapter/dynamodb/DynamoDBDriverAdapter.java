@@ -29,6 +29,6 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
 
     @Override
     public NBConfigModel getConfigModel() {
-        return DynamoDBSpace.getConfigModel();
+        return super.getConfigModel().add(DynamoDBSpace.getConfigModel());
     }
 }

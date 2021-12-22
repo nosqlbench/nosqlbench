@@ -14,7 +14,7 @@ public class Param<T> {
 
     private final List<String> names;
     public final Class<? extends T> type;
-    public String description;
+    private String description;
     private final T defaultValue;
     public boolean required;
     private Pattern regex;
@@ -87,6 +87,18 @@ public class Param<T> {
      */
     public static <V> Param<V> defaultTo(String name, V defaultValue) {
         return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, true, defaultValue);
+    }
+
+    /**
+     * Parameters which are given a default value are automatically marked as required, as the default
+     * value allows them to be accessed as such.
+     * @param name
+     * @param defaultValue
+     * @param <V>
+     * @return
+     */
+    public static <V> Param<V> defaultTo(String name, V defaultValue, String description) {
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), description, true, defaultValue);
     }
 
     /**
