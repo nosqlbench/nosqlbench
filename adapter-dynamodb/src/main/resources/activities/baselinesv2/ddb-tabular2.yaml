@@ -17,7 +17,7 @@ bindings:
   data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27,33); EscapeJSON();
   data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45,55); EscapeJSON();
   data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72,88); EscapeJSON();
-  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107,143); EscapeJSON();
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',117,143); EscapeJSON();
   data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189,231); EscapeJSON();
   data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306,374); EscapeJSON();
 
@@ -50,8 +50,8 @@ blocks:
             part: S
             clust: S
           BillingMode: PROVISIONED
-          ReadCapacityUnits: "10"
-          WriteCapacityUnits: "10"
+          ReadCapacityUnits: "TEMPLATE(rcus,40000)"
+          WriteCapacityUnits: "TEMPLATE(wcus,40000)"
 #          BillingMode: PAY_PER_REQUEST
   - name: rampup
     tags:
