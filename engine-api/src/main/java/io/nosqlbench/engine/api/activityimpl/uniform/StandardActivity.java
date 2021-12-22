@@ -22,14 +22,14 @@ import java.util.function.Function;
  * @param <R> A type of runnable which wraps the operations for this type of driver.
  * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
-public class StandardActivity<R extends Op,S> extends SimpleActivity {
+public class StandardActivity<R extends Op, S> extends SimpleActivity {
 
-    private final DriverAdapter<R,S> adapter;
+    private final DriverAdapter<R, S> adapter;
     private final OpSource<R> opsource;
     private NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<R>> sequence;
 
-    public StandardActivity(DriverAdapter<R,S> adapter, ActivityDef activityDef) {
+    public StandardActivity(DriverAdapter<R, S> adapter, ActivityDef activityDef) {
         super(activityDef);
         this.adapter = adapter;
 
@@ -37,7 +37,7 @@ public class StandardActivity<R extends Op,S> extends SimpleActivity {
             Function<ParsedOp, OpDispenser<R>> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
             sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor));
-            opsource= OpSource.of(sequence);
+            opsource = OpSource.of(sequence);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
@@ -57,14 +57,11 @@ public class StandardActivity<R extends Op,S> extends SimpleActivity {
         return sequence;
     }
 
-    public OpSource<R> getOpSource() {
-        return opsource;
-    }
-
     /**
      * When an adapter needs to identify an error uniquely for the purposes of
      * routing it to the correct error handler, or naming it in logs, or naming
      * metrics, override this method in your activity.
+     *
      * @return A function that can reliably and safely map an instance of Throwable to a stable name.
      */
     @Override
