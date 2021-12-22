@@ -1,13 +1,14 @@
 package io.nosqlbench.engine.core.lifecycle;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.NBEnvironment;
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -139,7 +140,6 @@ public class ActivityTypeLoader {
             activityDef.getParams().remove("driver");
             if (driverAdapter instanceof NBConfigurable) {
                 NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
-                cfgModel = cfgModel.add(ACTIVITY_CFG_MODEL);
                 NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
                 ((NBConfigurable) driverAdapter).applyConfig(cfg);
             }
@@ -149,15 +149,6 @@ public class ActivityTypeLoader {
             return Optional.empty();
         }
     }
-
-    private static final NBConfigModel ACTIVITY_CFG_MODEL = ConfigModel.of(Activity.class)
-        .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto"))
-        .add(Param.optional(List.of("workload", "yaml")))
-        .add(Param.optional("cycles"))
-        .add(Param.optional("alias"))
-        .add(Param.optional(List.of("cyclerate", "rate")))
-        .add(Param.optional("tags"))
-        .asReadOnly();
 
     public Set<String> getAllSelectors() {
         Map<String, Maturity> allSelectors = ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
