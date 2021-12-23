@@ -1,1 +1,2 @@
-- 4f310c122 (HEAD -> j17-preview) fix annotators init bug
+- 36de1f267 (HEAD -> j17-preview, origin/j17-preview) Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
+- 65759973a add client config options to ddb
