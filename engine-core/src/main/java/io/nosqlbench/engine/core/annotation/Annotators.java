@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Annotator;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import io.nosqlbench.nb.api.config.standard.ConfigLoader;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -56,6 +58,12 @@ public class Annotators {
                 if (annotator instanceof NBMapConfigurable) {
                     NBMapConfigurable NBMapConfigurable = (NBMapConfigurable) annotator;
                     NBMapConfigurable.applyConfig(cmap);
+                }
+
+                if (annotator instanceof NBConfigurable) {
+                    NBConfigurable nbConfigurable = (NBConfigurable) annotator;
+                    NBConfiguration cfg = nbConfigurable.getConfigModel().apply(cmap);
+                    nbConfigurable.applyConfig(cfg);
                 }
 
                 annotators.add(annotator);
