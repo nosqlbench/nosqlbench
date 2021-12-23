@@ -1,5 +1,6 @@
 package io.nosqlbench.adapter.dynamodb;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -41,6 +42,30 @@ public class DynamoDBSpace {
         } else {
             throw new OpConfigError("Either region or endpoint and signing_region options are required.");
         }
+
+
+        ClientConfiguration ccfg = new ClientConfiguration();
+        cfg.getOptional("client_socket_timeout").map(Integer::parseInt).ifPresent(ccfg::withSocketTimeout);
+        cfg.getOptional("client_execution_timeout").map(Integer::parseInt).ifPresent(ccfg::withClientExecutionTimeout);
+        cfg.getOptional("client_max_connections").map(Integer::parseInt).ifPresent(ccfg::withMaxConnections);
+        cfg.getOptional("client_max_error_retry").map(Integer::parseInt).ifPresent(ccfg::withMaxErrorRetry);
+        cfg.getOptional("client_user_agent_prefix").ifPresent(ccfg::withUserAgentPrefix);
+//            ccfg.withHeader();
+        cfg.getOptional("client_consecutive_retries_before_throttling").map(Integer::parseInt)
+            .ifPresent(ccfg::withMaxConsecutiveRetriesBeforeThrottling);
+        cfg.getOptional("client_gzip").map(Boolean::parseBoolean).ifPresent(ccfg::withGzip);
+        cfg.getOptional("client_tcp_keepalive").map(Boolean::parseBoolean).ifPresent(ccfg::withTcpKeepAlive);
+        cfg.getOptional("client_disable_socket_proxy").map(Boolean::parseBoolean).ifPresent(ccfg::withDisableSocketProxy);
+//                ccfg.withProtocol()
+//                    ccfg.withRetryMode();
+//            ccfg.withRetryPolicy();
+
+        ccfg.withSocketBufferSizeHints(
+            cfg.getOptional("client_so_send_size_hint").map(Integer::parseInt).orElse(0),
+            cfg.getOptional("client_so_recv_size_hint").map(Integer::parseInt).orElse(0)
+        );
+
+        builder.setClientConfiguration(ccfg);
 
         return builder.build();
     }
