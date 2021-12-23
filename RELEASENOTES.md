@@ -13,3 +13,4 @@
 - 8b7636851 Merge pull request #395 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.16.0
 - 2804ab7e7 Bump log4j-core from 2.15.0 to 2.16.0 in /mvn-defaults
 - 378a37aa2 Bump log4j-api from 2.15.0 to 2.16.0 in /mvn-defaults
+- force release
