@@ -2,9 +2,9 @@
 set -e
 #RELEASE_NOTES_FILE=${RELEASE_NOTES_FILE:?RELEASE_NOTES_FILE must be provided}
 
-git log --oneline --decorate --max-count=1000 main > /tmp/gitlog_main
+git log --oneline --decorate --max-count=1000 > /tmp/gitlog.txt
 
-readarray lines < /tmp/gitlog_main
+readarray lines < /tmp/gitlog.txt
 for line in "${lines[@]}"
 do
  if [[ $line =~ \(tag:\ nosqlbench-[0-9]+\.[0-9]+\.[0-9]+\).+ ]]
