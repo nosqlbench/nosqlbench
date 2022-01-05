@@ -2,7 +2,12 @@
 
 These examples are here to illustrate and test specific variations of op templates.
 
-## keyed name statement form
+## Op Naming
+
+### map of op templates with explicit name
+
+If you use a map of op templates, they can still override the name of the op simply by adding
+the `name` key.
 
 *yaml:*
 
@@ -11,8 +16,6 @@ ops:
   op1:
     name: special-op-name
     op: select * from ks1.tb1;
-    params:
-      prepared: false
 ```
 
 *json:*
@@ -22,10 +25,7 @@ ops:
   "ops": {
     "op1": {
       "name": "special-op-name",
-      "op": "select * from ks1.tb1;",
-      "params": {
-        "prepared": false
-      }
+      "op": "select * from ks1.tb1;"
     }
   }
 }
@@ -40,9 +40,6 @@ ops:
     "op": {
       "stmt": "select * from ks1.tb1;"
     },
-    "params": {
-      "prepared": false
-    },
     "tags": {
       "block": "block0",
       "name": "block0--special-op-name"
@@ -51,54 +48,12 @@ ops:
 ]
 ```
 
-## keyed name statement-map form with name field
+### map of op templates without explicit name
 
-*yaml:*
+This yaml document contains a single named op template `op1` which contains a scoped op `op` with
+two op fields `field1` and `field2`.
 
-```yaml
-ops:
-  op1:
-    name: special-op-name
-    op:
-      field1: select * from ks1.tb1;
-      field2: field 2 value
-```
-
-*json:*
-
-```json5
-{
-  "ops": {
-    "op1": {
-      "name": "special-op-name",
-      "op": {
-        "field1": "select * from ks1.tb1;",
-        "field2": "field 2 value"
-      }
-    }
-  }
-}
-```
-
-*ops:*
-
-```json5
-[
-  {
-    "name": "block0--special-op-name",
-    "op": {
-      "field1": "select * from ks1.tb1;",
-      "field2": "field 2 value"
-    },
-    "tags": {
-      "block": "block0",
-      "name": "block0--special-op-name"
-    }
-  }
-]
-```
-
-## keyed name statement-map form WITHOUT name field WITH op key
+The op template takes its name `op1` from the map key under the ops property.
 
 *yaml:*
 
@@ -143,7 +98,9 @@ ops:
 ]
 ```
 
-## keyed name statement-map form WITHOUT name field WITHOUT op key
+## Op Fields
+
+### Anonymous fields go to op by default
 
 *yaml:*
 
@@ -174,9 +131,156 @@ ops:
   {
     "name": "block0--op1",
     "op": {
-      "stmt": "select * from ks1.tb1;"
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value"
+    },
+    "tags": {
+      "block": "block0",
+      "name": "block0--op1"
+    }
+  }
+]
+```
+
+### Scoped op fields allow dangling param values
+
+*yaml:*
+
+```yaml
+ops:
+  op1:
+    op:
+      field1: select * from ks1.tb1;
+      field2: field 2 value
+    paramname1: paramval1
+```
+
+*json:*
+
+```json5
+{
+  "ops": {
+    "op1": {
+      "op": {
+        "field1": "select * from ks1.tb1;",
+        "field2": "field 2 value"
+      },
+      "paramname1": "paramval1"
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "name": "block0--op1",
+    "op": {
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value"
     },
     "params": {
+      "paramname1": "paramval1"
+    },
+    "tags": {
+      "block": "block0",
+      "name": "block0--op1"
+    }
+  }
+]
+```
+
+### Scoped op and param fields disallow dangling fields
+
+*yaml:*
+
+```yaml
+ops:
+  op1:
+    op:
+      field1: select * from ks1.tb1;
+      field2: field 2 value
+    params:
+      paramname1: paramval1
+#   dangling1: value
+#   ^ NOT ALLOWED HERE
+```
+
+*json:*
+
+```json5
+{
+  "ops": {
+    "op1": {
+      "op": {
+        "field1": "select * from ks1.tb1;",
+        "field2": "field 2 value"
+      },
+      "params": {
+        "paramname1": "paramval1"
+      }
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "name": "block0--op1",
+    "op": {
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value"
+    },
+    "params": {
+      "paramname1": "paramval1"
+    },
+    "tags": {
+      "block": "block0",
+      "name": "block0--op1"
+    }
+  }
+]
+```
+
+## keyed name statement-map form WITHOUT name field WITHOUT op key
+
+When statements are named by key, and you need to specify a query string of some type, then it must
+be explicitly part of the naming structure, as with a field name like `stmt` or `op`.
+
+*yaml:*
+
+```yaml
+ops:
+  op1:
+    field1: select * from ks1.tb1;
+    field2: field 2 value
+```
+
+*json:*
+
+```json5
+{
+  "ops": {
+    "op1": {
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value"
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "name": "block0--op1",
+    "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
     },

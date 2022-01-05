@@ -78,7 +78,8 @@ public class StatementsOwner extends RawStmtFields {
                 if (o instanceof String) {
                     defs.add(new RawStmtDef(defaultName, (String) o));
                 } else if (o instanceof Map) {
-                    defs.add(new RawStmtDef(defaultName, (Map<String, Object>) o));
+                    RawStmtDef def = new RawStmtDef(defaultName, (Map<String, Object>) o);
+                    defs.add(def);
                 } else {
                     throw new RuntimeException("Can not construct stmt def from object type:" + o.getClass());
                 }
