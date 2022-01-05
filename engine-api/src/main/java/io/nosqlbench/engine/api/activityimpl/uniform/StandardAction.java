@@ -10,6 +10,8 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @param <R> The type of operation
  */
 public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> implements SyncAction, ActivityDefObserver {
+    private final static Logger logger = LogManager.getLogger("ACTION");
 
     private final A activity;
     private final int slot;
@@ -33,7 +36,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer resultTimer;
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
-    private final OpSequence<OpDispenser<R>> opsequence;
+    private final OpSequence<OpDispenser<? extends R>> opsequence;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
@@ -50,57 +53,62 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     @Override
     public int runCycle(long cycle) {
 
-        OpDispenser<R> dispenser;
+        OpDispenser<? extends R> dispenser;
         Op op = null;
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
             op = dispenser.apply(cycle);
         }
 
-        int tries = 0;
         int code = 0;
+        while (op != null) {
 
-        Object result = null;
-        while (tries++ <= activity.getMaxTries()) {
-            Throwable error = null;
-            long startedAt = System.nanoTime();
+            int tries = 0;
+            Object result = null;
+            while (tries++ <= activity.getMaxTries()) {
+                Throwable error = null;
+                long startedAt = System.nanoTime();
 
-            try (Timer.Context ct = executeTimer.time()) {
-                if (op instanceof RunnableOp) {
-                    ((RunnableOp)op).run();
-                } else if (op instanceof CycleOp<?>) {
-                    result = ((CycleOp) op).apply(cycle);
-                } else if (op instanceof ChainingOp) {
-                    result = ((ChainingOp) op).apply(result);
-                } else {
-                    throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
-                        "either InitialCycleFunction or ChainedCycleFunction");
-                }
-                if (op instanceof OpGenerator) {
-                    op = ((OpGenerator) op).getNextOp();
-                } else {
-                    break;
-                }
-
-            } catch (Exception e) {
-                error = e;
-            } finally {
-                long nanos = System.nanoTime() - startedAt;
-                resultTimer.update(nanos, TimeUnit.NANOSECONDS);
-                if (error == null) {
-                    resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
-                    dispenser.onSuccess(cycle,nanos,op.getResultSize());
-                } else {
-                    ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
-                    dispenser.onError(cycle,nanos,error);
-                    code = detail.resultCode;
-                    if (!detail.isRetryable()) {
+                try (Timer.Context ct = executeTimer.time()) {
+                    if (op instanceof RunnableOp) {
+                        ((RunnableOp) op).run();
+                    } else if (op instanceof CycleOp<?>) {
+                        result = ((CycleOp) op).apply(cycle);
+                    } else if (op instanceof ChainingOp) {
+                        result = ((ChainingOp) op).apply(result);
+                    } else {
+                        throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
+                            "one of [RunnableOp, CycleOp, or ChainingOp]");
+                    }
+                } catch (Exception e) {
+                    error = e;
+                } finally {
+                    long nanos = System.nanoTime() - startedAt;
+                    resultTimer.update(nanos, TimeUnit.NANOSECONDS);
+                    if (error == null) {
+                        resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
+                        dispenser.onSuccess(cycle, nanos, op.getResultSize());
                         break;
+                    } else {
+                        ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
+                        dispenser.onError(cycle, nanos, error);
+                        code = detail.resultCode;
+                        if (!detail.isRetryable()) {
+                            break;
+                        }
                     }
                 }
             }
+            triesHistogram.update(tries);
+
+            if (op instanceof OpGenerator) {
+                logger.trace("GEN OP for cycle(" + cycle + ")");
+                op = ((OpGenerator) op).getNextOp();
+            } else {
+                op = null;
+            }
         }
-        triesHistogram.update(tries);
+
         return code;
     }
 
