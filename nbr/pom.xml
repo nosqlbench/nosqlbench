@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.79-SNAPSHOT</version>
+        <version>4.17.01-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,37 +24,37 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-rest</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-diag</artifactId>
-            <version>4.15.79-SNAPSHOT</version>
+            <version>4.17.01-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
