@@ -302,10 +302,12 @@ public class NBCLIOptions {
                     break;
                 case DASH_VV_DEBUG:
                     consoleLevel = NBLogLevel.DEBUG;
+                    setWantsStackTraces(true);
                     arglist.removeFirst();
                     break;
                 case DASH_VVV_TRACE:
                     consoleLevel = NBLogLevel.TRACE;
+                    setWantsStackTraces(true);
                     arglist.removeFirst();
                     break;
                 case ANNOTATE_EVENTS:
