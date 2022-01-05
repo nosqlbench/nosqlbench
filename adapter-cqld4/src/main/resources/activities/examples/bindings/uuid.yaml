@@ -1,0 +1,39 @@
+# You can run this file with this command line to see the values printed to stdout:
+# ./ebdse run driver=stdout yaml=bindings/uuid.yaml cycles=10
+
+# This file demonstrates different types of timestamp recipes
+# that you can use with virtdata. (The bindings used in ebdse)
+
+# If you want to control the output, uncomment and edit the statement template below
+# and modify the named anchors to suit your output requirements.
+
+#statements:
+#  example1: "{fullname}\n"
+
+bindings:
+
+# All uncommented lines under this are indented, so they become named bindings below
+# the entry above
+
+# Normally, the value that you get with a cycle starts at 0.
+
+ cycleNum: Identity();
+
+# here we convert the cycle number to a UUID by casting.
+ id: Identity(); ToHashedUUID()
+
+##    Station ID (100 unique UUID values, can override stations on the command-line)
+ station_id: Mod(<<stations:100>>); ToHashedUUID()
+
+#  Example output:
+
+#  station_id : 28df63b7-cc57-43cb-9752-fae69d1653da
+#  station_id : 5752fae6-9d16-43da-b20f-557a1dd5c571
+#  station_id : 720f557a-1dd5-4571-afb2-0dd47d657943
+#  station_id : 6fb20dd4-7d65-4943-9967-459343efafdd
+#  station_id : 19674593-43ef-4fdd-bdf4-98b19568b584
+#  station_id : 3df498b1-9568-4584-96fd-76f6081da01a
+#  station_id : 56fd76f6-081d-401a-85eb-b1d9e5bba058
+#  station_id : 45ebb1d9-e5bb-4058-b75d-d51547d31952
+#  station_id : 375dd515-47d3-4952-a49d-236be9a5c070
+#  station_id : 249d236b-e9a5-4070-9afa-8fae9060d959

@@ -1,0 +1,54 @@
+scenarios:
+  default:
+    schema: run driver=cql tags==phase:schema cycles==UNDEF threads==1
+    rampup: run driver=cql tags==phase:rampup cycles=TEMPLATE(rampup-cycles,100K) threads=auto
+
+bindings:
+  userid: Template('user-{}',ToString()); SaveString('userid');
+  interest: Template('interest-{}',ToString());
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    statements:
+      - create-keyspace: |
+          create KEYSPACE if not exists TEMPLATE(keyspace,examples)
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
+          AND durable_writes = 'true';
+      - create-users-table: |
+          create table if not exists TEMPLATE(keyspace,examples).users (
+            userid text PRIMARY KEY
+          );
+      - create-interests-table: |
+          create table if not exists TEMPLATE(keyspace,examples).interests (
+            userid text,
+            interest text,
+            primary key (interest, userid)
+          );
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - insert-users: |
+          insert into TEMPLATE(keyspace,examples).users (userid) VALUES ({userid});
+        tags:
+          entity: users
+      - insert-interests: |
+          insert into TEMPLATE(keyspace,examples).interests(
+           interest,    userid
+          ) VALUES (
+           {interest}, {userid}
+          );
+        tags:
+          entity: interests
+  - name: main
+    tags:
+      phase: main
+    statements:
+      - read-user: |
+         select * from TEMPLATE(keyspace,examples).users
+          where userid={userid};
+      - read interests: |
+         select * from TEMPLATE(keyspace,examples).interests
+          where interest={interest};

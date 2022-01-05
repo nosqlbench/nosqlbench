@@ -1,0 +1,121 @@
+description: |
+  This is a workload which creates an incrementally growing dataset over cycles.
+
+  Rows will be added incrementally in both rampup and main phases. However, during
+  the main phase, reads will also occur at the same rate, with the read patterns
+  selecting from the size of data written up to that point.
+  In order to ensure that the reads and writes operate against the same set of
+  identifiers, it is crucial that the ratios are not adjusted unless the binding
+  recipes are adjusted to match. With write:read ratio of 1:1 and a prefix function
+  Div(2L) at the front of the main phase bindings, the writes and reads will address
+  the same rows rather than playing leap-frog on the cycle values.
+  The main phase can be run without the rampup phase for this workload, as long
+  as your test is defined as an incremental write and read test. If you need
+  background data pre-loaded to ensure realistic read times against pre-indexed
+  data, then you may use the rampup phase before the main phase. However, be aware
+  that these are simply different test definitions, and are both valid in different ways.
+  Due to how this workload is meant to be used, you must specify main-cycles= when
+  invoking the main phase.
+  The cycles value for the main test includes operations for both writes and reads,
+  thus the logical number of rows in the dataset will be effectively half of that.
+  This workload is intended to be run with a sufficiently high number of cycles.
+  Two key details should be obvious in the read latency metrics -- 1) the relationship
+  between dataset size, request rate, and response times and 2) inflection points
+  between any hot and cold access modes for LRU or other caching mechanisms as
+  the primary cache layer is saturated.
+
+scenarios:
+  default:
+    schema: run tags=phase:schema threads==1
+    #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
+    main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
+  default-schema: run tags=phase:schema threads==1
+  #  default-rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
+  default-main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
+  astra:
+    schema: run tags=phase:astra-schema threads==1
+    #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,0) threads=auto
+    main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
+
+params:
+  instrument: true
+
+bindings:
+  seq_key: ToString()
+  rampup_value: Hash(); ToString();
+  read_key: Div(2L); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); ToString();
+  read_value: Div(2L); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); Hash(); ToString();
+  write_key: Div(2L); Hash(); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); ToString();
+  write_value: Div(2L); Hash(); HashRangeScaled(TEMPLATE(scalefactor,1.0d)); Hash(); ToString();
+
+
+blocks:
+  - name: schema
+    tags:
+      phase: schema
+    statements:
+      - create-keyspace: |
+          create keyspace if not exists TEMPLATE(keyspace,baselines)
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+          AND durable_writes = true;
+        tags:
+          name: create-keyspace
+      - create-table: |
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+  - name: schema-astra
+    tags:
+      phase: schema-astra
+    params:
+      prepared: false
+    statements:
+      - create-table: |
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+        tags:
+          name: create-table-astra
+
+  - name: rampup
+    tags:
+      phase: rampup
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    statements:
+      - rampup-insert: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
+          (key, value)
+          values ({rampup_key},{rampup_value});
+        tags:
+          name: rampup-insert
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: 1
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    statements:
+      - main-select: |
+          select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) where key={read_key};
+        tags:
+          name: main-select
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: 1
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    statements:
+      - main-insert: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
+          (key, value) values ({write_key}, {write_value});
+        tags:
+          name: main-insert
+

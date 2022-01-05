@@ -1,0 +1,172 @@
+# You can run this file with this command line to see the values printed to stdout:
+# ./ebdse run driver=stdout yaml=bindings/text.yaml cycles=10
+
+# This file demonstrates different types of timestamp recipes
+# that you can use with virtdata. (The bindings used in ebdse)
+
+# If you want to control the output, uncomment and edit the statement template below
+# and modify the named anchors to suit your output requirements.
+
+#statements:
+#  example1: "{fullname}\n"
+
+bindings:
+
+# All uncommented lines under this are indented, so they become named bindings below
+# the entry above
+
+# Normally, the value that you get with a cycle starts at 0.
+
+ cycleNum: Identity();
+
+# here we convert the cycle number to a text by casting.
+ id: Identity(); ToString()
+
+## Names
+#    See http://docs.virtdata.io/functions/funcref_premade/
+#    Full name
+ fullname: FullNames()
+
+#  Example output:
+
+#  fullname : Norman Wolf
+#  fullname : Lisa Harris
+#  fullname : John Williams
+#  fullname : Freda Gaytan
+#  fullname : Violet Ferguson
+#  fullname : Larry Roberts
+#  fullname : Andrew Daniels
+#  fullname : Jean Keys
+#  fullname : Mark Cole
+#  fullname : Roberta Bounds
+
+
+#    Name with last name first
+ fullname_lastname_first: Template('{}, {}', LastNames(), FirstNames())
+
+#  Example output:
+
+#  fullname_lastname_first : Miracle, Lisa
+#  fullname_lastname_first : Wolf, John
+#  fullname_lastname_first : Harris, Freda
+#  fullname_lastname_first : Williams, Violet
+#  fullname_lastname_first : Gaytan, Larry
+#  fullname_lastname_first : Ferguson, Andrew
+#  fullname_lastname_first : Roberts, Jean
+#  fullname_lastname_first : Daniels, Mark
+#  fullname_lastname_first : Keys, Roberta
+#  fullname_lastname_first : Cole, Timothy
+
+#    Phone
+ phone: compose HashRange(10000000000L,99999999999L); Combinations('0-9;0-9;0-9;-;0-9;0-9;0-9;-;0-9;0-9;0-9;0-9')
+
+#  Example output:
+
+#    $ ebdse run driver=stdout yaml=example-bindings format=readout cycles=10
+#  phone : 241-478-6787
+#  phone : 784-482-7668
+#  phone : 804-068-5502
+#  phone : 044-195-5579
+#  phone : 237-202-5601
+#  phone : 916-390-8911
+#  phone : 550-943-7851
+#  phone : 762-031-1362
+#  phone : 234-050-2563
+#  phone : 312-672-0039
+
+##    Career
+ career: HashedLineToString('data/careers.txt')
+
+#  Example output:
+
+#  career : Paper Goods Machine Setters, Operators, and Tenders
+#  career : Training and Development Specialists
+#  career : Embossing Machine Set-Up Operators
+#  career : Airframe-and-Power-Plant Mechanics
+#  career : Sales Representatives, Agricultural
+#  career : Automotive Body and Related Repairers
+#  career : Community Health Workers
+#  career : Billing, Posting, and Calculating Machine Operators
+#  career : Data Processing Equipment Repairers
+#  career : Sawing Machine Setters and Set-Up Operators
+
+##    Job Description
+ jobdescription: Add(0); HashedLineToString('data/jobdescription.txt')
+
+#  Example output:
+
+#  jobdescription: Add(0); HashedLineToString('data/jobdescription.txt')
+
+##    Weighted enumerated values
+#    Sorting hat (even distribution)
+ house: WeightedStrings('Gryffindor:0.2;Hufflepuff:0.2;Ravenclaw:0.2;Slytherin:0.2')
+#  Example output:
+
+#  house : Hufflepuff
+#  house : Ravenclaw
+#  house : Slytherin
+#  house : Slytherin
+#  house : Gryffindor
+#  house : Hufflepuff
+#  house : Ravenclaw
+#  house : Ravenclaw
+#  house : Hufflepuff
+#  house : Hufflepuff
+
+##    Weighted prefixes
+ prefix: WeightedStrings('Mr:0.45;Mrs:0.25;Ms:0.1;Miss:0.1;Dr:0.05')
+
+#  Example output:
+
+#  prefix : Mr
+#  prefix : Mrs
+#  prefix : Miss
+#  prefix : Miss
+#  prefix : Mr
+#  prefix : Mrs
+#  prefix : Mrs
+#  prefix : Mrs
+#  prefix : Mr
+#  prefix : Mr
+#  prefix : Mr
+#  prefix : Mr
+#  prefix : Mrs
+#  prefix : Mrs
+#  prefix : Mr
+#  prefix : Mr
+#  prefix : Mrs
+#  prefix : Miss
+#  prefix : Ms
+#  prefix : Dr
+
+##    Current Employer
+ current_employer: HashedLineToString('data/companies.txt')
+
+#  Example output:
+
+#  current_employer : Monsanto Company
+#  current_employer : International Flavors & Fragrances
+#  current_employer : Carpenter Technology Corporation
+#  current_employer : Union Pacific Corporation
+#  current_employer : Rush Enterprises
+#  current_employer : Peabody Energy Corporation
+#  current_employer : Rockwell Automation
+#  current_employer : Auto-Owners Insurance Group
+#  current_employer : ArcBest Corporation
+#  current_employer : WGL Holdings
+
+##    Sensor
+ sensor_name: HashedLineToString('data/variable_words.txt')
+
+#  Example output:
+
+#  sensor_name : rotational_latency
+#  sensor_name : half_life
+#  sensor_name : clarity
+#  sensor_name : fairness
+#  sensor_name : diversity
+#  sensor_name : turbulence
+#  sensor_name : mode
+#  sensor_name : current
+#  sensor_name : rating
+#  sensor_name : stall_speed

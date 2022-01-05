@@ -1,12 +1,17 @@
-description: creates local graphs which resemble a wagon-wheel topology
+description: creates local graphs which resemble a wagon-wheel topology, using
+ DSE Graph, version 6.8 or newer
 
 scenarios:
+  creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
+  schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
+  disable-verify: run driver=cqld4 graphname=graph_wheels tags=phase:disable-verify cycles===UNDEF
+  rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1000
   default:
-    creategraph: run driver=dsegraph graphname=graph_wheels tags=phase:graph-schema
-    schema: run driver=dsegraph graphname=graph_wheels tags=phase:graph-schema
-    main: run driver==dsegraph graphname=graph_wheels tags=name:main-add cycles=100000
-  devmode: run driver=dsegraph graphname=graph_wheels tags=name:dev-mode
-  prodmode: run driver=dsegraph graphname=graph_wheels tags=name:dev-mode
+    creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
+    schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
+    rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1
+  devmode: run driver=cqld4 graphname=graph_wheels tags=name:dev-mode
+  prodmode: run driver=cqld4 graphname=graph_wheels tags=name:dev-mode
 
 bindings:
   sessionid: ToEpochTimeUUID()->java.util.UUID; ToString();
@@ -16,54 +21,86 @@ bindings:
   osversion: WeightedStrings('nougat:3;oreo:1;jellybean:2;4:1;4c:1;5:1;5c:1;trusty:1;xenial:1;yosemite:1;el capitan:2;sierra:3;high sierra:1;7:1;10:2')
   ipaddress: Combinations('1;7;0-3;.;0-2;0-2;0-5;.;0-2;0-2;0-5')
   createdtime: Add(1505256898)
+  diag_ten_pct: WeightedLongs('1:1;0:9')
+  diag_one_pct: WeightedLongs('1:1;0:99')
 
 blocks:
-  - name: create-graph
+  create-graph:
     tags:
       phase: create-graph
     statements:
-      - creategraph: >-
-          system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
-  - name: create-schema
+      creategraph:
+       type: gremlin
+       script: >-
+         system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
+  create-schema:
     tags:
       phase: graph-schema
     statements:
-      - graph-schema: >-
-          schema.propertyKey('sessionid').Uuid().ifNotExists().create();
-          schema.propertyKey('deviceid').Uuid().ifNotExists().create();
-          schema.propertyKey('ipaddress').Text().ifNotExists().create();
-          schema.propertyKey('createdtime').Bigint().ifNotExists().create();
-          schema.vertexLabel('session').partitionKey('sessionid').properties('ipaddress', 'deviceid', 'createdtime').ifNotExists().create();
-          schema.propertyKey('type').Text().ifNotExists().create();
-          schema.propertyKey('os').Text().ifNotExists().create();
-          schema.propertyKey('osversion').Text().ifNotExists().create();
-          schema.vertexLabel('device').partitionKey('deviceid').properties('type', 'os', 'osversion').ifNotExists().create();
-          schema.edgeLabel('using').single().connection('session','device').ifNotExists().create();
-        tags:
-          name: graph-schema
-  - name: dev-mode
+      graph-schema:
+        type: gremlin
+        graphname: <<graphname:graph_wheels>>
+        script: >-
+          schema.vertexLabel('session')
+           .ifNotExists()
+           .partitionBy('sessionid', Uuid)
+           .property('ipaddress', Text)
+           .property('deviceid', Uuid)
+           .property('createdtime', Bigint)
+           .create();
+
+          schema.vertexLabel('device')
+           .ifNotExists()
+           .partitionBy('deviceid', Uuid)
+           .property('type', Text)
+           .property('os', Text)
+           .property('osversion', Text)
+           .create();
+
+           schema.edgeLabel('using')
+           .ifNotExists()
+           .from('session')
+           .to('device')
+           .create()
+  dev-mode:
     tags:
       phase: dev-mode
     statements:
-      - dev-mode: >-
-          schema.config().option('graph.schema_mode').set('Development');
-        tags:
-          name: dev-mode
-  - name: prod-mode
+      dev-mode:
+       type: gremlin
+       graphname: <<graphname:graph_wheels>>
+       script: >-
+        schema.config().option('graph.schema_mode').set('Development');
+  prod-mode:
     tags:
       phase: prod-mode
     statements:
-      - prod-mode: >-
-          schema.config().option('graph.schema_mode').set('Production');
-        tags:
-          name: prod-mode
-  - name: main
+      prod-mode:
+        type: gremlin
+        graphname: <<graphname:graph_wheels>>
+        script: >-
+         schema.config().option('graph.schema_mode').set('Production');
+  rampup:
     tags:
-      phase: main
+      phase: rampup
     statements:
-      - main-add: >-
-          device = graph.addVertex(label, 'device','deviceid', {deviceid}, 'type', {type}, 'os', {os},  'osversion', {osversion});
-          session = graph.addVertex(label, 'session', 'sessionid', {sessionid}, 'ipaddress', {ipaddress}, 'deviceid', {deviceid}, 'createdtime', {createdtime});
-          session.addEdge('using', device);
-        tags:
-          name: main-add
+      main-add:
+        type: gremlin
+        diag: "{diag_one_pct}"
+        graphname: <<graphname:graph_wheels>>
+        script: >-
+          device = g.addV('device')
+           .property('deviceid', '{deviceid}' as UUID)
+           .property('type', '{type}')
+           .property('os', '{os}')
+           .property('osversion', '{osversion}')
+           .as('d')
+          .addV('session')
+           .property('sessionid', '{sessionid}' as UUID)
+           .property('ipaddress', '{ipaddress}')
+           .property('deviceid', '{deviceid}' as UUID)
+           .property('createdtime', {createdtime})
+           .as('s')
+          .addE('using').from('s').to('d');
+
+
