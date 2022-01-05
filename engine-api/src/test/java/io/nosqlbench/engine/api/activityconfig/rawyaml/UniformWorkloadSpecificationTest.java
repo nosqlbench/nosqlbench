@@ -301,7 +301,7 @@ public class UniformWorkloadSpecificationTest {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
-                StmtsDocList stmtsDocs = StatementsLoader.loadString(yaml);
+                StmtsDocList stmtsDocs = StatementsLoader.loadString(yaml, Map.of());
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
@@ -340,7 +340,7 @@ public class UniformWorkloadSpecificationTest {
 
         try {
             List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
-            JsonElement elem = parser.parse(json);
+            JsonElement elem = JsonParser.parseString(json);
             if (elem.isJsonArray()) {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();
