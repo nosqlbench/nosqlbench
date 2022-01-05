@@ -127,9 +127,11 @@ public class ConfigModel implements NBConfigModel {
         LinkedHashMap<String, Object> extracted = new LinkedHashMap<>();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (getNamedParams().containsKey(providedCfgField)) {
-                extracted.put(providedCfgField, sharedConfig.remove(providedCfgField));
+                extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }
+        extracted.keySet().forEach(sharedConfig::remove);
+
         return new NBConfiguration(this, extracted);
     }
 
