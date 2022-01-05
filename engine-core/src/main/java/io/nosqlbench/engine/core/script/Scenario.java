@@ -321,7 +321,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.out.flush();
             } catch (Exception e) {
                 this.state = State.Errored;
-                logger.warn("Error in scenario, shutting down.");
+                logger.error("Error in scenario, shutting down. (" + e.toString() + ")");
                 this.scenarioController.forceStopScenario(5000, false);
                 this.error = e;
                 throw new RuntimeException(e);
