@@ -1,17 +1,19 @@
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4Processors;
+import io.nosqlbench.adapter.cqld4.RSProcessors;
+import io.nosqlbench.adapter.cqld4.ResultSetProcessor;
 import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4PreparedBatchOpDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4BatchStatementDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedStmtDispenser;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStmtDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.processors.CqlFieldCaptureProcessor;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
@@ -19,19 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
+public class CqlD4CqlOpMapper implements OpMapper<Cqld4CqlOp> {
+    private final CqlSession session;
 
-
-    private final DriverSpaceCache<? extends Cqld4Space> cache;
-    private final NBConfiguration cfg;
-
-    public Cqld4OpMapper(NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
-        this.cfg = config;
-        this.cache = cache;
+    public CqlD4CqlOpMapper(CqlSession session) {
+        this.session = session;
     }
 
-    public OpDispenser<Cqld4Op> apply(ParsedOp cmd) {
-
+    public OpDispenser<Cqld4CqlOp> apply(ParsedOp cmd) {
         ParsedTemplate stmtTpl = cmd.getStmtAsTemplate().orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + cmd
         ));
@@ -41,11 +38,6 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
             processors.add(() -> new CqlFieldCaptureProcessor(stmtTpl.getCaptures()));
         }
 
-//        cmd.getOptionalStaticConfig("processor",String.class)
-//            .map(s -> ParamsParser.parseToMap(s,"type"))
-//            .map(Cqld4Processors::resolve)
-//            .ifPresent(processors::add);
-//
         Optional<List> processorList = cmd.getOptionalStaticConfig("processors", List.class);
         processorList.ifPresent(l -> {
             l.forEach(m -> {
@@ -54,18 +46,10 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
                 processors.add(() -> processor);
             });
         });
-//
-//            processorList.stream()
-//            .map(s -> ParamsParser.parseToMap(s,"type"))
-//            .map(Cqld4Processors::resolve)
-//            .forEach(processors::add);
 
-        Cqld4Space cqld4Space = cache.get(cmd.getStaticConfigOr("space", "default"));
+
         boolean prepared = cmd.getStaticConfigOr("prepared", true);
         boolean batch = cmd.getStaticConfigOr("boolean", false);
-        CqlSession session = cqld4Space.getSession();
-
-
 
         if (prepared && batch) {
             return new CqlD4PreparedBatchOpDispenser(session, cmd);
@@ -76,6 +60,6 @@ public class Cqld4OpMapper implements OpMapper<Cqld4Op> {
         } else {
             return new Cqld4SimpleCqlStmtDispenser(session, cmd);
         }
-    }
 
+    }
 }

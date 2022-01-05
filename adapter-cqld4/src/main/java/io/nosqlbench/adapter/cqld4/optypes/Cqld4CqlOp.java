@@ -1,11 +1,13 @@
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.*;
 import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
+import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
@@ -30,8 +32,7 @@ import java.util.Map;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-
-public abstract class Cqld4Op implements CycleOp<ResultSet>, VariableCapture, OpGenerator {
+public abstract class Cqld4CqlOp extends Cqld4BaseOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator {
 
     private final CqlSession session;
     private final int maxpages;
@@ -39,10 +40,10 @@ public abstract class Cqld4Op implements CycleOp<ResultSet>, VariableCapture, Op
     private final Cqld4OpMetrics metrics;
 
     private ResultSet rs;
-    private Cqld4Op nextOp;
+    private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
 
-    public Cqld4Op(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics) {
+    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics) {
         this.session = session;
         this.maxpages = maxpages;
         this.retryreplace = retryreplace;
@@ -50,7 +51,7 @@ public abstract class Cqld4Op implements CycleOp<ResultSet>, VariableCapture, Op
         this.metrics = metrics;
     }
 
-    public Cqld4Op(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics, RSProcessors processors) {
+    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics, RSProcessors processors) {
         this.session = session;
         this.maxpages = maxpages;
         this.retryreplace = retryreplace;
@@ -122,9 +123,9 @@ public abstract class Cqld4Op implements CycleOp<ResultSet>, VariableCapture, Op
 
     public abstract String getQueryString();
 
-    private Cqld4Op rebindLwt(Statement<?> stmt, Row row) {
+    private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
-        return new Cqld4ReboundStatement(session,maxpages,retryreplace,metrics,rebound,processors);
+        return new Cqld4CqlReboundStatement(session,maxpages,retryreplace,metrics,rebound,processors);
     }
 
 }

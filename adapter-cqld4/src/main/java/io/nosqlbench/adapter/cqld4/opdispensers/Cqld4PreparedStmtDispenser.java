@@ -3,17 +3,17 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import io.nosqlbench.adapter.cqld4.Cqld4Op;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4PreparedStatement;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser extends BaseOpDispenser<Cqld4Op> {
+public class Cqld4PreparedStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
 
     private final CqlSession session;
 
@@ -41,9 +41,9 @@ public class Cqld4PreparedStmtDispenser extends BaseOpDispenser<Cqld4Op> {
     }
 
     @Override
-    public Cqld4Op apply(long value) {
+    public Cqld4CqlOp apply(long value) {
         Object[] parameters = varbinder.apply(value);
         BoundStatement stmt = preparedStmt.bind(parameters);
-        return new Cqld4PreparedStatement(session, stmt, maxpages, retryreplace, metrics, processors);
+        return new Cqld4CqlPreparedStatement(session, stmt, maxpages, retryreplace, metrics, processors);
     }
 }

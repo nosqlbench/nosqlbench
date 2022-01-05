@@ -2,13 +2,13 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import io.nosqlbench.adapter.cqld4.Cqld4Op;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4SimpleCqlStatement;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleCqlStatement;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
-public class Cqld4SimpleCqlStmtDispenser extends BaseOpDispenser<Cqld4Op> {
+public class Cqld4SimpleCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
 
     private final CqlSession session;
     private final ParsedOp cmd;
@@ -26,9 +26,9 @@ public class Cqld4SimpleCqlStmtDispenser extends BaseOpDispenser<Cqld4Op> {
     }
 
     @Override
-    public Cqld4SimpleCqlStatement apply(long value) {
+    public Cqld4CqlSimpleCqlStatement apply(long value) {
         String stmtBody = cmd.get("stmt",value);
         SimpleStatement simpleStatement = SimpleStatement.newInstance(stmtBody);
-        return new Cqld4SimpleCqlStatement(session,simpleStatement,maxpages,retryreplace,metrics);
+        return new Cqld4CqlSimpleCqlStatement(session,simpleStatement,maxpages,retryreplace,metrics);
     }
 }

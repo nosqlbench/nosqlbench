@@ -2,16 +2,12 @@ package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import io.nosqlbench.adapter.cqld4.Cqld4Op;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
-import io.nosqlbench.virtdata.core.templates.CapturePoint;
 
-import java.util.Map;
-
-public class Cqld4SimpleCqlStatement extends Cqld4Op {
+public class Cqld4CqlSimpleCqlStatement extends Cqld4CqlOp {
     private final SimpleStatement stmt;
 
-    public Cqld4SimpleCqlStatement(CqlSession session, SimpleStatement stmt, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics) {
+    public Cqld4CqlSimpleCqlStatement(CqlSession session, SimpleStatement stmt, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics) {
         super(session, maxpages,retryreplace,metrics);
         this.stmt = stmt;
     }

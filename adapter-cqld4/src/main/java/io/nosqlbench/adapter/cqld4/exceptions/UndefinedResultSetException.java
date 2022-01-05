@@ -1,9 +1,11 @@
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.adapter.cqld4.exceptions;
+
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 
 public class UndefinedResultSetException extends RuntimeException {
-    private final Cqld4Op cqld4op;
+    private final Cqld4CqlOp cqld4op;
 
-    public UndefinedResultSetException(Cqld4Op cqld4Op) {
+    public UndefinedResultSetException(Cqld4CqlOp cqld4Op) {
         this.cqld4op = cqld4Op;
     }
 
