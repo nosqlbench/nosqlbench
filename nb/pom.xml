@@ -57,11 +57,11 @@
             <version>4.15.78-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-web</artifactId>
-            <version>4.15.78-SNAPSHOT</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>driver-web</artifactId>-->
+<!--            <version>4.15.78-SNAPSHOT</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>io.nosqlbench</groupId>

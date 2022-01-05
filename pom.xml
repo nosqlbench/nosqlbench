@@ -47,7 +47,8 @@
 <!--        <module>driver-cql-shaded</module>-->
 <!--        <module>driver-cqlverify</module>-->
 <!--        <module>driver-cqld3-shaded</module>-->
-        <module>driver-web</module>
+<!--        <module>driver-web</module>-->
+<!--        <module>driver-grpc</module>-->
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
         <module>driver-jmx</module>
@@ -55,7 +56,6 @@
         <module>driver-cockroachdb</module>
         <module>driver-pulsar</module>
         <module>driver-jms</module>
-        <module>driver-grpc</module>
 
 
         <!-- VIRTDATA MODULES -->
