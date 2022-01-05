@@ -22,26 +22,46 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 
 public class StatementsLoader {
 
+    public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml"};
+
     private final static Logger logger = LogManager.getLogger(StatementsLoader.class);
 
+    public static StmtsDocList loadString(String yamlContent, Map<String,?> params) {
 
-    public enum Loader {
-        original,
-        generified
-    }
-
-    public static StmtsDocList loadString(String yamlContent) {
-        RawStmtsLoader loader = new RawStmtsLoader();
+        StrInterpolator transformer = new StrInterpolator(params);
+        RawStmtsLoader loader = new RawStmtsLoader(transformer);
         RawStmtsDocList rawDocList = loader.loadString(logger, yamlContent);
         StmtsDocList layered = new StmtsDocList(rawDocList);
+        transformer.checkpointAccesses().forEach((k,v) -> {
+            layered.addTemplateVariable(k,v);
+            params.remove(k);
+        });
+        return layered;
+    }
+
+    public static StmtsDocList loadStmt(
+        Logger logger,
+        String statement,
+        Map<String,?> params
+    ) {
+        StrInterpolator transformer = new StrInterpolator(params);
+        statement = transformer.apply(statement);
+        RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(statement);
+        StmtsDocList layered = new StmtsDocList(rawStmtsDocList);
+        transformer.checkpointAccesses().forEach((k,v) -> {
+            layered.addTemplateVariable(k,v);
+            params.remove(k);
+        });
         return layered;
     }
 
@@ -50,57 +70,27 @@ public class StatementsLoader {
         Content<?> content,
         Map<String,String> params
     ) {
-        StrInterpolator transformer = new StrInterpolator(params);
-        RawStmtsLoader loader = new RawStmtsLoader(transformer);
-        RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
-        StmtsDocList layered = new StmtsDocList(rawDocList);
-        for (String varname : transformer.checkpointAccesses()) {
-            params.remove(varname);
-        }
-        return layered;
+        return loadString(content.get().toString(),params);
     }
 
-    public static StmtsDocList loadContent(
+    public static StmtsDocList loadPath(
         Logger logger,
-        Content<?> content
-    ) {
-        RawStmtsLoader loader = new RawStmtsLoader();
-        RawStmtsDocList rawDocList = loader.loadString(logger, content.get().toString());
-        StmtsDocList layered = new StmtsDocList(rawDocList);
-        return layered;
+        String path,
+        Map<String,?> params,
+        String... searchPaths) {
+
+        RawStmtsDocList list = null;
+        Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
+        String content = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
+        return loadString(content,params);
     }
-//    }
+
 
     public static StmtsDocList loadPath(
             Logger logger,
             String path,
             String... searchPaths) {
-        RawStmtsDocList list = null;
-
-        StrInterpolator transformer = new StrInterpolator();
-        RawStmtsLoader gloaderImpl = new RawStmtsLoader(transformer);
-        list = gloaderImpl.loadPath(logger, path, searchPaths);
-        return new StmtsDocList(list);
-    }
-
-    public static StmtsDocList loadStmt(
-            Logger logger,
-            String statement, Function<String,String> transformer) {
-        String transformed = transformer.apply(statement);
-        RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(transformed);
-        return new StmtsDocList(rawStmtsDocList);
-    }
-
-    public static StmtsDocList loadPath(
-            Logger logger,
-            String path,
-            Function<String, String> transformer,
-            String... searchPaths) {
-        RawStmtsDocList list = null;
-
-        RawStmtsLoader gloaderImpl = new RawStmtsLoader(transformer);
-        list = gloaderImpl.loadPath(logger, path, searchPaths);
-        return new StmtsDocList(list);
+        return loadPath(logger, path, Map.of(), searchPaths);
     }
 
 }

@@ -15,7 +15,9 @@ public class ReadyHttpOpTest {
     public void testOnelineSpec() {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
-                " - s1: method=get uri=http://localhost/\n");
+                " - s1: method=get uri=http://localhost/\n",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -26,7 +28,9 @@ public class ReadyHttpOpTest {
     public void testRFCFormMinimal() {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
-                " - s1: get http://localhost/");
+                " - s1: get http://localhost/",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -37,7 +41,9 @@ public class ReadyHttpOpTest {
     public void testRFCFormVersioned() {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
-                " - s1: get http://localhost/ HTTP/1.1");
+                " - s1: get http://localhost/ HTTP/1.1",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -51,7 +57,9 @@ public class ReadyHttpOpTest {
                 " - s1: |\n" +
                 "    get http://localhost/\n" +
                 "    Content-Type: application/json" +
-                "");
+                "",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -65,7 +73,9 @@ public class ReadyHttpOpTest {
                 " - s1: |\n" +
                 "    get http://localhost/\n" +
                 "    \n" +
-                "    body1");
+                "    body1",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -93,7 +103,9 @@ public class ReadyHttpOpTest {
                 " query: StaticString('test')\n" +
                 " version: StaticString('test')\n" +
                 " header1val: StaticString('test')\n" +
-                " body: StaticString('test')\n");
+                " body: StaticString('test')\n",
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         Map<String, String> parse = HttpFormatParser.parseInline(stmtDef.getStmt().orElseThrow());

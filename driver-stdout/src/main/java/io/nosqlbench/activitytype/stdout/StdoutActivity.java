@@ -32,7 +32,6 @@ import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
@@ -70,12 +69,11 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     public StdoutActivity(ActivityDef activityDef) {
         super(activityDef);
-        StrInterpolator interp = new StrInterpolator(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
 
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
         this.fileName = activityDef.getParams().getOptionalString("filename").orElse("stdout");
-        this.stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+        this.stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, activityDef.getParams(), "activities");
     }
 
     @Override
