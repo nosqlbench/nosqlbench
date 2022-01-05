@@ -18,7 +18,7 @@ public class JDBCAction implements SyncAction {
     private static final Logger LOGGER = LogManager.getLogger(JDBCAction.class);
 
     private final JDBCActivity activity;
-    private OpSequence<OpDispenser<String>> sequencer;
+    private OpSequence<OpDispenser<? extends String>> sequencer;
 
     public JDBCAction(JDBCActivity a, int slot) {
         activity = a;
@@ -33,7 +33,7 @@ public class JDBCAction implements SyncAction {
     public int runCycle(long cycle) {
         String boundStmt;
 
-        LongFunction<String> unboundStmt = sequencer.apply(cycle);
+        LongFunction<? extends String> unboundStmt = sequencer.apply(cycle);
 
         try (Timer.Context bindTime = activity.getBindTimer().time()) {
             boundStmt = unboundStmt.apply(cycle);

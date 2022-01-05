@@ -19,7 +19,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
 
     private final static Logger logger = LogManager.getLogger(HttpAsyncAction.class);
 
-    private OpSequence<OpDispenser<HttpOp>> sequencer;
+    private OpSequence<OpDispenser<? extends HttpOp>> sequencer;
     private HttpClient client;
 
     private CompletableFuture<HttpResponse<Void>> future;
@@ -46,7 +46,7 @@ public class HttpAsyncAction extends BaseAsyncAction<HttpAsyncOp, HttpActivity> 
     @Override
     public LongFunction<HttpAsyncOp> getOpInitFunction() {
         return l -> {
-            LongFunction<HttpOp> readyHttpOp = sequencer.apply(l);
+            LongFunction<? extends HttpOp> readyHttpOp = sequencer.apply(l);
             return new HttpAsyncOp(this,readyHttpOp,l,client);
         };
     }

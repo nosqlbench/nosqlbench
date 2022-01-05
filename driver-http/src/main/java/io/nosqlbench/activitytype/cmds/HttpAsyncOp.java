@@ -7,13 +7,13 @@ import java.util.function.LongFunction;
 
 public class HttpAsyncOp {
     public final HttpAsyncAction action;
-    public final LongFunction<HttpOp> op;
+    public final LongFunction<? extends HttpOp> op;
     public final long cycle;
 
     private final HttpOp httpOp;
     private final HttpClient client;
 
-    public HttpAsyncOp(HttpAsyncAction action, LongFunction<HttpOp> op, long cycle, HttpClient client) {
+    public HttpAsyncOp(HttpAsyncAction action, LongFunction<? extends HttpOp> op, long cycle, HttpClient client) {
         this.action = action;
         this.op = op;
         this.cycle = cycle;
