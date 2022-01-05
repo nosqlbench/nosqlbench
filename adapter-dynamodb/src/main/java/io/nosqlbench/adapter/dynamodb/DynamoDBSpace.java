@@ -31,7 +31,7 @@ public class DynamoDBSpace {
         Optional<String> signing_region = cfg.getOptional("signing_region");
 
         if (region.isPresent() && (endpoint.isPresent() || signing_region.isPresent())) {
-            throw new OpConfigError("If you specify region, endpoint and signing_region option are ambiguous");
+            throw new OpConfigError("If you specify region, endpoint and signing_region options are not allowed");
         }
 
         if (region.isPresent()) {
@@ -50,15 +50,15 @@ public class DynamoDBSpace {
         cfg.getOptional("client_max_connections").map(Integer::parseInt).ifPresent(ccfg::withMaxConnections);
         cfg.getOptional("client_max_error_retry").map(Integer::parseInt).ifPresent(ccfg::withMaxErrorRetry);
         cfg.getOptional("client_user_agent_prefix").ifPresent(ccfg::withUserAgentPrefix);
-//            ccfg.withHeader();
         cfg.getOptional("client_consecutive_retries_before_throttling").map(Integer::parseInt)
             .ifPresent(ccfg::withMaxConsecutiveRetriesBeforeThrottling);
         cfg.getOptional("client_gzip").map(Boolean::parseBoolean).ifPresent(ccfg::withGzip);
         cfg.getOptional("client_tcp_keepalive").map(Boolean::parseBoolean).ifPresent(ccfg::withTcpKeepAlive);
         cfg.getOptional("client_disable_socket_proxy").map(Boolean::parseBoolean).ifPresent(ccfg::withDisableSocketProxy);
-//                ccfg.withProtocol()
-//                    ccfg.withRetryMode();
-//            ccfg.withRetryPolicy();
+// ccfg.withHeader();
+// ccfg.withProtocol()
+// ccfg.withRetryMode();
+// ccfg.withRetryPolicy();
 
         ccfg.withSocketBufferSizeHints(
             cfg.getOptional("client_so_send_size_hint").map(Integer::parseInt).orElse(0),
@@ -75,6 +75,18 @@ public class DynamoDBSpace {
             .add(Param.optional("endpoint"))
             .add(Param.optional("signing_region"))
             .add(Param.optional("region"))
+
+            .add(Param.optional("client_socket_timeout"))
+            .add(Param.optional("client_execution_timeout"))
+            .add(Param.optional("client_max_connections"))
+            .add(Param.optional("client_max_error_retry"))
+            .add(Param.optional("client_user_agent_prefix"))
+            .add(Param.optional("client_consecutive_retries_before_throttling"))
+            .add(Param.optional("client_gzip"))
+            .add(Param.optional("client_tcp_keepalive"))
+            .add(Param.optional("client_disable_socket_proxy"))
+            .add(Param.optional("client_so_send_size_hint"))
+            .add(Param.optional("client_so_recv_size_hint"))
             .asReadOnly();
     }
 
