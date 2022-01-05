@@ -67,7 +67,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
 
-        Map<String, Object> map = opTemplate.getOp().orElseThrow();
+        Map<String, Object> map = opTemplate.getOp().orElseThrow(() ->
+            new OpConfigError("ParsedOp constructor requires a non-null value for the op field, but it was missing."));
         for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
             map = preprocessor.apply(map);
         }
@@ -259,6 +260,10 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getAsOptionalFunction(name, type);
     }
 
+    public <V> Optional<LongFunction<String>> getAsOptionalFunction(String name) {
+        return this.getAsOptionalFunction(name, String.class);
+    }
+
     public <V> LongFunction<? extends V> getAsRequiredFunction(String name, Class<? extends V> type) {
         return tmap.getAsRequiredFunction(name, type);
     }
@@ -411,11 +416,18 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @throws OpConfigError if more than one field matches
      */
     public <E extends Enum<E>> Optional<NamedTarget<E>> getTypeFromEnum(Class<E> enumclass) {
-        return tmap.getTypeFromEnum(enumclass);
+        return tmap.getOptionalTypeFromEnum(enumclass);
     }
 
     public <E extends Enum<E>> NamedTarget<E> getRequiredTypeFromEnum(Class<E> enumclass) {
         return tmap.getRequiredTypeFromEnum(enumclass);
     }
 
+    public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(Class<E> enumclass, String fieldName) {
+        return tmap.getOptionalEnumFromField(enumclass,fieldName);
+    }
+
+    public <E extends Enum<E>> E getEnumFromFieldOr(Class<E> enumClass, E defaultEnum, String fieldName) {
+        return getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
+    }
 }
