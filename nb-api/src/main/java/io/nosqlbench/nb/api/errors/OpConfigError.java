@@ -47,7 +47,7 @@ public class OpConfigError extends ActivityInitError {
         }
 
         if (getCause()!=null) {
-            sb.append("cause: " + getCause().getMessage());
+            sb.append(" cause: " + getCause().getClass().getSimpleName() + ":"+ getCause().getMessage());
         }
 
 //        if (getCause()!=null) {
@@ -62,7 +62,7 @@ public class OpConfigError extends ActivityInitError {
 //        }
 
         if (super.getMessage()!=null) {
-            sb.append(super.getMessage());
+            sb.append(" " + super.getMessage());
         }
 
         return sb.toString();
