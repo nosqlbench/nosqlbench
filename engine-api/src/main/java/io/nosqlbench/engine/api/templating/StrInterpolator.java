@@ -48,7 +48,7 @@ public class StrInterpolator implements Function<String, String> {
             .forEach(multimap::add);
     }
 
-    public StrInterpolator(Map<String, String> basicMap) {
+    public StrInterpolator(Map<String, ?> basicMap) {
         multimap.add(basicMap);
     }
 
@@ -67,7 +67,7 @@ public class StrInterpolator implements Function<String, String> {
         return after;
     }
 
-    public Set<String> checkpointAccesses() {
+    public Map<String,String> checkpointAccesses() {
         return multimap.checkpointAccesses();
     }
 
@@ -79,40 +79,42 @@ public class StrInterpolator implements Function<String, String> {
 
     public static class MultiMap extends StrLookup<String> {
 
-        private final List<Map<String, String>> maps = new ArrayList<>();
+        private final List<Map<String, ?>> maps = new ArrayList<>();
         private final String warnPrefix = "UNSET";
-        private final Set<String> accesses = new HashSet<>();
+        private final Map<String,String> accesses = new LinkedHashMap<>();
 
-        public void add(Map<String, String> addedMap) {
+        public void add(Map<String, ?> addedMap) {
             maps.add(addedMap);
         }
 
         @Override
         public String lookup(String key) {
-            String defval = null;
+            String value = null;
 
             String[] parts = key.split("[:,]", 2);
             if (parts.length == 2) {
                 key = parts[0];
-                defval = parts[1];
+                value = parts[1];
             }
-            accesses.add(key);
 
-            for (Map<String, String> map : maps) {
-                String val = map.get(key);
+            for (Map<String, ?> map : maps) {
+                Object val = map.get(key);
                 if (val != null) {
-                    return val;
+                    value = val.toString();
+                    break;
                 }
             }
 
-            String value = (defval != null) ? defval : warnPrefix + ":" + key;
+            value = (value != null) ? value : warnPrefix + ":" + key;
+
+            accesses.put(key,value);
             logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
             return value;
 
         }
 
-        public Set<String> checkpointAccesses() {
-            HashSet<String> accesses = new HashSet<>(this.accesses);
+        public Map<String,String> checkpointAccesses() {
+            LinkedHashMap<String,String> accesses = new LinkedHashMap<>(this.accesses);
             logger.info("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;

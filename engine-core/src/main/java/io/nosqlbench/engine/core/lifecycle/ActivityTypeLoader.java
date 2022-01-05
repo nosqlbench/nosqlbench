@@ -1,6 +1,8 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
@@ -140,6 +142,11 @@ public class ActivityTypeLoader {
             activityDef.getParams().remove("driver");
             if (driverAdapter instanceof NBConfigurable) {
                 NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
+                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+                if (op_yaml_loc.isPresent()) {
+                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                    cfgModel=cfgModel.add(workload.getConfigModel());
+                }
                 NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
                 ((NBConfigurable) driverAdapter).applyConfig(cfg);
             }
