@@ -1,17 +1,7 @@
-- f71240558 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #396 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.0
-- 3ce865642 Merge pull request #397 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.0
-- eff9104c6 Bump log4j-core from 2.16.0 to 2.17.0 in /mvn-defaults
-- 6db334398 Bump log4j-api from 2.16.0 to 2.17.0 in /mvn-defaults
-- 40bd771e1 Merge pull request #394 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.16.0
-- 8b7636851 Merge pull request #395 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.16.0
-- 2804ab7e7 Bump log4j-core from 2.15.0 to 2.16.0 in /mvn-defaults
-- 378a37aa2 Bump log4j-api from 2.15.0 to 2.16.0 in /mvn-defaults
-- 57b78dcb2 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #398 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1
-- 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
-- 05d6704c2 Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
-- 017b2cb59 Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
+- e161599f7 (HEAD -> main) reset version to snapshot
+- 2e8a39dc9 (origin/main) bump log4j versions
 - cd82768ce bump log4j versions
 - 57b78dcb2 Merge pull request #398 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1
 - 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
-- 05d6704c2 Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
-- 017b2cb59 Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
+- 05d6704c2 (origin/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1) Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
+- 017b2cb59 (origin/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1) Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
