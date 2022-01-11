@@ -1,5 +1,7 @@
-- e161599f7 (HEAD -> main) reset version to snapshot
-- 2e8a39dc9 (origin/main) bump log4j versions
+- f12d22afc (HEAD -> main) fix main release version
+- 7536a45e5 bump log4j versions
+- e161599f7 reset version to snapshot
+- 2e8a39dc9 bump log4j versions
 - cd82768ce bump log4j versions
 - 57b78dcb2 Merge pull request #398 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1
 - 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
