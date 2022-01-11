@@ -1,3 +1,7 @@
+---
+title: Op Template Variations
+---
+
 # Op Templates Variations
 
 These examples are here to illustrate and test specific variations of op templates.
