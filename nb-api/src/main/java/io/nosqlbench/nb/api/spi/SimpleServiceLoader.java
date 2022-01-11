@@ -34,8 +34,9 @@ public class SimpleServiceLoader<T> {
 
     public SimpleServiceLoader(Class<? extends T> serviceType, Maturity maturity) {
         this.serviceType = serviceType;
-        this.maturity =maturity;
+        this.maturity = maturity;
     }
+
     public SimpleServiceLoader setMaturity(Maturity maturity) {
         this.maturity = maturity;
         return this;
@@ -43,14 +44,14 @@ public class SimpleServiceLoader<T> {
 
     public Optional<T> get(String implName) {
         List<Component<? extends T>> namedProviders = getNamedProviders();
-        if (namedProviders==null) {
+        if (namedProviders == null) {
             return Optional.empty();
         }
         List<Component<? extends T>> components = namedProviders.stream().filter(n -> n.selector.equals(implName)).toList();
-        if (components.size()>1) {
-            throw new RuntimeException("Found multiple components matching '" + implName +"',");
+        if (components.size() > 1) {
+            throw new RuntimeException("Found multiple components matching '" + implName + "',");
         }
-        if (components.size()==0) {
+        if (components.size() == 0) {
             return Optional.empty();
         }
         return Optional.of(components.get(0).provider.get());
@@ -80,9 +81,8 @@ public class SimpleServiceLoader<T> {
     public synchronized List<Component<? extends T>> getNamedProviders(String... includes) {
         ServiceLoader<? extends T> loader = ServiceLoader.load(serviceType);
         List<String> defaultedPatterns = (includes != null && includes.length > 0) ? Arrays.asList(includes) : List.of(".*");
-        List<Pattern> qualifiedPatterns = defaultedPatterns.stream().map(p -> {
-            return Pattern.compile(p);
-        }).collect(Collectors.toList());
+        List<Pattern> qualifiedPatterns = defaultedPatterns.stream()
+            .map(Pattern::compile).collect(Collectors.toList());
 
         List<Component<? extends T>> components = new ArrayList<>();
 
@@ -128,10 +128,10 @@ public class SimpleServiceLoader<T> {
     }
 
 
-    public Map<String,Maturity> getAllSelectors(String... patterns) {
+    public Map<String, Maturity> getAllSelectors(String... patterns) {
         LinkedHashMap<String, Maturity> map = new LinkedHashMap<>();
         for (Component<? extends T> namedProvider : getNamedProviders(patterns)) {
-            map.put(namedProvider.selector,namedProvider.maturity);
+            map.put(namedProvider.selector, namedProvider.maturity);
         }
         return map;
     }
