@@ -1,23 +1,11 @@
-- 96cef8c65 (HEAD -> j17-preview, origin/j17-preview) fix template param removal bug
-- 3af97e202 reset version of this branch to 4.17.*
-- 1bc8b1e3e merge fixups
-- 0fca63905 support gremlin in cqld4 driver
-- acb3efa10 elevate scenario shutting down error to ERROR
-- c5b4afe71 disable modules which are incomplete or little tested
-- 2de3c745c clarify corner case on yaml structure
-- 770424137 add client tuning parameters to ddb space
-- 1a0b079ad allow op type specialization/covariance
-- 0cea93e77 add gremlin dep to cqld4 adapter
-- 0d8f6f730 stub for cql and cqld3 routes to cqld4 with warning
-- 843cbcbf4 refinements to stmtdef op structure
-- b950e0f30 refine ParsedCmd API
-- 3e0f4c2b4 pre-read yaml to construct config model for template params
-- ea392ad46 improve OpConfigError output
-- 28ddf424b general logging and type fixes
-- 79533bb25 fix optional return type bug
-- 82e6d7cbf fix op generator flow in main action loop
-- 64416cd29 fix concurrent modification error
-- e8b06829c explicitly enable stacktraces on any -v
-- 0ca86e33f simplify stmts loader call paths
-- d54e75ce6 update graph wheels to graph workload
-- b12e2afa6 update annotation processors to support J17
+- 71ddd9727 (HEAD -> j17-preview) Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
+- d5397068c allow driver adapters to directly specify docs resources
+- 8eb408f79 enable export-docs app on NBCLI
+- 980062db3 improve error for missing enum
+- 9560f3193 move cql and cqld3 stub warnings to active logic
+- c27630e5a move some doc apis to core API layer
+- 6e1790057 allow DocsBinder to distinguish root paths from containers
+- 374a92852 add example frontmatter for testing
+- 26b5ba161 add bundled markdown doc SPI layer
+- 7d92c37c5 rehome graph-wheels under cqld4
+- 7d31c6a6a update jopt-simple version
