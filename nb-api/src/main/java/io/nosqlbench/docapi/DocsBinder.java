@@ -1,4 +1,4 @@
-package io.nosqlbench.docsys.api;
+package io.nosqlbench.docapi;
 
 import java.nio.file.Path;
 import java.util.List;

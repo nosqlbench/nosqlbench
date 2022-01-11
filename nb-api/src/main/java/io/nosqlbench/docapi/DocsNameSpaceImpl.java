@@ -1,4 +1,4 @@
-package io.nosqlbench.docsys.api;
+package io.nosqlbench.docapi;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -42,7 +42,7 @@ public class DocsNameSpaceImpl implements DocsNameSpace {
     public String toString() {
         return "DocPath{" +
                 "namespace='" + namespace + '\'' +
-                ",paths=" + paths.toString() +
+                ",paths=" + paths +
                 '}';
     }
 

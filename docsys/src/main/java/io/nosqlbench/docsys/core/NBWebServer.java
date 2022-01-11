@@ -1,7 +1,7 @@
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.docsys.DocsysDefaultAppPath;
-import io.nosqlbench.docsys.api.Docs;
+import io.nosqlbench.docapi.Docs;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.handlers.FavIconHandler;
 import io.nosqlbench.nb.annotations.Maturity;

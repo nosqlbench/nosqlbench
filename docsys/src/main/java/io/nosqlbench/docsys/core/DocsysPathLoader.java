@@ -1,6 +1,8 @@
 package io.nosqlbench.docsys.core;
 
-import io.nosqlbench.docsys.api.*;
+import io.nosqlbench.docapi.*;
+import io.nosqlbench.docsys.api.DocsysDynamicManifest;
+import io.nosqlbench.docsys.api.DocsysStaticManifest;
 
 import java.util.ServiceLoader;
 
@@ -29,4 +31,6 @@ public class DocsysPathLoader {
         }
         return docs;
     }
+
+
 }
