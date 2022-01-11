@@ -638,7 +638,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 String values = EnumSet.allOf(enumclass).toString();
                 Set<String> definedNames = getDefinedNames();
                 return new OpConfigError("Unable to match op template fields [" + definedNames + "] with " +
-                    "possible op types [" + values + "]");
+                    "possible op types [" + values + "]. " +
+                    "If you are specifying an op type which should be implemented, please file an issue.");
             }
         );
     }
