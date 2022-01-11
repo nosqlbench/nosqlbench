@@ -1,6 +1,6 @@
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.docapi.BundledMarkdownExporter;
+import io.nosqlbench.docexporter.BundledMarkdownExporter;
 import io.nosqlbench.docsys.core.NBWebServerApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;

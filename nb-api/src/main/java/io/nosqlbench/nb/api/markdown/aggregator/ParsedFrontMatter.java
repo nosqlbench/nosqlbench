@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.markdown.aggregator;
 
+import io.nosqlbench.nb.api.markdown.types.BasicFrontMatterInfo;
 import io.nosqlbench.nb.api.markdown.types.DocScope;
 import io.nosqlbench.nb.api.markdown.types.FrontMatterInfo;
 import org.apache.logging.log4j.LogManager;
@@ -14,34 +15,40 @@ public class ParsedFrontMatter implements FrontMatterInfo {
 
     private final static Logger logger = LogManager.getLogger(ParsedFrontMatter.class);
 
-    private final Map<String, List<String>> data;
+    private final Map<String, List<String>> data = new LinkedHashMap<>();
 
     public ParsedFrontMatter(Map<String, List<String>> data) {
-        this.data = data;
+        this.data.putAll(data);
     }
 
     @Override
     public String getTitle() {
-        List<String> titles = data.get(FrontMatterInfo.TITLE);
+        List<String> titles = data.get(BasicFrontMatterInfo.TITLE);
         if (titles==null) {
             return "";
         }
-        if (titles.size()!=1) {
-            throw new InvalidParameterException(FrontMatterInfo.TITLE + " can only contain a single value.");
+        if (titles.size()>1) {
+            throw new InvalidParameterException(BasicFrontMatterInfo.TITLE + " can only contain a single value.");
         }
-        return titles.get(0);
+        if (titles.size()==1) {
+            return titles.get(0);
+        }
+        return "";
     }
 
     @Override
     public int getWeight() {
-        List<String> weights = data.get(FrontMatterInfo.WEIGHT);
+        List<String> weights = data.get(BasicFrontMatterInfo.WEIGHT);
         if (weights==null) {
             return 0;
         }
-        if (weights.size()!=1) {
-            throw new InvalidParameterException(FrontMatterInfo.WEIGHT + " can only contain a single value.");
+        if (weights.size()>1) {
+            throw new InvalidParameterException(BasicFrontMatterInfo.WEIGHT + " can only contain a single value.");
         }
-        return Integer.parseInt(weights.get(0));
+        if (weights.size()==1) {
+            return Integer.parseInt(weights.get(0));
+        }
+        return 0;
     }
 
     @Override
@@ -93,21 +100,20 @@ public class ParsedFrontMatter implements FrontMatterInfo {
         return scopeNames.stream().map(DocScope::valueOf).collect(Collectors.toSet());
     }
 
-    public List<String> getDiagnostics() {
-        List<String> warnings = new ArrayList<>();
+    @Override
+    public List<String> getDiagnostics(List<String> buffer) {
         for (String propname : data.keySet()) {
             if (!FrontMatterInfo.FrontMatterKeyWords.contains(propname)) {
-                warnings.add("unrecognized frontm atter property " + propname);
+                buffer.add("unrecognized frontmatter property " + propname);
             }
         }
-        return warnings;
+        return buffer;
     }
 
-
-    public void setTopics(Set<String> newTopics) {
-        // TODO: allow functional version of this
-//        this.data.put(FrontMatterInfo.TOPICS,newTopics);
+    public List<String> getDiagnostics() {
+        return getDiagnostics(new ArrayList<>());
     }
+
 
     public ParsedFrontMatter withTopics(List<String> assigning) {
         HashMap<String, List<String>> newmap = new HashMap<>();
@@ -142,4 +148,13 @@ public class ParsedFrontMatter implements FrontMatterInfo {
     public int hashCode() {
         return Objects.hash(data);
     }
+
+    public void setTitle(String title) {
+        this.data.put(FrontMatterInfo.TITLE,List.of(title));
+    }
+
+    public void setWeight(int weight) {
+        data.put(FrontMatterInfo.WEIGHT,List.of(String.valueOf(weight)));
+    }
+
 }

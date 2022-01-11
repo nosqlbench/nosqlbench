@@ -9,13 +9,11 @@ import java.util.regex.Pattern;
  * If the markdown source file does not contain the metadata requested, then reasonable non-null
  * defaults must be provided.
  */
-public interface FrontMatterInfo {
+public interface FrontMatterInfo extends BasicFrontMatterInfo, HasDiagnostics {
 
     String SCOPES = "scopes";
     String AGGREGATE = "aggregate";
     String TOPICS = "topics";
-    String WEIGHT = "weight";
-    String TITLE = "title";
     String INCLUDED = "included";
 
     Set<String> FrontMatterKeyWords =

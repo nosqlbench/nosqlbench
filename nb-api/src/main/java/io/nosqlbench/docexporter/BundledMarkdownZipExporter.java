@@ -1,44 +1,33 @@
-package io.nosqlbench.docapi;
+package io.nosqlbench.docexporter;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
+import io.nosqlbench.docapi.BundledMarkdownLoader;
+import io.nosqlbench.docapi.DocsBinder;
+import io.nosqlbench.docapi.DocsNameSpace;
+import io.nosqlbench.nb.api.markdown.aggregator.MutableMarkdown;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
+import java.util.Locale;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class BundledMarkdownExporter {
-    public static void main(String[] args) {
+public class BundledMarkdownZipExporter {
 
-        final OptionParser parser = new OptionParser();
+    private final BundledMarkdownProcessor[] filters;
+    private final Function<Path, MutableMarkdown> parser = MutableMarkdown::new;
 
-        OptionSpec<String> zipfileSpec = parser.accepts("zipfile", "zip file to write to")
-                .withOptionalArg().ofType(String.class).defaultsTo("exported_docs.zip");
-
-        OptionSpec<?> helpSpec = parser.acceptsAll(List.of("help", "h", "?"), "Display help").forHelp();
-        OptionSet options = parser.parse(args);
-        if (options.has(helpSpec)) {
-            try {
-                parser.printHelpOn(System.out);
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to show help:" + e);
-            }
-        }
-
-        String zipfile = options.valueOf(zipfileSpec);
-
-        new BundledMarkdownExporter().exportDocs(Path.of(zipfile));
+    public BundledMarkdownZipExporter(BundledMarkdownProcessor... filters) {
+        this.filters = filters;
     }
 
-    private void exportDocs(Path out) {
+    public void exportDocs(Path out) {
         ZipOutputStream zipstream;
         try {
             OutputStream stream = Files.newOutputStream(out, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -66,21 +55,29 @@ public class BundledMarkdownExporter {
 
         ZipEntry entry = new ZipEntry(name);
 
-
         if (Files.isDirectory(p)) {
             zos.putNextEntry(entry);
             DirectoryStream<Path> stream = Files.newDirectoryStream(p);
             for (Path path : stream) {
                 addEntry(path,r,zos);
             }
-            zos.closeEntry();
         } else {
             entry.setTime(Files.getLastModifiedTime(p).toMillis());
             zos.putNextEntry(entry);
-            byte[] bytes = Files.readAllBytes(p);
-            zos.write(bytes);
-            zos.closeEntry();
+
+            if (p.toString().toLowerCase(Locale.ROOT).endsWith(".md")) {
+                MutableMarkdown parsed = parser.apply(p);
+                for (BundledMarkdownProcessor filter : this.filters) {
+                    parsed = filter.apply(parsed);
+                }
+                zos.write(parsed.getComposedMarkdown().getBytes(StandardCharsets.UTF_8));
+            } else {
+                byte[] bytes = Files.readAllBytes(p);
+                zos.write(bytes);
+            }
         }
+        zos.closeEntry();
 
     }
+
 }
