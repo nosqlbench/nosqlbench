@@ -1,7 +1,9 @@
-package io.nosqlbench.docsys.api;
+package io.nosqlbench.docapi;
 
 import io.nosqlbench.nb.api.content.NBIO;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -15,13 +17,31 @@ import java.util.stream.Collectors;
  */
 public class Docs implements DocsBinder {
 
-    private LinkedList<DocsNameSpaceImpl> namespaces = new LinkedList<>();
+    private final LinkedList<DocsNameSpaceImpl> namespaces = new LinkedList<>();
 
     public Docs() {
     }
 
+    public static DocsBinder forRoot(String namespace, Path root) {
+        return new Docs().namespace(namespace).addPath(root).asDocsBinder();
+    }
+
+    public static DocsBinder empty() {
+        return new Docs();
+    }
+
     public Docs namespace(String namespace) {
         return addNamespace(namespace);
+    }
+
+    public Docs addFirstFoundContentPath(String ... potentials) {
+        Path pathIn = NBIO.getFirstLocalPath(potentials);
+
+        if (pathIn == null || !Files.exists(pathIn)) {
+            throw new RuntimeException("Unable to find path in one of " + Arrays.stream(potentials).collect(Collectors.joining(",")));
+        }
+
+        return this.addContentsOf(pathIn);
     }
 
     public Docs addFirstFoundPath(String... potentials) {
@@ -31,6 +51,30 @@ public class Docs implements DocsBinder {
             throw new RuntimeException("Unable to find a path in one of " + Arrays.stream(potentials).collect(Collectors.joining(",")));
         }
         return this.addPath(pathIn);
+    }
+
+    /**
+     * Add each contained path within the specified directory path. Only the top-level elements are added. This serves to
+     * relativize any content added this way so that the owning directory is not included itself by name.
+     * @param root The root of the content to add.
+     * @return this Docs, for method chaining
+     */
+    public Docs addContentsOf(Path root) {
+        if (!Files.isDirectory(root)) {
+            throw new RuntimeException("path '" + root + "' must be a directory to use addContentsOf(...)");
+        }
+        if (namespaces.peekLast() == null) {
+            throw new RuntimeException("You must add a namespace first.");
+        }
+        try {
+            DirectoryStream<Path> paths = Files.newDirectoryStream(root);
+            for (Path path : paths) {
+                addPath(path);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
     }
 
     public Docs addPath(Path path) {
