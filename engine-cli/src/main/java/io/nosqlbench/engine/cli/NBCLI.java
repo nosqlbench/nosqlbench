@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.docapi.BundledMarkdownExporter;
 import io.nosqlbench.docsys.core.NBWebServerApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
@@ -61,7 +62,7 @@ public class NBCLI {
 
     public static void main(String[] args) {
         try {
-            NBCLI cli = new NBCLI("eb");
+            NBCLI cli = new NBCLI("nb");
             cli.run(args);
         } catch (Exception e) {
             boolean showStackTraces = false;
@@ -170,6 +171,10 @@ public class NBCLI {
             annotatorsConfig = "[{type:'log',level:'info'}]";
         }
 
+        if (args.length > 0 && args[0].toLowerCase().equals("export-docs")) {
+            BundledMarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
