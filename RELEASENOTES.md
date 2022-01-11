@@ -10,3 +10,8 @@
 - 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
 - 05d6704c2 Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
 - 017b2cb59 Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
+- cd82768ce bump log4j versions
+- 57b78dcb2 Merge pull request #398 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1
+- 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
+- 05d6704c2 Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
+- 017b2cb59 Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
