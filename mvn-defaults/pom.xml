@@ -3,7 +3,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.17.3-SNAPSHOT</version>
+    <version>4.17.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
