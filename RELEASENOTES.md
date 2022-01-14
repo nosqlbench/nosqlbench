@@ -1,11 +1,2 @@
-- 71ddd9727 (HEAD -> j17-preview) Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
-- d5397068c allow driver adapters to directly specify docs resources
-- 8eb408f79 enable export-docs app on NBCLI
-- 980062db3 improve error for missing enum
-- 9560f3193 move cql and cqld3 stub warnings to active logic
-- c27630e5a move some doc apis to core API layer
-- 6e1790057 allow DocsBinder to distinguish root paths from containers
-- 374a92852 add example frontmatter for testing
-- 26b5ba161 add bundled markdown doc SPI layer
-- 7d92c37c5 rehome graph-wheels under cqld4
-- 7d31c6a6a update jopt-simple version
+- 52c892a83 (HEAD -> j17-preview) implement scripting in client to support fluent API usage with generated values
+- 37a0954fa provide complete metadata on bundled markdown files
