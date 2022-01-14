@@ -59,7 +59,6 @@ public class RawStmtDef extends RawStmtFields {
         } else if (found.size() > 1) {
             throw new BasicError("You used " + found + " as an op name, but only one of these is allowed at a time.");
         } else if ((getName() == null || getName().isEmpty()) && op == null && map.size() > 0) {
-            System.out.println("here");
             Map.Entry<String, Object> first = map.entrySet().iterator().next();
             setName(first.getKey());
             setOp(first.getValue());
