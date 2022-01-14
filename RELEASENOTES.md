@@ -1,9 +1,2 @@
-- f12d22afc (HEAD -> main) fix main release version
-- 7536a45e5 bump log4j versions
-- e161599f7 reset version to snapshot
-- 2e8a39dc9 bump log4j versions
-- cd82768ce bump log4j versions
-- 57b78dcb2 Merge pull request #398 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1
-- 8f42f1a5e Merge pull request #399 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1
-- 05d6704c2 (origin/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-core-2.17.1) Bump log4j-core from 2.17.0 to 2.17.1 in /mvn-defaults
-- 017b2cb59 (origin/dependabot/maven/mvn-defaults/org.apache.logging.log4j-log4j-api-2.17.1) Bump log4j-api from 2.17.0 to 2.17.1 in /mvn-defaults
+- 6e61dd1ce (HEAD -> main, origin/main) Merge pull request #402 from lhotari/lh-upgrade-Pulsar-client-to-2.8.2
+- 08b26bf05 [Pulsar] Bump Pulsar client version to 2.8.2
