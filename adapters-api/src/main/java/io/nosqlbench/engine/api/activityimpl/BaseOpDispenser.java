@@ -68,6 +68,9 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
 
     @Override
     public void onError(long cycleValue, long resultNanos, Throwable t) {
+        if (!instrument) {
+            return;
+        }
         errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
     }
 

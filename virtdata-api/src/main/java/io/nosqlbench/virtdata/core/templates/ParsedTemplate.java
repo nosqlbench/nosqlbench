@@ -280,6 +280,9 @@ public class ParsedTemplate {
         }
         return sb.toString();
     }
+    public String getPositionalStatement() {
+        return getPositionalStatement(s -> s);
+    }
 
     /**
      * Return the parsed template in (<em>literal, variable, ..., ..., literal</em>) form.

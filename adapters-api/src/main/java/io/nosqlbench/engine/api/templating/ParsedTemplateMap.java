@@ -64,6 +64,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     private final LinkedHashMap<String, Object> protomap = new LinkedHashMap<>();
     private final List<Map<String, Object>> cfgsources;
+    private Map<String, Object> specmap;
+    private Map<String, String> bindings;
 
     public ParsedTemplateMap(Map<String, Object> map, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
         this.cfgsources = cfgsources;
@@ -75,6 +77,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     // fields. This seems like the saner and less confusing approach, so implementing
     // op field references should be left until it is requested if at all
     private void applyTemplateFields(Map<String, Object> map, Map<String, String> bindings) {
+        this.specmap = map;
+        this.bindings = bindings;
         map.forEach((k, v) -> {
             if (v instanceof CharSequence) {
                 ParsedTemplate pt = ParsedTemplate.of(((CharSequence) v).toString(), bindings);
@@ -495,6 +499,18 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return false;
     }
 
+    public Optional<ParsedTemplate> getAsTemplate(String fieldname) {
+        if (specmap.containsKey(fieldname)) {
+            Object fval = specmap.get(fieldname);
+            if (fval instanceof CharSequence) {
+                return Optional.of(new ParsedTemplate(fval.toString(),this.bindings));
+            } else {
+                throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname +"' of type '" + fval.getClass().getSimpleName() + "'");
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * convenience method for conjugating {@link #isDefined(String)} with AND
      *
@@ -677,4 +693,5 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
         return Optional.empty();
     }
+
 }

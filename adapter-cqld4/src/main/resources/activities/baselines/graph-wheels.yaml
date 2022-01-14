@@ -8,6 +8,7 @@ scenarios:
   schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
   disable-verify: run driver=cqld4 graphname=graph_wheels tags=phase:disable-verify cycles===UNDEF
   rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1000
+  fluent: run driver=cqld4 graphname=graph_wheels tags=block:fluent cycles=10
   default:
     creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
     schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
@@ -117,5 +118,11 @@ blocks:
            .property('createdtime', {createdtime})
            .as('s')
           .addE('using').from('s').to('d');
-
+  fluent:
+    statements:
+      read:
+        type: fluent
+        graphname: <<graphname:graph_wheels>>
+        fluent: >-
+          g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
 

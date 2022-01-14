@@ -2,14 +2,14 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
-public class Cqld4OpMapper implements OpMapper<Cqld4BaseOp> {
+public class Cqld4OpMapper implements OpMapper<Op> {
 
 
     private final DriverSpaceCache<? extends Cqld4Space> cache;
@@ -30,7 +30,7 @@ public class Cqld4OpMapper implements OpMapper<Cqld4BaseOp> {
      *            which ones are static and dynamic.
      * @return An op dispenser for each provided op command
      */
-    public OpDispenser<? extends Cqld4BaseOp> apply(ParsedOp cmd) {
+    public OpDispenser<? extends Op> apply(ParsedOp cmd) {
 
         Cqld4Space cqld4Space = cache.get(cmd.getStaticConfigOr("space", "default"));
         CqlSession session = cqld4Space.getSession();
@@ -42,6 +42,7 @@ public class Cqld4OpMapper implements OpMapper<Cqld4BaseOp> {
         return switch (cmdtype) {
             case cql -> new CqlD4CqlOpMapper(session).apply(cmd);
             case gremlin -> new Cqld4GremlinOpMapper(session).apply(cmd);
+            case fluent -> new Cqld4FluentGraphOpMapper(session).apply(cmd);
         };
     }
 

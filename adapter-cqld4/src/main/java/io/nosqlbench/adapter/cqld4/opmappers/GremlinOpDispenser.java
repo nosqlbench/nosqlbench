@@ -3,13 +3,14 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatement;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatementBuilder;
 import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class GremlinOpDispenser extends BaseOpDispenser<Cqld4GremlinOp> {
+public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
 
     private final LongFunction<? extends ScriptGraphStatement> stmtFunc;
     private final CqlSession session;
@@ -62,12 +63,12 @@ public class GremlinOpDispenser extends BaseOpDispenser<Cqld4GremlinOp> {
     }
 
     @Override
-    public Cqld4GremlinOp apply(long value) {
+    public Cqld4ScriptGraphOp apply(long value) {
         ScriptGraphStatement stmt = stmtFunc.apply(value);
         if (diagFunc.apply(value)>0L) {
             System.out.println("## GREMLIN DIAG: ScriptGraphStatement on graphname(" + stmt.getGraphName() + "):\n" + stmt.getScript());
         }
-        return new Cqld4GremlinOp(session, stmt);
+        return new Cqld4ScriptGraphOp(session, stmt);
     }
 
 }

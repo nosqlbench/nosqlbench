@@ -32,7 +32,7 @@ import java.util.Map;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp extends Cqld4BaseOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator {
+public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator {
 
     private final CqlSession session;
     private final int maxpages;

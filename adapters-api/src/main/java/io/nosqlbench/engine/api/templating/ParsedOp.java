@@ -154,6 +154,11 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return _opTemplate.getParsed();
     }
 
+
+    public Optional<ParsedTemplate> getAsTemplate(String fieldname) {
+        return this.tmap.getAsTemplate(fieldname);
+    }
+
     /**
      * Get the named static field value, or return the provided default, but throw an exception if
      * the named field is dynamic.

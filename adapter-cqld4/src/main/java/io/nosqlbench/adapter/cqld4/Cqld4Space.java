@@ -3,6 +3,9 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.OptionsMap;
+import com.datastax.oss.driver.api.core.config.TypedDriverOption;
+import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.content.Content;
@@ -36,7 +39,13 @@ public class Cqld4Space {
     private CqlSession createSession(NBConfiguration cfg) {
         CqlSessionBuilder builder = new CqlSessionBuilder();
 
-        resolveConfigLoader(cfg).ifPresent(builder::withConfigLoader);
+        OptionsMap defaults = new OptionsMap();
+        defaults.put(TypedDriverOption.MONITOR_REPORTING_ENABLED, false);
+        DriverConfigLoader driverConfigLoader = DriverConfigLoader.fromMap(defaults);
+
+        DriverConfigLoader mainCfgLoader = resolveConfigLoader(cfg).orElse(DriverConfigLoader.fromMap(OptionsMap.driverDefaults()));
+        driverConfigLoader = new CompositeDriverConfigLoader(driverConfigLoader,mainCfgLoader);
+        builder.withConfigLoader(driverConfigLoader);
 
         int port = cfg.getOrDefault("port", 9042);
 
