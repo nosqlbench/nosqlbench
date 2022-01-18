@@ -91,6 +91,9 @@ public class RawStmtFields extends Tags {
     public void setFieldsByReflection(Map<String, Object> propsmap) {
 
         Object descriptionObj = propsmap.remove("description");
+        if (descriptionObj==null) {
+            descriptionObj = propsmap.remove("desc");
+        }
         if (descriptionObj!=null) {
             setDescription(descriptionObj.toString());
         }
