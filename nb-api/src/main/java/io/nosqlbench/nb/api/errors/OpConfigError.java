@@ -57,6 +57,6 @@ public class OpConfigError extends ActivityInitError {
                 .append(")");
         }
 
-        return sb.toString();
+        return sb + super.getMessage();
     }
 }
