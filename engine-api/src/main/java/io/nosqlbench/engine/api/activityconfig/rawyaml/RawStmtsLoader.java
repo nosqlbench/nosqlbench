@@ -5,6 +5,7 @@ import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -69,7 +70,12 @@ public class RawStmtsLoader {
         for (Object object : objects) {
             if (object instanceof Map) {
                 RawStmtsDoc doc = new RawStmtsDoc();
-                doc.setFieldsByReflection((Map<String, Object>) object);
+                Map<String, Object> docfields = (Map<String, Object>) object;
+                doc.setFieldsByReflection(docfields);
+                if (docfields.size()>0) {
+                    throw new OpConfigError("Some fields were not recognized from the yaml provided:" + docfields.keySet());
+                }
+
                 newDocList.add(doc);
             } else {
                 throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());

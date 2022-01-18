@@ -1,0 +1,5 @@
+description: user should get an error when extraneous fields are found
+unknown:
+  this: should
+  not: be
+  allowed: here
