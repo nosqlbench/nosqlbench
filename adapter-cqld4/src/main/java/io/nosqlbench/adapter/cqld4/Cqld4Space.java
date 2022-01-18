@@ -2,12 +2,15 @@ package io.nosqlbench.adapter.cqld4;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
-import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.datastax.oss.driver.api.core.config.OptionsMap;
-import com.datastax.oss.driver.api.core.config.TypedDriverOption;
+import com.datastax.oss.driver.api.core.config.*;
 import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -36,16 +39,41 @@ public class Cqld4Space {
         session = createSession(cfg);
     }
 
+    private static NBConfigModel getDriverOptionsModel() {
+        ConfigModel driverOpts = ConfigModel.of(DriverConfig.class);
+        Iterable<TypedDriverOption<?>> builtins = TypedDriverOption.builtInValues();
+        for (TypedDriverOption<?> builtin : builtins) {
+            String path = builtin.getRawOption().getPath();
+            Class<?> rawType = builtin.getExpectedType().getRawType();
+            driverOpts.add(Param.optional("driver."+path,rawType));
+        }
+        return driverOpts.asReadOnly();
+    }
+
     private CqlSession createSession(NBConfiguration cfg) {
         CqlSessionBuilder builder = new CqlSessionBuilder();
 
+        // stop insights for testing
         OptionsMap defaults = new OptionsMap();
-        defaults.put(TypedDriverOption.MONITOR_REPORTING_ENABLED, false);
-        DriverConfigLoader driverConfigLoader = DriverConfigLoader.fromMap(defaults);
+        defaults.put(TypedDriverOption.MONITOR_REPORTING_ENABLED, false); // We don't need to do this every time we run a test or sanity check
+        DriverConfigLoader dcl = DriverConfigLoader.fromMap(defaults);
 
-        DriverConfigLoader mainCfgLoader = resolveConfigLoader(cfg).orElse(DriverConfigLoader.fromMap(OptionsMap.driverDefaults()));
-        driverConfigLoader = new CompositeDriverConfigLoader(driverConfigLoader,mainCfgLoader);
-        builder.withConfigLoader(driverConfigLoader);
+        // add user-provided parameters
+        NBConfiguration driverCfg = getDriverOptionsModel().extractConfig(cfg);
+        if (!driverCfg.isEmpty()) {
+            Map<String,Object> remapped = new LinkedHashMap<>();
+            driverCfg.getMap().forEach((k,v) -> remapped.put(k.substring("driver.".length()),v));
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String remappedViaSerdesToSatisfyObtuseConfigAPI = gson.toJson(remapped);
+            DriverConfigLoader userProvidedOptions = DriverConfigLoader.fromString(remappedViaSerdesToSatisfyObtuseConfigAPI);
+            dcl = new CompositeDriverConfigLoader(dcl, userProvidedOptions);
+        }
+
+        // add referenced config from 'cfg' activity parameter
+        DriverConfigLoader cfgDefaults = resolveConfigLoader(cfg).orElse(DriverConfigLoader.fromMap(OptionsMap.driverDefaults()));
+        dcl = new CompositeDriverConfigLoader(dcl, cfgDefaults);
+
+        builder.withConfigLoader(dcl);
 
         int port = cfg.getOrDefault("port", 9042);
 
@@ -224,6 +252,7 @@ public class Cqld4Space {
             .add(Param.optional("password"))
             .add(Param.optional("passfile"))
             .add(SSLKsFactory.get().getConfigModel())
+            .add(getDriverOptionsModel())
             .asReadOnly();
 
     }
