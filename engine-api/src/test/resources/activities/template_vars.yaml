@@ -1,0 +1,6 @@
+description: template vars should expand consistently
+bindings:
+  b1a: Prefix("<<prefix:prefix>>")
+  b1b: Prefix("<<prefix:prefix>>")
+  b2a: Suffix("TEMPLATE(suffix,suffix)")
+  b2b: Suffix("TEMPLATE(suffix,suffix)")
