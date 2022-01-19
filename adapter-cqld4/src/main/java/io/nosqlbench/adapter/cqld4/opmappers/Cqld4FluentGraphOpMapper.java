@@ -13,8 +13,11 @@ import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
@@ -32,18 +35,22 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op>  {
 
         ParsedTemplate fluent = cmd.getAsTemplate("fluent").orElseThrow();
         String scriptBodyWithRawVarRefs = fluent.getPositionalStatement();
+
+        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+
+        List<String> imports = cmd.getStaticConfigOr("imports", List.of());
+        ImportCustomizer importer = new ImportCustomizer();
+        importer.addImports(imports.toArray(new String[0]));
+        compilerConfiguration.addCompilationCustomizers(importer);
+
         Supplier<Script> supplier = () -> {
             groovy.lang.Binding groovyBindings = new Binding(new LinkedHashMap<String,Object>(Map.of("g",g)));
-            GroovyShell gshell = new GroovyShell(groovyBindings);
+            GroovyShell gshell = new GroovyShell(groovyBindings,compilerConfiguration);
             return gshell.parse(scriptBodyWithRawVarRefs);
         };
 
         LongFunction<? extends String> graphnameFunc = cmd.getAsRequiredFunction("graphname");
         Bindings virtdataBindings = new BindingsTemplate(fluent.getBindPoints()).resolveBindings();
-//        Map<String, Object> values = virtdataBindings.getAllMap(1L);
-//        values.forEach(groovyBindings::setVariable);
-//        GraphTraversal<Vertex,Vertex> v = (GraphTraversal<Vertex, Vertex>) parsed.run();
-//        FluentGraphStatement fgs = new FluentGraphStatementBuilder(v).setGraphName("graph_wheels").build();
 
         return new Cqld4FluentGraphOpDispenser(cmd, graphnameFunc, session, virtdataBindings, supplier);
     }
