@@ -73,21 +73,21 @@ public class NBCLIScenarioParser {
         }
 
         // Parse CLI command into keyed parameters, in order
-        LinkedHashMap<String, String> userParams = new LinkedHashMap<>();
+        LinkedHashMap<String, String> userProvidedParams = new LinkedHashMap<>();
         while (arglist.size() > 0
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=", 2);
             arg[0] = Synonyms.canonicalize(arg[0], logger);
-            if (userParams.containsKey(arg[0])) {
+            if (userProvidedParams.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
             }
-            userParams.put(arg[0], arg[1]);
+            userProvidedParams.put(arg[0], arg[1]);
         }
 
         // This will buffer the new command before adding it to the main arg list
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
-        StrInterpolator userParamsInterp = new StrInterpolator(userParams);
+        StrInterpolator userParamsInterp = new StrInterpolator(userProvidedParams);
 
 
         for (String scenarioName : scenarioNames) {
@@ -99,10 +99,9 @@ public class NBCLIScenarioParser {
                 .name(workloadName)
                 .extension(RawStmtsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
-
-            StmtsDocList stmts = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userParams);
-
-            Scenarios scenarios = stmts.getDocScenarios();
+            // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
+            StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userProvidedParams);
+            Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             Map<String, String> namedSteps = scenarios.getNamedScenario(scenarioName);
 
@@ -119,7 +118,7 @@ public class NBCLIScenarioParser {
                 String cmd = cmdEntry.getValue();
                 cmd = userParamsInterp.apply(cmd);
                 LinkedHashMap<String, CmdArg> parsedStep = parseStep(cmd);
-                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userParams);
+                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
 
                 // consume each of the parameters from the steps to produce a composited command
