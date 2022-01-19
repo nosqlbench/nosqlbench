@@ -60,7 +60,7 @@ public class NBCLIScenarioParser {
 //        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
 //        Path workloadPath = workloadPathSearch.orElseThrow();
 
-        // Buffer in CLI word from user, but only until the next command
+        // Buffer in scenario names from CLI, only counting non-options non-parameters and non-reserved words
         List<String> scenarioNames = new ArrayList<>();
         while (arglist.size() > 0
             && !arglist.peekFirst().contains("=")
@@ -100,7 +100,7 @@ public class NBCLIScenarioParser {
                 .extension(RawStmtsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
-            StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, userProvidedParams);
+            StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             Map<String, String> namedSteps = scenarios.getNamedScenario(scenarioName);
