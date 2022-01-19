@@ -86,7 +86,6 @@ public class StrInterpolator implements Function<String, String> {
 
         public void add(Map<String, ?> addedMap) {
             maps.add(addedMap);
-            maps.add(extractedDefaults);
         }
 
         @Override
@@ -109,6 +108,7 @@ public class StrInterpolator implements Function<String, String> {
                     break;
                 }
             }
+            value = (value==null? extractedDefaults.get(key) : value);
 
             value = (value != null) ? value : warnPrefix + ":" + key;
 
