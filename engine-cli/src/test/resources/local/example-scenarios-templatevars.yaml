@@ -1,0 +1,10 @@
+# example-scenarios.yaml
+scenarios:
+  default:
+    - run cycles=3 alias=A driver=stdout tvar1=replaced
+    - run cycles=5 alias=B driver=stdout
+bindings:
+  cycle: Identity()
+  name: NumberNameToCycle()
+statements:
+  - cycle: "cycle {cycle} TEMPLATE(tvar1,def1) TEMPLATE(tvar1)\n"
