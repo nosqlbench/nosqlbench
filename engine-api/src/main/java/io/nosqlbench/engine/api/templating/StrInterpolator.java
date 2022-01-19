@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
@@ -82,9 +83,11 @@ public class StrInterpolator implements Function<String, String> {
         private final List<Map<String, ?>> maps = new ArrayList<>();
         private final String warnPrefix = "UNSET";
         private final Map<String,String> accesses = new LinkedHashMap<>();
+        private final Map<String,String> extractedDefaults = new LinkedHashMap<>();
 
         public void add(Map<String, ?> addedMap) {
             maps.add(addedMap);
+            maps.add(extractedDefaults);
         }
 
         @Override
@@ -95,6 +98,9 @@ public class StrInterpolator implements Function<String, String> {
             if (parts.length == 2) {
                 key = parts[0];
                 value = parts[1];
+                if (!extractedDefaults.containsKey(key)) {
+                    extractedDefaults.put(key,value);
+                }
             }
 
             for (Map<String, ?> map : maps) {
@@ -106,6 +112,11 @@ public class StrInterpolator implements Function<String, String> {
             }
 
             value = (value != null) ? value : warnPrefix + ":" + key;
+
+            if (accesses.containsKey(key) && !accesses.get(key).equals(value)) {
+                throw new OpConfigError("A templated variable '" + key + "' was found with multiple default values: '" + accesses.get(key) + ", and " + value +". This is not allowed." +
+                    " Template variables must resolve to a single value.");
+            }
 
             accesses.put(key,value);
             logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
