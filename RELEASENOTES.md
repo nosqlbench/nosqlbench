@@ -1,2 +1,8 @@
-- 6e61dd1ce (HEAD -> main, origin/main) Merge pull request #402 from lhotari/lh-upgrade-Pulsar-client-to-2.8.2
-- 08b26bf05 [Pulsar] Bump Pulsar client version to 2.8.2
+- d98e1aaae (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- e6d6c5873 (origin/main) Merge pull request #411 from eolivelli/fix/root-log-level
+- bcfa4911e Logging: do not set ROOT level to ALL
+- 0503730db Merge pull request #409 from eolivelli/fix/pulsar-avro
+- 94b72156f Pulsar: improve AVRO decoding
+- 2f9b88ce4 support desc and description in yaml
+- 9a3774bb9 improve yaml warnings and tests
+- e44df1535 include operative message in OpConfigError output
