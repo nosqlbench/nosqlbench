@@ -16,18 +16,20 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpMapper implements OpMapper<Op>  {
+public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
     private final CqlSession session;
+    private GraphTraversalSource gtsPlaceHolder;
 
     public Cqld4FluentGraphOpMapper(CqlSession session) {
         this.session = session;
-   }
+    }
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp cmd) {
@@ -38,14 +40,20 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op>  {
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
-        List<String> imports = cmd.getStaticConfigOr("imports", List.of());
-        ImportCustomizer importer = new ImportCustomizer();
-        importer.addImports(imports.toArray(new String[0]));
-        compilerConfiguration.addCompilationCustomizers(importer);
+        cmd.getOptionalStaticValue("imports", List.class).ifPresent(
+            l -> {
+                ArrayList<String> stringList = new ArrayList<>();
+                l.forEach(o -> stringList.add(o.toString()));
+                String[] verifiedClasses = expandClassNames(l);
+                ImportCustomizer importer = new ImportCustomizer();
+                importer.addImports(verifiedClasses);
+                compilerConfiguration.addCompilationCustomizers(importer);
+            }
+        );
 
         Supplier<Script> supplier = () -> {
-            groovy.lang.Binding groovyBindings = new Binding(new LinkedHashMap<String,Object>(Map.of("g",g)));
-            GroovyShell gshell = new GroovyShell(groovyBindings,compilerConfiguration);
+            groovy.lang.Binding groovyBindings = new Binding(new LinkedHashMap<String, Object>(Map.of("g", g)));
+            GroovyShell gshell = new GroovyShell(groovyBindings, compilerConfiguration);
             return gshell.parse(scriptBodyWithRawVarRefs);
         };
 
@@ -53,5 +61,24 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op>  {
         Bindings virtdataBindings = new BindingsTemplate(fluent.getBindPoints()).resolveBindings();
 
         return new Cqld4FluentGraphOpDispenser(cmd, graphnameFunc, session, virtdataBindings, supplier);
+    }
+
+    private String[] expandClassNames(List l) {
+        ClassLoader loader = Cqld4FluentGraphOpMapper.class.getClassLoader();
+
+        List<String> classNames = new ArrayList<>();
+        for (Object name : l) {
+            String candidateName = name.toString();
+            if (candidateName.endsWith(".*")) {
+                throw new RuntimeException("You can not use wildcard package imports like '" + candidateName + "'");
+            }
+            try {
+                loader.loadClass(candidateName);
+                classNames.add(candidateName);
+            } catch (Exception e) {
+                throw new RuntimeException("Class '" + candidateName + "' was not found for fluent imports.");
+            }
+        }
+        return classNames.toArray(new String[0]);
     }
 }

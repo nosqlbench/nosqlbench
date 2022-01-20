@@ -123,6 +123,8 @@ blocks:
       read:
         type: fluent
         graphname: <<graphname:graph_wheels>>
+        imports:
+          - "org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__"
         fluent: >-
           g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
 
