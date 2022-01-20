@@ -66,7 +66,6 @@ public class LoggerConfig extends ConfigurationFactory {
     private final String logfilePattern = DEFAULT_LOGFILE_PATTERN;
     private NBLogLevel fileLevel = NBLogLevel.DEBUG;
 
-    public static final Level ROOT_LOG_LEVEL = Level.ALL;
     private Map<String, String> logLevelOverrides = new LinkedHashMap<>();
     private Path loggerDir = Path.of("logs");
     private String sessionName;
@@ -116,9 +115,20 @@ public class LoggerConfig extends ConfigurationFactory {
 
         Level internalLoggingStatusThreshold = Level.ERROR;
         Level builderThresholdLevel = Level.INFO;
-//        Level rootLoggingLevel = Level.INFO;
 
-        RootLoggerComponentBuilder rootBuilder = builder.newRootLogger(ROOT_LOG_LEVEL);
+        Level fileLevel = Level.valueOf(getEffectiveFileLevel().toString());
+        Level consoleLevel = Level.valueOf(this.consoleLevel.toString());
+
+        // configure the ROOT logger the same way as the File level
+        // this is because the fileLevel is supposed to show more than the console
+
+        // therefore, it is very important that the ROOT level is as much specific as possible
+        // because NB code and especially third party libraries may rely on logging guards (if logger.isDebugEnabled())
+        // to reduce memory allocations and resource waste due to debug/trace logging
+        // if you set ROOT to ALL or to TRACE then you will trigger the execution of trace/debugging code
+        // that will affect performances and impact on the measurements made with NB
+        Level rootLoggingLevel = fileLevel;
+        RootLoggerComponentBuilder rootBuilder = builder.newRootLogger(rootLoggingLevel);
 
         builder.setConfigurationName(name);
 
@@ -186,14 +196,14 @@ public class LoggerConfig extends ConfigurationFactory {
 
             rootBuilder.add(
                 builder.newAppenderRef("SCENARIO_APPENDER")
-                    .addAttribute("level", Level.valueOf(getEffectiveFileLevel().toString()))
+                    .addAttribute("level", fileLevel)
             );
         }
 
         rootBuilder.add(
             builder.newAppenderRef("console")
                 .addAttribute("level",
-                    Level.valueOf(consoleLevel.toString())
+                    consoleLevel
                 )
         );
 
