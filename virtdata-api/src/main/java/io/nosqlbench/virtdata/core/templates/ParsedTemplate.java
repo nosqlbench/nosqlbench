@@ -18,6 +18,7 @@
 package io.nosqlbench.virtdata.core.templates;
 
 
+import io.nosqlbench.engine.api.templating.BindType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -119,32 +120,6 @@ public class ParsedTemplate {
     }
 
     /**
-     * The type of a parsed template depends on the structure of the bindings provided.
-     */
-    public enum Type {
-
-        /**
-         * A literal template is one which has no bindings that need to be provided to render a specific statement.
-         * These templates are basically static statements.
-         * Example: <em>{@code truncate testks.testtable;}</em>
-         */
-        literal,
-        /**
-         * A bindref template is one which has only a single bind point and no leading or trailing text.
-         * It represents a single value which is to be injected, with no clear indication as to whether the
-         * value should be in string form or not. These are used when referencing objects by bind point name.
-         * Callers which use rawbind templates where Strings are needed should convert them with {@link Object#toString()}}
-         * Example: <em>{@code {myvalue}}</em>
-         */
-        bindref,
-        /**
-         * A string template is one which is neither a literal template nor a bindref template. This includes
-         * any template which has any amount of literal text and any template with more than one bind point.
-         */
-        concat
-    }
-
-    /**
      * Spans is an even-odd form of (literal, variable, ..., ..., literal)
      * Thus a 1-length span is a single literal, and a 3 length span has a single bind point
      **/
@@ -176,13 +151,13 @@ public class ParsedTemplate {
         this.bindpoints = bindPointsResult.getBindpoints();
     }
 
-    public Type getType() {
+    public BindType getType() {
         if (this.spans.length == 1) {
-            return Type.literal;
+            return BindType.literal;
         } else if (this.spans[0].isEmpty() && this.spans[2].isEmpty()) {
-            return Type.bindref;
+            return BindType.bindref;
         } else {
-            return Type.concat;
+            return BindType.concat;
         }
     }
 

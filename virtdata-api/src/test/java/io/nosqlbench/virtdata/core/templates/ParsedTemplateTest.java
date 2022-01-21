@@ -1,12 +1,9 @@
 package io.nosqlbench.virtdata.core.templates;
 
-import org.junit.jupiter.api.Disabled;
+import io.nosqlbench.engine.api.templating.BindType;
 import org.junit.jupiter.api.Test;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,7 +79,7 @@ public class ParsedTemplateTest {
             "select [u],[v as v1] from users where userid={userid}", Map.of("userid", "NumberNameToString()")
         );
         assertThat(pt.getAnchors()).containsExactly("userid");
-        assertThat(pt.getType()).isEqualTo(ParsedTemplate.Type.concat);
+        assertThat(pt.getType()).isEqualTo(BindType.concat);
         assertThat(pt.getCaptures()).containsExactly(CapturePoint.of("u"),CapturePoint.of("v","v1"));
 
     }
