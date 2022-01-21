@@ -19,6 +19,9 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.Param;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class StmtsDocList implements Iterable<StmtsDoc> {
 
     private final RawStmtsDocList rawStmtsDocList;
+    private final Map<String,String> templateVariables = new LinkedHashMap<>();
 
     public StmtsDocList(RawStmtsDocList rawStmtsDocList) {
         this.rawStmtsDocList = rawStmtsDocList;
@@ -106,6 +110,22 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      */
     public String getDescription() {
         return this.getStmtDocs().get(0).getDescription();
+    }
+
+    public Map<String,String> getTemplateVariables() {
+        return templateVariables;
+    }
+
+    public void addTemplateVariable(String key, String defaultValue) {
+        this.templateVariables.put(key,defaultValue);
+    }
+
+    public NBConfigModel getConfigModel() {
+        ConfigModel cfgmodel = ConfigModel.of(StmtsDocList.class);
+        getTemplateVariables().forEach((k,v) -> {
+            cfgmodel.add(Param.defaultTo(k,"template parameter found in the yaml workload"));
+        });
+        return cfgmodel.asReadOnly();
     }
 
 }

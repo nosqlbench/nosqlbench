@@ -144,11 +144,6 @@ public class NBCLIScenarioParser {
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
-// The logic to remove the leading slash was likely used to fix a nuisance bug before,
-// although it is clearly not correct as-is. Leaving temporarily for context.
-//                    String relativeWorkloadPathFromRoot = yamlWithNamedScenarios.asPath().toString();
-//                    relativeWorkloadPathFromRoot = relativeWorkloadPathFromRoot.startsWith("/") ?
-//                        relativeWorkloadPathFromRoot.substring(1) : relativeWorkloadPathFromRoot;
                     buildingCmd.put("workload", "workload=" + workloadName);
                 }
 
@@ -176,7 +171,6 @@ public class NBCLIScenarioParser {
                 logger.debug("rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
             }
-
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
 
@@ -285,7 +279,7 @@ public class NBCLIScenarioParser {
                     .name(referenced).extension(RawStmtsLoader.YAML_EXTENSIONS)
                     .one();
 
-                StmtsDocList stmts = StatementsLoader.loadContent(logger, content);
+                StmtsDocList stmts = StatementsLoader.loadContent(logger, content, Map.of());
                 if (stmts.getStmtDocs().size() == 0) {
                     logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                     continue;

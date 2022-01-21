@@ -475,10 +475,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
         Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
         Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (stmt.isPresent()) {
-            stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), interp);
+            stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
             workloadSource = "commandline:" + stmt.get();
         } else if (op_yaml_loc.isPresent()) {
-            stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), interp, "activities");
+            stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
             workloadSource = "yaml:" + op_yaml_loc.get();
         }
 

@@ -17,7 +17,6 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.LogManager;
@@ -104,8 +103,12 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         );
         SequencePlanner<ReadyMongoStatement> sequencer = new SequencePlanner<>(sequencerType);
 
-        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, new StrInterpolator(activityDef),
-                "activities");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(
+            logger,
+            yamlLoc,
+            activityDef.getParams(),
+            "activities"
+        );
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 

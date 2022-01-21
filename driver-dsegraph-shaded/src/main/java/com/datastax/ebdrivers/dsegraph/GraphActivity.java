@@ -86,8 +86,7 @@ public class GraphActivity extends SimpleActivity implements ActivityDefObserver
         SequencePlanner<ReadyGraphStatementTemplate> planner = new SequencePlanner<>(sequencerType);
 
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        StrInterpolator interp = new StrInterpolator(activityDef);
-        StmtsDocList unfiltered = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+        StmtsDocList unfiltered = StatementsLoader.loadPath(logger, yaml_loc, activityDef.getParams(), "activities");
 
         // log tag filtering results
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");

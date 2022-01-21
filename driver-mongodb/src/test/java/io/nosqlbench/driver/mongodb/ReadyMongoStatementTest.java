@@ -4,7 +4,6 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +32,7 @@ public class ReadyMongoStatementTest {
         };
         activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, new StrInterpolator(activityDef), "activities");
+        stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, activityDef.getParams(), "activities");
     }
 
     @Test

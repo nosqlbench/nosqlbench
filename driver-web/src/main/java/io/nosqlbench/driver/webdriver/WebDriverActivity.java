@@ -14,7 +14,6 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
@@ -169,9 +168,8 @@ public class WebDriverActivity extends SimpleActivity {
     }
 
     private OpSequence<CommandTemplate> initOpSequenceFromYaml() {
-        StrInterpolator interp = new StrInterpolator(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload").orElse("default");
-        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, interp, "activities");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yaml_loc, activityDef.getParams(), "activities");
 
         SequencerType sequencerType = getParams()
             .getOptionalString("seq")
