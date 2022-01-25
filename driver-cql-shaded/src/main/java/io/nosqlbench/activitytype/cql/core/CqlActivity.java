@@ -211,6 +211,12 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
             logger.debug("readying statement[" + (prepared ? "" : "un") + "prepared]:" + parsed.getStmt());
 
             ReadyCQLStatementTemplate template;
+            if (parsed.getStmt().contains("'?'") || parsed.getStmt().contains("\"?\"")) {
+                throw new BasicError(
+                    "You have a prepared-statement anchor in quotes. " +
+                        "This is usually incorrect. use a raw statement anchor without quotes as you would in a" +
+                        " prepared statement used directly with the vendor's driver.");
+            }
             String stmtForDriver = parsed.getPositionalStatement(s -> "?");
 
 
