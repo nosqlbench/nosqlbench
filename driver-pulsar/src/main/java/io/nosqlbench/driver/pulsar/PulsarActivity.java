@@ -253,9 +253,11 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             pulsarSchema = PulsarActivityUtil.getAvroSchema(schemaType, schemaDefStr);
         } else if (PulsarActivityUtil.isPrimitiveSchemaTypeStr(schemaType)) {
             pulsarSchema = PulsarActivityUtil.getPrimitiveTypeSchema((schemaType));
+        } else if (PulsarActivityUtil.isAutoConsumeSchemaTypeStr(schemaType)) {
+            pulsarSchema = Schema.AUTO_CONSUME();
         } else {
             throw new RuntimeException("Unsupported schema type string: " + schemaType + "; " +
-                "Only primitive type and Avro type are supported at the moment!");
+                "Only primitive type, Avro type and AUTO_CONSUME are supported at the moment!");
         }
     }
 
