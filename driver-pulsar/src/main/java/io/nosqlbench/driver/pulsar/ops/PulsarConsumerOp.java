@@ -21,6 +21,7 @@ import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.client.api.schema.GenericObject;
 import org.apache.pulsar.client.api.schema.GenericRecord;
 import org.apache.pulsar.client.api.transaction.Transaction;
 import org.apache.pulsar.common.schema.KeyValue;
@@ -194,17 +195,16 @@ public class PulsarConsumerOp implements PulsarOp {
         }
 
         if (logger.isDebugEnabled()) {
-            if (pulsarSchema.getSchemaInfo() != null
-                && PulsarActivityUtil.isAvroSchemaTypeStr(pulsarSchema.getSchemaInfo().getType().name())) {
-                org.apache.avro.Schema avroSchema = getSchemaFromConfiguration();
-                org.apache.avro.generic.GenericRecord avroGenericRecord =
-                    AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
-
+            Object decodedPayload = message.getValue();
+            if (decodedPayload instanceof GenericObject) {
+                // GenericObject is a wrapper for Primitives, for AVRO/JSON structs and for KeyValu
+                // we fall here with a configured AVRO schema or with AUTO_CONSUME
+                GenericObject object = (GenericObject) decodedPayload;
                 logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
                     consumer.getConsumerName(),
                     message.getKey(),
                     message.getProperties(),
-                    avroGenericRecord.toString());
+                    object.getNativeObject() + "");
             }
             else {
                 logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
@@ -223,17 +223,28 @@ public class PulsarConsumerOp implements PulsarOp {
             // because Pulsar caches the Schema, handles Schema evolution
             // as much efficiently as possible
             if (decodedPayload instanceof GenericRecord) { // AVRO and AUTO_CONSUME
-                GenericRecord pulsarGenericRecord = (GenericRecord) decodedPayload;
+                final GenericRecord pulsarGenericRecord = (GenericRecord) decodedPayload;
 
+                Object field = null;
                 // KeyValue is a special wrapper in Pulsar to represent a pair of values
+                // a Key and a Value
                 Object nativeObject = pulsarGenericRecord.getNativeObject();
                 if (nativeObject instanceof KeyValue) {
                     KeyValue keyValue = (KeyValue) nativeObject;
-                    if (keyValue.getValue() instanceof  GenericRecord) {
-                        pulsarGenericRecord = (GenericRecord) keyValue.getValue();
+                    // look into the Key
+                    if (keyValue.getKey() instanceof GenericRecord) {
+                        GenericRecord keyPart = (GenericRecord) keyValue.getKey();
+                        field = keyPart.getField(payloadRttTrackingField);
                     }
+                    // look into the Value
+                    if (keyValue.getValue() instanceof GenericRecord && field == null) {
+                        GenericRecord valuePart = (GenericRecord) keyValue.getValue();
+                        field = valuePart.getField(payloadRttTrackingField);
+                    }
+                } else {
+                    field = pulsarGenericRecord.getField(payloadRttTrackingField);
                 }
-                Object field = pulsarGenericRecord.getField(payloadRttTrackingField);
+
                 if (field != null) {
                     if (field instanceof Number) {
                         extractedSendTime = ((Number) field).longValue();
