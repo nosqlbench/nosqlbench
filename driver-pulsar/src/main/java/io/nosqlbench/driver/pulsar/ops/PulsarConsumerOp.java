@@ -239,7 +239,7 @@ public class PulsarConsumerOp implements PulsarOp {
                             field = keyPart.getField(payloadRttTrackingField);
                         } catch (AvroRuntimeException err) {
                             // field is not in the key
-                            logger.error("Cannot find "+payloadRttTrackingField+" in key " + keyPart + ": " + err);
+                            logger.error("Cannot find {} in key {}: {}", payloadRttTrackingField, keyPart, err + "");
                         }
                     }
                     // look into the Value
@@ -249,11 +249,11 @@ public class PulsarConsumerOp implements PulsarOp {
                             field = valuePart.getField(payloadRttTrackingField);
                         } catch (AvroRuntimeException err) {
                             // field is not in the value
-                            logger.error("Cannot find "+payloadRttTrackingField+" in value " + valuePart + ": " + err);
+                            logger.error("Cannot find {} in value {}: {}", payloadRttTrackingField, valuePart, err + "");
                         }
                     }
                     if (field == null) {
-                        throw new RuntimeException("Cannot find field " + payloadRttTrackingField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
+                        throw new RuntimeException("Cannot find field {}" + payloadRttTrackingField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
                     }
                 } else {
                     field = pulsarGenericRecord.getField(payloadRttTrackingField);
@@ -266,7 +266,7 @@ public class PulsarConsumerOp implements PulsarOp {
                         extractedSendTime = Long.valueOf(field.toString());
                     }
                 } else {
-                    logger.error("Cannot find " + payloadRttTrackingField + " in value " + pulsarGenericRecord);
+                    logger.error("Cannot find {} in value {}", payloadRttTrackingField, pulsarGenericRecord);
                 }
                 done = true;
             }
