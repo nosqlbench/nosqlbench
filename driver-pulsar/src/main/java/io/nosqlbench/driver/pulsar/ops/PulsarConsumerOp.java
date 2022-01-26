@@ -239,6 +239,7 @@ public class PulsarConsumerOp implements PulsarOp {
                             field = keyPart.getField(payloadRttTrackingField);
                         } catch (AvroRuntimeException err) {
                             // field is not in the key
+                            logger.error("Cannot find "+payloadRttTrackingField+" in key " + keyPart + ": " + err);
                         }
                     }
                     // look into the Value
@@ -248,7 +249,11 @@ public class PulsarConsumerOp implements PulsarOp {
                             field = valuePart.getField(payloadRttTrackingField);
                         } catch (AvroRuntimeException err) {
                             // field is not in the value
+                            logger.error("Cannot find "+payloadRttTrackingField+" in value " + valuePart + ": " + err);
                         }
+                    }
+                    if (field == null) {
+                        throw new RuntimeException("Cannot find field " + payloadRttTrackingField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
                     }
                 } else {
                     field = pulsarGenericRecord.getField(payloadRttTrackingField);
@@ -260,6 +265,8 @@ public class PulsarConsumerOp implements PulsarOp {
                     } else {
                         extractedSendTime = Long.valueOf(field.toString());
                     }
+                } else {
+                    logger.error("Cannot find " + payloadRttTrackingField + " in value " + pulsarGenericRecord);
                 }
                 done = true;
             }
