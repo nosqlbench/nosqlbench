@@ -451,6 +451,10 @@ public class PulsarActivityUtil {
     public static boolean isAvroSchemaTypeStr(String typeStr) {
         return typeStr.equalsIgnoreCase("AVRO");
     }
+    // automatic decode the type from the Registry
+    public static boolean isAutoConsumeSchemaTypeStr(String typeStr) {
+        return typeStr.equalsIgnoreCase("AUTO_CONSUME");
+    }
     public static Schema<?> getAvroSchema(String typeStr, String definitionStr) {
         String schemaDefinitionStr = definitionStr;
         String filePrefix = "file://";

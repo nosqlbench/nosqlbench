@@ -21,9 +21,12 @@ import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.client.api.schema.GenericObject;
 import org.apache.pulsar.client.api.schema.GenericRecord;
 import org.apache.pulsar.client.api.transaction.Transaction;
-import org.apache.pulsar.common.schema.SchemaType;
+import org.apache.pulsar.common.schema.KeyValue;
+// this is from the Shaded version of Avro inside the Pulsar client jar
+import org.apache.pulsar.shade.org.apache.avro.AvroRuntimeException;
 
 public class PulsarConsumerOp implements PulsarOp {
 
@@ -193,18 +196,16 @@ public class PulsarConsumerOp implements PulsarOp {
         }
 
         if (logger.isDebugEnabled()) {
-            SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
-
-            if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
-                org.apache.avro.Schema avroSchema = getSchemaFromConfiguration();
-                org.apache.avro.generic.GenericRecord avroGenericRecord =
-                    AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
-
+            Object decodedPayload = message.getValue();
+            if (decodedPayload instanceof GenericObject) {
+                // GenericObject is a wrapper for Primitives, for AVRO/JSON structs and for KeyValu
+                // we fall here with a configured AVRO schema or with AUTO_CONSUME
+                GenericObject object = (GenericObject) decodedPayload;
                 logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
                     consumer.getConsumerName(),
                     message.getKey(),
                     message.getProperties(),
-                    avroGenericRecord.toString());
+                    object.getNativeObject() + "");
             }
             else {
                 logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
@@ -216,22 +217,60 @@ public class PulsarConsumerOp implements PulsarOp {
         }
 
         if (!payloadRttTrackingField.isEmpty()) {
+            boolean done = false;
             Object decodedPayload = message.getValue();
             Long extractedSendTime = null;
             // if Pulsar is able to decode this it is better to let it do the work
             // because Pulsar caches the Schema, handles Schema evolution
             // as much efficiently as possible
-            if (decodedPayload instanceof GenericRecord) {
-                GenericRecord pulsarGenericRecord = (GenericRecord) decodedPayload;
-                Object field = pulsarGenericRecord.getField(payloadRttTrackingField);
+            if (decodedPayload instanceof GenericRecord) { // AVRO and AUTO_CONSUME
+                final GenericRecord pulsarGenericRecord = (GenericRecord) decodedPayload;
+
+                Object field = null;
+                // KeyValue is a special wrapper in Pulsar to represent a pair of values
+                // a Key and a Value
+                Object nativeObject = pulsarGenericRecord.getNativeObject();
+                if (nativeObject instanceof KeyValue) {
+                    KeyValue keyValue = (KeyValue) nativeObject;
+                    // look into the Key
+                    if (keyValue.getKey() instanceof GenericRecord) {
+                        GenericRecord keyPart = (GenericRecord) keyValue.getKey();
+                        try {
+                            field = keyPart.getField(payloadRttTrackingField);
+                        } catch (AvroRuntimeException err) {
+                            // field is not in the key
+                            logger.error("Cannot find {} in key {}: {}", payloadRttTrackingField, keyPart, err + "");
+                        }
+                    }
+                    // look into the Value
+                    if (keyValue.getValue() instanceof GenericRecord && field == null) {
+                        GenericRecord valuePart = (GenericRecord) keyValue.getValue();
+                        try {
+                            field = valuePart.getField(payloadRttTrackingField);
+                        } catch (AvroRuntimeException err) {
+                            // field is not in the value
+                            logger.error("Cannot find {} in value {}: {}", payloadRttTrackingField, valuePart, err + "");
+                        }
+                    }
+                    if (field == null) {
+                        throw new RuntimeException("Cannot find field {}" + payloadRttTrackingField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
+                    }
+                } else {
+                    field = pulsarGenericRecord.getField(payloadRttTrackingField);
+                }
+
                 if (field != null) {
                     if (field instanceof Number) {
                         extractedSendTime = ((Number) field).longValue();
                     } else {
                         extractedSendTime = Long.valueOf(field.toString());
                     }
+                } else {
+                    logger.error("Cannot find {} in value {}", payloadRttTrackingField, pulsarGenericRecord);
                 }
-            } else {
+                done = true;
+            }
+            if (!done) {
                 org.apache.avro.Schema avroSchema = getSchemaFromConfiguration();
                 org.apache.avro.generic.GenericRecord avroGenericRecord =
                     AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
