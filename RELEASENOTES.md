@@ -1,8 +1,6 @@
-- d98e1aaae (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- e6d6c5873 (origin/main) Merge pull request #411 from eolivelli/fix/root-log-level
-- bcfa4911e Logging: do not set ROOT level to ALL
-- 0503730db Merge pull request #409 from eolivelli/fix/pulsar-avro
-- 94b72156f Pulsar: improve AVRO decoding
-- 2f9b88ce4 support desc and description in yaml
-- 9a3774bb9 improve yaml warnings and tests
-- e44df1535 include operative message in OpConfigError output
+- c7403eb1c (HEAD -> main, origin/main, origin/HEAD) Merge pull request #412 from eolivelli/pulsar/handle-keyvalue
+- 1c91469e6 fix logger
+- 2e8fbd710 fail if field is not found
+- 614fb3bb5 Look for Payload RTT field in the Key as well
+- e3ed83835 Look for Payload RTT field in the Key as well
+- a3acfbaec Pulsar: support Schema.AUTO_CONSUME() and support KeyValue for RTT tracking feature
