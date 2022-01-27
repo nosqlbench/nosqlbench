@@ -27,7 +27,7 @@
     "js-yaml-loader": "^1.2.2",
     "markdown-it": "^11.0.1",
     "markdown-it-imsize": "^2.0.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "npm": "^6.14.8",
     "nuxt": "^2.14.4",
     "source-map-resolve": "^0.6.0",
