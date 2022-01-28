@@ -104,11 +104,17 @@ public class CQLSessionCache implements Shutdownable {
         builder.withCompression(ProtocolOptions.Compression.NONE);
 
         Optional<String> usernameOpt = activityDef.getParams().getOptionalString("username");
+        Optional<String> userfileOpt = activityDef.getParams().getOptionalString("userfile");
         Optional<String> passwordOpt = activityDef.getParams().getOptionalString("password");
         Optional<String> passfileOpt = activityDef.getParams().getOptionalString("passfile");
 
-        if (usernameOpt.isPresent()) {
-            String username = usernameOpt.get();
+
+        if (usernameOpt.isPresent() || userfileOpt.isPresent()) {
+            String username = usernameOpt.orElse(null);
+            if (userfileOpt.isPresent()) {
+                username = readfile(userfileOpt.get());
+            }
+
             String password;
             if (passwordOpt.isPresent()) {
                 password = passwordOpt.get();
@@ -330,6 +336,14 @@ public class CQLSessionCache implements Shutdownable {
         }
 
         return session;
+    }
+
+    private String readfile(String path) {
+        try {
+            return Files.readAllLines(Path.of(path)).get(0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
