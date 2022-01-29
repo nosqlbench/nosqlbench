@@ -76,9 +76,9 @@ public class PulsarSpace {
             CollectionUtils.addAll(pulsarClusterMetadata, stringList.listIterator());
 
         } catch (PulsarAdminException e) {
-            String errMsg = "Fail to create PulsarClient from global configuration: " + e.getMessage();
-            logger.error(errMsg);
-            throw new RuntimeException(errMsg);
+            // this is okay if you are connecting with a token that does not have access to the
+            // system configuration
+            logger.info("Could not get list of Pulsar Clusters from global configuration: " + e.getMessage());
         }
     }
 
