@@ -1,1 +1,1 @@
-- 46c19ff41 (HEAD -> main) add userfile support to cql and cqld3 drivers
+- f4ec05aef (HEAD -> main) fully port template var fixes from 4.17 branch
