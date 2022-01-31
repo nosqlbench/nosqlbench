@@ -10,7 +10,6 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -71,8 +70,7 @@ public class KafkaProducerActivity extends SimpleActivity {
         SequencePlanner<KafkaStatement> sequencer = new SequencePlanner<>(sequencerType);
 
         String tagFilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, new StrInterpolator(activityDef),
-            "activities");
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, activityDef.getParams(), "activities");
         List<OpTemplate> statements = stmtsDocList.getStmts(tagFilter);
 
         String format = getParams().getOptionalString("format").orElse(null);

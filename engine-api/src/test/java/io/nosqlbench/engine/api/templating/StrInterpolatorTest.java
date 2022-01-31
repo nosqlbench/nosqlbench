@@ -27,45 +27,48 @@ public class StrInterpolatorTest {
 
     private static final List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{
         add(
-                new HashMap<String,String>() {{
-                    put("akey", "aval1");
-                    put("bkey", "bval1");
-                    put("ckey", "cval1");
-                }}
+            new HashMap<>() {{
+                put("akey", "aval1");
+                put("bkey", "bval1");
+                put("ckey", "cval1");
+            }}
         );
         add(
-                new HashMap<String,String>() {
-                    {
-                        put("akey", "aval2");
-                        put("bkey", "bval2");
-                    }
+            new HashMap<>() {
+                {
+                    put("akey", "aval2");
+                    put("bkey", "bval2");
                 }
+            }
         );
         add(
-                new HashMap<String,String>() {
-                    {
-                        put("json-a-b", "'a': 'b'");
-                    }
+            new HashMap<>() {
+                {
+                    put("json-a-b", "'a': 'b'");
                 }
+            }
         );
     }};
 
-    private static final StrInterpolator interp = new StrInterpolator(abcd);
+
 
     @Test
     public void shouldReturnIdentity() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("A");
         assertThat(a).isEqualTo("A");
     }
 
     @Test
     public void shouldMatchSimpleSubst() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<akey>>");
         assertThat(a).isEqualTo("aval1");
     }
 
     @Test
     public void shouldMatchAlternateSubst() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("TEMPLATE(akey)");
         assertThat(a).isEqualTo("aval1");
         String b = interp.apply("TEMPLATE(nokeymatches,value2)");
@@ -74,44 +77,52 @@ public class StrInterpolatorTest {
 
     @Test
     public void shouldReturnWarningWhenUnmatched() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<nokeymatchesthis>>");
         assertThat(a).isEqualTo("UNSET:nokeymatchesthis");
     }
 
     @Test
     public void shouldReturnDefaultWhenNotOverridden() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<nokeymatchesthis:butithasadefault>>");
         assertThat(a).isEqualTo("butithasadefault");
     }
 
     @Test
     public void shouldOverrideDefault() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<bkey:bkeydefault>>");
         assertThat(a).isEqualTo("bval1");
     }
 
     @Test
     public void shouldWorkWithOddCharacters() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<unchanged:{'parm1':'val1',parm2:val2, parm3: 'val3'}>>");
         assertThat(a).isEqualTo("{'parm1':'val1',parm2:val2, parm3: 'val3'}");
     }
 
     @Test
     public void shouldWorkWithAllQuotes() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<Token:'Key': 'Value'>>");
         assertThat(a).isEqualTo("'Key': 'Value'");
     }
 
     @Test
     public void shouldWorkWithAllQuotesOverride() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<Token:'Key': 'Value'>>");
         assertThat(a).isEqualTo("'Key': 'Value'");
-        String b = interp.apply("<<json-a-b:'Key': 'Value'>>");
+        StrInterpolator interp2 = new StrInterpolator(abcd);
+        String b = interp2.apply("<<json-a-b:'Key': 'Value'>>");
         assertThat(b).isEqualTo("'a': 'b'");
     }
 
     @Test
     public void shouldWorkWithMultipleGroups() {
+        StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<Token:'Key': 'Value'>>.<<Token2:'Stuff'>>");
         assertThat(a).isEqualTo("'Key': 'Value'.'Stuff'");
     }

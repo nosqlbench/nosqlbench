@@ -55,13 +55,13 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatVerboseFinalParameterThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"}));
+            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"}));
     }
 
     @Test
     public void testThatMissingScenarioNameThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
+            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
     }
 
     @Test
@@ -82,14 +82,17 @@ public class NBCLIScenarioParserTest {
     }
 
     @Test
-    public void testThatTemplateParamsAreExpandedAndRemovedOverride() {
+    public void testThatTemplateParamsAreExpandedAndNotRemovedOverride() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
-        assertThat(cmds.get(0).getArg("cycles")).isEqualTo("20");
-        assertThat(cmds.get(0).getArg("cycles-test")).isNull();
-        assertThat(cmds.get(0).getArg("workload")).isEqualTo("scenario-test");
+        assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
+            "alias","scenariotest_templatetest_withtemplate",
+            "cycles","20",
+            "cycles-test","20",
+            "driver","stdout",
+            "workload","scenario-test"
+        ));
     }
 
     @Test
@@ -99,6 +102,7 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
             "alias","scenariotest_schemaonly_000",
+            "cycles-test","20",
             "driver","stdout",
             "tags","phase:schema",
             "workload","scenario-test"

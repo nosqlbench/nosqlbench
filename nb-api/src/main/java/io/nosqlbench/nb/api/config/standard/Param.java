@@ -14,7 +14,7 @@ public class Param<T> {
 
     private final List<String> names;
     public final Class<? extends T> type;
-    public String description;
+    private String description;
     private final T defaultValue;
     public boolean required;
     private Pattern regex;
@@ -35,6 +35,7 @@ public class Param<T> {
 
     /**
      * Declare an optional String parameter with the given name.
+     *
      * @param name the name of the parameter
      */
     public static Param<String> optional(String name) {
@@ -57,12 +58,27 @@ public class Param<T> {
      * When users provide more than one of these in configuration data, it is considered an error.
      *
      * @param names one or more names that the parameter can be specified with.
-     * @param type The type of value that the provided configuration value must be returnable as (assignable to)
-     * @param <V> Generic type for inference.
+     * @param type  The type of value that the provided configuration value must be returnable as (assignable to)
+     * @param <V>   Generic type for inference.
      */
     public static <V> Param<V> optional(List<String> names, Class<V> type) {
         return new Param<V>(names, type, null, false, null);
     }
+
+    /**
+     * Declare an optional parameter specified by any of the names which must be assignable to
+     * (returnable as) the specified type.
+     * When users provide more than one of these in configuration data, it is considered an error.
+     *
+     * @param names       one or more names that the parameter can be specified with.
+     * @param type        The type of value that the provided configuration value must be returnable as (assignable to)
+     * @param description A description of what this parameter is
+     * @param <V>         Generic type for inference.
+     */
+    public static <V> Param<V> optional(List<String> names, Class<V> type, String description) {
+        return new Param<V>(names, type, description, false, null);
+    }
+
 
     /**
      * Declare an optional parameter for the given name which must be assignable to
@@ -71,15 +87,30 @@ public class Param<T> {
      *
      * @param name the name of the parameter
      * @param type The type of value that the provided configuration value must be returnable as (assignable to)
-     * @param <V> Generic type for inference.
+     * @param <V>  Generic type for inference.
      */
     public static <V> Param<V> optional(String name, Class<V> type) {
         return new Param<V>(List.of(name), type, null, false, null);
     }
 
     /**
+     * Declare an optional parameter for the given name which must be assignable to
+     * (returnable as) the specified type.
+     * When users provide more than one of these in configuration data, it is considered an error.
+     *
+     * @param name        the name of the parameter
+     * @param type        The type of value that the provided configuration value must be returnable as (assignable to)
+     * @param description A description of what this parameter is
+     * @param <V>         Generic type for inference.
+     */
+    public static <V> Param<V> optional(String name, Class<V> type, String description) {
+        return new Param<V>(List.of(name), type, description, false, null);
+    }
+
+    /**
      * Parameters which are given a default value are automatically marked as required, as the default
      * value allows them to be accessed as such.
+     *
      * @param name
      * @param defaultValue
      * @param <V>
@@ -92,6 +123,20 @@ public class Param<T> {
     /**
      * Parameters which are given a default value are automatically marked as required, as the default
      * value allows them to be accessed as such.
+     *
+     * @param name
+     * @param defaultValue
+     * @param <V>
+     * @return
+     */
+    public static <V> Param<V> defaultTo(String name, V defaultValue, String description) {
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), description, true, defaultValue);
+    }
+
+    /**
+     * Parameters which are given a default value are automatically marked as required, as the default
+     * value allows them to be accessed as such.
+     *
      * @param names
      * @param defaultValue
      * @param <V>
@@ -108,7 +153,6 @@ public class Param<T> {
     public static <V> Param<V> required(List<String> names, Class<V> type) {
         return new Param<V>(names, type, null, true, null);
     }
-
 
 
     @Override
