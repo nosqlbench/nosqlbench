@@ -279,7 +279,9 @@ public class PulsarConsumerOp implements PulsarOp {
                 }
             }
             if (extractedSendTime != null) {
-                long delta = System.currentTimeMillis() - extractedSendTime;
+                // fallout expects latencies in "ns" and not in "ms"
+                long delta = TimeUnit.MILLISECONDS
+                    .toNanos(System.currentTimeMillis() - extractedSendTime);
                 payloadRttHistogram.update(delta);
             }
         }
