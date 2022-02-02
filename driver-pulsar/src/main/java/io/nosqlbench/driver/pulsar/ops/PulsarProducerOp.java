@@ -108,15 +108,13 @@ public class PulsarProducerOp implements PulsarOp {
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
         if (pulsarSchema instanceof KeyValueSchema) {
 
+            // {KEY IN JSON}||{VALUE IN JSON}
             int separator = msgPayload.indexOf("}||{");
             if (separator < 0) {
                 throw new IllegalArgumentException("KeyValue payload MUST be in form {KEY IN JSON}||{VALUE IN JSON} (with 2 pipes that separate the KEY part from the VALUE part)");
             }
             String keyInput = msgPayload.substring(0, separator + 1);
             String valueInput = msgPayload.substring(separator + 3);
-            logger.info("msgPayload: {}", msgPayload);
-            logger.info("keyInput: {}", keyInput);
-            logger.info("valueInput: {}", valueInput);
 
             KeyValueSchema keyValueSchema = (KeyValueSchema) pulsarSchema;
             org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
@@ -259,7 +257,6 @@ public class PulsarProducerOp implements PulsarOp {
         // no need for synchronization, this is only a cache
         // in case of the race we will parse the string twice, not a big
         if (avroSchema == null) {
-            logger.info("getAvroSchemaFromConfiguration...{}", pulsarSchema);
             if (pulsarSchema.getSchemaInfo().getType() == SchemaType.KEY_VALUE) {
                 KeyValueSchema kvSchema = (KeyValueSchema) pulsarSchema;
                 Schema valueSchema = kvSchema.getValueSchema();
@@ -270,7 +267,6 @@ public class PulsarProducerOp implements PulsarOp {
                 avroSchema = AvroUtil.GetSchema_ApacheAvro(avroDefStr);
             }
         }
-        logger.info("getAvroSchemaFromConfiguration...avroSchema {}", avroSchema);
         return avroSchema;
     }
 
@@ -287,7 +283,6 @@ public class PulsarProducerOp implements PulsarOp {
                 throw new RuntimeException("We are not using KEY_VALUE schema, so no Schema for the Key!");
             }
         }
-        logger.info("getKeyAvroSchemaFromConfiguration...avroSchema {}", avroKeySchema);
         return avroKeySchema;
     }
 }
