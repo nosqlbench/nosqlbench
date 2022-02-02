@@ -451,6 +451,10 @@ public class PulsarActivityUtil {
     public static boolean isAvroSchemaTypeStr(String typeStr) {
         return typeStr.equalsIgnoreCase("AVRO");
     }
+    public static boolean isKeyValueTypeStr(String typeStr) {
+        return typeStr.equalsIgnoreCase("KEY_VALUE");
+    }
+
     // automatic decode the type from the Registry
     public static boolean isAutoConsumeSchemaTypeStr(String typeStr) {
         return typeStr.equalsIgnoreCase("AUTO_CONSUME");

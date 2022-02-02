@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
 import java.util.Map;
 
@@ -244,21 +245,40 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
      * Get Pulsar schema from the definition string
      */
     private void createPulsarSchemaFromConf() {
-        Object value = pulsarNBClientConf.getSchemaConfValue("schema.type");
+        pulsarSchema = buldSchemaFromDefinition("schema.type", "schema.definition");
+
+        // this is to allow KEY_VALUE schema
+        if (pulsarNBClientConf.hasSchemaConfKey("schema.key.type")) {
+           Schema<?> pulsarKeySchema = buldSchemaFromDefinition("schema.key.type", "schema.key.definition");
+           Object encodingType =  pulsarNBClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
+           KeyValueEncodingType keyValueEncodingType = KeyValueEncodingType.SEPARATED;
+           if (encodingType != null) {
+               keyValueEncodingType = KeyValueEncodingType.valueOf(encodingType.toString());
+           }
+           pulsarSchema = Schema.KeyValue(pulsarKeySchema, pulsarSchema, keyValueEncodingType);
+        }
+    }
+
+    private Schema<?> buldSchemaFromDefinition(String schemaTypeConfEntry,
+                                                      String schemaDefinitionConfEntry) {
+        Object value = pulsarNBClientConf.getSchemaConfValue(schemaTypeConfEntry);
+        Object schemaDefinition = pulsarNBClientConf.getSchemaConfValue(schemaDefinitionConfEntry);
         String schemaType = (value != null) ? value.toString() : "";
 
+        Schema<?> result;
         if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType)) {
-            value = pulsarNBClientConf.getSchemaConfValue("schema.definition");
-            String schemaDefStr = (value != null) ? value.toString() : "";
-            pulsarSchema = PulsarActivityUtil.getAvroSchema(schemaType, schemaDefStr);
+            String schemaDefStr = (schemaDefinition != null) ? schemaDefinition.toString() : "";
+            result = PulsarActivityUtil.getAvroSchema(schemaType, schemaDefStr);
         } else if (PulsarActivityUtil.isPrimitiveSchemaTypeStr(schemaType)) {
-            pulsarSchema = PulsarActivityUtil.getPrimitiveTypeSchema((schemaType));
+            result = PulsarActivityUtil.getPrimitiveTypeSchema(schemaType);
         } else if (PulsarActivityUtil.isAutoConsumeSchemaTypeStr(schemaType)) {
-            pulsarSchema = Schema.AUTO_CONSUME();
+            result = Schema.AUTO_CONSUME();
         } else {
             throw new RuntimeException("Unsupported schema type string: " + schemaType + "; " +
                 "Only primitive type, Avro type and AUTO_CONSUME are supported at the moment!");
         }
+        logger.info("Generated schema from {}={} {}={}: {}", schemaTypeConfEntry, value, schemaDefinitionConfEntry, schemaDefinition, result.getSchemaInfo().getSchemaDefinition());
+        return result;
     }
 
     public PulsarNBClientConf getPulsarConf() { return this.pulsarNBClientConf;}

@@ -13,8 +13,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.client.api.schema.GenericRecord;
+import org.apache.pulsar.client.api.schema.KeyValueSchema;
 import org.apache.pulsar.client.api.transaction.Transaction;
 import org.apache.pulsar.client.impl.schema.generic.GenericAvroSchema;
+import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.common.schema.SchemaType;
 
 import java.nio.charset.StandardCharsets;
@@ -42,6 +44,9 @@ public class PulsarProducerOp implements PulsarOp {
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
     private final Timer transactionCommitTimer;
+
+    private org.apache.avro.Schema avroSchema;
+    private org.apache.avro.Schema avroKeySchema;
 
     public PulsarProducerOp( PulsarActivity pulsarActivity,
                              boolean asyncPulsarOp,
@@ -101,7 +106,36 @@ public class PulsarProducerOp implements PulsarOp {
         // set message payload
         int messageSize;
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
-        if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
+        if (pulsarSchema instanceof KeyValueSchema) {
+
+            int separator = msgPayload.indexOf("}||{");
+            if (separator < 0) {
+                throw new IllegalArgumentException("KeyValue payload MUST be in form {KEY IN JSON}||{VALUE IN JSON} (with 2 pipes that separate the KEY part from the VALUE part)");
+            }
+            String keyInput = msgPayload.substring(0, separator + 1);
+            String valueInput = msgPayload.substring(separator + 3);
+            logger.info("msgPayload: {}", msgPayload);
+            logger.info("keyInput: {}", keyInput);
+            logger.info("valueInput: {}", valueInput);
+
+            KeyValueSchema keyValueSchema = (KeyValueSchema) pulsarSchema;
+            org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
+            GenericRecord payload = AvroUtil.GetGenericRecord_PulsarAvro(
+                (GenericAvroSchema) keyValueSchema.getValueSchema(),
+                avroSchema,
+                valueInput
+            );
+
+            org.apache.avro.Schema avroSchemaForKey = getKeyAvroSchemaFromConfiguration();
+            GenericRecord key = AvroUtil.GetGenericRecord_PulsarAvro(
+                (GenericAvroSchema) keyValueSchema.getKeySchema(),
+                avroSchemaForKey,
+                keyInput
+            );
+            typedMessageBuilder = typedMessageBuilder.value(new KeyValue(key, payload));
+            // TODO: add a way to calculate the message size for KEY_VALUE messages
+            messageSize = msgPayload.length();
+        } else if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
             GenericRecord payload = AvroUtil.GetGenericRecord_PulsarAvro(
                 (GenericAvroSchema) pulsarSchema,
                 pulsarSchema.getSchemaInfo().getSchemaDefinition(),
@@ -132,9 +166,7 @@ public class PulsarProducerOp implements PulsarOp {
 
                 if (logger.isDebugEnabled()) {
                     if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
-                        String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
-                        org.apache.avro.Schema avroSchema =
-                            AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+                        org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
                         org.apache.avro.generic.GenericRecord avroGenericRecord =
                             AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, msgPayload);
 
@@ -187,9 +219,7 @@ public class PulsarProducerOp implements PulsarOp {
                 future.whenComplete((messageId, error) -> {
                     if (logger.isDebugEnabled()) {
                         if (PulsarActivityUtil.isAvroSchemaTypeStr(schemaType.name())) {
-                            String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
-                            org.apache.avro.Schema avroSchema =
-                                AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+                            org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
                             org.apache.avro.generic.GenericRecord avroGenericRecord =
                                 AvroUtil.GetGenericRecord_ApacheAvro(avroSchema, msgPayload);
 
@@ -223,5 +253,41 @@ public class PulsarProducerOp implements PulsarOp {
                 throw new PulsarDriverUnexpectedException(e);
             }
         }
+    }
+
+    private org.apache.avro.Schema getAvroSchemaFromConfiguration() {
+        // no need for synchronization, this is only a cache
+        // in case of the race we will parse the string twice, not a big
+        if (avroSchema == null) {
+            logger.info("getAvroSchemaFromConfiguration...{}", pulsarSchema);
+            if (pulsarSchema.getSchemaInfo().getType() == SchemaType.KEY_VALUE) {
+                KeyValueSchema kvSchema = (KeyValueSchema) pulsarSchema;
+                Schema valueSchema = kvSchema.getValueSchema();
+                String avroDefStr = valueSchema.getSchemaInfo().getSchemaDefinition();
+                avroSchema = AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+            } else {
+                String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
+                avroSchema = AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+            }
+        }
+        logger.info("getAvroSchemaFromConfiguration...avroSchema {}", avroSchema);
+        return avroSchema;
+    }
+
+    private org.apache.avro.Schema getKeyAvroSchemaFromConfiguration() {
+        // no need for synchronization, this is only a cache
+        // in case of the race we will parse the string twice, not a big
+        if (avroKeySchema == null) {
+            if (pulsarSchema.getSchemaInfo().getType() == SchemaType.KEY_VALUE) {
+                KeyValueSchema kvSchema = (KeyValueSchema) pulsarSchema;
+                Schema keySchema = kvSchema.getKeySchema();
+                String avroDefStr = keySchema.getSchemaInfo().getSchemaDefinition();
+                avroKeySchema = AvroUtil.GetSchema_ApacheAvro(avroDefStr);
+            } else {
+                throw new RuntimeException("We are not using KEY_VALUE schema, so no Schema for the Key!");
+            }
+        }
+        logger.info("getKeyAvroSchemaFromConfiguration...avroSchema {}", avroKeySchema);
+        return avroKeySchema;
     }
 }
