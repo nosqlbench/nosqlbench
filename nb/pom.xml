@@ -119,6 +119,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>driver-cql-scylla-shaded</artifactId>
+            <version>4.15.87-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cqlverify</artifactId>
             <version>4.15.87-SNAPSHOT</version>
         </dependency>
@@ -252,9 +258,27 @@
                     <version>4.15.87-SNAPSHOT</version>
                 </dependency>
             </dependencies>
-
-
         </profile>
+
+        <profile>
+            <id>with-scylla-cql</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-cql-scylla-shaded</artifactId>
+                    <version>4.15.87-SNAPSHOT</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>driver-cqlverify</artifactId>
+                    <version>4.15.87-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
         <profile>
             <id>with-cql-d4</id>
             <activation>

@@ -44,6 +44,7 @@
         <module>driver-dsegraph-shaded</module>
         <module>driver-cql-shaded</module>
         <module>driver-cqld3-shaded</module>
+        <module>driver-cql-scylla-shaded</module>
         <module>driver-cqlverify</module>
         <module>driver-web</module>
         <module>driver-kafka</module>

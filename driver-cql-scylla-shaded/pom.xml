@@ -1,0 +1,235 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>mvn-defaults</artifactId>
+        <version>4.15.87-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>driver-cql-scylla-shaded</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <description>
+        A Shaded CQL ActivityType driver for http://nosqlbench.io/,
+        using version 3.* of the ScyllaDB CQL Driver
+    </description>
+
+    <dependencies>
+
+        <!-- core dependencies -->
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+          <version>4.15.87-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
+          <version>4.15.87-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>scylla-driver-core</artifactId>
+            <version>3.10.2-scylla-1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>scylla-driver-extras</artifactId>
+            <version>3.10.2-scylla-1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>scylla-driver-mapping</artifactId>
+            <version>3.10.2-scylla-1</version>
+        </dependency>
+
+        <!-- For CQL compression option -->
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+        </dependency>
+
+        <!-- For CQL compression option -->
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-haproxy</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+
+        </dependency>
+
+        <!-- test only scope -->
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+
+            <!--
+            If this plugin is re-enabled, the local CQL grammar will
+            be overwritten. The grammar has some syntax issues, so
+            fixes will be made to it before it is submitted back.
+
+            (lack of composite key syntax, nested type syntax, etc)
+            -->
+            <!--            <plugin>-->
+            <!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
+            <!--                <artifactId>download-maven-plugin</artifactId>-->
+            <!--                <version>1.4.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>get-cql-lexer</id>-->
+            <!--                        <phase>generate-sources</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>wget</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <url>-->
+            <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlLexer.g4-->
+            <!--                            </url>-->
+            <!--                            <outputFileName>CqlLexer.g4</outputFileName>-->
+            <!--                            <outputDirectory>src/main/grammars/cql3/-->
+            <!--                            </outputDirectory>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                    <execution>-->
+            <!--                        <id>get-cql-parser</id>-->
+            <!--                        <phase>generate-sources</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>wget</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <url>-->
+            <!--                                https://raw.githubusercontent.com/antlr/grammars-v4/master/cql3/CqlParser.g4-->
+            <!--                            </url>-->
+            <!--                            <outputFileName>CqlParser.g4</outputFileName>-->
+            <!--                            <outputDirectory>src/main/grammars/cql3/-->
+            <!--                            </outputDirectory>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
+
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.9.2</version>
+                <configuration>
+                    <sourceDirectory>src/main/grammars/cql3
+                    </sourceDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>io.nosqlbench.generators.cql.generated
+                        </argument>
+                    </arguments>
+                    <outputDirectory>
+                        src/main/java/io/nosqlbench/generators/cql/generated
+                    </outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                    <createSourcesJar>true</createSourcesJar>
+                    <!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
+                    <!--          <shadedClassifierName>shaded</shadedClassifierName>-->
+                    <relocations>
+                        <relocation>
+                            <pattern>com.google.common</pattern>
+                            <shadedPattern>com.datastax.internal.com_google_common</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.datastax</pattern>
+                            <shadedPattern>com.datastax.cql3.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.activitytype.cql</pattern>
+                            <shadedPattern>io.nosqlbench.activitytype.scyllacql.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.endpoints.cql</pattern>
+                            <shadedPattern>io.nosqlbench.endpoints.scyllacql.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.nosqlbench.generators.cql</pattern>
+                            <shadedPattern>io.nosqlbench.generators.scyllacql.shaded</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>dse19.io.netty</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <artifactSet>
+                        <includes>
+                            <include>*:*</include>
+                        </includes>
+                    </artifactSet>
+                    <transformers combine.children="append">
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                    </transformers>
+                    <!--          <finalName>${project.artifactId}</finalName>-->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
