@@ -90,6 +90,10 @@ public class AvroUtil {
     // Get a Pulsar Avro record (GenericRecord) from a JSON string that matches a specific Pulsar Avro schema
     public static GenericRecord GetGenericRecord_PulsarAvro(GenericAvroSchema genericAvroSchema, String avroSchemDefStr, String jsonData) {
         org.apache.avro.Schema avroSchema = GetSchema_ApacheAvro(avroSchemDefStr);
+        return GetGenericRecord_PulsarAvro(genericAvroSchema, avroSchema, jsonData);
+    }
+
+    public static GenericRecord GetGenericRecord_PulsarAvro(GenericAvroSchema genericAvroSchema, org.apache.avro.Schema avroSchema, String jsonData) {
         org.apache.avro.generic.GenericRecord apacheAvroRecord = GetGenericRecord_ApacheAvro(avroSchema, jsonData);
         return GetGenericRecord_PulsarAvro(genericAvroSchema, apacheAvroRecord);
     }

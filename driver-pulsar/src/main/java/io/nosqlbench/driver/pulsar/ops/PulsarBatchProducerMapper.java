@@ -6,7 +6,6 @@ import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pulsar.client.api.Producer;
 
 import java.util.HashMap;
 import java.util.Map;
