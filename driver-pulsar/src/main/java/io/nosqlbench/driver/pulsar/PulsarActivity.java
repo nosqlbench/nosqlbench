@@ -277,7 +277,6 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
             throw new RuntimeException("Unsupported schema type string: " + schemaType + "; " +
                 "Only primitive type, Avro type and AUTO_CONSUME are supported at the moment!");
         }
-        logger.info("Generated schema from {}={} {}={}: {}", schemaTypeConfEntry, value, schemaDefinitionConfEntry, schemaDefinition, result.getSchemaInfo().getSchemaDefinition());
         return result;
     }
 
