@@ -2,15 +2,17 @@ package io.nosqlbench.adapter.cqld4;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
-import com.datastax.oss.driver.api.core.config.*;
+import com.datastax.oss.driver.api.core.config.DriverConfig;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.OptionsMap;
+import com.datastax.oss.driver.api.core.config.TypedDriverOption;
 import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
+import com.datastax.oss.driver.internal.core.loadbalancing.helper.NodeFilterToDistanceEvaluatorAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -24,8 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Cqld4Space {
@@ -34,7 +34,7 @@ public class Cqld4Space {
 
     CqlSession session;
 
-    public Cqld4Space(String space,NBConfiguration cfg) {
+    public Cqld4Space(String space, NBConfiguration cfg) {
         this.space = space;
         session = createSession(cfg);
     }
@@ -45,7 +45,7 @@ public class Cqld4Space {
         for (TypedDriverOption<?> builtin : builtins) {
             String path = builtin.getRawOption().getPath();
             Class<?> rawType = builtin.getExpectedType().getRawType();
-            driverOpts.add(Param.optional("driver."+path,rawType));
+            driverOpts.add(Param.optional("driver." + path, rawType));
         }
         return driverOpts.asReadOnly();
     }
@@ -58,11 +58,16 @@ public class Cqld4Space {
         defaults.put(TypedDriverOption.MONITOR_REPORTING_ENABLED, false); // We don't need to do this every time we run a test or sanity check
         DriverConfigLoader dcl = DriverConfigLoader.fromMap(defaults);
 
+        // add streamlined cql parameters
+        OptionHelpers helpers = new OptionHelpers(defaults);
+        NBConfiguration cqlHelperCfg = helpers.getConfigModel().extractConfig(cfg);
+        helpers.applyConfig(cqlHelperCfg);
+
         // add user-provided parameters
         NBConfiguration driverCfg = getDriverOptionsModel().extractConfig(cfg);
         if (!driverCfg.isEmpty()) {
-            Map<String,Object> remapped = new LinkedHashMap<>();
-            driverCfg.getMap().forEach((k,v) -> remapped.put(k.substring("driver.".length()),v));
+            Map<String, Object> remapped = new LinkedHashMap<>();
+            driverCfg.getMap().forEach((k, v) -> remapped.put(k.substring("driver.".length()), v));
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String remappedViaSerdesToSatisfyObtuseConfigAPI = gson.toJson(remapped);
             DriverConfigLoader userProvidedOptions = DriverConfigLoader.fromString(remappedViaSerdesToSatisfyObtuseConfigAPI);
@@ -130,6 +135,25 @@ public class Cqld4Space {
             builder.withAuthCredentials(username, password);
         }
 
+        cfg.getOptional("whitelist").ifPresent(wl -> {
+            List<InetSocketAddress> addrs = Arrays
+                .stream(wl.split(","))
+                .map(this::toSocketAddr)
+                .toList();
+            builder.withNodeDistanceEvaluator(new NodeFilterToDistanceEvaluatorAdapter(n -> {
+                return (n.getBroadcastAddress().isPresent() && addrs.contains(n.getBroadcastAddress().get()))
+                ||(n.getBroadcastRpcAddress().isPresent() && addrs.contains(n.getBroadcastRpcAddress().get()))
+                    ||(n.getListenAddress().isPresent() && addrs.contains(n.getListenAddress().get()));
+            }));
+        });
+
+        cfg.getOptional("cloud_proxy_address").ifPresent(cpa -> {
+            String[] addr = cpa.split(":",2);
+            if (addr.length==1) {
+                throw new RuntimeException("cloud_proxy_address must be specified in host:port form.");
+            }
+            builder.withCloudProxyAddress(InetSocketAddress.createUnresolved(addr[0],Integer.parseInt(addr[1])));
+        });
 
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(cfg);
 
@@ -142,41 +166,13 @@ public class Cqld4Space {
         return session;
     }
 
-
-    /**
-     * Split off any clearly separate config loader specifications from the beginning or end,
-     * so they can be composed as an ordered set of config loaders.
-     *
-     * @param driverconfig The string containing driver config specs as described in the cqld4.md
-     *                     documentation.
-     * @return A list of zero or more strings, each representing a config source
-     */
-    // for testing
-    public static List<String> splitConfigLoaders(String driverconfig) {
-        List<String> configs = new ArrayList<>();
-        Pattern preconfig = Pattern.compile("(?<pre>((\\w+://.+?)|[a-zA-z0-9_:'/\\\\]+?))\\s*,\\s*(?<rest>.+)");
-        Matcher matcher = preconfig.matcher(driverconfig);
-        while (matcher.matches()) {
-            configs.add(matcher.group("pre"));
-            driverconfig = matcher.group("rest");
-            matcher = preconfig.matcher(driverconfig);
-        }
-        Pattern postconfig = Pattern.compile("(?<head>.+?)\\s*,\\s*(?<post>(\\w+://.+?)|([a-zA-Z0-9_:'/\\\\]+?))");
-        matcher = postconfig.matcher(driverconfig);
-        LinkedList<String> tail = new LinkedList<>();
-        while (matcher.matches()) {
-            tail.push(matcher.group("post"));
-            driverconfig = matcher.group("head");
-            matcher = postconfig.matcher(driverconfig);
-        }
-        if (!driverconfig.isEmpty()) {
-            configs.add(driverconfig);
-        }
-        while (tail.size() > 0) {
-            configs.add(tail.pop());
-        }
-        return configs;
+    private InetSocketAddress toSocketAddr(String addr) {
+        String[] addrs = addr.split(":", 2);
+        String inetHost = addrs[0];
+        String inetPort = (addrs.length == 2) ? addrs[1] : "9042";
+        return new InetSocketAddress(inetHost, Integer.valueOf(inetPort));
     }
+
 
     private Optional<DriverConfigLoader> resolveConfigLoader(NBConfiguration cfg) {
         Optional<String> maybeDriverConfig = cfg.getOptional("driverconfig");
@@ -187,7 +183,7 @@ public class Cqld4Space {
 
         String driverconfig = maybeDriverConfig.get();
 
-        List<String> loaderspecs = splitConfigLoaders(driverconfig);
+        List<String> loaderspecs = NBConfigSplitter.splitConfigLoaders(driverconfig);
         LinkedList<DriverConfigLoader> loaders = new LinkedList<>();
 
         for (String loaderspec : loaderspecs) {
@@ -247,10 +243,12 @@ public class Cqld4Space {
             .add(Param.optional("localdc"))
             .add(Param.optional("secureconnectbundle"))
             .add(Param.optional("hosts"))
-            .add(Param.optional("driverconfig"))
-            .add(Param.optional("username"))
-            .add(Param.optional("password"))
-            .add(Param.optional("passfile"))
+            .add(Param.optional("driverconfig",String.class))
+            .add(Param.optional("username",String.class,"user name (see also password and passfile)"))
+            .add(Param.optional("password", String.class, "password (see also passfile)"))
+            .add(Param.optional("passfile",String.class,"file to load the password from"))
+            .add(Param.optional("whitelist",String.class,"list of whitelist hosts addresses"))
+            .add(Param.optional("cloud_proxy_address",String.class,"Cloud Proxy Address"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())
             .asReadOnly();
