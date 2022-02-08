@@ -4,7 +4,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleCqlStatement;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
@@ -26,9 +26,10 @@ public class Cqld4SimpleCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
     }
 
     @Override
-    public Cqld4CqlSimpleCqlStatement apply(long value) {
+    public Cqld4CqlSimpleStatement apply(long value) {
+        // TODO: allow for the pre-rendering of a statement with certain template fields, for RAW mode
         String stmtBody = cmd.get("stmt",value);
         SimpleStatement simpleStatement = SimpleStatement.newInstance(stmtBody);
-        return new Cqld4CqlSimpleCqlStatement(session,simpleStatement,maxpages,retryreplace,metrics);
+        return new Cqld4CqlSimpleStatement(session,simpleStatement,maxpages,retryreplace,metrics);
     }
 }
