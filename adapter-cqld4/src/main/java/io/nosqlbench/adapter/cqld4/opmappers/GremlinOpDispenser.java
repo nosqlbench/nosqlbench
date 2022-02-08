@@ -40,21 +40,8 @@ public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
 
         LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
         this.stmtFunc = l -> finalFunc.apply(l).build();
-//        LongFunction<SimpleGraphStatement> gsFunc = l -> finalFunc.apply(l).build();
-//
-//        this.stmtFunc = gsFunc;
-//        // graph-internal-options
-//        Optional<LongFunction<Map>> internalOptionsFunc = cmd.getAsOptionalFunction("graph-internal-options", Map.class);
-//        if (internalOptionsFunc.isPresent()) {
-//            LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
-//            LongFunction<Map> optionsFunc = internalOptionsFunc.get();
-//            func = l -> {
-//                GraphStatement gs = gsFunc.apply(l);
-//                Map options = optionsFunc.apply(l);
-//                options.forEach((k,v) -> gs.s);
-//
-//            }
-//        }
+
+        // TODO: investigate enabling equivalent settings in core graph
         /**
          *            gs.setGraphInternalOption("cfg.external_vertex_verify",String.valueOf(verifyVertexIds));
          *             gs.setGraphInternalOption("cfg.verify_unique",String.valueOf(java.lang.Boolean.FALSE));

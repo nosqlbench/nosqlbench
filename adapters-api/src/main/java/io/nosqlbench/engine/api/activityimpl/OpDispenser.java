@@ -18,13 +18,13 @@ import java.util.function.LongFunction;
  * implementing op dispensers.
  * <p>
  * <H2>Concepts</H2>
- * Op Synthesis is the process of building a specific and executable
+ * Op Synthesis is the process of building a specific executable
  * operation for some (low level driver) API by combining the
  * static and dynamic elements of the operation together.
  * In most cases, implementations of OpDispenser will be constructed
  * within the logic of an {@link OpMapper} which is responsible for
  * determining the type of OpDispenser to use as associated with a specific
- * type {@code (<T>)}. The OpMapper is called for each type of operation
+ * type &lt;T&gt;. The OpMapper is called for each type of operation
  * that is active during activity initialization. It's primary responsibility
  * is figuring out what types of {@link OpDispenser}s to create based
  * on the op templates provided by users. Once the activity is initialized,
@@ -36,7 +36,7 @@ import java.util.function.LongFunction;
  * <h2>Implementation Strategy</h2>
  * <p>OpDispenser implementations are intended to be implemented
  * for each type of distinct operation that is supported by a
- * {@link io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter}.
+ * DriverAdapter.
  * That is not to say that an OpDispenser can't be responsible for
  * producing multiple types of operations. Operations which are similar
  * in what they need and how they are constructed make sense to be implemented
