@@ -1,19 +1,6 @@
-- ce4d61928 (HEAD -> j17-preview) Fix conversion bug for fluent imports
-- 4faf74052 include operative message in OpConfigError output
-- 97e4601c7 Logging: do not set ROOT level to ALL
-- 60bad74ed Pulsar: improve AVRO decoding
-- ac30bf812 (origin/j17-preview) allow fluent groovy usage to specify imports
-- 35dfa4786 instance str interpolator per test now that it has state
-- b2c0a4930 allow template params to remain in expanded command
-- b16620d02 add test for and fix named scenario parameter overrides in template vars
-- 7ff0920a4 test that multiple occurrences of template var resolve consistently
-- 2767da34f clarity in naming for debugging
-- 2f9f8f144 allow template vars to set default value on first occurence
-- 52d07c099 improve yaml warnings and tests
-- bb0b24246 support desc and description in yaml
-- a94273c68 support all cqld4 driver options as activity params when named as driver.name.
-- 36eadce1e Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
-- 15f21ceab [Pulsar] Bump Pulsar client version to 2.8.2
-- 55c90498c Merge pull request #403 from pingtimeout/patch-1
-- d75bc56e9 only suggest alternates if the Levenshtein distance is 5 or less
-- 7f9d8e594 Remove extraneous System.out.println statement
+- 2bb4b5584 (HEAD -> j17-preview) simplify overzealous auto-naming
+- 273b42e2e split config sources cleanly with json nesting
+- 4fd1a5bdd typos and minor fixes
+- 240ba54c5 update versions of excluded modules
+- 275aef1c3 progress on cqld4 activity params
+- 7f2cb9347 partial work to introduce list templates
