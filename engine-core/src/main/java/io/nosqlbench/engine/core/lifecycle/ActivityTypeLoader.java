@@ -144,7 +144,8 @@ public class ActivityTypeLoader {
                 NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
                 Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
                 if (op_yaml_loc.isPresent()) {
-                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                    Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
                     cfgModel=cfgModel.add(workload.getConfigModel());
                 }
                 NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
