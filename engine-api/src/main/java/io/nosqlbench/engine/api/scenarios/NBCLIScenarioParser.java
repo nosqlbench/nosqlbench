@@ -173,6 +173,7 @@ public class NBCLIScenarioParser {
             }
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
+        logger.debug("composed command line args to fulfill named scenario: " + arglist);
 
     }
 
