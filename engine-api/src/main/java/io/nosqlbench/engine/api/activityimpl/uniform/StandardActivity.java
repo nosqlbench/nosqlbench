@@ -1,8 +1,6 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityapi.planning.OpSource;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
@@ -25,8 +23,6 @@ import java.util.function.Function;
 public class StandardActivity<R extends Op, S> extends SimpleActivity {
 
     private final DriverAdapter<R, S> adapter;
-    private final OpSource<R> opsource;
-    private NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends R>> sequence;
 
     public StandardActivity(DriverAdapter<R, S> adapter, ActivityDef activityDef) {
@@ -34,11 +30,9 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity {
         this.adapter = adapter;
 
         try {
-//            Function<ParsedOp, OpDispenser<R>> opmapper;
             OpMapper<R> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
             sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor));
-            opsource = OpSource.of(sequence);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
