@@ -1,4 +1,11 @@
-- 2bb4b5584 (HEAD -> j17-preview) simplify overzealous auto-naming
+- 4dd4d25c8 (HEAD -> j17-preview) use copy of params for dry-run loading of yaml for config model extraction
+- 7734ffde2 typos and cleanups
+- 786439761 improve template var expansion test
+- 26592dbdc make protocol_version exhaustive and type-safe
+- 16fc85282 explain named scenario parsing in debug
+- aa780b5ea add cql historic activity parameters to config model
+- 15dcd1cbb template vars fix release
+- 2bb4b5584 simplify overzealous auto-naming
 - 273b42e2e split config sources cleanly with json nesting
 - 4fd1a5bdd typos and minor fixes
 - 240ba54c5 update versions of excluded modules
