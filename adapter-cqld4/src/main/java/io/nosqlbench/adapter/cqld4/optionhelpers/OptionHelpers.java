@@ -1,5 +1,7 @@
 package io.nosqlbench.adapter.cqld4.optionhelpers;
 
+import com.datastax.oss.driver.api.core.DefaultProtocolVersion;
+import com.datastax.oss.driver.api.core.ProtocolVersion;
 import com.datastax.oss.driver.api.core.config.OptionsMap;
 import com.datastax.oss.driver.api.core.config.TypedDriverOption;
 import com.datastax.oss.driver.internal.core.connection.ExponentialReconnectionPolicy;
@@ -9,11 +11,9 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,7 +63,25 @@ public class OptionHelpers implements NBConfigurable {
         });
 
         add("protocol_version", "Protocol Version", (m, v) -> {
-            m.put(TypedDriverOption.PROTOCOL_VERSION, v);
+            String version = v.toUpperCase(Locale.ROOT);
+            try {
+                DefaultProtocolVersion defaultProtocolVersion = DefaultProtocolVersion.valueOf(version);
+                version = defaultProtocolVersion.toString();
+            } catch (IllegalArgumentException iae) {
+                try {
+                    Field field = ProtocolVersion.class.getField(version);
+                } catch (NoSuchFieldException e) {
+                    Set<String> known = new HashSet<>();
+                    for (DefaultProtocolVersion value : DefaultProtocolVersion.values()) {
+                        known.add(value.toString());
+                    }
+                    for (Field field : ProtocolVersion.class.getFields()) {
+                        known.add(field.getName());
+                    }
+                    throw new RuntimeException("There was no protocol name that matched '" + v + "'. The known values are " + known.stream().sorted().toList().toString());
+                }
+            }
+            m.put(TypedDriverOption.PROTOCOL_VERSION, version);
         });
 
         add("socket_options", "Socket Options", (m, v) -> {
@@ -142,7 +160,7 @@ public class OptionHelpers implements NBConfigurable {
 
         add("pooling", "Pooling Options", (m, spec) -> {
             Pattern CORE_AND_MAX_RQ_PATTERN = Pattern.compile(
-                "(?<core>\\d+)(:(?<max>\\d+)(:(?<rq>\\d+))?)?(,(?<rcore>\\d+)(:(?<rmax>\\d+)(:(?<rrq>\\d+))?)?)?(,?heartbeat_interval_s:(?<heartbeatinterval>\\d+))?(,?idle_timeout_s:(?<idletimeout>\\d+))?(,?pool_timeout_ms:(?<pooltimeout>\\d+))?"
+                "(?<core>\\d+)(:(?<max>\\d+)(:(?<rq>\\d+))?)?(,(?<rcore>\\d+)(:(?<rmax>\\d+)(:(?<rrq>\\d+))?)?)?(,?heartbeat_interval_s:(?<heartbeatinterval>\\d+))?(,?heartbeat_timeout_s:(?<heartbeattimeout>\\d+))?(,?idle_timeout_s:(?<idletimeout>\\d+))?(,?pool_timeout_ms:(?<pooltimeout>\\d+))?"
             );
 
             Matcher matcher = CORE_AND_MAX_RQ_PATTERN.matcher(spec);
