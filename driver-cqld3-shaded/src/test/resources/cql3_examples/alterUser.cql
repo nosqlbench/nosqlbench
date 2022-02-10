@@ -1,1 +1,0 @@
-ALTER USER moss WITH PASSWORD 'bestReceiver';

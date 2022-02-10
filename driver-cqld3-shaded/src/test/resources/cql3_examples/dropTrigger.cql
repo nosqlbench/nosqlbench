@@ -1,1 +1,0 @@
-DROP TRIGGER trigger_name ON ks.table_name;
