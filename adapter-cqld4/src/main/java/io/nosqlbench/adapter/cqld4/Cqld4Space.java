@@ -251,6 +251,7 @@ public class Cqld4Space {
             .add(Param.optional("cloud_proxy_address",String.class,"Cloud Proxy Address"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())
+            .add(new OptionHelpers(new OptionsMap()).getConfigModel())
             .asReadOnly();
 
     }
