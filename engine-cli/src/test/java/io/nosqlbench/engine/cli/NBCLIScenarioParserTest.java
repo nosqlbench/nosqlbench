@@ -143,6 +143,24 @@ public class NBCLIScenarioParserTest {
     public void testSanitizer() {
         String sanitized = NBCLIScenarioParser.sanitize("A-b,c_d");
         assertThat(sanitized).isEqualTo("Abcd");
+    }
+
+    @Test
+    public void testSubStepSelection() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
+        List<Cmd> cmds = opts.getCommands();
+        assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
+            "alias","scenariotest_schemaonly_000",
+            "cycles-test","20",
+            "driver","stdout",
+            "tags","phase:schema",
+            "workload","scenario-test"
+        ));
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});
+        List<Cmd> cmds1 = opts1.getCommands();
+        assertThat(cmds1.size()).isEqualTo(1);
+        assertThat(cmds1.get(0).getArg("cycles-test")).isNull();
 
     }
 }

@@ -103,12 +103,36 @@ public class NBCLIScenarioParser {
             StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
-            Map<String, String> namedSteps = scenarios.getNamedScenario(scenarioName);
+            String[] nameparts = scenarioName.split("\\.",2);
+            Map<String,String> namedSteps = new LinkedHashMap<>();
+            if (nameparts.length==1) {
+                Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
+                if (namedScenario==null) {
+                    throw new BasicError("Named step '" + scenarioName + "' was not found.");
+                }
+                namedSteps.putAll(namedScenario);
+            } else {
+                Map<String, String> selectedScenario = scenarios.getNamedScenario(nameparts[0]);
+                if (selectedScenario==null) {
+                    throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                        + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
+                }
+                String stepname = nameparts[1];
+                if (stepname.matches("\\d+")) {
+                    stepname = String.format("%03d",Integer.parseInt(nameparts[1]));
+                }
+                if (selectedScenario.containsKey(stepname)) {
+                    namedSteps.put(stepname,selectedScenario.get(stepname));
+                } else {
+                    throw new BasicError("Unable to find named scenario.step'" + scenarioName + "' in workload '" + workloadName
+                        + "', but you can pick from one of: " + selectedScenario.keySet().stream().map(n -> nameparts[0].concat(".").concat(n)).collect(Collectors.joining(", ")));
+                }
+            }
 
             if (namedSteps == null) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
                     + "', but you can pick from one of: " +
-                    scenarios.getScenarioNames().stream().collect(Collectors.joining(", ")));
+                    String.join(", ", scenarios.getScenarioNames()));
             }
 
             // each named command line step of the named scenario
