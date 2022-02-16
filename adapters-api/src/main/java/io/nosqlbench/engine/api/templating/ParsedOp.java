@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 
@@ -97,8 +98,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     }
 
     @Override
-    public boolean isDefinedDynamic(String field) {
-        return tmap.isDefinedDynamic(field);
+    public boolean isDynamic(String field) {
+        return tmap.isDynamic(field);
     }
 
 
@@ -261,15 +262,18 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param type The value type which the field must be assignable to
      * @return A function which can provide a value for the given name and type
      */
-    public <V> Optional<LongFunction<V>> getAsOptionalFunction(String name, Class<? extends V> type) {
+    public <V> Optional<LongFunction<V>> getAsOptionalFunction(String name, Class<V> type) {
         return tmap.getAsOptionalFunction(name, type);
+    }
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
+        return tmap.getAsOptionalEnumFunction(name, type);
     }
 
     public <V> Optional<LongFunction<String>> getAsOptionalFunction(String name) {
         return this.getAsOptionalFunction(name, String.class);
     }
 
-    public <V> LongFunction<? extends V> getAsRequiredFunction(String name, Class<? extends V> type) {
+    public <V> LongFunction<V> getAsRequiredFunction(String name, Class<? extends V> type) {
         return tmap.getAsRequiredFunction(name, type);
     }
 
@@ -289,8 +293,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     }
 
     /**
-     * Get a LongFunction that first creates a LongFunction of String as in {@link #getAsFunction(String, Class)}, but then
-     * applies the result and cached it for subsequent access. This relies on {@link ObjectCache} internally.
+     * Get a LongFunction that first creates a LongFunction of String as in {@link #getAsRequiredFunction(String, Class)}, but then
+     * applies the result and caches it for subsequent access. This relies on {@link ObjectCache} internally.
      *
      * @param fieldname    The name of the field which could contain a static or dynamic value
      * @param defaultValue The default value to use in the init function if the fieldname is not defined as static nor dynamic
@@ -420,12 +424,32 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return Optionally, an enum value which matches, or {@link Optional#empty()}
      * @throws OpConfigError if more than one field matches
      */
-    public <E extends Enum<E>> Optional<NamedTarget<E>> getTypeFromEnum(Class<E> enumclass) {
-        return tmap.getOptionalTypeFromEnum(enumclass);
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getTypeFromEnum(Class<E> enumclass, Class<V> valueClass) {
+        return tmap.getOptionalTargetEnum(enumclass,valueClass);
     }
 
-    public <E extends Enum<E>> NamedTarget<E> getRequiredTypeFromEnum(Class<E> enumclass) {
-        return tmap.getRequiredTypeFromEnum(enumclass);
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTargetEnum(
+        Class<E> enumclass,
+        Class<V> valueClass
+    ){
+        return tmap.getOptionalTargetEnum(enumclass,valueClass);
+    }
+
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTargetEnum(
+        Class<E> enumclass,
+        Class<V> valueClass,
+        String alternateTypeField,
+        String alternateValueField
+    ) {
+        return tmap.getOptionalTargetEnum(enumclass, valueClass, alternateTypeField, alternateValueField);
+    }
+
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(Class<E> enumclass, Class<V> valueClass) {
+        return tmap.getTargetEnum(enumclass, valueClass);
+    }
+
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(Class<E> enumclass, Class<V> valueclass, String tname, String vname) {
+        return tmap.getTargetEnum(enumclass, valueclass,tname,vname);
     }
 
     public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(Class<E> enumclass, String fieldName) {
@@ -435,4 +459,67 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     public <E extends Enum<E>> E getEnumFromFieldOr(Class<E> enumClass, E defaultEnum, String fieldName) {
         return getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
     }
+
+    public <FA,FE> Optional<LongFunction<FA>> enhance(
+        Optional<LongFunction<FA>> func,
+        String field,
+        Class<FE> type,
+        FE defaultFe,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        if (func.isEmpty()) {
+            return func;
+        }
+        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
+        LongFunction<FA> faLongFunction = func.get();
+        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
+        return Optional.of(lfa);
+    }
+
+    public <FA,FE> Optional<LongFunction<FA>> enhance(
+        Optional<LongFunction<FA>> func,
+        String field,
+        Class<FE> type,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
+        if (func.isEmpty()||fieldEnhancerFunc.isEmpty()) {
+            return func;
+        }
+        LongFunction<FA> faLongFunction = func.get();
+        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),feLongFunction.apply(l));
+        return Optional.of(lfa);
+    }
+
+    public <FA,FE> LongFunction<FA> enhance(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) {
+            return func;
+        }
+        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        return lfa;
+    }
+
+    public <FA,FE extends Enum<FE>> LongFunction<FA> enhanceEnum(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalEnumFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) {
+            return func;
+        }
+        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        return lfa;
+    }
+
 }

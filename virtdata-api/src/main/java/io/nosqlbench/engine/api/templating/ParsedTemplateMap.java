@@ -367,6 +367,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return getAsRequiredFunction(name, String.class);
     }
 
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
+        Optional<LongFunction<String>> nameFunc = this.getAsOptionalFunction(name, String.class);
+        return nameFunc.map((f) -> (l) -> Enum.valueOf(type, f.apply(l)));
+    }
+
     /**
      * Get the op field as a {@link LongFunction}
      *
@@ -378,11 +383,23 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     public <V> Optional<LongFunction<V>> getAsOptionalFunction(String name, Class<? extends V> type) {
         if (isStatic(name)) {
             V value = getStaticValue(name);
-            return Optional.of((cycle) -> value);
-        } else if (isDefinedDynamic(name)) {
+            if (type.isAssignableFrom(value.getClass())) {
+                return Optional.of((cycle) -> value);
+            } else if (NBTypeConverter.canConvert(value, type)) {
+                V converted = NBTypeConverter.convert(value, type);
+                return Optional.of((cycle) -> converted);
+            } else {
+                throw new OpConfigError(
+                    "function for '" + name + "' yielded a " + value.getClass().getCanonicalName()
+                        + " type, which is not assignable to a " + type.getCanonicalName() + "'"
+                );
+            }
+        } else if (isDynamic(name)) {
             Object testValue = dynamics.get(name).apply(0L);
             if (type.isAssignableFrom(testValue.getClass())) {
                 return Optional.of((LongFunction<V>) dynamics.get(name));
+            } else if (NBTypeConverter.canConvert(testValue, type)) {
+                return Optional.of(l -> NBTypeConverter.convert(dynamics.get(name).apply(l), type));
             } else {
                 throw new OpConfigError(
                     "function for '" + name + "' yielded a " + testValue.getClass().getCanonicalName()
@@ -393,8 +410,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
     }
 
-    public <V> LongFunction<? extends V> getAsRequiredFunction(String name, Class<? extends V> type) {
-        Optional<? extends LongFunction<? extends V>> sf = getAsOptionalFunction(name, type);
+    public <V> LongFunction<V> getAsRequiredFunction(String name, Class<? extends V> type) {
+        Optional<? extends LongFunction<V>> sf = getAsOptionalFunction(name, type);
         return sf.orElseThrow(() -> new OpConfigError("The op field '" + name + "' is required, but it wasn't found in the op template."));
     }
 
@@ -439,7 +456,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             } else {
                 throw new OpConfigError("Unable to compose string to object cache with non-String value of type " + defaultValue.getClass().getCanonicalName());
             }
-        } else if (isDefinedDynamic(fieldname)) {
+        } else if (isDynamic(fieldname)) {
             LongFunction<V> f = l -> get(fieldname, l);
             V testValue = f.apply(0);
             if (testValue instanceof String) {
@@ -608,6 +625,55 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     }
 
+
+    public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTargetEnum(
+        Class<E> enumclass,
+        String typeFieldName,
+        String valueFieldName,
+        Class<V> valueClass
+    ) {
+        if (isStatic(typeFieldName)) {
+            String enumValue = statics.get(typeFieldName).toString();
+            E verifiedEnumValue;
+
+            try {
+                verifiedEnumValue = Enum.valueOf(enumclass, enumValue);
+            } catch (IllegalArgumentException iae) {
+                throw new OpConfigError("type designator field '" + typeFieldName + "' had value of '" + enumValue + ", but this failed to match " +
+                    "any of known types in " + EnumSet.allOf(enumclass));
+            }
+
+            if (isDefined(valueFieldName)) {
+                if (isStatic(typeFieldName)) {
+                    return Optional.of(
+                        new TypeAndTarget<E, V>(verifiedEnumValue, typeFieldName, l -> NBTypeConverter.convert(statics.get(valueFieldName), valueClass))
+                    );
+                } else if (isDynamic(valueFieldName)) {
+                    return Optional.of(
+                        new TypeAndTarget<E, V>(verifiedEnumValue, typeFieldName, getAsRequiredFunction(valueFieldName, valueClass))
+                    );
+                }
+            }
+        } else if (isDynamic(typeFieldName)) {
+            throw new OpConfigError("The op template field '" + typeFieldName + "' must be a static value. You can not vary it by cycle.");
+        }
+
+        return Optional.empty();
+    }
+
+    public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTargetEnum(
+        Class<E> enumclass,
+        Class<V> valueClass,
+        String alternateTypeField,
+        String alternateValueField
+    ) {
+        Optional<TypeAndTarget<E, V>> result = getOptionalTargetEnum(enumclass, valueClass);
+        if (result.isPresent()) {
+            return result;
+        }
+        return getOptionalTargetEnum(enumclass,alternateTypeField,alternateValueField,valueClass);
+    }
+
     /**
      * Given an enum of any type, return the enum value which is found in any of the field names of the op template,
      * ignoring case and any non-word characters. This is useful for matching op templates to op types where the presence
@@ -619,37 +685,58 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * @return Optionally, an enum value which matches, or {@link Optional#empty()}
      * @throws OpConfigError if more than one field matches
      */
-    public <E extends Enum<E>> Optional<NamedTarget<E>> getOptionalTypeFromEnum(Class<E> enumclass) {
-        List<NamedTarget<E>> matched = new ArrayList<>();
+    public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTargetEnum(
+        Class<E> enumclass,
+        Class<? extends V> valueClass
+    ) {
+        List<TypeAndTarget<E, V>> matched = new ArrayList<>();
         for (E e : EnumSet.allOf(enumclass)) {
             String lowerenum = e.name().toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "");
             for (String s : statics.keySet()) {
                 String lowerkey = s.toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "");
                 if (lowerkey.equals(lowerenum)) {
-                    matched.add(new NamedTarget<>(e, s, null));
+                    matched.add(new TypeAndTarget<>(e, s, null));
                 }
             }
             for (String s : dynamics.keySet()) {
                 String lowerkey = s.toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "");
                 if (lowerkey.equals(lowerenum)) {
-                    matched.add(new NamedTarget<>(e, s, null));
+                    matched.add(new TypeAndTarget<>(e, s, null));
                 }
             }
         }
         if (matched.size() == 1) {
-            NamedTarget<E> prototype = matched.get(0);
-            LongFunction<? extends String> asFunction = getAsRequiredFunction(prototype.field);
-            return Optional.of(new NamedTarget<>(prototype.enumId, prototype.field, asFunction));
-        }
-        if (matched.size() > 1) {
+            TypeAndTarget<E, V> prototype = matched.get(0);
+            LongFunction<V> asFunction = getAsRequiredFunction(prototype.field, valueClass);
+            return Optional.of(new TypeAndTarget<E, V>(prototype.enumId, prototype.field, asFunction));
+        } else if (matched.size() > 1) {
             throw new OpConfigError("Multiple matches were found from op template fieldnames ["
                 + getDefinedNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
         }
+
         return Optional.empty();
     }
 
-    public <E extends Enum<E>> NamedTarget<E> getRequiredTypeFromEnum(Class<E> enumclass) {
-        Optional<NamedTarget<E>> typeFromEnum = getOptionalTypeFromEnum(enumclass);
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(
+        Class<E> enumclass,
+        Class<V> valueClass,
+        String tname,
+        String vname
+    ) {
+        Optional<TypeAndTarget<E, V>> optionalMappedEnum = getOptionalTargetEnum(enumclass, valueClass);
+        if (optionalMappedEnum.isPresent()) {
+            return optionalMappedEnum.get();
+        }
+        Optional<TypeAndTarget<E, V>> optionalSpecifiedEnum = getOptionalTargetEnum(enumclass, tname, vname, valueClass);
+        if (optionalSpecifiedEnum.isPresent()) {
+            return optionalSpecifiedEnum.get();
+        }
+        throw new OpConfigError("Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) +" either by key or by fields " + tname + " and " + vname + ". " +
+            "Fields considered: static:" + statics.keySet() + " dynamic:" + dynamics.keySet());
+    }
+
+    public <E extends Enum<E>, V> TypeAndTarget<E, V> getTargetEnum(Class<E> enumclass, Class<V> valueClass) {
+        Optional<TypeAndTarget<E, V>> typeFromEnum = getOptionalTargetEnum(enumclass, valueClass);
 
         return typeFromEnum.orElseThrow(
             () -> {
@@ -666,12 +753,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     /**
      * Map a named op field to an enum
      *
-     * @param enumclass   The type of enum to look within
-     * @param fieldname   The field name to look for
-     * @param <E>         The generic type of the enum
+     * @param enumclass The type of enum to look within
+     * @param fieldname The field name to look for
+     * @param <E>       The generic type of the enum
      * @return An optional enum value
      */
-    public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(Class<E> enumclass,String fieldname) {
+    public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(Class<E> enumclass, String fieldname) {
 
         Optional<String> enumField = getOptionalStaticConfig(fieldname, String.class);
         if (enumField.isEmpty()) {
@@ -695,5 +782,6 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
         return Optional.empty();
     }
+
 
 }
