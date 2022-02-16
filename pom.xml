@@ -38,6 +38,7 @@
 
         <!-- driver modules -->
         <module>adapter-cqld4</module>
+        <module>adapter-cqls3</module>
         <module>adapter-dynamodb</module>
         <module>driver-diag</module>
         <module>driver-stdout</module>

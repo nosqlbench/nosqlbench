@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <parent>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>mvn-defaults</artifactId>
+        <version>4.17.7-SNAPSHOT</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>adapter-cqls3</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <description>
+        A CQL ActivityType driver for http://nosqlbench.io/ that uses ScyllaDB java driver
+    </description>
+
+    <dependencies>
+
+        <!-- core dependencies -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-core</artifactId>
+            <version>3.4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>tinkergraph-gremlin</artifactId>
+            <version>3.4.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>4.17.7-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>drivers-api</artifactId>
+            <version>4.17.7-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-basics</artifactId>
+            <version>4.17.7-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-cqld4</artifactId>
+            <version>4.17.7-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>scylla-driver-core</artifactId>
+            <version>3.10.2-scylla-1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.scylladb</groupId>
+            <artifactId>java-driver-query-builder</artifactId>
+            <version>4.13.0.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
