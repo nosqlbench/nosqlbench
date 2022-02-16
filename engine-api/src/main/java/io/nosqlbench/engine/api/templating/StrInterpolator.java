@@ -126,7 +126,7 @@ public class StrInterpolator implements Function<String, String> {
 
         public Map<String,String> checkpointAccesses() {
             LinkedHashMap<String,String> accesses = new LinkedHashMap<>(this.accesses);
-            logger.info("removed template params after applying:" + accesses);
+            logger.debug("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;
 
