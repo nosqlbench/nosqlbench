@@ -73,5 +73,70 @@ with an explanation. Otherwise, these helper options will simply set the equival
 in the driver profile to achieve the same effect. As stated above, it is highly recommended that
 driver settings be captured in a configuration file and set with `driverconfig=<file>.json`
 
+## Statement Forms
+
+The CQLd4 driver supports idiomatic usage of all the main statement APIs within the native Java
+driver. The syntax for specifying these types is simplified as well, using only a single
+`type` field which allows values of simple, prepared, raw, gremlin, fluent, and so on.
+The previous form of specifing `type: cql` and optional modifiers like `prepared` and
+`parameterized` is deprecated now, sinces all the forms are explicitly supported by a
+well-defined type name.
+
+The previous form will work, but you will get a warning, as these should be deprecated
+going forward. It is best to use the forms in the examples below. The defaults and field
+names for the classic form have not changed.
+
+## CQLd4 Op Template Examples
+
+    ops:
+
+      # prepared statement
+      # allows for parameterization via bindings, and uses prepared statements internally
+      example-prepared-cql-stmt:
+        prepared: |
+         select one, two from buckle.myshoe where ...
+
+      # prepared statement (verbose form)
+      example-prepared-cql-stmt-verbose:
+        type: prepared
+        stmt: |
+          select one, two from buckle.myshoe where ...
+
+      # simple statement
+      # allows for parameterization via bindings, but does not use prepared statements internally
+      example-simple-cql-stmt:
+        simple: |
+         select three, four from knock.onthedoor where ...
+
+      # raw statement
+      # pre-renders the statement into a string, with no driver-supervised parameterization
+      # useful for testing variant DDL where some fields are not parameterizable
+      # NOTE: the raw form does its best to quote non-literals where needed, but you may
+      # have to inject single or double quotes in special cases.
+      example-raw-cql-stmt:
+        raw: |
+         create table if not exist {ksname}.{tblname} ...
+
+      # gremlin statement using the fluent API, as it would be written in a client application
+      example-fluent-graph-stmt:
+        fluent: >-
+          g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
+
+      # gremlin statement using string API (not recommended)
+      example-raw-gremlin-stmt:
+        gremlin: >-
+          g.V().hasLabel("device").has("deviceid", UUID.fromString('{deviceid})')
+
+
+## Driver Cache
+
+Like all driver adapters, the CQLd4 driver has the ability to use multiple low-level
+driver instances for the purposes of advanced testing. To take advantage of this,
+simply set a `space` parameter in your op templates, with a dynamic value.
+
+__WARNING__: If you use the driver cache feature, be aware that creating a large
+number of driver instances will be very expensive. Generally driver instances are meant
+to be initialized and then shared throughout the life-cycle of an application process.
+
 
 
