@@ -1,11 +1,13 @@
-- cc105bb7f (HEAD -> j17-preview) remove driver-cqld3-shaded
-- 74655af6e remove driver-dsegraph-shaded
-- 57c087369 remove driver-grpc
-- 7f7a9cac0 Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
-- b832e6390 fix release for template vars
-- 4dd4d25c8 use copy of params for dry-run loading of yaml for config model extraction
-- 7734ffde2 typos and cleanups
-- 786439761 improve template var expansion test
-- 26592dbdc make protocol_version exhaustive and type-safe
-- 16fc85282 explain named scenario parsing in debug
-- aa780b5ea add cql historic activity parameters to config model
+- 8fd8a6cb9 (HEAD -> j17-preview) improve graph op mappers and pre-processors
+- ec5128396 support more cql op forms and streamline with TypeAndTarget
+- 542ae8369 port CQL data mapping functions into cqld4
+- df9ee20f0 minor typos and readability improvements
+- af8f17306 lower logging level on less interesting events
+- a1834ca5e improve type-safe intention mapping
+- 35871718d improve string bindings API and functionality
+- dde2eab49 doc updates
+- b6354b95f add support for scenario.step CLI naming
+- 11245c07a distinguish between base runnables and op measurables
+- ade9cae76 remove driver-web to be replaced with a fresh impl
+- bec448bcc remove driver-cqlverify
+- 9df051f33 remove driver-cql-shaded
