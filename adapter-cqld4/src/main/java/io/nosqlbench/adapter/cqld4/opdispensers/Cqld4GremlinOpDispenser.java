@@ -1,4 +1,4 @@
-package io.nosqlbench.adapter.cqld4.opmappers;
+package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatement;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatementBuilder;
@@ -10,15 +10,15 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
+public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
 
     private final LongFunction<? extends ScriptGraphStatement> stmtFunc;
-    private final CqlSession session;
+    private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<Long> diagFunc;
 
-    public GremlinOpDispenser(CqlSession session, ParsedOp cmd) {
+    public Cqld4GremlinOpDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd) {
         super(cmd);
-        this.session = session;
+        this.sessionFunc = sessionFunc;
         this.diagFunc = cmd.getAsFunctionOr("diag", 0L);
 
         LongFunction<ScriptGraphStatementBuilder> func = l -> new ScriptGraphStatementBuilder();
@@ -27,7 +27,7 @@ public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
         Optional<LongFunction<String>> graphnameFunc = cmd.getAsOptionalFunction("graphname");
         if (graphnameFunc.isPresent()) {
             LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
-            LongFunction<String> stringLongFunction = graphnameFunc.get();
+            LongFunction<? extends String> stringLongFunction = graphnameFunc.get();
             func = l -> finalFunc.apply(l).setGraphName(stringLongFunction.apply(l));
         }
 
@@ -41,12 +41,6 @@ public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
         LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
         this.stmtFunc = l -> finalFunc.apply(l).build();
 
-        // TODO: investigate enabling equivalent settings in core graph
-        /**
-         *            gs.setGraphInternalOption("cfg.external_vertex_verify",String.valueOf(verifyVertexIds));
-         *             gs.setGraphInternalOption("cfg.verify_unique",String.valueOf(java.lang.Boolean.FALSE));
-         *
-         */
     }
 
     @Override
@@ -55,7 +49,7 @@ public class GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp> {
         if (diagFunc.apply(value)>0L) {
             System.out.println("## GREMLIN DIAG: ScriptGraphStatement on graphname(" + stmt.getGraphName() + "):\n" + stmt.getScript());
         }
-        return new Cqld4ScriptGraphOp(session, stmt);
+        return new Cqld4ScriptGraphOp(sessionFunc.apply(value), stmt);
     }
 
 }

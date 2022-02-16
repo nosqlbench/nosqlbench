@@ -7,15 +7,18 @@ import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
-public class Cqld4OpMapper implements OpMapper<Op> {
+import java.util.function.LongFunction;
+
+public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
 
     private final DriverSpaceCache<? extends Cqld4Space> cache;
     private final NBConfiguration cfg;
 
-    public Cqld4OpMapper(NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
+    public Cqld4CoreOpMapper(NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
         this.cfg = config;
         this.cache = cache;
     }
@@ -32,17 +35,21 @@ public class Cqld4OpMapper implements OpMapper<Op> {
      */
     public OpDispenser<? extends Op> apply(ParsedOp cmd) {
 
-        Cqld4Space cqld4Space = cache.get(cmd.getStaticConfigOr("space", "default"));
-        CqlSession session = cqld4Space.getSession();
+        LongFunction<String> spaceName = cmd.getAsFunctionOr("space", "default");
+        // Since the only needed thing in the Cqld4Space is the session, we can short-circuit
+        // to it here instead of stepping down from the cycle to the space to the session
+        LongFunction<CqlSession> sessionFunc = l -> cache.get(spaceName.apply(l)).getSession();
 
-        CqlD4OpType cmdtype = cmd.getEnumFromFieldOr(CqlD4OpType.class, CqlD4OpType.cql, "type");
+        CqlD4OpType opType = CqlD4OpType.prepared;
 
-//        OpDispenser<Cqld4CqlOp> t = new CqlD4CqlOpMapper(session).apply(cmd);
+        TypeAndTarget<CqlD4OpType, String> target = cmd.getTargetEnum(CqlD4OpType.class, String.class, "type", "stmt");
 
-        return switch (cmdtype) {
-            case cql -> new CqlD4CqlOpMapper(session).apply(cmd);
-            case gremlin -> new Cqld4GremlinOpMapper(session).apply(cmd);
-            case fluent -> new Cqld4FluentGraphOpMapper(session).apply(cmd);
+        return switch (target.enumId) {
+            case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
+            case simple -> new CqlD4CqlSimpleStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
+            case prepared -> new CqlD4PreparedStmtMapper(sessionFunc, target).apply(cmd);
+            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc).apply(cmd);
+            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc).apply(cmd);
         };
     }
 

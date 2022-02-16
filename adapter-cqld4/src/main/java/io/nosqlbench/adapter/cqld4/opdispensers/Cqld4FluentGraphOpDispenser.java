@@ -1,4 +1,4 @@
-package io.nosqlbench.adapter.cqld4.opmappers;
+package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.dse.driver.api.core.graph.FluentGraphStatement;
 import com.datastax.dse.driver.api.core.graph.FluentGraphStatementBuilder;
@@ -19,20 +19,20 @@ import java.util.function.Supplier;
 public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op> {
 
     private final LongFunction<? extends String> graphnameFunc;
-    private final CqlSession session;
+    private final LongFunction<CqlSession> sessionFunc;
     private final Bindings virtdataBindings;
     private final ThreadLocal<Script> tlScript;
 
     public Cqld4FluentGraphOpDispenser(
         ParsedOp optpl,
         LongFunction<? extends String> graphnameFunc,
-        CqlSession session,
+        LongFunction<CqlSession> sessionFunc,
         Bindings virtdataBindings,
         Supplier<Script> scriptSource
     ) {
         super(optpl);
         this.graphnameFunc = graphnameFunc;
-        this.session = session;
+        this.sessionFunc = sessionFunc;
         this.virtdataBindings = virtdataBindings;
         this.tlScript = ThreadLocal.withInitial(scriptSource);
     }
@@ -45,7 +45,7 @@ public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op> {
         allMap.forEach((k,v) -> script.getBinding().setVariable(k,v));
         GraphTraversal<Vertex,Vertex> v = (GraphTraversal<Vertex, Vertex>) script.run();
         FluentGraphStatement fgs = new FluentGraphStatementBuilder(v).setGraphName(graphname).build();
-        return new Cqld4FluentGraphOp(session,fgs);
+        return new Cqld4FluentGraphOp(sessionFunc.apply(value),fgs);
     }
 
 
