@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.8-SNAPSHOT</version>
+        <version>4.17.8</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,109 +24,109 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-rest</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-kafka</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-stdout</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-diag</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-tcp</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-http</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-jmx</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-mongodb</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-pulsar</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-cockroachdb</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-jms</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-dynamodb</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <version>4.17.8-SNAPSHOT</version>
+            <version>4.17.8</version>
         </dependency>
 
     </dependencies>
@@ -201,7 +201,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>driver-mongodb</artifactId>
-                    <version>4.17.8-SNAPSHOT</version>
+                    <version>4.17.8</version>
                 </dependency>
             </dependencies>
         </profile>
