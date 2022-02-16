@@ -133,7 +133,6 @@ names for the classic form have not changed.
 Like all driver adapters, the CQLd4 driver has the ability to use multiple low-level
 driver instances for the purposes of advanced testing. To take advantage of this,
 simply set a `space` parameter in your op templates, with a dynamic value.
-
 __WARNING__: If you use the driver cache feature, be aware that creating a large
 number of driver instances will be very expensive. Generally driver instances are meant
 to be initialized and then shared throughout the life-cycle of an application process.

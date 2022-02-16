@@ -151,9 +151,9 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getStaticValue(field);
     }
 
-    public Optional<ParsedTemplate> getStmtAsTemplate() {
-        return _opTemplate.getParsed();
-    }
+//    public Optional<ParsedTemplate> getStmtAsTemplate() {
+//        return _opTemplate.getParsed();
+//    }
 
 
     public Optional<ParsedTemplate> getAsTemplate(String fieldname) {

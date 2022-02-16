@@ -18,12 +18,12 @@ public class Cqld4RawStmtDispenser extends BaseCqlStmtDispenser {
     public Cqld4RawStmtDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
         super(sessionFunc, cmd);
         this.targetFunction=targetFunction;
-        this.stmtFunc = super.getStmtFunc();
+        this.stmtFunc = createStmtFunc(cmd);
     }
 
-    @Override
-    protected LongFunction<Statement> getPartialStmtFunction(ParsedOp cmd) {
-        return l -> new SimpleStatementBuilder(targetFunction.apply(l)).build();
+    protected LongFunction<Statement> createStmtFunc(ParsedOp cmd) {
+        LongFunction<Statement> basefunc = l -> new SimpleStatementBuilder(targetFunction.apply(l)).build();
+        return super.getEnhancedStmtFunc(basefunc,cmd);
     }
 
     @Override

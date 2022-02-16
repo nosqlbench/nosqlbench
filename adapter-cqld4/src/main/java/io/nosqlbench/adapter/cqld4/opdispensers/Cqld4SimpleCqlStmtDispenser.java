@@ -16,12 +16,11 @@ public class Cqld4SimpleCqlStmtDispenser extends BaseCqlStmtDispenser {
     public Cqld4SimpleCqlStmtDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
         super(sessionFunc,cmd);
         this.targetFunction=targetFunction;
-        this.stmtFunc = super.getStmtFunc();
+        this.stmtFunc =createStmtFunc(cmd);
     }
 
-    @Override
-    protected LongFunction<Statement> getPartialStmtFunction(ParsedOp op) {
-        return l -> SimpleStatement.newInstance(targetFunction.apply(l));
+    protected LongFunction<Statement> createStmtFunc(ParsedOp op) {
+        return super.getEnhancedStmtFunc(l -> SimpleStatement.newInstance(targetFunction.apply(l)),op);
     }
 
     @Override

@@ -51,9 +51,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
             });
         });
 
-        boolean prepared = cmd.getStaticConfigOr("prepared", true);
-
-        return new Cqld4PreparedStmtDispenser(sessionFunc, cmd, processors);
+        return new Cqld4PreparedStmtDispenser(sessionFunc, cmd, stmtTpl, processors);
 
     }
 }

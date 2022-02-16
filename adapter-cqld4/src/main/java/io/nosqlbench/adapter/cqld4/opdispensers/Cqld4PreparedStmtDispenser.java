@@ -16,26 +16,26 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
 
     private final RSProcessors processors;
     private final LongFunction<Statement> stmtFunc;
+    private final ParsedTemplate stmtTpl;
     private PreparedStatement preparedStmt;
     private CqlSession boundSession;
 
-    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd, RSProcessors processors) {
+    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd, ParsedTemplate stmtTpl, RSProcessors processors) {
         super(sessionFunc, cmd);
         if (cmd.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not supported." +
                 " This would churn the prepared statement cache, defeating the purpose of prepared statements.");
         }
         this.processors = processors;
-        stmtFunc = super.getStmtFunc();
+        this.stmtTpl = stmtTpl;
+        stmtFunc = createStmtFunc(cmd);
     }
 
-    @Override
-    protected LongFunction<Statement> getPartialStmtFunction(ParsedOp cmd) {
+    protected LongFunction<Statement> createStmtFunc(ParsedOp cmd) {
 
         LongFunction<Object[]> varbinder;
-        ParsedTemplate parsed = cmd.getStmtAsTemplate().orElseThrow();
-        varbinder = cmd.newArrayBinderFromBindPoints(parsed.getBindPoints());
-        String preparedQueryString = parsed.getPositionalStatement(s -> "?");
+        varbinder = cmd.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
         boundSession = getSessionFunc().apply(0);
         preparedStmt = boundSession.prepare(preparedQueryString);
 
@@ -43,7 +43,7 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
             Object[] apply = varbinder.apply(c);
             return preparedStmt.bind(apply);
         };
-        return boundStmtFunc;
+        return super.getEnhancedStmtFunc(boundStmtFunc, cmd);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
 
         return new Cqld4CqlPreparedStatement(
             boundSession,
-            (BoundStatement) getStmtFunc().apply(value),
+            (BoundStatement) stmtFunc.apply(value),
             getMaxPages(),
             isRetryReplace(),
             processors
