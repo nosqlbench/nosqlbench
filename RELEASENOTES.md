@@ -1,13 +1,2 @@
-- 8fd8a6cb9 (HEAD -> j17-preview) improve graph op mappers and pre-processors
-- ec5128396 support more cql op forms and streamline with TypeAndTarget
-- 542ae8369 port CQL data mapping functions into cqld4
-- df9ee20f0 minor typos and readability improvements
-- af8f17306 lower logging level on less interesting events
-- a1834ca5e improve type-safe intention mapping
-- 35871718d improve string bindings API and functionality
-- dde2eab49 doc updates
-- b6354b95f add support for scenario.step CLI naming
-- 11245c07a distinguish between base runnables and op measurables
-- ade9cae76 remove driver-web to be replaced with a fresh impl
-- bec448bcc remove driver-cqlverify
-- 9df051f33 remove driver-cql-shaded
+- b5befbca1 (HEAD -> j17-preview) Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
+- 3df691b1f fix initializion order bug in CQL op mapping
