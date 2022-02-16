@@ -130,9 +130,6 @@ public class ParsedTemplate {
      */
     private final Map<String, String> bindings = new LinkedHashMap<>();
 
-    private final BindPointParser bindPointParser = new BindPointParser();
-    private final CapturePointParser capturePointParser = new CapturePointParser();
-
     /**
      * Parse the given raw template, check the bind points against the provide bindings, and
      * provide detailed template checks for validity.
@@ -144,8 +141,11 @@ public class ParsedTemplate {
         this.bindings.putAll(availableBindings);
         this.rawtemplate = rawtemplate;
 
+        CapturePointParser capturePointParser = new CapturePointParser();
         CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
         this.captures = captureData.getCaptures();
+
+        BindPointParser bindPointParser = new BindPointParser();
         BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(), availableBindings);
         this.spans = bindPointsResult.getSpans().toArray(new String[0]);
         this.bindpoints = bindPointsResult.getBindpoints();

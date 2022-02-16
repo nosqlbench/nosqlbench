@@ -1,74 +1,73 @@
 package io.nosqlbench.virtdata.core.templates;
 
-import io.nosqlbench.virtdata.core.bindings.ValuesBinder;
-import io.nosqlbench.virtdata.core.bindings.Bindings;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
- * StringCompositor provides a way to build strings from a string template and provided values.
- *
- * <p>
- * The template is simply an array of string values, where odd indices represent token positions, and even indices represent
- * literals. This version of the StringCompositor fetches data from the bindings only for the named fields in the template.
- * </p>
+ * This implementation of a string compositor takes a logically coherent
+ * string template and bindings set. It employs a few simplistic optimizations
+ * to avoid re-generating duplicate values, as well as lower allocation
+ * rate of buffer data.
  */
-public class StringCompositor implements ValuesBinder<StringCompositor, String> {
+public class StringCompositor implements LongFunction<String> {
 
-    private final String[] templateSegments;
-    private Function<Object, String> stringfunc = String::valueOf;
+    private final String[] spans;
+    private final DataMapper<?>[] mappers;
+    private final int[] LUT;
+    private final int bufsize;
 
-    /**
-     * Create a string template which has positional tokens, in "{}" form.
-     *
-     * @param template The string template
-     */
-    public StringCompositor(String template) {
-        templateSegments = parseTemplate(template);
-    }
+    private final Function<Object, String> stringfunc;
 
-    public StringCompositor(String template, Function<Object, String> stringfunc) {
-        this(template);
+    public StringCompositor(ParsedTemplate template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
+        Map<String,Integer> specs = new HashMap<>();
+        List<BindPoint> bindpoints = template.getBindPoints();
+        for (BindPoint bindPoint : bindpoints) {
+            String spec = bindPoint.getBindspec();
+            specs.compute(spec,(s,i) -> i==null ? specs.size() : i);
+        }
+        mappers = new DataMapper<?>[specs.size()];
+        specs.forEach((k,v) -> {
+            mappers[v]= VirtData.getOptionalMapper(k,fconfig).orElseThrow();
+        });
+        String[] even_odd_spans = template.getSpans();
+        this.spans = new String[bindpoints.size()+1];
+        LUT = new int[bindpoints.size()];
+        for (int i = 0; i < bindpoints.size(); i++) {
+            spans[i]=even_odd_spans[i<<1];
+            LUT[i]=specs.get(template.getBindPoints().get(i).getBindspec());
+        }
+        spans[spans.length-1]=even_odd_spans[even_odd_spans.length-1];
         this.stringfunc = stringfunc;
+
+        int minsize = 0;
+        for (int i = 0; i < 100; i++) {
+            String result = apply(i);
+            minsize = Math.max(minsize,result.length());
+        }
+        bufsize = minsize*2;
     }
 
-    public StringCompositor(ParsedTemplate pt) {
-        templateSegments = pt.getSpans();
+    public StringCompositor(ParsedTemplate template, Map<String,Object> fconfig) {
+        this(template,fconfig,Object::toString);
     }
-
-    // for testing
-    protected String[] parseTemplate(String template) {
-        ParsedTemplate parsed = new ParsedTemplate(template, Collections.emptyMap());
-        return parsed.getSpans();
-    }
-
 
     @Override
-    public String bindValues(StringCompositor context, Bindings bindings, long cycle) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < templateSegments.length; i++) {
-            if (i % 2 == 0) {
-                sb.append(templateSegments[i]);
-            } else {
-                String key = templateSegments[i];
-                Object value = bindings.get(key, cycle);
-                String valueString = stringfunc.apply(value);
-                sb.append(valueString);
-            }
+    public String apply(long value) {
+        StringBuilder sb = new StringBuilder(bufsize);
+        String[] ary = new String[mappers.length];
+        for (int i = 0; i < ary.length; i++) {
+            ary[i] = stringfunc.apply(mappers[i].apply(value));
         }
+        for (int i = 0; i < LUT.length; i++) {
+          sb.append(spans[i]).append(ary[LUT[i]]);
+        }
+        sb.append(spans[spans.length-1]);
         return sb.toString();
-    }
-
-    public List<String> getBindPointNames() {
-        List<String> tokens = new ArrayList<>();
-        for (int i = 0; i < templateSegments.length; i++) {
-            if (i % 2 == 1) {
-                tokens.add(templateSegments[i]);
-            }
-        }
-        return tokens;
     }
 }

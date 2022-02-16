@@ -2,15 +2,13 @@ package io.virtdata;
 
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.StringCompositor;
+import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IntegratedStringCompositorTest {
+public class IntegratedStringBindingsTest {
 
     private static BindingsTemplate template;
     private static Bindings bindings;
@@ -28,40 +26,35 @@ public class IntegratedStringCompositorTest {
     }
 
     @Test
+    public void testEven() {
+        StringBindings c = new StringBindings("A{ident}B{ident}C{mod5}D{mod-5}",template);
+        String bind3 = c.bind(3);
+        assertThat(bind3).isEqualTo("A3B3C3D3");
+    }
+
+    @Test
+    public void testOdd() {
+        StringBindings c = new StringBindings("A{ident}B{ident}C{mod5}D{mod-5}E",template);
+        String bind3 = c.bind(7);
+        assertThat(bind3).isEqualTo("A7B7C2D2E");
+    }
+
+    @Test
     public void testBindValues() {
-        StringCompositor c = new StringCompositor("A{ident}C");
-        String s = c.bindValues(c, bindings, 0L);
+        StringBindings c = new StringBindings("A{ident}C", template);
+        String s = c.apply(0);
         assertThat(s).isEqualTo("A0C");
     }
 
     @Test
     public void testBindValuesSpecialChars() {
-        StringCompositor c = new StringCompositor("A{mod-5}C");
-        String s = c.bindValues(c, bindings, 6L);
+        StringBindings c = new StringBindings("A{mod-5}C", template);
+        String s = c.apply(6L);
         assertThat(s).isEqualTo("A1C");
 
-        c = new StringCompositor("A{5_mod_5}C");
-        s = c.bindValues(c, bindings, 7L);
+        c = new StringBindings("A{5_mod_5}C", template);
+        s = c.apply(7L);
         assertThat(s).isEqualTo("A2C");
-
-//        c = new StringCompositor("A{.mod5}C");
-//        s = c.bindValues(c, bindings, 8L);
-//        assertThat(s).isEqualTo("A3C");
-    }
-
-//    @Test
-//    public void testBindEscapedAnchor() {
-//        StringCompositor c = new StringCompositor("A\\{{mod-5}C");
-//        String s = c.bindValues(c, bindings, 6L);
-//        assertThat(s).isEqualTo("A{1C");
-//    }
-
-    @Test
-    public void testBindCustomTransform() {
-        Function<Object,String> f = (o) -> "'" + o.toString() + "'";
-        StringCompositor c = new StringCompositor("A{mod5}C", f);
-        String s = c.bindValues(c, bindings, 13L);
-        assertThat(s).isEqualTo("A'3'C");
     }
 
 }
