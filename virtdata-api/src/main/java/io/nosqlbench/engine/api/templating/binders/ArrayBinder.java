@@ -27,7 +27,7 @@ public class ArrayBinder implements LongFunction<Object[]> {
             String field = fields[i];
             if (cmd.isStatic(field)) {
                 protoary[i] = cmd.getStaticValue(field);
-            } else if (cmd.isDefinedDynamic(field)) {
+            } else if (cmd.isDynamic(field)) {
                 mapperary[i] = cmd.getMapper(field);
                 indexes[nextIndex++] = i;
             } else {

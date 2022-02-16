@@ -17,7 +17,7 @@ public class OrderedMapBinder implements LongFunction<Map<String, Object>> {
         for (String field : fields) {
             if (cmd.isStatic(field)) {
                 protomap.put(field,cmd.getStaticValue(field));
-            } else if (cmd.isDefinedDynamic(field)) {
+            } else if (cmd.isDynamic(field)) {
                 bindermap.put(field,cmd.getMapper(field));
                 protomap.put(field,null);
             } else {

@@ -43,12 +43,6 @@
         <module>driver-stdout</module>
         <module>driver-tcp</module>
         <module>driver-http</module>
-<!--        <module>driver-dsegraph-shaded</module>-->
-<!--        <module>driver-cql-shaded</module>-->
-<!--        <module>driver-cqlverify</module>-->
-<!--        <module>driver-cqld3-shaded</module>-->
-<!--        <module>driver-web</module>-->
-<!--        <module>driver-grpc</module>-->
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
         <module>driver-jmx</module>

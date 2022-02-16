@@ -25,7 +25,7 @@ public class ListBinder implements LongFunction<List<Object>> {
             if (cmd.isStatic(field)) {
                 protolist.add(cmd.getStaticValue(field));
                 mapperlist.add(null);
-            } else if (cmd.isDefinedDynamic(field)) {
+            } else if (cmd.isDynamic(field)) {
                 protolist.add(null);
                 mapperlist.add(cmd.getMapper(field));
                 indexes[lastIndex++]=i;

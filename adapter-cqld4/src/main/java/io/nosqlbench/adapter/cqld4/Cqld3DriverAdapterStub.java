@@ -17,7 +17,7 @@ public class Cqld3DriverAdapterStub extends Cqld4DriverAdapter {
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        logger.warn("This version of NoSQLBench uses the DataStax Java Driver version 4 for all CQL workloads. In this preview version, advanced testing features present in the previous cql and cqld3 drivers are being back-ported. If you need those features, please use only the release artifacts. To suppress this message, use driver=cqld4. This warning will be removed in a future version when all features are completely back-ported.");
+        logger.warn("This version of NoSQLBench uses the DataStax Java Driver version 4 for all CQL workloads. In this preview version, advanced testing features present in the previous cql and cqld3 drivers are being back-ported. If you need those features before the porting is complete, please use only the release artifacts from the 4.15.x branch. To suppress this message, use driver=cqld4. This warning will be removed in a future version when all features are completely back-ported.");
         return super.getOpMapper();
     }
 }

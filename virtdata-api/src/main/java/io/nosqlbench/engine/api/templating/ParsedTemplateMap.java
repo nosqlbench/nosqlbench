@@ -159,7 +159,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
     @Override
-    public boolean isDefinedDynamic(String field) {
+    public boolean isDynamic(String field) {
         return dynamics.containsKey(field);
     }
 
@@ -430,7 +430,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (isStatic(name)) {
             V value = getStaticValue(name);
             return l -> value;
-        } else if (isDefinedDynamic(name)) {
+        } else if (isDynamic(name)) {
             return l -> get(name, l);
         } else {
             return l -> defaultValue;
@@ -522,9 +522,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (specmap.containsKey(fieldname)) {
             Object fval = specmap.get(fieldname);
             if (fval instanceof CharSequence) {
-                return Optional.of(new ParsedTemplate(fval.toString(),this.bindings));
+                return Optional.of(new ParsedTemplate(fval.toString(), this.bindings));
             } else {
-                throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname +"' of type '" + fval.getClass().getSimpleName() + "'");
+                throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname + "' of type '" + fval.getClass().getSimpleName() + "'");
             }
         }
         return Optional.empty();
