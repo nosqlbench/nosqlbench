@@ -11,12 +11,14 @@ import java.util.function.LongFunction;
 
 public class Cqld4GremlinOpMapper implements OpMapper<Cqld4ScriptGraphOp> {
     private final LongFunction<CqlSession> sessionFunc;
+    private final LongFunction<String> targetFunction;
 
-    public Cqld4GremlinOpMapper(LongFunction<CqlSession> session) {
+    public Cqld4GremlinOpMapper(LongFunction<CqlSession> session, LongFunction<String> targetFunction) {
         this.sessionFunc = session;
+        this.targetFunction = targetFunction;
     }
 
     public OpDispenser<Cqld4ScriptGraphOp> apply(ParsedOp cmd) {
-        return new Cqld4GremlinOpDispenser(sessionFunc, cmd);
+        return new Cqld4GremlinOpDispenser(sessionFunc, targetFunction, cmd);
     }
 }

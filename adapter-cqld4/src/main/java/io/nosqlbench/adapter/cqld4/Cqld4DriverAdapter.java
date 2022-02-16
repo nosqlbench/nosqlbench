@@ -59,6 +59,26 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
                     map.remove("type");
                 }
             }
+            if (map.containsKey("type")) {
+                String type = map.get("type").toString();
+                if (type.equals("gremlin")&&map.containsKey("script")) {
+                    map.put("gremlin",map.get("script").toString());
+                    map.remove("script");
+                    map.remove("type");
+                }
+                if (type.equals("gremlin")&&map.containsKey("stmt")) {
+                    map.put("gremlin",map.get("stmt"));
+                    map.remove("type");
+                    map.remove("stmt");
+                }
+                if (type.equals("fluent")&&map.containsKey("fluent")) {
+                    map.remove("type");
+                }
+                if (type.equals("fluent")&&map.containsKey("stmt")) {
+                    map.put("fluent",map.get("stmt"));
+                    map.remove("stmt");
+                }
+            }
 
             return map;
         });

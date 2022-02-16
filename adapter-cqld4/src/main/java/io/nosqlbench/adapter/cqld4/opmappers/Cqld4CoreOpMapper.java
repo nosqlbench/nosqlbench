@@ -48,8 +48,8 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
             case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
             case simple -> new CqlD4CqlSimpleStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
             case prepared -> new CqlD4PreparedStmtMapper(sessionFunc, target).apply(cmd);
-            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc).apply(cmd);
-            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc).apply(cmd);
+            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc, target.targetFunction).apply(cmd);
+            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc, target).apply(cmd);
         };
     }
 

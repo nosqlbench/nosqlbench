@@ -10,6 +10,7 @@ import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
@@ -30,17 +31,19 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
     private final static Logger logger = LogManager.getLogger(Cqld4FluentGraphOpMapper.class);
 
     private final LongFunction<CqlSession> sessionFunc;
+    private final TypeAndTarget<CqlD4OpType, String> target;
     private GraphTraversalSource gtsPlaceHolder;
 
-    public Cqld4FluentGraphOpMapper(LongFunction<CqlSession> sessionFunc) {
+    public Cqld4FluentGraphOpMapper(LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType, String> target) {
         this.sessionFunc = sessionFunc;
+        this.target = target;
     }
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp cmd) {
         GraphTraversalSource g = DseGraph.g;
 
-        ParsedTemplate fluent = cmd.getAsTemplate("fluent").orElseThrow();
+        ParsedTemplate fluent = cmd.getAsTemplate(target.field).orElseThrow();
         String scriptBodyWithRawVarRefs = fluent.getPositionalStatement();
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();

@@ -16,7 +16,7 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp>
     private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<Long> diagFunc;
 
-    public Cqld4GremlinOpDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd) {
+    public Cqld4GremlinOpDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
         super(cmd);
         this.sessionFunc = sessionFunc;
         this.diagFunc = cmd.getAsFunctionOr("diag", 0L);
@@ -31,15 +31,8 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp>
             func = l -> finalFunc.apply(l).setGraphName(stringLongFunction.apply(l));
         }
 
-        // script
-        Optional<LongFunction<String>> scriptFunc = cmd.getAsOptionalFunction("script");
-        if (scriptFunc.isPresent()) {
-            LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
-            func = l -> finalFunc.apply(l).setScript(scriptFunc.get().apply(l));
-        }
-
         LongFunction<ScriptGraphStatementBuilder> finalFunc = func;
-        this.stmtFunc = l -> finalFunc.apply(l).build();
+        this.stmtFunc = l -> finalFunc.apply(l).setScript(targetFunction.apply(l)).build();
 
     }
 
