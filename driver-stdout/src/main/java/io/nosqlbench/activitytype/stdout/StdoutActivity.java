@@ -173,8 +173,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 String generatedStmt = genStatementTemplate(activeBindingNames);
                 BindingsTemplate bt = new BindingsTemplate();
                 stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
-                StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
-                StringBindings sb = sbt.resolve();
+                StringBindings sb = new StringBindings(generatedStmt,bt.getMap());
                 sequencer.addOp(sb, 1L);
             }
         } else if (stmts.size() > 0) {

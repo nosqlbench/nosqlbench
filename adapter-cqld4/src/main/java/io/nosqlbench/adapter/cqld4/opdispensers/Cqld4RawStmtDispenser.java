@@ -2,30 +2,32 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.cql.SimpleStatementBuilder;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4SimpleCqlStmtDispenser extends BaseCqlStmtDispenser {
+public class Cqld4RawStmtDispenser extends BaseCqlStmtDispenser {
 
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
 
-    public Cqld4SimpleCqlStmtDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(sessionFunc,cmd);
+    public Cqld4RawStmtDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(sessionFunc, cmd);
         this.targetFunction=targetFunction;
         this.stmtFunc = super.getStmtFunc();
     }
 
     @Override
-    protected LongFunction<Statement> getPartialStmtFunction(ParsedOp op) {
-        return l -> SimpleStatement.newInstance(targetFunction.apply(l));
+    protected LongFunction<Statement> getPartialStmtFunction(ParsedOp cmd) {
+        return l -> new SimpleStatementBuilder(targetFunction.apply(l)).build();
     }
 
     @Override
-    public Cqld4CqlSimpleStatement apply(long value) {
+    public Cqld4CqlOp apply(long value) {
         return new Cqld4CqlSimpleStatement(
             getSessionFunc().apply(value),
             (SimpleStatement) stmtFunc.apply(value),

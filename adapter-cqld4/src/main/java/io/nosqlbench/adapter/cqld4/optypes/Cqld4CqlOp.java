@@ -37,38 +37,24 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private final CqlSession session;
     private final int maxpages;
     private final boolean retryreplace;
-    private final Cqld4OpMetrics metrics;
 
     private ResultSet rs;
     private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
 
-    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics) {
-        this.session = session;
-        this.maxpages = maxpages;
-        this.retryreplace = retryreplace;
-        this.processors = new RSProcessors();
-        this.metrics = metrics;
-    }
-
-    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, Cqld4OpMetrics metrics, RSProcessors processors) {
+    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, RSProcessors processors) {
         this.session = session;
         this.maxpages = maxpages;
         this.retryreplace = retryreplace;
         this.processors = processors;
-        this.metrics = metrics;
     }
 
     public final ResultSet apply(long cycle) {
 
-        metrics.onStart();
         Statement<?> stmt = getStmt();
-
         rs = session.execute(stmt);
-
         processors.start(cycle, rs);
-
-        int totalRows=0;
+        int totalRows = 0;
 
         if (!rs.wasApplied()) {
             if (!retryreplace) {
@@ -97,10 +83,9 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
             if (rs.isFullyFetched()) {
                 break;
             }
-            totalRows+=pageRows;
+            totalRows += pageRows;
         }
         processors.flush();
-        metrics.onSuccess();
         return rs;
     }
 
@@ -125,7 +110,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
     private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
-        return new Cqld4CqlReboundStatement(session,maxpages,retryreplace,metrics,rebound,processors);
+        return new Cqld4CqlReboundStatement(session, maxpages, retryreplace, rebound, processors);
     }
 
 }
