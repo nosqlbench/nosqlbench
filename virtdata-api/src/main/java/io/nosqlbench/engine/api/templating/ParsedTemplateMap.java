@@ -121,6 +121,13 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             } else if (v instanceof List) {
                 List<Object> sublist = (List<Object>) v;
                 ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
+                if (subtpl.isStatic()) {
+                    statics.put(k, sublist);
+                    protomap.put(k, sublist);
+                } else {
+                    dynamics.put(k,subtpl);
+                    protomap.put(k,null);
+                }
             } else {
                 // Eventually, nested and mixed static dynamic structure could be supported, but
                 // it would be complex to implement and also not that efficient, so let's just copy

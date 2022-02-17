@@ -121,6 +121,10 @@ names for the classic form have not changed.
       example-fluent-graph-stmt:
         fluent: >-
           g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
+        # if imports are not specified, the following is auto imported.
+        # if imports are specified, you must also provide the __ class if needed
+        imports:
+         - org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__
 
       # gremlin statement using string API (not recommended)
       example-raw-gremlin-stmt:

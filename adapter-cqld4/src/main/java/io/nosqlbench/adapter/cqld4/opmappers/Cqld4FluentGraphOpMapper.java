@@ -11,6 +11,7 @@ import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
@@ -20,10 +21,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -48,16 +46,16 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
-        cmd.getOptionalStaticValue("imports", List.class).ifPresent(
-            l -> {
-                ArrayList<String> stringList = new ArrayList<>();
-                l.forEach(o -> stringList.add(o.toString()));
-                String[] verifiedClasses = expandClassNames(l);
-                ImportCustomizer importer = new ImportCustomizer();
-                importer.addImports(verifiedClasses);
-                compilerConfiguration.addCompilationCustomizers(importer);
-            }
-        );
+        if (cmd.isDynamic("imports")) {
+            throw new OpConfigError("You may only define imports as a static list. Dynamic values are not allowed.");
+        }
+
+        List imports = cmd.getOptionalStaticValue("imports", List.class)
+            .orElse(List.of("org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__"));
+        String[] verifiedClasses = expandClassNames(imports);
+        ImportCustomizer importer = new ImportCustomizer();
+        importer.addImports(verifiedClasses);
+        compilerConfiguration.addCompilationCustomizers(importer);
 
         Supplier<Script> supplier = () -> {
             groovy.lang.Binding groovyBindings = new Binding(new LinkedHashMap<String, Object>(Map.of("g", g)));
