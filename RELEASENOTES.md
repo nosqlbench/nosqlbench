@@ -1,2 +1,1 @@
-- b5befbca1 (HEAD -> j17-preview) Merge branch 'j17-preview' of github.com:nosqlbench/nosqlbench into j17-preview
-- 3df691b1f fix initializion order bug in CQL op mapping
+- 4b6019e7d (HEAD -> j17-preview) add missing list templating logic to fix imports bug
