@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.88-SNAPSHOT</version>
+        <version>4.15.88</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -28,13 +28,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.88-SNAPSHOT</version>
+            <version>4.15.88</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-            <version>4.15.88-SNAPSHOT</version>
+            <version>4.15.88</version>
         </dependency>
 
         <dependency>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-clients</artifactId>
-          <version>4.15.88-SNAPSHOT</version>
+          <version>4.15.88</version>
             <scope>compile</scope>
         </dependency>
 
