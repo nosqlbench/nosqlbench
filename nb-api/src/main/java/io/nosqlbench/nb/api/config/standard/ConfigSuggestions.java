@@ -9,7 +9,7 @@ public class ConfigSuggestions {
 
     public static Optional<String> getForParam(ConfigModel model, String param) {
         return suggestAlternateCase(model,param)
-            .or(() -> suggestAlternates(model,param,5));
+            .or(() -> suggestAlternates(model,param,4));
     }
 
     private static Optional<String> suggestAlternateCase(ConfigModel model, String param) {
