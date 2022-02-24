@@ -460,6 +460,20 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
     }
 
+    public <FA,FE> LongFunction<FA> enhance(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        FE defaultFe,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
+        LongFunction<FA> faLongFunction = func;
+        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
+        return lfa;
+
+    }
+
     public <FA,FE> Optional<LongFunction<FA>> enhance(
         Optional<LongFunction<FA>> func,
         String field,
