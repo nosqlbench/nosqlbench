@@ -11,7 +11,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
  */
 public class DDBGetItemOp extends DynamoDBOp {
     private final Table table;
-    private GetItemSpec getItemSpec;
+    private final GetItemSpec getItemSpec;
     private long resultSize=-1;
 
     public DDBGetItemOp(DynamoDB ddb, Table table, GetItemSpec getItemSpec) {
@@ -23,7 +23,9 @@ public class DDBGetItemOp extends DynamoDBOp {
     @Override
     public Item apply(long value) {
         Item result = table.getItem(getItemSpec);
-        resultSize=result.numberOfAttributes();
+        if (result!=null) {
+            resultSize=result.numberOfAttributes();
+        }
         return result;
     }
 
