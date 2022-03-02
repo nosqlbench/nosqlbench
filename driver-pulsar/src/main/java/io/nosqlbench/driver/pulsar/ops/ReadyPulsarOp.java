@@ -322,6 +322,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
         LongFunction<String> consumer_name_func = lookupParameterFunc("consumer_name");
 
+        LongFunction<String> ranges_func = lookupParameterFunc("ranges", false, "");
+
         LongFunction<Supplier<Transaction>> transactionSupplierFunc =
             (l) -> clientSpace.getTransactionSupplier(); //TODO make it dependant on current cycle?
 
@@ -330,7 +332,8 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
                 topic_uri_func.apply(l),
                 subscription_name_func.apply(l),
                 subscription_type_func.apply(l),
-                consumer_name_func.apply(l)
+                consumer_name_func.apply(l),
+                ranges_func.apply(l)
             );
 
         return new PulsarConsumerMapper(
