@@ -11,4 +11,9 @@ public class TestBlock extends ArrayList<TestSet> {
     public void addTestSet(TestSet set) {
         this.add(set);
     }
+
+    @Override
+    public String toString() {
+        return (size()>0 ? get(0).toString() : "NONE");
+    }
 }

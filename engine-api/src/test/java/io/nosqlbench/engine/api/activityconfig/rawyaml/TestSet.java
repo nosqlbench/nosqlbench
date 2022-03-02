@@ -54,7 +54,11 @@ final class TestSet {
         if (inij) {
             relpath = Path.of(relpath.toString().replace("target/classes/","src/main/resources/"));
         }
-        return "\t at (" + relpath.toString() + ":" + this.getLine() + ")";
+        return "\t at (" + relpath + ":" + this.getLine() + ")";
     }
 
+    @Override
+    public String toString() {
+        return this.getDesc();
+    }
 }
