@@ -146,6 +146,56 @@ ops:
 ]
 ```
 
+### Anonymous fields may include scoped params
+
+*yaml:*
+
+```yaml
+ops:
+  op1:
+    field1: select * from ks1.tb1;
+    field2: field 2 value
+    params:
+      paramname1: paramvalue1
+```
+
+*json:*
+
+```json5
+{
+  "ops": {
+    "op1": {
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value",
+      "params": {
+        "paramname1": "paramvalue1"
+      }
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "name": "block0--op1",
+    "op": {
+      "field1": "select * from ks1.tb1;",
+      "field2": "field 2 value"
+    },
+    params: {
+      "paramname1": "paramvalue1"
+    },
+    "tags": {
+      "block": "block0",
+      "name": "block0--op1"
+    }
+  }
+]
+```
+
 ### Scoped op fields allow dangling param values
 
 *yaml:*

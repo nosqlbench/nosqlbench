@@ -15,7 +15,7 @@ blocks:
        global_param1: anothervalue
       tags:
        tname1: tval1
-      freeparam1: "free parameter value"
+#      freeparam1: "free parameter value"
     - name: s4
       stmt: statement 4
 

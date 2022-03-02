@@ -18,6 +18,7 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.*;
 
@@ -41,11 +42,14 @@ public class RawStmtDef extends RawStmtFields {
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
         setFieldsByReflection(map);
+        if (this.getName() == null || this.getName().isEmpty()) {
+            this.setName(defaultName);
+        }
     }
 
     public void setFieldsByReflection(Map<String, Object> map) {
+        checkForUnintendedJsonMap(map, new ArrayList<>());
         super.setFieldsByReflection(map);
-
 
         HashSet<String> found = new HashSet<>();
         for (String opName : opFieldSynonyms) {
@@ -67,13 +71,18 @@ public class RawStmtDef extends RawStmtFields {
         boolean _params = !getParams().isEmpty();
         boolean _op = op != null;
 
-        if (!_op && !_params) {
-            LinkedHashMap<String, Object> newop = new LinkedHashMap<>();
-            newop.putAll(map);
+        if (_op) {
+            if (_params) {
+                if (map.size() > 0) {
+                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields.");
+                }
+            } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params
+                getParams().putAll(map);
+                map.clear();
+            }
+        } else { // no op, so assume all remaining fields belong to the op
+            LinkedHashMap<String, Object> newop = new LinkedHashMap<>(map);
             setOp(newop);
-            map.clear();
-        } else if (_op) {
-            getParams().putAll(map);
             map.clear();
         }
     }
@@ -105,4 +114,23 @@ public class RawStmtDef extends RawStmtFields {
         }
         return super.getName();
     }
+
+    private void checkForUnintendedJsonMap(Object m, List<String> path) {
+        if (m instanceof Map) {
+            ((Map)m).forEach((k,v) -> {
+                if (v == null) {
+                    throw new OpConfigError("A map key '" + k.toString() + "' with a null value was encountered. This is not" +
+                        " allowed, and may be the result of using an unquoted binding, like {" + k + "}. You can simply wrap this in quotes" +
+                        " like \"{"+ k +"\"} to avoid interpreting this as a JSON map." +
+                        (path.size()>0 ? String.join(".",path):""));
+                } else {
+                    if (v instanceof Map) {
+                        path.add(k.toString());
+                        checkForUnintendedJsonMap(v, path);
+                    }
+                }
+            });
+        }
+    }
+
 }
