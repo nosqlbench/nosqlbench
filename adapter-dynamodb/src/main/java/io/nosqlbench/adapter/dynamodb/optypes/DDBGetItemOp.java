@@ -12,7 +12,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 public class DDBGetItemOp extends DynamoDBOp {
     private final Table table;
     private final GetItemSpec getItemSpec;
-    private long resultSize=-1;
+    private long resultSize=0;
 
     public DDBGetItemOp(DynamoDB ddb, Table table, GetItemSpec getItemSpec) {
         super(ddb);
