@@ -9,10 +9,9 @@ import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
-import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 
 public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
 
@@ -39,19 +38,12 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
 //            return new RawDynamoDBOpDispenser(cmd);
         } else {
             TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTargetEnum(DynamoDBCmdType.class,String.class);
-            switch (cmdType.enumId) {
-                case CreateTable:
-                    return new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case PutItem:
-                    return new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case GetItem:
-                    return new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case Query:
-                    return new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);
-
-                default:
-                    throw new OpConfigError("No implementation for " + cmdType);
-            }
+            return switch (cmdType.enumId) {
+                case CreateTable -> new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case PutItem -> new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case GetItem -> new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case Query -> new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);
+            };
         }
 
     }
