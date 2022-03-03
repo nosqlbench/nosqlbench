@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.datastax.dse</groupId>
             <artifactId>dse-java-driver-core</artifactId>
-            <version>1.9.0</version>
+            <version>2.0.0</version>
         </dependency>
 
         <dependency>
@@ -200,7 +200,7 @@
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>io.nosqlbench.engine.cli.NBCLI</mainClass>
                         </transformer>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     </transformers>
                     <filters>
                         <filter>
