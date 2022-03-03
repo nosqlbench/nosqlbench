@@ -6,7 +6,7 @@
     <name>docsys</name>
     <url>http://nosqlbench.io/</url>
     <properties>
-        <jersey.version>3.0.2</jersey.version>
+        <jersey.version>3.0.4</jersey.version>
     </properties>
 
     <parent>
