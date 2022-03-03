@@ -20,7 +20,7 @@
     "antlr4": "^4.8.0",
     "antlr4-cli": "^4.5.3",
     "chokidar": "^3.4.2",
-    "eslint": "^7.32.0",
+    "eslint": "^7.16.0",
     "file-saver": "^2.0.2",
     "front-matter": "^4.0.2",
     "js-yaml": "^3.14.0",
