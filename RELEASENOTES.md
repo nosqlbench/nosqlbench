@@ -1,8 +1,6 @@
-- d98e1aaae (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- e6d6c5873 (origin/main) Merge pull request #411 from eolivelli/fix/root-log-level
-- bcfa4911e Logging: do not set ROOT level to ALL
-- 0503730db Merge pull request #409 from eolivelli/fix/pulsar-avro
-- 94b72156f Pulsar: improve AVRO decoding
-- 2f9b88ce4 support desc and description in yaml
-- 9a3774bb9 improve yaml warnings and tests
-- e44df1535 include operative message in OpConfigError output
+- 2d833091a (HEAD -> main) unapply uniqueness constraints on template values
+- 70789ee99 properly initialize grafana client for annotations
+- 440df9541 (origin/main, origin/HEAD) Merge pull request #426 from nosqlbench/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.3.3
+- 0ff75f20d (origin/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.3.3) Bump postgresql from 42.2.25 to 42.3.3 in /driver-cockroachdb
+- a3c445ba1 Merge pull request #420 from eolivelli/fix/pulsar-remove-debug
+- fcf5fd5ed Pulsar Driver: remove debug log that breaks Schema.AUTO_CONSUME() usage

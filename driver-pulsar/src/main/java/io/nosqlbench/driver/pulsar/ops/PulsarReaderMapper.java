@@ -4,7 +4,6 @@ import io.nosqlbench.driver.pulsar.PulsarActivity;
 import io.nosqlbench.driver.pulsar.PulsarSpace;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.pulsar.client.api.Reader;
-import org.apache.pulsar.client.api.Schema;
 
 import java.util.function.LongFunction;
 

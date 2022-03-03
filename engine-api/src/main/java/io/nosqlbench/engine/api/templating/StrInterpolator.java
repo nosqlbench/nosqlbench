@@ -112,10 +112,10 @@ public class StrInterpolator implements Function<String, String> {
 
             value = (value != null) ? value : warnPrefix + ":" + key;
 
-            if (accesses.containsKey(key) && !accesses.get(key).equals(value)) {
-                throw new RuntimeException("A templated variable '" + key + "' was found with multiple default values: '" + accesses.get(key) + ", and " + value +". This is not allowed." +
-                    " Template variables must resolve to a single value.");
-            }
+            accesses.put(key,value);
+//            if (accesses.containsKey(key) && !accesses.get(key).equals(value)) {
+//                logger.warn("A templated variable '" + key + "' was found with multiple default values.");
+//            }
 
             accesses.put(key,value);
             logger.debug("Template parameter '" + key + "' applied as '" + value + "'");

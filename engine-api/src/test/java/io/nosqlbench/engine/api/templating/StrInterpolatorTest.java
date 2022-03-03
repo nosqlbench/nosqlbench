@@ -28,25 +28,25 @@ public class StrInterpolatorTest {
     private static final List<Map<String, String>> abcd = new ArrayList<Map<String, String>>() {{
         add(
                 new HashMap<>() {{
-                    put("akey", "aval1");
-                    put("bkey", "bval1");
-                    put("ckey", "cval1");
-                }}
+                put("akey", "aval1");
+                put("bkey", "bval1");
+                put("ckey", "cval1");
+            }}
         );
         add(
                 new HashMap<>() {
-                    {
-                        put("akey", "aval2");
-                        put("bkey", "bval2");
-                    }
+                {
+                    put("akey", "aval2");
+                    put("bkey", "bval2");
                 }
+            }
         );
         add(
                 new HashMap<>() {
-                    {
-                        put("json-a-b", "'a': 'b'");
-                    }
+                {
+                    put("json-a-b", "'a': 'b'");
                 }
+            }
         );
     }};
 

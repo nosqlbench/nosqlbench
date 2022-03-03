@@ -55,13 +55,13 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatVerboseFinalParameterThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"}));
+            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "yaml=canttouchthis"}));
     }
 
     @Test
     public void testThatMissingScenarioNameThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
+            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
     }
 
     @Test
