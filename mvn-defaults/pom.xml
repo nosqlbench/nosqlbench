@@ -331,7 +331,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>20.3.0</version>
+                <version>20.3.5</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
