@@ -16,10 +16,9 @@ public class CommandTemplateTest {
     @Test
     public void testCommandTemplate() {
         StmtsDocList stmtsDocs = StatementsLoader.loadString("" +
-            "statements:\n" +
-            " - s1: test1=foo test2=bar",
-            Map.of()
-        );
+                "statements:\n" +
+                " - s1: test1=foo test2=bar",
+            Map.of());
         OpTemplate optpl = stmtsDocs.getStmts().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);
         assertThat(ct.isStatic()).isTrue();

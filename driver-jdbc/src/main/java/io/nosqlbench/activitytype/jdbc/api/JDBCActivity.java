@@ -29,7 +29,7 @@ public abstract class JDBCActivity extends SimpleActivity {
     private int minRetryDelayMs;
 
     protected DataSource dataSource;
-    protected OpSequence<OpDispenser<String>> opSequence;
+    protected OpSequence<OpDispenser<? extends String>> opSequence;
 
     public JDBCActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -107,7 +107,7 @@ public abstract class JDBCActivity extends SimpleActivity {
         return dataSource;
     }
 
-    public OpSequence<OpDispenser<String>> getOpSequence() {
+    public OpSequence<OpDispenser<? extends String>> getOpSequence() {
         return opSequence;
     }
 

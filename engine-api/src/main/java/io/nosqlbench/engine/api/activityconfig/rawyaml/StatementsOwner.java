@@ -59,16 +59,6 @@ public class StatementsOwner extends RawStmtFields {
 
     @SuppressWarnings("unchecked")
     public void setStatementsFieldByType(Object object) {
-// TODO: Re-plumb this code path with clarity around structural traversal
-//        LinkedHashMap<String,LinkedHashMap<String,Object>> namedStatementMaps = new LinkedHashMap<>();
-//        if (object instanceof List) {
-//            List<?> entries = (ArrayList)object;
-//            for (Object entry : entries) {
-//
-//            }
-//        }
-//
-
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
             List<RawStmtDef> defs = new ArrayList<>(stmtList.size());
@@ -78,7 +68,8 @@ public class StatementsOwner extends RawStmtFields {
                 if (o instanceof String) {
                     defs.add(new RawStmtDef(defaultName, (String) o));
                 } else if (o instanceof Map) {
-                    defs.add(new RawStmtDef(defaultName, (Map<String, Object>) o));
+                    RawStmtDef def = new RawStmtDef(defaultName, (Map<String, Object>) o);
+                    defs.add(def);
                 } else {
                     throw new RuntimeException("Can not construct stmt def from object type:" + o.getClass());
                 }
@@ -114,4 +105,5 @@ public class StatementsOwner extends RawStmtFields {
             throw new RuntimeException("Unknown object type: " + object.getClass());
         }
     }
+
 }

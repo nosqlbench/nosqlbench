@@ -65,11 +65,11 @@ blocks:
     statements:
       - name: s1
         optype: msg-consume
-        topic_names:
-        topics_pattern:
+#        topic_names:
+#        topics_pattern:
         subscription_name: "mysub"
-        subscription_type:
-        consumer_name:
+#        subscription_type:
+#        consumer_name:
 
   - name: reader-block
     tags:
@@ -78,7 +78,7 @@ blocks:
     statements:
       - name: s1
         optype: msg-read
-        reader_name:
+#        reader_name:
 
 #  - websocket-producer:
 #    tags:

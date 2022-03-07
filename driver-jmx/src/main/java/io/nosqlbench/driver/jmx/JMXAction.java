@@ -17,7 +17,7 @@ public class JMXAction implements SyncAction {
     private final ActivityDef activityDef;
     private final int slot;
     private final JMXActivity activity;
-    private OpSequence<OpDispenser<JmxOp>> sequencer;
+    private OpSequence<OpDispenser<? extends JmxOp>> sequencer;
 
     public JMXAction(ActivityDef activityDef, int slot, JMXActivity activity) {
         this.activityDef = activityDef;
@@ -32,7 +32,7 @@ public class JMXAction implements SyncAction {
 
     @Override
     public int runCycle(long cycle) {
-        LongFunction<JmxOp> readyJmxOp = sequencer.apply(cycle);
+        LongFunction<? extends JmxOp> readyJmxOp = sequencer.apply(cycle);
         JmxOp jmxOp = readyJmxOp.apply(cycle);
         jmxOp.execute();
         return 0;

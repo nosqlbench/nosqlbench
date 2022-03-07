@@ -9,7 +9,7 @@ public class ConfigSuggestions {
 
     public static Optional<String> getForParam(ConfigModel model, String param) {
         return suggestAlternateCase(model,param)
-            .or(() -> suggestAlternates(model,param));
+            .or(() -> suggestAlternates(model,param,4));
     }
 
     private static Optional<String> suggestAlternateCase(ConfigModel model, String param) {
@@ -21,11 +21,14 @@ public class ConfigSuggestions {
         return Optional.empty();
     }
 
-    private static Optional<String> suggestAlternates(ConfigModel model, String param) {
+    private static Optional<String> suggestAlternates(ConfigModel model, String param, int maxDistance) {
         Map<Integer, Set<String>> suggestions = new HashMap<>();
         for (String candidate : model.getNamedParams().keySet()) {
             try {
                 Integer distance = LevenshteinDistance.getDefaultInstance().apply(param, candidate);
+                if (distance>maxDistance) {
+                    continue;
+                }
                 Set<String> strings = suggestions.computeIfAbsent(distance, d -> new HashSet<>());
                 strings.add(candidate);
             } catch (Exception e) {

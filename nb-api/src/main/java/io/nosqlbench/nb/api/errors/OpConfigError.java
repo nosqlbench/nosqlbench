@@ -43,18 +43,26 @@ public class OpConfigError extends ActivityInitError {
         }
 
         if (cfgsrc!=null) {
-            sb.append("configsource:" + configSource);
+            sb.append(" [from:" + configSource + "] ");
         }
 
         if (getCause()!=null) {
-            StackTraceElement causeFrame = getCause().getStackTrace()[0];
-            sb.append("\n\t caused by ")
-                .append(getCause().getMessage())
-                .append("\n\t at (")
-                .append(causeFrame.getFileName())
-                .append(":")
-                .append(causeFrame.getLineNumber())
-                .append(")");
+            sb.append(" cause: " + getCause().getClass().getSimpleName() + ":"+ getCause().getMessage());
+        }
+
+//        if (getCause()!=null) {
+//            StackTraceElement causeFrame = getCause().getStackTrace()[0];
+//            sb.append("\n\t caused by ")
+//                .append(getCause().getMessage())
+//                .append("\n\t at (")
+//                .append(causeFrame.getFileName())
+//                .append(":")
+//                .append(causeFrame.getLineNumber())
+//                .append(")");
+//        }
+
+        if (super.getMessage()!=null) {
+            sb.append(" " + super.getMessage());
         }
 
         return sb + super.getMessage();

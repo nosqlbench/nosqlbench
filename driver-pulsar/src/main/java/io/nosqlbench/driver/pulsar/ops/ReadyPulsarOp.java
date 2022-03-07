@@ -7,7 +7,7 @@ import io.nosqlbench.driver.pulsar.exception.PulsarDriverParamException;
 import io.nosqlbench.driver.pulsar.exception.PulsarDriverUnsupportedOpException;
 import io.nosqlbench.driver.pulsar.util.PulsarActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,7 @@ import java.util.function.LongFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
+public class ReadyPulsarOp extends BaseOpDispenser<PulsarOp> {
 
     // TODO: Add this to the pulsar driver docs
     public static final String RTT_TRACKING_FIELD = "payload-tracking-field";
@@ -38,6 +38,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
     // TODO: Add docs for the command template with respect to the OpTemplate
 
     public ReadyPulsarOp(OpTemplate optpl, PulsarSpaceCache pcache, PulsarActivity pulsarActivity) {
+        super(optpl);
         // TODO: Consider parsing map structures into equivalent binding representation
         this.pulsarActivity = pulsarActivity;
         this.opTpl = optpl;

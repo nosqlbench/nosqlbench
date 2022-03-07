@@ -3,6 +3,7 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.NBEnvironment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
@@ -59,6 +60,8 @@ public class NBCLIOptions {
     private static final String SCRIPT_FILE = "--script-file";
     private static final String COPY = "--copy";
     private static final String SHOW_STACKTRACES = "--show-stacktraces";
+    private static final String EXPERIMENTAL = "--experimental";
+    private static final String MATURITY = "--maturity";
 
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
@@ -66,6 +69,7 @@ public class NBCLIOptions {
     private static final String HDR_DIGITS = "--hdr-digits";
 
     // Execution Options
+
 
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
@@ -162,6 +166,7 @@ public class NBCLIOptions {
     private String dockerPromRetentionDays = "183d";
     private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
+    private Maturity minMaturity = Maturity.Unspecified;
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -297,10 +302,12 @@ public class NBCLIOptions {
                     break;
                 case DASH_VV_DEBUG:
                     consoleLevel = NBLogLevel.DEBUG;
+                    setWantsStackTraces(true);
                     arglist.removeFirst();
                     break;
                 case DASH_VVV_TRACE:
                     consoleLevel = NBLogLevel.TRACE;
+                    setWantsStackTraces(true);
                     arglist.removeFirst();
                     break;
                 case ANNOTATE_EVENTS:
@@ -392,6 +399,15 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     showStackTraces = true;
                     break;
+                case EXPERIMENTAL:
+                    arglist.removeFirst();
+                    arglist.addFirst("experimental");
+                    arglist.addFirst("--maturity");
+                    break;
+                case MATURITY:
+                    arglist.removeFirst();
+                    String maturity = readWordOrThrow(arglist,"maturity of components to allow");
+                    this.minMaturity = Maturity.valueOf(maturity.toLowerCase(Locale.ROOT));
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -624,6 +640,10 @@ public class NBCLIOptions {
                 classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         checkLoggerConfigs(configs, CLASSIC_HISTOGRAMS);
         return configs;
+    }
+
+    public Maturity allowMinMaturity() {
+        return minMaturity;
     }
 
     public List<Cmd> getCommands() {

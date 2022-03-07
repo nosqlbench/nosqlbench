@@ -25,7 +25,7 @@ import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = ActivityType.class, selector = "tcpclient")
+@Service(value= ActivityType.class, selector="tcpclient")
 public class TCPClientActivityType implements ActivityType<TCPClientActivity> {
 
     @Override

@@ -62,12 +62,12 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
 
         // sanity check
         yamlLoc = activityDef.getParams().getOptionalString("yaml", "workload")
-                             .orElseThrow(() -> new IllegalArgumentException("yaml is not defined"));
+            .orElseThrow(() -> new IllegalArgumentException("yaml is not defined"));
         connectionString = activityDef.getParams().getOptionalString("connection")
-                                      .orElseThrow(() -> new IllegalArgumentException("connection is not defined"));
+            .orElseThrow(() -> new IllegalArgumentException("connection is not defined"));
         // TODO: support multiple databases
         databaseName = activityDef.getParams().getOptionalString("database")
-                                  .orElseThrow(() -> new IllegalArgumentException("database is not defined"));
+            .orElseThrow(() -> new IllegalArgumentException("database is not defined"));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         client = createMongoClient(connectionString);
         mongoDatabase = client.getDatabase(databaseName);
         showQuery = activityDef.getParams().getOptionalBoolean("showquery")
-                               .orElse(false);
+            .orElse(false);
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
@@ -99,7 +99,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
 
     OpSequence<ReadyMongoStatement> initOpSequencer() {
         SequencerType sequencerType = SequencerType.valueOf(
-                activityDef.getParams().getOptionalString("seq").orElse("bucket")
+            activityDef.getParams().getOptionalString("seq").orElse("bucket")
         );
         SequencePlanner<ReadyMongoStatement> sequencer = new SequencePlanner<>(sequencerType);
 
@@ -124,7 +124,7 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
                 String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);
 
-                sequencer.addOp(new ReadyMongoStatement(stmt), stmt.getParamOrDefault("ratio",1));
+                sequencer.addOp(new ReadyMongoStatement(stmt), stmt.getParamOrDefault("ratio", 1));
             }
         }
 
@@ -133,12 +133,12 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
 
     MongoClient createMongoClient(String connectionString) {
         CodecRegistry codecRegistry = fromRegistries(fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
-                                                     MongoClientSettings.getDefaultCodecRegistry());
+            MongoClientSettings.getDefaultCodecRegistry());
         MongoClientSettings settings = MongoClientSettings.builder()
-                                                          .applyConnectionString(new ConnectionString(connectionString))
-                                                          .codecRegistry(codecRegistry)
-                                                          .uuidRepresentation(UuidRepresentation.STANDARD)
-                                                          .build();
+            .applyConnectionString(new ConnectionString(connectionString))
+            .codecRegistry(codecRegistry)
+            .uuidRepresentation(UuidRepresentation.STANDARD)
+            .build();
         return MongoClients.create(settings);
     }
 

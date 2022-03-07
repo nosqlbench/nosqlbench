@@ -1,1 +1,0 @@
-CREATE USER newuser WITH PASSWORD 'password';

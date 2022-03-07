@@ -37,7 +37,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Timer resultSuccessTimer;
     public Histogram statusCodeHisto;
 
-    private OpSequence<OpDispenser<HttpOp>> sequencer;
+    private OpSequence<OpDispenser<? extends HttpOp>> sequencer;
     private boolean diagnosticsEnabled;
     private long timeout = Long.MAX_VALUE;
     private NBErrorHandler errorhandler;
@@ -121,7 +121,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return builder.build();
     }
 
-    public OpSequence<OpDispenser<HttpOp>> getSequencer() {
+    public OpSequence<OpDispenser<? extends HttpOp>> getSequencer() {
         return sequencer;
     }
 

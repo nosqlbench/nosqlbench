@@ -10,14 +10,21 @@ import java.util.function.LongFunction;
  * in NoSQLBench.</p>
  * <hr/>
  * <p>
+ * <H2>BaseOpDispenser</H2>
+ * </p>
+ * Some common behaviors which are intended to be portable across all op
+ * dispenser types are implemented in {@link BaseOpDispenser}. It is
+ * <em>strongly</em> recommended that you use this as your base type when
+ * implementing op dispensers.
+ * <p>
  * <H2>Concepts</H2>
- * Op Synthesis is the process of building a specific and executable
+ * Op Synthesis is the process of building a specific executable
  * operation for some (low level driver) API by combining the
  * static and dynamic elements of the operation together.
  * In most cases, implementations of OpDispenser will be constructed
  * within the logic of an {@link OpMapper} which is responsible for
  * determining the type of OpDispenser to use as associated with a specific
- * type {@code (<T>)}. The OpMapper is called for each type of operation
+ * type &lt;T&gt;. The OpMapper is called for each type of operation
  * that is active during activity initialization. It's primary responsibility
  * is figuring out what types of {@link OpDispenser}s to create based
  * on the op templates provided by users. Once the activity is initialized,
@@ -29,7 +36,7 @@ import java.util.function.LongFunction;
  * <h2>Implementation Strategy</h2>
  * <p>OpDispenser implementations are intended to be implemented
  * for each type of distinct operation that is supported by a
- * {@link io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter}.
+ * DriverAdapter.
  * That is not to say that an OpDispenser can't be responsible for
  * producing multiple types of operations. Operations which are similar
  * in what they need and how they are constructed make sense to be implemented
@@ -43,7 +50,7 @@ import java.util.function.LongFunction;
  *            to hold all the details for executing an operation,
  *            something that implements {@link Runnable}.
  */
-public interface OpDispenser<T> extends LongFunction<T> {
+public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
 
     /**
      * The apply method in an op dispenser should do all the work of
@@ -56,6 +63,6 @@ public interface OpDispenser<T> extends LongFunction<T> {
      *              generated op fields to be bound into an operation.
      * @return an executable operation
      */
-    @Override
+
     T apply(long value);
 }

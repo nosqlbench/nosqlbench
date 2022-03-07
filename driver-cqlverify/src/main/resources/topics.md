@@ -1,2 +1,0 @@
-# cqlverify help topics
-- cqlverify

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * <p>If an element contains a property named <i>name</i>, then the value of this property
  * is taken as the name of the element. This is useful in certain contexts when you
  * need to define a name at the source of a configuration element but expose it
- * to readers. This means that an element can be positioned with a hierarchic structure
+ * to readers. This means that an element can be positioned within a hierarchic structure
  * simply by naming it appropriately.</p>
  * <hr/>
  *
@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
  *
  * <H2>Single-Element View</H2>
  *
- * <p>The <i>one element access</i> interface is mean to provide basic support for
+ * <p>The <i>one element access</i> interface is meant to provide basic support for
  * parameterizing a single entity. The names of the parameters surfaced at the
  * top level should map directly to the names of properties as provided by the
  * underlying data source. This is irrespective of whatever other structure may
@@ -69,11 +69,26 @@ import java.util.stream.Collectors;
  * names of the configuration object are available under the same top-level names
  * within the one element interface.</p>
  * <br/>
- * <p>As data sources can provide either one or many style results, it is important
- * that each data source provide a clear explanation about how it distinguishes
- * reading a single element vs reading (possibly) multiple elements.</p>
+ *
+ * <H2>Avoiding Ambiguity</H2>
+ * <p>As data sources may provide either one or many style results, and the consumption
+ * patterns of these are different, a distinction must be made by each data source
+ * that is faithful to users' expectations. In other words, it must be clear to users
+ * when a single entity is being configured and when multiple entities are being configured.
+ * Take for example, configuration of a single user's preferences. In this case, you would have
+ * a set of preferences each with a name. The user providing the configuration values <EM>AND</EM>
+ * the developer who writes code to consume these values must both agree that they are configuring
+ * <EM>A set of named preference values for a single user entity.</EM> However, if you were intending
+ * to read the configuration values for a set of users, each with their own set of configuration values,
+ * then as before, it must be clear to the user providing the values as well as the developer writing
+ * code to consume these values that they are communicating <em>A set of user preferences objects,
+ * each consisting of a set of named user preference values.</em>. If the programmer were to read a
+ * single preference object as a set of preferences for many users, a logical error would occur, at least.
+ * Likewise, reading a named set of preferences objects as a single preference object would cause a logical
+ * error.</p>
+ *
  * <br/>
- * <p>When explicitly reading a single element, the underlying data source must provide
+ * <p>When explicitly reading a configuration source as a single element, the underlying data source must provide
  * exactly one element <EM>OR</EM> provide a series of elements of which some contain
  * <i>name</i> properties. Non-distinct names are allowed, although the last element
  * for a given name will be the only one visible to readers. It is an error for the

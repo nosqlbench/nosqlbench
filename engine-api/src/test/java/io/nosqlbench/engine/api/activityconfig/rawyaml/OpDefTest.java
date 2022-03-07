@@ -22,9 +22,9 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import org.junit.jupiter.api.Test;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -105,8 +105,9 @@ public class OpDefTest {
         assertThat(block1.getOps()).hasSize(2);
         OpTemplate op0 = block1.getOps().get(0);
         assertThat(op0.getName()).isEqualTo("map-of-maps--block0--s3");
-        assertThat(op0.getParams()).hasSize(2);
-        assertThat(op0.getParams()).containsAllEntriesOf(Map.of("p1", "v7", "p2", "v8"));
+        assertThat(op0.getOp()).contains(Map.of("p1","v7","p2","v8"));
+        assertThat(op0.getParams()).hasSize(0);
+        assertThat(op0.getParams()).hasSize(0);
         OpTemplate op1 = block1.getOps().get(1);
         assertThat(op1.getParams()).containsAllEntriesOf(Map.of());
         assertThat(op1.getName()).isEqualTo("map-of-maps--block0--s2");
@@ -141,7 +142,7 @@ public class OpDefTest {
         System.out.println(op0.getParams());
 
         assertThat(op0.getName()).isEqualTo("list-of-named-map--block1--s1");
-        assertThat(op0.getOp()).isNull();
+        assertThat(op0.getOp()).contains(Map.of("p1","v1","p2","v2"));
 //        System.out.println("here");
         // TODO: This needs to be clarified and the logic made less ambiguous
 //        assertThat(op0.getParams()).hasSize(1);

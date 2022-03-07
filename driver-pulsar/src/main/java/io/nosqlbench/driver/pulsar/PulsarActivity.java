@@ -67,7 +67,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
     private Schema<?> pulsarSchema;
 
     private NBErrorHandler errorHandler;
-    private OpSequence<OpDispenser<PulsarOp>> sequencer;
+    private OpSequence<OpDispenser<? extends PulsarOp>> sequencer;
     private volatile Throwable asyncOperationFailure;
     private boolean cycleratePerThread;
 
@@ -152,7 +152,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
 
     public NBErrorHandler getErrorHandler() { return errorHandler; }
 
-    public OpSequence<OpDispenser<PulsarOp>> getSequencer() { return sequencer; }
+    public OpSequence<OpDispenser<? extends PulsarOp>> getSequencer() { return sequencer; }
 
     public void failOnAsyncOperationFailure() {
         if (asyncOperationFailure != null) {

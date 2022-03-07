@@ -84,7 +84,7 @@ public class VirtData {
         flowSpec = CompatibilityFixups.fixup(flowSpec);
         VirtDataDSL.ParseResult parseResult = VirtDataDSL.parse(flowSpec);
         if (parseResult.throwable != null) {
-            throw new RuntimeException(parseResult.throwable);
+            throw new RuntimeException("Error while parsing binding specification '" + flowSpec +"': "+ parseResult.throwable);
         }
         VirtDataFlow flow = parseResult.flow;
         VirtDataComposer composer = new VirtDataComposer();

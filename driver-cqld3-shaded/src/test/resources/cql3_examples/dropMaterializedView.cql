@@ -1,1 +1,0 @@
-DROP MATERIALIZED VIEW cycling.cyclist_by_age;

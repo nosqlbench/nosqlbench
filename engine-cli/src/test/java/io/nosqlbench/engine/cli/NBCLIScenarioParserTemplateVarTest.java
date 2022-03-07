@@ -38,8 +38,16 @@ public class NBCLIScenarioParserTemplateVarTest {
         OpTemplate optpl1 = workload1.getStmts().get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} overridden overridden\n");
+    }
 
-
+    @Test
+    public void testThatAdditionalCLIParamIsAdded() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example-scenarios-templatevars", "tvar3=tval3"});
+        List<Cmd> cmds = opts.getCommands();
+        cmds.forEach(System.out::println);
+        assertThat(cmds).hasSize(2);
+        assertThat(cmds.get(0).getParams().get("tvar3")).isEqualTo("tval3");
+        assertThat(cmds.get(1).getParams().get("tvar3")).isEqualTo("tval3");
     }
 
 }

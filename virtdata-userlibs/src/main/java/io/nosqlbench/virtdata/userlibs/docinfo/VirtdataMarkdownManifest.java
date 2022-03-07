@@ -1,11 +1,11 @@
 package io.nosqlbench.virtdata.userlibs.docinfo;
 
-import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.docsys.api.Docs;
-import io.nosqlbench.docsys.api.DocsBinder;
+import io.nosqlbench.docapi.Docs;
+import io.nosqlbench.docapi.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;
+import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = DocsysDynamicManifest.class, selector = "virtdata-docs")
+@Service(value= DocsysDynamicManifest.class, selector="virtdata-docs")
 public class VirtdataMarkdownManifest implements DocsysDynamicManifest {
 
     public DocsBinder getDocs() {

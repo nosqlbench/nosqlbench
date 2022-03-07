@@ -1,1 +1,0 @@
-ALTER ROLE coach WITH PASSWORD='bestTeam';

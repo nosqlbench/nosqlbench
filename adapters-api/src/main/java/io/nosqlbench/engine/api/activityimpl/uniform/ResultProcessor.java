@@ -28,4 +28,5 @@ public interface ResultProcessor<C,E> {
      * ResultProcessors which need to see all the data can finish processing here.
      */
     void flush();
+
 }

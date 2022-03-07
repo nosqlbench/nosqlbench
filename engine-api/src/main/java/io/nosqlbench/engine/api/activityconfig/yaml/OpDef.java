@@ -54,7 +54,7 @@ public class OpDef extends OpTemplate {
     public Optional<Map<String, Object>> getOp() {
         Object op = rawStmtDef.getOp();
         if (op == null) {
-            return null;
+            return Optional.empty();
         }
         HashMap<String, Object> newmap = new LinkedHashMap<>();
         if (op instanceof Map) {

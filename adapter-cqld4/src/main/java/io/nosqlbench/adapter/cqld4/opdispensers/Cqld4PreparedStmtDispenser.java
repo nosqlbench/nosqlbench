@@ -3,46 +3,59 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import io.nosqlbench.adapter.cqld4.Cqld4Op;
-import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser implements OpDispenser<Cqld4Op> {
+public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
 
-    private final CqlSession session;
-
-    private final LongFunction<Object[]> varbinder;
-    private final PreparedStatement preparedStmt;
-    private final int maxpages;
-    private final boolean retryreplace;
-    private final Cqld4OpMetrics metrics;
     private final RSProcessors processors;
+    private final LongFunction<Statement> stmtFunc;
+    private final ParsedTemplate stmtTpl;
+    private PreparedStatement preparedStmt;
+    private CqlSession boundSession;
 
-    public Cqld4PreparedStmtDispenser(CqlSession session, ParsedOp cmd, RSProcessors processors) {
-        this.session = session;
+    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd, ParsedTemplate stmtTpl, RSProcessors processors) {
+        super(sessionFunc, cmd);
+        if (cmd.isDynamic("space")) {
+            throw new RuntimeException("Prepared statements and dynamic space values are not supported." +
+                " This would churn the prepared statement cache, defeating the purpose of prepared statements.");
+        }
         this.processors = processors;
+        this.stmtTpl = stmtTpl;
+        stmtFunc = createStmtFunc(cmd);
+    }
 
-        ParsedTemplate parsed = cmd.getStmtAsTemplate().orElseThrow();
-        varbinder = cmd.newArrayBinderFromBindPoints(parsed.getBindPoints());
+    protected LongFunction<Statement> createStmtFunc(ParsedOp cmd) {
 
-        String preparedQueryString = parsed.getPositionalStatement(s -> "?");
-        preparedStmt = session.prepare(preparedQueryString);
+        LongFunction<Object[]> varbinder;
+        varbinder = cmd.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
+        boundSession = getSessionFunc().apply(0);
+        preparedStmt = boundSession.prepare(preparedQueryString);
 
-        this.maxpages = cmd.getStaticConfigOr("maxpages",1);
-        this.retryreplace = cmd.getStaticConfigOr("retryreplace", false);
-        this.metrics = new Cqld4OpMetrics();
+        LongFunction<Statement> boundStmtFunc = c -> {
+            Object[] apply = varbinder.apply(c);
+            return preparedStmt.bind(apply);
+        };
+        return super.getEnhancedStmtFunc(boundStmtFunc, cmd);
     }
 
     @Override
-    public Cqld4Op apply(long value) {
-        Object[] parameters = varbinder.apply(value);
-        BoundStatement stmt = preparedStmt.bind(parameters);
-        return new Cqld4PreparedStatement(session, stmt, maxpages, retryreplace, metrics, processors);
+    public Cqld4CqlOp apply(long value) {
+
+        return new Cqld4CqlPreparedStatement(
+            boundSession,
+            (BoundStatement) stmtFunc.apply(value),
+            getMaxPages(),
+            isRetryReplace(),
+            processors
+        );
     }
+
 }

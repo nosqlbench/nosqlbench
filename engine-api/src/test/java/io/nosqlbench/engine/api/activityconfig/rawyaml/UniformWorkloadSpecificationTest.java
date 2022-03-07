@@ -75,6 +75,15 @@ public class UniformWorkloadSpecificationTest {
     }
 
     @Test
+    public void testTemplatedOperationVariations() {
+        testSpecPath(
+            NBIO.fs().prefix("target/classes/workload_definition/")
+                .name("templated_operation_variations.md")
+                .one().asPath()
+        );
+    }
+
+    @Test
     public void testTemplateVariables() {
         testSpecPath(
             NBIO.fs().prefix("target/classes/workload_definition/")
@@ -331,7 +340,7 @@ public class UniformWorkloadSpecificationTest {
 
         try {
             List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
-            JsonElement elem = parser.parse(json);
+            JsonElement elem = JsonParser.parseString(json);
             if (elem.isJsonArray()) {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();

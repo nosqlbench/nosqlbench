@@ -419,20 +419,20 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @param <O>
      * @return
      */
-    protected <O extends Op> OpSequence<OpDispenser<O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
+    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
-        Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
+        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
         return createOpSequence(opTemplateOFunction);
     }
 
-    protected <O extends Op> OpSequence<OpDispenser<O>> createOpSourceFromCommands(
-        Function<ParsedOp, OpDispenser<O>> opinit,
+    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
+        Function<ParsedOp, OpDispenser<? extends O>> opinit,
         NBConfiguration cfg,
         List<Function<Map<String, Object>, Map<String, Object>>> parsers
     ) {
         Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
-        Function<OpTemplate, OpDispenser<O>> opTemplateOFunction = f.andThen(opinit);
+        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
         return createOpSequence(opTemplateOFunction);
     }
 
@@ -459,14 +459,14 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<O>> createOpSequence(Function<OpTemplate, OpDispenser<O>> opinit) {
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        StrInterpolator interp = new StrInterpolator(activityDef);
+//        StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
             .getOptionalString("seq")
             .map(SequencerType::valueOf)
             .orElse(SequencerType.bucket);
-        SequencePlanner<OpDispenser<O>> planner = new SequencePlanner<>(sequencerType);
+        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
         StmtsDocList stmtsDocList = null;
 
@@ -500,11 +500,11 @@ public class SimpleActivity implements Activity, ProgressCapable {
             for (int i = 0; i < stmts.size(); i++) {
                 long ratio = ratios.get(i);
                 OpTemplate optemplate = stmts.get(i);
-                OpDispenser<O> driverSpecificReadyOp = opinit.apply(optemplate);
+                OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
                 planner.addOp(driverSpecificReadyOp, ratio);
             }
         } catch (Exception e) {
-            throw new OpConfigError("error while configuring op",workloadSource,e);
+            throw new OpConfigError(e.getMessage(),workloadSource,e);
         }
 
         return planner.resolve();

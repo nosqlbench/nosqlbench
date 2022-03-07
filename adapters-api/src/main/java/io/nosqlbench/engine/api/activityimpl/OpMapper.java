@@ -53,7 +53,7 @@ import java.util.function.Function;
  * rules provided to the user. Conversely, the driver maintainer should take care to provide
  * rules of construction and examples in the documentation.
  * Each {@link io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter} has a unique
- * name, just as with {@link io.nosqlbench.engine.api.activityapi.core.ActivityType}s. The documentation
+ * name. The documentation
  * for each of these should be kept in the bundled resources in a top-level markdown file that
  * matches the driver name.
  * </p>
@@ -62,7 +62,7 @@ import java.util.function.Function;
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<T extends Op> extends Function<ParsedOp, OpDispenser<T>> {
+public interface OpMapper<T extends Op> extends Function<ParsedOp, OpDispenser<? extends T>> {
 
     /**
      * Interrogate the parsed command, and provide a new
@@ -73,5 +73,5 @@ public interface OpMapper<T extends Op> extends Function<ParsedOp, OpDispenser<T
      * @return An OpDispenser which can be used to synthesize real operations.
      */
     @Override
-    OpDispenser<T> apply(ParsedOp cmd);
+    OpDispenser<? extends T> apply(ParsedOp cmd);
 }

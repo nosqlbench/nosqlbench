@@ -1,5 +1,6 @@
 package io.nosqlbench.nb.api.config.standard;
 
+import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.math.BigDecimal;
@@ -22,6 +23,17 @@ public class ConfigModel implements NBConfigModel {
 
     public static ConfigModel of(Class<?> ofType, Param<?>... params) {
         return new ConfigModel(ofType, params);
+    }
+    public static ConfigModel of(Class<?> ofType) {
+        return new ConfigModel(ofType);
+    }
+
+    public static NBConfiguration defacto(ActivityDef def) {
+        ConfigModel configModel = new ConfigModel(Object.class);
+        for (Map.Entry<String, Object> entry : def.getParams().entrySet()) {
+            configModel.add(Param.defaultTo(entry.getKey(),entry.getValue().toString()));
+        }
+        return configModel.apply(def.getParams());
     }
 
     public <T> ConfigModel add(Param<T> param) {
@@ -115,9 +127,11 @@ public class ConfigModel implements NBConfigModel {
         LinkedHashMap<String, Object> extracted = new LinkedHashMap<>();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (getNamedParams().containsKey(providedCfgField)) {
-                extracted.put(providedCfgField, sharedConfig.remove(providedCfgField));
+                extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }
+        extracted.keySet().forEach(sharedConfig::remove);
+
         return new NBConfiguration(this, extracted);
     }
 
@@ -158,7 +172,11 @@ public class ConfigModel implements NBConfigModel {
                     break;
                 }
             }
+            if (activename==null) {
+                activename = param.getNames().get(0);
+            }
             if (cval == null && param.isRequired()) {
+                activename = param.getNames().get(0);
                 cval = param.getDefaultValue();  // We know this will be valid. It was validated, correct?
             }
             if (cval != null) {

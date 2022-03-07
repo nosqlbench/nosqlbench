@@ -1,7 +1,5 @@
 package io.nosqlbench.nb.api.markdown.types;
 
-import io.nosqlbench.nb.api.markdown.aggregator.CompositeMarkdownInfo;
-import io.nosqlbench.nb.api.markdown.types.FrontMatterInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;

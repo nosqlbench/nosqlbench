@@ -6,12 +6,13 @@ import io.nosqlbench.engine.api.templating.CommandTemplate;
 
 import java.util.Map;
 
-public class DiagRunnableOpDispenser<O extends Runnable> implements OpDispenser<Runnable> {
+public class DiagRunnableOpDispenser<O extends Runnable> extends BaseOpDispenser<Runnable> {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final CommandTemplate cmdTpl;
 
     public DiagRunnableOpDispenser(CommandTemplate commandTemplate) {
+        super(commandTemplate);
         this.cmdTpl = commandTemplate;
     }
 

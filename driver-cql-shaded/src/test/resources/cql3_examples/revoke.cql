@@ -1,6 +1,0 @@
-REVOKE SELECT 
-ON cycling.name 
-FROM manager;
-REVOKE ALTER 
-ON ALL ROLES 
-FROM coach;

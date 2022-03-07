@@ -17,6 +17,7 @@
 
 package io.nosqlbench.nb.api.spi;
 
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,22 +30,37 @@ public class SimpleServiceLoader<T> {
 
     private static final Logger logger = LogManager.getLogger("SERVICESAPI");
     private final Class<? extends T> serviceType;
+    private Maturity maturity = Maturity.Unspecified;
 
-    public SimpleServiceLoader(Class<? extends T> serviceType) {
+    public SimpleServiceLoader(Class<? extends T> serviceType, Maturity maturity) {
         this.serviceType = serviceType;
+        this.maturity = maturity;
+    }
+
+    public SimpleServiceLoader setMaturity(Maturity maturity) {
+        this.maturity = maturity;
+        return this;
     }
 
     public Optional<T> get(String implName) {
-        LinkedHashMap<String, ServiceLoader.Provider<? extends T>> namedProviders = getNamedProviders();
-        ServiceLoader.Provider<? extends T> providers = namedProviders.get(implName);
-        return Optional.ofNullable(providers == null ? null : providers.get());
+        List<Component<? extends T>> namedProviders = getNamedProviders();
+        if (namedProviders == null) {
+            return Optional.empty();
+        }
+        List<Component<? extends T>> components = namedProviders.stream().filter(n -> n.selector.equals(implName)).toList();
+        if (components.size() > 1) {
+            throw new RuntimeException("Found multiple components matching '" + implName + "',");
+        }
+        if (components.size() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(components.get(0).provider.get());
     }
 
     public T getOrThrow(String implName) {
         Optional<T> t = get(implName);
         return t.orElseThrow(
-            () -> new RuntimeException(serviceType.getSimpleName() + " '" + implName + "' not found. Available types:" +
-                this.getNamedProviders().keySet().stream().collect(Collectors.joining(",")))
+            () -> new RuntimeException(serviceType.getSimpleName() + " '" + implName + "' not found. Available types:" + getNamedProviders())
         );
     }
 
@@ -62,12 +78,13 @@ public class SimpleServiceLoader<T> {
      *                 {@link Service} annotation.
      * @return A map of providers of T
      */
-    public synchronized LinkedHashMap<String, ServiceLoader.Provider<? extends T>> getNamedProviders(Pattern... includes) {
+    public synchronized List<Component<? extends T>> getNamedProviders(String... includes) {
         ServiceLoader<? extends T> loader = ServiceLoader.load(serviceType);
-        List<Pattern> patterns = (includes != null && includes.length > 0) ? Arrays.asList(includes) : List.of(Pattern.compile(".*"));
+        List<String> defaultedPatterns = (includes != null && includes.length > 0) ? Arrays.asList(includes) : List.of(".*");
+        List<Pattern> qualifiedPatterns = defaultedPatterns.stream()
+            .map(Pattern::compile).collect(Collectors.toList());
 
-        LinkedHashMap<String, ServiceLoader.Provider<? extends T>> providers;
-        providers = new LinkedHashMap<>();
+        List<Component<? extends T>> components = new ArrayList<>();
 
         loader.stream().forEach(provider -> {
             logger.trace("loading provider: " + provider.type());
@@ -79,18 +96,43 @@ public class SimpleServiceLoader<T> {
                 );
             }
             Service service = type.getAnnotation(Service.class);
-            for (Pattern pattern : patterns) {
+            for (Pattern pattern : qualifiedPatterns) {
                 if (pattern.matcher(service.selector()).matches()) {
-                    providers.put(service.selector(), provider);
+                    components.add(new Component(service.selector(), provider, service.maturity()));
                     break;
                 }
             }
         });
 
-        return providers;
+        return components;
     }
 
-    public List<String> getAllSelectors(Pattern... patterns) {
-        return new ArrayList<>(getNamedProviders(patterns).keySet());
+
+    public final static class Component<T> {
+
+        public final String selector;
+        public final ServiceLoader.Provider<? extends T> provider;
+        public final Maturity maturity;
+
+        public Component(String selector, ServiceLoader.Provider<? extends T> provider, Maturity maturity) {
+            this.selector = selector;
+            this.provider = provider;
+            this.maturity = maturity;
+        }
+
+        @Override
+        public String toString() {
+            return "Component{" +
+                selector + " (" + maturity + ")";
+        }
+    }
+
+
+    public Map<String, Maturity> getAllSelectors(String... patterns) {
+        LinkedHashMap<String, Maturity> map = new LinkedHashMap<>();
+        for (Component<? extends T> namedProvider : getNamedProviders(patterns)) {
+            map.put(namedProvider.selector, namedProvider.maturity);
+        }
+        return map;
     }
 }

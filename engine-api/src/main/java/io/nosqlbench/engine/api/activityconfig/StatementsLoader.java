@@ -89,9 +89,9 @@ public class StatementsLoader {
 
 
     public static StmtsDocList loadPath(
-        Logger logger,
-        String path,
-        String... searchPaths) {
+            Logger logger,
+            String path,
+            String... searchPaths) {
         return loadPath(logger, path, Map.of(), searchPaths);
     }
 

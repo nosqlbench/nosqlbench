@@ -112,9 +112,9 @@ public class StrInterpolator implements Function<String, String> {
 
             value = (value != null) ? value : warnPrefix + ":" + key;
 
-            accesses.put(key,value);
 //            if (accesses.containsKey(key) && !accesses.get(key).equals(value)) {
-//                logger.warn("A templated variable '" + key + "' was found with multiple default values.");
+//                throw new OpConfigError("A templated variable '" + key + "' was found with multiple default values: '" + accesses.get(key) + ", and " + value +". This is not allowed." +
+//                    " Template variables must resolve to a single value.");
 //            }
 
             accesses.put(key,value);
@@ -125,7 +125,7 @@ public class StrInterpolator implements Function<String, String> {
 
         public Map<String,String> checkpointAccesses() {
             LinkedHashMap<String,String> accesses = new LinkedHashMap<>(this.accesses);
-            logger.info("removed template params after applying:" + accesses);
+            logger.debug("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;
 

@@ -1,7 +1,7 @@
 package io.nosqlbench.activitytype.cmds;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.nb.api.errors.BasicError;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class ReadyHttpOp implements OpDispenser<HttpOp> {
+public class ReadyHttpOp extends BaseOpDispenser<HttpOp> {
 
     private final CommandTemplate propertyTemplate;
     public static final String DEFAULT_OK_BODY = ".+?";
@@ -26,6 +26,7 @@ public class ReadyHttpOp implements OpDispenser<HttpOp> {
     private final HttpOp cachedOp;
 
     public ReadyHttpOp(OpTemplate stmtDef) {
+        super(stmtDef);
         propertyTemplate = new CommandTemplate(stmtDef,
             List.of(
                 HttpFormatParser::parseUrl,

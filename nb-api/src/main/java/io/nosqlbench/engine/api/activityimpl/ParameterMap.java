@@ -201,7 +201,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     @Override
     public Object remove(Object key) {
         Object removed = super.remove(key);
-        logger.info("removing param: " + key);
+        logger.trace("removing param: " + key);
 
         markMutation();
         return removed;

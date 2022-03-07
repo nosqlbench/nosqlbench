@@ -70,12 +70,7 @@ public class KafkaProducerActivity extends SimpleActivity {
         SequencePlanner<KafkaStatement> sequencer = new SequencePlanner<>(sequencerType);
 
         String tagFilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        StmtsDocList stmtsDocList = StatementsLoader.loadPath(
-            logger,
-            yamlLoc,
-            activityDef.getParams(),
-            "activities"
-        );
+        StmtsDocList stmtsDocList = StatementsLoader.loadPath(logger, yamlLoc, activityDef.getParams(), "activities");
         List<OpTemplate> statements = stmtsDocList.getStmts(tagFilter);
 
         String format = getParams().getOptionalString("format").orElse(null);

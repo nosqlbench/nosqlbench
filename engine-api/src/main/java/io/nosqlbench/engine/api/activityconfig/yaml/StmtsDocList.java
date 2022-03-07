@@ -123,7 +123,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     public NBConfigModel getConfigModel() {
         ConfigModel cfgmodel = ConfigModel.of(StmtsDocList.class);
         getTemplateVariables().forEach((k,v) -> {
-            cfgmodel.add(Param.defaultTo(k,"template parameter found in the yaml workload"));
+            cfgmodel.add(Param.defaultTo(k,v,"template parameter found in the yaml workload"));
         });
         return cfgmodel.asReadOnly();
     }

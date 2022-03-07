@@ -8,8 +8,6 @@ import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.PerThreadMapper;
@@ -26,7 +24,7 @@ import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.ThreadSa
  * enumerate candidate functions without requiring them to have a no-args constructor.
  */
 @SupportedOptions({"title"})
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedAnnotationTypes({
         ThreadSafeMapper,
         PerThreadMapper

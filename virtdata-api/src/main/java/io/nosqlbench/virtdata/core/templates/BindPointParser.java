@@ -33,6 +33,7 @@ public class BindPointParser implements BiFunction<String, Map<String, String>, 
         List<String> spans = new ArrayList<>();
         List<BindPoint> bindpoints = new ArrayList<>();
 
+        int genid=0;
         while (m.find()) {
             String pre = template.substring(lastMatch, m.start());
             spans.add(pre);
@@ -67,6 +68,9 @@ public class BindPointParser implements BiFunction<String, Map<String, String>, 
             this.bindpoints = bindpoints;
         }
 
+        /**
+         * @return the spans of literal values which are between the bind points
+         */
         public List<String> getSpans() {
             return spans;
         }

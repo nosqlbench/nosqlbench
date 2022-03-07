@@ -107,6 +107,9 @@ public class NBTypeSafeConversions implements NBTypeConverters {
         return Float.parseFloat(in);
     }
 
+    public static boolean to_boolean(String in) {
+        return Boolean.parseBoolean(in);
+    }
 
 }
 

@@ -1,0 +1,54 @@
+description: |
+  A workload with only text keys and text values. This is based on the CQL keyvalue workloads as found
+  in cql-keyvalue2.yaml.
+
+scenarios:
+  default:
+    schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=dynamodb tags=='block:main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main-read: run driver=dynamodb tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main-write: run driver=dynamodb tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+bindings:
+  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+
+blocks:
+  schema:
+    ops:
+      create-table:
+        CreateTable: TEMPLATE(table,keyvalue)
+        Keys:
+          partkey: HASH
+        Attributes:
+          partkey: S
+        BillingMode: PROVISIONED
+        ReadCapacityUnits: "TEMPLATE(rcus,40000)"
+        WriteCapacityUnits: "TEMPLATE(wcus,40000)"
+  rampup:
+    ops:
+      rampup-putitem:
+        PutItem: TEMPLATE(table,keyvalue)
+        json: |
+          {
+           "partkey": "{seq_key}",
+           "value": "{seq_value}"
+          }
+  main-write:
+    ops:
+      main-putitem:
+        PutItem: TEMPLATE(table,keyvalue)
+        json: |
+          {
+           "partkey": "{rw_key}",
+           "value": "{rw_value}"
+          }
+  main-read:
+    ops:
+      main-getitem:
+        GetItem: TEMPLATE(table,keyvalue)
+        key:
+          partkey: "{rw_key}"

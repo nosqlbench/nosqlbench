@@ -18,14 +18,18 @@
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.*;
 
+/**
+ * See specification for what this should do in UniformWorkloadSpecificationTest
+ */
 public class RawStmtDef extends RawStmtFields {
 
     private Object op;
 
-    private final static List<String> opNames = List.of("stmt","statement","op","operation");
+    private final static List<String> opFieldSynonyms = List.of("stmt", "statement", "op", "operation");
 
     public RawStmtDef() {
     }
@@ -37,64 +41,50 @@ public class RawStmtDef extends RawStmtFields {
 
     @SuppressWarnings("unchecked")
     public RawStmtDef(String defaultName, Map<String, Object> map) {
+        setFieldsByReflection(map);
+        if (this.getName() == null || this.getName().isEmpty()) {
+            this.setName(defaultName);
+        }
+    }
+
+    public void setFieldsByReflection(Map<String, Object> map) {
+        checkForUnintendedJsonMap(map, new ArrayList<>());
+        super.setFieldsByReflection(map);
+
         HashSet<String> found = new HashSet<>();
-        for (String opName : opNames) {
+        for (String opName : opFieldSynonyms) {
             if (map.containsKey(opName)) {
                 found.add(opName);
             }
         }
-        if (found.size()>1) {
-            throw new BasicError("You used " + found + " as an op name, but only one of these is allowed.");
-        }
-        if (found.size()==1) {
+        if (found.size() == 1) {
             Object op = map.remove(found.iterator().next());
-            this.setOp(op);
+            setOp(op);
+        } else if (found.size() > 1) {
+            throw new BasicError("You used " + found + " as an op name, but only one of these is allowed at a time.");
+        } else if ((getName() == null || getName().isEmpty()) && op == null && map.size() > 0) {
+            Map.Entry<String, Object> first = map.entrySet().iterator().next();
+            setName(first.getKey());
+            setOp(first.getValue());
+            map.remove(first.getKey());
         }
+        boolean _params = !getParams().isEmpty();
+        boolean _op = op != null;
 
-        Optional.ofNullable((String) map.remove("name")).ifPresent(this::setName);
-        Optional.ofNullable((String) map.remove("desc")).ifPresent(this::setDesc);
-        Optional.ofNullable((String) map.remove("description")).ifPresent(this::setDesc);
-
-        Optional.ofNullable((Map<String, String>) map.remove("tags")).ifPresent(this::setTags);
-        Optional.ofNullable((Map<String, String>) map.remove("bindings")).ifPresent(this::setBindings);
-        Optional.ofNullable((Map<String, Object>) map.remove("params")).ifPresent(this::setParams);
-
-
-        // Depends on order stability, relying on LinkedHashMap -- Needs stability unit tests
-        if (this.op == null) {
-            Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
-            if (!iterator.hasNext()) {
-                throw new RuntimeException("undefined-name-statement-tuple:" +
-                        " The statement is not set, and no statements remain to pull 'name: statement' values from." +
-                        " For more details on this error see " +
-                        "the troubleshooting section of the YAML format" +
-                        " docs for undefined-name-statement-tuple");
+        if (_op) {
+            if (_params) {
+                if (map.size() > 0) {
+                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields.");
+                }
+            } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params
+                getParams().putAll(map);
+                map.clear();
             }
-            Map.Entry<String, Object> firstEntry = iterator.next();
-            if (firstEntry.getValue() instanceof Map && map.size()==1) {
-                Map values = (Map) firstEntry.getValue();
-                setFieldsByReflection(values);
-                map = values;
-            } else if (firstEntry.getValue() instanceof CharSequence) {
-                setStmt(((CharSequence) firstEntry.getValue()).toString());
-            }
-            if (getName().isEmpty()) {
-                map.remove(firstEntry.getKey());
-                setName(firstEntry.getKey());
-            }
-            // TODO: Add explicit check condition for this error
-//            else {
-//                throw new RuntimeException("redefined-name-in-statement-tuple: Statement name has already been set by name parameter. Remove the name parameter for a statement definition map." +
-//                        " For more details on this error see " +
-//                        "the troubleshooting section in the " +
-//                        "YAML format docs for redefined-name-statement-tuple");
-//            }
+        } else { // no op, so assume all remaining fields belong to the op
+            LinkedHashMap<String, Object> newop = new LinkedHashMap<>(map);
+            setOp(newop);
+            map.clear();
         }
-        if (getName().isEmpty()) {
-            setName(defaultName);
-        }
-
-        map.forEach((key, value) -> getParams().put(key, value));
     }
 
     private void setOp(Object op) {
@@ -119,9 +109,28 @@ public class RawStmtDef extends RawStmtFields {
 
     public String getName() {
         Object name = getParams().get("name");
-        if (name!=null) {
+        if (name != null) {
             return name.toString();
         }
         return super.getName();
     }
+
+    private void checkForUnintendedJsonMap(Object m, List<String> path) {
+        if (m instanceof Map) {
+            ((Map)m).forEach((k,v) -> {
+                if (v == null) {
+                    throw new OpConfigError("A map key '" + k.toString() + "' with a null value was encountered. This is not" +
+                        " allowed, and may be the result of using an unquoted binding, like {" + k + "}. You can simply wrap this in quotes" +
+                        " like \"{"+ k +"\"} to avoid interpreting this as a JSON map." +
+                        (path.size()>0 ? String.join(".",path):""));
+                } else {
+                    if (v instanceof Map) {
+                        path.add(k.toString());
+                        checkForUnintendedJsonMap(v, path);
+                    }
+                }
+            });
+        }
+    }
+
 }

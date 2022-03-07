@@ -1,16 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.81-SNAPSHOT</version>
+        <version>4.17.10-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>driver-cqld4</artifactId>
+    <artifactId>adapter-cqld4</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
@@ -21,56 +19,59 @@
     <dependencies>
 
         <!-- core dependencies -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-core</artifactId>
+            <version>3.4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>tinkergraph-gremlin</artifactId>
+            <version>3.4.12</version>
+        </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.81-SNAPSHOT</version>
+            <version>4.17.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-            <version>4.15.81-SNAPSHOT</version>
+            <version>4.17.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-basics</artifactId>
-            <version>4.15.81-SNAPSHOT</version>
+            <version>4.17.10-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>java-driver-core</artifactId>
-            <version>4.12.0</version>
+            <version>4.13.0</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.datastax.oss</groupId>-->
-<!--            <artifactId>java-driver-core-shaded</artifactId>-->
-<!--            <version>4.12.0</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>java-driver-query-builder</artifactId>
-            <version>4.12.0</version>
+            <version>4.13.0</version>
         </dependency>
 
-
-<!--        &lt;!&ndash; For CQL compression option &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.lz4</groupId>-->
-<!--            <artifactId>lz4-java</artifactId>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash; For CQL compression option &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.xerial.snappy</groupId>-->
-<!--            <artifactId>snappy-java</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.7.3</version>
+        </dependency>
 
     </dependencies>
 

@@ -1,0 +1,84 @@
+# nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
+description: |
+  This workload emulates a time-series data model and access patterns. This is based on the
+  cql-timeseries2 workload. This workload does not do full temporal range scans. Like
+  the workload it is based on, it uses storage order to retrieve the most recently added
+  values up to a limit. This emulates a simplified implementation of time-series access
+  patterns which are typically used to process roll-ups in near time.
+  A canonical time-series test for general purpose query would use fully bounded range queries
+  at a variety of payload sizes (time ranges).
+
+scenarios:
+  default:
+    schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=dynamodb tags==block:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+params:
+  instrument: TEMPLATE(instrument,true)
+
+bindings:
+  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L);
+  cell_timestamp: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); Mul(1000L)
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); EscapeJSON();
+
+blocks:
+  schema:
+    ops:
+      create-table:
+        CreateTable: TEMPLATE(table,timeseries)
+        Keys:
+          machine_id_sensor_name: HASH
+          time: RANGE
+        Attributes:
+          machine_id_sensor_name: S
+          time: N
+        BillingMode: PROVISIONED
+        ReadCapacityUnits: "TEMPLATE(rcus,10000)"
+        WriteCapacityUnits: "TEMPLATE(wcus,10000)"
+        #          machine_id UUID,     // source machine
+        #          sensor_name text,    // sensor name
+        #          time timestamp,      // timestamp of collection
+        #          sensor_value double, //
+        #          station_id UUID,     // source location
+        #          data text,
+        #          PRIMARY KEY ((machine_id, sensor_name), time)
+        #          ) WITH CLUSTERING ORDER BY (time DESC)
+
+  rampup:
+    ops:
+      write-item:
+        PutItem: TEMPLATE(table,timeseries)
+        json: |
+          {
+           "machine_id_sensor_name": "{machine_id}.{sensor_name}",
+           "time": {time},
+           "sensor_value": "{sensor_value}",
+           "station_id": "{station_id}",
+           "data": "{data}"
+          }
+
+  main:
+    ops:
+      write-item:
+        PutItem: TEMPLATE(table,timeseries)
+        json: |
+          {
+           "machine_id_sensor_name": "{machine_id}.{sensor_name}",
+           "time": {time},
+           "sensor_value": "{sensor_value}",
+           "station_id": "{station_id}",
+           "data": "{data}"
+          }
+      read-item:
+        GetItem: TEMPLATE(table,timeseries)
+        key:
+          machine_id_sensor_name: "{machine_id}.{sensor_name}"
+          time: "{time}"
+        order: reverse
+        limit: 10
+

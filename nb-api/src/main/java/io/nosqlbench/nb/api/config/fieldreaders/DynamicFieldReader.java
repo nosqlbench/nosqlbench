@@ -12,7 +12,7 @@ import java.util.function.LongFunction;
  * and {@link EnvironmentReader}
  */
 public interface DynamicFieldReader {
-    boolean isDefinedDynamic(String field);
+    boolean isDynamic(String field);
 
     <T> T get(String field, long input);
 

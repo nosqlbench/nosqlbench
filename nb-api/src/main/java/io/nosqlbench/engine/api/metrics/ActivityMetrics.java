@@ -38,7 +38,7 @@ public class ActivityMetrics {
     private final static Logger logger = LogManager.getLogger(ActivityMetrics.class);
 
     public static final String HDRDIGITS_PARAM = "hdr_digits";
-    public static final int DEFAULT_HDRDIGITS= 4;
+    public static final int DEFAULT_HDRDIGITS = 4;
     private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
 
     private static MetricRegistry registry;
@@ -100,6 +100,7 @@ public class ActivityMetrics {
         return metric;
 
     }
+
     /**
      * <p>Create a timer associated with an activity.</p>
      *
@@ -110,19 +111,30 @@ public class ActivityMetrics {
      * that only one of them succeeds.</p>
      *
      * @param activityDef an associated activity def
-     * @param name     a simple, descriptive name for the timer
+     * @param name        a simple, descriptive name for the timer
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         Timer registeredTimer = (Timer) register(activityDef, name, () ->
-                new NicerTimer(fullMetricName,
-                        new DeltaHdrHistogramReservoir(
-                                fullMetricName,
-                                activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
-                        )
-                ));
+            new NicerTimer(fullMetricName,
+                new DeltaHdrHistogramReservoir(
+                    fullMetricName,
+                    activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                )
+            ));
         return registeredTimer;
+    }
+
+    public static Timer timer(String fullMetricName) {
+        NicerTimer timer = get().register(fullMetricName, new NicerTimer(
+            fullMetricName,
+            new DeltaHdrHistogramReservoir(
+                fullMetricName,
+                _HDRDIGITS
+            ))
+        );
+        return timer;
     }
 
     /**
@@ -134,21 +146,31 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     *
      * @param activityDef an associated activity def
-     * @param name     a simple, descriptive name for the histogram
+     * @param name        a simple, descriptive name for the histogram
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         return (Histogram) register(activityDef, name, () ->
-                new NicerHistogram(
-                        fullMetricName,
-                        new DeltaHdrHistogramReservoir(
-                                fullMetricName,
-                                activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
-                        )
-                ));
+            new NicerHistogram(
+                fullMetricName,
+                new DeltaHdrHistogramReservoir(
+                    fullMetricName,
+                    activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                )
+            ));
+    }
+
+    public static Histogram histogram(String fullname) {
+        NicerHistogram histogram = get().register(fullname, new NicerHistogram(
+            fullname,
+            new DeltaHdrHistogramReservoir(
+                fullname,
+                _HDRDIGITS
+            )
+        ));
+        return histogram;
     }
 
     /**
@@ -157,7 +179,7 @@ public class ActivityMetrics {
      * that only one of them succeeds.</p>
      *
      * @param activityDef an associated activity def
-     * @param name     a simple, descriptive name for the counter
+     * @param name        a simple, descriptive name for the counter
      * @return the counter, perhaps a different one if it has already been registered
      */
     public static Counter counter(ActivityDef activityDef, String name) {
@@ -170,7 +192,7 @@ public class ActivityMetrics {
      * that only one of them succeeds.</p>
      *
      * @param activityDef an associated activity def
-     * @param name     a simple, descriptive name for the meter
+     * @param name        a simple, descriptive name for the meter
      * @return the meter, perhaps a different one if it has already been registered
      */
     public static Meter meter(ActivityDef activityDef, String name) {
@@ -202,7 +224,7 @@ public class ActivityMetrics {
 
     private static MetricRegistry lookupRegistry() {
         ServiceLoader<MetricRegistryService> metricRegistryServices =
-                ServiceLoader.load(MetricRegistryService.class);
+            ServiceLoader.load(MetricRegistryService.class);
         List<MetricRegistryService> mrss = new ArrayList<>();
         metricRegistryServices.iterator().forEachRemaining(mrss::add);
 
@@ -223,21 +245,22 @@ public class ActivityMetrics {
 
     /**
      * Add a histogram interval logger to matching metrics in this JVM instance.
+     *
      * @param sessionName The name for the session to be annotated in the histogram log
-     * @param pattern A regular expression pattern to filter out metric names for logging
-     * @param filename A file to log the histogram data in
-     * @param interval How many seconds to wait between writing each interval histogram
+     * @param pattern     A regular expression pattern to filter out metric names for logging
+     * @param filename    A file to log the histogram data in
+     * @param interval    How many seconds to wait between writing each interval histogram
      */
     public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_",sessionName);
+            filename = filename.replace("_SESSION_", sessionName);
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(()->new RuntimeException("Unable to parse interval spec:'" + interval + "'"));
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:'" + interval + "'"));
 
         HistoIntervalLogger histoIntervalLogger =
-                new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
+            new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
         logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
         metricsCloseables.add(histoIntervalLogger);
@@ -245,21 +268,22 @@ public class ActivityMetrics {
 
     /**
      * Add a histogram stats logger to matching metrics in this JVM instance.
+     *
      * @param sessionName The name for the session to be annotated in the histogram log
-     * @param pattern A regular expression pattern to filter out metric names for logging
-     * @param filename A file to log the histogram data in
-     * @param interval How many seconds to wait between writing each interval histogram
+     * @param pattern     A regular expression pattern to filter out metric names for logging
+     * @param filename    A file to log the histogram data in
+     * @param interval    How many seconds to wait between writing each interval histogram
      */
     public static void addStatsLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_",sessionName);
+            filename = filename.replace("_SESSION_", sessionName);
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
         long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
 
         HistoStatsLogger histoStatsLogger =
-                new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
+            new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
         logger.debug("attaching " + histoStatsLogger + " to the metrics registry.");
         get().addListener(histoStatsLogger);
         metricsCloseables.add(histoStatsLogger);
@@ -269,22 +293,23 @@ public class ActivityMetrics {
      * Add a classic histogram in addition to the default implementation in this runtime. This is a way to
      * get a view to both the enhanced histogram implementation as well as the classic implementation in the
      * same scenario.
+     *
      * @param sessionName The name of the session to be annotated in the classic histogram
-     * @param pattern A regular expression pattern to filter out metric names for inclusion
-     * @param prefix The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
-     * @param interval How frequently to update the histogram
+     * @param pattern     A regular expression pattern to filter out metric names for inclusion
+     * @param prefix      The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
+     * @param interval    How frequently to update the histogram
      */
     public static void addClassicHistos(String sessionName, String pattern, String prefix, String interval) {
         Pattern compiledPattern = Pattern.compile(pattern);
         long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
 
         ClassicHistoListener classicHistoListener =
-                new ClassicHistoListener(get(),sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+            new ClassicHistoListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
         logger.debug("attaching histo listener " + classicHistoListener + " to the metrics registry.");
         get().addListener(classicHistoListener);
 
         ClassicTimerListener classicTimerListener =
-                new ClassicTimerListener(get(),sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+            new ClassicTimerListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
         logger.debug("attaching timer listener " + classicTimerListener + " to the metrics registry.");
         get().addListener(classicTimerListener);
     }
@@ -292,6 +317,7 @@ public class ActivityMetrics {
     /**
      * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
      * etc.
+     *
      * @param showChart whether to chart metrics on console
      */
     public static void closeMetrics(boolean showChart) {
@@ -299,7 +325,7 @@ public class ActivityMetrics {
         for (MetricsCloseable metricsCloseable : metricsCloseables) {
             logger.trace("closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
-            if (showChart){
+            if (showChart) {
                 metricsCloseable.chart();
             }
         }
@@ -312,22 +338,22 @@ public class ActivityMetrics {
     public static void reportTo(PrintStream out) {
         out.println("====================  BEGIN-METRIC-LOG  ====================");
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-                .convertDurationsTo(TimeUnit.MICROSECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(MetricFilter.ALL)
-                .outputTo(out)
-                .build();
+            .convertDurationsTo(TimeUnit.MICROSECONDS)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .filter(MetricFilter.ALL)
+            .outputTo(out)
+            .build();
         consoleReporter.report();
         out.println("====================   END-METRIC-LOG   ====================");
     }
 
     public static void mountSubRegistry(String mountPrefix, MetricRegistry subRegistry) {
-        new MetricsRegistryMount(getMetricRegistry(),subRegistry,mountPrefix);
+        new MetricsRegistryMount(getMetricRegistry(), subRegistry, mountPrefix);
     }
 
     public static void removeActivityMetrics(ActivityDef activityDef) {
-        get().getMetrics().keySet().stream().filter(s -> s.startsWith(activityDef.getAlias()+"."))
-                .forEach(get()::remove);
+        get().getMetrics().keySet().stream().filter(s -> s.startsWith(activityDef.getAlias() + "."))
+            .forEach(get()::remove);
     }
 
 }

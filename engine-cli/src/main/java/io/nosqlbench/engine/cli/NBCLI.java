@@ -1,5 +1,6 @@
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.docexporter.BundledMarkdownExporter;
 import io.nosqlbench.docsys.core.NBWebServerApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
@@ -17,6 +18,7 @@ import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
+import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.content.Content;
@@ -56,19 +58,18 @@ public class NBCLI {
 
     public NBCLI(String commandName) {
         this.commandName = commandName;
-
     }
-
 
     public static void main(String[] args) {
         try {
-            NBCLI cli = new NBCLI("eb");
+            NBCLI cli = new NBCLI("nb");
             cli.run(args);
         } catch (Exception e) {
             boolean showStackTraces = false;
             for (String arg : args) {
-                if (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces")) {
-                    showStackTraces=true;
+
+                if (arg.toLowerCase(Locale.ROOT).startsWith("-v") || (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces"))) {
+                    showStackTraces = true;
                 }
             }
 
@@ -170,6 +171,10 @@ public class NBCLI {
             annotatorsConfig = "[{type:'log',level:'info'}]";
         }
 
+        if (args.length > 0 && args[0].toLowerCase().equals("export-docs")) {
+            BundledMarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
             System.exit(0);
@@ -263,12 +268,12 @@ public class NBCLI {
         }
 
         if (options.wantsInputTypes()) {
-            InputType.FINDER.getAllSelectors().forEach(System.out::println);
+            InputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
             System.exit(0);
         }
 
         if (options.wantsMarkerTypes()) {
-            OutputType.FINDER.getAllSelectors().forEach(System.out::println);
+            OutputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
             System.exit(0);
         }
 
@@ -364,8 +369,8 @@ public class NBCLI {
             options.wantsCompileScript(),
             options.getReportSummaryTo(),
             String.join("\n", args),
-            options.getLogsDirectory()
-        );
+            options.getLogsDirectory(),
+            Maturity.Unspecified);
 
         ScriptBuffer buffer = new BasicScriptBuffer()
             .add(options.getCommands()

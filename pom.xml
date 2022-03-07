@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.89-SNAPSHOT</version>
+        <version>4.17.10-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -37,15 +37,12 @@
         <module>adapters-api</module>
 
         <!-- driver modules -->
+        <module>adapter-cqld4</module>
+        <module>adapter-dynamodb</module>
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
         <module>driver-http</module>
-        <module>driver-dsegraph-shaded</module>
-        <module>driver-cql-shaded</module>
-        <module>driver-cqld3-shaded</module>
-        <module>driver-cqlverify</module>
-        <module>driver-web</module>
         <module>driver-kafka</module>
         <module>driver-mongodb</module>
         <module>driver-jmx</module>
@@ -53,8 +50,7 @@
         <module>driver-cockroachdb</module>
         <module>driver-pulsar</module>
         <module>driver-jms</module>
-        <module>driver-grpc</module>
-<!--        <module>driver-directapi</module>-->
+
 
         <!-- VIRTDATA MODULES -->
 
@@ -65,7 +61,6 @@
         <module>virtdata-lib-random</module>
         <module>virtdata-lib-curves4</module>
         <module>virtdata-lib-realer</module>
-
         <module>virtdata-userlibs</module>
 
         <!-- Documentation -->
@@ -74,15 +69,6 @@
     </modules>
 
     <profiles>
-        <profile>
-            <id>with-cql-d4</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>adapter-cqld4</module>
-            </modules>
-        </profile>
         <profile>
             <id>with-mongodb</id>
             <activation>
@@ -150,7 +136,7 @@
             scm:git:https://github.com/nosqlbench/nosqlbench.git
         </developerConnection>
         <url>scm:git:git@github.com:nosqlbench/nosqlbench.git</url>
-        <tag>nosqlbench-4.15.81-SNAPSHOT</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>

@@ -32,7 +32,7 @@ public class JmsActivity extends SimpleActivity {
 
     private JMSContext jmsContext;
 
-    private OpSequence<OpDispenser<JmsOp>> sequence;
+    private OpSequence<OpDispenser<? extends JmsOp>> sequence;
     private volatile Throwable asyncOperationFailure;
     private NBErrorHandler errorhandler;
 
@@ -144,7 +144,7 @@ public class JmsActivity extends SimpleActivity {
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) { super.onActivityDefUpdate(activityDef); }
-    public OpSequence<OpDispenser<JmsOp>> getSequencer() { return sequence; }
+    public OpSequence<OpDispenser<? extends JmsOp>> getSequencer() { return sequence; }
 
     public String getJmsProviderType() { return jmsProviderType; }
     public JmsConnInfo getJmsConnInfo() { return jmsConnInfo; }

@@ -19,17 +19,18 @@ import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
+import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ActivityProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.PolyglotScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
-import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import io.nosqlbench.nb.annotations.Maturity;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.metadata.ScenarioMetadata;
 import io.nosqlbench.nb.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.nb.api.metadata.SystemId;
-import io.nosqlbench.nb.api.annotations.Layer;
-import io.nosqlbench.nb.api.annotations.Annotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
@@ -49,7 +50,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -58,6 +62,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private final String commandLine;
     private final String reportSummaryTo;
     private final Path logsPath;
+    private final Maturity minMaturity;
     private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
@@ -106,7 +111,8 @@ public class Scenario implements Callable<ScenarioResult> {
         boolean wantsCompiledScript,
         String reportSummaryTo,
         String commandLine,
-        Path logsPath) {
+        Path logsPath,
+        Maturity minMaturity) {
 
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
@@ -118,13 +124,15 @@ public class Scenario implements Callable<ScenarioResult> {
         this.reportSummaryTo = reportSummaryTo;
         this.commandLine = commandLine;
         this.logsPath = logsPath;
+        this.minMaturity = minMaturity;
     }
 
-    public Scenario(String name, Engine engine, String reportSummaryTo) {
+    public Scenario(String name, Engine engine, String reportSummaryTo, Maturity minMaturity) {
         this.scenarioName = name;
         this.reportSummaryTo = reportSummaryTo;
         this.engine = engine;
         this.commandLine = "";
+        this.minMaturity = minMaturity;
         this.logsPath = Path.of("logs");
     }
 
@@ -197,7 +205,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 break;
         }
 
-        scenarioController = new ScenarioController(this.scenarioName);
+        scenarioController = new ScenarioController(this.scenarioName, minMaturity);
         if (!progressInterval.equals("disabled")) {
             activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
@@ -313,7 +321,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.out.flush();
             } catch (Exception e) {
                 this.state = State.Errored;
-                logger.warn("Error in scenario, shutting down.");
+                logger.error("Error in scenario, shutting down. (" + e.toString() + ")");
                 this.scenarioController.forceStopScenario(5000, false);
                 this.error = e;
                 throw new RuntimeException(e);

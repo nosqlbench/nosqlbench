@@ -16,7 +16,8 @@ public class ReadyHttpOpTest {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: method=get uri=http://localhost/\n",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -28,7 +29,8 @@ public class ReadyHttpOpTest {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: get http://localhost/",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -40,7 +42,8 @@ public class ReadyHttpOpTest {
         StmtsDocList docs = StatementsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: get http://localhost/ HTTP/1.1",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -55,7 +58,8 @@ public class ReadyHttpOpTest {
                 "    get http://localhost/\n" +
                 "    Content-Type: application/json" +
                 "",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -70,7 +74,8 @@ public class ReadyHttpOpTest {
                 "    get http://localhost/\n" +
                 "    \n" +
                 "    body1",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         ReadyHttpOp readyReq = new ReadyHttpOp(stmtDef);
@@ -99,7 +104,8 @@ public class ReadyHttpOpTest {
                 " version: StaticString('test')\n" +
                 " header1val: StaticString('test')\n" +
                 " body: StaticString('test')\n",
-            Map.of());
+            Map.of()
+        );
         OpTemplate stmtDef = docs.getStmts().get(0);
 
         Map<String, String> parse = HttpFormatParser.parseInline(stmtDef.getStmt().orElseThrow());

@@ -274,7 +274,7 @@ ops:
     tags:
       phase: schema
     params:
-      prepated: false
+      prepared: false
     description: This is just an example operation
 ```
 
@@ -291,7 +291,7 @@ ops:
       "name": "special-op-name",
       "op": "select * from ks1.tb1;",
       "params": {
-        "prepated": false
+        "prepared": false
       },
       "tags": {
         "phase": "schema"
@@ -315,7 +315,7 @@ ops:
       "stmt": "select * from ks1.tb1;"
     },
     "params": {
-      "prepated": false
+      "prepared": false
     },
     "tags": {
       "phase": "schema",

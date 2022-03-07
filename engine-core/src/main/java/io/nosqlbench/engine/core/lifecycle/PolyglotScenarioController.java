@@ -53,7 +53,7 @@ public class PolyglotScenarioController {
         } else if (o instanceof String) {
             controller.run(timeout, o.toString());
         } else {
-            throw new RuntimeException("Uncrecognized type: " + o.getClass().getCanonicalName());
+            throw new RuntimeException("Unrecognized type: " + o.getClass().getCanonicalName());
         }
     }
 
@@ -74,10 +74,10 @@ public class PolyglotScenarioController {
             if (o instanceof ActivityDef) {
                 controller.run(timeout, (ActivityDef) o);
             } else {
-                throw new RuntimeException("unrecognized polyglot host object type for run: " + spec.toString());
+                throw new RuntimeException("unrecognized polyglot host object type for run: " + spec);
             }
         } else {
-            throw new RuntimeException("unrecognized polyglot base type for run: " + spec.toString());
+            throw new RuntimeException("unrecognized polyglot base type for run: " + spec);
         }
     }
 
@@ -102,7 +102,7 @@ public class PolyglotScenarioController {
         } else if (spec.hasMembers()) {
             controller.start(spec.as(Map.class));
         } else {
-            throw new RuntimeException("unknown base type for graal polyglot: " + spec.toString());
+            throw new RuntimeException("unknown base type for graal polyglot: " + spec);
         }
     }
 
@@ -126,7 +126,7 @@ public class PolyglotScenarioController {
         } else if (spec.hasMembers()) {
             controller.stop(spec.as(Map.class));
         } else {
-            throw new RuntimeException("unknown base type for graal polyglot: " + spec.toString());
+            throw new RuntimeException("unknown base type for graal polyglot: " + spec);
         }
     }
 
@@ -193,7 +193,7 @@ public class PolyglotScenarioController {
             controller.waitMillis(spec.asLong());
         } else {
             throw new InvalidParameterException(
-                "unable to convert polyglot type " + spec.toString() + " to a long for waitMillis");
+                "unable to convert polyglot type " + spec + " to a long for waitMillis");
         }
     }
 

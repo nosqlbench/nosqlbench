@@ -2,10 +2,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +11,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op,S>
-    implements DriverAdapter<R,S>, NBConfigurable {
+public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable {
 
-    private final DriverSpaceCache<? extends S> spaceCache;
+    private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
 
     protected BaseDriverAdapter() {
-        this.spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
     }
 
     /**
@@ -83,18 +78,11 @@ public abstract class BaseDriverAdapter<R extends Op,S>
     }
 
     @Override
-    public final DriverSpaceCache<? extends S> getSpaceCache() {
+    public synchronized final DriverSpaceCache<? extends S> getSpaceCache() {
+        if (spaceCache==null) {
+            spaceCache=new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
+        }
         return spaceCache;
-    }
-
-    /**
-     * In order to be provided with config information, it is required
-     * that the driver adapter specify the valid configuration options,
-     * their types, and so on.
-     */
-    @Override
-    public NBConfigModel getConfigModel() {
-        return ConfigModel.of(this.getClass());
     }
 
     @Override
@@ -105,6 +93,29 @@ public abstract class BaseDriverAdapter<R extends Op,S>
     @Override
     public void applyConfig(NBConfiguration cfg) {
         this.cfg = cfg;
+    }
+
+    /**
+     * In order to be provided with config information, it is required
+     * that the driver adapter specify the valid configuration options,
+     * their types, and so on.
+     */
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(BaseDriverAdapter.class)
+            .add(Param.optional("alias"))
+            .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
+            .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
+            .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
+            .add(Param.defaultTo("errors", "stop", "error handler configuration"))
+            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
+            .add(Param.optional("stride").setRegex("\\d+"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.optional("cycles").setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\.\\d+[KMBGTPE]?").setDescription("cycle interval to use"))
+            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
+            .add(Param.optional("phaserate", String.class, "rate limit for phases per second"))
+            .add(Param.optional("seq", String.class, "sequencing algorithm"))
+            .asReadOnly();
     }
 
 }

@@ -74,7 +74,7 @@ public class StmtDetailOverrideTest {
         assertThat(s.getTags()).containsEntry("tname1", "tval1");
         assertThat(s.getTags()).containsEntry("global_tag1", "tag value");
         assertThat(s.getBindings()).hasSize(3);
-        assertThat(s.getParams()).hasSize(3);
+        assertThat(s.getParams()).hasSize(2);
 
         s = stmts.get(3);
         assertThat(s.getName()).isEqualTo("testblock1--s4");

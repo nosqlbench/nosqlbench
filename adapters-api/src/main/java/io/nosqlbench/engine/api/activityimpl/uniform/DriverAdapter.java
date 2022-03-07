@@ -1,12 +1,19 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.docapi.Docs;
+import io.nosqlbench.docapi.DocsBinder;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.annotations.Maturity;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -109,7 +116,7 @@ public interface DriverAdapter<R extends Op, S> {
      * construction of operations.
      *
      * See {@link DriverSpaceCache} for details on when and how to use this function.
-
+     *
      * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
      * you may need access to the objects in (the or a) space cache. You can build the
      * type of context needed and then provide this function to provide new instances
@@ -126,6 +133,39 @@ public interface DriverAdapter<R extends Op, S> {
         return n -> null;
     }
 
-
     NBConfiguration getConfiguration();
+
+    /**
+     * The standard way to provide docs for a driver adapter is to put them in one of two common places:
+     * <ul>
+     *     <li>&lt;resources&gt;/&lt;adaptername&gt;.md - A single markdown file which is the named top-level
+     *     markdown file for this driver adapter.</li>
+     *     <li>&lt;resources&gt;/docs/&lt;adaptername&gt;/ - A directory containing any type of file which
+     *     is to be included in docs under the adapter name, otherwise known as the {@link Service#selector()}</li>
+     * </ul>
+     * path &lt;resources&gt;/docs/&lt;adaptername&gt;. Specifically, the file
+     *
+     * @return A {@link DocsBinder} which describes docs to include for a given adapter.
+     */
+    default DocsBinder getBundledDocs() {
+        Docs docs = new Docs().namespace("adapter-"+this.getAdapterName());
+
+        String dev_docspath = "adapter-" + this.getAdapterName() + "/src/main/resources/docs/" + this.getAdapterName();
+        String cp_docspath = "docs/" + this.getAdapterName();
+        Optional<Content<?>> bundled_docs = NBIO.local().name(dev_docspath, cp_docspath).first();
+        bundled_docs.map(Content::asPath).ifPresent(docs::addContentsOf);
+
+        Optional<Content<?>> maindoc = NBIO.local().name("/src/main/resources/" + this.getAdapterName() + ".md", this.getAdapterName() + ".md").first();
+        maindoc.map(Content::asPath).ifPresent(docs::addPath);
+
+        return docs.asDocsBinder();
+    }
+
+    default String getAdapterName() {
+        return this.getClass().getAnnotation(Service.class).selector();
+    }
+
+    default Maturity getAdapterMaturity() {
+        return this.getClass().getAnnotation(Service.class).maturity();
+    }
 }

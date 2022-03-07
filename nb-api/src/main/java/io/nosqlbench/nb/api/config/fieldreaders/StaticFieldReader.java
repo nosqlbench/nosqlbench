@@ -29,7 +29,7 @@ public interface StaticFieldReader {
 
     <T> T getStaticValueOr(String name, T defaultValue);
 
-    <T> Optional<T> getOptionalValue(String field, Class<T> classOfT);
+    <T> Optional<T> getOptionalStaticValue(String field, Class<T> classOfT);
 
-    void assertDefinedStatic(String... fields);
+//    void assertDefinedStatic(String... fields);
 }

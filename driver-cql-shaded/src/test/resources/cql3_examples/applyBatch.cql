@@ -1,1 +1,0 @@
-APPLY BATCH;

@@ -13,7 +13,7 @@ import javax.net.ssl.SSLContext;
 
 public class JMXActivity extends SimpleActivity implements Activity {
 
-    private OpSequence<OpDispenser<JmxOp>> sequence;
+    private OpSequence<OpDispenser<? extends JmxOp>> sequence;
     private SSLContext sslContext;
 
     public JMXActivity(ActivityDef activityDef) {
@@ -39,7 +39,7 @@ public class JMXActivity extends SimpleActivity implements Activity {
         return sslContext;
     }
 
-    public OpSequence<OpDispenser<JmxOp>> getSequencer() {
+    public OpSequence<OpDispenser<? extends JmxOp>> getSequencer() {
         return sequence;
     }
 }
