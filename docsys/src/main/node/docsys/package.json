@@ -13,7 +13,7 @@
     "antlr": "cd antlr && node ../node_modules/antlr4-cli/bin/antlr4.js -Dlanguage=JavaScript -Werror -visitor -listener CQL3.g4"
   },
   "dependencies": {
-    "@nuxt/webpack": "^2.14.4",
+    "@nuxt/webpack": "^2.15.8",
     "@nuxtjs/axios": "^5.12.2",
     "@nuxtjs/babel-preset-app": "^0.8.0",
     "@nuxtjs/vuetify": "^2.0.0-beta.2",
