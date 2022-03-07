@@ -3,7 +3,7 @@ name: release
 on:
   push:
     branches:
-      - main
+      - nb4-maintenance
     paths:
       - RELEASENOTES.**
 
@@ -95,7 +95,7 @@ jobs:
       - name: select release type from branch name
         run: |
           current_branch=$(git rev-parse --abbrev-ref HEAD)
-          if [[ ${current_branch} == *"main"* ]]
+          if [[ ${current_branch} == *"nb4-maintenance"* ]]
            then
             echo "PRERELEASE=false" >> $GITHUB_ENV
             echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest,nosqlbench/nosqlbench:4x,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
@@ -107,8 +107,8 @@ jobs:
       - name: prepare Maven release
         run: scripts/release-prepare.sh
         env:
-          RELEASE_BRANCH_PATTERN: "main"
-          PRERELEASE_BRANCH_PATTERN: "prerelease"
+          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
+          PRERELEASE_BRANCH_PATTERN: "nb5-preview"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
@@ -161,8 +161,8 @@ jobs:
         run: scripts/release-perform.sh
         continue-on-error: true
         env:
-          RELEASE_BRANCH_PATTERN: "main"
-          PRERELEASE_BRANCH_PATTERN: "prerelease"
+          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
+          PRERELEASE_BRANCH_PATTERN: "nb5-preview"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
