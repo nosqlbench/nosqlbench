@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.api.processors;
 //io.nosqlbench.virtdata.api.processors.FunctionDocInfoProcessor
 
@@ -33,7 +49,7 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
 
     public final static String AUTOSUFFIX = "AutoDocsInfo";
 
-    private static Pattern packageNamePattern = Pattern.compile("(?<packageName>.+)?\\.(?<className>.+)");
+    private static final Pattern packageNamePattern = Pattern.compile("(?<packageName>.+)?\\.(?<className>.+)");
     private Filer filer;
     private Map<String, String> options;
     private Elements elementUtils;
@@ -70,7 +86,7 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
         for (Element classElem : ts) {
 
             if (classElem.getKind() != ElementKind.CLASS) {
-                throw new RuntimeException("Unexpected kind of element: " + classElem.getKind() + " for " + classElem.toString());
+                throw new RuntimeException("Unexpected kind of element: " + classElem.getKind() + " for " + classElem);
             }
 
             // package and Class Name
@@ -165,7 +181,7 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
         return false;
     }
 
-    private static Pattern inheritDocPattern = Pattern.compile("(?ms)(?<pre>.*)(?<inherit>\\{@inheritDoc})(?<post>.*)$");
+    private static final Pattern inheritDocPattern = Pattern.compile("(?ms)(?<pre>.*)(?<inherit>\\{@inheritDoc})(?<post>.*)$");
     private String inheritDocs(String classDoc, Element classElem) {
         if (classDoc==null) {
             return null;
@@ -184,15 +200,15 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
 
 
         if (!inheritFromElement.isPresent()) {
-            messenger.printMessage(Diagnostic.Kind.ERROR, "Element " + classElem.toString() + " has '{@inheritDoc}', but a superclass was not found.");
-            return pre + "UNABLE TO FIND ELEMENT TO INHERIT DOCS FROM for " + classElem.toString() + " " + post;
+            messenger.printMessage(Diagnostic.Kind.ERROR, "Element " + classElem + " has '{@inheritDoc}', but a superclass was not found.");
+            return pre + "UNABLE TO FIND ELEMENT TO INHERIT DOCS FROM for " + classElem + " " + post;
         }
         TypeElement inheritFromType = inheritFromElement.get();
         String inheritedDocs = elementUtils.getDocComment(inheritFromType);
         if (inheritedDocs==null) {
-            messenger.printMessage(Diagnostic.Kind.ERROR, "javadocs are missing on " + inheritFromElement.toString() + ", but "
-            + classElem.toString() + " is trying to inherit docs from it.");
-            return pre + "UNABLE TO FIND INHERITED DOCS for " + classElem.toString() + " " + post;
+            messenger.printMessage(Diagnostic.Kind.ERROR, "javadocs are missing on " + inheritFromElement + ", but "
+            + classElem + " is trying to inherit docs from it.");
+            return pre + "UNABLE TO FIND INHERITED DOCS for " + classElem + " " + post;
         }
 
         if (inheritDocPattern.matcher(inheritedDocs).matches()) {
