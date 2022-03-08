@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.userlibs.apps;
 
 import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
@@ -32,11 +48,11 @@ public class VirtDataMainApp {
             appArgs = Arrays.copyOfRange(args, 1, args.length);
         }
 
-        if (appSelection.toLowerCase().equals(APP_TESTMAPPER)) {
+        if (appSelection.equalsIgnoreCase(APP_TESTMAPPER)) {
             VirtDataCheckPerfApp.main(appArgs);
-        } else if (appSelection.toLowerCase().equals(APP_GENDOCS)) {
+        } else if (appSelection.equalsIgnoreCase(APP_GENDOCS)) {
             VirtDataGenDocsApp.main(appArgs);
-        } else if (appSelection.toLowerCase().equals(APP_DIAGNOSE)) {
+        } else if (appSelection.equalsIgnoreCase(APP_DIAGNOSE)) {
             VirtDataDiagnoseApp.main(appArgs);
         } else {
             System.err.println("Error in command line. The first argument must one of " + String.join(",", names));
