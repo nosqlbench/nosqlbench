@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Generated from VirtData.g4 by ANTLR 4.9.2
 package io.nosqlbench.virtdata.lang.generated;
 import org.antlr.v4.runtime.Lexer;
@@ -17,8 +33,8 @@ public class VirtDataLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9, 
-		FLOAT=10, BOOLEAN=11, NEWLINE=12, COMPOSE=13, TYPEARROW=14, ASSIGN=15, 
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9,
+		FLOAT=10, BOOLEAN=11, NEWLINE=12, COMPOSE=13, TYPEARROW=14, ASSIGN=15,
 		SSTRING_LITERAL=16, DSTRING_LITERAL=17, ID=18, IDPART=19, WS=20;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -30,8 +46,8 @@ public class VirtDataLexer extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "LONG", "DOUBLE", "INTEGER", 
-			"FLOAT", "BOOLEAN", "INT", "ZINT", "EXP", "NEWLINE", "COMPOSE", "TYPEARROW", 
+			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "LONG", "DOUBLE", "INTEGER",
+			"FLOAT", "BOOLEAN", "INT", "ZINT", "EXP", "NEWLINE", "COMPOSE", "TYPEARROW",
 			"ASSIGN", "SSTRING_LITERAL", "DSTRING_LITERAL", "ID", "IDPART", "WS"
 		};
 	}
@@ -39,15 +55,15 @@ public class VirtDataLexer extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null, 
+			null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null,
 			null, null, "'compose'", "'->'", "'='"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER", 
-			"FLOAT", "BOOLEAN", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL", 
+			null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER",
+			"FLOAT", "BOOLEAN", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL",
 			"DSTRING_LITERAL", "ID", "IDPART", "WS"
 		};
 	}

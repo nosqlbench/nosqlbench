@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Generated from VirtData.g4 by ANTLR 4.7.1
 package io.nosqlbench.virtdata.lang.lang.generated;
 import org.antlr.v4.runtime.atn.*;
@@ -14,27 +30,27 @@ public class VirtDataParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9, 
-		FLOAT=10, NEWLINE=11, COMPOSE=12, TYPEARROW=13, ASSIGN=14, SSTRING_LITERAL=15, 
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9,
+		FLOAT=10, NEWLINE=11, COMPOSE=12, TYPEARROW=13, ASSIGN=14, SSTRING_LITERAL=15,
 		DSTRING_LITERAL=16, ID=17, IDPART=18, WS=19;
 	public static final int
-		RULE_virtdataRecipe = 0, RULE_virtdataFlow = 1, RULE_expression = 2, RULE_virtdataCall = 3, 
-		RULE_lvalue = 4, RULE_inputType = 5, RULE_funcName = 6, RULE_outputType = 7, 
-		RULE_arg = 8, RULE_ref = 9, RULE_value = 10, RULE_stringValue = 11, RULE_longValue = 12, 
+		RULE_virtdataRecipe = 0, RULE_virtdataFlow = 1, RULE_expression = 2, RULE_virtdataCall = 3,
+		RULE_lvalue = 4, RULE_inputType = 5, RULE_funcName = 6, RULE_outputType = 7,
+		RULE_arg = 8, RULE_ref = 9, RULE_value = 10, RULE_stringValue = 11, RULE_longValue = 12,
 		RULE_doubleValue = 13, RULE_integerValue = 14, RULE_floatValue = 15, RULE_specend = 16;
 	public static final String[] ruleNames = {
-		"virtdataRecipe", "virtdataFlow", "expression", "virtdataCall", "lvalue", 
-		"inputType", "funcName", "outputType", "arg", "ref", "value", "stringValue", 
+		"virtdataRecipe", "virtdataFlow", "expression", "virtdataCall", "lvalue",
+		"inputType", "funcName", "outputType", "arg", "ref", "value", "stringValue",
 		"longValue", "doubleValue", "integerValue", "floatValue", "specend"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null, 
+		null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null,
 		null, "'compose'", "'->'", "'='"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER", 
-		"FLOAT", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL", 
+		null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER",
+		"FLOAT", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL",
 		"DSTRING_LITERAL", "ID", "IDPART", "WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
@@ -982,7 +998,7 @@ public class VirtDataParser extends Parser {
 				{
 				setState(122);
 				match(T__5);
-				setState(124); 
+				setState(124);
 				_errHandler.sync(this);
 				_alt = 1;
 				do {
@@ -998,7 +1014,7 @@ public class VirtDataParser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(126); 
+					setState(126);
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
@@ -1015,7 +1031,7 @@ public class VirtDataParser extends Parser {
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(130); 
+				setState(130);
 				_errHandler.sync(this);
 				_alt = 1;
 				do {
@@ -1031,7 +1047,7 @@ public class VirtDataParser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(132); 
+					setState(132);
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,13,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );

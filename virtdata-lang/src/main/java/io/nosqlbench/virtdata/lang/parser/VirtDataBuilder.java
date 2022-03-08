@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.lang.parser;
 
 import io.nosqlbench.virtdata.lang.ast.*;
@@ -17,15 +33,15 @@ import java.util.regex.Pattern;
 
 public class VirtDataBuilder extends VirtDataBaseListener {
     private final static Logger logger  = LogManager.getLogger(VirtDataBuilder.class);
-    private VirtDataAST model = new VirtDataAST();
-    private List<ErrorNode> errorNodes = new ArrayList<>();
+    private final VirtDataAST model = new VirtDataAST();
+    private final List<ErrorNode> errorNodes = new ArrayList<>();
 
-    private Stack<VirtDataParser.VirtdataFlowContext> flowContexts = new Stack<>();
-    private Stack<VirtDataParser.ExpressionContext> expressionContexts = new Stack<>();
-    private Stack<VirtDataParser.VirtdataCallContext> callContexts = new Stack<>();
+    private final Stack<VirtDataParser.VirtdataFlowContext> flowContexts = new Stack<>();
+    private final Stack<VirtDataParser.ExpressionContext> expressionContexts = new Stack<>();
+    private final Stack<VirtDataParser.VirtdataCallContext> callContexts = new Stack<>();
 
-    private LinkedList<VirtDataFlow> flows = new LinkedList<>();
-    private Stack<FunctionCall> calls = new Stack<FunctionCall>();
+    private final LinkedList<VirtDataFlow> flows = new LinkedList<>();
+    private final Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
 
     @Override
@@ -130,7 +146,7 @@ public class VirtDataBuilder extends VirtDataBaseListener {
         calls.peek().addFunctionArg(new FloatArg(Float.valueOf(ctx.getText())));
     }
 
-    private static Pattern escapePattern = Pattern.compile("\\.");
+    private static final Pattern escapePattern = Pattern.compile("\\.");
 
     @Override
     public void exitStringValue(VirtDataParser.StringValueContext ctx) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Generated from VirtData.g4 by ANTLR 4.9.2
 package io.nosqlbench.virtdata.lang.generated;
 import org.antlr.v4.runtime.atn.*;
@@ -17,20 +33,20 @@ public class VirtDataParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9, 
-		FLOAT=10, BOOLEAN=11, NEWLINE=12, COMPOSE=13, TYPEARROW=14, ASSIGN=15, 
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, LONG=7, DOUBLE=8, INTEGER=9,
+		FLOAT=10, BOOLEAN=11, NEWLINE=12, COMPOSE=13, TYPEARROW=14, ASSIGN=15,
 		SSTRING_LITERAL=16, DSTRING_LITERAL=17, ID=18, IDPART=19, WS=20;
 	public static final int
-		RULE_virtdataRecipe = 0, RULE_virtdataFlow = 1, RULE_expression = 2, RULE_virtdataCall = 3, 
-		RULE_lvalue = 4, RULE_inputType = 5, RULE_funcName = 6, RULE_outputType = 7, 
-		RULE_arg = 8, RULE_ref = 9, RULE_value = 10, RULE_stringValue = 11, RULE_longValue = 12, 
-		RULE_doubleValue = 13, RULE_integerValue = 14, RULE_floatValue = 15, RULE_booleanValue = 16, 
+		RULE_virtdataRecipe = 0, RULE_virtdataFlow = 1, RULE_expression = 2, RULE_virtdataCall = 3,
+		RULE_lvalue = 4, RULE_inputType = 5, RULE_funcName = 6, RULE_outputType = 7,
+		RULE_arg = 8, RULE_ref = 9, RULE_value = 10, RULE_stringValue = 11, RULE_longValue = 12,
+		RULE_doubleValue = 13, RULE_integerValue = 14, RULE_floatValue = 15, RULE_booleanValue = 16,
 		RULE_specend = 17;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"virtdataRecipe", "virtdataFlow", "expression", "virtdataCall", "lvalue", 
-			"inputType", "funcName", "outputType", "arg", "ref", "value", "stringValue", 
-			"longValue", "doubleValue", "integerValue", "floatValue", "booleanValue", 
+			"virtdataRecipe", "virtdataFlow", "expression", "virtdataCall", "lvalue",
+			"inputType", "funcName", "outputType", "arg", "ref", "value", "stringValue",
+			"longValue", "doubleValue", "integerValue", "floatValue", "booleanValue",
 			"specend"
 		};
 	}
@@ -38,15 +54,15 @@ public class VirtDataParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null, 
+			null, "';'", "'('", "','", "')'", "'$'", "';;'", null, null, null, null,
 			null, null, "'compose'", "'->'", "'='"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER", 
-			"FLOAT", "BOOLEAN", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL", 
+			null, null, null, null, null, null, null, "LONG", "DOUBLE", "INTEGER",
+			"FLOAT", "BOOLEAN", "NEWLINE", "COMPOSE", "TYPEARROW", "ASSIGN", "SSTRING_LITERAL",
 			"DSTRING_LITERAL", "ID", "IDPART", "WS"
 		};
 	}
@@ -1044,7 +1060,7 @@ public class VirtDataParser extends Parser {
 				{
 				setState(127);
 				match(T__5);
-				setState(129); 
+				setState(129);
 				_errHandler.sync(this);
 				_alt = 1;
 				do {
@@ -1060,7 +1076,7 @@ public class VirtDataParser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(131); 
+					setState(131);
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
@@ -1077,7 +1093,7 @@ public class VirtDataParser extends Parser {
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(135); 
+				setState(135);
 				_errHandler.sync(this);
 				_alt = 1;
 				do {
@@ -1093,7 +1109,7 @@ public class VirtDataParser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(137); 
+					setState(137);
 					_errHandler.sync(this);
 					_alt = getInterpreter().adaptivePredict(_input,13,_ctx);
 				} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
