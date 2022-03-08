@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 
 import java.nio.ByteBuffer;
@@ -5,8 +21,8 @@ import java.util.Iterator;
 
 public class DiscreteProbabilityBuffer implements Iterable<DiscreteProbabilityBuffer.Entry> {
 
-    private static int REFERENT_ID =0;
-    private static int PROBABILITY = REFERENT_ID +Integer.BYTES;
+    private static final int REFERENT_ID =0;
+    private static final int PROBABILITY = REFERENT_ID +Integer.BYTES;
     public static int RECORD_LEN = PROBABILITY +Double.BYTES;
     private double cumulativeProbability = 0.0D;
     private boolean isNormalized=false;
@@ -71,7 +87,7 @@ public class DiscreteProbabilityBuffer implements Iterable<DiscreteProbabilityBu
 
     private static class Iter implements Iterator<Entry> {
 
-        private ByteBuffer iterbuf;
+        private final ByteBuffer iterbuf;
 
         public Iter(ByteBuffer iterbuf) {
             this.iterbuf = iterbuf;
@@ -91,8 +107,8 @@ public class DiscreteProbabilityBuffer implements Iterable<DiscreteProbabilityBu
     }
 
     public static class Entry {
-        private int eventId;
-        private double probability;
+        private final int eventId;
+        private final double probability;
 
         public Entry(int eventId, double probability) {
             this.eventId = eventId;
