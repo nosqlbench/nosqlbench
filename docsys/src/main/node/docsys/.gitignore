@@ -1,7 +1,0 @@
-local/**
-node_modules
-npm-debug.log
-.nuxt
-_nuxt/**
-dist
-.idea
