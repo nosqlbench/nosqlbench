@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
@@ -48,14 +64,14 @@ public class NBWebServerApp {
 
         StandardOpenOption[] OVERWRITE = {StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE,StandardOpenOption.WRITE};
 
-        logger.info("generating to directory " + dirpath.toString());
+        logger.info("generating to directory " + dirpath);
 
 
         DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
         String markdownList = dds.getMarkdownList(true);
 
         Path markdownCsvPath = dirpath.resolve(Path.of("services/docs/markdown.csv"));
-        logger.info("markdown.csv located at " + markdownCsvPath.toString());
+        logger.info("markdown.csv located at " + markdownCsvPath);
 
         Files.createDirectories(markdownCsvPath.getParent());
         Files.writeString(markdownCsvPath, markdownList, OVERWRITE);
@@ -64,7 +80,7 @@ public class NBWebServerApp {
 
         for (String markdownFile : markdownFileArray) {
             Path relativePath = dirpath.resolve(Path.of("services/docs", markdownFile));
-            logger.info("Creating " + relativePath.toString());
+            logger.info("Creating " + relativePath);
 
             Path path = dds.findPath(markdownFile);
 //            String markdown = dds.getFileByPath(markdownFile);
