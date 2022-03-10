@@ -18,6 +18,6 @@ blocks:
     statements:
       - name: s1
         optype: admin-tenant
-        admin_roles:
-        allowed_clusters:
+#        admin_roles:
+#        allowed_clusters:
         tenant: "{tenant}"

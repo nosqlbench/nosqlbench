@@ -47,7 +47,7 @@ blocks:
       - name: s1
         optype: msg-send
         # producer_name: {producer_name}
-        msg_key:
+#        msg_key:
         msg_value: "{myvalue}"
 
   - name: consumer-block
@@ -58,8 +58,8 @@ blocks:
       - name: s1
         optype: msg-consume
         subscription_name: "mysub"
-        subscription_type:
-        consumer_name:
+#        subscription_type:
+#        consumer_name:
 
   - name: reader-block
     tags:
@@ -68,7 +68,7 @@ blocks:
     statements:
       - name: s1
         optype: msg-read
-        reader_name:
+#        reader_name:
 
   - name: multi-topic-consumer-block
     tags:
@@ -77,11 +77,11 @@ blocks:
     statements:
       - name: s1
         optype: msg-mt-consume
-        topic_names:
-        topics_pattern:
+#        topic_names:
+#        topics_pattern:
         subscription_name: "mysub"
-        subscription_type:
-        consumer_name:
+#        subscription_type:
+#        consumer_name:
 
 #  - websocket-producer:
 #    tags:

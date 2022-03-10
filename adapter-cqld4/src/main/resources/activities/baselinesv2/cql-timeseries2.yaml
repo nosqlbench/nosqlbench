@@ -82,10 +82,10 @@ blocks:
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
           using timestamp {cell_timestamp}
-        idempotent: true
         tags:
           name: insert-rampup
         params:
+          idempotent: true
           instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
   - tags:
       phase: verify
@@ -130,9 +130,9 @@ blocks:
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
           using timestamp {cell_timestamp}
-        idempotent: true
         tags:
           name: insert-main
         params:
           instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
+          idempotent: true
 

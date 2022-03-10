@@ -34,7 +34,6 @@ blocks:
   - name: schema
     tags:
       phase: schema
-    params:
     statements:
       - create-table: |
           CREATE TABLE IF NOT EXISTS "<<table:account>>" (
@@ -55,13 +54,11 @@ blocks:
   - name: rampup
     tags:
       phase: rampup
-    params:
     statements:
       - rampup-insert: |
           INSERT INTO "<<table:account>>" (uuid, amount, amount_unit, updated_at, created_at, filler)
           VALUES ('{seq_uuid}', {rand_amount}, 'us_cents', '{timestamp}', '{timestamp}', '{filler}')
           ON CONFLICT DO NOTHING;
-        params:
         tags:
           name: rampup-insert
   - name: main-read
@@ -73,7 +70,6 @@ blocks:
     statements:
       - main-find: |
           SELECT * FROM "<<table:account>>" WHERE uuid = '{rand_uuid}';
-        params:
         tags:
           name: main-find
   - name: main-write
@@ -85,6 +81,5 @@ blocks:
     statements:
       - main-insert: |
           UPDATE "<<table:account>>" SET amount = {rand_amount}, updated_at = '{timestamp}' WHERE uuid = '{rand_uuid}';
-        params:
         tags:
           name: main-insert
