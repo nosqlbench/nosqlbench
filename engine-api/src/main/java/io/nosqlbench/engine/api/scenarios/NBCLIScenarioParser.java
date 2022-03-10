@@ -320,9 +320,15 @@ public class NBCLIScenarioParser {
                     .name(referenced).extension(RawStmtsLoader.YAML_EXTENSIONS)
                     .one();
 
-                StmtsDocList stmts = StatementsLoader.loadContent(logger, content, Map.of());
-                if (stmts.getStmtDocs().size() == 0) {
-                    logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                StmtsDocList stmts = null;
+                try {
+                    stmts = StatementsLoader.loadContent(logger, content, Map.of());
+                    if (stmts.getStmtDocs().size() == 0) {
+                        logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                        continue;
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error while loading scenario at '" + referenced + "': " + e);
                     continue;
                 }
 
@@ -335,8 +341,6 @@ public class NBCLIScenarioParser {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
-
                 Scenarios scenarios = stmts.getDocScenarios();
 
                 List<String> scenarioNames = scenarios.getScenarioNames();
