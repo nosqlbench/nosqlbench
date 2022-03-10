@@ -73,7 +73,7 @@ public class RawStmtDef extends RawStmtFields {
         if (_op) {
             if (_params) {
                 if (map.size() > 0) {
-                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields.");
+                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields. Op template named '" + this.getName() + "' is invalid. Move dangling params ("+ map.keySet() +") under another field.");
                 }
             } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params
                 getParams().putAll(map);
