@@ -35,6 +35,7 @@ import java.util.Optional;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  */
+@Deprecated(forRemoval = true,since = "5.0")
 public interface ActivityType<A extends Activity> {
 
 
