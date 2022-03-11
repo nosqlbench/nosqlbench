@@ -127,4 +127,14 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         return cfgmodel.asReadOnly();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int stmtcount = this.rawStmtsDocList.getStmtsDocs().stream().mapToInt(rsd -> rsd.getRawStmtDefs().size()).sum();
+        int docscount = this.rawStmtsDocList.getStmtsDocs().size();
+        sb.append("[" + docscount + "] docs, [" + stmtcount + "] stmts");
+        String names = this.rawStmtsDocList.getStmtsDocs().stream().flatMap(sd -> sd.getRawStmtDefs().stream()).map(d->d.getName()).collect(Collectors.joining(","));
+        sb.append(", names:").append(names);
+        return sb.toString();
+    }
 }
