@@ -1,7 +1,2 @@
-- 65542f9b7 (HEAD -> nb5-preview, main) fix null values and dangling parameters in bundled workloads
-- 13abfa958 add detail to null value error
-- 3ed80963f fix double text error in OpConfig toString()
-- aca1f6c73 allow workload scanner to skip over invalid files
-- 7a3bb3d78 deprecate ActivityType API
-- 2dc6b4210 yaml fixes
-- 8cf73de78 re-add codeql with j17 settings
+- 701122ff6 (HEAD -> nb5-preview, main) implement DeleteTable for dynamodb driver
+- 38688dd6c fix path traversal so static analysis can recognize it
