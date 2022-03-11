@@ -151,6 +151,9 @@ public class WorkSpace {
     }
 
     private void assertLegalWorkspacePath(Path target) {
+        if (!target.normalize().startsWith(this.workspacePath)) {
+            throw new RuntimeException("workspace path '" + target + "' contains path traversal");
+        }
         if (target.toString().contains("..")) {
             throw new RuntimeException("Possible path injection:" + target);
         }
