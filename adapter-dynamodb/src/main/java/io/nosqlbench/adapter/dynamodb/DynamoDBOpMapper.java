@@ -17,10 +17,7 @@
 package io.nosqlbench.adapter.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBCreateTableOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBGetItemOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBPutItemOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBQueryOpDispenser;
+import io.nosqlbench.adapter.dynamodb.opdispensers.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
@@ -56,6 +53,7 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
             TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTargetEnum(DynamoDBCmdType.class,String.class);
             return switch (cmdType.enumId) {
                 case CreateTable -> new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case PutItem -> new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case GetItem -> new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case Query -> new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);

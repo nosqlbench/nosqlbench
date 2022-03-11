@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dynamodb;
+package io.nosqlbench.adapter.dynamodb.optypes;
 
-/**
- * Op templates which are supported by the NoSQLBench DynamoDB driver are
- * enumerated below. These command names should mirror those in the official
- * DynamoDB API exactly. See the official API for more details.
- * @see <a href="https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/Welcome.html">DynamoDB API Reference</a>
- */
-public enum DynamoDBCmdType {
-    CreateTable,
-    DeleteTable,
-    PutItem,
-    GetItem,
-    Query
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
+
+public class DDBDeleteTableOp extends DynamoDBOp {
+
+    private final DeleteTableRequest rq;
+
+    public DDBDeleteTableOp(DynamoDB ddb, DeleteTableRequest rq) {
+        super(ddb);
+        this.rq = rq;
+    }
+
+    @Override
+    public DeleteTableResult apply(long value) {
+        return ddb.getTable(rq.getTableName()).delete();
+    }
 }
