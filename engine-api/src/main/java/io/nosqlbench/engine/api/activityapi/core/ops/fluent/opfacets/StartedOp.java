@@ -1,18 +1,17 @@
 /*
+ * Copyright (c) 2022 nosqlbench
  *
- *    Copyright 2016 jshook
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- * /
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets;
@@ -70,13 +69,13 @@ public interface StartedOp<D> extends Payload<D>, CycleReadable {
      * Return the nanos that have elapsed since the op was started at the time of this call.
      * @return nanosecond service time duration
      */
-    public long getCurrentServiceTimeNanos();
+    long getCurrentServiceTimeNanos();
 
     /**
      * Return the nanos that have elapsed since this op was started at the time of this call,
      * plus any prior waittime.
      * @return nanosecond response time duration
      */
-    public long getCurrentResponseTimeNanos();
+    long getCurrentResponseTimeNanos();
 
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 
 import java.nio.ByteBuffer;
@@ -19,11 +35,11 @@ import java.util.stream.Collectors;
  */
 public class AliasSamplerDoubleInt implements DoubleToIntFunction {
 
-    private ByteBuffer stats; // tuples of double,int,int (unfair coin, direct pointers to referents)
-    private double slotCount; // The number of fair die-roll slotCount that contain unfair coin probabilities
-    private static int _r0=0;
-    private static int _r1=_r0+Double.BYTES;
-    private static int _r2=_r1+Integer.BYTES;
+    private final ByteBuffer stats; // tuples of double,int,int (unfair coin, direct pointers to referents)
+    private final double slotCount; // The number of fair die-roll slotCount that contain unfair coin probabilities
+    private static final int _r0=0;
+    private static final int _r1=_r0+Double.BYTES;
+    private static final int _r2=_r1+Integer.BYTES;
     public static int RECORD_LEN = _r2 + Integer.BYTES; // Record size for the above.
 
     // for testing

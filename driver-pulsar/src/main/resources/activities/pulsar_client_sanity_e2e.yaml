@@ -16,7 +16,7 @@ blocks:
     statements:
       - name: s1
         optype: ec2-msg-proc-send
-        msg_key:
+#        msg_key:
         msg_property: |
           {
             "prop1": "{myprop1}"
@@ -27,4 +27,4 @@ blocks:
         optype: ec2-msg-proc-consume
         ratio: 1
         subscription_name: "mysub"
-        subscription_type:
+#        subscription_type:

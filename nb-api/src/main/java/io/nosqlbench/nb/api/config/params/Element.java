@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.nb.api.config.params;
 
 import java.util.Map;
@@ -74,7 +90,7 @@ public interface Element {
      * inferencing when possible. The value asked for will be cast to the type T at runtime,
      * as with type erasure there is no simple way to capture the requested type without
      * reifying it into a runtime instance in the caller. Thus, this method is provided
-     * as a syntactic convenience at best. It will almost always be better to use 
+     * as a syntactic convenience at best. It will almost always be better to use
      * {@link #get(String, Class)}
      *
      * @param name The simple or hierarchic variable name to resolve

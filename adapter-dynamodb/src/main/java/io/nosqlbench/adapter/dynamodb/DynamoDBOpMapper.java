@@ -1,10 +1,23 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.adapter.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBCreateTableOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBGetItemOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBPutItemOpDispenser;
-import io.nosqlbench.adapter.dynamodb.opdispensers.DDBQueryOpDispenser;
+import io.nosqlbench.adapter.dynamodb.opdispensers.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
@@ -40,6 +53,7 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
             TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTargetEnum(DynamoDBCmdType.class,String.class);
             return switch (cmdType.enumId) {
                 case CreateTable -> new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case PutItem -> new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case GetItem -> new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case Query -> new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);

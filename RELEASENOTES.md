@@ -1,1 +1,2 @@
-- 4b6019e7d (HEAD -> j17-preview) add missing list templating logic to fix imports bug
+- 701122ff6 (HEAD -> nb5-preview, main) implement DeleteTable for dynamodb driver
+- 38688dd6c fix path traversal so static analysis can recognize it

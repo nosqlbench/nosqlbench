@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.core.bindings;
 
 import io.nosqlbench.virtdata.core.composers.FunctionAssembly;
@@ -160,7 +176,7 @@ public class VirtDataComposer {
             diagnostics.trace(summarize(resolved, "  - "));
 
             if (resolved.size()==0) {
-                return diagnostics.error(new RuntimeException("There were no functions found for " + call.toString()));
+                return diagnostics.error(new RuntimeException("There were no functions found for " + call));
             }
 
             funcs.addFirst(resolved);
@@ -177,7 +193,7 @@ public class VirtDataComposer {
         List<ResolvedFunction> flattenedFuncs = optimizePath(funcs, ValueType.classOfType(flow.getLastExpression().getCall().getOutputType()));
 
         if (flattenedFuncs.size() == 1) {
-            diagnostics.trace("FUNCTION resolution succeeded (single): '" + flow.toString() + "'");
+            diagnostics.trace("FUNCTION resolution succeeded (single): '" + flow + "'");
             return diagnostics.setResolvedFunction(flattenedFuncs.get(0));
         }
 
@@ -194,11 +210,11 @@ public class VirtDataComposer {
                 }
             } catch (Exception e) {
                 String flowdata = flow != null ? flow.toString() : "undefined";
-                return diagnostics.error(new RuntimeException("FUNCTION resolution failed: '" + flowdata + "': " + e.toString(),e));
+                return diagnostics.error(new RuntimeException("FUNCTION resolution failed: '" + flowdata + "': " + e,e));
             }
         }
         ResolvedFunction composedFunction = assembly.getResolvedFunction(isThreadSafe);
-        diagnostics.trace("FUNCTION resolution succeeded (lambda): '" + flow.toString() + "'");
+        diagnostics.trace("FUNCTION resolution succeeded (lambda): '" + flow + "'");
         return diagnostics.setResolvedFunction(composedFunction);
     }
 
@@ -225,7 +241,7 @@ public class VirtDataComposer {
             Object[] combination = new Object[allargs.length];
             int number = row;
             for (int pos = 0; pos < combination.length; pos++) {
-                int selector = (int) (number / modulos[pos]);
+                int selector = number / modulos[pos];
                 Object[] allargspos = allargs[pos];
                 Object objectatpos = allargspos[selector];
                 combination[pos] = objectatpos;

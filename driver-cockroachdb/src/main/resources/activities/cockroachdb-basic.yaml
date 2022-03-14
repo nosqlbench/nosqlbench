@@ -24,7 +24,7 @@ blocks:
   - name: schema
     tags:
       phase: schema
-    params:
+#    params:
     statements:
       - create-database: |
           CREATE DATABASE <<database:bank>>;
@@ -40,13 +40,13 @@ blocks:
   - name: rampup
     tags:
       phase: rampup
-    params:
+#    params:
     statements:
       - rampup-insert: |
           INSERT INTO "<<database:bank>>"."<<table:banktransaction>>"
           (code, amount) VALUES ('{seq_key}', {seq_value})
           ON CONFLICT (code) DO NOTHING;
-        params:
+#        params:
         tags:
           name: rampup-insert
   - name: main-read
@@ -59,7 +59,7 @@ blocks:
       - main-find: |
           SELECT code, amount FROM "<<database:bank>>"."<<table:banktransaction>>"
           WHERE code = '{rw_key}' AND amount = {rw_value};
-        params:
+#        params:
         tags:
           name: main-find
   - name: main-write
@@ -71,6 +71,6 @@ blocks:
     statements:
       - main-insert: |
           UPDATE "<<database:bank>>"."<<table:banktransaction>>" SET amount = {seq_value} WHERE code = '{seq_key}';
-        params:
+#        params:
         tags:
           name: main-insert

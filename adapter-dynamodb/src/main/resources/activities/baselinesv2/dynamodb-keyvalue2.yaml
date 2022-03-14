@@ -7,8 +7,10 @@ scenarios:
     schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=dynamodb tags=='block:main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main-read: run driver=dynamodb tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main-write: run driver=dynamodb tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  delete:
+    table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
+  main-read: run driver=dynamodb tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  main-write: run driver=dynamodb tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
@@ -52,3 +54,8 @@ blocks:
         GetItem: TEMPLATE(table,keyvalue)
         key:
           partkey: "{rw_key}"
+  delete:
+    ops:
+      delete-table:
+        DeleteTable: TEMPLATE(table,keyvalue)
+

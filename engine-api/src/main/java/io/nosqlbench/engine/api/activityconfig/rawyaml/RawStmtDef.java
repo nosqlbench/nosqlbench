@@ -1,18 +1,17 @@
 /*
+ * Copyright (c) 2022 nosqlbench
  *
- *    Copyright 2016 jshook
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- * /
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
@@ -74,7 +73,7 @@ public class RawStmtDef extends RawStmtFields {
         if (_op) {
             if (_params) {
                 if (map.size() > 0) {
-                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields.");
+                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields. Op template named '" + this.getName() + "' is invalid. Move dangling params ("+ map.keySet() +") under another field.");
                 }
             } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params
                 getParams().putAll(map);

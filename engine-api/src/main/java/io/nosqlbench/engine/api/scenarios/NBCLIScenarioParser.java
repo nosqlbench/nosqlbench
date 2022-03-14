@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.engine.api.scenarios;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
@@ -304,9 +320,15 @@ public class NBCLIScenarioParser {
                     .name(referenced).extension(RawStmtsLoader.YAML_EXTENSIONS)
                     .one();
 
-                StmtsDocList stmts = StatementsLoader.loadContent(logger, content, Map.of());
-                if (stmts.getStmtDocs().size() == 0) {
-                    logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                StmtsDocList stmts = null;
+                try {
+                    stmts = StatementsLoader.loadContent(logger, content, Map.of());
+                    if (stmts.getStmtDocs().size() == 0) {
+                        logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                        continue;
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error while loading scenario at '" + referenced + "': " + e);
                     continue;
                 }
 
@@ -319,8 +341,6 @@ public class NBCLIScenarioParser {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
-
                 Scenarios scenarios = stmts.getDocScenarios();
 
                 List<String> scenarioNames = scenarios.getScenarioNames();

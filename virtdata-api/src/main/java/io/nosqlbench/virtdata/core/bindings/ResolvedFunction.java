@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.nosqlbench.virtdata.core.bindings;
 
 import java.lang.invoke.MethodHandles;
@@ -16,13 +32,13 @@ public class ResolvedFunction {
     public static Comparator<ResolvedFunction> PREFERRED_TYPE_COMPARATOR = new PreferredTypeComparator();
     private final Class<?> inputType;
     private final Class<?> outputType;
-    private Class<?>[] initializerSignature;
-    private Object[] initializerValues;
+    private final Class<?>[] initializerSignature;
+    private final Object[] initializerValues;
     private FunctionType functionType;
     private Object functionObject;
     private String libraryName;
-    private boolean isThreadSafe;
-    private static MethodHandles.Lookup methodLookup = MethodHandles.publicLookup();
+    private final boolean isThreadSafe;
+    private static final MethodHandles.Lookup methodLookup = MethodHandles.publicLookup();
 
 
     public ResolvedFunction(Object g, boolean isThreadSafe, Class<?>[] initializerSignature, Object[] initValues, Class<?> inputType, Class<?> outputType, String libraryName) {
