@@ -130,11 +130,23 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        int stmtcount = this.rawStmtsDocList.getStmtsDocs().stream().mapToInt(rsd -> rsd.getRawStmtDefs().size()).sum();
-        int docscount = this.rawStmtsDocList.getStmtsDocs().size();
-        sb.append("[" + docscount + "] docs, [" + stmtcount + "] stmts");
-        String names = this.rawStmtsDocList.getStmtsDocs().stream().flatMap(sd -> sd.getRawStmtDefs().stream()).map(d->d.getName()).collect(Collectors.joining(","));
-        sb.append(", names:").append(names);
+        int docscount = 0;
+        int blockscount = 0;
+        int opscount = 0;
+
+        for (StmtsDoc stmtDoc : this.getStmtDocs()) {
+            docscount++;
+            for (StmtsBlock block : stmtDoc.getBlocks()) {
+                blockscount++;
+                for (OpTemplate op : block.getOps()) {
+                    opscount++;
+                }
+            }
+        }
+
+        sb.append("docs: " + docscount + " blocks:" + blockscount + " ops:" + opscount);
+//        String names = this.rawStmtsDocList.getStmtsDocs().stream().flatMap(sd -> sd.getRawStmtDefs().stream()).map(d->d.getName()).collect(Collectors.joining(","));
+//        sb.append(", names:").append(names);
         return sb.toString();
     }
 }
