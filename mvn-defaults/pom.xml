@@ -36,7 +36,7 @@
         <commons.lang.version>3.9</commons.lang.version>
         <commons.math3.version>3.6.1</commons.math3.version>
         <commons.text.version>1.9</commons.text.version>
-        <docker.java.version>3.2.1</docker.java.version>
+        <docker.java.version>3.2.13</docker.java.version>
         <greenrobot.version>3.0.0-RC1</greenrobot.version>
         <javapoet.version>1.11.1</javapoet.version>
         <jaxb.api.version>2.4.0-b180830.0359</jaxb.api.version>
