@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>tinkergraph-gremlin</artifactId>
-            <version>3.4.12</version>
+            <version>3.5.2</version>
         </dependency>
 
         <dependency>
