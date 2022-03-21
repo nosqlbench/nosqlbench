@@ -162,7 +162,7 @@ public class SSLKsFactoryTest {
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
-                .withMessageMatching("Unable to load the keystore. Please check.");
+                .withMessageMatching("Unable to load the keystore: .*");
     }
 
     @Test
@@ -192,7 +192,7 @@ public class SSLKsFactoryTest {
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
-                .withMessageMatching("Unable to load the truststore. Please check.");
+                .withMessageMatching("Unable to load the truststore: .*");
     }
 
     @Test
