@@ -2,7 +2,7 @@
 set -e
 #RELEASE_NOTES_FILE=${RELEASE_NOTES_FILE:?RELEASE_NOTES_FILE must be provided}
 
-git log --oneline --decorate --max-count=1000 main > /tmp/gitlog_main
+git log --oneline --decorate --max-count=1000 nb4-maintenance > /tmp/gitlog_main
 
 readarray lines < /tmp/gitlog_main
 for line in "${lines[@]}"
