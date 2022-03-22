@@ -48,7 +48,7 @@
 
         <lz4.version>1.4.1</lz4.version>
         <!--    <metrics.version>4.0.7</metrics.version>-->
-        <mvel2.version>2.4.10.Final</mvel2.version>
+        <mvel2.version>2.4.14.Final</mvel2.version>
         <number.to.words.version>1.0.0</number.to.words.version>
         <!--        <slf4j.version>1.7.29</slf4j.version>-->
         <snakeyaml.version>1.26</snakeyaml.version>
