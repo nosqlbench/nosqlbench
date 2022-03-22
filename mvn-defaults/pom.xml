@@ -42,8 +42,8 @@
         <jaxb.api.version>2.4.0-b180830.0359</jaxb.api.version>
         <jaxb.core.version>2.3.0.1</jaxb.core.version>
         <jaxb.impl.version>2.4.0-b180830.0438</jaxb.impl.version>
+        <joda.time.version>2.10.13</joda.time.version>
         <jmh.version>1.34</jmh.version>
-        <joda.time.version>2.9.9</joda.time.version>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
 
         <lz4.version>1.4.1</lz4.version>
