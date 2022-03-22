@@ -63,13 +63,13 @@
 
         <dependency>
             <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-core</artifactId>
+            <artifactId>oshi-core-java11</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.177</version>
+            <version>1.12.180</version>
         </dependency>
 
         <dependency>
