@@ -223,7 +223,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         executorService.shutdown();
         boolean wasStopped = false;
         try {
-            logger.trace("awaiting termination with timeout of " + secondsToWait + " seconds");
+            logger.trace(() -> "awaiting termination with timeout of " + secondsToWait + " seconds");
             wasStopped = executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
             logger.trace("interrupted while awaiting termination");
@@ -231,7 +231,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
             activitylogger.debug("REQUEST STOP/exception alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
         } finally {
-            logger.trace("finally shutting down activity " + this.getActivity().getAlias());
+            logger.trace(() -> "finally shutting down activity " + this.getActivity().getAlias());
             activity.shutdownActivity();
             logger.trace("closing auto-closeables");
             activity.closeAutoCloseables();
@@ -240,7 +240,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
 
         if (stoppingException != null) {
-            logger.trace("an exception caused the activity to stop:" + stoppingException.getMessage());
+            logger.trace(() -> "an exception caused the activity to stop:" + stoppingException.getMessage());
             throw stoppingException;
         }
         activitylogger.debug("REQUEST STOP/after alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
@@ -330,12 +330,12 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * @param activityDef the activityDef for this activity instance
      */
     private synchronized void adjustToActivityDef(ActivityDef activityDef) {
-        logger.trace(">-pre-adjust->" + getSlotStatus());
+        logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
 
         // Stop and remove extra motor slots
         while (motors.size() > activityDef.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
-            logger.trace("Stopping cycle motor thread:" + motor);
+            logger.trace(() -> "Stopping cycle motor thread:" + motor);
             motor.requestStop();
             motors.remove(motors.size() - 1);
         }
@@ -344,20 +344,20 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         while (motors.size() < activityDef.getThreads()) {
 
             Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
-            logger.trace("Starting cycle motor thread:" + motor);
+            logger.trace(() -> "Starting cycle motor thread:" + motor);
             motors.add(motor);
         }
 
         applyIntendedStateToDivergentMotors();
         awaitActivityAndMotorStateAlignment();
 
-        logger.trace(">post-adjust->" + getSlotStatus());
+        logger.trace(() -> ">post-adjust->" + getSlotStatus());
 
     }
 
     private void applyIntendedStateToDivergentMotors() {
         RunState intended = activity.getRunState();
-        logger.trace("ADJUSTING to INTENDED " + intended);
+        logger.trace(() -> "ADJUSTING to INTENDED " + intended);
         switch (intended) {
             case Uninitialized:
                 break;
@@ -429,7 +429,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             for (RunState desiredRunState : desiredRunStates) {
                 actualStates.remove(desiredRunState);
             }
-            logger.trace("state of remaining slots:" + actualStates);
+            logger.trace(() -> "state of remaining slots:" + actualStates);
             if (actualStates.size() == 0) {
                 return true;
             } else {
@@ -440,7 +440,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 }
             }
         }
-        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotStateTracker().getSlotState());
+        logger.trace(() -> activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotStateTracker().getSlotState());
         return false;
     }
 
@@ -453,7 +453,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             for (Motor motor : motors) {
                 awaited = awaitMotorState(motor, waitTime, pollTime, awaitingState);
                 if (!awaited) {
-                    logger.trace("failed awaiting motor " + motor.getSlotId() + " for state in " +
+                    logger.trace(() -> "failed awaiting motor " + motor.getSlotId() + " for state in " +
                             Arrays.asList(awaitingState));
                     break;
                 }
@@ -469,7 +469,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             for (Motor motor : motors) {
                 for (RunState state : awaitingState) {
                     if (motor.getSlotStateTracker().getSlotState() == state) {
-                        logger.trace("at least one 'any' of " + activityDef.getAlias() + "/Motor[" + motor.getSlotId() + "] is now in state " + motor.getSlotStateTracker().getSlotState());
+                        logger.trace(() -> "at least one 'any' of " + activityDef.getAlias() + "/Motor[" + motor.getSlotId() + "] is now in state " + motor.getSlotStateTracker().getSlotState());
                         return true;
                     }
                 }
@@ -479,7 +479,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             } catch (InterruptedException ignored) {
             }
         }
-        logger.trace("none of " + activityDef.getAlias() + "/Motor [" + motors.size() + "] is in states in " + Arrays.asList(awaitingState));
+        logger.trace(() -> "none of " + activityDef.getAlias() + "/Motor [" + motors.size() + "] is in states in " + Arrays.asList(awaitingState));
         return false;
     }
 
@@ -504,7 +504,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.error(error);
             throw e;
         }
-        logger.trace("motor " + m + " entered awaited state: " + Arrays.asList(awaitingState));
+        logger.trace(() -> "motor " + m + " entered awaited state: " + Arrays.asList(awaitingState));
     }
 
     private synchronized void requestStopMotors() {
