@@ -29,7 +29,7 @@
 
         <!-- properties for package versions -->
         <ascii.data.version>1.2.0</ascii.data.version>
-        <antlr4.version>4.9.2</antlr4.version>
+        <antlr4.version>4.9.3</antlr4.version>
         <commons.compress.version>1.21</commons.compress.version>
         <commons.codec.version>1.15</commons.codec.version>
         <commons.csv.version>1.8</commons.csv.version>
