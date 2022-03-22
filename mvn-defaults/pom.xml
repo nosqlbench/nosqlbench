@@ -251,8 +251,8 @@
 
             <dependency>
                 <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core</artifactId>
-                <version>5.8.7</version>
+                <artifactId>oshi-core-java11</artifactId>
+                <version>6.1.5</version>
             </dependency>
 
             <dependency>
