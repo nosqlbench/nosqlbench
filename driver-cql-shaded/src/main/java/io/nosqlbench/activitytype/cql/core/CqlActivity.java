@@ -129,7 +129,9 @@ public class CqlActivity extends SimpleActivity implements Activity, ActivityDef
 
     public synchronized Session getSession() {
         if (session == null) {
-            session = CQLSessionCache.get().getSession(this.getActivityDef());
+            ActivityDef activityDef = this.getActivityDef();
+            CQLSessionCache cqlSessionCache = CQLSessionCache.get();
+            session = cqlSessionCache.getSession(activityDef);
         }
         return session;
     }

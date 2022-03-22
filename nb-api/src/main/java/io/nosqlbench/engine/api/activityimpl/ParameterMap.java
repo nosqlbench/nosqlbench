@@ -173,7 +173,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     public void set(String paramName, Object newValue) {
         super.put(paramName, String.valueOf(newValue));
-        logger.info("setting param " + paramName + "=" + newValue);
+        logger.trace("setting param " + paramName + "=" + newValue);
         markMutation();
     }
 
@@ -184,7 +184,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     @Override
     public Object put(String name, Object value) {
         Object oldVal = super.put(name, String.valueOf(value));
-        logger.info("putting param " + name + "=" + value);
+        logger.trace("putting param " + name + "=" + value);
 
         markMutation();
         return oldVal;
@@ -198,10 +198,15 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         markMutation();
     }
 
+    public Object removeSilent(Object key) {
+        Object removed = super.remove(key);
+        return removed;
+    }
+
     @Override
     public Object remove(Object key) {
-        Object removed = super.remove(key);
-        logger.info("removing param: " + key);
+        Object removed = removeSilent(key);
+        logger.trace("removing param: " + key);
 
         markMutation();
         return removed;

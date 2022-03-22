@@ -12,10 +12,12 @@ import io.nosqlbench.activitytype.cql.core.CQLOptions;
 import io.nosqlbench.activitytype.cql.core.ProxyTranslator;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.ExprEvaluator;
 import io.nosqlbench.engine.api.scripting.GraalJsEvaluator;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -29,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 
 public class CQLSessionCache implements Shutdownable {
 
@@ -53,7 +56,8 @@ public class CQLSessionCache implements Shutdownable {
 
     public Session getSession(ActivityDef activityDef) {
         String key = activityDef.getParams().getOptionalString("clusterid").orElse(DEFAULT_SESSION_ID);
-        return sessionCache.computeIfAbsent(key, (cid) -> createSession(activityDef, key));
+        Function<String, Session> sessionFunc = (cid) -> createSession(activityDef, key);
+        return sessionCache.computeIfAbsent(key, sessionFunc);
     }
 
     // cbopts=\".withLoadBalancingPolicy(LatencyAwarePolicy.builder(new TokenAwarePolicy(new DCAwareRoundRobinPolicy(\"dc1-us-east\", 0, false))).build()).withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE))\"
@@ -243,7 +247,13 @@ public class CQLSessionCache implements Shutdownable {
             .ifPresent(builder::withCompression);
 
 
-        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+        ParameterMap sslparams = activityDef.getParams();
+        SSLKsFactory sslKsFactory = SSLKsFactory.get();
+        NBConfigModel configModel = sslKsFactory.getConfigModel();
+        NBConfiguration sslCfg = configModel.extractConfig(new LinkedHashMap<>(activityDef.getParams()));
+        for (String s : sslCfg.getMap().keySet()) {
+            activityDef.getParams().removeSilent(s); // work-around for active listeners retriggering idempotent application
+        }
         SSLContext context = SSLKsFactory.get().getContext(sslCfg);
 
         if (context != null) {
