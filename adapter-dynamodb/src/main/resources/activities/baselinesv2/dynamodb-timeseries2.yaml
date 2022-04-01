@@ -13,6 +13,8 @@ scenarios:
     schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=dynamodb tags==block:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  delete:
+    table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
 
 params:
   instrument: TEMPLATE(instrument,true)
@@ -82,3 +84,7 @@ blocks:
         order: reverse
         limit: 10
 
+  delete:
+    ops:
+      delete-table:
+        DeleteTable: TEMPLATE(table,timeseries)

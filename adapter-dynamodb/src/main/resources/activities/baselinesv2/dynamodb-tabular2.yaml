@@ -7,6 +7,8 @@ scenarios:
   read: run driver=dynamodb tags=block:read region=us-east-1
   main: run driver=dynamodb tags=block:main region=us-east-1
   read01: run driver=dynamodb tags='name:.*main-read-01' region=us-east-1
+  delete:
+    table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
 
 bindings:
   # for ramp-up and verify phases
@@ -173,3 +175,10 @@ blocks:
         ConsistentRead: true
         projection: data0, data1, data2, data3, data4, data5, data6, data7
         Limit: "{limit}"
+
+  - name: delete
+    tags:
+      phase: delete
+    ops:
+      delete-table:
+        DeleteTable: TEMPLATE(table,tabular)
