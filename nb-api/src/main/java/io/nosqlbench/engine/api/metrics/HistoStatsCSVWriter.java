@@ -92,15 +92,15 @@ public class HistoStatsCSVWriter {
         csvLine.append(",").append(len);
         csvLine.append(",").append(h.getTotalCount());
         csvLine.append(",").append(h.getMinValue());
-        csvLine.append(",").append(h.getValueAtPercentile(0.25D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.50D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.75D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.90D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.95D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.98D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.99D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.999D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.9999D));
+        csvLine.append(",").append(h.getValueAtPercentile(25.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(50.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(75.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(90.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(95.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(98.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.90D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.99D));
         csvLine.append(",").append(h.getMaxValue());
         writer.println(csvLine);
 
