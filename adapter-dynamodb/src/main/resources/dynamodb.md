@@ -38,6 +38,7 @@ Specifically, the following commands are supported as of this release:
 * GetItem
 * PutItem
 * Query
+* DeleteTable
 
 ## Examples
 
@@ -103,4 +104,8 @@ ops:
     ## optionally, set an exclusive start key
     # ExclusiveStartKey: key-spec
 
+  example-DeleteTable:
+    # the type and target of the command
+    # the table identifier/name (string) to delete
+    DeleteTable: TEMPLATE(table,timeseries)
 ```
