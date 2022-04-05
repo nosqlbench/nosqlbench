@@ -407,9 +407,8 @@ public class PulsarSpace {
         }
 
         String consumerCacheKey = PulsarActivityUtil.buildCacheKey(consumerName, subscriptionName, cycleTopicName);
-        Consumer<?> consumer = consumers.get(consumerCacheKey);
+        Consumer<?> consumer = consumers.computeIfAbsent(consumerCacheKey, (k -> {
 
-        if (consumer == null) {
             PulsarClient pulsarClient = getPulsarClient();
 
             // Get other possible consumer settings that are set at global level
@@ -447,7 +446,7 @@ public class PulsarSpace {
                     consumerBuilder = consumerBuilder.consumerName(consumerName);
                 }
 
-                consumer = consumerBuilder.subscribe();
+                Consumer<?> newConsumer = consumerBuilder.subscribe();
 
                 String consumerMetricsPrefix = getPulsarAPIMetricsPrefix(
                     PulsarActivityUtil.PULSAR_API_TYPE.CONSUMER.label,
@@ -456,29 +455,28 @@ public class PulsarSpace {
 
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "total_bytes_recv",
-                    consumerSafeExtractMetric(consumer, (s -> s.getTotalBytesReceived() + s.getNumBytesReceived())));
+                    consumerSafeExtractMetric(newConsumer, (s -> s.getTotalBytesReceived() + s.getNumBytesReceived())));
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "total_msg_recv",
-                    consumerSafeExtractMetric(consumer, (s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived())));
+                    consumerSafeExtractMetric(newConsumer, (s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived())));
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "total_recv_failed",
-                    consumerSafeExtractMetric(consumer, (s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed())));
+                    consumerSafeExtractMetric(newConsumer, (s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed())));
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "total_acks_sent",
-                    consumerSafeExtractMetric(consumer,(s -> s.getTotalAcksSent() + s.getNumAcksSent())));
+                    consumerSafeExtractMetric(newConsumer,(s -> s.getTotalAcksSent() + s.getNumAcksSent())));
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "recv_bytes_rate",
-                    consumerSafeExtractMetric(consumer, ConsumerStats::getRateBytesReceived));
+                    consumerSafeExtractMetric(newConsumer, ConsumerStats::getRateBytesReceived));
                 ActivityMetrics.gauge(activityDef,
                     consumerMetricsPrefix + "recv_msg_rate",
-                    consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
+                    consumerSafeExtractMetric(newConsumer, ConsumerStats::getRateMsgsReceived));
+                return newConsumer;
             } catch (PulsarClientException ple) {
-                ple.printStackTrace();
+                logger.error("Error creating a consumer", ple);
                 throw new RuntimeException("Unable to create a Pulsar consumer!");
             }
-
-            consumers.put(consumerCacheKey, consumer);
-        }
+        }));
 
         return consumer;
     }
