@@ -1,2 +1,4 @@
-- 0df215c2b (HEAD -> nb4-maintenance) fix for SSL issue #538
-- bcc618ac5 remove local api key
+- f73955992 (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #565 from eolivelli/fix/pulsar-concurrent-consumer-283
+- b3938f263 Pulsar: fix race in creating Pulsar Consumer and upgrade to Pulsar 2.8.3
+- f903a44e9 Merge pull request #563 from hemidactylus/bugfix-histostats-issue560
+- 451750261 Brought percentile sample points on a 1-100 scale (fixes issue #560)
