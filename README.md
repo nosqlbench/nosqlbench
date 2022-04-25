@@ -1,4 +1,4 @@
-![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg)
+[comment]: < ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg) >
 
 # NoSQLBench
 
