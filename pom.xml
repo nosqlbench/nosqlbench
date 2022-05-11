@@ -7,7 +7,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.92</version>
+        <version>4.15.93-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -150,7 +150,7 @@
             scm:git:https://github.com/nosqlbench/nosqlbench.git
         </developerConnection>
         <url>scm:git:git@github.com:nosqlbench/nosqlbench.git</url>
-        <tag>nosqlbench-4.15.92</tag>
+        <tag>nosqlbench-4.15.81-SNAPSHOT</tag>
     </scm>
 
     <distributionManagement>
