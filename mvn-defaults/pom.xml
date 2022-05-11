@@ -352,7 +352,7 @@
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
-                <version>20.3.5</version>
+                <version>21.0.0</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
