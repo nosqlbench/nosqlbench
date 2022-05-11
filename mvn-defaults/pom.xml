@@ -358,7 +358,7 @@
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>20.3.5</version>
+                <version>21.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
