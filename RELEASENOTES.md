@@ -1,1 +1,3 @@
-- fd409abda (HEAD -> nb4-maintenance) address OSHI loading issue for Mac M1
+- 1b56f72d2 (HEAD -> nb4-maintenance) add udev to alpine docker image
+- 0e81faf7c (origin/nb4-maintenance) M1 Mac fix release
+- fd409abda address OSHI loading issue for Mac M1
