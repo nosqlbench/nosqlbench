@@ -67,6 +67,10 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
         return pattern.matcher(metricName).matches();
     }
 
+    private static final String HDR_UNITS_GUIDE = "UNITS: StartTimestamp = seconds since StartTime; "
+                                                + "Interval_Length = seconds, Interval_Max = milliseconds, "
+                                                + "values in the histogram = nanoseconds";
+
     /**
      * By convention, it is typical for the logging application
      * to use a comment to indicate the logging application at the head
@@ -81,6 +85,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
             writer.outputLogFormatVersion();
             long currentTimeMillis = System.currentTimeMillis();
             writer.outputStartTime(currentTimeMillis);
+            writer.outputComment(HDR_UNITS_GUIDE);
             writer.setBaseTime(currentTimeMillis);
             writer.outputLegend();
         } catch (FileNotFoundException e) {
