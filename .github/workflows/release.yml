@@ -18,7 +18,7 @@ jobs:
       - name: setup java
         uses: actions/setup-java@v1
         with:
-          java-version: '15'
+          java-version: '14'
           java-package: jdk
           architecture: x64
 
