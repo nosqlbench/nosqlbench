@@ -2,6 +2,8 @@ package io.nosqlbench.nb.api.metadata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -11,8 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.function.Function;
 
 public class SystemId {
+    private final static Logger logger = LogManager.getLogger(SystemId.class);
 
     /**
      * Return the address of a node which is likely to be unique enough to identify
@@ -76,37 +80,96 @@ public class SystemId {
     }
 
     public static String getHostSummary() {
-        SystemInfo sysinfo = new SystemInfo();
-        HardwareAbstractionLayer hal = sysinfo.getHardware();
-        CentralProcessor p = hal.getProcessor();
 
-        Gson gson = new GsonBuilder().create();
+        SystemInfo sysinfo = null;
+        HardwareAbstractionLayer hal = null;
 
-        Set<String> ifspeeds = new HashSet<>();
-        hal.getNetworkIFs().forEach(
-            x -> {
-                long spd = x.getSpeed();
-                if (spd < (1024 * 1024 * 1000)) {
-                    ifspeeds.add(String.format("%.0fMib", (double) (spd / (1024 * 1024))));
-                } else {
-                    ifspeeds.add(String.format("%.0fGib", (double) (spd / (1024 * 1024 * 1000))));
+        try {
+            sysinfo = new SystemInfo();
+            hal = sysinfo.getHardware();
+
+        } catch (Exception e) {
+            logger.warn(e);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            return gson.toJson(Map.of("ERROR","OSHI library was unable to query system hardware details because: " + e.toString()));
+        }
+
+        HardwareSummary summary = new HardwareSummary(hal);
+
+        summary.add("physical-cores", h -> {
+            CentralProcessor p = h.getProcessor();
+            return String.valueOf(p.getPhysicalProcessorCount());
+        });
+
+        summary.add("logical-cores", h-> {
+            CentralProcessor p = h.getProcessor();
+            return String.valueOf(p.getLogicalProcessors().size());
+        });
+
+        summary.add("max-frequency-ghz", h -> {
+            CentralProcessor p = h.getProcessor();
+            return String.format("%.2f", (p.getMaxFreq() / 1_000_000_000_000.0d));
+        });
+
+        summary.add("sockets", h -> {
+            CentralProcessor p = h.getProcessor();
+            return String.valueOf(p.getPhysicalPackageCount());
+        });
+
+        summary.add("processor-name", h -> {
+            CentralProcessor p = h.getProcessor();
+            return String.valueOf(p.getProcessorIdentifier().getName());
+        });
+
+        summary.add("memory-GiB", h -> {
+            return String.format("%.2f", h.getMemory().getTotal() / (1024.0 * 1024.0 * 1024.0));
+        });
+
+        summary.add("heap-max-GiB", h -> {
+            return String.format("%.2f", Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0 * 1024.0));
+        });
+
+        summary.add("if-speeds", h -> {
+            Set<String> ifspeeds = new HashSet<>();
+            h.getNetworkIFs().forEach(
+                x -> {
+                    long spd = x.getSpeed();
+                    if (spd < (1024 * 1024 * 1000)) {
+                        ifspeeds.add(String.format("%.0fMib", (double) (spd / (1024 * 1024))));
+                    } else {
+                        ifspeeds.add(String.format("%.0fGib", (double) (spd / (1024 * 1024 * 1000))));
+                    }
                 }
-            }
-        );
+            );
+            return ifspeeds;
+        });
 
-        Map<String, Object> details = Map.of(
-            "physical-cores", String.valueOf(p.getPhysicalProcessorCount()),
-            "logical-cores", String.valueOf(p.getLogicalProcessors().size()),
-            "max-frequency-ghz", String.format("%.2f", (p.getMaxFreq() / 1_000_000_000_000.0d)),
-            "sockets", String.valueOf(p.getPhysicalPackageCount()),
-            "processor-name", String.valueOf(p.getProcessorIdentifier().getName()),
-            "memory-GiB", String.format("%.2f", hal.getMemory().getTotal() / (1024.0 * 1024.0 * 1024.0)),
-            "heap-max-GiB", String.format("%.2f", Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0 * 1024.0)),
-            "if-speeds", ifspeeds
-
-        );
-
-        return gson.toJson(details);
+        return summary.toString();
 
     }
+
+    private static class HardwareSummary {
+        private final HardwareAbstractionLayer hal;
+        private Map<String,Object> details = new LinkedHashMap<>();
+
+        public HardwareSummary(HardwareAbstractionLayer hal) {
+            this.hal = hal;
+        }
+
+        public void add(String name, Function<HardwareAbstractionLayer, Object> gatherer) {
+            try {
+                String result = gatherer.apply(hal).toString();
+                details.put(name,result);
+            } catch (Exception e) {
+                details.put(name,"ERROR:"+e.toString());
+            }
+        }
+
+        @Override
+        public String toString() {
+            Gson gson = new GsonBuilder().create();
+            return gson.toJson(details);
+        }
+    }
+
 }
