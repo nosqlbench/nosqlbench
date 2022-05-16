@@ -1,3 +1,2 @@
-- eef2abb93 (HEAD -> nb4-maintenance) Merge branch 'nb4-maintenance' of github.com:nosqlbench/nosqlbench into nb4-maintenance
-- 083bb3634 upate docker images with udev support
-- 1b56f72d2 add udev to alpine docker image
+- 104e21a35 (HEAD -> nb4-maintenance) Enforce Java versions up front to avoid any confusion about build requirements
+- 32997116b wrap OSHI calls to gather hardware data so they may fail without stopping NB
