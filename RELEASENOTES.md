@@ -1,4 +1,6 @@
-- 62dbab35e (HEAD -> main) merge fixes
+- 6c4c11d96 (HEAD -> main) add udev to dockerfile
+- cdc17b670 (origin/main) merge fixes
+- 62dbab35e merge fixes
 - e096e582e fix release
 - 31384c7d1 updated version to 4.17.13-SNAPSHOT
 - 3de6fe953 update release
