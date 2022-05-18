@@ -29,6 +29,7 @@
 
         <!-- properties for package versions -->
         <ascii.data.version>1.2.0</ascii.data.version>
+        <antlr4.version>4.9.3</antlr4.version>
         <commons.compress.version>1.21</commons.compress.version>
         <commons.codec.version>1.15</commons.codec.version>
         <commons.csv.version>1.9.0</commons.csv.version>
@@ -315,7 +316,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.10.1</version>
+                <version>${antlr4.version}</version>
             </dependency>
 
             <dependency>

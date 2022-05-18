@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -105,8 +106,13 @@ public class JmsActivity extends SimpleActivity {
         }
 
         PulsarConnectionFactory factory;
-        factory = new PulsarConnectionFactory(jmsConnInfo.getJmsConnConfig());
-        this.jmsContext = factory.createContext();
+        try {
+            factory = new PulsarConnectionFactory(jmsConnInfo.getJmsConnConfig());
+            this.jmsContext = factory.createContext();
+        } catch (JMSException e) {
+            throw new RuntimeException(
+                "Unable to initialize JMS connection factory (driver type: " + jmsProviderType + ")!");
+        }
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
