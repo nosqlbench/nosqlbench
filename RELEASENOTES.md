@@ -1,4 +1,6 @@
-- 31384c7d1 (HEAD -> main) updated version to 4.17.13-SNAPSHOT
+- 62dbab35e (HEAD -> main) merge fixes
+- e096e582e fix release
+- 31384c7d1 updated version to 4.17.13-SNAPSHOT
 - 3de6fe953 update release
 - 0e27cf5ba update release action
 - 0f8d698ff checkpoint release
