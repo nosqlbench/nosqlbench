@@ -3,7 +3,7 @@ name: release
 on:
   push:
     branches:
-      - nb5-preview
+      - main
     paths:
       - RELEASENOTES.**
 
@@ -108,7 +108,7 @@ jobs:
         run: scripts/release-prepare.sh
         env:
           RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "nb5-preview"
+          PRERELEASE_BRANCH_PATTERN: "main"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
@@ -162,7 +162,7 @@ jobs:
         continue-on-error: true
         env:
           RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "nb5-preview"
+          PRERELEASE_BRANCH_PATTERN: "main"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
           ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
