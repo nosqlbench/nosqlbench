@@ -1,9 +1,11 @@
-- 1b3cead29 (HEAD -> main) add binding functions ToJavaInstant, ToJodaInstant, Expr to Object
+- 0e27cf5ba (HEAD -> main) update release action
+- 0f8d698ff (origin/main) checkpoint release
+- 1b3cead29 add binding functions ToJavaInstant, ToJodaInstant, Expr to Object
 - 53acf7543 update JMS to API changes
 - 22827c4b1 update antlr version and remove intermediate artifacts
 - 9e35e6d81 Revert "update jms for API changes"
 - 818cb914c update jms for API changes
-- 88d5fd5c7 (origin/main) Merge pull request #573 from nosqlbench/snyk-fix-bca49309136b533b17f2ed5be59650f3
+- 88d5fd5c7 Merge pull request #573 from nosqlbench/snyk-fix-bca49309136b533b17f2ed5be59650f3
 - bdf6424b8 Merge pull request #554 from nosqlbench/snyk-fix-77c237f281fd7c49feb6d3ebec3cd74a
 - 94485533c Merge pull request #564 from nosqlbench/snyk-fix-14a426bd3e64d436f85f85bb60e89a14
 - 4b59803b9 Merge pull request #571 from nosqlbench/snyk-fix-b268af608f77af4994bea0209c2728f5
