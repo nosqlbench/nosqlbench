@@ -553,6 +553,33 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.13</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/generated/**</exclude>
+                    </excludes>
+                    <addLicenseHeaders>true</addLicenseHeaders>
+                    <consoleOutput>true</consoleOutput>
+                    <addLicenseHeaders>true</addLicenseHeaders>
+                    <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
+                </configuration>
+            </plugin>
+
         </plugins>
 
         <pluginManagement>

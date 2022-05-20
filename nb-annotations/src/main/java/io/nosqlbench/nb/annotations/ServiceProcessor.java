@@ -1,5 +1,23 @@
 package io.nosqlbench.nb.annotations;
 
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
@@ -56,7 +74,7 @@ public class ServiceProcessor extends AbstractProcessor {
         return writers.computeIfAbsent(className, s -> {
             try {
                 return filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/" + s, elements)
-                        .openWriter();
+                    .openWriter();
             } catch (IOException e) {
                 messenger.printMessage(Diagnostic.Kind.ERROR, e.toString());
                 return null;
@@ -71,7 +89,7 @@ public class ServiceProcessor extends AbstractProcessor {
         try {
             for (String annotationType : this.getSupportedAnnotationTypes()) {
                 Class<? extends Annotation> annotationClass =
-                        (Class<? extends Annotation>) Class.forName(annotationType);
+                    (Class<? extends Annotation>) Class.forName(annotationType);
                 Set<? extends Element> tsms = roundEnv.getElementsAnnotatedWith(annotationClass);
 
                 for (Element element : tsms) {
@@ -83,7 +101,7 @@ public class ServiceProcessor extends AbstractProcessor {
                         }
 
                         List<? extends ExecutableElement> valueKeys = am.getElementValues().keySet().stream()
-                                .filter(k -> k.toString().equals("value()")).collect(Collectors.toList());
+                            .filter(k -> k.toString().equals("value()")).collect(Collectors.toList());
                         if (valueKeys.size()==0) {
                             messenger.printMessage(Diagnostic.Kind.ERROR, "Annotation missing required value");
                             return false;
