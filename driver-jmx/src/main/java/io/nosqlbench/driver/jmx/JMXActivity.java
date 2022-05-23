@@ -39,7 +39,7 @@ public class JMXActivity extends SimpleActivity implements Activity {
     @Override
     public void initActivity() {
         super.initActivity();
-        this.sequence = createOpSequenceFromCommands(ReadyJmxOp::new);
+        this.sequence = createOpSequenceFromCommands(ReadyJmxOp::new, false);
         setDefaultsFromOpSequence(sequence);
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
         this.sslContext= SSLKsFactory.get().getContext(sslCfg);

@@ -38,7 +38,6 @@ import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -324,7 +323,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
-            spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
+                spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
             .map(RateSpec::new)
@@ -424,32 +423,38 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * Given a function that can create an op of type <O> from a CommandTemplate, generate
      * an indexed sequence of ready to call operations.
      *
-     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function)},
+     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function, boolean)},
      * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
      * for map-based specification of operations with bindings in each field.
      *
      * It is recommended to use the CommandTemplate form
      * than the
      *
-     * @param opinit
      * @param <O>
+     * @param opinit
+     * @param strict
      * @return
      */
-    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(Function<CommandTemplate, OpDispenser<O>> opinit) {
+    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(
+        Function<CommandTemplate, OpDispenser<O>> opinit,
+        boolean strict
+    ) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
-        return createOpSequence(opTemplateOFunction);
+        return createOpSequence(opTemplateOFunction, strict);
     }
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
         Function<ParsedOp, OpDispenser<? extends O>> opinit,
         NBConfiguration cfg,
-        List<Function<Map<String, Object>, Map<String, Object>>> parsers
+        List<Function<Map<String, Object>, Map<String, Object>>> parsers,
+        boolean strict
     ) {
         Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
-        return createOpSequence(opTemplateOFunction);
+
+        return createOpSequence(opTemplateOFunction, strict);
     }
 
     /**
@@ -475,7 +480,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit) {
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict) {
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 //        StrInterpolator interp = new StrInterpolator(activityDef);
         SequencerType sequencerType = getParams()
@@ -517,10 +522,13 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 long ratio = ratios.get(i);
                 OpTemplate optemplate = stmts.get(i);
                 OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
+                if (strict) {
+                    optemplate.assertConsumed();
+                }
                 planner.addOp(driverSpecificReadyOp, ratio);
             }
         } catch (Exception e) {
-            throw new OpConfigError(e.getMessage(),workloadSource,e);
+            throw new OpConfigError(e.getMessage(), workloadSource, e);
         }
 
         return planner.resolve();

@@ -114,7 +114,7 @@ public class JmsActivity extends SimpleActivity {
         messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
 
         if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
-            this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this));
+            this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this), false);
         }
 
         setDefaultsFromOpSequence(sequence);

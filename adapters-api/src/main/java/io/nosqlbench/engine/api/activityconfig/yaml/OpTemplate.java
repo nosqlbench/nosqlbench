@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.util.Tagged;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
 import java.util.LinkedHashMap;
@@ -331,5 +332,27 @@ public abstract class OpTemplate implements Tagged {
 
     public Element getParamReader() {
         return NBParams.one(getName(),getParams());
+    }
+
+    /**
+     * @return the size of remaining fields from the op template and the params map.
+     */
+    public int size() {
+        return getOp().map(Map::size).orElse(0) + getParams().size();
+    }
+
+    /**
+     * @return the map of all remaining fields from the op template and the params map.
+     */
+    public Map<String, Object> remainingFields() {
+        Map<String,Object> remaining = new LinkedHashMap<>(getOp().orElse(Map.of()));
+        remaining.putAll(getParams());
+        return remaining;
+    }
+
+    public void assertConsumed() {
+        if (size()>0) {
+            throw new OpConfigError("The op template named '" + getName() + "' was not fully consumed. These fields are not being applied:" + remainingFields());
+        }
     }
 }

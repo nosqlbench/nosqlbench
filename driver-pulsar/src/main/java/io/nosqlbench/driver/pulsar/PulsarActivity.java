@@ -136,7 +136,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         createPulsarSchemaFromConf();
 
 
-        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this));
+        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this), false);
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
 

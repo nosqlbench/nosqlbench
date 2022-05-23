@@ -88,7 +88,7 @@ public abstract class JDBCActivity extends SimpleActivity {
         resultSuccessTimer = ActivityMetrics.timer(getActivityDef(), "result-success");
         triesHisto = ActivityMetrics.histogram(getActivityDef(), "tries");
 
-        opSequence = createOpSequence(ReadyJDBCOp::new);
+        opSequence = createOpSequence(ReadyJDBCOp::new,false);
         setDefaultsFromOpSequence(opSequence);
 
         onActivityDefUpdate(getActivityDef());

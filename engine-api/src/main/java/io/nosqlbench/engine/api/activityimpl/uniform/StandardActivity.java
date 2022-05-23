@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * This is a typed activity which is expected to be come the standard
+ * This is a typed activity which is expected to become the standard
  * core of all new activity types. Extant NB drivers should also migrate
  * to this when possible.
  *
@@ -48,7 +48,8 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity {
         try {
             OpMapper<R> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
-            sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor));
+            boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(true);
+            sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor), strict);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;

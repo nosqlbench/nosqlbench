@@ -120,6 +120,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(BaseDriverAdapter.class)
             .add(Param.optional("alias"))
+            .add(Param.defaultTo("strict",true,"strict op field mode, which requires that provided op fields are recognized and used"))
             .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
             .add(Param.optional("tags", String.class, "tags to be used to filter operations"))

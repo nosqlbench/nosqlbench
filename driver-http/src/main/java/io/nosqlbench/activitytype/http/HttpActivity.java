@@ -75,7 +75,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         statusCodeHisto = ActivityMetrics.histogram(activityDef, "statuscode");
         skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
         resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
-        this.sequencer = createOpSequence(ReadyHttpOp::new);
+        this.sequencer = createOpSequence(ReadyHttpOp::new, false);
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
     }
