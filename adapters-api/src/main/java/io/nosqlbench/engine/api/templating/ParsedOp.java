@@ -446,6 +446,13 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     public <T> T getStaticConfigOr(String name, T defaultValue) {
         return tmap.getStaticConfigOr(name, defaultValue);
     }
+    public <T> T takeStaticConfigOr(String name, T defaultValue) {
+        return tmap.takeStaticConfigOr(name, defaultValue);
+    }
+    public String getStaticConfig(String name, Class<String> clazz) {
+        return tmap.getStaticConfig(name, clazz);
+    }
+
 
     public <T> Optional<T> getOptionalStaticConfig(String name, Class<T> type) {
         return tmap.getOptionalStaticConfig(name, type);
@@ -474,6 +481,11 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     @Override
     public <T> Optional<T> getOptionalStaticValue(String field, Class<T> classOfT) {
         return Optional.ofNullable(tmap.getStaticValue(field, classOfT));
+    }
+
+
+    public <T> Optional<T> takeOptionalStaticValue(String field, Class<T> classOfT) {
+        return Optional.ofNullable(tmap.takeStaticValue(field, classOfT));
     }
 
     /**

@@ -227,6 +227,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return (T) statics.get(field);
     }
 
+    public <T> T takeStaticValue(String field, Class<T> classOfT) {
+        return (T) statics.remove(field);
+    }
+
     /**
      * Get the static value for the provided name, cast to the required type, where the type is inferred
      * from the calling context.
@@ -293,6 +297,41 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             return defaultValue;
         }
     }
+
+    public String getStaticConfig(String name, Class<String> clazz) {
+        if (statics.containsKey(name)) {
+            return NBTypeConverter.convert(statics.get(name),clazz);
+        }
+        for (Map<String, Object> cfgsource : cfgsources) {
+            if (cfgsource.containsKey(name)) {
+                return NBTypeConverter.convert(cfgsource.get(name),clazz);
+            }
+        }
+        if (dynamics.containsKey(name)) {
+            throw new OpConfigError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+                "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
+        }
+        throw new OpConfigError("static config field '" + name + "' was requested, but it does not exist");
+    }
+
+    public <T> T takeStaticConfigOr(String name, T defaultValue) {
+        if (statics.containsKey(name)) {
+            Object value = statics.remove(name);
+            return NBTypeConverter.convertOr(value, defaultValue);
+        }
+        for (Map<String, Object> cfgsource : cfgsources) {
+            if (cfgsource.containsKey(name)) {
+                return NBTypeConverter.convertOr(cfgsource.get(name), defaultValue);
+            }
+        }
+        if (dynamics.containsKey(name)) {
+            throw new OpConfigError("static config field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
+                "updates the op mapper to support this field as a dynamic field, but it is not yet supported.");
+        } else {
+            return defaultValue;
+        }
+    }
+
 
     public <T> Optional<T> getOptionalStaticConfig(String name, Class<T> type) {
         if (statics.containsKey(name)) {
