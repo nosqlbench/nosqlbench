@@ -2,7 +2,7 @@
 
 ## requirements
 
-You need Java 12 or newer to build NoSQLBench.
+You need Java 17 or newer to build NoSQLBench.
 
 # Building Locally
 
