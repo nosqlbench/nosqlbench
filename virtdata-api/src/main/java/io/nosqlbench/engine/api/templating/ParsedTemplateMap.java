@@ -42,11 +42,11 @@ import java.util.function.LongFunction;
  * A parsed map template, which allows construction of extracted or projected functions related
  * to dynamic value templates.
  *
- * The provided map is taken as a map of string to object templates using these rules:
+ * The provided map is interpreted as a map of string to object templates using these rules:
  * <OL>
- * <LI>If the value is a String and contains no binding points, it is taken as a literal</LI>
- * <LI>If the value is a String and contains only a binding point with no leading nor trailing text, it is taken as an object binding</LI>
- * <LI>If the value is a String and contains a binding point with any leading or trailing text, it is taken as a String template binding</LI>
+ * <LI>If the value is a String and contains no binding points, it is interpreted as a literal</LI>
+ * <LI>If the value is a String and contains only a binding point with no leading nor trailing text, it is interpreted as an object binding</LI>
+ * <LI>If the value is a String and contains a binding point with any leading or trailing text, it is interpreted as a String template binding</LI>
  * <LI>If the value is a map, list, or set, then each element is interpreted as above</LI>
  * </OL>
  */
