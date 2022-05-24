@@ -36,7 +36,246 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 
 /**
- * Parse an OpTemplate into a ParsedOp, which can dispense object maps
+ * <H1>ParsedOp API</H1>
+ *
+ * <P>This is the primary developer-focused API for driver developers to use when up-converting op templates
+ * to operations. This {@link ParsedOp} is a wrapper around the op template structure. It provides many
+ * ways of constructing higher-order objects from a variety of sources.</P>
+ *
+ * <H2>Supporting Variety</H2>
+ * <P>
+ * For some drivers or protocols, the primary user interface is a statement format or grammar. For CQL or SQL,
+ * the most natural way of describing templates for operations is in that native format. For others, an operation
+ * template may look like a block of JSON or a HTTP request. All these forms are supported. In order to deal with
+ * the variety, there are some normative rules about how they must be structured, both for the user, and for the
+ * driver developer.
+ *
+ * <H2>Op Template Parsing</H2>
+ * <OL>
+ *     <LI>All op templates are parsed into an internal normalized structure which contains:
+ *     <OL>
+ *         <LI>A map of op payload fields, which can be either of:
+ *         <OL>
+ *             <LI>static field values</LI>
+ *             <LI>dynamic field values</LI>
+ *         </OL>
+ *         <LI>
+ *         Further, when the type of an op template is specified as a string, it is auto de-sugared into a map of a single
+ *         op payload field named 'stmt'.</LI>
+ *         </LI>
+ *         <LI>op params</LI>
+ *         <LI>When neither 'op' nor 'params' is specified, all root-level op fields are put into the op payload.</LI>
+ *         <LI>When either 'op' or 'params' is specified, all other root-level fields are automatically put into the other.</LI>
+ *         <LI>When both 'op' and 'params' is specified, any other root-level fields causes an error to be thrown.</LI>
+ *     </OL>
+ *
+ *     </LI>
+ *
+ * </OL>
+ * </P>
+ *
+ * <H2>Distinguishing Op Payload from Op Config</H2>
+ * <P>When a user specifies an op template, they may choose to provide only a single set of op fields without
+ * distinguishing between config or payload, or they may choose to directly configure each.
+ * <H4>Example:</H4>
+ * <PRE>{@code
+ * ops:
+ * # both op and params explicitly named
+ *   op1:
+ *     op:
+ *       opfield1: value1
+ *     params:
+ *       param2: value2
+ * # neither op field nor params named, so all assumed to be op fields
+ *   op2:
+ *     opfield1: value1
+ *     param2: value2
+ *     # in this case, if param2 is meant to be config level,
+ *     # it is a likely config error that should be thrown to the user
+ * # only op field explicitly named, so remainder automatically pushed into params
+ *   op3:
+ *     op:
+ *       opfield1: value1
+ *     param2: value2
+ * # only params explicitly named, so remainder pushed into op payload
+ *   op4:
+ *     params:
+ *       param2: value2
+ *     opfield1: value1
+ * }</PRE>
+ *
+ * All of these are considered valid constructions, and all of them may actually achieve the same result.
+ * This looks like an undesirable problem, but it serves to simplify things for users in one specific way: It allows
+ * them to be a bit ambiguous, within guidelines, and still have a valid workload definition.
+ * The NoSQLBench runtime does a non-trivial amount of processing on the op template to
+ * ensure that it can conform to an unambiguous normalized internal structure on your behalf.
+ * This is needed because of how awful YAML is as a user configuration language in spite of its
+ * ubiquity in practice.
+ *
+ * <HR></HR>
+ * <H2>Design Invariants</H2>
+ *
+
+ *
+ * <P>The above rules imply invariants, which are made explicit here. Most of these are provided for automatically by {@link ParsedOp}.</P>
+ *
+ * <P><UL>
+ *
+ *     <LI><EM>You may not use an op field name or parameter name for more than one purpose.</EM>
+ *     <UL>
+ *         <LI>Treat all parameters supported by a drier adapter and it's op fields as a globally shared namespace, even if it is not.
+ *         This avoids creating any confusion about what a parameter can be used for and how to use it for the right thing in the right place.
+ *         For example, you may not use the parameter name `socket` in an op template to mean one thing and then use it
+ *         at the driver adapter level to mean something different.
+ *         </LI>
+ *     </UL>
+ *     </LI>
+ *
+ *     <LI><EM>Users may specify op payload fields within op params or activity params as fallback config sources in that order.</EM>
+ *     <UL>
+ *         <LI>IF a name is valid as an op field, it must also be valid as such when specified in op params.</LI>
+ *         <LI>If a name is valid as an op field, it must also be valid as such when specified in activity params, within the scope of {@link ParsedOp}</LI>
+ *         <LI>When an op field is found via op params or activity params, it may be dynamic.</LI>
+ *     </UL>
+ *     </LI>
+ *
+ *     <LI><EM>You must access non-payload params via Config-oriented methods.</EM>
+ *         <UL>
+ *             <LI>Op Templates contain op payload data and op configs (params, activity params).</LI>
+ *             <LI>You must use only {@link ParsedOp} getters with "...Config..." names, such as {@link #getConfigOr(String, Object, long)}
+ *             when accessing non-payload fields.</LI>
+ *             <LI>When a dynamic value is found via one of these calls, an error should be thrown,
+ *              as configuration level data is not expected to be variant per-operation or cycle.</LI>
+ *         </UL>
+ *     </LI>
+ *
+ *     <LI><EM>The user must be warned when a required or optional config value is missing from op params (or activity params), but a value
+ *     of the same name is found in op payload fields.</EM>
+ *       <UL>
+ *           <LI>If rule #1 is followed, and names are unambiguous across the driver, then it is almost certainly a configuration error.</LI>
+ *       </UL>
+ *     </LI>
+ *
+ *     <LI><EM>When both an op payload field and a param field of the same name are defined through cascading configuration of param fields,
+ *     the local op payload field takes precedence.</EM>
+ *       <UL>
+ *           <LI>This is an extension of the param override rules which say that the closest (most local) value to an operation is the one that takes precedence.</LI>
+ *       </UL>
+ *     </LI>
+ * </UL>
+ * </P>
+ *
+ * <HR></HR>
+ *
+ * <H2>Op Payload Forms</H2>
+ * Field values can come from multiple sources. These forms and any of their combinations are supported.
+ *
+ * <H3>Static Op Fields</H3>
+ * <H4>Example:</H4>
+ * <PRE>{@code
+ * op:
+ *   field1: value1
+ *   field2:
+ *     map3:
+ *       key4: value4
+ *     map5:
+ *       key6: value6
+ *   field7: false
+ *   field8: 8.8
+ * }</PRE>
+ *
+ * As shown, any literal value of any valid YAML type, including structured values like lists or maps are accepted as
+ * static op template values. A static value is any value which contains zero bind points at any level.
+ *
+ * <H3>Dynamic Op Fields with Binding References</H3>
+ * <H4>Example:</H4>
+ * <PRE>{@code
+ * op:
+ *   field1: "{binding1}"
+ *   field2: "value is: {binding1}"
+ * }
+ * </PRE>
+ *
+ * <P>In this form, {@code {binding1}} is known as a <EM>binding reference</EM>, since the binding function is defined
+ * elsewhere under the given name. The first field "field1" is specified with no leading nor trailing literals, and
+ * is thus taken as a <EM>raw binding reference</EM>, meaning that it will not be converted to a String. The second,
+ * named "field2", is what is known as a <EM>string template</EM>, and is syntactical sugar for a more complex binding
+ * which concatenates static and dynamic parts together. In this form, object types produced by binding functions are
+ * converted to string form before concatenation.
+ * </P>
+ *
+ * <P>Note that a raw {@code {binding1}} value (without quotes) would be NOT be a binding reference, since YAML
+ * is a superset of JSON. this means that {@code {binding1}} would be converted to a map or JSON object type
+ * with invalid contents. This is warned about when detected as a null valued map key, although it also makes
+ * null values invalid for ANY op template value.</P>
+ *
+ * <H3>Dynamic Op Fields with Binding Definitions</H3>
+ * <H4>Example:</H4>
+ *
+ * <PRE>{@code
+ * op:
+ *   field1: "{{NumberNameToString()}}"
+ *   field2: "value is: {{NumberNameToString()}}"
+ * }
+ * </PRE>
+ *
+ * This form has exactly the same effect as the previous example as long as your bindings definitions included:
+ * <PRE>{@code
+ * bindings:
+ *   binding1: NumberNameToString();
+ * }</PRE>
+ *
+ * <H3>Dynamic Op Fields with Structure</H3>
+ * <H4>Example:</H4>
+ *
+ * <PRE>{@code
+ *   field1:
+ *     k1: "{binding1}
+ *     k2: "literal value"
+ *   field2:
+ *     - "value3"
+ *     - "{binding4}"
+ *     - "a value: {binding5}"
+ *     - "{{NumberNameToString}}"
+ *     - "a value: {{NumberNameToString()}}"
+ * }</PRE>
+ *
+ * <P>This example combines the previous ones with structure and dynamic values. Both field1 and field2 are dynamic,
+ * since each contains some dynamic value or template within. When field1 is accessed within a cycle, that cycles value
+ * will be used as the seed to generate equivalent structures with all the literal and dynamic elements inserted as
+ * the template implies. As before, direct binding references like {@code {binding4}} will be inserted into the
+ * structure with whatever type the binding definition produces, so if you want strings in them, ensure that you
+ * configure your binding definitions thusly.</P>
+ *
+ * <H3>Op Template Params</H3>
+ * <H4>Example:</H4>
+ * <PRE>{@code
+ * params:
+ *  prepared: true
+ * ops:
+ *  op1:
+ *   field1: value1
+ *   params:
+ *    prepared: false
+ * }</PRE>
+ *
+ * The params section are the first layer of external configuration values that an op template can use to distinguish
+ * op configuration parameters from op payload content.
+ * Op Template Params are referenced when any of the {@link #getConfigOr(String, Object, long)} or other <EM>...Config...</EM>
+ * getters are used (bypassing non-param fields). They are also accessed as a fallback when no static nor dynamic value is found
+ * for a reference op template field. Unlike op fields, op params cascade from within the workload YAML from the document level,
+ * down to each block and then down to each statement.
+ *
+ * <H3>Activity Params</H3>
+ * <H4>Example:</H4>
+ * <PRE>{@code
+ * ./nb run driver=... workload=... cl=LOCAL_QUORUM
+ * }</PRE>
+ *
+ * <P>When explicitly allowed by a driver adapter's configuration model, values like {@code cl} above can be seen as
+ * another fallback source for configuration parameters. The {@link ParsedOp} implementation will automatically look
+ * in the activity parameters if needed to find a missing configuration parameter, but this will only work if
+ * the specific named parameter is allowed at the activity level.</P>
  */
 public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader, DynamicFieldReader {
 
