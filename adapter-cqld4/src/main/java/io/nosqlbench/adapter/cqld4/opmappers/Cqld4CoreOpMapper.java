@@ -58,7 +58,7 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
         CqlD4OpType opType = CqlD4OpType.prepared;
 
-        TypeAndTarget<CqlD4OpType, String> target = cmd.getTargetEnum(CqlD4OpType.class, String.class, "type", "stmt");
+        TypeAndTarget<CqlD4OpType, String> target = cmd.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
 
         return switch (target.enumId) {
             case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(cmd);

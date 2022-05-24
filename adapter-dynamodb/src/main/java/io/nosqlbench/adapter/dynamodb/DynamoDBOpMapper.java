@@ -50,7 +50,7 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
             throw new RuntimeException("This mode is reserved for later. Do not use the 'body' op field.");
 //            return new RawDynamoDBOpDispenser(cmd);
         } else {
-            TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTargetEnum(DynamoDBCmdType.class,String.class);
+            TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTypeAndTarget(DynamoDBCmdType.class,String.class);
             return switch (cmdType.enumId) {
                 case CreateTable -> new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
                 case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, cmd, cmdType.targetFunction);

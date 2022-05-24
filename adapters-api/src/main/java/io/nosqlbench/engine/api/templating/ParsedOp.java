@@ -440,18 +440,18 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return Optionally, an enum value which matches, or {@link Optional#empty()}
      * @throws OpConfigError if more than one field matches
      */
-    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getTypeFromEnum(Class<E> enumclass, Class<V> valueClass) {
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getTypeAndTargetFromEnum(Class<E> enumclass, Class<V> valueClass) {
         return tmap.getOptionalTargetEnum(enumclass,valueClass);
     }
 
-    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTargetEnum(
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTypeAndTargetEnum(
         Class<E> enumclass,
         Class<V> valueClass
     ){
         return tmap.getOptionalTargetEnum(enumclass,valueClass);
     }
 
-    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTargetEnum(
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTypeAndTargetEnum(
         Class<E> enumclass,
         Class<V> valueClass,
         String alternateTypeField,
@@ -460,11 +460,11 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getOptionalTargetEnum(enumclass, valueClass, alternateTypeField, alternateValueField);
     }
 
-    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(Class<E> enumclass, Class<V> valueClass) {
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(Class<E> enumclass, Class<V> valueClass) {
         return tmap.getTargetEnum(enumclass, valueClass);
     }
 
-    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(Class<E> enumclass, Class<V> valueclass, String tname, String vname) {
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(Class<E> enumclass, Class<V> valueclass, String tname, String vname) {
         return tmap.getTargetEnum(enumclass, valueclass,tname,vname);
     }
 
