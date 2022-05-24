@@ -77,10 +77,10 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         }
 
         int code = 0;
+        Object result = null;
         while (op != null) {
 
             int tries = 0;
-            Object result = null;
             while (tries++ <= activity.getMaxTries()) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
