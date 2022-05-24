@@ -85,6 +85,8 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 
+                dispenser.onStart(cycle);
+
                 try (Timer.Context ct = executeTimer.time()) {
                     if (op instanceof RunnableOp) {
                         ((RunnableOp) op).run();

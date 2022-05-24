@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,6 +45,14 @@ public class ThreadLocalNamedTimers {
         timers.put(name, timer);
     }
 
+    public static void addTimer(ParsedOp pop, String name) {
+        if (timers.containsKey("name")) {
+            logger.warn("A timer named '" + name + "' was already defined and initialized.");
+        }
+        Timer timer = ActivityMetrics.timer(pop.getStaticConfig("alias",String.class)+"."+name);
+        timers.put(name, timer);
+    }
+
     public void start(String name) {
         Timer.Context context = timers.get(name).time();
         contexts.put(name, context);
@@ -54,9 +63,15 @@ public class ThreadLocalNamedTimers {
         context.stop();
     }
 
-    public void start(List<String> timerName) {
-        for (String startTimer : timerName) {
-            start(startTimer);
+    public void start(List<String> timerNames) {
+        for (String timerName : timerNames) {
+            start(timerName);
+        }
+    }
+
+    public void start(String[] timerNames) {
+        for (String timerName : timerNames) {
+            start(timerName);
         }
     }
 
@@ -66,4 +81,9 @@ public class ThreadLocalNamedTimers {
         }
     }
 
+    public void stop(String[] timerStops) {
+        for (String timerStop : timerStops) {
+            stop(timerStop);
+        }
+    }
 }
