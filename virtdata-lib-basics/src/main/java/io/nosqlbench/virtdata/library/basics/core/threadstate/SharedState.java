@@ -39,4 +39,18 @@ public class SharedState {
     public static ConcurrentHashMap<String,Object> gl_ObjectMap =
             new ConcurrentHashMap<>();
 
+    public static <T> T put(Scope scope, String name, T value) {
+        return switch(scope) {
+            case process -> (T) gl_ObjectMap.put(name, value);
+            case thread -> (T) tl_ObjectMap.get().put(name, value);
+        };
+    }
+
+    public static <T> T get(Scope scope, String name) {
+        return switch(scope) {
+            case process -> (T) gl_ObjectMap.get(name);
+            case thread -> (T) tl_ObjectMap.get().get(name);
+        };
+    }
+
 }
