@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx.ops;
+package io.nosqlbench.adapter.jmx.operations;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import org.apache.logging.log4j.LogManager;

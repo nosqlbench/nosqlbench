@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx.ops;
+package io.nosqlbench.adapter.jmx.operations;
 
-import io.nosqlbench.driver.jmx.formats.MBeanInfoConsoleFormat;
+import io.nosqlbench.adapter.jmx.formats.MBeanInfoConsoleFormat;
 
 import javax.management.*;
 import javax.management.remote.JMXConnector;
-import java.io.IOException;
 
 public class JMXExplainOperation extends JmxOp {
     public final static String EXPLAIN = "explain";

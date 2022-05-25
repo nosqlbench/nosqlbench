@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx;
+package io.nosqlbench.adapter.jmx;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

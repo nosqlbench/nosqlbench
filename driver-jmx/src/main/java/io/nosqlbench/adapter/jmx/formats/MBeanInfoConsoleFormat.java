@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx.formats;
+package io.nosqlbench.adapter.jmx.formats;
 
 import javax.management.*;
 import java.util.Map;

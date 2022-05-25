@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx;
+package io.nosqlbench.adapter.jmx;
 
-import io.nosqlbench.adapter.jmx.ValueConverter;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class ValueConverterTest {
-
-    @Test
-    public void testConvertStringDouble() {
-        String s = "3";
-        double d = (double) ValueConverter.convert("double", s);
-    }
-
+public enum JMXOpTypes {
+    Read,
+    Print,
+    Explain
 }

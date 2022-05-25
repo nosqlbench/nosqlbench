@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx;
-
-import java.util.function.Function;
+package io.nosqlbench.adapter.jmx;
 
 public class ValueConverter {
 

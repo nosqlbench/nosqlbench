@@ -14,33 +14,38 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.driver.jmx.ops;
+package io.nosqlbench.adapter.jmx.operations;
 
-import io.nosqlbench.driver.jmx.ValueConverter;
+import io.nosqlbench.adapter.jmx.JMXSpace;
+import io.nosqlbench.adapter.jmx.ValueConverter;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import java.util.Map;
 
 public class JMXPrintOperation extends JMXReadOperation {
-    public static final String PRINTVAR = "printvar";
 
-    public JMXPrintOperation(JMXConnector connector, ObjectName objectName, String attribute, Map<String, String> cfg) {
-        super(connector, objectName, attribute, cfg);
+    public JMXPrintOperation(
+        JMXSpace space,
+        ObjectName oname,
+        String readvar,
+        String asType,
+        String asName,
+        SharedState.Scope scope
+    ) {
+        super(space, oname, readvar, asType, asName, scope);
     }
 
     @Override
     public void execute() {
-        Object value = readObject(attribute);
-        System.out.println("# read JMX attribute '" + attribute + "' as " + value.getClass() +
+        Object value = readObject(readvar);
+        System.out.println("# read JMX attribute '" + readvar + "' as " + value.getClass() +
                 ((asType != null) ? " as_type=" + asType : "") +
                 ((asName != null) ? " as_name=" + asName : ""));
 
         if (asType != null) {
             value = ValueConverter.convert(asType, value);
         }
-        String storedName = (asName == null) ? attribute : asName;
+        String storedName = (asName == null) ? readvar : asName;
 
         System.out.println(storedName + "=" + value + "\n");
     }
