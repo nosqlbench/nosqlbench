@@ -435,7 +435,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
     /**
-     * Get the op field as a {@link LongFunction}
+     * Get the op field as a {@link LongFunction}, using statics, then dynamics, then config sources.
      *
      * @param name The field name which must be defined as static or dynamic
      * @param type The value type which the field must be assignable to
@@ -453,7 +453,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             } else {
                 throw new OpConfigError(
                     "function for '" + name + "' yielded a " + value.getClass().getCanonicalName()
-                        + " type, which is not assignable to a " + type.getCanonicalName() + "'"
+                        + " type, which is not assignable to a '" + type.getCanonicalName() + "'"
                 );
             }
         } else if (isDynamic(name)) {
@@ -465,9 +465,24 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             } else {
                 throw new OpConfigError(
                     "function for '" + name + "' yielded a " + testValue.getClass().getCanonicalName()
-                        + " type, which is not assignable to " + type.getCanonicalName() + "'");
+                        + " type, which is not assignable to '" + type.getCanonicalName() + "'");
             }
         } else {
+            for (Map<String, Object> cfgsource : cfgsources) {
+                if (cfgsource.containsKey(name)) {
+                    Object object = cfgsource.get(name);
+                    if (type.isAssignableFrom(object.getClass())) {
+                        return Optional.of((LongFunction<V>) cfgsource.get(name));
+                    } else if (NBTypeConverter.canConvert(object, type)) {
+                        return Optional.of(l -> NBTypeConverter.convert(cfgsource.get(name), type));
+                    } else {
+                        throw new OpConfigError(
+                            "function for '" + name + "' found a " + object.getClass().getCanonicalName()
+                                + " type in cfg source, which is not assignable to '" + type.getCanonicalName() + "'");
+
+                    }
+                }
+            }
             return Optional.empty();
         }
     }
@@ -733,7 +748,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (result.isPresent()) {
             return result;
         }
-        return getOptionalTargetEnum(enumclass,alternateTypeField,alternateValueField,valueClass);
+        return getOptionalTargetEnum(enumclass, alternateTypeField, alternateValueField, valueClass);
     }
 
     /**
@@ -779,7 +794,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return Optional.empty();
     }
 
-    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTargetEnum(
+    public <E extends Enum<E>, V> TypeAndTarget<E, V> getTargetEnum(
         Class<E> enumclass,
         Class<V> valueClass,
         String tname,
@@ -793,7 +808,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (optionalSpecifiedEnum.isPresent()) {
             return optionalSpecifiedEnum.get();
         }
-        throw new OpConfigError("Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) +" either by key or by fields " + tname + " and " + vname + ". " +
+        throw new OpConfigError("Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) + " either by key or by fields " + tname + " and " + vname + ". " +
             "Fields considered: static:" + statics.keySet() + " dynamic:" + dynamics.keySet());
     }
 
