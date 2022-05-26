@@ -1,0 +1,150 @@
+bindings:
+  cur_cycle: ToString()
+  mykey: Mod(5); ToString(); Prefix("key-")
+  mytext_val: AlphaNumericString(30)
+  mymap_val1: AlphaNumericString(10)
+  mymap_val2: AlphaNumericString(20)
+  mystream_val1: AlphaNumericString(50)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  temporary_dest: "false"
+  dest_type: "topic"
+  dest_name: "mys4jtest_t"
+  reuse_producer: "true"
+  async_api: "false"
+
+blocks:
+  ###################
+  # Message sender/producer/publisher
+  # - Applicable to a Topic or a Queue
+  #------------------
+  - name: "msg-send-block"
+    tags:
+      phase: "ms"
+    statements:
+      - name: "s1"
+        optype: "msg_send"
+
+        ## (Optional) JMS headers (in JSON format).
+        msg_header: |
+          {
+            "JMSPriority": "9"
+          }
+
+        ## (Optional) JMS properties, predefined or customized (in JSON format).
+        msg_property: |
+          {
+            "MyMsgSeq": "{cur_cycle}",
+            "JMSXGroupID": "{mykey}"
+          }
+
+        ## (Optional) JMS message types, default to be BYTES.
+        msg_type: "text"
+#        msg_type: "map"
+#        msg_type: "stream"
+
+        ## (Mandatory) JMS message body. Value depends on msg_type.
+        msg_body: "{mytext_val}"
+#        msg_body: |
+#          {
+#            "prop-key-1": "{mymap_val1}",
+#            "prop-key-2": "{mymap_val2}"
+#          }
+#        msg_body: |
+#          [
+#            "100",
+#            "{mystream_val1}",
+#            "abcdef"
+#          ]
+
+  ###################
+  # Regular message receiver/consumer/subscriber
+  # - Applicable to a Topic or a Queue
+  #------------------
+  - name: "msg-read-block"
+    tags:
+      phase: "mr"
+    statements:
+      - name: "s1"
+        optype: "msg_read"
+
+        ## (Optional) Message selector
+        msg_selector: ""
+
+        ## (Optional) No Local
+        no_local: "false"
+
+        ## (Optional) Read Timeout
+        read_timeout: "10"
+
+        ## (Optional) Receive message without wait
+        no_wait: "true"
+
+  ###################
+  # Durable message receiver/consumer/subscriber
+  # - Applicable to Topic only
+  # - Subscription name is mandatory
+  #------------------
+  - name: "msg-read-durable-block"
+    tags:
+      phase: "mrd"
+    statements:
+      - name: "s1"
+        optype: "msg_read_durable"
+
+        ## Subscription name
+        subscription_name: "sub-mrd"
+
+        ## (Optional) Receive message without wait
+        no_wait: "true"
+
+  ###################
+  # Shared message receiver/consumer/subscriber
+  # - Applicable to Topic only
+  # - Subscription name is mandatory
+  #------------------
+  - name: "msg-read-shared-block"
+    tags:
+      phase: "mrs"
+    statements:
+      - name: "s1"
+        optype: "msg_read_shared"
+
+        ## Subscription name
+        subscription_name: "sub-mrs"
+
+        ## (Optional) Receive message without wait
+        no_wait: "true"
+
+  ###################
+  # Durable and shared message receiver/consumer/subscriber
+  # - Applicable to Topic only
+  # - Subscription name is mandatory
+  #------------------
+  - name: "msg-read-durable-shared-block"
+    tags:
+      phase: "mrds"
+    statements:
+      - name: "s1"
+        optype: "msg_Read_shared_durable"
+
+        ## Subscription name
+        subscription_name: "sub-mrds"
+
+        ## (Optional) Receive message without wait
+        no_wait: "true"
+
+  ###################
+  # Queue browser
+  # - Applicable to Queue only
+  #------------------
+  - name: "msg-queue-browse-block"
+    tags:
+      phase: "mqb"
+    statements:
+      - name: "s1"
+        optype: "msg_browse"
+
+        ## (Optional) Message selector
+        msg_selector: ""
