@@ -1,6 +1,41 @@
-- d0a5ecc46 (HEAD -> nb4-maintenance) correct java version in enforce-java mojo
-- 1f064fff9 (origin/nb4-maintenance) release fix release
-- 2acb34e7b set github actions java to j14 (LTS) for maint branch
-- d127821bd fix release
-- 104e21a35 Enforce Java versions up front to avoid any confusion about build requirements
-- 32997116b wrap OSHI calls to gather hardware data so they may fail without stopping NB
+- eb4e78cb0 (HEAD -> nb4-maintenance) possible fix for #586
+- d36839143 (origin/nb4-maintenance) Merge branch 'nb4-maintenance' of github.com:nosqlbench/nosqlbench into nb4-maintenance
+- 2b91e4186 gson update
+- 0227fd3e0 Merge pull request #578 from hemidactylus/hdr_log_units_legend
+- dd89c4cd1 updated license headers for driver-jms
+- 4fe0ef5be updated license headers for driver-cockroachdb
+- 05ceca394 updated license headers for driver-jdbc
+- bc93dd4b0 updated license headers for driver-cqld4,directapi
+- 36da9e689 updated license headers for driver-pulsar
+- 00791dab2 updated license headers for driver-mongodb
+- 60389c768 updated license headers for driver-cqlverify
+- 493ebfebb updated license headers for driver-cqld3-shaded
+- dedddb9cf updated license headers for driver-cql-shaded
+- fcb0d9ac2 updated license headers for driver-dsegraph
+- 26458af7f updated license headers for driver-jmx
+- 357ed4e4d updated license headers for driver-http
+- a5745e712 updated license headers for driver-kafka
+- 8fb22e729 updated license headers for driver-stdout
+- 1c40f033d updated license headers for driver-web
+- 483f45247 updated license headers for nbr
+- 2d15ccedb updated license headers for driver-diag
+- 476b05f18 updated license headers for engine-extensions
+- 1e31caec1 updated license headers for engine-docs
+- 59edfdcf2 updated license headers for engine-rest
+- c9664b748 updated license headers for engine-cli
+- 7c8a44e1d updated license headers for engine-docker
+- 1630acaeb updated license headers for engine-core
+- c1ddc4c2b updated license headers for engine-clients
+- 031c519d7 updated license headers for engine-api
+- 7e6cdffe5 updated license headers for drivers-api
+- 619814eb7 updated license headers for adapters-api
+- b8a4217b4 updated license headers for virtdata-userlibs
+- 977abcce8 updated license headers for docsys
+- f1e300915 updated license headers for virtdata-lib-curves4
+- 15955d095 updated license headers for virtdata-lib-random
+- 85d3d7db8 updated license headers for virtdata-lib-realer
+- dd16160b2 updated license headers for virtdata-basics
+- d21365ae0 updated license headers for virtdata-realdata
+- 7603d5cc7 updated license headers for virtdata
+- 9d1b47196 updated license headers for virtdata-lang
+- 8350dd136 update license headers
