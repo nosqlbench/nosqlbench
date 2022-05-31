@@ -86,8 +86,20 @@
 
             <dependency>
                 <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java11</artifactId>
+                <artifactId>oshi-core</artifactId>
                 <version>6.1.6</version>
+            </dependency>
+
+            <!-- due to https://github.com/oshi/oshi/issues/1289 -->
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>5.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>5.8.0</version>
             </dependency>
 
             <dependency>
