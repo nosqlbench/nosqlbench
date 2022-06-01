@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.core;
+package io.nosqlbench.engine.api.activityapi.core.progress;
 
-public interface ProgressMeter {
+public interface InputProgressMeter {
     String getProgressName();
 
     //    RunState getProgressState();
     long getStartedAtMillis();
 
-    long getProgressMin();
+    long getMinInputCycle();
 
-    long getProgressCurrent();
+    long getCurrentInputCycle();
 
-    long getProgressMax();
+    long getMaxInputCycle();
 
     long getRecyclesCurrent();
 
     long getRecyclesMax();
 
     default String getProgressSummary() {
-        return "min=" + getProgressMin() + " cycle=" + getProgressCurrent() + " max=" + getProgressMax() +
+        return "min=" + getMinInputCycle() + " cycle=" + getCurrentInputCycle() + " max=" + getMaxInputCycle() +
             (getRecyclesMax() > 0L ? " recycles=" + getRecyclesCurrent() + "/" + getRecyclesMax() : "");
     }
 
     default double getProgressRatio() {
         return
-            ((double) (getProgressCurrent() - getProgressMin()))
+            ((double) (getCurrentInputCycle() - getMinInputCycle()))
                 /
-                ((double) (getProgressMax() - getProgressMin()));
+                ((double) (getMaxInputCycle() - getMinInputCycle()));
     }
 
     default double getProgressTotal() {
-        return (getProgressMax() - getProgressMin());
+        return (getMaxInputCycle() - getMinInputCycle());
     }
 
     default double getProgressETAMillis() {
@@ -53,10 +53,10 @@ public interface ProgressMeter {
         long now = System.currentTimeMillis();
         double elapsed = now - then;
 
-        double completed = getProgressCurrent() - getProgressMin();
+        double completed = getCurrentInputCycle() - getMinInputCycle();
         double rate = completed / elapsed;
 
-        double remaining = getProgressMax() - getProgressCurrent();
+        double remaining = getMaxInputCycle() - getCurrentInputCycle();
         return remaining / rate;
     }
 }

@@ -16,15 +16,15 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.InputProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 
-public class ProgressAndStateMeter implements ProgressMeter, StateCapable {
-    private final ProgressMeter meter;
+public class ProgressAndStateMeter implements InputProgressMeter, StateCapable {
+    private final InputProgressMeter meter;
     private final StateCapable statesrc;
 
-    public ProgressAndStateMeter(ProgressMeter meter, StateCapable statesrc) {
+    public ProgressAndStateMeter(InputProgressMeter meter, StateCapable statesrc) {
         this.meter = meter;
         this.statesrc = statesrc;
     }
@@ -40,18 +40,18 @@ public class ProgressAndStateMeter implements ProgressMeter, StateCapable {
     }
 
     @Override
-    public long getProgressMin() {
-        return meter.getProgressMin();
+    public long getMinInputCycle() {
+        return meter.getMinInputCycle();
     }
 
     @Override
-    public long getProgressCurrent() {
-        return meter.getProgressCurrent();
+    public long getCurrentInputCycle() {
+        return meter.getCurrentInputCycle();
     }
 
     @Override
-    public long getProgressMax() {
-        return meter.getProgressMax();
+    public long getMaxInputCycle() {
+        return meter.getMaxInputCycle();
     }
 
     @Override

@@ -18,6 +18,10 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
+import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.InputProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
@@ -33,7 +37,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
@@ -74,6 +77,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private int nameEnumerator = 0;
     private ErrorMetrics errorMetrics;
     private NBErrorHandler errorHandler;
+    private ActivityMetricProgressMeter progressMeter;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -535,14 +539,11 @@ public class SimpleActivity implements Activity, ProgressCapable {
     }
 
     @Override
-    public ProgressMeter getProgressMeter() {
-        Input input = getInputDispenserDelegate().getInput(0);
-        if (input instanceof ProgressCapable) {
-            ProgressMeter meter = ((ProgressCapable) input).getProgressMeter();
-            return new ProgressAndStateMeter(meter, this);
-        } else {
-            throw new RuntimeException("Progress meter must be implemented here.");
+    public synchronized ProgressMeter getProgressMeter() {
+        if (progressMeter == null) {
+            this.progressMeter = new ActivityMetricProgressMeter(this);
         }
+        return this.progressMeter;
     }
 
     /**

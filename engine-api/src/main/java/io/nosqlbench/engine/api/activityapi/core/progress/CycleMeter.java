@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityimpl.input;
+package io.nosqlbench.engine.api.activityapi.core.progress;
 
-import io.nosqlbench.engine.api.activityapi.core.RunState;
+public interface CycleMeter {
 
-public interface StateCapable {
-    RunState getRunState();
+    long getMinInputCycle();
+
+    long getCurrentInputCycle();
+
+    long getMaxInputCycle();
+
+    long getRecyclesCurrent();
+
+    long getRecyclesMax();
 }

@@ -18,9 +18,9 @@ package io.nosqlbench.engine.core.lifecycle;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.nb.annotations.Maturity;
@@ -504,12 +504,12 @@ public class ScenarioController {
         return activityMap;
     }
 
-    public List<ProgressAndStateMeter> getProgressMeters() {
-        List<ProgressAndStateMeter> indicators = new ArrayList<>();
+    public List<ProgressMeter> getProgressMeters() {
+        List<ProgressMeter> indicators = new ArrayList<>();
         for (ActivityExecutor ae : activityExecutors.values()) {
-            indicators.add(new ProgressAndStateMeter(ae.getProgressMeter(), ae.getActivity()));
+            indicators.add(ae.getProgressMeter());
         }
-        indicators.sort((o1, o2) -> Long.compare(o1.getStartedAtMillis(), o2.getStartedAtMillis()));
+        indicators.sort(Comparator.comparing(ProgressMeter::getStartTime));
         return indicators;
     }
 

@@ -25,8 +25,8 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
-import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
