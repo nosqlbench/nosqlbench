@@ -228,7 +228,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
     public <T> T takeStaticValue(String field, Class<T> classOfT) {
-        return (T) statics.remove(field);
+        if (statics.containsKey(field)) {
+            protomap.remove(field);
+            return (T) statics.remove(field);
+        }
+        return null;
     }
 
     /**
@@ -317,6 +321,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     public <T> T takeStaticConfigOr(String name, T defaultValue) {
         if (statics.containsKey(name)) {
             Object value = statics.remove(name);
+            protomap.remove(name);
             return NBTypeConverter.convertOr(value, defaultValue);
         }
         for (Map<String, Object> cfgsource : cfgsources) {
@@ -472,7 +477,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 if (cfgsource.containsKey(name)) {
                     Object object = cfgsource.get(name);
                     if (type.isAssignableFrom(object.getClass())) {
-                        return Optional.of((LongFunction<V>) cfgsource.get(name));
+                        return Optional.of(l -> (V) cfgsource.get(name));
                     } else if (NBTypeConverter.canConvert(object, type)) {
                         return Optional.of(l -> NBTypeConverter.convert(cfgsource.get(name), type));
                     } else {
