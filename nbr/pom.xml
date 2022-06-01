@@ -12,7 +12,7 @@
     <artifactId>nbr</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>Runbime-Only CLI for nosqlbench</description>
+    <description>Runtime-Only CLI for nosqlbench</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,6 +54,12 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-diag</artifactId>
+            <version>4.17.15-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-diag</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
     </dependencies>
