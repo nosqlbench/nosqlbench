@@ -42,6 +42,7 @@
         <module>mvn-defaults</module>
         <module>nb</module>
         <module>nbr</module>
+        <module>nbr-examples</module>
         <module>nb-api</module>
         <module>nb-annotations</module>
         <module>engine-api</module>
@@ -58,6 +59,7 @@
         <!-- driver modules -->
         <module>adapter-cqld4</module>
         <module>adapter-dynamodb</module>
+        <module>adapter-diag</module>
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
