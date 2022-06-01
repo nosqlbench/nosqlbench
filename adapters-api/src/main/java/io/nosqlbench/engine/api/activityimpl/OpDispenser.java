@@ -82,5 +82,4 @@ public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
 
     T apply(long value);
 
-    void onStart(long cycleValue);
 }
