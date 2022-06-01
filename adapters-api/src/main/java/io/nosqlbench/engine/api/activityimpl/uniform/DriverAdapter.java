@@ -28,6 +28,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -123,6 +124,10 @@ public interface DriverAdapter<R extends Op, S> {
      */
     default Function<Throwable, String> getErrorNameMapper() {
         return t -> t.getClass().getSimpleName();
+    }
+
+    default List<Function<Map<String,Object>,Map<String,Object>>> getOpFieldRemappers() {
+        return List.of(f -> f);
     }
 
     /**

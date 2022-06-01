@@ -89,6 +89,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      * Each function is applied to the op template fields. </p>
      * @return
      */
+    @Override
     public List<Function<Map<String,Object>,Map<String,Object>>> getOpFieldRemappers() {
         return List.of();
     }
@@ -132,6 +133,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
             .add(Param.optional("phaserate", String.class, "rate limit for phases per second"))
             .add(Param.optional("seq", String.class, "sequencing algorithm"))
+            .add(Param.optional("instrument", Boolean.class))
             .asReadOnly();
     }
 
