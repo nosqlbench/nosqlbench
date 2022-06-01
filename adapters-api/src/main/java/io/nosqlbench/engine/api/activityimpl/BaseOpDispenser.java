@@ -89,26 +89,12 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
             this.errorTimer = ActivityMetrics.timer(pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--error");
             this.resultSizeHistogram = ActivityMetrics.histogram(pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--resultset-size");
         }
-
-        timerStarts = pop.takeOptionalStaticValue("start-timers", String.class)
-            .map(s -> s.split(", *"))
-            .orElse(null);
-
-        if (timerStarts!=null) {
-            for (String timerStart : timerStarts) {
-                ThreadLocalNamedTimers.addTimer(pop,timerStart);
-            }
-        }
-
-        timerStops = pop.takeOptionalStaticValue("stop-timers", String.class)
-            .map(s -> s.split(", *"))
-            .orElse(null);
     }
 
     @Override
     public void onStart(long cycleValue) {
         if (timerStarts!=null) {
-            ThreadLocalNamedTimers.TL_INSTANCE.get().start(timerStops);
+            ThreadLocalNamedTimers.TL_INSTANCE.get().start(timerStarts);
         }
     }
 
@@ -117,6 +103,9 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
         if (instrument) {
             successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
             resultSizeHistogram.update(resultsize);
+        }
+        if (timerStops!=null) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
         }
 
 //        ThreadLocalNamedTimers.TL_INSTANCE.get().stop(stopTimers);
