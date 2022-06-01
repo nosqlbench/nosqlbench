@@ -24,9 +24,15 @@
 
     <dependencies>
 
-        <!-- logging -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+        </dependency>
 
-        <!-- The ONLY upstream module in project from nb-api -->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-annotations</artifactId>
