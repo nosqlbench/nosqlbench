@@ -15,17 +15,17 @@
  */
 
 var leader = {
-    type: 'diag',
+    driver: 'diag',
     alias: 'leader',
     targetrate: '10000',
-    async: '1000'
+    op: 'log:info'
 };
 
 var follower = {
-    type: 'diag',
+    driver: 'diag',
     alias: 'follower',
     linkinput: 'leader',
-    async: '1000'
+    op: 'log:INFO'
 };
 
 scenario.start(leader);

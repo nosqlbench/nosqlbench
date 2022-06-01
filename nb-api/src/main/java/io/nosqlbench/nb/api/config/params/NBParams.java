@@ -56,15 +56,15 @@ import java.util.stream.Collectors;
  * <H2>Element Views</H2>
  *
  * <p>This API allows a developer to choose the structural model imposed on
- * configuration data. Specifically, you must choose whether or not to consume the
+ * configuration data. Specifically, you must choose whether to consume the
  * parameter data as a set of properties of one element instance, or as as set
  * of elements, each with their own properties.</p>
  *
- * <table border="1">
- *     <tr><td></td><th>view<br>as single</th><th>view<br>as multiple</th></tr>
- *     <tr><th>source is<br>single element</th><td><i>param name</i></td><td>ERROR</td></tr>
- *     <tr><th>source is<br>multiple elements</th><td>using <i>element name</i>.<i>param name</td><td>iterable<br>elements</td></tr>
- * </table>
+ * <pre>{@code
+ *  view                           as single                      as multiple
+ *  source is single element       <param name>                   ERROR
+ *  source is multiple elements    <element name>.<param name>    iterable of elements
+ * }</pre>
  *
  * <br/>
  *

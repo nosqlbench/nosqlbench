@@ -507,6 +507,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
             workloadSource = "yaml:" + op_yaml_loc.get();
         }
 
+        if (stmtsDocList==null) {
+            throw new OpConfigError("No op templates found. You must provide either workload=... or op=...");
+        }
+
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         List<Long> ratios = new ArrayList<>(stmts.size());
 

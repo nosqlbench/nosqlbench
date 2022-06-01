@@ -63,7 +63,11 @@ public class AsyncScriptIntegrationTests {
         ClassLoader cl = AsyncScriptIntegrationTests.class.getClassLoader();
         String script;
         try {
-            InputStream sstream = cl.getResourceAsStream("scripts/async/" + scriptname + ".js");
+            String scriptPath = "scripts/examples/" + scriptname + ".js";
+            InputStream sstream = cl.getResourceAsStream(scriptPath);
+            if (sstream==null) {
+                throw new RuntimeException("Integrated test tried to load '" + scriptPath + "', but it was not there.");
+            }
             byte[] bytes = IOUtils.toByteArray(sstream);
             script = new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException ex) {
