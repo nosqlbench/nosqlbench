@@ -27,7 +27,10 @@ public class OpConfigError extends ActivityInitError {
     private final String configSource;
 
     public OpConfigError(String error) {
-        this(error,null);
+        this(error,null,null);
+    }
+    public OpConfigError(String error, Throwable cause) {
+        this(error, null, cause);
     }
 
     public OpConfigError(String error, String configSource) {

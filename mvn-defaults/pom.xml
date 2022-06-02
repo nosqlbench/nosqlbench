@@ -474,18 +474,17 @@
                     <source>17</source>
                     <release>17</release>
                     <compilerArgs>
-                        --enable-preview
+<!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
+<!--                        <compilerArg>-Xlint:all</compilerArg>-->
                     </compilerArgs>
-                    <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
-                    <!--                    <compilerArgument>-Xlint:all</compilerArgument>-->
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
                 <configuration>
-                    <!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -502,6 +501,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M6</version>
                 <executions>
                     <execution>
                         <id>run-tests</id>
@@ -513,7 +513,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -534,6 +533,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
+                    <release>17</release>
                     <doctitle>${javadoc.name}</doctitle>
                     <windowtitle>${javadoc.name}</windowtitle>
                     <isOffline>false</isOffline>
@@ -541,8 +541,10 @@
                     <detectLinks>false</detectLinks>
                     <detectOfflineLinks>false</detectOfflineLinks>
                     <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
-                    <additionalOptions>-Xdoclint:none</additionalOptions>
-                    <additionalJOption>-Xdoclint:none</additionalJOption>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+<!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
                     <doclint>none</doclint>
                 </configuration>
                 <executions>
@@ -560,6 +562,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -575,6 +578,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -586,6 +590,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
             </plugin>
 
             <plugin>

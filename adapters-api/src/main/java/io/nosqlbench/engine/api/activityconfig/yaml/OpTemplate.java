@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.util.Tagged;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.api.config.standard.NBTypeConverter;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
 
@@ -204,11 +205,12 @@ public abstract class OpTemplate implements Tagged {
 
         Object value = getParams().remove(name);
 
-        try {
-            return (V) defaultValue.getClass().cast(value);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to cast type " + value.getClass().getCanonicalName() + " to " + defaultValue.getClass().getCanonicalName(), e);
+        if (defaultValue.getClass().isAssignableFrom(value.getClass())) {
+            return (V) value;
+        } else {
+            return NBTypeConverter.convertOr(value,defaultValue);
         }
+
     }
 
     @SuppressWarnings("unchecked")

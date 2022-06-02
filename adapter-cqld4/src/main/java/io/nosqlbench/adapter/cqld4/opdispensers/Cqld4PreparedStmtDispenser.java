@@ -25,53 +25,72 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
 public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
+    private final static Logger logger = LogManager.getLogger(Cqld4PreparedStmtDispenser.class);
 
     private final RSProcessors processors;
     private final LongFunction<Statement> stmtFunc;
     private final ParsedTemplate stmtTpl;
+    private final LongFunction<Object[]> fieldsF;
     private PreparedStatement preparedStmt;
     private CqlSession boundSession;
 
-    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp cmd, ParsedTemplate stmtTpl, RSProcessors processors) {
-        super(sessionFunc, cmd);
-        if (cmd.isDynamic("space")) {
+    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplate stmtTpl, RSProcessors processors) {
+        super(sessionFunc, op);
+        if (op.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not supported." +
                 " This would churn the prepared statement cache, defeating the purpose of prepared statements.");
         }
         this.processors = processors;
         this.stmtTpl = stmtTpl;
-        stmtFunc = createStmtFunc(cmd);
+        this.fieldsF = getFieldsFunction(op);
+        stmtFunc = createStmtFunc(fieldsF, op);
     }
 
-    protected LongFunction<Statement> createStmtFunc(ParsedOp cmd) {
-
+    private LongFunction<Object[]> getFieldsFunction(ParsedOp op) {
         LongFunction<Object[]> varbinder;
-        varbinder = cmd.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        varbinder = op.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        return varbinder;
+    }
+
+    protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
+
         String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
         boundSession = getSessionFunc().apply(0);
         preparedStmt = boundSession.prepare(preparedQueryString);
 
         LongFunction<Statement> boundStmtFunc = c -> {
-            Object[] apply = varbinder.apply(c);
+            Object[] apply = fieldsF.apply(c);
             return preparedStmt.bind(apply);
         };
-        return super.getEnhancedStmtFunc(boundStmtFunc, cmd);
+        return super.getEnhancedStmtFunc(boundStmtFunc, op);
     }
 
     @Override
-    public Cqld4CqlOp apply(long value) {
+    public Cqld4CqlOp apply(long cycle) {
 
-        return new Cqld4CqlPreparedStatement(
-            boundSession,
-            (BoundStatement) stmtFunc.apply(value),
-            getMaxPages(),
-            isRetryReplace(),
-            processors
-        );
+        BoundStatement boundStatement;
+        try {
+            boundStatement = (BoundStatement) stmtFunc.apply(cycle);
+            return new Cqld4CqlPreparedStatement(
+                boundSession,
+                boundStatement,
+                getMaxPages(),
+                isRetryReplace(),
+                processors
+            );
+        } catch (Exception exception) {
+            return CQLD4PreparedStmtDiagnostics.rebindWithDiagnostics(
+                preparedStmt,
+                fieldsF,
+                cycle,
+                exception
+            );
+        }
     }
-
 }
