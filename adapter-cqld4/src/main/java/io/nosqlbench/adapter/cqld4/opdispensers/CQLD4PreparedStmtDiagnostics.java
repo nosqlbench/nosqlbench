@@ -54,42 +54,42 @@ public class CQLD4PreparedStmtDiagnostics {
 
     public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname, Object colval, DataType coltype) {
 
-        return switch (coltype) {
-            case PrimitiveType pt -> switch (pt.getProtocolCode()) {
+        if (coltype instanceof PrimitiveType pt) {
+            return switch (pt.getProtocolCode()) {
                 case CUSTOM -> throw new OpConfigError("Error with Custom DataType");
                 case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
-                case BIGINT, COUNTER ->bound.setLong(colname, (long) colval);
+                case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
                 case BLOB -> bound.setByteBuffer(colname, (ByteBuffer) colval);
                 case BOOLEAN -> bound.setBoolean(colname, (boolean) colval);
-                case DECIMAL ->bound.setBigDecimal(colname, (BigDecimal) colval);
-                case DOUBLE ->bound.setDouble(colname, (double) colval);
-                case FLOAT ->bound.setFloat(colname, (float) colval);
+                case DECIMAL -> bound.setBigDecimal(colname, (BigDecimal) colval);
+                case DOUBLE -> bound.setDouble(colname, (double) colval);
+                case FLOAT -> bound.setFloat(colname, (float) colval);
                 case INT, SMALLINT, TINYINT -> bound.setInt(colname, (int) colval);
                 case TIMESTAMP -> bound.setInstant(colname, (Instant) colval);
-                case TIMEUUID, UUID ->bound.setUuid(colname, (UUID) colval);
-                case VARINT ->bound.setBigInteger(colname, (BigInteger) colval);
-                case INET ->bound.setInetAddress(colname, (InetAddress) colval);
-                case DATE ->bound.setLocalDate(colname, (LocalDate) colval);
+                case TIMEUUID, UUID -> bound.setUuid(colname, (UUID) colval);
+                case VARINT -> bound.setBigInteger(colname, (BigInteger) colval);
+                case INET -> bound.setInetAddress(colname, (InetAddress) colval);
+                case DATE -> bound.setLocalDate(colname, (LocalDate) colval);
                 case TIME -> bound.setLocalTime(colname, (LocalTime) colval);
-                case DURATION ->bound.setCqlDuration(colname, (CqlDuration) colval);
-                case LIST -> bound.setList(colname,(List)colval,((List)colval).get(0).getClass());
+                case DURATION -> bound.setCqlDuration(colname, (CqlDuration) colval);
+                case LIST -> bound.setList(colname, (List) colval, ((List) colval).get(0).getClass());
                 case MAP -> {
                     Map map = (Map) colval;
                     Set<Map.Entry> entries = map.entrySet();
                     Optional<Map.Entry> first = entries.stream().findFirst();
                     if (first.isPresent()) {
-                        yield bound.setMap(colname,map,first.get().getKey().getClass(),first.get().getValue().getClass());
+                        yield bound.setMap(colname, map, first.get().getKey().getClass(), first.get().getValue().getClass());
                     } else {
-                        yield bound.setMap(colname,map,Object.class,Object.class);
+                        yield bound.setMap(colname, map, Object.class, Object.class);
                     }
                 }
                 case SET -> {
-                    Set set = (Set)colval;
+                    Set set = (Set) colval;
                     Optional first = set.stream().findFirst();
                     if (first.isPresent()) {
-                        yield bound.setSet(colname,set,first.get().getClass());
+                        yield bound.setSet(colname, set, first.get().getClass());
                     } else {
-                        yield bound.setSet(colname,Set.of(),Object.class);
+                        yield bound.setSet(colname, Set.of(), Object.class);
                     }
                 }
                 case UDT -> {
@@ -98,13 +98,12 @@ public class CQLD4PreparedStmtDiagnostics {
                 }
                 case TUPLE -> {
                     TupleValue tuple = (TupleValue) colval;
-                    yield bound.setTupleValue(colname,tuple);
+                    yield bound.setTupleValue(colname, tuple);
                 }
-                default-> throw new RuntimeException("Unknown CQL type for diagnostic (type:'" + coltype +"',code:'" + coltype.getProtocolCode()+"'");
+                default -> throw new RuntimeException("Unknown CQL type for diagnostic (type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
             };
-
-            default -> throw new IllegalStateException("Unexpected value: " + coltype);
-        };
+        }
+        throw new IllegalStateException("Unexpected value: " + coltype);
 
     }
 

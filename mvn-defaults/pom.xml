@@ -462,10 +462,9 @@
                     <source>17</source>
                     <release>17</release>
                     <compilerArgs>
-                        --enable-preview
+<!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
+<!--                        <compilerArg>-Xlint:all</compilerArg>-->
                     </compilerArgs>
-                    <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
-                    <!--                    <compilerArgument>-Xlint:all</compilerArgument>-->
                 </configuration>
             </plugin>
 
@@ -474,9 +473,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M6</version>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
-
-                    <!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -505,8 +501,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
-                    <!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -537,9 +531,8 @@
                     <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
                     <additionalOptions>
                         <additionalOption>-Xdoclint:none</additionalOption>
-                        <additionalOption>--enable-preview</additionalOption>
                     </additionalOptions>
-<!--                    <additionalJOption>-Xdoclint:none &#45;&#45;enable-preview</additionalJOption>-->
+<!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
                     <doclint>none</doclint>
                 </configuration>
                 <executions>
