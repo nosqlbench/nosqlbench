@@ -48,7 +48,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity {
         try {
             OpMapper<R> opmapper = adapter.getOpMapper();
             Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
-            boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(true);
+            boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
             sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor), strict);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
