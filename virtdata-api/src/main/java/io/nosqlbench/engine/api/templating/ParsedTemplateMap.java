@@ -472,7 +472,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 if (cfgsource.containsKey(name)) {
                     Object object = cfgsource.get(name);
                     if (type.isAssignableFrom(object.getClass())) {
-                        return Optional.of((LongFunction<V>) cfgsource.get(name));
+                        return Optional.of(l -> type.cast(cfgsource.get(name)));
                     } else if (NBTypeConverter.canConvert(object, type)) {
                         return Optional.of(l -> NBTypeConverter.convert(cfgsource.get(name), type));
                     } else {
