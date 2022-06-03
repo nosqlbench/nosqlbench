@@ -2,7 +2,7 @@ name: Snyk
 on:
   push:
     branches:
-      - "nb4-maintenance"
+      - nb4-maintenance
 
 jobs:
   security:
@@ -13,8 +13,9 @@ jobs:
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          THIS_BRANCH:  ${GITHUB_REF##*/}
         with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference=${GITHUB_REF##*/}
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${THIS_BRANCH}"
       - uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk-results.sarif
