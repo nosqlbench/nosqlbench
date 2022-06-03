@@ -11,7 +11,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${GITHUB_REF##*/}"
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference=${GITHUB_REF##*/}
       - uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk-results.sarif
