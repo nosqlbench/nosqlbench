@@ -1,0 +1,17 @@
+name: Run snyk on this branch and update
+on: push
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${GITHUB_REF##*/}"
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-results.sarif
