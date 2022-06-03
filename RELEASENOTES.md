@@ -1,2 +1,1 @@
-- 0883e9b6a (HEAD -> nb4-maintenance) Merge branch 'nb4-maintenance' of github.com:nosqlbench/nosqlbench into nb4-maintenance
-- 6bddec5d2 update JNA to latest release which has known ABI compatibility
+- 10fa5ada2 (HEAD -> nb4-maintenance) driver update
