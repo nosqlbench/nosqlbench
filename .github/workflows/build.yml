@@ -24,6 +24,12 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
+    - name: mvn package
+      run: mvn package
+
+    - name: mvn verify
+      run: mvn verify
+
     - name: Run Snyk
       uses: snyk/actions/maven@master
       env:
@@ -36,8 +42,3 @@ jobs:
       with:
         sarif_file: snyk-results.sarif
 
-    - name: mvn package
-      run: mvn package
-
-    - name: mvn verify
-      run: mvn verify
