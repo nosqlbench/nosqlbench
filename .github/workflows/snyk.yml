@@ -1,6 +1,8 @@
-name: Run snyk on this branch and update
-on: push
-  branches: nb4-maintenance
+name: Snyk
+on:
+  push:
+    branches:
+      - "nb4-maintenance"
 
 jobs:
   security:
