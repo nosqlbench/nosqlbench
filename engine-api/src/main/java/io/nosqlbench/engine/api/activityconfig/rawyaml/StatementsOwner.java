@@ -94,7 +94,8 @@ public class StatementsOwner extends RawStmtFields {
                     }};
                     itemizedMaps.add(stmtDetails);
                 } else {
-                    throw new RuntimeException("Unknown inner value type on map-based statement definition.");
+                    throw new RuntimeException("Unknown inner value type on map-based statement definition: name:'" + entries.getKey() + "', type:'" +
+                    entries.getValue().getClass() + "', only maps and strings are recognized.");
                 }
             }
             setStatementsFieldByType(itemizedMaps);
