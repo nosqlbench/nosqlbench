@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+var csvlogger = csvmetrics.log("logs/csvmetricstestdir");
+
+activitydef = {
+    "alias" : "csvmetrics",
+    "driver" : "diag",
+    "cycles" : "50000",
+    "threads" : "20",
+    "op": '{"log":"interval=1000"}',
+    "targetrate" : "10000.0"
 };
+scenario.start(activitydef);
+csvlogger.add(metrics.csvmetrics.cycles.servicetime);
+csvlogger.start(500,"MILLISECONDS");
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
+scenario.waitMillis(2000);
+scenario.stop(activitydef);
 
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
-
-scenario.waitMillis(500);
-
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+csvlogger.report();

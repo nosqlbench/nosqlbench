@@ -14,29 +14,22 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+activitydef = {
+    "alias" : "testactivity",
+    "driver" : "diag",
+    "cycles" : "0..1000000000",
+    "threads" : "25",
+    "interval" : "2000",
+    "op" : "noop"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
-
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
+scenario.start(activitydef);
 
 scenario.waitMillis(500);
+while (metrics.testactivity.cycles.servicetime.count < 1000) {
+    print('waiting 10ms because cycles<10000 : ' + metrics.testactivity.cycles.servicetime.count);
+    scenario.waitMillis(10);
 
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+}
+scenario.stop(activitydef);
+print("count: " + metrics.testactivity.cycles.servicetime.count);

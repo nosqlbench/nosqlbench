@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+activitydef = {
+    "alias" : "testhistologger",
+    "driver" : "diag",
+    "cycles" : "50000",
+    "threads" : "20",
+    "interval" : "2000",
+    "targetrate" : "10000.0",
+    "op" : "noop"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
+histologger.logHistoIntervals("testing extention histologger", ".*", "hdrhistodata.log", "0.5s");
+print("started logging to hdrhistodata.log for all metrics at 1/2 second intervals.");
 
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
-
-scenario.waitMillis(500);
-
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+scenario.start(activitydef);
+scenario.waitMillis(2000);
+scenario.stop(activitydef);

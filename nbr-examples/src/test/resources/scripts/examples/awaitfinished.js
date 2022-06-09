@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+activitydef1 = {
+    "alias" : "activity_to_await",
+    "driver" : "diag",
+    "cycles" : "0..1500",
+    "threads" : "1",
+    "targetrate" : "500",
+    "op" : "noop"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
-
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
-
-scenario.waitMillis(500);
-
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+print('starting activity teststartstopdiag');
+scenario.start(activitydef1);
+scenario.awaitActivity("activity_to_await");
+print("awaited activity");

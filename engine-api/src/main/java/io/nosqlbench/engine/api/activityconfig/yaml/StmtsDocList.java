@@ -16,19 +16,21 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.config.standard.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
+    private final static Logger logger = LogManager.getLogger(StmtsDocList.class);
 
     private final RawStmtsDocList rawStmtsDocList;
-    private final Map<String,String> templateVariables = new LinkedHashMap<>();
+    private final Map<String, String> templateVariables = new LinkedHashMap<>();
 
     public StmtsDocList(RawStmtsDocList rawStmtsDocList) {
         this.rawStmtsDocList = rawStmtsDocList;
@@ -111,18 +113,18 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         return this.getStmtDocs().get(0).getDescription();
     }
 
-    public Map<String,String> getTemplateVariables() {
+    public Map<String, String> getTemplateVariables() {
         return templateVariables;
     }
 
     public void addTemplateVariable(String key, String defaultValue) {
-        this.templateVariables.put(key,defaultValue);
+        this.templateVariables.put(key, defaultValue);
     }
 
     public NBConfigModel getConfigModel() {
         ConfigModel cfgmodel = ConfigModel.of(StmtsDocList.class);
-        getTemplateVariables().forEach((k,v) -> {
-            cfgmodel.add(Param.defaultTo(k,v,"template parameter found in the yaml workload"));
+        getTemplateVariables().forEach((k, v) -> {
+            cfgmodel.add(Param.defaultTo(k, v, "template parameter found in the yaml workload"));
         });
         return cfgmodel.asReadOnly();
     }
@@ -149,4 +151,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
 //        sb.append(", names:").append(names);
         return sb.toString();
     }
+
+    public static NBConfigModelExpander TEMPLATE_VAR_EXPANDER = workload -> {
+        StmtsDocList loaded = StatementsLoader.loadPath(logger, (String) workload, "activities");
+        return loaded.getConfigModel();
+    };
 }

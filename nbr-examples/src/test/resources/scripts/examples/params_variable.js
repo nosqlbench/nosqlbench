@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+// Called with one=two three=four
+
+print('params["one"]=\'' + params["one"] + "'");
+print('params["three"]=\'' + params["three"] + "'");
+
+var overrides = {
+  'three': "five"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
+var overridden = params.withOverrides(overrides);
+
+print('overridden["three"] [overridden-three-five]=\'' + overridden["three"] + "'");
+
+var defaults = {
+    'four': "niner"
 };
 
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
+var defaulted = params.withDefaults(defaults);
 
-scenario.waitMillis(500);
-
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
+print('defaulted.get["four"] [defaulted-four-niner]=\'' + defaulted["four"] + "'");
 

@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+activitydef1 = {
+    "alias" : "blockingactivity1",
+    "driver" : "diag",
+    "cycles" : "0..100000",
+    "threads" : "1",
+    "interval" : "2000",
+    "op":"noop"
+};
+activitydef2 = {
+    "alias" : "blockingactivity2",
+    "driver" : "diag",
+    "cycles" : "0..100000",
+    "threads" : "1",
+    "interval" : "2000",
+    "op":"noop"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
 
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
-
-scenario.waitMillis(500);
-
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+print('running blockingactivity1');
+scenario.run(10000,activitydef1);
+print('blockingactivity1 finished');
+print('running blockingactivity2');
+scenario.run(10000,activitydef2);
+print('blockingactivity2 finished');

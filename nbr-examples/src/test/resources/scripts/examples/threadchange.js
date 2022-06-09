@@ -14,29 +14,12 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
-};
-
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
-
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
-
+scenario.start('driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;modulo=1000000;op=noop;rate=1000');
+activities.threadchange.threads=1;
+print("threads now " + activities.threadchange.threads);
+print('waiting 500 ms');
 scenario.waitMillis(500);
 
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
-
+activities.threadchange.threads=5;
+print("threads now " + activities.threadchange.threads);
+scenario.stop('threadchange');

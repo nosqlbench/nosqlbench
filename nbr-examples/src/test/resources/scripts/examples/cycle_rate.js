@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022 nosqlbench
  *
@@ -14,29 +15,19 @@
  * limitations under the License.
  */
 
-var leader = {
-    driver: 'diag',
-    alias: 'leader',
-    targetrate: '10000',
-    op: 'log:level=info'
+activitydef = {
+    "alias" : "cycle_rate",
+    "driver" : "diag",
+    "cycles" : "5K",
+    "threads" : "10",
+    "cyclerate" : "1K",
+    "op" : "noop"
 };
 
-var follower = {
-    driver: 'diag',
-    alias: 'follower',
-    // linkinput: 'leader',
-    op: 'log:level=INFO'
-};
+scenario.run(activitydef);
 
-scenario.start(leader);
-print("started leader");
-scenario.start(follower);
-print("started follower");
+print("current cycle = " + metrics.cycle_rate.cycles.servicetime.count);
+print("mean cycle rate = " + metrics.cycle_rate.cycles.servicetime.meanRate);
 
-scenario.waitMillis(500);
 
-scenario.stop(leader);
-print("stopped leader");
-scenario.stop(follower);
-print("stopped follower");
 
