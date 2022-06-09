@@ -36,7 +36,7 @@ import java.util.Collection;
  * the original NBConfigurable which <EM>ALSO</EM> implements NBReconfigurable, then
  * {@link NBReconfigurable#applyReconfig(NBConfiguration)} should be called.
  * The helper methods {@link #collectModels(Class, Collection)} and
- * {@link #applyMatching(NBConfiguration, Object...)} can be used to apply
+ * {@link #applyMatching(NBConfiguration, Collection)} can be used to apply
  * reconfigurations to groups of elements with a shared configuration model.
  */
 public interface NBReconfigurable extends NBCanReconfigure, NBReconfigModelProvider {

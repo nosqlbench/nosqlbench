@@ -16,8 +16,6 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.adapter.diag.DiagSpace;
-import io.nosqlbench.adapter.diag.types.SpaceFuncUser;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.standard.*;
 import org.apache.logging.log4j.Level;
@@ -25,15 +23,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
-import java.util.function.LongFunction;
 
 @Service(value= DiagTask.class,selector="log")
-public class DiagTask_log implements DiagTask, NBConfigurable, SpaceFuncUser {
+public class DiagTask_log implements DiagTask, NBConfigurable {
     private final static Logger logger = LogManager.getLogger("DIAG");
     private Level level;
     private long modulo;
     private long interval;
-    private LongFunction<DiagSpace> spaceF;
     private String name;
 
     @Override
@@ -61,11 +57,6 @@ public class DiagTask_log implements DiagTask, NBConfigurable, SpaceFuncUser {
             .add(Param.defaultTo("modulo", 1))
             .add(Param.defaultTo("interval",1000))
             .asReadOnly();
-    }
-
-    @Override
-    public void setSpaceFunc(LongFunction<DiagSpace> spaceF) {
-        this.spaceF = spaceF;
     }
 
     @Override
