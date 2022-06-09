@@ -18,11 +18,42 @@ package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
 
-public class DiagOpMapper implements OpMapper<DiagOp> {
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.LongFunction;
+
+public class DiagOpMapper implements OpMapper<DiagOp>, NBReconfigurable {
+    private final DriverSpaceCache<? extends DiagSpace> spaceCache;
+    private final Map<String,DiagOpDispenser> dispensers = new LinkedHashMap<>();
+
+    public DiagOpMapper(DriverSpaceCache<? extends DiagSpace> spaceCache) {
+        this.spaceCache = spaceCache;
+    }
+
     @Override
     public OpDispenser<? extends DiagOp> apply(ParsedOp cmd) {
-        return new DiagOpDispenser(cmd);
+        DiagOpDispenser dispenser = new DiagOpDispenser(cmd);
+        LongFunction<String> spaceName = cmd.getAsFunctionOr("space", "default");
+        LongFunction<DiagSpace> spacef = l -> spaceCache.get(spaceName.apply(l));
+        dispensers.put(cmd.getName(),dispenser);
+        return dispenser;
+    }
+
+
+    @Override
+    public void applyReconfig(NBConfiguration recfg) {
+        NBReconfigurable.applyMatching(recfg, dispensers.values());
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return NBReconfigurable.collectModels(this.getClass(),new ArrayList<>(dispensers.values()));
     }
 }

@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
 import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.config.standard.NBConfigError;
 import io.nosqlbench.nb.api.config.standard.NBTypeConverter;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -866,4 +867,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
 
+    public Map<String, Object> parseStaticCmdMap(String taskname, String mainField) {
+        Object mapsrc = getStaticValue(taskname);
+        return new LinkedHashMap<String,Object>(ParamsParser.parseToMap(mapsrc,mainField));
+    }
 }

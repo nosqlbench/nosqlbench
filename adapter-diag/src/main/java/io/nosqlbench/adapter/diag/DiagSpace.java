@@ -22,29 +22,35 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DiagSpace implements ActivityDefObserver {
-    private final NBConfiguration cfg;
-    private RateLimiter diagRateLimiter;
+    private final Logger logger = LogManager.getLogger(DiagSpace.class);
 
-    public DiagSpace(NBConfiguration cfg) {
+    private final NBConfiguration cfg;
+    private final String name;
+    private RateLimiter diagRateLimiter;
+    private long interval;
+
+    public DiagSpace(String name, NBConfiguration cfg) {
         this.cfg = cfg;
+        this.name = name;
+        logger.trace("diag space initialized as '" + name + "'");
     }
 
     public void applyConfig(NBConfiguration cfg) {
-
+        this.interval = cfg.get("interval",long.class);
     }
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(DiagSpace.class)
+            .add(Param.defaultTo("interval",1000))
             .asReadOnly();
     }
 
-    public boolean isLogCycle() {
-        return cfg.getOrDefault("logcycle",false);
-    }
-
-    public void maybeWaitForOp() {
+    public void maybeWaitForOp(double diagrate) {
         if (diagRateLimiter != null) {
             long waittime = diagRateLimiter.maybeWaitForOp();
         }

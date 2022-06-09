@@ -812,4 +812,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return lfa;
     }
 
+    public Map<String, Object> parseStaticCmdMap(String key, String mainField) {
+        return tmap.parseStaticCmdMap(key, mainField);
+    }
 }

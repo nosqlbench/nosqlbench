@@ -177,7 +177,7 @@ public class NBConfiguration {
         return data == null || data.isEmpty();
     }
 
-    public Map<String, Object> getMap() {
+    public LinkedHashMap<String, Object> getMap() {
         return data;
     }
 

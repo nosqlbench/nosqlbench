@@ -17,34 +17,37 @@
 package io.nosqlbench.adapter.diag.optasks;
 
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.*;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
 
 import java.util.Map;
 
-@Service(value=DiagOpTask.class,selector="log")
-public class DiagTask_Log implements DiagOpTask, NBConfigurable {
-    private final static Logger logger = LogManager.getLogger("DIAG");
-    private Level level;
+@Service(value= DiagTask.class,selector = "noop")
+public class DiagTask_noop implements DiagTask {
 
-    @Override
-    public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-        logger.log(level,"cycle=" + aLong+" state="+stringObjectMap.toString());
-        return stringObjectMap;
-    }
+    private String name;
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        String level = cfg.getOptional("level").orElse("INFO");
-        this.level = Level.valueOf(level);
+        this.name = cfg.get("name",String.class);
     }
 
     @Override
     public NBConfigModel getConfigModel() {
-        return ConfigModel.of(DiagTask_Log.class)
-            .add(Param.optional("level"))
+        return ConfigModel.of(DiagTask_noop.class)
+            .add(Param.required("name",String.class))
             .asReadOnly();
+    }
+
+    @Override
+    public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
+        return Map.of();
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

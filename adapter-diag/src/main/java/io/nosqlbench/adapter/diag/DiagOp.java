@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.diag;
 
-import io.nosqlbench.adapter.diag.optasks.DiagOpTask;
+import io.nosqlbench.adapter.diag.optasks.DiagTask;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,16 +27,16 @@ import java.util.Map;
 public class DiagOp implements CycleOp<Integer> {
 
     private final static Logger logger = LogManager.getLogger(DiagOp.class);
-    private final List<DiagOpTask> mutators;
+    private final List<DiagTask> mutators;
 
-    public DiagOp(List<DiagOpTask> mutators) {
+    public DiagOp(List<DiagTask> mutators) {
         this.mutators = mutators;
     }
 
     @Override
     public Integer apply(long value) {
         Map<String, Object> state = Map.of("cycle", value, "code", 0);
-        for (DiagOpTask mutator : mutators) {
+        for (DiagTask mutator : mutators) {
             state = mutator.apply(value,state);
         }
         return (int) state.getOrDefault("code", 0);

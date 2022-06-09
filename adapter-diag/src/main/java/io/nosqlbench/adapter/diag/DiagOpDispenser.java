@@ -16,67 +16,109 @@
 
 package io.nosqlbench.adapter.diag;
 
-import io.nosqlbench.adapter.diag.optasks.DiagOpTask;
-import io.nosqlbench.nb.annotations.ServiceSelector;
+import io.nosqlbench.adapter.diag.optasks.DiagTask;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.LongFunction;
 
-public class DiagOpDispenser extends BaseOpDispenser<DiagOp> {
+public class DiagOpDispenser extends BaseOpDispenser<DiagOp> implements NBReconfigurable {
     private final static Logger logger = LogManager.getLogger(DiagOpDispenser.class);
-    private final LongFunction<DiagOp> opFunc;
+    private OpFunc opFunc;
 
     private RateLimiter diagRateLimiter;
+    private LongFunction<DiagSpace> spaceF;
+    private OpFunc opFuncs;
 
     public DiagOpDispenser(ParsedOp op) {
         super(op);
         this.opFunc = resolveOpFunc(op);
     }
 
-    private LongFunction<DiagOp> resolveOpFunc(ParsedOp op) {
-        List<DiagOpTask> tasks = new ArrayList<>();
+    private OpFunc resolveOpFunc(ParsedOp op) {
+        List<DiagTask> tasks = new ArrayList<>();
         Set<String> tasknames = op.getDefinedNames();
 
         /**
          * Dynamically load diag tasks and add them to the in-memory template used by the op dispenser
          */
         for (String taskname : tasknames) {
+
             // Get the value of the keyed task name, but throw an error if it is not static or not a map
-            Object taskcfg = op.getStaticValue(taskname, Object.class);
-            // Load this value into a map using the adaptive loading logic of NBParams
-            // This can be a map or a string or a list.
-            // Exactly one instance is required, and we take the field values from it as a map
-            Map<String, Object> cfgmap = NBParams.one(taskcfg).getMap();
+
+            // Get the op config by name, if provided in string or map form, and
+            // produce a normalized map form which contains the type field. If
+            // the type isn't contained in the parsed form, inject the name as short-hand
+            // Also, inject the name into the map
+            Map<String,Object> taskcfg = op.parseStaticCmdMap(taskname, "type");
+            taskcfg.computeIfAbsent("name",l -> taskname);
+            taskcfg.computeIfAbsent("type",l -> taskname);
+            String optype = taskcfg.remove("type").toString();
+
             // Dynamically load the named task instance, based on the op field key AKA the taskname
             // and ensure that exactly one is found or throw an error
-            DiagOpTask task = ServiceSelector.of(taskname, ServiceLoader.load(DiagOpTask.class)).getOne();
+            DiagTask task = ServiceSelector.of(optype, ServiceLoader.load(DiagTask.class)).getOne();
+
             // Load the configuration model of the dynamically loaded task for type-safe configuration
             NBConfigModel cfgmodel = task.getConfigModel();
+
             // Apply the raw configuration data to the configuration model, which
             // both validates the provided configuration fields and
             // yields a usable configuration that should apply to the loaded task without error or ambiguity
-            NBConfiguration taskconfig = cfgmodel.apply(cfgmap);
+            NBConfiguration taskconfig = cfgmodel.apply(taskcfg);
+
             // Apply the validated configuration to the loaded task
             task.applyConfig(taskconfig);
+
             // Store the task into the diag op's list of things to do when it runs
             tasks.add(task);
         }
-        return l -> new DiagOp(tasks);
+        this.opFunc = new OpFunc(tasks);
+        return opFunc;
     }
 
+    @Override
+    public void applyReconfig(NBConfiguration recfg) {
+        opFunc.applyReconfig(recfg);
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return opFunc.getReconfigModel();
+    }
+
+    private final static class OpFunc implements LongFunction<DiagOp>, NBReconfigurable {
+        private final List<DiagTask> tasks;
+        public OpFunc(List<DiagTask> tasks) {
+            this.tasks = tasks;
+        }
+
+        @Override
+        public DiagOp apply(long value) {
+            return new DiagOp(tasks);
+        }
+
+        @Override
+        public void applyReconfig(NBConfiguration recfg) {
+            NBReconfigurable.applyMatching(recfg,tasks);
+        }
+
+        @Override
+        public NBConfigModel getReconfigModel() {
+            return NBReconfigurable.collectModels(DiagTask.class, tasks);
+        }
+    }
 
     @Override
     public DiagOp apply(long value) {
         return opFunc.apply(value);
     }
-
-
 }
