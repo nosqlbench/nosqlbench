@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-var sum= adder.getSum(12,34);
-print('sum is ' + sum);
+package io.nosqlbench.api;
+
+public interface NBNamedElement {
+    String getName();
+}

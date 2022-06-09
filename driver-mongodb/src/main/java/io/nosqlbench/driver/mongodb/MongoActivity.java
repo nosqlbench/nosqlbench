@@ -98,11 +98,11 @@ public class MongoActivity extends SimpleActivity implements ActivityDefObserver
         mongoDatabase = client.getDatabase(databaseName);
         showQuery = activityDef.getParams().getOptionalBoolean("showquery")
             .orElse(false);
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        resultTimer = ActivityMetrics.timer(activityDef, "result");
-        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
-        resultSetSizeHisto = ActivityMetrics.histogram(activityDef, "resultset-size");
-        triesHisto = ActivityMetrics.histogram(activityDef, "tries");
+        bindTimer = ActivityMetrics.timer(activityDef, "bind", this.getHdrDigits());
+        resultTimer = ActivityMetrics.timer(activityDef, "result", this.getHdrDigits());
+        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success", this.getHdrDigits());
+        resultSetSizeHisto = ActivityMetrics.histogram(activityDef, "resultset-size", this.getHdrDigits());
+        triesHisto = ActivityMetrics.histogram(activityDef, "tries", this.getHdrDigits());
     }
 
     @Override

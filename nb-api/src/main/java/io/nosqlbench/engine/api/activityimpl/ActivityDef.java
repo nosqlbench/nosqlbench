@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
  * with an atomic change counter which can be used to signal changes to observers.</p>
  */
-public class ActivityDef {
+public class ActivityDef implements NBNamedElement {
 
     // milliseconds between cycles per thread, for slow tests only
     public static final String DEFAULT_ALIAS = "UNNAMEDACTIVITY";
@@ -208,4 +209,8 @@ public class ActivityDef {
         }
     }
 
+    @Override
+    public String getName() {
+        return getAlias();
+    }
 }

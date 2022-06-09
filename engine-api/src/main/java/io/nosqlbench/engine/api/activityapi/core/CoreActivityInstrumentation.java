@@ -49,13 +49,13 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
     @Override
     public synchronized Timer getOrCreateInputTimer() {
         String metricName = "read_input";
-        return ActivityMetrics.timer(def, metricName);
+        return ActivityMetrics.timer(def, metricName, activity.getHdrDigits());
     }
 
 
     @Override
     public synchronized Timer getOrCreateStridesServiceTimer() {
-        return ActivityMetrics.timer(def, "strides" + SERVICE_TIME);
+        return ActivityMetrics.timer(def, "strides" + SERVICE_TIME,  activity.getHdrDigits());
     }
 
     @Override
@@ -63,13 +63,13 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
         if (activity.getStrideLimiter()==null) {
             return null;
         }
-        return ActivityMetrics.timer(def, "strides" + RESPONSE_TIME);
+        return ActivityMetrics.timer(def, "strides" + RESPONSE_TIME,  activity.getHdrDigits());
     }
 
 
     @Override
     public synchronized Timer getOrCreateCyclesServiceTimer() {
-        return ActivityMetrics.timer(def, "cycles" + svcTimeSuffix);
+        return ActivityMetrics.timer(def, "cycles" + svcTimeSuffix,  activity.getHdrDigits());
     }
 
     @Override
@@ -78,20 +78,20 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
             return null;
         }
         String metricName = "cycles" + RESPONSE_TIME;
-        return ActivityMetrics.timer(def, metricName);
+        return ActivityMetrics.timer(def, metricName, activity.getHdrDigits());
     }
 
 
     @Override
     public synchronized Timer getOrCreatePhasesServiceTimer() {
-        return ActivityMetrics.timer(def, "phases" + SERVICE_TIME);
+        return ActivityMetrics.timer(def, "phases" + SERVICE_TIME, activity.getHdrDigits());
     }
     @Override
     public synchronized Timer getPhasesResponseTimerOrNull() {
         if (activity.getPhaseLimiter()==null) {
             return null;
         }
-        return ActivityMetrics.timer(def,"phases" + RESPONSE_TIME);
+        return ActivityMetrics.timer(def,"phases" + RESPONSE_TIME,  activity.getHdrDigits());
     }
 
     @Override
@@ -108,26 +108,26 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
 
     @Override
     public synchronized Timer getOrCreateBindTimer() {
-        return ActivityMetrics.timer(def, "bind");
+        return ActivityMetrics.timer(def, "bind",  activity.getHdrDigits());
     }
 
     @Override
     public synchronized Timer getOrCreateExecuteTimer() {
-        return ActivityMetrics.timer(def,"execute");
+        return ActivityMetrics.timer(def,"execute",  activity.getHdrDigits());
     }
 
     @Override
     public synchronized Timer getOrCreateResultTimer() {
-        return ActivityMetrics.timer(def,"result");
+        return ActivityMetrics.timer(def,"result",  activity.getHdrDigits());
     }
 
     @Override
     public synchronized Timer getOrCreateResultSuccessTimer() {
-        return ActivityMetrics.timer(def,"result-success");
+        return ActivityMetrics.timer(def,"result-success",  activity.getHdrDigits());
     }
 
     @Override
     public synchronized Histogram getOrCreateTriesHistogram() {
-        return ActivityMetrics.histogram(def,"tries");
+        return ActivityMetrics.histogram(def,"tries",  activity.getHdrDigits());
     }
 }

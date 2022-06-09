@@ -75,8 +75,8 @@ public class KafkaProducerActivity extends SimpleActivity {
         opSequence = initOpSequencer();
         setDefaultsFromOpSequence(opSequence);
 
-        resultTimer = ActivityMetrics.timer(activityDef, "result");
-        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
+        resultTimer = ActivityMetrics.timer(activityDef, "result", this.getHdrDigits());
+        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success", this.getHdrDigits());
     }
 
     private OpSequence<KafkaStatement> initOpSequencer() {

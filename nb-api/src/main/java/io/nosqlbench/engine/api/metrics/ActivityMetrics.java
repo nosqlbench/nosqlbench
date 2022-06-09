@@ -17,11 +17,11 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.Unit;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 import java.io.File;
@@ -62,17 +62,17 @@ public class ActivityMetrics {
     /**
      * Register a named metric for an activity, synchronized on the activity
      *
-     * @param activityDef    The activity def that the metric will be for
+     * @param named    The activity def that the metric will be for
      * @param name           The full metric name
      * @param metricProvider A function to actually create the metric if needed
      * @return a Metric, or null if the metric for the name was already present
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static Metric register(ActivityDef activityDef, String name, MetricProvider metricProvider) {
-        String fullMetricName = activityDef.getAlias() + "." + name;
+    private static Metric register(NBNamedElement named, String name, MetricProvider metricProvider) {
+        String fullMetricName = named.getName() + "." + name;
         Metric metric = get().getMetrics().get(fullMetricName);
         if (metric == null) {
-            synchronized (activityDef) {
+            synchronized (named) {
                 metric = get().getMetrics().get(fullMetricName);
                 if (metric == null) {
                     metric = metricProvider.getMetric();
@@ -109,17 +109,17 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param activityDef an associated activity def
+     * @param named an associated activity def
      * @param name        a simple, descriptive name for the timer
      * @return the timer, perhaps a different one if it has already been registered
      */
-    public static Timer timer(ActivityDef activityDef, String name) {
-        String fullMetricName = activityDef.getAlias() + "." + name;
-        Timer registeredTimer = (Timer) register(activityDef, name, () ->
+    public static Timer timer(NBNamedElement named, String name, int hdrdigits) {
+        String fullMetricName = named.getName() + "." + name;
+        Timer registeredTimer = (Timer) register(named, name, () ->
             new NicerTimer(fullMetricName,
                 new DeltaHdrHistogramReservoir(
                     fullMetricName,
-                    activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                    hdrdigits
                 )
             ));
         return registeredTimer;
@@ -145,18 +145,18 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param activityDef an associated activity def
+     * @param named an associated activity def
      * @param name        a simple, descriptive name for the histogram
      * @return the histogram, perhaps a different one if it has already been registered
      */
-    public static Histogram histogram(ActivityDef activityDef, String name) {
-        String fullMetricName = activityDef.getAlias() + "." + name;
-        return (Histogram) register(activityDef, name, () ->
+    public static Histogram histogram(NBNamedElement named, String name, int hdrdigits) {
+        String fullMetricName = named.getName() + "." + name;
+        return (Histogram) register(named, name, () ->
             new NicerHistogram(
                 fullMetricName,
                 new DeltaHdrHistogramReservoir(
                     fullMetricName,
-                    activityDef.getParams().getOptionalInteger(HDRDIGITS_PARAM).orElse(_HDRDIGITS)
+                    hdrdigits
                 )
             ));
     }
@@ -177,12 +177,12 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param activityDef an associated activity def
+     * @param named an associated activity def
      * @param name        a simple, descriptive name for the counter
      * @return the counter, perhaps a different one if it has already been registered
      */
-    public static Counter counter(ActivityDef activityDef, String name) {
-        return (Counter) register(activityDef, name, Counter::new);
+    public static Counter counter(NBNamedElement named, String name) {
+        return (Counter) register(named, name, Counter::new);
     }
 
     /**
@@ -190,12 +190,12 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param activityDef an associated activity def
+     * @param named an associated activity def
      * @param name        a simple, descriptive name for the meter
      * @return the meter, perhaps a different one if it has already been registered
      */
-    public static Meter meter(ActivityDef activityDef, String name) {
-        return (Meter) register(activityDef, name, Meter::new);
+    public static Meter meter(NBNamedElement named, String name) {
+        return (Meter) register(named, name, Meter::new);
     }
 
     private static MetricRegistry get() {
@@ -211,8 +211,8 @@ public class ActivityMetrics {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
-        return (Gauge<T>) register(activityDef, name, () -> gauge);
+    public static <T> Gauge<T> gauge(NBNamedElement named, String name, Gauge<T> gauge) {
+        return (Gauge<T>) register(named, name, () -> gauge);
     }
 
     @SuppressWarnings("unchecked")
@@ -350,8 +350,8 @@ public class ActivityMetrics {
         new MetricsRegistryMount(getMetricRegistry(), subRegistry, mountPrefix);
     }
 
-    public static void removeActivityMetrics(ActivityDef activityDef) {
-        get().getMetrics().keySet().stream().filter(s -> s.startsWith(activityDef.getAlias() + "."))
+    public static void removeActivityMetrics(NBNamedElement named) {
+        get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + "."))
             .forEach(get()::remove);
     }
 

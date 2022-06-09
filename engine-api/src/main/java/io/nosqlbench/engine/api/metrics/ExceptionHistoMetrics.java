@@ -42,7 +42,7 @@ public class ExceptionHistoMetrics {
             synchronized (histos) {
                 h = histos.computeIfAbsent(
                     name,
-                    k -> ActivityMetrics.histogram(activityDef, "errorhistos." + name)
+                    k -> ActivityMetrics.histogram(activityDef, "errorhistos." + name, activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
                 );
             }
         }

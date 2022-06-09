@@ -83,10 +83,10 @@ public abstract class JDBCActivity extends SimpleActivity {
     @Override
     public void initActivity() {
         LOGGER.debug("initializing activity: " + getActivityDef().getAlias());
-        bindTimer = ActivityMetrics.timer(getActivityDef(), "bind");
-        resultTimer = ActivityMetrics.timer(getActivityDef(), "result");
-        resultSuccessTimer = ActivityMetrics.timer(getActivityDef(), "result-success");
-        triesHisto = ActivityMetrics.histogram(getActivityDef(), "tries");
+        bindTimer = ActivityMetrics.timer(getActivityDef(), "bind", this.getHdrDigits());
+        resultTimer = ActivityMetrics.timer(getActivityDef(), "result", this.getHdrDigits());
+        resultSuccessTimer = ActivityMetrics.timer(getActivityDef(), "result-success", this.getHdrDigits());
+        triesHisto = ActivityMetrics.histogram(getActivityDef(), "tries", this.getHdrDigits());
 
         opSequence = createOpSequence(ReadyJDBCOp::new,false);
         setDefaultsFromOpSequence(opSequence);

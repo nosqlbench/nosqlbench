@@ -67,14 +67,14 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public void initActivity() {
         super.initActivity();
 
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
-        resultTimer = ActivityMetrics.timer(activityDef, "result");
-        triesHisto = ActivityMetrics.histogram(activityDef, "tries");
+        bindTimer = ActivityMetrics.timer(activityDef, "bind",this.getHdrDigits());
+        executeTimer = ActivityMetrics.timer(activityDef, "execute", this.getHdrDigits());
+        resultTimer = ActivityMetrics.timer(activityDef, "result", this.getHdrDigits());
+        triesHisto = ActivityMetrics.histogram(activityDef, "tries", this.getHdrDigits());
         rowCounter = ActivityMetrics.meter(activityDef, "rows");
-        statusCodeHisto = ActivityMetrics.histogram(activityDef, "statuscode");
-        skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens");
-        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success");
+        statusCodeHisto = ActivityMetrics.histogram(activityDef, "statuscode",this.getHdrDigits());
+        skippedTokens = ActivityMetrics.histogram(activityDef, "skipped-tokens",this.getHdrDigits());
+        resultSuccessTimer = ActivityMetrics.timer(activityDef, "result-success", this.getHdrDigits());
         this.sequencer = createOpSequence(ReadyHttpOp::new, false);
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);

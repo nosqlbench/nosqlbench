@@ -37,11 +37,11 @@ public class ThreadLocalNamedTimers {
     private final static Map<String, Timer> timers = new HashMap<>();
     private final Map<String, Timer.Context> contexts = new HashMap<>();
 
-    public static void addTimer(ActivityDef def, String name) {
+    public static void addTimer(ActivityDef def, String name, int hdrdigits) {
         if (timers.containsKey("name")) {
             logger.warn("A timer named '" + name + "' was already defined and initialized.");
         }
-        Timer timer = ActivityMetrics.timer(def, name);
+        Timer timer = ActivityMetrics.timer(def, name, hdrdigits);
         timers.put(name, timer);
     }
 

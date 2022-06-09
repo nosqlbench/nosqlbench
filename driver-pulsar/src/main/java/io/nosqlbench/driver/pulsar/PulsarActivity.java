@@ -110,14 +110,14 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         pulsarCache = new PulsarSpaceCache(this);
 
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
-        messageSizeHistogram = ActivityMetrics.histogram(activityDef, "message_size");
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
-        createTransactionTimer = ActivityMetrics.timer(activityDef, "create_transaction");
-        commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction");
+        messageSizeHistogram = ActivityMetrics.histogram(activityDef, "message_size", this.getHdrDigits());
+        bindTimer = ActivityMetrics.timer(activityDef, "bind", this.getHdrDigits());
+        executeTimer = ActivityMetrics.timer(activityDef, "execute", this.getHdrDigits());
+        createTransactionTimer = ActivityMetrics.timer(activityDef, "create_transaction", this.getHdrDigits());
+        commitTransactionTimer = ActivityMetrics.timer(activityDef, "commit_transaction", this.getHdrDigits());
 
-        e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency");
-        payloadRttHistogram = ActivityMetrics.histogram(activityDef, "payload_rtt");
+        e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(activityDef, "e2e_msg_latency", this.getHdrDigits());
+        payloadRttHistogram = ActivityMetrics.histogram(activityDef, "payload_rtt", this.getHdrDigits());
 
         msgErrOutOfSeqCounter = ActivityMetrics.counter(activityDef, "err_msg_oos");
         msgErrLossCounter = ActivityMetrics.counter(activityDef, "err_msg_loss");

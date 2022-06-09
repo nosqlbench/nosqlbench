@@ -17,14 +17,14 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.api.NBNamedElement;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RateLimiters {
     private final static Logger logger = LogManager.getLogger(RateLimiters.class);
 
-    public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
+    public static synchronized RateLimiter createOrUpdate(NBNamedElement def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
             RateLimiter rateLimiter= new HybridRateLimiter(def, label, spec);
@@ -38,7 +38,7 @@ public class RateLimiters {
         }
     }
 
-    public static synchronized RateLimiter create(ActivityDef def, String label, String specString) {
+    public static synchronized RateLimiter create(NBNamedElement def, String label, String specString) {
         return createOrUpdate(def, label, null, new RateSpec(specString));
     }
 

@@ -41,7 +41,7 @@ public class ExceptionTimerMetrics {
             synchronized (timers) {
                 timer = timers.computeIfAbsent(
                     name,
-                    k -> ActivityMetrics.timer(activityDef, "exceptions." + name)
+                    k -> ActivityMetrics.timer(activityDef, "exceptions." + name, activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
                 );
             }
         }

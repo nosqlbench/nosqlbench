@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.ratelimits;
+package io.nosqlbench.adapter.diag.types;
 
-import io.nosqlbench.api.NBNamedElement;
-
-public interface TokenPool {
-
-    TokenPool apply(NBNamedElement named, RateSpec rateSpec);
-
-    double getBurstRatio();
-
-    long takeUpTo(long amt);
-
-    long blockAndTake();
-
-    long blockAndTake(long tokens);
-
-    long getWaitTime();
-
-    long getWaitPool();
-
-    long getActivePool();
-
-    RateSpec getRateSpec();
-
-    long restart();
-
-    void start();
+public interface OpNameAware {
+    void setOpName(String opname);
+    static void apply(String opname, Object... awares) {
+        for (Object aware : awares) {
+            if (aware instanceof OpNameAware opNameAware) {
+                opNameAware.setOpName(opname);
+            }
+        }
+    }
 }

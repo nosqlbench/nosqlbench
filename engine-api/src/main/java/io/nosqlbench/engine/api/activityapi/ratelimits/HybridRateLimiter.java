@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.activityapi.core.Startable;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -80,6 +80,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HybridRateLimiter implements Startable, RateLimiter {
 
     private final static Logger logger = LogManager.getLogger(HybridRateLimiter.class);
+    private NBNamedElement named;
 
     //private volatile TokenFiller filler;
     private volatile long starttime;
@@ -88,7 +89,6 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     private RateSpec rateSpec;
 
     // basic state
-    private ActivityDef activityDef;
     private String label;
     private State state = State.Idle;
     // metrics
@@ -104,19 +104,15 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     protected HybridRateLimiter() {
     }
 
-    public HybridRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
-        setActivityDef(def);
+    public HybridRateLimiter(NBNamedElement named, String label, RateSpec rateSpec) {
         setLabel(label);
-        init(activityDef);
+        init(named);
+        this.named = named;
         this.applyRateSpec(rateSpec);
     }
 
     protected void setLabel(String label) {
         this.label = label;
-    }
-
-    protected void setActivityDef(ActivityDef def) {
-        this.activityDef = def;
     }
 
     @Override
@@ -151,7 +147,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         }
 
         this.rateSpec = updatingRateSpec;
-        this.tokens = (this.tokens == null) ? new ThreadDrivenTokenPool(rateSpec, activityDef) : this.tokens.apply(rateSpec);
+        this.tokens = (this.tokens == null) ? new ThreadDrivenTokenPool(rateSpec, named) : this.tokens.apply(named, rateSpec);
 //        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
 //        this.tokens = this.filler.getTokenPool();
 
@@ -163,7 +159,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
 
-    protected void init(ActivityDef activityDef) {
+    protected void init(NBNamedElement activityDef) {
         this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGauge(this));
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.cyclerate", new RateLimiters.RateGauge(this));
         this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.burstrate", new RateLimiters.BurstRateGauge(this));
