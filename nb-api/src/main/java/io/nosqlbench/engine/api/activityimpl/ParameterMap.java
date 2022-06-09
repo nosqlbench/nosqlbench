@@ -172,6 +172,12 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return super.get(key);
     }
 
+    public void setSilently(String paramName, Object newValue) {
+        super.put(paramName, String.valueOf(newValue));
+        logger.trace("setting param silently " + paramName + "=" + newValue);
+    }
+
+
     public void set(String paramName, Object newValue) {
         super.put(paramName, String.valueOf(newValue));
         logger.info("setting param " + paramName + "=" + newValue);
