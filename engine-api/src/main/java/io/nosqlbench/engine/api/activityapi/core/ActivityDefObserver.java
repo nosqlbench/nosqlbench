@@ -25,4 +25,12 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
  */
 public interface ActivityDefObserver {
     void onActivityDefUpdate(ActivityDef activityDef);
+
+    static void apply(ActivityDef def, Object... candidates) {
+        for (Object candidate : candidates) {
+            if (candidate instanceof ActivityDefObserver observer) {
+                observer.onActivityDefUpdate(def);
+            }
+        }
+    }
 }
