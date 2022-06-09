@@ -48,7 +48,7 @@ public class ExitStatusIntegrationTests {
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_initexception", 15,
                 java, "-jar", JARNAME, "--logs-dir", "logs/test", "run",
-            "driver=diag", "initdelay=notanumber"
+            "driver=diag", "op=initdelay:initdelay=notanumber"
         );
         String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("For input string: \"notanumber\"");
@@ -71,12 +71,12 @@ public class ExitStatusIntegrationTests {
 //    }
 
     @Test
-    public void testExitStatusOnActivityAsyncStopException() {
+    public void testExitStatusOnActivityOpException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
                 java, "-jar", JARNAME, "--logs-dir", "logs/test", "run",
-            "driver=diag", "async=1", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vvv"
+            "driver=diag", "cyclerate=5", "op=erroroncycle:erroroncycle=10", "cycles=2000", "-vvv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was requested to stop on cycle 10");

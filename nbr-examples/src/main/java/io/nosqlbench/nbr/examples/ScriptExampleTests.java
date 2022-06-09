@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.nbr.examples;
 
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
+import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
@@ -38,7 +40,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AsyncScriptIntegrationTests {
+// TODO: convert to Junit5 jupiter assertions
+
+public class ScriptExampleTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
@@ -51,15 +55,19 @@ public class AsyncScriptIntegrationTests {
         }
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
-        ScenariosExecutor executor = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
+        ScenariosExecutor executor = new ScenariosExecutor(ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
 
         s.addScenarioScriptParams(paramsMap);
 
-        ClassLoader cl = AsyncScriptIntegrationTests.class.getClassLoader();
+        ClassLoader cl = ScriptExampleTests.class.getClassLoader();
         String script;
         try {
-            InputStream sstream = cl.getResourceAsStream("scripts/async/" + scriptname + ".js");
+            String scriptPath = "scripts/examples/" + scriptname + ".js";
+            InputStream sstream = cl.getResourceAsStream(scriptPath);
+            if (sstream==null) {
+                throw new RuntimeException("Integrated test tried to load '" + scriptPath + "', but it was not there.");
+            }
             byte[] bytes = IOUtils.toByteArray(sstream);
             script = new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException ex) {
@@ -80,19 +88,18 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
-    public void testOptimo() {
-        ScenarioResult scenarioResult = runScenario("optimo");
-        String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n" + iolog);
-//        Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);
-//        Matcher m = p.matcher(iolog);
-//        assertThat(m.matches()).isTrue();
-//
-//        String digits = m.group(1);
-//        assertThat(digits).isNotEmpty();
-//        double rate = Double.valueOf(digits);
-//        assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
-//
+    public void testLinkedInput() {
+        ScenarioResult scenarioResult = runScenario("linkedinput");
+        Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
+            Pattern.DOTALL);
+        assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
+    }
+
+    @Test
+    public void testExceptionPropagationFromMotorThread() {
+        ScenarioResult scenarioResult = runScenario("activityerror");
+        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
     }
 
     @Test
@@ -110,23 +117,6 @@ public class AsyncScriptIntegrationTests {
         assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
     }
 
-// The coverage of this test is also covered by the rate limiter
-// specific tests
-//    @Test
-//    public void testStrideRateOnly() {
-//        ScenarioResult scenarioResult = runScenario("stride_rate");
-//        String iolog = scenarioResult.getIOLog();
-//        System.out.println("iolog\n" + iolog);
-//        Pattern p = Pattern.compile(".*stride_rate.strides.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
-//        Matcher m = p.matcher(iolog);
-//        assertThat(m.matches()).isTrue();
-//
-//        String digits = m.group(1);
-//        assertThat(digits).isNotEmpty();
-//        double rate = Double.valueOf(digits);
-//        assertThat(rate).isCloseTo(2500, Offset.offset(500D));
-//    }
-
     @Test
     public void testExtensionPoint() {
         ScenarioResult scenarioResult = runScenario("extensions");
@@ -134,20 +124,19 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
-    public void testLinkedInput() {
-        ScenarioResult scenarioResult = runScenario("linkedinput");
-        Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
-                Pattern.DOTALL);
-        assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
+    public void testOptimo() {
+        ScenarioResult scenarioResult = runScenario("optimo");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println("iolog\n" + iolog);
+        assertThat(iolog).contains("map of result was");
     }
 
     @Test
     public void testExtensionCsvLogger() {
         ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
         assertThat(scenarioResult.getIOLog()).contains("started new " +
-                "csvlogger: logs/csvmetricstestdir");
+            "csvlogger: logs/csvmetricstestdir");
     }
-
 
     @Test
     public void testScriptParamsVariable() {
@@ -171,9 +160,9 @@ public class AsyncScriptIntegrationTests {
     public void testExtensionHistoStatsLogger() throws IOException {
         ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
         assertThat(scenarioResult.getIOLog()).contains("stdout started " +
-                "logging to logs/histostats.csv");
+            "logging to logs/histostats.csv");
         List<String> strings = Files.readAllLines(Paths.get(
-                "logs/histostats.csv"));
+            "logs/histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
         assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(2);
@@ -247,17 +236,10 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
-    public void testExceptionPropagationFromMotorThread() {
-        ScenarioResult scenarioResult = runScenario("activityerror");
-        assertThat(scenarioResult.getException()).isPresent();
-        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
-    }
-
-    @Test
     public void testExceptionPropagationFromActivityInit() {
         ScenarioResult scenarioResult = runScenario("activityiniterror");
         assertThat(scenarioResult.getException()).isPresent();
-        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+        assertThat(scenarioResult.getException().get().getMessage()).contains("Unknown config parameter 'unknown_config'");
         assertThat(scenarioResult.getException()).isNotNull();
     }
 
@@ -282,15 +264,6 @@ public class AsyncScriptIntegrationTests {
         // after investigating minor decreasing effect
     }
 
-
-//    @Test
-//    @Disabled
-//    public void testCycleRateChangeOldMetrics() {
-//        ScenarioResult scenarioResult = runScenario("cycle_rate_change_deprecated");
-//        String ioLog = scenarioResult.getIOLog();
-//        assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
-//    }
-
     @Test
     public void testCycleRateChangeNewMetrics() {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change");
@@ -301,8 +274,8 @@ public class AsyncScriptIntegrationTests {
     @Test
     public void testExitLogic() {
         ScenarioResult scenarioResult = runScenario(
-                "basicdiag",
-                "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+            "basicdiag",
+            "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
 
