@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.config.params;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class MapBackedElement implements ElementData {
@@ -47,6 +48,20 @@ public class MapBackedElement implements ElementData {
     @Override
     public String getGivenName() {
         return this.elementName;
+    }
+
+    @Override
+    public Object getAsCommon(String key) {
+        Object found = get(key);
+        if (found==null) {
+            return null;
+        }
+
+        Optional<Object> converted = ElementData.asCommonType(found);
+        if (converted.isPresent()) {
+            return converted.get();
+        }
+        throw new RuntimeException("Unable to convert type '" + found.getClass().getCanonicalName() + "' to a common type.");
     }
 
     @Override

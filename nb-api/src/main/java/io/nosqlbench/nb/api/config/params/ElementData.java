@@ -16,6 +16,9 @@
 
 package io.nosqlbench.nb.api.config.params;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -28,6 +31,25 @@ import java.util.Set;
  */
 public interface ElementData {
     String NAME = "name";
+    List<Class<?>> COMMON_TYPES = List.of(
+        String.class,
+        byte.class, Byte.class,
+        short.class, Short.class,
+        int.class, Integer.class,
+        long.class, Long.class,
+        double.class, Double.class,
+        float.class, Float.class,
+        Map.class, Set.class, List.class
+    );
+
+    static Optional<Object> asCommonType(Object src) {
+        for (Class<?> commonType : COMMON_TYPES) {
+            if (commonType.isAssignableFrom(src.getClass())) {
+                return Optional.of(commonType.cast(src));
+            }
+        }
+        return Optional.empty();
+    }
 
     Object get(String name);
 
@@ -110,4 +132,23 @@ public interface ElementData {
         return get(name,type);
     }
 
+    /**
+     * <p>Get the value for the key, but ensure that the type of value that is returned
+     * is in one of the sanctioned {@link #COMMON_TYPES}.
+     *
+     * <p>If possible, the value provided should be a wrapper type around the actual backing
+     * type, such that mutability is preserved.</p>
+     *
+     * <p>If the backing type is a structured type object graph which defies direct
+     * conversion to one of the types above, then an error should be thrown.</p>
+     *
+     * <p>If the type is a collection type, then type conversion should be provided all the way
+     * down to each primitive value.</p>
+     *
+     * <p>If no value by the given name exists, the null should be returned.</p>
+     *
+     * @param key The key of the value to retrieve
+     * @return The value as a Java primitive, Boxed primitive, or Set, List, or Map of String to Object.
+     */
+    Object getAsCommon(String key);
 }
