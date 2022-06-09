@@ -16,6 +16,7 @@
 package io.nosqlbench.engine.core.script;
 
 import com.codahale.metrics.MetricRegistry;
+import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
@@ -34,10 +35,7 @@ import io.nosqlbench.nb.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.nb.api.metadata.SystemId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.EnvironmentAccess;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.PolyglotAccess;
+import org.graalvm.polyglot.*;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -98,8 +96,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private long endedAtMillis = -1L;
 
     public enum Engine {
-        Graalvm,
-        Nashorn
+        Graalvm
     }
 
     public Scenario(
@@ -175,62 +172,47 @@ public class Scenario implements Callable<ScenarioResult> {
 
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
-        switch (engine) {
-            case Nashorn:
-                throw new RuntimeException("The nashorn engine has been deprecated in this version of NoSQLBench.");
-            case Graalvm:
-                Context.Builder contextSettings = Context.newBuilder("js")
-                    .allowHostAccess(HostAccess.ALL)
-                    .allowNativeAccess(true)
-                    .allowCreateThread(true)
-                    .allowIO(true)
-                    .allowHostClassLookup(s -> true)
-                    .allowHostClassLoading(true)
-                    .allowCreateProcess(true)
-                    .allowAllAccess(true)
-                    .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
-                    .allowPolyglotAccess(PolyglotAccess.ALL)
-                    .option("js.ecmascript-version", "2020")
-                    .option("js.nashorn-compat", "true");
+        Context.Builder contextSettings = Context.newBuilder("js")
+            .allowHostAccess(HostAccess.ALL)
+            .allowNativeAccess(true)
+            .allowCreateThread(true)
+            .allowIO(true)
+            .allowHostClassLookup(s -> true)
+            .allowHostClassLoading(true)
+            .allowCreateProcess(true)
+            .allowAllAccess(true)
+            .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
+            .allowPolyglotAccess(PolyglotAccess.ALL)
+            .option("js.ecmascript-version", "2020")
+            .option("js.nashorn-compat", "true");
 
-                // TODO: add in, out, err for this scenario
-                this.scriptEngine = GraalJSScriptEngine.create(null, contextSettings);
+        org.graalvm.polyglot.Engine.Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
+        engineBuilder.option("engine.WarnInterpreterOnly","false");
+        org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
 
-//                try {
-//                    this.scriptEngine.put("javaObj", new Object());
-//                    this.scriptEngine.eval("(javaObj instanceof Java.type('java.lang.Object'));");
-//                } catch (ScriptException e) {
-//                    throw new RuntimeException(e);
-//                }
+        // TODO: add in, out, err for this scenario
+        this.scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
 
-                break;
-        }
 
         scenarioController = new ScenarioController(this.scenarioName, minMaturity);
         if (!progressInterval.equals("disabled")) {
             activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
 
+
         scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
 
         scriptEngine.put("params", scenarioScriptParams);
 
-        if (engine == Engine.Graalvm) {
-            // https://github.com/graalvm/graaljs/blob/master/docs/user/JavaInterop.md
-            if (wantsGraaljsCompatMode) {
-                scriptEngine.put("scenario", scenarioController);
-                scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-                scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
-            } else {
-                scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
-                scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-                scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
-            }
-        } else if (engine == Engine.Nashorn) {
-            throw new RuntimeException("The Nashorn engine has been deprecated in this version of NoSQLBench.");
+        if (wantsGraaljsCompatMode) {
+            scriptEngine.put("scenario", scenarioController);
+            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
         } else {
-            throw new RuntimeException("Unsupported engine: " + engine);
+            scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
+            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
         }
 
         for (ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
@@ -246,7 +228,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 metricRegistry,
                 scriptEnv
             );
-            ScenarioMetadataAware.apply(extensionObject,getScenarioMetadata());
+            ScenarioMetadataAware.apply(extensionObject, getScenarioMetadata());
             logger.trace("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                 " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
@@ -254,7 +236,7 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     private synchronized ScenarioMetadata getScenarioMetadata() {
-        if (this.scenarioMetadata==null) {
+        if (this.scenarioMetadata == null) {
             this.scenarioMetadata = new ScenarioMetadata(
                 this.startedAtMillis,
                 this.scenarioName,
