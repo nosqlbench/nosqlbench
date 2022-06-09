@@ -123,12 +123,17 @@ import java.util.stream.Collectors;
 public class NBParams {
 
     public static List<Element> some(Object source) {
-        return DataSources.elements(source).stream().map(ElementImpl::new).collect(Collectors.toList());
+        return DataSources
+            .elements(source)
+            .stream()
+            .map(ElementImpl::new)
+            .collect(Collectors.toList());
     }
 
     public static Element one(Object source) {
         return one(null, source);
     }
+
     public static Element one(String givenName, Object source) {
         List<ElementData> some = DataSources.elements(givenName,source);
         if (some.size() == 0) {

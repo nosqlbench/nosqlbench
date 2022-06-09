@@ -21,7 +21,7 @@ package io.nosqlbench.engine.api.templating;
  * types which could be configured. This method provides an efficient method for refining a template or builder object
  * with O(1) field lookup.
  * <p>
- * The field enum doesn't limit how a field may be modified. In some cases, a single field may be iterativel built-up,
+ * The field enum doesn't limit how a field may be modified. In some cases, a single field may be iteratively built-up,
  * such as headers for a request object. (Multiple headers can be added, and they are all a header type, just with
  * different values.) In other cases, there may be a single-valued property that is replaced entirely each time it is
  * set.
