@@ -19,13 +19,11 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
-import io.nosqlbench.engine.api.activityapi.core.progress.InputProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
-import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -102,7 +100,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public void initActivity() {
-        onActivityDefUpdate(this.activityDef);
+        initOrUpdateRateLimiters(this.activityDef);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
@@ -268,7 +266,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public Timer getResultTimer() {
-        return ActivityMetrics.timer(getActivityDef(), "result");
+        return ActivityMetrics.timer(getActivityDef(), "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     @Override
@@ -320,6 +318,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+        initOrUpdateRateLimiters(activityDef);
+    }
+
+    public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
             .map(RateSpec::new)
@@ -347,14 +349,16 @@ public class SimpleActivity implements Activity, ProgressCapable {
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
             logger.info("defaulting stride to " + stride + " (the sequence length)");
-            getParams().set("stride", stride);
+//            getParams().set("stride", stride);
+            getParams().setSilently("stride",stride);
         }
 
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info("defaulting cycles to " + cycles + " (the stride length)");
-            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
             if (getActivityDef().getCycleCount() == 0) {
                 throw new RuntimeException(
@@ -391,15 +395,18 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 } else {
                     logger.info("setting threads to " + threads + " (auto) [10xCORES]");
                 }
-                activityDef.setThreads(threads);
+//                activityDef.setThreads(threads);
+                activityDef.getParams().setSilently("threads",threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
                 logger.info("setting threads to " + threads + " (" + multiplier + "x)");
-                activityDef.setThreads(threads);
+//                activityDef.setThreads(threads);
+                activityDef.getParams().setSilently("threads",threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
                 logger.info("setting threads to " + spec + " (direct)");
-                activityDef.setThreads(Integer.parseInt(spec));
+//                activityDef.setThreads(Integer.parseInt(spec));
+                activityDef.getParams().setSilently("threads",Integer.parseInt(spec));
             }
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
@@ -563,4 +570,8 @@ public class SimpleActivity implements Activity, ProgressCapable {
     }
 
 
+    @Override
+    public String getName() {
+        return this.activityDef.getAlias();
+    }
 }
