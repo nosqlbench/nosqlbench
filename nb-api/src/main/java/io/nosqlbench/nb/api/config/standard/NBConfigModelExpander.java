@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.diag.optasks;
+package io.nosqlbench.nb.api.config.standard;
 
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
-
-import java.util.Map;
-import java.util.function.BiFunction;
-
-public interface DiagOpTask extends BiFunction<Long,Map<String,Object>, Map<String,Object>>, NBConfigurable {
+public interface NBConfigModelExpander {
+    NBConfigModel apply(Object value);
 }

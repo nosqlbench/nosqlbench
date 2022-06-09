@@ -22,6 +22,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ConfigModel implements NBConfigModel {
 
@@ -29,6 +30,7 @@ public class ConfigModel implements NBConfigModel {
     private final List<Param<?>> params = new ArrayList<>();
     private Param<?> lastAdded = null;
     private final Class<?> ofType;
+    private final List<NBConfigModelExpander> expanders = new ArrayList<>();
 
     private ConfigModel(Class<?> ofType, Param<?>... params) {
         this.ofType = ofType;
@@ -40,6 +42,7 @@ public class ConfigModel implements NBConfigModel {
     public static ConfigModel of(Class<?> ofType, Param<?>... params) {
         return new ConfigModel(ofType, params);
     }
+
     public static ConfigModel of(Class<?> ofType) {
         return new ConfigModel(ofType);
     }
@@ -47,7 +50,7 @@ public class ConfigModel implements NBConfigModel {
     public static NBConfiguration defacto(ActivityDef def) {
         ConfigModel configModel = new ConfigModel(Object.class);
         for (Map.Entry<String, Object> entry : def.getParams().entrySet()) {
-            configModel.add(Param.defaultTo(entry.getKey(),entry.getValue().toString()));
+            configModel.add(Param.defaultTo(entry.getKey(), entry.getValue().toString()));
         }
         return configModel.apply(def.getParams());
     }
@@ -60,6 +63,13 @@ public class ConfigModel implements NBConfigModel {
         lastAdded = null;
         return this;
     }
+
+    /**
+     * Add a param that, when present in a runtime configuration, will cause the config
+     * model to be expanded dynamically. This is for scenarios in which you have external
+     * configurable resources or templates which contain their own models that can
+     * only be known at runtime.
+     */
 
     public NBConfigModel asReadOnly() {
         return this;
@@ -140,20 +150,30 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public NBConfiguration extractConfig(Map<String, ?> sharedConfig) {
+        NBConfiguration matchedConfig = matchConfig(sharedConfig);
+        matchedConfig.getMap().keySet().forEach(sharedConfig::remove);
+        return new NBConfiguration(this, matchedConfig.getMap());
+    }
+
+    @Override
+    public NBConfiguration matchConfig(Map<String, ?> sharedConfig) {
         LinkedHashMap<String, Object> extracted = new LinkedHashMap<>();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (getNamedParams().containsKey(providedCfgField)) {
                 extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }
-        extracted.keySet().forEach(sharedConfig::remove);
-
         return new NBConfiguration(this, extracted);
     }
 
     @Override
     public NBConfiguration extractConfig(NBConfiguration cfg) {
         return extractConfig(cfg.getMap());
+    }
+
+    @Override
+    public NBConfiguration matchConfig(NBConfiguration cfg) {
+        return matchConfig(cfg.getMap());
     }
 
     private void assertDistinctSynonyms(Map<String, ?> config) {
@@ -173,10 +193,12 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public NBConfiguration apply(Map<String, ?> config) {
+        ConfigModel expanded = expand(this, config);
+
         assertValidConfig(config);
         LinkedHashMap<String, Object> validConfig = new LinkedHashMap<>();
 
-        for (Param<?> param : params) {
+        for (Param<?> param : expanded.params) {
             Class<?> type = param.getType();
             List<String> found = new ArrayList<>();
             String activename = null;
@@ -188,7 +210,7 @@ public class ConfigModel implements NBConfigModel {
                     break;
                 }
             }
-            if (activename==null) {
+            if (activename == null) {
                 activename = param.getNames().get(0);
             }
             if (cval == null && param.isRequired()) {
@@ -205,9 +227,28 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public void assertValidConfig(Map<String, ?> config) {
-        assertRequiredFields(config);
-        assertNoExtraneousFields(config);
-        assertDistinctSynonyms(config);
+        ConfigModel expanded = expand(this, config);
+        expanded.assertRequiredFields(config);
+        expanded.assertNoExtraneousFields(config);
+        expanded.assertDistinctSynonyms(config);
+    }
+
+    private ConfigModel expand(ConfigModel configModel, Map<String, ?> config) {
+        List<Param<?>> expanders = configModel.params.stream()
+            .filter(p -> p.getExpander()!=null).toList();
+
+        for (Param<?> expandingParameter : expanders) {
+            for (String name : expandingParameter.getNames()) {
+                if (config.containsKey(name)) {
+                    Object triggeringValue = config.get(name);
+                    expandingParameter.validate(triggeringValue);
+                    NBConfigModelExpander expander = expandingParameter.getExpander();
+                    NBConfigModel newModel = expander.apply(triggeringValue);
+                    configModel = configModel.add(newModel);
+                }
+            }
+        }
+        return configModel;
     }
 
     @Override
@@ -273,5 +314,15 @@ public class ConfigModel implements NBConfigModel {
             add(param);
         }
         return this;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[").append(
+                params.stream().map(p -> p.getNames().get(0)).collect(Collectors.joining(",")))
+            .append("]");
+
+        return sb.toString();
     }
 }
