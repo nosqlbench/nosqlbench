@@ -16,16 +16,29 @@ jobs:
         java-version: '14'
         java-package: jdk
         architecture: x64
-        
+
     - name: Cache Maven packages
       uses: actions/cache@v1
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2   
+        restore-keys: ${{ runner.os }}-m2
 
     - name: mvn package
       run: mvn package
-    
+
     - name: mvn verify
       run: mvn verify
+
+    - name: Run Snyk
+      uses: snyk/actions/maven@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        THIS_BRANCH:  ${GITHUB_REF##*/}
+      with:
+        args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${THIS_BRANCH}"
+    - name: upload snyk report
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: snyk.sarif
+
