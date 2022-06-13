@@ -1,6 +1,1 @@
-- d0a5ecc46 (HEAD -> nb4-maintenance) correct java version in enforce-java mojo
-- 1f064fff9 (origin/nb4-maintenance) release fix release
-- 2acb34e7b set github actions java to j14 (LTS) for maint branch
-- d127821bd fix release
-- 104e21a35 Enforce Java versions up front to avoid any confusion about build requirements
-- 32997116b wrap OSHI calls to gather hardware data so they may fail without stopping NB
+- 10fa5ada2 (HEAD -> nb4-maintenance) driver update

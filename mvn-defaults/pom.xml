@@ -3,7 +3,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.15.95-SNAPSHOT</version>
+    <version>4.15.98-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -86,8 +86,20 @@
 
             <dependency>
                 <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core-java11</artifactId>
+                <artifactId>oshi-core</artifactId>
                 <version>6.1.6</version>
+            </dependency>
+
+            <!-- due to https://github.com/oshi/oshi/issues/1289 -->
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>5.11.0</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>5.11.0</version>
             </dependency>
 
             <dependency>

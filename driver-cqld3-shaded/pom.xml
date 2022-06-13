@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
-        <version>4.15.95-SNAPSHOT</version>
+        <version>4.15.98-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -24,31 +24,31 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-          <version>4.15.95-SNAPSHOT</version>
+          <version>4.15.98-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>drivers-api</artifactId>
-          <version>4.15.95-SNAPSHOT</version>
+          <version>4.15.98-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
-            <version>3.9.0</version>
+            <version>3.11.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-mapping</artifactId>
-            <version>3.9.0</version>
+            <version>3.11.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-extras</artifactId>
-            <version>3.9.0</version>
+            <version>3.11.2</version>
         </dependency>
 
         <!-- For CQL compression option -->
