@@ -25,7 +25,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.81-SNAPSHOT</version>
+            <version>4.15.98-SNAPSHOT</version>
         </dependency>
 
         <dependency>

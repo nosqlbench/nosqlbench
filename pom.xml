@@ -52,7 +52,7 @@
         <module>driver-jdbc</module>
         <module>driver-cockroachdb</module>
         <module>driver-pulsar</module>
-        <module>driver-jms</module>
+        <module>driver-s4j</module>
         <module>driver-grpc</module>
 <!--        <module>driver-directapi</module>-->
 
