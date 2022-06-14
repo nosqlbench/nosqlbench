@@ -30,15 +30,15 @@ jobs:
     - name: mvn verify
       run: mvn verify
 
-    - name: Run Snyk
-      uses: snyk/actions/maven@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        THIS_BRANCH:  ${GITHUB_REF##*/}
-      with:
-        args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${THIS_BRANCH}"
-    - name: upload snyk report
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: snyk.sarif
+#    - name: Run Snyk
+#      uses: snyk/actions/maven@master
+#      env:
+#        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#        THIS_BRANCH:  ${GITHUB_REF##*/}
+#      with:
+#        args: --severity-threshold=high --sarif-file-output=snyk.sarif --target-reference="${THIS_BRANCH}"
+#    - name: upload snyk report
+#      uses: github/codeql-action/upload-sarif@v2
+#      with:
+#        sarif_file: snyk.sarif
 
