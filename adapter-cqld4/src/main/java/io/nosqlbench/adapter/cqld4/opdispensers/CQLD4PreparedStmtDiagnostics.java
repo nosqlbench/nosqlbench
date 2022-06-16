@@ -118,7 +118,7 @@ public class CQLD4PreparedStmtDiagnostics {
         Object[] values = fieldsF.apply(cycle);
         if (defs.size() != values.length) {
             throw new OpConfigError("There are " + defs.size() + " anchors in statement '" + preparedStmt.getQuery() + "'" +
-                "but only " + values.length + " values were provided.");
+                "but " + values.length + " values were provided. These must match.");
         }
 
         BoundStatement bound = preparedStmt.bind();
