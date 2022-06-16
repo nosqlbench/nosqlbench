@@ -37,7 +37,7 @@
 
         <!-- CORE MODULES -->
         <module>mvn-defaults</module>
-        <module>nb</module>
+        <module>nb5</module>
         <module>nbr</module>
         <module>nbr-examples</module>
         <module>nb-api</module>
@@ -57,6 +57,7 @@
         <module>adapter-cqld4</module>
         <module>adapter-dynamodb</module>
         <module>adapter-diag</module>
+        <module>adapter-stdout</module>
         <module>driver-diag</module>
         <module>driver-stdout</module>
         <module>driver-tcp</module>
@@ -88,9 +89,18 @@
 
     <profiles>
         <profile>
+            <id>with-nb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>nb</module>
+            </modules>
+        </profile>
+        <profile>
             <id>with-mongodb</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>driver-mongodb</module>
