@@ -69,12 +69,6 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-diag</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
