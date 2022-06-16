@@ -46,6 +46,7 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
 
 
     // TODO: Consider changing this to "ready op template" or similar
+    @Deprecated
     public BaseOpDispenser(OpTemplate optpl) {
         this.name = optpl.getName();
     }
