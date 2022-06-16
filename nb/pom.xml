@@ -1,3 +1,19 @@
+<!--
+  ~ Copyright (c) 2022 nosqlbench
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,45 +39,36 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-rest</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-cli</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-docs</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-core</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-extensions</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-kafka</artifactId>
+            <artifactId>adapter-stdout</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-diag</artifactId>
+            <version>4.17.15-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-dynamodb</artifactId>
+            <version>4.17.15-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-cqld4</artifactId>
+            <version>4.17.15-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Everything below this line constitutes the delta between nb and nb5 -->
+        <!-- All driver-* modules should be migrated to adapter-* modules and added to nb5 -->
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
@@ -71,19 +78,21 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-diag</artifactId>
+            <artifactId>driver-http</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
+
+
+        <!--        <dependency>-->
+        <!--            <groupId>io.nosqlbench</groupId>-->
+        <!--            <artifactId>driver-kafka</artifactId>-->
+        <!--            <version>4.17.15-SNAPSHOT</version>-->
+        <!--        </dependency>-->
+
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>driver-tcp</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-http</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
 
@@ -117,17 +126,6 @@
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-dynamodb</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-cqld4</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-        </dependency>
 
     </dependencies>
 
