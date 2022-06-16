@@ -39,9 +39,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-// TODO: convert to Junit5 jupiter assertions
-
 public class ScriptExampleTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
