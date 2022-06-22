@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nb.api.annotations;
 
-public interface BuilderFacets {
+public interface AnnotationBuilderFacets {
 
     interface All extends
             WantsSession, WantsInterval, WantsLayer, WantsLabels, WantsMoreDetailsOrBuild, WantsMoreLabelsOrDetails {

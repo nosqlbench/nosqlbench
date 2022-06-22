@@ -83,7 +83,7 @@ public interface Annotation {
      */
     Map<String, String> getDetails();
 
-    static BuilderFacets.WantsSession newBuilder() {
+    static AnnotationBuilderFacets.WantsSession newBuilder() {
         return new AnnotationBuilder();
     }
 
