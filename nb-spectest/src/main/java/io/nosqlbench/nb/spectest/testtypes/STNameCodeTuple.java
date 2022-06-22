@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityconfig.rawyaml;
+package io.nosqlbench.nb.spectest.testtypes;
 
 import com.vladsch.flexmark.util.ast.Node;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Supplier;
 
-final class TestSet {
+/**
+ * A {@link STNameCodeTuple} is a set of metadata that describes a test target from a
+ * test specification file, in terms of {@link Node} sequences and context.
+ * It contains naming and locating information as well as the document nodes containing
+ * the target element.
+ */
+public final class STNameCodeTuple {
+
     private final String description;
     private final Path path;
     private final int line;
@@ -30,7 +38,7 @@ final class TestSet {
     public CharSequence info;
     public CharSequence text;
 
-    public TestSet(Supplier<CharSequence> desc, Node infoNode, Node dataNode, Path path) {
+    public STNameCodeTuple(Supplier<CharSequence> desc, Node infoNode, Node dataNode, Path path) {
         this.description = desc.get().toString();
         this.info = infoNode.getChars();
         this.text = dataNode.getFirstChild().getChars();
@@ -58,7 +66,7 @@ final class TestSet {
     /**
      * Provide the logical path of the file being examined in this test set.
      * If the system properties indicate that the test is being run from within intellij,
-     * the path will be relatized from the next module level up to allow for hot linking
+     * the path will be relativized from the next module level up to allow for hot linking
      * directly to files.
      * @return A useful relative path to the file being tested
      */
@@ -76,5 +84,31 @@ final class TestSet {
     @Override
     public String toString() {
         return this.getDesc();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        STNameCodeTuple that = (STNameCodeTuple) o;
+
+        if (line != that.line) return false;
+        if (!Objects.equals(description, that.description)) return false;
+        if (!Objects.equals(path, that.path)) return false;
+        if (!Objects.equals(refnode, that.refnode)) return false;
+        if (!Objects.equals(info, that.info)) return false;
+        return Objects.equals(text, that.text);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = description != null ? description.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + line;
+        result = 31 * result + (refnode != null ? refnode.hashCode() : 0);
+        result = 31 * result + (info != null ? info.hashCode() : 0);
+        result = 31 * result + (text != null ? text.hashCode() : 0);
+        return result;
     }
 }

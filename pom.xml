@@ -42,6 +42,7 @@
         <module>nbr-examples</module>
         <module>nb-api</module>
         <module>nb-annotations</module>
+        <module>nb-spectest</module>
         <module>engine-api</module>
         <module>engine-core</module>
         <module>engine-extensions</module>

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityconfig.rawyaml;
+package io.nosqlbench.nb.spectest;
 
 import com.vladsch.flexmark.ext.yaml.front.matter.YamlFrontMatterExtension;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
+import io.nosqlbench.nb.spectest.loaders.STHeadingScanner;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class HeadingScannerTest {
+public class STHeadingScannerTest {
     Parser parser = Parser.builder().extensions(List.of(YamlFrontMatterExtension.create())).build();
 
     @Test
@@ -34,19 +34,19 @@ public class HeadingScannerTest {
             .parse("# heading1\n\n## heading2\n\ntext\n\n# heading3")
             .getFirstChild();
 
-        HeadingScanner scanner = new HeadingScanner(".");
+        STHeadingScanner scanner = new STHeadingScanner(".");
 
-        assertThat(scanner.update(node).toString()).isEqualTo("heading1"); // Paragraph
+        Assertions.assertThat(scanner.update(node).toString()).isEqualTo("heading1"); // Paragraph
         node = node.getNext();
-        assertThat(scanner.update(node).toString()).isEqualTo("heading1.heading2"); // Paragraph
+        Assertions.assertThat(scanner.update(node).toString()).isEqualTo("heading1.heading2"); // Paragraph
         node=node.getNext();
-        assertThat(scanner.update(node).toString()).isEqualTo("heading1.heading2"); // Paragraph
+        Assertions.assertThat(scanner.update(node).toString()).isEqualTo("heading1.heading2"); // Paragraph
         node=node.getNext();
-        assertThat(scanner.update(node).toString()).isEqualTo("heading3"); // Paragraph
+        Assertions.assertThat(scanner.update(node).toString()).isEqualTo("heading3"); // Paragraph
         scanner.index();
-        assertThat(scanner.toString()).isEqualTo("heading3 (01)"); // Paragraph
+        Assertions.assertThat(scanner.toString()).isEqualTo("heading3 (01)"); // Paragraph
         node=node.getNext();
-        assertThat(node).isNull();
+        Assertions.assertThat(node).isNull();
     }
 
 }

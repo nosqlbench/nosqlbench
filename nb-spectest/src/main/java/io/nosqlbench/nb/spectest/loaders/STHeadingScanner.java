@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityconfig.rawyaml;
+package io.nosqlbench.nb.spectest.loaders;
 
 import com.vladsch.flexmark.ast.Heading;
 
@@ -23,13 +23,13 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.function.Supplier;
 
-public class HeadingScanner implements Supplier<CharSequence> {
+public class STHeadingScanner implements Supplier<CharSequence> {
     private final LinkedList<Heading> tnodes = new LinkedList<>();
     private Path path;
     private int index;
     private final String delimiter;
 
-    public HeadingScanner(String delimiter) {
+    public STHeadingScanner(String delimiter) {
         this.delimiter = delimiter;
     }
 
@@ -56,10 +56,11 @@ public class HeadingScanner implements Supplier<CharSequence> {
     }
 
     /**
-     * If this method is called, then the heading is presented as
+     * If this method is called, then the heading index is incremented to track
+     * enumerations (represented as numeric indices) of headings within a common flow of elements
      * @return
      */
-    public HeadingScanner index() {
+    public STHeadingScanner index() {
         index++;
         return this;
     }
@@ -74,8 +75,9 @@ public class HeadingScanner implements Supplier<CharSequence> {
      * @param object Any object which might be a Heading or Path
      * @return this HeadingScanner for method chaining
      */
-    public HeadingScanner update(Object object) {
+    public STHeadingScanner update(Object object) {
         if (object==null ) {
+            updatePath(null);
         } else if (object instanceof Path) {
             updatePath((Path)object);
         } else if (object instanceof Heading) {
@@ -114,4 +116,5 @@ public class HeadingScanner implements Supplier<CharSequence> {
     public CharSequence get() {
         return toString();
     }
+
 }
