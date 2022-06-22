@@ -17,7 +17,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
@@ -48,23 +47,6 @@
             <artifactId>adapter-diag</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <version>${junit.jupiter.version}</version>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-<!--            <scope>compile</scope>-->
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.19.0</version>
-            <scope>test</scope>
-<!--            <scope>compile</scope>-->
-        </dependency>
-
 
     </dependencies>
 
