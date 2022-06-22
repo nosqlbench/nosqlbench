@@ -28,7 +28,6 @@
         <javadoc.name>nosqlbench</javadoc.name>
 
         <!-- properties for package versions -->
-        <ascii.data.version>1.2.0</ascii.data.version>
         <commons.compress.version>1.21</commons.compress.version>
         <commons.codec.version>1.15</commons.codec.version>
         <commons.csv.version>1.9.0</commons.csv.version>
@@ -43,7 +42,6 @@
         <jaxb.impl.version>2.4.0-b180830.0438</jaxb.impl.version>
         <joda.time.version>2.10.13</joda.time.version>
         <jmh.version>1.34</jmh.version>
-        <junit.jupiter.version>5.7.2</junit.jupiter.version>
 
         <lz4.version>1.4.1</lz4.version>
         <!--    <metrics.version>4.0.7</metrics.version>-->
@@ -113,7 +111,7 @@
 
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
-                <version>${junit.jupiter.version}</version>
+                <version>5.9.0-M1</version>
                 <artifactId>junit-jupiter</artifactId>
                 <scope>test</scope>
             </dependency>
@@ -167,7 +165,7 @@
             <dependency>
                 <groupId>com.mitchtalmadge</groupId>
                 <artifactId>ascii-data</artifactId>
-                <version>${ascii.data.version}</version>
+                <version>1.2.0</version>
             </dependency>
 
             <!-- For CQL compression option -->
@@ -402,61 +400,63 @@
             <artifactId>log4j-core</artifactId>
             <version>2.17.2</version>
         </dependency>
-
-        <!-- binding for routing slf4j API calls to log4j -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-
+<!--        <dependency>-->
+<!--            <groupId>org.apache.logging.log4j</groupId>-->
+<!--            <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--            <version>2.17.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.logging.log4j</groupId>-->
+<!--            <artifactId>log4j-slf4j18-impl</artifactId>-->
+<!--            <version>2.17.2</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
             <version>2.17.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>slf4j-impl</artifactId>
-            <version>2.0-alpha2</version>
-        </dependency>
+<!--        Removed due to a possible conflict-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.logging.log4j</groupId>-->
+<!--            <artifactId>slf4j-impl</artifactId>-->
+<!--            <version>2.0-alpha2</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-ext</artifactId>
-            <version>1.7.36</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-ext</artifactId>-->
+<!--            <version>1.7.36</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-api</artifactId>-->
+<!--            <version>1.7.36</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.36</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-log4j12</artifactId>-->
+<!--            <version>1.7.36</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.19.0</version>
+            <version>3.23.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.7.2</version>
+            <version>1.8.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
 
