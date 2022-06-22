@@ -20,6 +20,14 @@
  * of literate programming, but more focused on providing a clearly documented
  * and tested specification, including detailed examples and corner cases.</P>
  *
+ * <H2>Naming</H2>
+ *
+ * <p>
+ * To make navigating and finding relevant classes in this module, except for the
+ * {@link io.nosqlbench.nb.spectest.core.SpecTest} class, which is the main entry point,
+ * all other types are named ST... such as {@link io.nosqlbench.nb.spectest.loaders.STHeadingScanner}.
+ * </p>
+ *
  * <H2>Motivation</H2>
  * <P>There is a common problem in many OSS projects and code bases which has no
  * simple and definitive solution so far: Many APIs, type systems, protocols, and other
@@ -71,5 +79,16 @@
  * </p>
  *
  * <H3>Output Assertions</H3>
+ * For tests which validate correct results based on the full output of some intermediate step, it is
+ * useful to simply use the fenced code blocks to contain some string encoding of the content. This
+ * may be a fully-qualified format wherein all the bland lines and newlines matter. It may be that you
+ * need to read an encoded data structure from yaml or JSON. In these cases, you will generally create
+ * a matching set of these helper types:
+ * <UL>
+ * <LI>A node sequence matcher, which determines what patterns will be extracted from the markdown
+ * files specified to the test harness.</LI>
+ * <LI>A validator which knows how to interpret the resulting node sequences to run a specific type
+ * of validation test.</LI>
+ * </UL>
  */
 package io.nosqlbench.nb.spectest;

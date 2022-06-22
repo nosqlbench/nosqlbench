@@ -18,7 +18,7 @@ package io.nosqlbench.nb.spectest.types;
 
 import com.vladsch.flexmark.util.ast.Node;
 import io.nosqlbench.nb.spectest.core.SpecTest;
-import io.nosqlbench.nb.spectest.core.SpecTestBuilder;
+import io.nosqlbench.nb.spectest.core.STBuilder;
 import io.nosqlbench.nb.spectest.loaders.STNodePredicate;
 import io.nosqlbench.nb.spectest.loaders.STNodePredicates;
 
@@ -34,7 +34,7 @@ public interface STBuilderFacets {
          * files or other directories. Only files which match a markdown path with a '.md' extension
          * will be validated.
          * @param paths Paths to test
-         * @return this {@link SpecTestBuilder} for method chaining
+         * @return this {@link STBuilder} for method chaining
          */
         WantsPathsOrScannersOrValidators paths(Path... paths);
         /**
@@ -42,7 +42,7 @@ public interface STBuilderFacets {
          * files or other directories. Only files which match a markdown path with a '.md' extension
          * will be validated.
          * @param paths Paths to test
-         * @return this {@link SpecTestBuilder} for method chaining
+         * @return this {@link STBuilder} for method chaining
          */
         default WantsPathsOrScannersOrValidators paths(String... paths) {
             Path[] args = new Path[paths.length];
@@ -56,7 +56,7 @@ public interface STBuilderFacets {
          * files or other directories. Only files which match a markdown path with a '.md' extension
          * will be validated.
          * @param path Paths to test
-         * @return this {@link SpecTestBuilder} for method chaining
+         * @return this {@link STBuilder} for method chaining
          */
         default WantsPathsOrScannersOrValidators path(Path path) {
             return this.paths(path);
@@ -67,7 +67,7 @@ public interface STBuilderFacets {
          * files or other directories. Only files which match a markdown path with a '.md' extension
          * will be validated.
          * @param path Paths to test
-         * @return this {@link SpecTestBuilder} for method chaining
+         * @return this {@link STBuilder} for method chaining
          */
         default WantsPathsOrScannersOrValidators path(String path) {
             return this.paths(Path.of(path));

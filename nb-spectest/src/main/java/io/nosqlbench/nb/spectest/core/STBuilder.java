@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class SpecTestBuilder implements STBuilderFacets.All {
+public abstract class STBuilder implements STBuilderFacets.All {
 
     protected List<Path> paths = new ArrayList<>();
     protected List<STPathLoader> scanners  = new ArrayList<>();

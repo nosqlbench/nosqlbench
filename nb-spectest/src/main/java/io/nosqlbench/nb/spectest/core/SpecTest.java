@@ -114,7 +114,7 @@ public class SpecTest implements Runnable {
         return new SpecTest.Builder();
     }
 
-    private static class Builder extends SpecTestBuilder {
+    private static class Builder extends STBuilder {
         @Override
         public SpecTest build() {
             return new SpecTest(paths,scanners,validators);
