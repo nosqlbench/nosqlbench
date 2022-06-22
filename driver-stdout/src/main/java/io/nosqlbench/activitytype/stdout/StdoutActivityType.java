@@ -24,7 +24,7 @@ import io.nosqlbench.nb.annotations.Service;
 
 import java.util.Optional;
 
-@Service(value= ActivityType.class, selector="stdout")
+@Service(value= ActivityType.class, selector="stdout-nb4")
 public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
     @Override

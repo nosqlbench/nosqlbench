@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityconfig.rawyaml;
+package io.nosqlbench.adapter.stdout;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 
-public class TestBlock extends ArrayList<TestSet> {
-    public TestBlock(TestSet... testsets) {
-        this.addAll(Arrays.asList(testsets));
-    }
-
-    public void addTestSet(TestSet set) {
-        this.add(set);
-    }
+public class StdoutOpMapper implements OpMapper<Op> {
 
     @Override
-    public String toString() {
-        return (size()>0 ? get(0).toString() : "NONE");
+    public OpDispenser<? extends Op> apply(ParsedOp cmd) {
+        return new StdoutOpDispenser(cmd);
     }
+
 }
