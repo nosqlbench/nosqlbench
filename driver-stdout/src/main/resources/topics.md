@@ -1,2 +1,0 @@
-# stdout help topics
-- stdout
