@@ -44,13 +44,13 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-spectest</artifactId>
+            <artifactId>adapters-api</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>drivers-api</artifactId>
+            <artifactId>nb-spectest</artifactId>
             <version>4.17.15-SNAPSHOT</version>
         </dependency>
 

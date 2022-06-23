@@ -47,13 +47,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>drivers-api</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
     </dependencies>
 
 <!--    <build>-->
