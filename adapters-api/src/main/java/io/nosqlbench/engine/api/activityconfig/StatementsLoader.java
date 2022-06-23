@@ -43,7 +43,9 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            params.remove(k);
+            if (params.containsKey(k)) {
+                 params.remove(k);
+            }
         });
         return layered;
     }
@@ -59,7 +61,9 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawStmtsDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            params.remove(k);
+            if (params.containsKey(k)) {
+                 params.remove(k);
+            }
         });
         return layered;
     }
