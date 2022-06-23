@@ -20,6 +20,8 @@ package io.nosqlbench.driver.jms.ops;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.S4JSpace;
+import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,26 +31,33 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
 
     private final static Logger logger = LogManager.getLogger(S4JMsgSendOp.class);
 
+    private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
     private final JMSContext jmsContext;
     private final Destination destination;
     private final boolean asyncApi;
     private final JMSProducer jmsProducer;
     private final Message message;
+    private final boolean commitTransact;
 
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
-    public S4JMsgSendOp(S4JActivity s4JActivity,
+    public S4JMsgSendOp(S4JSpace s4JSpace,
+                        S4JActivity s4JActivity,
+                        JMSContext jmsContext,
                         Destination destination,
                         boolean asyncApi,
                         JMSProducer producer,
-                        Message message) {
+                        Message message,
+                        boolean commitTransact) {
+        this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
-        this.jmsContext = s4JActivity.getJmsContext();
+        this.jmsContext = jmsContext;
         this.destination = destination;
         this.asyncApi = asyncApi;
         this.jmsProducer = producer;
         this.message = message;
+        this.commitTransact = commitTransact;
 
         this.bytesCounter = s4JActivity.getBytesCounter();
         this.messageSizeHistogram = s4JActivity.getMessagesizeHistogram();
@@ -58,20 +67,25 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
     public void run() {
         try {
             jmsProducer.send(destination, message);
+            if (this.commitTransact) {
+                jmsContext.commit();
+            }
 
-            byte[] msgPayload = message.getBody(byte[].class);
-            long msgSize = msgPayload.length;
+            int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
             this.bytesCounter.inc(msgSize);
             this.messageSizeHistogram.update(msgSize);
 
+            // Please see S4JActivity::getOrCreateJmsProducer() for async processing
             if (!asyncApi) {
                 if (logger.isDebugEnabled()) {
                     // for testing purpose
-                    String myMsgSeq = message.getStringProperty("MyMsgSeq");
+                    String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
 
                     logger.debug("Sync message send successful - message ID {} ({}) "
                         , message.getJMSMessageID(), myMsgSeq);
                 }
+
+                s4JSpace.incTotalOpResponseCnt();
             }
 
         } catch (MessageFormatRuntimeException mfre) {

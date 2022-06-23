@@ -35,10 +35,11 @@ public class S4JMsgBrowseOp extends S4JTimeTrackOp {
     private final Queue queue;
     private final QueueBrowser jmsQueueBrowser;
     public S4JMsgBrowseOp(S4JActivity s4JActivity,
+                          JMSContext jmsContext,
                           Queue queue,
                           QueueBrowser browser) {
         this.s4JActivity = s4JActivity;
-        this.jmsContext = s4JActivity.getJmsContext();
+        this.jmsContext = jmsContext;
         this.queue = queue;
         this.jmsQueueBrowser = browser;
     }

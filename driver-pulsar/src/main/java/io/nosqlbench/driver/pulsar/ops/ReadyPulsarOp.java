@@ -2,13 +2,13 @@ package io.nosqlbench.driver.pulsar.ops;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -55,7 +55,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
     // TODO: Add docs for the command template with respect to the OpTemplate
 
-    public ReadyPulsarOp(OpTemplate optpl, PulsarSpaceCache pcache, PulsarActivity pulsarActivity) {
+    public ReadyPulsarOp(OpTemplate optpl, PulsarSpaceCache s4jSpaceCache, PulsarActivity pulsarActivity) {
         // TODO: Consider parsing map structures into equivalent binding representation
         this.pulsarActivity = pulsarActivity;
         this.opTpl = optpl;
@@ -63,7 +63,7 @@ public class ReadyPulsarOp implements OpDispenser<PulsarOp> {
 
         // TODO: At the moment, only supports static "client"
         String client_name = lookupStaticParameter("client", false, "default");
-        this.clientSpace = pcache.getPulsarSpace(client_name);
+        this.clientSpace = s4jSpaceCache.getPulsarSpace(client_name);
 
         this.opFunc = resolve();
     }

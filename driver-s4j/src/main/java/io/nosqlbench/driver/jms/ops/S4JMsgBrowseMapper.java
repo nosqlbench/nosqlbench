@@ -18,7 +18,9 @@ package io.nosqlbench.driver.jms.ops;
  */
 
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.S4JSpace;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
+import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.*;
@@ -38,18 +40,24 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
     private final LongFunction<String> msgSelectorStrFunc;
 
-    public S4JMsgBrowseMapper(S4JActivity s4JActivity,
+    public S4JMsgBrowseMapper(S4JSpace s4JSpace,
+                              S4JActivity s4JActivity,
                               LongFunction<Boolean> tempDestBoolFunc,
                               LongFunction<String> destTypeStrFunc,
                               LongFunction<String> destNameStrFunc,
+                              LongFunction<Boolean> reuseClntBoolFunc,
                               LongFunction<Boolean> asyncAPIBoolFunc,
+                              LongFunction<Integer> txnBatchNumFunc,
                               LongFunction<String> msgSelectorStrFunc) {
-        super(s4JActivity,
+        super(s4JSpace,
+            s4JActivity,
             S4JActivityUtil.MSG_OP_TYPES.MSG_BROWSE.label,
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc);
+            reuseClntBoolFunc,
+            asyncAPIBoolFunc,
+            txnBatchNumFunc);
 
         this.msgSelectorStrFunc = msgSelectorStrFunc;
     }
@@ -61,6 +69,10 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
         String destName = destNameStrFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
 
+        int jmsSessionSeqNum = (int)(value % s4JActivity.getMaxNumSessionPerConn());
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getS4jJmsContextWrapper(jmsSessionSeqNum);
+        JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
+
         if (tempDest) {
             throw new RuntimeException("Can't use temporary destination for a QueueBrowser !");
         }
@@ -71,7 +83,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
         Queue queue;
         try {
-            queue = (Queue)s4JActivity.getOrCreateJmsDestination(tempDest, destType, destName);
+            queue = (Queue)s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDest, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new RuntimeException("Unable to create the JMS destination!");
@@ -79,7 +91,8 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
         QueueBrowser browser;
         try {
-            browser = s4JActivity.getOrCreateJmsQueueBrowser(
+            browser = s4JSpace.getOrCreateJmsQueueBrowser(
+                s4JJMSContextWrapper,
                 queue,
                 msgSelector);
         }
@@ -89,6 +102,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
         return new S4JMsgBrowseOp(
             s4JActivity,
+            jmsContext,
             queue,
             browser);
     }

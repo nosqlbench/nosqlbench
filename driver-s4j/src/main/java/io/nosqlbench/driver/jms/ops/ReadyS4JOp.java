@@ -18,6 +18,9 @@ package io.nosqlbench.driver.jms.ops;
  */
 
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.S4JSpace;
+import io.nosqlbench.driver.jms.S4JSpaceCache;
+import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -25,27 +28,93 @@ import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.jms.JMSContext;
 import java.util.function.LongFunction;
 
 public class ReadyS4JOp implements OpDispenser<S4JOp> {
 
+    private final static Logger logger = LogManager.getLogger(ReadyS4JOp.class);
+
     private final OpTemplate optpl;
     private final CommandTemplate cmdTpl;
+    private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
-    private final JMSContext jmsContext;
 
     private final LongFunction<S4JOp> opFunc;
 
-    public ReadyS4JOp(OpTemplate opTemplate, S4JActivity s4JActivity) {
-        this.optpl = opTemplate;
+
+    public ReadyS4JOp(OpTemplate optpl, S4JSpaceCache s4JSpaceCache, S4JActivity s4JActivity) {
+        this.optpl = optpl;
         this.cmdTpl = new CommandTemplate(optpl);
         this.s4JActivity = s4JActivity;
-        this.jmsContext = s4JActivity.getJmsContext();
+
+        String client_name = lookupStaticParameter("client", false, "default");
+        this.s4JSpace = s4JSpaceCache.getAssociatedSpace(client_name);
+        this.s4JSpace.setCmdTpl(cmdTpl);
+
+        // Initialize JMS connection and sessions
+        this.s4JSpace.initializeS4JConnectionFactory(s4JActivity.getS4JConnInfo());
+
+        this.s4JSpace.resetTotalOpResponseCnt();
 
         this.opFunc = resolveS4JOp();
     }
+
+
+    private String lookupStaticParameter(String parameterName) {
+        return lookupStaticParameter(parameterName, false, null);
+    }
+    private String lookupStaticParameter(String parameterName, boolean required) {
+        return lookupStaticParameter(parameterName, required, null);
+    }
+    private String lookupStaticParameter(String parameterName, boolean required, String defaultValue) {
+        if (cmdTpl.containsKey(parameterName)) {
+            if (cmdTpl.isStatic(parameterName)) {
+                return cmdTpl.getStatic(parameterName);
+            } else if (cmdTpl.isDynamic(parameterName)) {
+                throw new S4JDriverParamException("\"" + parameterName + "\" parameter must be static");
+            } else {
+                return defaultValue;
+            }
+        } else {
+            if (required) {
+                throw new S4JDriverParamException("\"" + parameterName + "\" field must be specified!");
+            } else {
+                return defaultValue;
+            }
+        }
+    }
+
+    private LongFunction<String> lookupParameterFunc(String parameterName) {
+        return lookupParameterFunc(parameterName, false, null);
+    }
+
+    private LongFunction<String> lookupParameterFunc(String parameterName, boolean required) {
+        return lookupParameterFunc(parameterName, required, null);
+    }
+    private LongFunction<String> lookupParameterFunc(String parameterName, boolean required, String defaultValue) {
+        if (cmdTpl.containsKey(parameterName)) {
+            LongFunction<String> lookupFunc;
+            if (cmdTpl.isStatic(parameterName)) {
+                String staticValue = cmdTpl.getStatic(parameterName);
+                lookupFunc = (l) -> staticValue;
+            } else if (cmdTpl.isDynamic(parameterName)) {
+                lookupFunc = (l) -> cmdTpl.getDynamic(parameterName, l);
+            } else {
+                lookupFunc = (l) -> defaultValue;
+            }
+            return lookupFunc;
+        } else {
+            if (required) {
+                throw new S4JDriverParamException("\"" + parameterName + "\" field must be specified!");
+            } else {
+                return (l) -> defaultValue;
+            }
+        }
+    }
+
 
     public S4JOp apply(long value) { return opFunc.apply(value); }
 
@@ -57,112 +126,102 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         String stmtOpType = cmdTpl.getStatic("optype");
 
         // Doc-level parameter: temporary_dest (default: false)
-        LongFunction<Boolean> tempDestBoolFunc = (l) -> false;
-        if (cmdTpl.containsKey(S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label)) {
-            if (cmdTpl.isStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label)) {
-                tempDestBoolFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label));
-            } else {
-                throw new RuntimeException("\"" + S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label + "\" parameter cannot be dynamic!");
-            }
-        }
+        String tempDestBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label, false, "false");
+        LongFunction<Boolean> tempDestBoolFunc = (l) -> BooleanUtils.toBoolean(tempDestBoolStr);
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label, tempDestBoolStr);
 
         // Doc-level parameter: dest_type (default: Topic)
-        LongFunction<String> destTypeStrFunc = (l) -> S4JActivityUtil.JMS_DEST_TYPES.TOPIC.label;
-        if (cmdTpl.containsKey(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label)) {
-            if (cmdTpl.isStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label)) {
-                destTypeStrFunc = (l) -> cmdTpl.getStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label);
-            } else {
-                throw new RuntimeException("\"" + S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label + "\" parameter cannot be dynamic!");
-            }
-        }
+        String destTypeStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label, false, S4JActivityUtil.JMS_DEST_TYPES.TOPIC.label);
+        LongFunction<String> destTypeStrFunc = (l) -> destTypeStr;
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label, destTypeStr);
 
         // Doc-level parameter: dest_name
-        LongFunction<String> destNameStrFunc = (l) -> null;
-        if (cmdTpl.containsKey(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label)) {
-            if (cmdTpl.isStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label)) {
-                destNameStrFunc = (l) -> cmdTpl.getStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label);
-            } else {
-                destNameStrFunc = (l) -> cmdTpl.getDynamic(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, l);
-            }
-        }
+        LongFunction<String> destNameStrFunc = lookupParameterFunc(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, true, "persistent://public/default/nb4_s4j_test");
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, destNameStrFunc.apply(0));
 
-        // Doc-level parameter: reuse_producer (default: true)
-        LongFunction<Boolean> reuseProducerBoolFunc = (l) -> true;
-        if (cmdTpl.containsKey(S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_PRODUCER.label)) {
-            if (cmdTpl.isStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_PRODUCER.label)) {
-                reuseProducerBoolFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_PRODUCER.label));
-            } else {
-                throw new RuntimeException("\"" + S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_PRODUCER.label + "\" parameter cannot be dynamic!");
-            }
-        }
+        // Doc-level parameter: reuse_clnt (default: true)
+        String reuseClntBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_CLNT.label, false, "false");
+        LongFunction<Boolean> reuseClntBoolFunc = (l) -> BooleanUtils.toBoolean(reuseClntBoolStr);
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_CLNT.label, reuseClntBoolStr);
 
         // Doc-level parameter: async_api (default: false)
-        LongFunction<Boolean> asyncAPIBoolFunc = (l) -> false;
-        if (cmdTpl.containsKey(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
-            if (cmdTpl.isStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label)) {
-                asyncAPIBoolFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label));
-            } else {
-                throw new RuntimeException("\"" + S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label + "\" parameter cannot be dynamic!");
-            }
-        }
+        String asyncAPIBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, false, "true");
+        LongFunction<Boolean> asyncAPIBoolFunc = (l) -> BooleanUtils.toBoolean(asyncAPIBoolStr);
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, asyncAPIBoolStr);
+
+        // Doc-level parameter: txn_batch_num
+        String txnBatchNumStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, false, "0");
+        LongFunction<Integer> txnBatchNumFunc = (l) -> NumberUtils.toInt(txnBatchNumStr, 0);
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, txnBatchNumStr);
 
         if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label)) {
-            return resolveMsgSend(s4JActivity,
+            return resolveMsgSend(
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseProducerBoolFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ.label)) {
-            return resolveMsgRead(s4JActivity,
+            return resolveMsgRead(
                 false,
                 false,
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED.label)) {
-            return resolveMsgRead(s4JActivity,
+            return resolveMsgRead(
                 false,
                 true,
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_DURABLE.label)) {
-            return resolveMsgRead(s4JActivity,
+            return resolveMsgRead(
                 true,
                 false,
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label)) {
-            return resolveMsgRead(s4JActivity,
+            return resolveMsgRead(
                 true,
                 true,
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_BROWSE.label)) {
-            return resolveMsgBrowse(s4JActivity,
+            return resolveMsgBrowse(
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc);
+                reuseClntBoolFunc,
+                asyncAPIBoolFunc,
+                txnBatchNumFunc);
         } else {
             throw new RuntimeException("Unsupported JMS operation type");
         }
     }
 
     private LongFunction<S4JOp> resolveMsgSend(
-        S4JActivity s4JActivity,
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> reuseProducerBoolFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc
+        LongFunction<Boolean> reuseClntBoolFunc,
+        LongFunction<Boolean> asyncAPIBoolFunc,
+        LongFunction<Integer> txnBatchNumFunc
     ) {
         // JMS message headers
         LongFunction<String> msgHeaderJsonStrFunc;
@@ -213,12 +272,14 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         }
 
         return new S4JMsgSendMapper(
+            s4JSpace,
             s4JActivity,
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseProducerBoolFunc,
+            reuseClntBoolFunc,
             asyncAPIBoolFunc,
+            txnBatchNumFunc,
             msgHeaderJsonStrFunc,
             msgPropJsonStrFunc,
             msgTypeFunc,
@@ -226,13 +287,14 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
     }
 
     private LongFunction<S4JOp> resolveMsgRead(
-        S4JActivity s4JActivity,
         boolean durableConsumer,                    // only relevant for Topic
         boolean sharedConsumer,                     // only relevant for Topic
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc
+        LongFunction<Boolean> reuseClntBoolFunc,
+        LongFunction<Boolean> asyncAPIBoolFunc,
+        LongFunction<Integer> txnBatchNumFunc
     ) {
         // subscription name - only relevant for Topic
         LongFunction<String> subNameStrFunc = (l) -> null;
@@ -241,6 +303,16 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 subNameStrFunc = (l) -> cmdTpl.getStatic("subscription_name");
             } else {
                 subNameStrFunc = (l) -> cmdTpl.getDynamic("subscription_name", l);
+            }
+        }
+
+        // message acknowledgement ratio
+        LongFunction<Float> msgAckRatioFunc = (l) -> 1.0f;
+        if (cmdTpl.containsKey("msg_ack_ratio")) {
+            if (cmdTpl.isStatic("msg_ack_ratio")) {
+                msgAckRatioFunc = (l) -> NumberUtils.toFloat(cmdTpl.getStatic("msg_ack_ratio"), 1.0f);
+            } else {
+                throw new RuntimeException("\"" + "msg_ack_ratio" + "\" parameter cannot be dynamic!");
             }
         }
 
@@ -275,7 +347,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         }
 
         // receive no wait
-
         LongFunction<Boolean> recvNoWaitBoolFunc = (l) -> false;
         if (cmdTpl.containsKey("no_wait")) {
             if (cmdTpl.isStatic("no_wait")) {
@@ -285,16 +356,19 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             }
         }
 
-
         return new S4JMsgReadMapper(
+            s4JSpace,
             s4JActivity,
             durableConsumer,
             sharedConsumer,
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
+            reuseClntBoolFunc,
             asyncAPIBoolFunc,
+            txnBatchNumFunc,
             subNameStrFunc,
+            msgAckRatioFunc,
             msgSelectorStrFunc,
             noLocalBoolFunc,
             readTimeoutFunc,
@@ -302,11 +376,12 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
     }
 
     private LongFunction<S4JOp> resolveMsgBrowse(
-        S4JActivity s4JActivity,
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc
+        LongFunction<Boolean> reuseClntBoolFunc,
+        LongFunction<Boolean> asyncAPIBoolFunc,
+        LongFunction<Integer> txnBatchNumFunc
     ) {
         // message selector - only relevant for Topic
         LongFunction<String> msgSelectorStrFunc = (l) -> null;
@@ -319,11 +394,14 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         }
 
         return new S4JMsgBrowseMapper(
+            s4JSpace,
             s4JActivity,
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
+            reuseClntBoolFunc,
             asyncAPIBoolFunc,
+            txnBatchNumFunc,
             msgSelectorStrFunc);
     }
 }

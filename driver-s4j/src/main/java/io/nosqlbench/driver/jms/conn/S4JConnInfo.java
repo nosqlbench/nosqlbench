@@ -17,10 +17,15 @@ package io.nosqlbench.driver.jms.conn;
  * under the License.
  */
 
+import com.datastax.oss.pulsar.jms.PulsarJMSConstants;
+import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JConf;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.jms.JMSContext;
 import javax.jms.Session;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +46,18 @@ public class S4JConnInfo {
 
         this.s4jConfMap.put("webServiceUrl", this.webSvcUrl);
         this.s4jConfMap.put("brokerServiceUrl", this.pulsarSvcUrl);
+
+        Map<String, Object> s4jMiscConfMap = this.inputS4JConf.getS4jMiscConfMap();
+        if (!s4jMiscConfMap.isEmpty()) {
+            this.s4jConfMap.putAll(s4jMiscConfMap);
+        }
+
+        if (!validTransactSetting(sessionMode, s4jMiscConfMap)) {
+            String errMsg =
+                "S4J config parameter \"enableTransaction\" needs to be set to \"true\" " +
+                    "in order to support JMS transaction - sessionModeStr:\"" + sessionModeStr + "\"(" + sessionMode + ")";
+            throw new S4JDriverParamException(errMsg);
+        }
 
         Map<String, Object> clientCfgMap = this.inputS4JConf.getClientConfMap();
         if (!clientCfgMap.isEmpty()) {
@@ -67,15 +84,33 @@ public class S4JConnInfo {
         int sessionMode = -1;
 
         if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
-            sessionMode = Session.AUTO_ACKNOWLEDGE;
+            sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
-            sessionMode = Session.CLIENT_ACKNOWLEDGE;
+            sessionMode = JMSContext.CLIENT_ACKNOWLEDGE;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.DUPS_OK_ACK.label))
-            sessionMode = Session.DUPS_OK_ACKNOWLEDGE;
+            sessionMode = JMSContext.DUPS_OK_ACKNOWLEDGE;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.TRANSACT.label))
-            sessionMode = Session.SESSION_TRANSACTED;
+            sessionMode = JMSContext.SESSION_TRANSACTED;
+        else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.INDIVIDUAL_ACK.label))
+            sessionMode = PulsarJMSConstants.INDIVIDUAL_ACKNOWLEDGE;
+        else
+            throw new S4JDriverParamException("Invalid session mode string \"" + sessionModeStr + "\". " +
+                "Valid values are: " + S4JActivityUtil.getValidJmsSessionModeList());
 
         return sessionMode;
+    }
+
+    private boolean validTransactSetting(int jmsSessionMode, Map<String, Object> s4jClntCfgMap) {
+        boolean validSetting = true;
+
+        if (jmsSessionMode == JMSContext.SESSION_TRANSACTED) {
+            validSetting = s4jClntCfgMap.containsKey("enableTransaction");
+            if (validSetting) {
+                validSetting = BooleanUtils.toBoolean(s4jClntCfgMap.get("enableTransaction").toString());
+            }
+        }
+
+        return validSetting;
     }
 
     public String getWebSvcUrl() { return this.webSvcUrl; }
@@ -83,4 +118,13 @@ public class S4JConnInfo {
     public int getSessionMode() { return this.sessionMode; }
     public S4JConf getInputS4JConf() { return this.inputS4JConf; }
     public Map<String, Object> getS4jConfMap() { return this.s4jConfMap; }
+
+    public String toString() {
+        return new ToStringBuilder(this).
+            append("webSvcUrl", webSvcUrl).
+            append("pulsarSvcUrl", pulsarSvcUrl).
+            append("sessionMode", sessionMode).
+            append("inputS4JConf", inputS4JConf).
+            toString();
+    }
 }

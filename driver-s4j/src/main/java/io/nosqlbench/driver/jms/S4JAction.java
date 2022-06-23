@@ -53,8 +53,8 @@ public class S4JAction implements SyncAction {
 
         S4JOp s4JOp;
         try (Timer.Context ctx = activity.getBindTimer().time()) {
-            LongFunction<S4JOp> readyJmsOp = activity.getSequencer().apply(cycle);
-            s4JOp = readyJmsOp.apply(cycle);
+            LongFunction<S4JOp> readyS4JOp = activity.getSequencer().apply(cycle);
+            s4JOp = readyS4JOp.apply(cycle);
         } catch (Exception bindException) {
             // if diagnostic mode ...
             activity.getErrorhandler().handleError(bindException, cycle, 0);

@@ -17,7 +17,6 @@ package io.nosqlbench.driver.jms.util;
  * under the License.
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,13 +48,12 @@ public class S4JActivityUtil {
         // String value
         DEST_NAME("dest_name"),
         // Reuse JMS producer across destinations
-        REUSE_PRODUCER("reuse_producer"),
+        REUSE_CLNT("reuse_clnt"),
         // Asynchronous message processing
         ASYNC_API("async_api"),
         // Transaction batch size
         // - Only relevant when session mode is SESSION_TRANSACTED
-        // - TODO: NOT implemented yet
-        TRANSACT_BATCH_SIZE("trans_batch_size");
+        TXN_BATCH_NUM("txn_batch_num");
 
         public final String label;
 
@@ -166,11 +164,15 @@ public class S4JActivityUtil {
         return Arrays.stream(JMS_DEFINED_MSG_PROPERTY.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
+    public final static String NB_MSG_SEQ_PROP = "NBMsgSeqProp";
+    public final static String NB_MSG_SIZE_PROP = "NBMsgSize";
+
     // JMS Destination Types
     public enum JMS_SESSION_MODES {
         AUTO_ACK("auto_ack"),
         CLIENT_ACK("client_ack"),
         DUPS_OK_ACK("dups_ok_ack"),
+        INDIVIDUAL_ACK("individual_ack"),
         TRANSACT("transact_ack");
 
         public final String label;
