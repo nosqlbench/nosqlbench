@@ -323,7 +323,7 @@ public class ScenarioController {
                     .setMaturity(this.minMaturity)
                     .load(activityDef)
                     .orElseThrow(
-                        () -> new RuntimeException("Could not load Driver for " + activityDef + "'")
+                        () -> new RuntimeException("Driver for '" + activityDef + "' was not found.")
                     );
 
                 executor = new ActivityExecutor(
