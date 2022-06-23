@@ -1,9 +1,9 @@
-# Command API
+# ParsedOp API
 
 In the workload template examples, we show statements as being formed from a string value. This is a
 specific type of statement form, although it is possible to provide structured op templates as well.
 
-**The Command API is responsible for converting all valid op template forms into a consistent and
+**The ParsedOp API is responsible for converting all valid op template forms into a consistent and
 unambiguous model.** Thus, the rules for mapping the various forms to the command model must be
 precise. Those rules are the substance of this specification.
 

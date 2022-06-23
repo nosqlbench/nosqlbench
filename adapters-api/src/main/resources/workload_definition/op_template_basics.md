@@ -1,30 +1,15 @@
 # Op Templates
 
-The rules around op templates deserve a separate section, given that there are many techniques that
-a user can choose from.
+Op templates are the recipes provided by users for an operation. These hold examples of payload
+data, metadata that configures the driver, timeout settings and so on.
 
-The valid elements of the raw workload form are explained below, using YAML and JSON5 as a schematic
-language. This guide is not meant to be very explanatory for new users, but it can serve as a handy
-reference about how workloads can be structured.
+The field name used in workload templates to represent operations can often be symbolic to users.
+For this reason, several names are allowed: ops, op, operations, statements, statement. It doesn't
+matter whether the value is provided as a map, list, or scalar. These all allow for the same
+level of templating. Map forms are preferred, since they include naming in a more streamlined
+structure. When you use list form, you have to provide the name as a separate field.
 
-Any bundled workload loader should test all of these fenced code blocks and confirm that the data
-structures are logically equivalent, using any json5 blocks as a trigger to compare against the
-prior block.
-**This document is a testable specification.**
-
-While some of the examples below appear to be demonstrating basic cross-format encoding, there is
-more going on. This document captures a set of basic sanity rules for all raw workload data, as well
-as visual examples and narratives to assist users and maintainers. In short, if you don't see what
-you want to do here, it is probably not valid in the format, and if you know that to be false, then
-this document needs to be updated with more details!
-
-The field used in workload templates to represent an operation can often be symbolic to users. For
-this reason, several names are allowed: ops, op, operations, statements, statement. It doesn't
-matter whether the value is provided as a map, list, or scalar. These all do the same thing,
-although an error is thrown if you specify more than one. The interpretation is always the same: An
-ordered collection of op templates. In map forms, the key is the op name. In forms which contain no
-provided name (as a key or as a property of an element map), a name is automatically provided by the
-API.
+A name is automatically provided by the API when there is one missing.
 
 ### a single un-named op template
 

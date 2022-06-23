@@ -1,21 +1,6 @@
-# Workload Templates
+# Workload Structure
 
-The valid elements of the raw workload form are explained below, using YAML and JSON5 as a schematic
-language. This guide is not meant to be very explanatory for new users, but it can serve as a handy
-reference about how workloads can be structured.
-
-Any bundled workload loader should test all of these fenced code blocks and confirm that the data
-structures are logically equivalent, using any json5 blocks as a trigger to compare against the
-prior block.
-**This document is a testable specification.**
-
-While some examples below appear to be demonstrating basic cross-format encoding, there is more
-going on. This document captures a set of basic sanity rules for all raw workload data, as well as
-visual examples and narratives to assist users and maintainers. In short, if you don't see what you
-want to do here, it is probably not valid in the format, and if you know that to be false, then this
-document needs to be updated with more details!
-
-# Keywords
+## Keywords
 
 The following words have special meaning in templated workloads:
 
@@ -27,46 +12,6 @@ The following words have special meaning in templated workloads:
 - tags - describes elements for filtering and grouping
 - op, ops, operations statement, statements - defines op templates
 - blocks - groups any or all elements
-
-# Layout of Examples
-
-The specifications and examples below follow this pattern:
-
-1. Some or part of a templated workload in yaml format.
-2. The JSON equivalent as it would be loaded. This is cross-checked against the result of parsing
-   the yaml into data.
-3. The Workload API view of the same data rendered as a JSON data structure. This is cross-checked
-   against the workload API's rendering of the loaded data.
-
-To be matched by the testing layer, you must prefix each section with a format marker with emphasis,
-like this:
-
-*format:*
-
-```text
-body of example
-```
-
-Further, to match the pattern above, these must occur in sequences like the following, with no other
-intervening content:
-
-*yaml:*
-
-```yaml
-# some yaml here
-```
-
-*json:*
-
-```
-[]
-```
-
-*ops:*
-
-```
-[]
-```
 
 ---
 
@@ -364,15 +309,14 @@ tags:
 
 ## Blocks
 
-Blocks are used to group operations which should be configured or run together such as during a
-specific part of a test sequence. Blocks can contain any of the defined elements above. Blocks are
-most useful for organizing a set of operations together, particularly when you put a tag on a block
-to filter by.
+Blocks are used to logically partition a workload for the purposes of grouping, configuring or
+executing subsets and op sequences. Blocks can contain any of the defined elements above.
+Every op template within a block automatically gets a tag with the name 'block' and the value of
+the block name. This makes it easy to select a whole block at a time with a tag filter like
+`tags=block:schema`.
 
 Blocks are not recursive. You may not put a block inside another block.
 
-You can think of a block as a subgroup of a document, where all the fields that are described above
-can be specified.
 
 ### named blocks as a map of property maps
 
@@ -571,4 +515,4 @@ blocks:
 # Putting things together
 
 This document is focused on the basic properties that can be added to a templated workload. To see
-how they are combined together, see [templated_operations.md](templated_operations.md).
+how they are combined together, see [Op Templates Basics](op_template_basics.md).

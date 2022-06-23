@@ -4,7 +4,7 @@ title: Op Template Variations
 
 # Op Templates Variations
 
-These examples are here to illustrate and test specific variations of op templates.
+These examples illustrate a variety of valid op template structures.
 
 ## Op Naming
 
@@ -301,47 +301,3 @@ ops:
 ]
 ```
 
-## keyed name statement-map form WITHOUT name field WITHOUT op key
-
-When statements are named by key, and you need to specify a query string of some type, then it must
-be explicitly part of the naming structure, as with a field name like `stmt` or `op`.
-
-*yaml:*
-
-```yaml
-ops:
-  op1:
-    field1: select * from ks1.tb1;
-    field2: field 2 value
-```
-
-*json:*
-
-```json5
-{
-  "ops": {
-    "op1": {
-      "field1": "select * from ks1.tb1;",
-      "field2": "field 2 value"
-    }
-  }
-}
-```
-
-*ops:*
-
-```json5
-[
-  {
-    "name": "block0--op1",
-    "op": {
-      "field1": "select * from ks1.tb1;",
-      "field2": "field 2 value"
-    },
-    "tags": {
-      "block": "block0",
-      "name": "block0--op1"
-    }
-  }
-]
-```
