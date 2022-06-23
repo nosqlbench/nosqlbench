@@ -18,7 +18,9 @@ package io.nosqlbench.driver.jms.ops;
  */
 
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.S4JSpace;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
+import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
 
 import javax.jms.*;
 import java.util.function.LongFunction;
@@ -38,33 +40,42 @@ public class S4JMsgReadMapper extends S4JOpMapper {
     private final boolean durable;
     private final boolean shared;
     private final LongFunction<String> subNameStrFunc;
+    private final LongFunction<Float> msgAckRatioFunc;
     private final LongFunction<String> msgSelectorStrFunc;
     private final LongFunction<Boolean> noLocalBoolFunc;
     private final LongFunction<Long> readTimeoutFunc;
     private final LongFunction<Boolean> recvNoWaitBoolFunc;
 
-    public S4JMsgReadMapper(S4JActivity s4JActivity,
+    public S4JMsgReadMapper(S4JSpace s4JSpace,
+                            S4JActivity s4JActivity,
                             boolean durable,
                             boolean shared,
                             LongFunction<Boolean> tempDestBoolFunc,
                             LongFunction<String> destTypeStrFunc,
                             LongFunction<String> destNameStrFunc,
+                            LongFunction<Boolean> reuseClntBoolFunc,
                             LongFunction<Boolean> asyncAPIBoolFunc,
+                            LongFunction<Integer> txnBatchNumFunc,
                             LongFunction<String> subNameStrFunc,
+                            LongFunction<Float> msgAckRatioFunc,
                             LongFunction<String> msgSelectorStrFunc,
                             LongFunction<Boolean> noLocalBoolFunc,
                             LongFunction<Long> readTimeoutFunc,
                             LongFunction<Boolean> recvNoWaitBoolFunc) {
-        super(s4JActivity,
+        super(s4JSpace,
+            s4JActivity,
             S4JActivityUtil.getMsgReadOpType(durable,shared),
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc);
+            reuseClntBoolFunc,
+            asyncAPIBoolFunc,
+            txnBatchNumFunc);
 
         this.durable = durable;
         this.shared = shared;
         this.subNameStrFunc = subNameStrFunc;
+        this.msgAckRatioFunc = msgAckRatioFunc;
         this.msgSelectorStrFunc = msgSelectorStrFunc;
         this.noLocalBoolFunc = noLocalBoolFunc;
         this.readTimeoutFunc = readTimeoutFunc;
@@ -77,15 +88,23 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         String destType = destTypeStrFunc.apply(value);
         String destName = destNameStrFunc.apply(value);
         boolean asyncApi = asyncAPIBoolFunc.apply(value);
+        int txnBatchNum = txnBatchNumFunc.apply(value);
+        boolean reuseClnt = reuseClntBoolFunc.apply(value);
         String subName = subNameStrFunc.apply(value);
+        float msgAckRatio = msgAckRatioFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
         boolean noLocal = noLocalBoolFunc.apply(value);
         long readTimeout = readTimeoutFunc.apply(value);
         boolean recvNoWait = recvNoWaitBoolFunc.apply(value);
 
+        int jmsSessionSeqNum = (int)(value % s4JActivity.getMaxNumSessionPerConn());
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getS4jJmsContextWrapper(jmsSessionSeqNum);
+        JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
+        boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
+
         Destination destination;
         try {
-            destination = s4JActivity.getOrCreateJmsDestination(tempDest, destType, destName);
+            destination = s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDest, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new RuntimeException("Unable to create the JMS destination!");
@@ -93,7 +112,8 @@ public class S4JMsgReadMapper extends S4JOpMapper {
 
         JMSConsumer consumer;
         try {
-            consumer = s4JActivity.getOrCreateJmsConsumer(
+            consumer = s4JSpace.getOrCreateJmsConsumer(
+                s4JJMSContextWrapper,
                 destination,
                 destType,
                 subName,
@@ -101,6 +121,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                 noLocal,
                 durable,
                 shared,
+                reuseClnt,
                 asyncApi);
         }
         catch (JMSException jmsException) {
@@ -111,11 +132,15 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         if (readTimeout < 0) readTimeout = 0;
 
         return new S4JMsgReadOp(
+            s4JSpace,
             s4JActivity,
+            jmsContext,
             destination,
             asyncApi,
             consumer,
+            msgAckRatio,
             readTimeout,
-            recvNoWait);
+            recvNoWait,
+            commitTransaction);
     }
 }

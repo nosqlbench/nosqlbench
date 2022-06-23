@@ -18,34 +18,73 @@ package io.nosqlbench.driver.jms.ops;
 
 
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.S4JSpace;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.jms.JMSContext;
+import javax.jms.Session;
 import java.util.function.LongFunction;
 
 public abstract class S4JOpMapper implements LongFunction<S4JOp> {
+
+    private final static Logger logger = LogManager.getLogger(S4JMsgSendOp.class);
+
+    protected final S4JSpace s4JSpace;
     protected final S4JActivity s4JActivity;
-    protected final JMSContext jmsContext;
     protected final String s4jOpType;
 
     protected final LongFunction<Boolean> tempDestBoolFunc;
     protected final LongFunction<String> destTypeStrFunc;
     protected final LongFunction<String> destNameStrFunc;
+    protected final LongFunction<Boolean> reuseClntBoolFunc;
     protected final LongFunction<Boolean> asyncAPIBoolFunc;
+    protected final LongFunction<Integer> txnBatchNumFunc;
 
-    public S4JOpMapper(S4JActivity s4JActivity,
+    public S4JOpMapper(S4JSpace s4JSpace,
+                       S4JActivity s4JActivity,
                        String s4jOpType,
                        LongFunction<Boolean> tempDestBoolFunc,
                        LongFunction<String> destTypeStrFunc,
                        LongFunction<String> destNameStrFunc,
-                       LongFunction<Boolean> asyncAPIBoolFunc)
+                       LongFunction<Boolean> reuseClntBoolFunc,
+                       LongFunction<Boolean> asyncAPIBoolFunc,
+                       LongFunction<Integer> txnBatchNumFunc)
     {
+        this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
-        this.jmsContext = s4JActivity.getJmsContext();
-
         this.s4jOpType = s4jOpType;
         this.tempDestBoolFunc = tempDestBoolFunc;
         this.destTypeStrFunc = destTypeStrFunc;
         this.destNameStrFunc = destNameStrFunc;
+        this.reuseClntBoolFunc = reuseClntBoolFunc;
         this.asyncAPIBoolFunc = asyncAPIBoolFunc;
+        this.txnBatchNumFunc = txnBatchNumFunc;
+    }
+
+    protected boolean commitTransaction(int txnBatchNum, int jmsSessionMode, long curCycleNum) {
+        // Whether to commit the transaction which happens when:
+        // - session mode is equal to "SESSION_TRANSACTED"
+        // - "txn_batch_num" has been reached since last reset
+        boolean commitTransaction = (Session.SESSION_TRANSACTED == jmsSessionMode);
+        if (commitTransaction) {
+            int txnBatchTackingCnt = s4JSpace.getTxnBatchTrackingCnt();
+
+            if ( ( (txnBatchTackingCnt >=  txnBatchNum) && ((txnBatchTackingCnt % txnBatchNum) == 0) ) ||
+                 (curCycleNum == (s4JActivity.getActivityDef().getCycleCount() - 1)) ) {
+                commitTransaction = true;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Commit transaction ({}, {}, {})",
+                        txnBatchTackingCnt,
+                        s4JSpace.getTotalOpResponseCnt(), curCycleNum);
+                }
+            }
+            else {
+                commitTransaction = false;
+            }
+
+            s4JSpace.incTxnBatchTrackingCnt();
+        }
+
+        return commitTransaction;
     }
 }

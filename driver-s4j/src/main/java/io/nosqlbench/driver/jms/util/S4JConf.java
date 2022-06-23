@@ -40,6 +40,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,6 +58,7 @@ public class S4JConf {
     public static final String CONSUMER_CONF_PREFIX = "consumer";
     public static final String JMS_CONF_PREFIX = "jms";
 
+    private final Map<String, Object> s4jMiscConfMap = new HashMap<>();
     private final Map<String, Object> clientConfMap = new HashMap<>();
     private final Map<String, Object> producerConfMap = new HashMap<>();
     private final Map<String, Object> consumerConfMap = new HashMap<>();
@@ -78,36 +80,32 @@ public class S4JConf {
 
             Configuration config = builder.getConfiguration();
 
-            // Get client connection specific configuration settings, removing "client." prefix
-            for (Iterator<String> it = config.getKeys(CLIENT_CONF_PREFIX); it.hasNext(); ) {
+            for (Iterator<String> it = config.getKeys(); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
 
-            // Get producer specific configuration settings, removing "producer." prefix
-            for (Iterator<String> it = config.getKeys(PRODUCER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
-
-            // Get consumer specific configuration settings, removing "consumer." prefix
-            for (Iterator<String> it = config.getKeys(CONSUMER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    consumerConfMap.put(confKey.substring(CONSUMER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
-
-            // Get JMS specific configuration settings, keeping "jms." prefix
-            for (Iterator<String> it = config.getKeys(JMS_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    jmsConfMap.put(confKey, config.getProperty(confKey));
+                if (!StringUtils.isBlank(confVal)) {
+                    // Get client connection specific configuration settings, removing "client." prefix
+                    if (StringUtils.startsWith(confKey, CLIENT_CONF_PREFIX)) {
+                        clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length() + 1), config.getProperty(confKey));
+                    }
+                    // Get producer specific configuration settings, removing "producer." prefix
+                    else if (StringUtils.startsWith(confKey, PRODUCER_CONF_PREFIX)) {
+                        producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
+                    }
+                    // Get consumer specific configuration settings, removing "consumer." prefix
+                    else if (StringUtils.startsWith(confKey, CONSUMER_CONF_PREFIX)) {
+                        consumerConfMap.put(confKey.substring(CONSUMER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
+                    }
+                    // Get JMS specific configuration settings, keeping "jms." prefix
+                    else if (StringUtils.startsWith(confKey, JMS_CONF_PREFIX)) {
+                        jmsConfMap.put(confKey, config.getProperty(confKey));
+                    }
+                    // For all other configuration settings (not having any of the above prefixes), keep as is
+                    else {
+                        s4jMiscConfMap.put(confKey, confVal);
+                    }
+                }
             }
         } catch (IOException ioe) {
             logger.error("Can't read the specified config properties file: " + fileName);
@@ -118,16 +116,19 @@ public class S4JConf {
         }
     }
 
-    public Map<String, Object> getClientConfMap() {
-        return this.clientConfMap;
-    }
-    public Map<String, Object> getProducerConfMap() {
-        return this.producerConfMap;
-    }
-    public Map<String, Object> getConsumerConfMap() {
-        return this.consumerConfMap;
-    }
-    public Map<String, Object> getJmsConfMap() {
-        return this.jmsConfMap;
+    public Map<String, Object> getS4jMiscConfMap() { return  this.s4jMiscConfMap; }
+    public Map<String, Object> getClientConfMap() { return this.clientConfMap; }
+    public Map<String, Object> getProducerConfMap() { return this.producerConfMap; }
+    public Map<String, Object> getConsumerConfMap() { return this.consumerConfMap; }
+    public Map<String, Object> getJmsConfMap() { return this.jmsConfMap; }
+
+    public String toString() {
+        return new ToStringBuilder(this).
+            append("s4jMiscConfMap", s4jMiscConfMap.toString()).
+            append("clientConfMap", clientConfMap.toString()).
+            append("producerConfMap", producerConfMap.toString()).
+            append("consumerConfMap", consumerConfMap.toString()).
+            append("jmsConfMap", jmsConfMap.toString()).
+            toString();
     }
 }
