@@ -31,13 +31,12 @@ import io.nosqlbench.nb.spectest.testtypes.STNodeReference;
 import io.nosqlbench.nb.spectest.types.STAssemblyValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.assertj.core.api.Assertions;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * <P>This validator looks at a {@link STNodeAssembly} as a sequence of
@@ -119,7 +118,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
-                assertThat(stmt_objs).isEqualTo(expectedList);
+                Assertions.assertThat(stmt_objs).isEqualTo(expectedList);
 
             }
 
@@ -158,13 +157,13 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
-                assertThat(docmaps).isEqualTo(expectedList);
+                Assertions.assertThat(docmaps).isEqualTo(expectedList);
                 System.out.println("OK");
             } else if (elem.isJsonObject()) {
                 Map<String, Object> expectedSingle = gson.fromJson(json, Map.class);
 
                 compareEach(expectedSingle, docmaps.get(0));
-                assertThat(docmaps.get(0)).isEqualTo(expectedSingle);
+                Assertions.assertThat(docmaps.get(0)).isEqualTo(expectedSingle);
                 if (docmaps.size() != 1) {
                     throw new RuntimeException("comparator expected a single object, but found " + docmaps.size());
                 }
@@ -187,11 +186,11 @@ public class YamlSpecValidator implements STAssemblyValidator {
     }
 
     private void compareEach(List<Map<String, Object>> expected, List<Map<String, Object>> docmaps) {
-        assertThat(docmaps).isEqualTo(expected);
+        Assertions.assertThat(docmaps).isEqualTo(expected);
     }
 
     private void compareEach(Map<String, Object> structure, Map<String, Object> stringObjectMap) {
-        assertThat(stringObjectMap).isEqualTo(structure);
+        Assertions.assertThat(stringObjectMap).isEqualTo(structure);
     }
 
 }

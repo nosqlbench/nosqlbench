@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityInitializationError;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -50,7 +50,7 @@ public class RawYamlLoader {
                 data = transformer.apply(data);
             }
         } catch (Exception e) {
-            RuntimeException t = new ActivityInitializationError("Error applying string transforms to input", e);
+            RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
             throw t;
         }
 
@@ -95,7 +95,7 @@ public class RawYamlLoader {
                 if (logger != null) logger.trace("Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
-                RuntimeException t = new ActivityInitializationError("Error applying string transforms to input", e);
+                RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
                 throw t;
             }
         }
