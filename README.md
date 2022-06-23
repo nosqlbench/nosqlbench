@@ -1,8 +1,21 @@
 [comment]: < ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg) >
 
+
 # NoSQLBench
 
 **The Open Source, Pluggable, NoSQL Benchmarking Suite**
+
+# BRANCH STATUS
+
+The main branch of NoSQLBench is the active development branch for the upcoming NoSQLBench 5.
+It requires Java 17 to build, and has a limited set of drivers available as the previous drivers are
+updated to the newer APIs (and features).
+
+If you want to build or modify the current stable release, that is on nb4-maintenance, and requires
+Java 14 or lower to build. Stable releases contain all of the prior drivers.
+
+To distinguish between versions, the binary and jar artifacts for nb5 (main) builds are named `nb5`.
+
 
 [Get it Here](DOWNLOADS.md)
 
