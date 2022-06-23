@@ -16,23 +16,28 @@
 
 package io.nosqlbench.adapter.stdout;
 
+import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
-import io.nosqlbench.engine.api.templating.OpTemplateSupplier;
+import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 @Service(value= DriverAdapter.class,selector = "stdout")
-public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements OpTemplateSupplier {
+public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements SyntheticOpTemplateProvider {
+    private final static Logger logger = LogManager.getLogger(StdoutDriverAdapter.class);
 
     @Override
     public OpMapper<StdoutOp> getOpMapper() {
@@ -53,7 +58,47 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     }
 
     @Override
-    public Optional<List<OpTemplate>> loadOpTemplates(NBConfiguration cfg) {
-        throw new RuntimeException("implement me");
+    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> cfg) {
+        Set<String> activeBindingNames = new LinkedHashSet<>();
+
+        String bindings = Optional.ofNullable(cfg.get("bindings")).map(Object::toString).orElse("doc");
+        activeBindingNames.addAll(stmtsDocList.getDocBindings().keySet());
+
+        Pattern bindingsFilter = Pattern.compile(bindings.equalsIgnoreCase("doc") ? ".*" : bindings);
+        Set<String> filteredBindingNames = new LinkedHashSet<>();
+        activeBindingNames
+            .stream()
+            .filter(n -> {
+                if (bindingsFilter.matcher(n).matches()) {
+                    logger.trace("bindings filter kept binding '" + n + "'");
+                    return true;
+                } else {
+                    logger.trace("bindings filter removed binding '" + n + "'");
+                    return false;
+                }
+            })
+            .forEach(filteredBindingNames::add);
+        activeBindingNames = filteredBindingNames;
+
+        OpData op = new OpData("synthetic", "synthetic", Map.of(), stmtsDocList.getDocBindings(), cfg,
+            Map.of("stmt", genStatementTemplate(activeBindingNames, cfg)));
+
+        return List.of(op);
     }
+
+    private String genStatementTemplate(Set<String> keySet, Map<String,Object> cfg) {
+        TemplateFormat format = Optional.ofNullable(cfg.get("format"))
+            .map(Object::toString)
+            .map(TemplateFormat::valueOf)
+            .orElse(TemplateFormat.assignments);
+
+        boolean ensureNewline = Optional.ofNullable(cfg.get("newline"))
+            .map(Object::toString)
+            .map(Boolean::valueOf)
+            .orElse(true);
+
+        String stmtTemplate = format.format(ensureNewline, new ArrayList<>(keySet));
+        return stmtTemplate;
+    }
+
 }

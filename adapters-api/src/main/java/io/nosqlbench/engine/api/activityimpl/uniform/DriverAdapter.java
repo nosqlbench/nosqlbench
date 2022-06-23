@@ -55,7 +55,6 @@ import java.util.function.Function;
  */
 public interface DriverAdapter<R extends Op, S> {
 
-
     /**
      * <p>
      * <H2>Op Mapping</H2>

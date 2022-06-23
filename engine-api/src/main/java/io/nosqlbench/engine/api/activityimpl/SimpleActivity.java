@@ -35,10 +35,12 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -503,6 +505,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
         StmtsDocList stmtsDocList = loadStmtsDocList();
 
+
         if (stmtsDocList == null) {
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=...");
         }
@@ -514,12 +517,13 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 throw new BasicError("There were no active statements with tag filter '"
                     + tagfilter + "', since all " + beforeFiltering.size()+ " were filtered out.");
             }
-//            else {
-//                if (this instanceof DefaultOpTemplateSupplier s) {
-//                    stmts = s.getDefaultTemplates(stmtsDocList);
-//                    Objects.requireNonNull(stmts);
-//                }
-//            }
+            else {
+                if (this instanceof SyntheticOpTemplateProvider sotp) {
+
+                    stmts = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
+                    Objects.requireNonNull(stmts);
+                }
+            }
             if (stmts.size()==0) {
                 throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
             }
