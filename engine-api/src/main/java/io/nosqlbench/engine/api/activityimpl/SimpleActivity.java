@@ -76,6 +76,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private ErrorMetrics errorMetrics;
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
+    private String workloadSource = "unspecified";
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -350,7 +351,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
             String stride = String.valueOf(seq.getSequence().length);
             logger.info("defaulting stride to " + stride + " (the sequence length)");
 //            getParams().set("stride", stride);
-            getParams().setSilently("stride",stride);
+            getParams().setSilently("stride", stride);
         }
 
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
@@ -396,17 +397,17 @@ public class SimpleActivity implements Activity, ProgressCapable {
                     logger.info("setting threads to " + threads + " (auto) [10xCORES]");
                 }
 //                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads",threads);
+                activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
                 logger.info("setting threads to " + threads + " (" + multiplier + "x)");
 //                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads",threads);
+                activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
                 logger.info("setting threads to " + spec + " (direct)");
 //                activityDef.setThreads(Integer.parseInt(spec));
-                activityDef.getParams().setSilently("threads",Integer.parseInt(spec));
+                activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
             }
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
@@ -500,25 +501,29 @@ public class SimpleActivity implements Activity, ProgressCapable {
             .orElse(SequencerType.bucket);
         SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-        StmtsDocList stmtsDocList = null;
+        StmtsDocList stmtsDocList = loadStmtsDocList();
 
-
-        String workloadSource = "unspecified";
-        Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
-        Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-        if (stmt.isPresent()) {
-            stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
-            workloadSource = "commandline:" + stmt.get();
-        } else if (op_yaml_loc.isPresent()) {
-            stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
-            workloadSource = "yaml:" + op_yaml_loc.get();
-        }
-
-        if (stmtsDocList==null) {
+        if (stmtsDocList == null) {
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=...");
         }
-
+        List<OpTemplate> beforeFiltering = stmtsDocList.getStmts();
         List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+
+        if (stmts.size() == 0) {
+            if (beforeFiltering.size()>0) {
+                throw new BasicError("There were no active statements with tag filter '"
+                    + tagfilter + "', since all " + beforeFiltering.size()+ " were filtered out.");
+            } else {
+                if (this instanceof DefaultOpTemplateSupplier s) {
+                    stmts = s.getDefaultTemplates(stmtsDocList);
+                    Objects.requireNonNull(stmts);
+                }
+            }
+            if (stmts.size()==0) {
+                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+            }
+        }
+
         List<Long> ratios = new ArrayList<>(stmts.size());
 
         for (int i = 0; i < stmts.size(); i++) {
@@ -527,9 +532,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
             ratios.add(ratio);
         }
 
-        if (stmts.size() == 0) {
-            throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
-        }
+
 
         try {
 
@@ -547,6 +550,29 @@ public class SimpleActivity implements Activity, ProgressCapable {
         }
 
         return planner.resolve();
+    }
+
+    protected StmtsDocList loadStmtsDocList() {
+
+        try {
+            StmtsDocList stmtsDocList = null;
+
+            Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
+            Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+            if (stmt.isPresent()) {
+                stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
+                workloadSource = "commandline:" + stmt.get();
+            } else if (op_yaml_loc.isPresent()) {
+                stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                workloadSource = "yaml:" + op_yaml_loc.get();
+            }
+
+            return stmtsDocList;
+
+        } catch (Exception e) {
+            throw new OpConfigError("Error loading op templates: " + e.toString(), workloadSource, e);
+        }
+
     }
 
     @Override

@@ -59,17 +59,6 @@
         <module>adapter-dynamodb</module>
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
-        <module>driver-diag</module>
-        <module>driver-stdout</module>
-        <module>driver-tcp</module>
-        <module>driver-http</module>
-        <module>driver-kafka</module>
-        <module>driver-mongodb</module>
-        <module>driver-jmx</module>
-        <module>driver-jdbc</module>
-        <module>driver-cockroachdb</module>
-        <module>driver-pulsar</module>
-        <module>driver-jms</module>
 
 
         <!-- VIRTDATA MODULES -->
@@ -96,6 +85,15 @@
             </activation>
             <modules>
                 <module>nb</module>
+                <module>driver-tcp</module>
+                <module>driver-http</module>
+                <module>driver-kafka</module>
+                <module>driver-jmx</module>
+                <module>driver-jdbc</module>
+                <module>driver-cockroachdb</module>
+                <module>driver-pulsar</module>
+                <module>driver-jms</module>
+
             </modules>
         </profile>
         <profile>

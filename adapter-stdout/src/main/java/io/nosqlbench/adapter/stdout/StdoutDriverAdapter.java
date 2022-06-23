@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Service(value= DriverAdapter.class,selector = "stdout")
-public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements OpTemplateSupplier, io.nosqlbench.engine.api.activityimpl.DefaultOpTemplateSupplier {
+public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements OpTemplateSupplier {
 
     @Override
     public OpMapper<StdoutOp> getOpMapper() {
