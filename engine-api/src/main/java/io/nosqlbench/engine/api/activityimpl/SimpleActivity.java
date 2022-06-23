@@ -18,10 +18,12 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
+import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
-import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -33,11 +35,12 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
+import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -74,6 +77,8 @@ public class SimpleActivity implements Activity, ProgressCapable {
     private int nameEnumerator = 0;
     private ErrorMetrics errorMetrics;
     private NBErrorHandler errorHandler;
+    private ActivityMetricProgressMeter progressMeter;
+    private String workloadSource = "unspecified";
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -98,7 +103,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public void initActivity() {
-        onActivityDefUpdate(this.activityDef);
+        initOrUpdateRateLimiters(this.activityDef);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
@@ -264,7 +269,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public Timer getResultTimer() {
-        return ActivityMetrics.timer(getActivityDef(), "result");
+        return ActivityMetrics.timer(getActivityDef(), "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     @Override
@@ -316,6 +321,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+        initOrUpdateRateLimiters(activityDef);
+    }
+
+    public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
             .map(RateSpec::new)
@@ -343,14 +352,16 @@ public class SimpleActivity implements Activity, ProgressCapable {
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
             logger.info("defaulting stride to " + stride + " (the sequence length)");
-            getParams().set("stride", stride);
+//            getParams().set("stride", stride);
+            getParams().setSilently("stride", stride);
         }
 
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info("defaulting cycles to " + cycles + " (the stride length)");
-            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
             if (getActivityDef().getCycleCount() == 0) {
                 throw new RuntimeException(
@@ -387,15 +398,18 @@ public class SimpleActivity implements Activity, ProgressCapable {
                 } else {
                     logger.info("setting threads to " + threads + " (auto) [10xCORES]");
                 }
-                activityDef.setThreads(threads);
+//                activityDef.setThreads(threads);
+                activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
                 logger.info("setting threads to " + threads + " (" + multiplier + "x)");
-                activityDef.setThreads(threads);
+//                activityDef.setThreads(threads);
+                activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
                 logger.info("setting threads to " + spec + " (direct)");
-                activityDef.setThreads(Integer.parseInt(spec));
+//                activityDef.setThreads(Integer.parseInt(spec));
+                activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
             }
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
@@ -489,21 +503,32 @@ public class SimpleActivity implements Activity, ProgressCapable {
             .orElse(SequencerType.bucket);
         SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-        StmtsDocList stmtsDocList = null;
+        StmtsDocList stmtsDocList = loadStmtsDocList();
 
 
-        String workloadSource = "unspecified";
-        Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
-        Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-        if (stmt.isPresent()) {
-            stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
-            workloadSource = "commandline:" + stmt.get();
-        } else if (op_yaml_loc.isPresent()) {
-            stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
-            workloadSource = "yaml:" + op_yaml_loc.get();
+        if (stmtsDocList == null) {
+            throw new OpConfigError("No op templates found. You must provide either workload=... or op=...");
+        }
+        List<OpTemplate> beforeFiltering = stmtsDocList.getStmts();
+        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
+
+        if (stmts.size() == 0) {
+            if (beforeFiltering.size()>0) {
+                throw new BasicError("There were no active statements with tag filter '"
+                    + tagfilter + "', since all " + beforeFiltering.size()+ " were filtered out.");
+            }
+            else {
+                if (this instanceof SyntheticOpTemplateProvider sotp) {
+
+                    stmts = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
+                    Objects.requireNonNull(stmts);
+                }
+            }
+            if (stmts.size()==0) {
+                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+            }
         }
 
-        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
         List<Long> ratios = new ArrayList<>(stmts.size());
 
         for (int i = 0; i < stmts.size(); i++) {
@@ -512,9 +537,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
             ratios.add(ratio);
         }
 
-        if (stmts.size() == 0) {
-            throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
-        }
+
 
         try {
 
@@ -534,15 +557,35 @@ public class SimpleActivity implements Activity, ProgressCapable {
         return planner.resolve();
     }
 
-    @Override
-    public ProgressMeter getProgressMeter() {
-        Input input = getInputDispenserDelegate().getInput(0);
-        if (input instanceof ProgressCapable) {
-            ProgressMeter meter = ((ProgressCapable) input).getProgressMeter();
-            return new ProgressAndStateMeter(meter, this);
-        } else {
-            throw new RuntimeException("Progress meter must be implemented here.");
+    protected StmtsDocList loadStmtsDocList() {
+
+        try {
+            StmtsDocList stmtsDocList = null;
+
+            Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
+            Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+            if (stmt.isPresent()) {
+                stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
+                workloadSource = "commandline:" + stmt.get();
+            } else if (op_yaml_loc.isPresent()) {
+                stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                workloadSource = "yaml:" + op_yaml_loc.get();
+            }
+
+            return stmtsDocList;
+
+        } catch (Exception e) {
+            throw new OpConfigError("Error loading op templates: " + e.toString(), workloadSource, e);
         }
+
+    }
+
+    @Override
+    public synchronized ProgressMeter getProgressMeter() {
+        if (progressMeter == null) {
+            this.progressMeter = new ActivityMetricProgressMeter(this);
+        }
+        return this.progressMeter;
     }
 
     /**
@@ -558,4 +601,8 @@ public class SimpleActivity implements Activity, ProgressCapable {
     }
 
 
+    @Override
+    public String getName() {
+        return this.activityDef.getAlias();
+    }
 }

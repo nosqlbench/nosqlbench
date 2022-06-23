@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
@@ -25,8 +26,8 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.input.ProgressCapable;
-import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -37,7 +38,7 @@ import java.util.function.Supplier;
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
-public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable {
+public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBNamedElement {
 
     /**
      * Provide the activity with the controls needed to stop itself.
@@ -211,4 +212,8 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     }
 
     int getMaxTries();
+
+    default int getHdrDigits() {
+        return getParams().getOptionalInteger("hdr_digits").orElse(4);
+    }
 }

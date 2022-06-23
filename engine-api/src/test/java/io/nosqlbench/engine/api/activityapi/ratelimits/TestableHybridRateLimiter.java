@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.NBNamedElement;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,8 +24,8 @@ public class TestableHybridRateLimiter extends HybridRateLimiter {
 
     private final AtomicLong clock;
 
-    public TestableHybridRateLimiter(AtomicLong clock, RateSpec rateSpec, ActivityDef def) {
-        setActivityDef(def);
+    public TestableHybridRateLimiter(AtomicLong clock, RateSpec rateSpec, NBNamedElement def) {
+        super(def, "test", rateSpec);
         applyRateSpec(rateSpec);
         setLabel("test");
         this.clock = clock;

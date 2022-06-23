@@ -107,7 +107,7 @@ public class InlineTokenPool {
         ByteBuffer logbuf = getBuffer();
         apply(rateSpec);
         logger.debug("initialized token pool: " + this + " for rate:" + rateSpec);
-        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller");
+        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller",4);
     }
 
     public InlineTokenPool(long poolsize, double burstRatio, ActivityDef def) {
@@ -116,7 +116,7 @@ public class InlineTokenPool {
         this.burstRatio = burstRatio;
         this.maxActiveAndBurstSize = (long) (maxActivePoolSize * burstRatio);
         this.maxBurstPoolSize = maxActiveAndBurstSize - maxActivePoolSize;
-        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller");
+        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller",4);
     }
 
     /**

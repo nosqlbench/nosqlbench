@@ -16,8 +16,11 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.api.NBNamedElement;
+
 public interface TokenPool {
-    TokenPool apply(RateSpec rateSpec);
+
+    TokenPool apply(NBNamedElement named, RateSpec rateSpec);
 
     double getBurstRatio();
 

@@ -18,10 +18,23 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class StandardActivityType<A extends StandardActivity<?,?>> extends SimpleActivity implements ActivityType<A> {
+
+    private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final DriverAdapter<?,?> adapter;
 
@@ -40,6 +53,24 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
         }
 
         return (A) new StandardActivity(adapter,activityDef);
+    }
+
+    @Override
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+        super.onActivityDefUpdate(activityDef);
+
+        if (adapter instanceof NBReconfigurable reconfigurable) {
+            NBConfigModel cfgModel = reconfigurable.getReconfigModel();
+            Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+            if (op_yaml_loc.isPresent()) {
+                Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+                StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
+                cfgModel=cfgModel.add(workload.getConfigModel());
+            }
+            NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
+            reconfigurable.applyReconfig(cfg);
+        }
+
     }
 
     @Override

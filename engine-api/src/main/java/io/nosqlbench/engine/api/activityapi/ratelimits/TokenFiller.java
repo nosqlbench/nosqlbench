@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -46,13 +46,11 @@ public class TokenFiller implements Runnable {
      * By default, this rate is at least every millisecond +- scheduling jitter
      * in the JVM.
      *
-     * @param rateSpec A {@link RateSpec}
-     * @param def      An {@link ActivityDef}
      */
-    public TokenFiller(RateSpec rateSpec, ThreadDrivenTokenPool tokenPool, ActivityDef def) {
+    public TokenFiller(RateSpec rateSpec, ThreadDrivenTokenPool tokenPool, NBNamedElement named, int hdrdigits) {
         this.rateSpec = rateSpec;
         this.tokenPool = tokenPool;
-        this.timer = ActivityMetrics.timer(def, "tokenfiller");
+        this.timer = ActivityMetrics.timer(named, "tokenfiller", hdrdigits);
     }
 
     public TokenFiller apply(RateSpec rateSpec) {

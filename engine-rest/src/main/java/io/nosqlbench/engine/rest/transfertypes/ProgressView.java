@@ -17,8 +17,9 @@
 package io.nosqlbench.engine.rest.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
-import io.nosqlbench.engine.api.activityimpl.input.StateCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 
 public class ProgressView {
 
@@ -33,33 +34,41 @@ public class ProgressView {
 
     @JsonProperty("summary")
     public String getProgressDetails() {
-        return progressMeter.getProgressSummary();
+        return progressMeter.getSummary();
     }
 
     @JsonProperty("min")
-    public long getMin() {
-        return progressMeter.getProgressMin();
+    public double getMin() {
+        return progressMeter.getMinValue();
     }
 
     @JsonProperty("current")
-    public long getCurrent() {
-        return progressMeter.getProgressCurrent();
+    public double getCurrent() {
+        return progressMeter.getCurrentValue();
     }
 
     @JsonProperty("max")
-    public long getMax() {
-        return progressMeter.getProgressMax();
+    public double getMax() {
+        return progressMeter.getMaxValue();
     }
 
 
     @JsonProperty("recycles_max")
-    public long getRecyclesMax() {
-        return progressMeter.getRecyclesMax();
+    public double getRecyclesMax() {
+        if (progressMeter instanceof CycleMeter cm) {
+            return cm.getRecyclesMax();
+        } else {
+            return Double.NaN;
+        }
     }
 
     @JsonProperty("recycles_current")
-    public long getRecyclesCurrent() {
-        return progressMeter.getRecyclesCurrent();
+    public double getRecyclesCurrent() {
+        if (progressMeter instanceof CycleMeter cm) {
+            return cm.getRecyclesCurrent();
+        } else {
+            return Double.NaN;
+        }
     }
 
     @JsonProperty("eta_millis")
@@ -74,7 +83,7 @@ public class ProgressView {
 
     @JsonProperty("completed")
     public double getProgress() {
-        return progressMeter.getProgressRatio();
+        return progressMeter.getRatioComplete();
     }
 
     @JsonProperty("state")

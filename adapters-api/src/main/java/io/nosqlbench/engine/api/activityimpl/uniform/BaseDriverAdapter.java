@@ -27,13 +27,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable {
+public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable, NBReconfigurable {
 
     private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
-
-    protected BaseDriverAdapter() {
-    }
 
     /**
      * BaseDriverAdapter will take any provided functions from {@link #getOpStmtRemappers()}
@@ -72,11 +69,33 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      * in the op template. These are useful, for example, for taking the 'stmt' field
      * and parsing it into component fields which might otherwise be specified by the user.
      * This allows users to specify String-form op templates which are automatically
-     * destructured into the canonical field-wise form for a given type of operation.</p>
+     * parsed and destructured into the canonical field-wise form for a given type of
+     * operation.</p>
+     *
      * <br/>
+     *
      * <p>Each function in this list is applied in order. If the function returns a value,
      * then the 'stmt' field is removed and the resulting map is added to the other
      * fields in the op template.</p>
+     *
+     * <br/>
+     *
+     * <p>If a driver adapter is meant to support the {@code stmt} field, then this
+     * <em>must</em> be provided. The use of the stmt field should be documented in
+     * the driver adapter user docs with examples for any supported formats. A default
+     * implementation does nothing, as it must be decided per-driver whether or not
+     * the stmt field will be used directly or whether it is short-hand for a more
+     * canonical form.
+     *
+     * <br/>
+     *
+     * <p>If you want to automatically destructure stmt values into a map and inject
+     * its entries into the op template fields, simply provide an implementation
+     * like this:<pre>
+     * {@code
+     *     return List.of(stmt -> Optional.of(NBParams.one(stmt).getMap()));
+     * }
+     * </pre></p>
      *
      * @return A list of optionally applied remapping functions.
      */
@@ -89,6 +108,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      * Each function is applied to the op template fields. </p>
      * @return
      */
+    @Override
     public List<Function<Map<String,Object>,Map<String,Object>>> getOpFieldRemappers() {
         return List.of();
     }
@@ -111,6 +131,12 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
         this.cfg = cfg;
     }
 
+    @Override
+    public void applyReconfig(NBConfiguration reconf) {
+        this.cfg = getReconfigModel().apply(reconf.getMap());
+    }
+
+
     /**
      * In order to be provided with config information, it is required
      * that the driver adapter specify the valid configuration options,
@@ -122,7 +148,6 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .add(Param.optional("alias"))
             .add(Param.defaultTo("strict",true,"strict op field mode, which requires that provided op fields are recognized and used"))
             .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
-            .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
             .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
             .add(Param.defaultTo("errors", "stop", "error handler configuration"))
             .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
@@ -132,6 +157,17 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
             .add(Param.optional("phaserate", String.class, "rate limit for phases per second"))
             .add(Param.optional("seq", String.class, "sequencing algorithm"))
+            .add(Param.optional("instrument", Boolean.class))
+            .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
+            .asReadOnly();
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return ConfigModel.of(BaseDriverAdapter.class)
+            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
             .asReadOnly();
     }
 

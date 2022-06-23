@@ -56,14 +56,21 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class NBCLI {
+public class NBCLI implements Function<String[], Integer> {
 
     private static Logger logger;
     private static LoggerConfig loggerConfig;
+    private static int EXIT_OK = 0;
+    private static int EXIT_WARNING = 1;
+    private static int EXIT_ERROR = 2;
 
     static {
         loggerConfig = new LoggerConfig();
@@ -76,10 +83,35 @@ public class NBCLI {
         this.commandName = commandName;
     }
 
+    /**
+     * Only call System.exit with the body of main. This is so that other scenario
+     * invocations are handled functionally by {@link #apply(String[])}, which allows
+     * for scenario encapsulation and concurrent testing.
+     * @param args Command Line Args
+     */
     public static void main(String[] args) {
         try {
             NBCLI cli = new NBCLI("nb");
-            cli.run(args);
+            int statusCode = cli.apply(args);
+            System.exit(statusCode);
+        } catch (Exception e) {
+
+        }
+    }
+    /**
+     *         return null;
+     *     }
+     *
+     *     public static void main(String[] args) {
+     * @param strings
+     * @return
+     */
+    @Override
+    public Integer apply(String[] args) {
+        try {
+            NBCLI cli = new NBCLI("nb");
+            int result = cli.applyDirect(args);
+            return result;
         } catch (Exception e) {
             boolean showStackTraces = false;
             for (String arg : args) {
@@ -96,11 +128,11 @@ public class NBCLI {
             }
             System.err.flush();
             System.out.flush();
-            System.exit(2);
+            return EXIT_ERROR;
         }
     }
 
-    public void run(String[] args) {
+    public Integer applyDirect(String[] args) {
 
         // Initial logging config covers only command line parsing
         // We don't want anything to go to console here unless it is a real problem
@@ -137,7 +169,7 @@ public class NBCLI {
         // Global only processing
         if (args.length == 0) {
             System.out.println(loadHelpFile("commandline.md"));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
@@ -189,19 +221,20 @@ public class NBCLI {
 
         if (args.length > 0 && args[0].toLowerCase().equals("export-docs")) {
             BundledMarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
-            System.exit(0);
+            return EXIT_OK;
         }
         if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
             VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
-            System.exit(0);
+            return EXIT_OK;
         }
         if (args.length > 0 && args[0].toLowerCase().matches("docserver|appserver")) {
             NBWebServerApp.main(Arrays.copyOfRange(args, 1, args.length));
-            System.exit(0);
+            return EXIT_OK;
         }
-        if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)) {
+        if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)
+        ) {
             MarkdownExporter.main(Arrays.copyOfRange(args, 1, args.length));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
@@ -213,37 +246,37 @@ public class NBCLI {
 
         if (options.wantsBasicHelp()) {
             System.out.println(loadHelpFile("basic.md"));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.isWantsVersionShort()) {
             System.out.println(new VersionInfo().getVersion());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsVersionCoords()) {
             System.out.println(new VersionInfo().getArtifactCoordinates());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsActivityTypes()) {
             new ActivityTypeLoader().getAllSelectors().forEach(System.out::println);
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsWorkloadsList()) {
             NBCLIScenarios.printWorkloads(false, options.wantsIncludes());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsScenariosList()) {
             NBCLIScenarios.printWorkloads(true, options.wantsIncludes());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsScriptList()) {
             NBCLIScripts.printScripts(true, options.wantsIncludes());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsToCopyResource()) {
@@ -279,28 +312,28 @@ public class NBCLI {
                 throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
             }
             logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() + "'");
-            System.exit(0);
+            return EXIT_OK;
 
         }
 
         if (options.wantsInputTypes()) {
             InputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsMarkerTypes()) {
             OutputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsToDumpCyclelog()) {
             CycleLogDumperUtility.main(options.getCycleLogExporterOptions());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsToImportCycleLog()) {
             CycleLogImporterUtility.main(options.getCyclelogImportOptions());
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsTopicalHelp()) {
@@ -308,14 +341,14 @@ public class NBCLI {
             System.out.println(helpDoc.orElseThrow(
                 () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsMetricsForActivity() != null) {
             String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
             System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
-            System.exit(0);
+            return EXIT_OK;
         }
 
         logger.debug("initializing annotators with config:'" + annotatorsConfig + "'");
@@ -396,7 +429,7 @@ public class NBCLI {
         if (options.wantsShowScript()) {
             System.out.println("// Rendered Script");
             System.out.println(scriptData);
-            System.exit(0);
+            return EXIT_OK;
         }
 
         if (options.wantsEnableChart()) {
@@ -410,7 +443,7 @@ public class NBCLI {
         // Execute Scenario!
         if (options.getCommands().size() == 0) {
             logger.info("No commands provided. Exiting before scenario.");
-            System.exit(0);
+            return EXIT_OK;
         }
 
         scenario.addScriptText(scriptData);
@@ -442,10 +475,10 @@ public class NBCLI {
 //            logger.warn(scenariosResults.getExecutionSummary());
             ScenarioErrorHandler.handle(exception, options.wantsStackTraces());
             System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
-            System.exit(2);
+            return EXIT_ERROR;
         } else {
             logger.info(scenariosResults.getExecutionSummary());
-            System.exit(0);
+            return EXIT_OK;
         }
 
     }
@@ -471,4 +504,5 @@ public class NBCLI {
         String metrics = MetricsMapper.metricsDetail(activityType);
         return metrics;
     }
+
 }

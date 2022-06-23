@@ -122,5 +122,74 @@ public class NBParamsTest {
         assertThat(e.get("a5.b5")).isEmpty();
     }
 
+    @Test
+    public void testNestedJsonObjectsToCommonTypes() {
+        String maxdouble = String.valueOf(Double.MAX_VALUE);
+        String maxfloat = String.valueOf(Float.MAX_VALUE);
+
+        var json = """
+            {
+                "level1key1": {
+                    "level2key1": {
+                        "afloat": %s
+                    }
+                }
+            }
+            """.formatted("thisisit");
+
+        Element elements = NBParams.one(json);
+        Map<String, Object> commonform = elements.getMap();
+        assertThat(commonform).isEqualTo(
+            Map.of(
+                "level1key1", Map.of(
+                    "level2key1", Map.of(
+                        "afloat", "thisisit"
+                    )
+                )
+            )
+        );
+    }
+
+    @Test
+    public void testNestedJsonObjectsToCommonTypesDeep() {
+
+        var json = """
+            {
+                "level1key1": {
+                    "level2key1": {
+                        "anint": %s,
+                        "along": %s
+                    },
+                    "level2key2": {
+                        "alist": ["a","b","c"],
+                        "abool": true
+                    }
+                },
+                "level1key2": {
+                    "name": "myname"
+                }
+            }
+            """.formatted(3,4L);
+
+        Element elements = NBParams.one(json);
+        Map<String, Object> commonform = elements.getMap();
+        assertThat(commonform).isEqualTo(
+            Map.of(
+                "level1key1", Map.of(
+                    "level2key1", Map.of(
+                        "anint", 3.0d,
+                        "along", 4.0d
+                    ),
+                    "level2key2", Map.of(
+                        "alist",List.of("a","b","c"),
+                        "abool",true
+                    )
+                ),
+                "level1key2", Map.of(
+                    "name","myname"
+                )
+            )
+        );
+    }
 
 }

@@ -78,6 +78,9 @@ public interface Element {
      * defined at the root level, so it is what will be found first. All implementations
      * should ensure that this order is preserved.</p>
      *
+     * <p>This method requires a type which will be given to the underlying {@link ElementData}
+     * implementation for contextual type conversion.</p>
+     *
      * @param name     The simple or hierarchic variable name to resolve
      * @param classOfT The type of value which the resolved value is required to be assignable to
      * @param <T>      The value type parameter

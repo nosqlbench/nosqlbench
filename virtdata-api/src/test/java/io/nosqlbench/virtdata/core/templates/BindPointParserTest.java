@@ -48,6 +48,19 @@ public class BindPointParserTest {
                 )
             )
         );
+    }
+
+    @Test
+    public void testCurlyBracesWithinPattern() {
+        BindPointParser bpp = new BindPointParser();
+        assertThat(bpp.apply("a{{Template(\"-{}-\",Combinations(\"a-z\"))}}b", Map.of())).isEqualTo(
+            new BindPointParser.Result(
+                List.of("a","Template(\"-{}-\",Combinations(\"a-z\"))","b"),
+                List.of(
+                    BindPoint.of(BindPointParser.DEFINITION,"Template(\"-{}-\",Combinations(\"a-z\"))", BindPoint.Type.definition)
+                )
+            )
+        );
 
     }
 

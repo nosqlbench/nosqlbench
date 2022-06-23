@@ -17,16 +17,11 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.NBEnvironment;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -156,17 +151,17 @@ public class ActivityTypeLoader {
             DriverAdapter<?, ?> driverAdapter = oda.get();
 
             activityDef.getParams().remove("driver");
-            if (driverAdapter instanceof NBConfigurable) {
-                NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
-                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-                if (op_yaml_loc.isPresent()) {
-                    Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
-                    cfgModel=cfgModel.add(workload.getConfigModel());
-                }
-                NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
-                ((NBConfigurable) driverAdapter).applyConfig(cfg);
-            }
+//            if (driverAdapter instanceof NBConfigurable) {
+//                NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
+//                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+//                if (op_yaml_loc.isPresent()) {
+//                    Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+//                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
+//                    cfgModel=cfgModel.add(workload.getConfigModel());
+//                }
+//                NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
+//                ((NBConfigurable) driverAdapter).applyConfig(cfg);
+//            }
             ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef);
             return Optional.of(activityType);
         } else {

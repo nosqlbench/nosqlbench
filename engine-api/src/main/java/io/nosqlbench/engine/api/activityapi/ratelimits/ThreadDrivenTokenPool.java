@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,12 +59,9 @@ public class ThreadDrivenTokenPool implements TokenPool {
     private volatile long waitingPool;
     private RateSpec rateSpec;
     private long nanosPerOp;
-    //    private long debugTrigger=0L;
-//    private long debugRate=1000000000;
     private long blocks = 0L;
 
     private TokenFiller filler;
-    private final ActivityDef activityDef;
 
     /**
      * This constructor tries to pick reasonable defaults for the token pool for
@@ -73,9 +70,8 @@ public class ThreadDrivenTokenPool implements TokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public ThreadDrivenTokenPool(RateSpec rateSpec, ActivityDef activityDef) {
-        this.activityDef = activityDef;
-        apply(rateSpec);
+    public ThreadDrivenTokenPool(RateSpec rateSpec, NBNamedElement named) {
+        apply(named,rateSpec);
         logger.debug("initialized token pool: " + this + " for rate:" + rateSpec);
 //        filler.start();
     }
@@ -87,7 +83,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
      * @param rateSpec The rate specifier.
      */
     @Override
-    public synchronized TokenPool apply(RateSpec rateSpec) {
+    public synchronized TokenPool apply(NBNamedElement named, RateSpec rateSpec) {
         this.rateSpec = rateSpec;
         this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp() * MIN_CONCURRENT_OPS));
         this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
@@ -95,7 +91,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
 
         this.burstPoolSize = maxOverActivePool - maxActivePool;
         this.nanosPerOp = rateSpec.getNanosPerOp();
-        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, this, activityDef) : filler.apply(rateSpec);
+        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, this, named, 3) : filler.apply(rateSpec);
         notifyAll();
         return this;
     }

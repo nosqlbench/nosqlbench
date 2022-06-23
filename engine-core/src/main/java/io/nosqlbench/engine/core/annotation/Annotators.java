@@ -110,7 +110,8 @@ public class Annotators {
             if (!type.isAnnotationPresent(Service.class)) {
                 throw new RuntimeException(
                         "Annotator services must be annotated with distinct selectors\n" +
-                                "such as @Service(Annotator.class,selector=\"myimpl42\")"
+                                "such as @Service(Annotator.class,selector=\"myimpl42\")" +
+                            " but " + provider.type().getCanonicalName() + " had none."
                 );
             }
             Service service = type.getAnnotation(Service.class);

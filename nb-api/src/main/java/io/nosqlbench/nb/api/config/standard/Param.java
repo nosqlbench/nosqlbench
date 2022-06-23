@@ -34,19 +34,22 @@ public class Param<T> {
     private final T defaultValue;
     public boolean required;
     private Pattern regex;
+    private final NBConfigModelExpander expander;
 
     public Param(
         List<String> names,
         Class<? extends T> type,
         String description,
         boolean required,
-        T defaultValue
+        T defaultValue,
+        NBConfigModelExpander expander
     ) {
         this.names = names;
         this.type = type;
         this.description = description;
         this.required = required;
         this.defaultValue = defaultValue;
+        this.expander = expander;
     }
 
     /**
@@ -78,7 +81,7 @@ public class Param<T> {
      * @param <V>   Generic type for inference.
      */
     public static <V> Param<V> optional(List<String> names, Class<V> type) {
-        return new Param<V>(names, type, null, false, null);
+        return new Param<V>(names, type, null, false, null, null);
     }
 
     /**
@@ -92,7 +95,7 @@ public class Param<T> {
      * @param <V>         Generic type for inference.
      */
     public static <V> Param<V> optional(List<String> names, Class<V> type, String description) {
-        return new Param<V>(names, type, description, false, null);
+        return new Param<V>(names, type, description, false, null, null);
     }
 
 
@@ -106,7 +109,7 @@ public class Param<T> {
      * @param <V>  Generic type for inference.
      */
     public static <V> Param<V> optional(String name, Class<V> type) {
-        return new Param<V>(List.of(name), type, null, false, null);
+        return new Param<V>(List.of(name), type, null, false, null, null);
     }
 
     /**
@@ -120,7 +123,7 @@ public class Param<T> {
      * @param <V>         Generic type for inference.
      */
     public static <V> Param<V> optional(String name, Class<V> type, String description) {
-        return new Param<V>(List.of(name), type, description, false, null);
+        return new Param<V>(List.of(name), type, description, false, null, null);
     }
 
     /**
@@ -133,7 +136,7 @@ public class Param<T> {
      * @return
      */
     public static <V> Param<V> defaultTo(String name, V defaultValue) {
-        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, true, defaultValue);
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, true, defaultValue, null);
     }
 
     /**
@@ -146,7 +149,7 @@ public class Param<T> {
      * @return
      */
     public static <V> Param<V> defaultTo(String name, V defaultValue, String description) {
-        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), description, true, defaultValue);
+        return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), description, true, defaultValue, null);
     }
 
     /**
@@ -159,15 +162,15 @@ public class Param<T> {
      * @return
      */
     public static <V> Param<V> defaultTo(List<String> names, V defaultValue) {
-        return new Param<V>(names, (Class<V>) defaultValue.getClass(), null, true, defaultValue);
+        return new Param<V>(names, (Class<V>) defaultValue.getClass(), null, true, defaultValue, null);
     }
 
     public static <V> Param<V> required(String name, Class<V> type) {
-        return new Param<V>(List.of(name), type, null, true, null);
+        return new Param<V>(List.of(name), type, null, true, null, null);
     }
 
     public static <V> Param<V> required(List<String> names, Class<V> type) {
-        return new Param<V>(names, type, null, true, null);
+        return new Param<V>(names, type, null, true, null, null);
     }
 
 
@@ -228,7 +231,6 @@ public class Param<T> {
 
     public CheckResult<T> validate(Object value) {
 
-
         if (value == null) {
             if (isRequired()) {
                 return CheckResult.INVALID(this, null, "Value is null but " + this.getNames() + " is required");
@@ -253,6 +255,15 @@ public class Param<T> {
             }
         }
         return CheckResult.VALID(this, value, "All validators passed for field '" + getNames() + "'");
+    }
+
+
+    public NBConfigModelExpander getExpander() {
+        return this.expander;
+    }
+
+    public Param<T> expand(NBConfigModelExpander expander) {
+        return new Param<>(names, type, description, required, defaultValue, expander);
     }
 
     public final static class CheckResult<T> {

@@ -268,6 +268,19 @@ public class ParamsParser {
         return parms;
     }
 
+    /**
+     * If the source object is a Map, return it as-is. If it is a parseable
+     * character sequence with assignments, parse it into a map and return it.
+     * Otherwise, if it is a character sequence with no parsable key=value
+     * assignments, assume it to be a short-form declaration of a type of
+     * selector field like 'name' or 'type', and compose it into a map with
+     * the provided main field name.
+     *
+     * @param src The source Map or CharSequence
+     * @param mainField The name of the main field in 'value only' mode.
+     * @return A map
+     * @throws RuntimeException if the src is neither CharSequence nor Map
+     */
     public static Map<String, String> parseToMap(Object src, String mainField) {
         if (src instanceof Map) {
             return (Map) src;
@@ -279,7 +292,7 @@ public class ParamsParser {
                 return new HashMap<>(Map.of(mainField, input));
             }
         } else {
-            throw new RuntimeException("can't parseToMap(...) on an object that is neither Map nor CharSequence");
+            throw new RuntimeException("can't parseToMap(...) on an object that is neither Map nor CharSequence, type: '"+src.getClass().getCanonicalName()+"', value:\n" + src);
         }
     }
 

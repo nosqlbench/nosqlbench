@@ -20,7 +20,7 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
 
-public class AnnotationBuilder implements BuilderFacets.All {
+public class AnnotationBuilder implements AnnotationBuilderFacets.All {
     private String session;
     private long start;
     private long end;
@@ -75,7 +75,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
     }
 
     @Override
-    public BuilderFacets.WantsMoreDetailsOrBuild detail(String name, String value) {
+    public AnnotationBuilderFacets.WantsMoreDetailsOrBuild detail(String name, String value) {
         this.details.put(name, value);
         return this;
     }
@@ -87,7 +87,7 @@ public class AnnotationBuilder implements BuilderFacets.All {
     }
 
     @Override
-    public BuilderFacets.WantsInterval session(String session) {
+    public AnnotationBuilderFacets.WantsInterval session(String session) {
         this.session = session;
         return this;
     }

@@ -80,7 +80,7 @@ public class ElementImpl implements Element {
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (String key : keys) {
-            Object value = this.data.get(key);
+            Object value = this.data.getAsCommon(key);
             map.put(key, value);
         }
 

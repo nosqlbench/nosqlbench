@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=nosqlbench5
+Exec=nb5 %F
+Icon=nb5
+Type=Application
+Categories=Development;Network;Utility;Science;
+Comment=nosqlbench5
+MimeType=text/yaml;application/yaml;
+Name[nb]=nb5
+Terminal=false
+StartupNotify=true
+NoDisplay=false

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.api.NBNamedElement;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,12 @@ public class TokenPoolTest {
         assertThat(p.getWaitTime()).isEqualTo(10000000L);
 
         RateSpec s2 = new RateSpec(1000000L, 1.10D);
-        p.apply(s2);
+        p.apply(new NBNamedElement() {
+            @Override
+            public String getName() {
+                return "test";
+            }
+        },s2);
 
 
     }

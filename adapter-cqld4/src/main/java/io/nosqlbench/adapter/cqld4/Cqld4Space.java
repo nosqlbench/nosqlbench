@@ -237,7 +237,7 @@ public class Cqld4Space {
         }
 
         if (loaders.size() == 0) {
-            throw new RuntimeException("Unexpected size of loaders list:" + 0);
+            throw new RuntimeException("The driverconfig parameter was provided, but no loader could be found for '" + driverconfig + "'. Ensure files or URLs are accessible.");
         } else if (loaders.size() == 1) {
             return Optional.of(loaders.getFirst());
         } else {

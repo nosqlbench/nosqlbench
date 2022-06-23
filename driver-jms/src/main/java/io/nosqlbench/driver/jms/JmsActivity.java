@@ -108,10 +108,10 @@ public class JmsActivity extends SimpleActivity {
         factory = new PulsarConnectionFactory(jmsConnInfo.getJmsConnConfig());
         this.jmsContext = factory.createContext();
 
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
+        bindTimer = ActivityMetrics.timer(activityDef, "bind", this.getHdrDigits());
+        executeTimer = ActivityMetrics.timer(activityDef, "execute", this.getHdrDigits());
         bytesCounter = ActivityMetrics.counter(activityDef, "bytes");
-        messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize");
+        messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize", this.getHdrDigits());
 
         if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
             this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this), false);

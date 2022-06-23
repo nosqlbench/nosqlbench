@@ -17,12 +17,13 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import io.nosqlbench.engine.api.activityimpl.ProgressAndStateMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.metrics.PeriodicRunnable;
 import io.nosqlbench.engine.api.util.Unit;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -57,15 +58,15 @@ public class ActivityProgressIndicator implements Runnable {
         switch (parts.length) {
             case 2:
                 intervalMillis = Unit.msFor(parts[1]).orElseThrow(
-                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] +"'")
+                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
                 );
             case 1:
                 try {
-                 indicatorMode = IndicatorMode.valueOf(parts[0]);
+                    indicatorMode = IndicatorMode.valueOf(parts[0]);
                 } catch (IllegalArgumentException ie) {
                     throw new RuntimeException(
-                            "No such IndicatorMode exists for --progress: choose one of console or logonly." +
-                    " If you need to specify an interval such as 10m, then you must use --progress logonly:10m or --progress console:10m");
+                        "No such IndicatorMode exists for --progress: choose one of console or logonly." +
+                            " If you need to specify an interval such as 10m, then you must use --progress logonly:10m or --progress console:10m");
                 }
                 break;
             default:
@@ -75,11 +76,12 @@ public class ActivityProgressIndicator implements Runnable {
 
     @Override
     public void run() {
-        Collection<ProgressAndStateMeter> progressMeters = sc.getProgressMeters();
-        for (ProgressAndStateMeter meter : progressMeters) {
+        Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
+        for (ProgressMeter meter : progressMeters) {
 
             boolean lastReport = false;
-            if (meter.getProgressRatio() >= 1.0d || meter.getRunState() == RunState.Finished) {
+            if (meter.getRatioComplete() >= 1.0d ||
+                (meter instanceof StateCapable sc && sc.getRunState() == RunState.Finished)) {
                 if (seen.contains(meter.getProgressName())) {
                     continue;
                 } else {
@@ -89,8 +91,7 @@ public class ActivityProgressIndicator implements Runnable {
             }
 
             String progress =
-                meter.getProgressName() + ": " + formatProgress(meter.getProgressRatio()) + "/" + meter.getRunState() +
-                    " (details: " + meter.getProgressSummary() + ")" + (lastReport ? " (last report)" : "");
+                meter.getSummary() + (lastReport ? " (last report)" : "");
 
             switch (indicatorMode) {
                 case console:

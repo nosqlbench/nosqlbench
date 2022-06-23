@@ -446,6 +446,15 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     public <T> T getStaticConfigOr(String name, T defaultValue) {
         return tmap.getStaticConfigOr(name, defaultValue);
     }
+
+    /**
+     * Get the parameter value from a static op template field OR any of the provided optional sources
+     * of op template values, including the activity parameters
+     * @param name The config field name
+     * @param defaultValue The default value, if the field is not defined in the op template nor the activity params
+     * @param <T> The type of the field
+     * @return The config value.
+     */
     public <T> T takeStaticConfigOr(String name, T defaultValue) {
         return tmap.takeStaticConfigOr(name, defaultValue);
     }
@@ -803,4 +812,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return lfa;
     }
 
+    public Map<String, Object> parseStaticCmdMap(String key, String mainField) {
+        return tmap.parseStaticCmdMap(key, mainField);
+    }
 }

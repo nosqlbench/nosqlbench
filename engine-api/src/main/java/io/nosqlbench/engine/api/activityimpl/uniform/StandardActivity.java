@@ -17,15 +17,24 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -36,14 +45,35 @@ import java.util.function.Function;
  * @param <R> A type of runnable which wraps the operations for this type of driver.
  * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
-public class StandardActivity<R extends Op, S> extends SimpleActivity {
+public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider {
+    private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final DriverAdapter<R, S> adapter;
     private final OpSequence<OpDispenser<? extends R>> sequence;
+    private final NBConfigModel yamlmodel;
 
     public StandardActivity(DriverAdapter<R, S> adapter, ActivityDef activityDef) {
         super(activityDef);
         this.adapter = adapter;
+
+        if (adapter instanceof NBConfigurable configurable) {
+            NBConfigModel cmodel = configurable.getConfigModel();
+            Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+            if (yaml_loc.isPresent()) {
+                Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+                StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
+                yamlmodel = workload.getConfigModel();
+            }
+            else {
+                yamlmodel= ConfigModel.of(StandardActivity.class).asReadOnly();
+            }
+            NBConfigModel combinedModel = cmodel.add(yamlmodel);
+            NBConfiguration configuration = combinedModel.apply(activityDef.getParams());
+            configurable.applyConfig(configuration);
+        }
+        else {
+            yamlmodel= ConfigModel.of(StandardActivity.class).asReadOnly();
+        }
 
         try {
             OpMapper<R> opmapper = adapter.getOpMapper();
@@ -79,6 +109,26 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity {
     @Override
     public final Function<Throwable, String> getErrorNameMapper() {
         return adapter.getErrorNameMapper();
+    }
+
+    @Override
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+        super.onActivityDefUpdate(activityDef);
+
+        if (adapter instanceof NBReconfigurable configurable) {
+            NBConfigModel cfgModel = configurable.getReconfigModel();
+            NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
+            NBReconfigurable.applyMatching(cfg,List.of(configurable));
+        }
+    }
+
+    @Override
+    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> cfg) {
+        if (adapter instanceof SyntheticOpTemplateProvider sotp) {
+            return sotp.getSyntheticOpTemplates(stmtsDocList, cfg);
+        } else {
+            return List.of();
+        }
     }
 
 }

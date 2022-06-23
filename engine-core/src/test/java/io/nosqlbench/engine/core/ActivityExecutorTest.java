@@ -43,7 +43,7 @@ public class ActivityExecutorTest {
 
     @Test
     public void testRestart() {
-        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;op=initdelay:initdelay=5000;");
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);

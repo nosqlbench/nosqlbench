@@ -99,10 +99,10 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         opSequence = initOpSequencer();
         setDefaultsFromOpSequence(opSequence);
 
-        bindTimer = ActivityMetrics.timer(activityDef, "bind");
-        executeTimer = ActivityMetrics.timer(activityDef, "execute");
-        resultTimer = ActivityMetrics.timer(activityDef, "result");
-        triesHisto = ActivityMetrics.histogram(activityDef, "tries");
+        bindTimer = ActivityMetrics.timer(activityDef, "bind", this.getHdrDigits());
+        executeTimer = ActivityMetrics.timer(activityDef, "execute", this.getHdrDigits());
+        resultTimer = ActivityMetrics.timer(activityDef, "result", this.getHdrDigits());
+        triesHisto = ActivityMetrics.histogram(activityDef, "tries", this.getHdrDigits());
 
         this.pw = createPrintWriter();
 
@@ -145,7 +145,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
                 getConsoleOut().println(diagnostics);
                 getConsoleOut().flush();
-                System.exit(2);
+                this.getActivityController().stopActivityWithReasonAsync("diagnostics created for stdout");
             } else {
                 logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
                 Set<String> activeBindingNames = new LinkedHashSet<>();

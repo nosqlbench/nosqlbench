@@ -34,11 +34,11 @@ The conceptual view of this would appear as:
 
               +--------+
               |   op   |
-            +------------+ 
+            +------------+
             |   motor    |
-          +-----------------+ 
+          +-----------------+
           |    activity     |
-        +---------------------+ 
+        +---------------------+
         |     scripting       |
       +-------------------------+   +---------------+
       |       scenario          |   |  application  |
@@ -71,26 +71,53 @@ happens within an activity, and so on.
 - op -- There are no op-level events at this time
 - application -- There are no application-level events at this time
 
-## tags
+## Annotation Contents
 
-These standard tags should be added to every annotation emitted by
+### labels
+
+Labels identify the event for the purposes of filtering in views
+and analysis. These standard labels should be added to every annotation emitted by
 NoSQLBench:
 
-**appname**: "nosqlbench"
-**layer**: one of the core layers as above
-**event**: The name of the event within the layer as shown above
+appname
+: "nosqlbench"
 
-type
-: <specific event name>
+session
+: the NoSQLBench session ID
+
+layer
+: one of the core layers as above
+
+event
+: The name of the event within the layer as shown above
+
 layer
 : (user, cli, scenario, activity, thread, op)
+
 span
 : (instant, interval)
+
 status
 : (ok,error)
 
-# Annotations Stores
+### details
 
-## Grafana Annotations
+Details is a map of properties which are canonical for the type of
+annotation being recorded, but which are not used for naming or lookup.
+At least one detail property should be added for each annotation. You could
+say that the labels identify the canonical type of annotation, while the details
+provide contextual information that makes the event described by the annotation
+unique within that type.
 
-## Logged Annotations
+All labels are considered details, and are packaged and represented for display
+anywhere details would be.
+
+## Annotation Implementations
+
+NoSQLBench comes with two built-in annotation implementations,
+which are configured automatically. By default, the logging
+annotator is enabled.
+
+If --docker-metrics is used, then the grafana annotator is enabled.
+In this case, if needed, default admin credentials will be used
+to create an API key, which will be cached on the local filesystem.

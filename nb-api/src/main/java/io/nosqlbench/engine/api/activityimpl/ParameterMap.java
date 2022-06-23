@@ -16,13 +16,14 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.nb.api.config.params.ParamsParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.util.Unit;
-
+import io.nosqlbench.nb.api.config.params.ParamsParser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import javax.script.Bindings;
 import java.util.*;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
  */
 public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings, ProxyObject {
     private final static Logger logger = LogManager.getLogger("PARAMS");
+    private final static Gson gson = new GsonBuilder().create();
 
 
 //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
@@ -172,6 +174,12 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return super.get(key);
     }
 
+    public void setSilently(String paramName, Object newValue) {
+        super.put(paramName, String.valueOf(newValue));
+        logger.trace("setting param silently " + paramName + "=" + newValue);
+    }
+
+
     public void set(String paramName, Object newValue) {
         super.put(paramName, String.valueOf(newValue));
         logger.info("setting param " + paramName + "=" + newValue);
@@ -194,7 +202,15 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     @Override
     public void putAll(Map<? extends String, ? extends Object> toMerge) {
         for (Entry<? extends String, ? extends Object> entry : toMerge.entrySet()) {
-            super.put(entry.getKey(),String.valueOf(entry.getValue()));
+
+            Object raw = entry.getValue();
+            String value = null;
+            if (raw instanceof Map || raw instanceof Set || raw instanceof List) {
+                value = gson.toJson(raw);
+            } else {
+                value = raw.toString();
+            }
+            super.put(entry.getKey(), value);
         }
         markMutation();
     }

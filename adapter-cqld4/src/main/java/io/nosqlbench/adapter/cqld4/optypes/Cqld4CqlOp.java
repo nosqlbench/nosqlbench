@@ -43,7 +43,6 @@ import java.util.Map;
 // TODO: add/document max tries exhausted exception
 // TODO: add/document UnexpectedPagingException
 // TODO: add/document chnge unapplied exception
-// TODO: add instrumented metrics
 // TODO: add total rows metrics
 // TODO: add rows histogram resultSetSizeHisto
 

@@ -67,6 +67,10 @@ public interface NBConfigModel {
      */
     NBConfiguration extractConfig(NBConfiguration cfg);
 
+    NBConfiguration matchConfig(NBConfiguration cfg);
+
+    NBConfiguration matchConfig(Map<String, ?> sharedConfig);
+
     NBConfigModel add(NBConfigModel otherModel);
 
 }

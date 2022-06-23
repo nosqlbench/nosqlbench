@@ -16,7 +16,9 @@
 package io.nosqlbench.engine.api.activityimpl.input;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
-import io.nosqlbench.engine.api.activityapi.core.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -25,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import java.security.InvalidParameterException;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -147,11 +150,11 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     }
 
     @Override
-    public AtomicInputProgress getProgressMeter() {
+    public ProgressMeter getProgressMeter() {
         return new AtomicInputProgress(activityDef.getAlias(), this);
     }
 
-    private static class AtomicInputProgress implements ProgressMeter {
+    private static class AtomicInputProgress implements ProgressMeter, CycleMeter {
         private final AtomicInput input;
         private final String name;
 
@@ -166,22 +169,33 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         }
 
         @Override
-        public long getStartedAtMillis() {
-            return input.getStarteAtMillis();
+        public Instant getStartTime() {
+            return Instant.ofEpochMilli(input.getStarteAtMillis());
         }
 
         @Override
-        public long getProgressMin() {
+        public double getMaxValue() {
+            return ((double)input.recycleMax.get()+1.0d)*((double)input.max.get()-(double)input.min.get());
+        }
+
+        @Override
+        public double getCurrentValue() {
+            return ((double)input.recycleValue.get())*((double)input.max.get()-(double)input.min.get())
+                +(double)input.cycleValue.get()-(double)input.min.get();
+        }
+
+        @Override
+        public long getMinInputCycle() {
             return input.min.get();
         }
 
         @Override
-        public long getProgressCurrent() {
+        public long getCurrentInputCycle() {
             return input.cycleValue.get();
         }
 
         @Override
-        public long getProgressMax() {
+        public long getMaxInputCycle() {
             return input.max.get();
         }
 

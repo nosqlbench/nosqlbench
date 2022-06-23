@@ -1,20 +1,17 @@
 <!--
-  ~ /*
-  ~  *    Copyright (c) 2022 nosqlbench
-  ~  *
-  ~  *    Licensed under the Apache License, Version 2.0 (the "License");
-  ~  *    you may not use this file except in compliance with the License.
-  ~  *    You may obtain a copy of the License at
-  ~  *
-  ~  *        http://www.apache.org/licenses/LICENSE-2.0
-  ~  *
-  ~  *    Unless required by applicable law or agreed to in writing, software
-  ~  *    distributed under the License is distributed on an "AS IS" BASIS,
-  ~  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  *    See the License for the specific language governing permissions and
-  ~  *    limitations under the License.
-  ~  */
+  ~ Copyright (c) 2022 nosqlbench
   ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -40,10 +37,12 @@
 
         <!-- CORE MODULES -->
         <module>mvn-defaults</module>
-        <module>nb</module>
+        <module>nb5</module>
         <module>nbr</module>
+        <module>nbr-examples</module>
         <module>nb-api</module>
         <module>nb-annotations</module>
+        <module>nb-spectest</module>
         <module>engine-api</module>
         <module>engine-core</module>
         <module>engine-extensions</module>
@@ -52,23 +51,13 @@
         <module>engine-cli</module>
         <module>engine-rest</module>
         <module>engine-clients</module>
-        <module>drivers-api</module>
         <module>adapters-api</module>
 
         <!-- driver modules -->
         <module>adapter-cqld4</module>
         <module>adapter-dynamodb</module>
-        <module>driver-diag</module>
-        <module>driver-stdout</module>
-        <module>driver-tcp</module>
-        <module>driver-http</module>
-        <module>driver-kafka</module>
-        <module>driver-mongodb</module>
-        <module>driver-jmx</module>
-        <module>driver-jdbc</module>
-        <module>driver-cockroachdb</module>
-        <module>driver-pulsar</module>
-        <module>driver-jms</module>
+        <module>adapter-diag</module>
+        <module>adapter-stdout</module>
 
 
         <!-- VIRTDATA MODULES -->
@@ -89,9 +78,27 @@
 
     <profiles>
         <profile>
+            <id>with-nb</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>nb</module>
+                <module>driver-tcp</module>
+                <module>driver-http</module>
+                <module>driver-kafka</module>
+                <module>driver-jmx</module>
+                <module>driver-jdbc</module>
+                <module>driver-cockroachdb</module>
+                <module>driver-pulsar</module>
+                <module>driver-jms</module>
+
+            </modules>
+        </profile>
+        <profile>
             <id>with-mongodb</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>driver-mongodb</module>
