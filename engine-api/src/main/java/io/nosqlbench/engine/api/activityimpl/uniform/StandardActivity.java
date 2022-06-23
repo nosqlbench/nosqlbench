@@ -18,11 +18,9 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.activityimpl.*;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -43,7 +41,7 @@ import java.util.function.Function;
  * @param <R> A type of runnable which wraps the operations for this type of driver.
  * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
-public class StandardActivity<R extends Op, S> extends SimpleActivity {
+public class StandardActivity<R extends Op, S> extends SimpleActivity implements DefaultOpTemplateSupplier {
     private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final DriverAdapter<R, S> adapter;
@@ -120,5 +118,14 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity {
         }
 //
 //        ActivityDefObserver.apply(activityDef, adapter, sequence);
+    }
+
+    @Override
+    public List<OpTemplate> getDefaultTemplates(StmtsDocList optionalDocs) {
+        if (adapter instanceof DefaultOpTemplateSupplier s) {
+            return s.getDefaultTemplates(optionalDocs);
+        } else {
+            return List.of();
+        }
     }
 }

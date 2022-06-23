@@ -20,11 +20,9 @@ import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.nb.annotations.Service;
 
 import java.util.Optional;
 
-@Service(value= ActivityType.class, selector="stdout-nb4")
 public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
     @Override

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.stdout;
+package io.nosqlbench.adapter.stdout;
 
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -32,9 +35,10 @@ public class StdoutSpace {
         this.writer = createPrintWriter(filename);
     }
 
-    public void write(String text) {
+    public void writeflush(String text) {
         try {
             writer.write(text);
+            writer.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +74,8 @@ public class StdoutSpace {
                 Param.optional("format")
                     .setRegex("csv|readout|json|inlinejson|assignments|diag")
                     .setDescription("Which format to use.\n" +
-                        "If provided, the format will override any statement formats provided by the YAML")
+                        "If provided, the format will override any statement formats provided by the YAML. " +
+                        "If 'diag' is used, a diagnostic readout will be provided for binding constructions.")
             )
             .add(
                 Param.defaultTo("bindings","doc")

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.stdout;
+package io.nosqlbench.adapter.stdout;
 
 import java.util.ArrayList;
 import java.util.List;

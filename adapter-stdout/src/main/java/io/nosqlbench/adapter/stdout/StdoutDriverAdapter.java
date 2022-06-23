@@ -16,27 +16,44 @@
 
 package io.nosqlbench.adapter.stdout;
 
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.engine.api.templating.OpTemplateSupplier;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-@Service(value= DriverAdapter.class, selector = "stdout")
-public class StdoutDriverAdapter extends BaseDriverAdapter<Op, Map<String,Object>> {
+@Service(value= DriverAdapter.class,selector = "stdout")
+public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements OpTemplateSupplier, io.nosqlbench.engine.api.activityimpl.DefaultOpTemplateSupplier {
 
     @Override
-    public OpMapper<Op> getOpMapper() {
-        return new StdoutOpMapper();
+    public OpMapper<StdoutOp> getOpMapper() {
+        DriverSpaceCache<? extends StdoutSpace> ctxCache = getSpaceCache();
+        return new StdoutOpMapper(ctxCache);
     }
 
     @Override
-    public Function<String, ? extends Map<String, Object>> getSpaceInitializer(NBConfiguration cfg) {
-        return name -> new ConcurrentHashMap<>(cfg.getMap());
+    public Function<String, ? extends StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new StdoutSpace(cfg);
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass())
+            .add(super.getConfigModel())
+            .add(StdoutSpace.getConfigModel());
+    }
+
+    @Override
+    public Optional<List<OpTemplate>> loadOpTemplates(NBConfiguration cfg) {
+        throw new RuntimeException("implement me");
     }
 }
