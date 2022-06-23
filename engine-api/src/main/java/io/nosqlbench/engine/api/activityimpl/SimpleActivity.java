@@ -513,12 +513,13 @@ public class SimpleActivity implements Activity, ProgressCapable {
             if (beforeFiltering.size()>0) {
                 throw new BasicError("There were no active statements with tag filter '"
                     + tagfilter + "', since all " + beforeFiltering.size()+ " were filtered out.");
-            } else {
-                if (this instanceof DefaultOpTemplateSupplier s) {
-                    stmts = s.getDefaultTemplates(stmtsDocList);
-                    Objects.requireNonNull(stmts);
-                }
             }
+//            else {
+//                if (this instanceof DefaultOpTemplateSupplier s) {
+//                    stmts = s.getDefaultTemplates(stmtsDocList);
+//                    Objects.requireNonNull(stmts);
+//                }
+//            }
             if (stmts.size()==0) {
                 throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
             }
