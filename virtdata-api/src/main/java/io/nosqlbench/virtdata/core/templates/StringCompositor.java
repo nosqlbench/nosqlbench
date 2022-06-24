@@ -40,7 +40,7 @@ public class StringCompositor implements LongFunction<String> {
 
     private final Function<Object, String> stringfunc;
 
-    public StringCompositor(ParsedTemplate template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
+    public StringCompositor(ParsedStringTemplate template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
         Map<String,Integer> specs = new HashMap<>();
         List<BindPoint> bindpoints = template.getBindPoints();
         for (BindPoint bindPoint : bindpoints) {
@@ -69,7 +69,7 @@ public class StringCompositor implements LongFunction<String> {
         bufsize = minsize*2;
     }
 
-    public StringCompositor(ParsedTemplate template, Map<String,Object> fconfig) {
+    public StringCompositor(ParsedStringTemplate template, Map<String,Object> fconfig) {
         this(template,fconfig,Object::toString);
     }
 

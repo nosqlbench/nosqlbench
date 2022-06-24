@@ -37,15 +37,15 @@ public class StringBindings implements Binder<String> {
     }
 
     public StringBindings(String template, Map<String,String> bindings, Map<String,Object> fconfig) {
-        ParsedTemplate parsed = new ParsedTemplate(template,bindings);
+        ParsedStringTemplate parsed = new ParsedStringTemplate(template,bindings);
         this.compositor = new StringCompositor(parsed, fconfig);
     }
 
-    public StringBindings(ParsedTemplate parsedTemplate) {
-        this(parsedTemplate, Map.of());
+    public StringBindings(ParsedStringTemplate parsedStringTemplate) {
+        this(parsedStringTemplate, Map.of());
     }
 
-    public StringBindings(ParsedTemplate pt, Map<String,Object> fconfig) {
+    public StringBindings(ParsedStringTemplate pt, Map<String,Object> fconfig) {
         this.compositor = new StringCompositor(pt,fconfig);
     }
 

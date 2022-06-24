@@ -23,7 +23,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParsedTemplateTest {
+public class ParsedStringTemplateTest {
 
     private final Map<String, String> bindings = Map.of(
             "bindname1", "bindspec1",
@@ -32,7 +32,7 @@ public class ParsedTemplateTest {
     @Test
     public void testShouldMatchRawLiteral() {
         String rawNothing = "This has no anchors";
-        ParsedTemplate pt = new ParsedTemplate(rawNothing, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(rawNothing, bindings);
         assertThat(pt.getSpans()).containsExactly("This has no anchors");
         assertThat(pt.getBindPoints()).isEmpty();
         assertThat(pt.getMissing()).isEmpty();
@@ -41,7 +41,7 @@ public class ParsedTemplateTest {
     @Test
     public void testShouldIgnoreExtraneousAnchors() {
         String oneExtraneous = "An {this is an extraneous form} invalid anchor.";
-        ParsedTemplate pt = new ParsedTemplate(oneExtraneous, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(oneExtraneous, bindings);
         assertThat(pt.getSpans()).containsExactly("An {this is an extraneous form} invalid anchor.");
         assertThat(pt.getBindPoints()).isEmpty();
         assertThat(pt.getMissing()).isEmpty();
@@ -50,7 +50,7 @@ public class ParsedTemplateTest {
     @Test
     public void testShouldAllowArbitraryNonGreedyInExtendedBindPoint() {
         String oneExtendedBindPoint = "An {{this is an extended form}} {{and another}} invalid anchor.";
-        ParsedTemplate pt = new ParsedTemplate(oneExtendedBindPoint, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(oneExtendedBindPoint, bindings);
         assertThat(pt.getSpans()).containsExactly("An ","this is an extended form"," ","and another"," invalid anchor.");
         assertThat(pt.getAnchors()).containsExactly("this is an extended form","and another");
     }
@@ -58,7 +58,7 @@ public class ParsedTemplateTest {
     @Test
     public void testShouldMatchLiteralVariableOnly() {
         String literalVariableOnly = "literal {bindname1}";
-        ParsedTemplate pt = new ParsedTemplate(literalVariableOnly, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(literalVariableOnly, bindings);
         assertThat(pt.getSpans()).containsExactly("literal ", "bindname1", "");
         assertThat(pt.getAnchors()).containsOnly("bindname1");
         assertThat(pt.getMissing()).isEmpty();
@@ -67,7 +67,7 @@ public class ParsedTemplateTest {
     @Test
     public void testShouldMatchVariableLiteralOnly() {
         String variableLiteralOnly = "{bindname2} literal";
-        ParsedTemplate pt = new ParsedTemplate(variableLiteralOnly, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(variableLiteralOnly, bindings);
         assertThat(pt.getSpans()).containsExactly("", "bindname2", " literal");
         assertThat(pt.getAnchors()).containsOnly("bindname2");
         assertThat(pt.getMissing()).isEmpty();
@@ -76,7 +76,7 @@ public class ParsedTemplateTest {
     @Test
     public void testPositionalExpansionShouldBeValid() {
         String multi = "A {bindname1} of {bindname2} sort.";
-        ParsedTemplate pt = new ParsedTemplate(multi, bindings);
+        ParsedStringTemplate pt = new ParsedStringTemplate(multi, bindings);
         assertThat(pt.getSpans()).containsExactly("A ", "bindname1", " of ", "bindname2", " sort.");
         assertThat(pt.getAnchors()).containsOnly("bindname1", "bindname2");
         assertThat(pt.getMissing()).isEmpty();
@@ -91,7 +91,7 @@ public class ParsedTemplateTest {
 
     @Test
     public void shouldMatchBasicCapturePoint() {
-        ParsedTemplate pt = new ParsedTemplate(
+        ParsedStringTemplate pt = new ParsedStringTemplate(
             "select [u],[v as v1] from users where userid={userid}", Map.of("userid", "NumberNameToString()")
         );
         assertThat(pt.getAnchors()).containsExactly("userid");

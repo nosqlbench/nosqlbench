@@ -74,7 +74,7 @@ import java.util.stream.StreamSupport;
  * <LI>provide a text template for re-assembly with injected data</LI>
  * </UL>
  *
- * Once the parsed template is constructed, the method {@link ParsedTemplate#orError()}
+ * Once the parsed template is constructed, the method {@link ParsedStringTemplate#orError()}
  * should <em>always</em> called before it is used.
  *
  * <H2>Validity Checks</H2>
@@ -106,16 +106,16 @@ import java.util.stream.StreamSupport;
  * This is a list of binding names which were provided by the user, but which were not used in the raw template by name.
  * </p>
  */
-public class ParsedTemplate {
+public class ParsedStringTemplate {
 
-    private final static Logger logger = LogManager.getLogger(ParsedTemplate.class);
+    private final static Logger logger = LogManager.getLogger(ParsedStringTemplate.class);
 
     private final String rawtemplate;
     private final List<CapturePoint> captures;
     private final List<BindPoint> bindpoints;
 
-    public static ParsedTemplate of(String rawtemplate, Map<String, String> bindings) {
-        return new ParsedTemplate(rawtemplate, bindings);
+    public static ParsedStringTemplate of(String rawtemplate, Map<String, String> bindings) {
+        return new ParsedStringTemplate(rawtemplate, bindings);
     }
 
     /**
@@ -136,7 +136,7 @@ public class ParsedTemplate {
      * @param rawtemplate       A string template which contains optionally embedded named anchors
      * @param availableBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
      */
-    public ParsedTemplate(String rawtemplate, Map<String, String> availableBindings) {
+    public ParsedStringTemplate(String rawtemplate, Map<String, String> availableBindings) {
         this.bindings.putAll(availableBindings);
         this.rawtemplate = rawtemplate;
 
@@ -160,7 +160,7 @@ public class ParsedTemplate {
         }
     }
 
-    public ParsedTemplate orError() {
+    public ParsedStringTemplate orError() {
         if (hasError()) {
             throw new RuntimeException("Unable to parse statement: " + this);
         }
