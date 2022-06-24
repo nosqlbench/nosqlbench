@@ -20,7 +20,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.function.Function;
 public class ParsedStmtOp {
 
     private final OpTemplate optpl;
-    private final ParsedTemplate parsed;
+    private final ParsedStringTemplate parsed;
 
     /**
      * Construct a new ParsedStatement from the provided stmtDef and anchor token.
@@ -40,7 +40,7 @@ public class ParsedStmtOp {
     public ParsedStmtOp(OpTemplate optpl) {
         this.optpl = optpl;
         String transformed = getStmt();
-        parsed = new ParsedTemplate(transformed, optpl.getBindings());
+        parsed = new ParsedStringTemplate(transformed, optpl.getBindings());
     }
 
     public ParsedStmtOp orError() {

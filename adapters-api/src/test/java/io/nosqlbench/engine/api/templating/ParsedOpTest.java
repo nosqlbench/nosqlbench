@@ -16,8 +16,12 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
 import org.junit.jupiter.api.Test;
 
@@ -50,8 +54,42 @@ public class ParsedOpTest {
     );
 
     @Test
+    public void testFieldDelegationFromDynamicToStaticToConfig() {
+        NBConfiguration cfg = ConfigModel.of(ParsedOpTest.class)
+            .add(Param.defaultTo("puppy", "dog"))
+            .add(Param.required("surname", String.class))
+            .asReadOnly().apply(Map.of("surname", "yes"));
+
+        String opt = """
+            ops:
+               op1:
+                 d1: "{{NumberNameToString()}}"
+                 s1: "static-one"
+                 params:
+                  ps1: "param-one"
+            """;
+        StmtsDocList stmtsDocs = StatementsLoader.loadString(opt, cfg.getMap());
+        assertThat(stmtsDocs.getStmts().size()).isEqualTo(1);
+        OpTemplate opTemplate = stmtsDocs.getStmts().get(0);
+        ParsedOp parsedOp = new ParsedOp(opTemplate, cfg);
+
+        assertThat(parsedOp.getAsFunctionOr("d1","invalid").apply(1L)).isEqualTo("one");
+        assertThat(parsedOp.getAsFunctionOr("s1","invalid").apply(1L)).isEqualTo("static-one");
+        assertThat(parsedOp.getAsFunctionOr("ps1","invalid").apply(1L)).isEqualTo("param-one");
+        assertThat(parsedOp.getAsFunctionOr("puppy","invalid").apply(1L)).isEqualTo("dog");
+        assertThat(parsedOp.getAsFunctionOr("surname","invalid").apply(1L)).isEqualTo("yes");
+
+    }
+
+    @Test
+    public void testStaticParamsPromoteToDynamicParams() {
+
+    }
+
+
+    @Test
     public void testSubMapTemplates() {
-        ParsedOp pop = new ParsedOp(
+        ParsedOp parsedOp = new ParsedOp(
             new OpData().applyFields(Map.of(
                 "op", Map.of(
                     "field1-literal", "literalvalue1",
@@ -72,12 +110,16 @@ public class ParsedOpTest {
                 .asReadOnly()
                 .apply(Map.of())
         );
-        LongFunction<? extends String> f1 = pop.getAsRequiredFunction("field1-literal");
-        LongFunction<? extends String> f2 = pop.getAsRequiredFunction("field2-object");
-        LongFunction<? extends String> f3 = pop.getAsRequiredFunction("field3-template");
-        LongFunction<? extends Map> f4 = pop.getAsRequiredFunction("field4-map-template",Map.class);
-        LongFunction<? extends Map> f5 = pop.getAsRequiredFunction("field5-map-literal",Map.class);
-        System.out.println("woo");
+        LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
+        LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
+        LongFunction<? extends String> f3 = parsedOp.getAsRequiredFunction("field3-template");
+        LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template",Map.class);
+        LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal",Map.class);
+        assertThat(f1.apply(1)).isNotNull();
+        assertThat(f2.apply(2)).isNotNull();
+        assertThat(f3.apply(3)).isNotNull();
+        assertThat(f4.apply(4)).isNotNull();
+        assertThat(f5.apply(5)).isNotNull();
 
     }
 

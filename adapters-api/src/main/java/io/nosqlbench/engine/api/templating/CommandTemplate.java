@@ -20,7 +20,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import org.apache.logging.log4j.Logger;
@@ -160,7 +160,7 @@ public class CommandTemplate {
         cmd.putAll(params);
 
         cmd.forEach((param, value) -> {
-            ParsedTemplate paramTemplate = new ParsedTemplate(value, bindings);
+            ParsedStringTemplate paramTemplate = new ParsedStringTemplate(value, bindings);
             if (paramTemplate.getBindPoints().size() > 0) {
                 BindingsTemplate paramBindings = new BindingsTemplate(paramTemplate.getBindPoints());
                 StringBindings paramStringBindings = new StringBindingsTemplate(value, paramBindings).resolve();

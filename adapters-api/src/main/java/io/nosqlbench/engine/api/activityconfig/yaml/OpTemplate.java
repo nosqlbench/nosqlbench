@@ -23,7 +23,7 @@ import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.nb.api.config.standard.NBTypeConverter;
 import io.nosqlbench.nb.api.errors.OpConfigError;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -271,9 +271,9 @@ public abstract class OpTemplate implements Tagged {
      * Parse the statement for anchors and return a richer view of the StmtDef which
      * is simpler to use for most statement configuration needs.
      *
-     * @return an optional {@link ParsedTemplate}
+     * @return an optional {@link ParsedStringTemplate}
      */
-    public Optional<ParsedTemplate> getParsed(Function<String,String>... rewriters) {
+    public Optional<ParsedStringTemplate> getParsed(Function<String,String>... rewriters) {
         Optional<String> os = getStmt();
         return os.map(s -> {
             String result = s;
@@ -281,11 +281,11 @@ public abstract class OpTemplate implements Tagged {
                 result = rewriter.apply(result);
             }
             return result;
-        }).map(s -> new ParsedTemplate(s,getBindings()));
+        }).map(s -> new ParsedStringTemplate(s,getBindings()));
     }
 
-    public Optional<ParsedTemplate> getParsed() {
-        return getStmt().map(s -> new ParsedTemplate(s, getBindings()));
+    public Optional<ParsedStringTemplate> getParsed() {
+        return getStmt().map(s -> new ParsedStringTemplate(s, getBindings()));
     }
 
     public abstract Optional<Map<String, Object>> getOp();
