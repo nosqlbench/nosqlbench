@@ -85,7 +85,7 @@ public class DockerHelper {
                 logger.error(String.format("Image %s not found, unable to automatically pull image." +
                                 " Check `docker images`",
                         IMG));
-                System.exit(1);
+                throw new RuntimeException("");
             }
         }
 

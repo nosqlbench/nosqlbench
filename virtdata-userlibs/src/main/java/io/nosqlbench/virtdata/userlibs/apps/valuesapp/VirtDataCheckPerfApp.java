@@ -18,10 +18,8 @@ package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
 
 import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-
-import java.util.Arrays;
+import org.apache.logging.log4j.Logger;
 
 public class VirtDataCheckPerfApp {
 
@@ -40,9 +38,7 @@ public class VirtDataCheckPerfApp {
             System.out.println("  end: The end cycle for the test, exclusive.");
             System.out.println(" OR");
             System.out.println(" ARGS: diagnose 'specifier'");
-            System.exit(2);
         }
-
     }
 
     private static void checkperf(String[] args) {
@@ -60,10 +56,8 @@ public class VirtDataCheckPerfApp {
         try {
             runData = checker.call();
             System.out.println(runData.toString());
-            System.exit(0);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(2);
+            throw new RuntimeException("Error while checking performance: " + e.toString(), e);
         }
 
     }

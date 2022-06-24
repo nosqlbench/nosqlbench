@@ -39,7 +39,7 @@ public class VirtDataMainApp {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DIAGNOSE +")");
-            System.exit(0);
+            return;
         }
 
         String appSelection = args[0];

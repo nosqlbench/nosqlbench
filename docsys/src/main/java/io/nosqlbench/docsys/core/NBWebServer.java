@@ -347,9 +347,7 @@ public class NBWebServer implements Runnable {
 
             server.join();
         } catch (Exception e) {
-            logger.error("error while starting doc server", e);
-            e.printStackTrace(System.out);
-            System.exit(2);
+            throw new RuntimeException("error while starting doc server: "+e.toString(),e);
         }
 
     }

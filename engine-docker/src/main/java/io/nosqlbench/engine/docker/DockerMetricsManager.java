@@ -211,8 +211,7 @@ public class DockerMetricsManager {
         String datasource = NBIO.readCharBuffer("docker/prometheus/prometheus.yml").toString();
 
         if (ip == null) {
-            logger.error("IP for graphite container not found");
-            System.exit(1);
+            throw new DockerInitError("IP for graphite container not found");
         }
 
         datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
@@ -267,15 +266,13 @@ public class DockerMetricsManager {
             return;
         }
         if (!dir.mkdir()) {
-            if (dir.canWrite()) {
-                System.out.println("no write access");
+            if (!dir.canWrite()) {
+                throw new DockerInitError("no write access to " + dir.getPath());
             }
-            if (dir.canRead()) {
-                System.out.println("no read access");
+            if (!dir.canRead()) {
+                throw new DockerInitError("no read access to " + dir.getPath());
             }
-            System.out.println("Could not create directory " + dir.getPath());
-            System.out.println("fix directory permissions to run --docker-metrics");
-            System.exit(1);
+            throw new DockerInitError("Could not create directory " + dir.getPath() + ". Fix directory permissions to run --docker-metrics");
         }
     }
 

@@ -79,7 +79,7 @@ public class VirtDataGenDocsApp implements Runnable {
                     "[basefile <name>] [basedir <dir>] [categories combined|split] [format json|markdown] " +
                     "[blurbsdirs <dir>[:...]]\n\n"
             );
-            System.exit(0);
+            return;
         }
         while (largs.peekFirst() != null) {
             String argtype = largs.removeFirst();
@@ -114,12 +114,16 @@ public class VirtDataGenDocsApp implements Runnable {
             }
         }
 
-        FDoc docsinfo = loadAllDocs();
+        Optional<FDoc> docsinfo = loadAllDocs();
+
+        if (!docsinfo.isPresent()) {
+            return;
+        }
 
         try {
             String extension = (this.format.equals(FORMAT_MARKDOWN)) ? ".md" : ".json";
 
-            for (FDocCat docsForCatName : docsinfo) {
+            for (FDocCat docsForCatName : docsinfo.get()) {
                 String categoryName = docsForCatName.getCategoryName();
                 categoryName = categoryName.isEmpty() ? "EMPTY" : categoryName;
 
@@ -180,7 +184,7 @@ public class VirtDataGenDocsApp implements Runnable {
         return writers.get(outputname);
     }
 
-    private FDoc loadAllDocs() {
+    private Optional<FDoc> loadAllDocs() {
         List<String> errors = new ArrayList<>();
         FDoc docsinfo = new FDoc();
         List<DocFuncData> allDocs = VirtDataDocs.getAllDocs();
@@ -215,9 +219,10 @@ public class VirtDataGenDocsApp implements Runnable {
         }
         if (errors.size()>0) {
             errors.forEach(System.out::println);
-            System.exit(2);
+            return Optional.empty();
+        } else {
+            return Optional.of(docsinfo);
         }
-        return docsinfo;
     }
 
 }
