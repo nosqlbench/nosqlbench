@@ -24,7 +24,7 @@ import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,12 +35,12 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
 
     private final RSProcessors processors;
     private final LongFunction<Statement> stmtFunc;
-    private final ParsedTemplate stmtTpl;
+    private final ParsedStringTemplate stmtTpl;
     private final LongFunction<Object[]> fieldsF;
     private PreparedStatement preparedStmt;
     private CqlSession boundSession;
 
-    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplate stmtTpl, RSProcessors processors) {
+    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedStringTemplate stmtTpl, RSProcessors processors) {
         super(sessionFunc, op);
         if (op.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not supported." +

@@ -30,7 +30,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -57,7 +57,7 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
     public OpDispenser<? extends Op> apply(ParsedOp cmd) {
         GraphTraversalSource g = DseGraph.g;
 
-        ParsedTemplate fluent = cmd.getAsTemplate(target.field).orElseThrow();
+        ParsedStringTemplate fluent = cmd.getAsTemplate(target.field).orElseThrow();
         String scriptBodyWithRawVarRefs = fluent.getPositionalStatement();
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
