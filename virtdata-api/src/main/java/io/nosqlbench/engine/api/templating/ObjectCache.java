@@ -22,7 +22,8 @@ import java.util.function.Function;
 /**
  * An object cache to memoize returned objects into a concurrent hash map by name.
  * This is meant to be used when you want to lazily initialize an instance of something
- * by name that is likely to be re-used over the lifetime of an owning object.
+ * by name that is likely to be re-used over the lifetime of an owning object,
+ * and for which the value cardinality has a knowable and reasonable maximum.
  *
  * @param <T> The type of object.
  */

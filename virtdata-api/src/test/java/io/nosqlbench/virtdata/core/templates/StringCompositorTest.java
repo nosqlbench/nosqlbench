@@ -26,13 +26,13 @@ public class StringCompositorTest {
 
     @Test
     public void testShouldMatchSpanOnly() {
-        ParsedTemplate pt = new ParsedTemplate("A\\{ {one}two", Map.of());
+        ParsedStringTemplate pt = new ParsedStringTemplate("A\\{ {one}two", Map.of());
         assertThat(pt.getSpans()).containsExactly("A\\{ ", "one", "two");
     }
 
     @Test
     public void testShouldNotMatchEscaped() {
-        ParsedTemplate pt = new ParsedTemplate("A\\{{B}C",Map.of());
+        ParsedStringTemplate pt = new ParsedStringTemplate("A\\{{B}C",Map.of());
         assertThat(pt.getSpans()).containsExactly("A\\{","B","C");
     }
 

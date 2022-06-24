@@ -71,9 +71,12 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
 
         OpDispenser<? extends R> dispenser;
         Op op = null;
+
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
             op = dispenser.apply(cycle);
+        } catch (Exception e) {
+            throw new RuntimeException("while binding request in cycle " + cycle + ": " + e.getMessage(), e);
         }
 
         int code = 0;

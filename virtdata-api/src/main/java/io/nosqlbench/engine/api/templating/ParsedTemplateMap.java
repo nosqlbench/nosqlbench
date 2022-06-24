@@ -30,7 +30,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +41,9 @@ import java.util.function.LongFunction;
 
 /**
  * A parsed map template, which allows construction of extracted or projected functions related
- * to dynamic value templates.
+ * to dynamic value templates. This is the backing implementation for ParsedOp which is map-based
+ * at the root level, but which can have recursive structure and thus needed an inner value type.
+ * This implementation supports parsing/restructuring around string, map, and list templates.
  *
  * The provided map is interpreted as a map of string to object templates using these rules:
  * <OL>
@@ -50,6 +52,8 @@ import java.util.function.LongFunction;
  * <LI>If the value is a String and contains a binding point with any leading or trailing text, it is interpreted as a String template binding</LI>
  * <LI>If the value is a map, list, or set, then each element is interpreted as above</LI>
  * </OL>
+ *
+ * TODO: Proactively check casting on functional methods, fallback to {@link NBTypeConverter} only if needed and can
  */
 public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFieldReader, DynamicFieldReader {
 
@@ -98,7 +102,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         this.bindings = bindings;
         map.forEach((k, v) -> {
             if (v instanceof CharSequence) {
-                ParsedTemplate pt = ParsedTemplate.of(((CharSequence) v).toString(), bindings);
+                ParsedStringTemplate pt = ParsedStringTemplate.of(((CharSequence) v).toString(), bindings);
                 this.captures.add(pt.getCaptures());
                 switch (pt.getType()) {
                     case literal:
@@ -167,6 +171,15 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return (dynamics.size() == 0);
     }
 
+    public boolean isConfig(String fieldname) {
+        for (Map<String, Object> cfgsource : this.cfgsources) {
+            if (cfgsource.containsKey(fieldname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Map<String, Object> getStaticPrototype() {
         return statics;
     }
@@ -175,6 +188,27 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return dynamics;
     }
 
+    public Map<String, Object> getConfigPrototype() {
+        Map<String,Object> cfgs = new LinkedHashMap<>();
+        for (Map<String, Object> cfgsource : cfgsources) {
+            for (String key : cfgsource.keySet()) {
+                if (!cfgs.containsKey(key)) {
+                    cfgs.put(key,cfgsource.get(key));
+                } else {
+                    logger.warn("config sources contain overlapping keys for '" + key + "', precedence is undefined");
+                }
+            }
+        }
+        return cfgs;
+    }
+
+    /**
+     * create a map of op field names and values, containing all
+     * statically and dynamically defined fields, but not including
+     * auxilliary config like params or activity params.
+     * @param value The input value to the binding functions
+     * @return A {@link Map} of {@link String} to {@link Object}
+     */
     @Override
     public Map<String, Object> apply(long value) {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>(protomap);
@@ -182,32 +216,44 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return map;
     }
 
+    public Map<String, Object> applyFull(long value) {
+        Map<String, Object> newmap = apply(value);
+        for (int i = cfgsources.size()-1; i>0 ; i--) {
+            newmap.putAll(cfgsources.get(i));
+        }
+        return newmap;
+    }
+
+    /**
+     * @return true if the specified field is found in the dynamic op fields
+     */
     @Override
     public boolean isDynamic(String field) {
         return dynamics.containsKey(field);
     }
 
-
     /**
-     * @param field The field name to look for in the static field map.
      * @return true if and only if the named field is present in the static field map.
      */
     public boolean isStatic(String field) {
         return statics.containsKey(field);
     }
 
+    /**
+     * @return true if and only if the named field is present in the static field map and the type is assignable to the specified class
+     */
     public boolean isStatic(String field, Class<?> type) {
         return statics.containsKey(field) && type.isAssignableFrom(field.getClass());
     }
 
     /**
-     * @param fields Names of fields to look for in the static field map.
-     * @return true if and only if all provided field names are present in the static field map.
+     * @param fields Names of fields to look for in the static, dynamic, or config field maps.
+     * @return true if and only if all provided field names are present in the static or dynamic or config field maps.
      */
     @Override
     public boolean isDefined(String... fields) {
         for (String field : fields) {
-            if (!statics.containsKey(field)) {
+            if (!isStatic(field)&&!isDynamic(field)&&!isConfig(field)) {
                 return false;
             }
         }
@@ -225,13 +271,29 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     @Override
     public <T> T getStaticValue(String field, Class<T> classOfT) {
-        return (T) statics.get(field);
+        if (isStatic(field)) {
+            return (T) statics.get(field);
+        } else if (isConfig(field)) {
+            return getConfig(field);
+        }
+        return null;
+    }
+
+    private <T> T getConfig(String field) {
+        for (Map<String, Object> cfgsource : cfgsources) {
+            if (cfgsource.containsKey(field)) {
+                return (T) cfgsource.get(field);
+            }
+        }
+        throw new OpConfigError("config value for '" +field +"' was not found in " + cfgsources);
     }
 
     public <T> T takeStaticValue(String field, Class<T> classOfT) {
         if (statics.containsKey(field)) {
             protomap.remove(field);
             return (T) statics.remove(field);
+        } else if (isConfig(field)) {
+            return getConfig(field);
         }
         return null;
     }
@@ -263,7 +325,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getStaticValueOr(String name, T defaultValue) {
-        if (statics.containsKey(name)) {
+        if (isStatic(name)) {
             return (T) statics.get(name);
         } else if (dynamics.containsKey(name)) {
             throw new BasicError("static field '" + name + "' was defined dynamically. This may be supportable if the driver developer" +
@@ -303,7 +365,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
     }
 
-    public String getStaticConfig(String name, Class<String> clazz) {
+    public <T> T getStaticConfig(String name, Class<T> clazz) {
         if (statics.containsKey(name)) {
             return NBTypeConverter.convert(statics.get(name),clazz);
         }
@@ -340,8 +402,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
 
     public <T> Optional<T> getOptionalStaticConfig(String name, Class<T> type) {
-        if (statics.containsKey(name)) {
-            return Optional.of(NBTypeConverter.convert(statics.get(name), type));
+        if (isStatic(name)) {
+            return Optional.of(NBTypeConverter.convert(getStaticConfig(name, type), type));
+        }
+        if (isConfig(name)) {
+            return Optional.of(NBTypeConverter.convert(getConfig(name), type));
         }
         for (Map<String, Object> cfgsource : cfgsources) {
             if (cfgsource.containsKey(name)) {
@@ -412,13 +477,17 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (dynamics.containsKey(field)) {
             return (T) dynamics.get(field).apply(input);
         }
+        if (isConfig(field)) {
+            return getConfig(field);
+        }
         return null;
     }
 
     /**
-     * @return a set of names which are defined, whether in static fields or dynamic fields
+     * @return a set of names which are defined, whether in static fields or dynamic fields,
+     * but NOT including params nor other config
      */
-    public Set<String> getDefinedNames() {
+    public Set<String> getOpFieldNames() {
         HashSet<String> nameSet = new HashSet<>(statics.keySet());
         nameSet.addAll(dynamics.keySet());
         return nameSet;
@@ -474,19 +543,17 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                         + " type, which is not assignable to '" + type.getCanonicalName() + "'");
             }
         } else {
-            for (Map<String, Object> cfgsource : cfgsources) {
-                if (cfgsource.containsKey(name)) {
-                    Object object = cfgsource.get(name);
-                    if (type.isAssignableFrom(object.getClass())) {
-                        return Optional.of(l -> type.cast(cfgsource.get(name)));
-                    } else if (NBTypeConverter.canConvert(object, type)) {
-                        return Optional.of(l -> NBTypeConverter.convert(cfgsource.get(name), type));
-                    } else {
-                        throw new OpConfigError(
-                            "function for '" + name + "' found a " + object.getClass().getCanonicalName()
-                                + " type in cfg source, which is not assignable to '" + type.getCanonicalName() + "'");
+            if (isConfig(name)) {
+                Object cfgval = getConfig(name);
+                if (type.isAssignableFrom(cfgval.getClass())) {
+                    return Optional.of(l -> type.cast(cfgval));
+                } else if (NBTypeConverter.canConvert(cfgval,type)) {
+                    return Optional.of(l -> NBTypeConverter.convert(cfgval, type));
+                } else {
+                    throw new OpConfigError(
+                        "function for '" + name + "' found a " + cfgval.getClass().getCanonicalName()
+                            + " type in cfg source, which is not assignable to '" + type.getCanonicalName() + "'");
 
-                    }
                 }
             }
             return Optional.empty();
@@ -510,11 +577,13 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     @Override
     public <V> LongFunction<V> getAsFunctionOr(String name, V defaultValue) {
-        if (isStatic(name)) {
+        if (isDynamic(name)) {
+            return l -> get(name, l);
+        } else if (isStatic(name)) {
             V value = getStaticValue(name);
             return l -> value;
-        } else if (isDynamic(name)) {
-            return l -> get(name, l);
+        } else if (isConfig(name)) {
+            return l -> getConfig(name);
         } else {
             return l -> defaultValue;
         }
@@ -523,6 +592,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     /**
      * Get a LongFunction that first creates a LongFunction of String as in {@link #getAsFunctionOr(String, Object)} )}, but then
      * applies the result and cached it for subsequent access. This relies on {@link ObjectCache} internally.
+     * The purpose of this is to avoid costly re-computation for mapped values over pure functions where the computation
+     * cost is significantly high. For trivial functions, the cost is generally lower than the hash lookup within the
+     * object cache..
      *
      * @param fieldname    The name of the field which could contain a static or dynamic value
      * @param defaultValue The default value to use in the init function if the fieldname is not defined as static nor dynamic
@@ -531,15 +603,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * @return A caching function which chains to the init function, with caching
      */
     public <V> LongFunction<V> getAsCachedFunctionOr(String fieldname, String defaultValue, Function<String, V> init) {
-        if (isStatic(fieldname)) {
-            V value = getStaticValue(fieldname);
-            if (value instanceof String) {
-                V defaultObject = init.apply((String) value);
-                return l -> defaultObject;
-            } else {
-                throw new OpConfigError("Unable to compose string to object cache with non-String value of type " + defaultValue.getClass().getCanonicalName());
-            }
-        } else if (isDynamic(fieldname)) {
+        // caching is only valid for the dynamic case, everything else can elide it
+        if (isDynamic(fieldname)) {
             LongFunction<V> f = l -> get(fieldname, l);
             V testValue = f.apply(0);
             if (testValue instanceof String) {
@@ -551,19 +616,37 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     "Unable to compose string func to obj cache with non-String function of type " + f.getClass().getCanonicalName()
                 );
             }
+        }
+        if (isStatic(fieldname)) {
+            V value = getStaticValue(fieldname);
+            if (value instanceof String s) {
+                V defaultObject = init.apply(s);
+                return l -> defaultObject;
+            } else {
+                throw new OpConfigError("Unable to compose string to object cache with non-String value of type " + defaultValue.getClass().getCanonicalName());
+            }
+        }
+        if (isConfig(fieldname)) {
+            V value = getConfig(fieldname);
+            if (value instanceof String s) {
+                V defaultObject = init.apply(s);
+                return l -> defaultObject;
+            } else {
+                throw new OpConfigError("Unable to compose string to object cache with non-String value of type " + defaultValue.getClass().getCanonicalName());
+            }
         } else {
-            throw new OpConfigError(
-                "Unable to compose string func to obj cache with no defined static nor dynamic field named " + fieldname
-            );
+            V defaultObject = init.apply(defaultValue);
+            return l -> defaultObject;
         }
     }
 
+
     /**
      * @param field The requested field name
-     * @return true if the named field is defined as static or dynamic
+     * @return true if the named field is defined as static or dynamic or config (params and activity params)
      */
     public boolean isDefined(String field) {
-        return statics.containsKey(field) || dynamics.containsKey(field);
+        return statics.containsKey(field) || dynamics.containsKey(field) || isConfig(field);
     }
 
     /**
@@ -573,7 +656,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * @return true if the named field is defined neither as static nor as dynamic
      */
     public boolean isUndefined(String field) {
-        return !(statics.containsKey(field) || dynamics.containsKey(field));
+        return !(statics.containsKey(field) || dynamics.containsKey(field) || isConfig(field));
     }
 
     /**
@@ -583,13 +666,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     @Override
     public boolean isDefined(String field, Class<?> type) {
-        if (statics.containsKey(field)) {
-            if (type.isAssignableFrom(statics.get(field).getClass())) {
-                return true;
-            } else {
-                throw new OpConfigError("field " + field + " was defined, but not as the requested type " + type.getCanonicalName());
-            }
-        } else if (dynamics.containsKey(field)) {
+        if (isDynamic(field)) {
             Object testObject = dynamics.get(field).apply(0L);
             if (type.isAssignableFrom(testObject.getClass())) {
                 return true;
@@ -598,14 +675,28 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     " requested type " + testObject.getClass().getCanonicalName());
             }
         }
+        if (isStatic(field)) {
+            if (type.isAssignableFrom(statics.get(field).getClass())) {
+                return true;
+            } else {
+                throw new OpConfigError("field " + field + " was defined (static), but not as the requested type " + type.getCanonicalName());
+            }
+        }
+        if (isConfig(field)) {
+            if (type.isAssignableFrom(getConfig(field).getClass())) {
+                return true;
+            } else {
+                throw new OpConfigError("field " + field + " was defined (config), but not as the requested type " + type.getCanonicalName());
+            }
+        }
         return false;
     }
 
-    public Optional<ParsedTemplate> getAsTemplate(String fieldname) {
+    public Optional<ParsedStringTemplate> getAsStringTemplate(String fieldname) {
         if (specmap.containsKey(fieldname)) {
             Object fval = specmap.get(fieldname);
             if (fval instanceof CharSequence) {
-                return Optional.of(new ParsedTemplate(fval.toString(), this.bindings));
+                return Optional.of(new ParsedStringTemplate(fval.toString(), this.bindings));
             } else {
                 throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname + "' of type '" + fval.getClass().getSimpleName() + "'");
             }
@@ -615,13 +706,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     /**
      * convenience method for conjugating {@link #isDefined(String)} with AND
-     *
-     * @param fields The fields which should be defined as either static or dynamic
-     * @return true if all specified fields are defined as static or dynamic
+     * @return true if all specified fields are defined as static or dynamic or config
      */
     public boolean isDefinedAll(String... fields) {
         for (String field : fields) {
-            if (!statics.containsKey(field) && !dynamics.containsKey(field)) {
+            if (!isDefined(field)) {
                 return false;
             }
         }
@@ -696,18 +785,17 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
 
     public Class<?> getValueType(String fieldname) {
-        if (isDefined(fieldname)) {
-            if (isStatic(fieldname)) {
-                return statics.get(fieldname).getClass();
-            } else {
-                return dynamics.get(fieldname).apply(1L).getClass();
-            }
-        } else {
-            throw new OpConfigError("Unable to determine value type for undefined op field '" + fieldname + "'");
+        if (isDynamic(fieldname)) {
+            return get(fieldname,1).getClass();
         }
-
+        if (isStatic(fieldname)) {
+            return getStaticValue(fieldname).getClass();
+        }
+        if (isConfig(fieldname)) {
+            return getConfig(fieldname).getClass();
+        }
+        throw new OpConfigError("Unable to determine value type for undefined op field '" + fieldname + "'");
     }
-
 
     public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTargetEnum(
         Class<E> enumclass,
@@ -794,7 +882,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             return Optional.of(new TypeAndTarget<E, V>(prototype.enumId, prototype.field, asFunction));
         } else if (matched.size() > 1) {
             throw new OpConfigError("Multiple matches were found from op template fieldnames ["
-                + getDefinedNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
+                + getOpFieldNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
         }
 
         return Optional.empty();
@@ -824,7 +912,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return typeFromEnum.orElseThrow(
             () -> {
                 String values = EnumSet.allOf(enumclass).toString();
-                Set<String> definedNames = getDefinedNames();
+                Set<String> definedNames = getOpFieldNames();
                 return new OpConfigError("Unable to match op template fields [" + definedNames + "] with " +
                     "possible op types [" + values + "]. " +
                     "If you are specifying an op type which should be implemented, please file an issue.");
@@ -861,7 +949,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
         if (matched.size() > 1) {
             throw new OpConfigError("Multiple matches were found from op template fieldnames ["
-                + getDefinedNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
+                + getOpFieldNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
         }
         return Optional.empty();
     }
@@ -870,5 +958,21 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     public Map<String, Object> parseStaticCmdMap(String taskname, String mainField) {
         Object mapsrc = getStaticValue(taskname);
         return new LinkedHashMap<String,Object>(ParamsParser.parseToMap(mapsrc,mainField));
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("protomap:\n");
+        for (String k : this.protomap.keySet()) {
+            Object v = this.protomap.get(k);
+            sb.append(" ")
+                .append(k)
+                .append("->")
+                .append(
+                    v ==null? specmap.get(k) : v.toString()
+                ).append("\n");
+
+        }
+        return sb.toString();
     }
 }

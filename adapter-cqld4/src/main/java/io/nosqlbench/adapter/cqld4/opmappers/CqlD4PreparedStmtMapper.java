@@ -29,7 +29,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
 
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp cmd) {
 
-        ParsedTemplate stmtTpl = cmd.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
+        ParsedStringTemplate stmtTpl = cmd.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + cmd
         ));
 

@@ -28,7 +28,7 @@ public class FastStringCompositorTest {
     public void testFastStringCompositor() {
         String rawTpl = "template {b1}, {{TestValue(5)}}";
         Map<String, String> bindings = Map.of("b1", "TestIdentity()");
-        ParsedTemplate ptpl = new ParsedTemplate(rawTpl, bindings);
+        ParsedStringTemplate ptpl = new ParsedStringTemplate(rawTpl, bindings);
         StringCompositor fsc = new StringCompositor(ptpl,Map.of());
         System.out.println(fsc);
     }

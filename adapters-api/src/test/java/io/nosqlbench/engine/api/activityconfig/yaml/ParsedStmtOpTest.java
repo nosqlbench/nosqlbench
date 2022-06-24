@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,13 +38,13 @@ public class ParsedStmtOpTest {
     public void testBasicParser() {
         StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         OpTemplate stmtDef0 = block0.getOps().get(0);
-        ParsedTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
         assertThat(parsed0.getMissing()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
         StmtsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
         OpTemplate stmtDef1 = block1.getOps().get(0);
-        ParsedTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        ParsedStringTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
         assertThat(parsed1.getMissing()).containsExactly();
         assertThat(parsed1.hasError()).isFalse();
     }
@@ -54,12 +54,12 @@ public class ParsedStmtOpTest {
         StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
         OpTemplate stmtDef0 = block2.getOps().get(0);
-        ParsedTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
         assertThat(parsed0.getMissing()).isEmpty();
         assertThat(parsed0.hasError()).isFalse();
 
         OpTemplate stmtDef1 = block2.getOps().get(1);
-        ParsedTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        ParsedStringTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
         assertThat(parsed1.getMissing()).isEmpty();
         assertThat(parsed1.hasError()).isFalse();
     }

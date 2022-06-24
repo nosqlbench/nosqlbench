@@ -31,7 +31,7 @@ public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp> {
         this.ctxfunc = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         LongFunction<String> stringfunc = l -> objectFunction.apply(l).toString();
-        cmd.enhance(stringfunc,"suffix",String.class,(a,b) -> a+b);
+        cmd.enhanceFuncOptionally(stringfunc,"suffix",String.class,(a, b) -> a+b);
         this.outFunction = stringfunc;
     }
 

@@ -26,7 +26,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,31 +47,40 @@ import java.util.function.LongFunction;
  * For some drivers or protocols, the primary user interface is a statement format or grammar. For CQL or SQL,
  * the most natural way of describing templates for operations is in that native format. For others, an operation
  * template may look like a block of JSON or a HTTP request. All these forms are supported. In order to deal with
- * the variety, there are some normative rules about how they must be structured, both for the user, and for the
- * driver developer.
+ * the variety, there is a set of detailed rules for how the workload definitions are transformed into driver
+ * operations for a native driver. The high-level flow is:
+ * <OL>
+ *     <LI>Op Template Form</LI>
+ *     <LI>Normalized Data Structure</LI>
+ *     <LI>ParsedOp Form</LI>
+ * </OL>
+ *
+ * The specifications govern how the raw op template form is transformed into the normalized data structure.
+ * This documentation focuses on the API provided by the last form, this class, although peripheral awareness
+ * of the first two forms will certainly help for any advanced scenarios. You can find detailed examples and
+ * specification tests under the workload_definition folder of the adapters-api module.
+ * </P>
+ *
  *
  * <H2>Op Template Parsing</H2>
  * <OL>
- *     <LI>All op templates are parsed into an internal normalized structure which contains:
+ *     <LI>Rule #1: All op templates are parsed into an internal normalized structure which contains:
  *     <OL>
- *         <LI>A map of op payload fields, which can be either of:
+ *         <LI>A map of op fields, which can consist of:
  *         <OL>
  *             <LI>static field values</LI>
- *             <LI>dynamic field values</LI>
+ *             <LI>dynamic field values, the actual value of which can only be known for a given cycle</LI>
  *         </OL>
- *         <LI>
- *         Further, when the type of an op template is specified as a string, it is auto de-sugared into a map of a single
- *         op payload field named 'stmt'.</LI>
  *         </LI>
- *         <LI>op params</LI>
- *         <LI>When neither 'op' nor 'params' is specified, all root-level op fields are put into the op payload.</LI>
- *         <LI>When either 'op' or 'params' is specified, all other root-level fields are automatically put into the other.</LI>
- *         <LI>When both 'op' and 'params' is specified, any other root-level fields causes an error to be thrown.</LI>
- *     </OL>
- *
+*          <LI>Access to auxiliary configuration values like activity parameters. These can back-fill
+ *          when values aren't present in the direct static or dynamic op fields.</LI>
  *     </LI>
  *
+ *     <LI>Rule #2: When asking for a dynamic parameter, static parameters may be automatically promoted to functional form as a back-fill.</LI>
+ *     <LI>Rule #3: When asking for static parameters, config parameters may automatically be promoted as a back-fill.</LI>
  * </OL>
+ * The net effect of these rules is that the NoSQLBench driver developer may safely use functional forms to access data
+ * in the op template, or may decide that certain op fields must only be provided in a static way per operation.
  * </P>
  *
  * <H2>Distinguishing Op Payload from Op Config</H2>
@@ -106,27 +115,28 @@ import java.util.function.LongFunction;
  *
  * All of these are considered valid constructions, and all of them may actually achieve the same result.
  * This looks like an undesirable problem, but it serves to simplify things for users in one specific way: It allows
- * them to be a bit ambiguous, within guidelines, and still have a valid workload definition.
+ * them to be a vague, within guidelines, and still have a valid workload definition.
  * The NoSQLBench runtime does a non-trivial amount of processing on the op template to
  * ensure that it can conform to an unambiguous normalized internal structure on your behalf.
  * This is needed because of how awful YAML is as a user configuration language in spite of its
- * ubiquity in practice.
+ * ubiquity in practice. The basic design guideline for these forms is that the op template must
+ * mean what a reasonable user would assume without looking at any documentation.
  *
  * <HR></HR>
  * <H2>Design Invariants</H2>
  *
-
- *
- * <P>The above rules imply invariants, which are made explicit here. Most of these are provided for automatically by {@link ParsedOp}.</P>
+ * <P>The above rules imply invariants, which are made explicit here. {@link ParsedOp}.</P>
  *
  * <P><UL>
  *
  *     <LI><EM>You may not use an op field name or parameter name for more than one purpose.</EM>
  *     <UL>
- *         <LI>Treat all parameters supported by a drier adapter and it's op fields as a globally shared namespace, even if it is not.
+ *         <LI>Treat all parameters supported by a driver adapter and it's op fields as a globally shared namespace, even if it is not.
  *         This avoids creating any confusion about what a parameter can be used for and how to use it for the right thing in the right place.
  *         For example, you may not use the parameter name `socket` in an op template to mean one thing and then use it
- *         at the driver adapter level to mean something different.
+ *         at the driver adapter level to mean something different. However, if the meaning is congruent, a driver developer
+ *         may choose to support some cross-cutting parameters at the activity level. These allowances are explicit,
+ *         however, as each driver dictates what it will allow as activity parameters.
  *         </LI>
  *     </UL>
  *     </LI>
@@ -135,7 +145,8 @@ import java.util.function.LongFunction;
  *     <UL>
  *         <LI>IF a name is valid as an op field, it must also be valid as such when specified in op params.</LI>
  *         <LI>If a name is valid as an op field, it must also be valid as such when specified in activity params, within the scope of {@link ParsedOp}</LI>
- *         <LI>When an op field is found via op params or activity params, it may be dynamic.</LI>
+ *         <LI>When an op field is found via op params or activity params, it may NOT be dynamic. If dynamic values are intended to be provided
+ *         at a common layer in the workload, then bindings support this already.</LI>
  *     </UL>
  *     </LI>
  *
@@ -160,6 +171,9 @@ import java.util.function.LongFunction;
  *     the local op payload field takes precedence.</EM>
  *       <UL>
  *           <LI>This is an extension of the param override rules which say that the closest (most local) value to an operation is the one that takes precedence.</LI>
+ *           <LI>In practice, there will be no conflicts between direct static and dynamic fields, but there will be possibly between
+ *           static or dynamic fields and parameters and activity params. If a user wants to promote an activity param as an override to existing op fields,
+ *           template variables allow for this to happen gracefully. Otherwise, the order of precedence is 1) op fields 2) op params 3) activity params.</LI>
  *       </UL>
  *     </LI>
  * </UL>
@@ -241,7 +255,7 @@ import java.util.function.LongFunction;
  * }</PRE>
  *
  * <P>This example combines the previous ones with structure and dynamic values. Both field1 and field2 are dynamic,
- * since each contains some dynamic value or template within. When field1 is accessed within a cycle, that cycles value
+ * since each contains some dynamic value or template within. When field1 is accessed within a cycle, that cycle's value
  * will be used as the seed to generate equivalent structures with all the literal and dynamic elements inserted as
  * the template implies. As before, direct binding references like {@code {binding4}} will be inserted into the
  * structure with whatever type the binding definition produces, so if you want strings in them, ensure that you
@@ -366,6 +380,10 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.isStatic(field);
     }
 
+    private boolean isConfig(String fieldname) {
+        return tmap.isConfig(fieldname);
+    }
+
     public boolean isStatic(String field, Class<?> type) {
         return tmap.isStatic(field, type);
     }
@@ -406,13 +424,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getStaticValue(field);
     }
 
-//    public Optional<ParsedTemplate> getStmtAsTemplate() {
-//        return _opTemplate.getParsed();
-//    }
-
-
-    public Optional<ParsedTemplate> getAsTemplate(String fieldname) {
-        return this.tmap.getAsTemplate(fieldname);
+    public Optional<ParsedStringTemplate> getAsTemplate(String fieldname) {
+        return this.tmap.getAsStringTemplate(fieldname);
     }
 
     /**
@@ -517,7 +530,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return a set of names which are defined, whether in static fields or dynamic fields
      */
     public Set<String> getDefinedNames() {
-        return tmap.getDefinedNames();
+        return tmap.getOpFieldNames();
     }
 
     /**
@@ -736,7 +749,18 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
     }
 
-    public <FA,FE> LongFunction<FA> enhance(
+    /**
+     * <p>Enhance a {@link Function} with another <EM>required</EM> named field or function combiner OR a default value.</p>
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param defaultFe The default value of the field, if none is provided
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return an enhanced function
+     */
+    public <FA,FE> LongFunction<FA> enhanceDefaultFunc(
         LongFunction<FA> func,
         String field,
         Class<FE> type,
@@ -750,23 +774,66 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
 
     }
 
-    public <FA,FE> Optional<LongFunction<FA>> enhance(
-        Optional<LongFunction<FA>> func,
+    /**
+     * <p>Enhance a {@link Function} with a named required function, or throw an error.</p>
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return a version of the base function, optionally enhanced
+     */
+    public <FA,FE> LongFunction<FA> enhanceFunc(
+        LongFunction<FA> func,
         String field,
         Class<FE> type,
-        FE defaultFe,
         BiFunction<FA,FE,FA> combiner
     ) {
-        if (func.isEmpty()) {
-            return func;
-        }
-        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
-        LongFunction<FA> faLongFunction = func.get();
-        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
-        return Optional.of(lfa);
+        LongFunction<FE> fieldEnhancerFunc = getAsRequiredFunction(field, type);
+        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),fieldEnhancerFunc.apply(l));
+        return lfa;
     }
 
-    public <FA,FE> Optional<LongFunction<FA>> enhance(
+    /**
+     * <p>Enhance a {@link Function} with a named optional function IFF it exists.</p>
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return a version of the base function, optionally enhanced
+     */
+    public <FA,FE> LongFunction<FA> enhanceFuncOptionally(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        BiFunction<FA,FE,FA> combiner
+    ) {
+        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) {
+            return func;
+        }
+        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        return lfa;
+    }
+
+
+    /**
+     * <p>Enhance an {@link Optional} {@link Function} with an optional named field or value combiner,
+     * IFF both functions are defined.</p>
+     *
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return the enhanced optional function
+     */
+    public <FA,FE> Optional<LongFunction<FA>> enhanceOptionalFuncOptionally(
         Optional<LongFunction<FA>> func,
         String field,
         Class<FE> type,
@@ -782,21 +849,48 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return Optional.of(lfa);
     }
 
-    public <FA,FE> LongFunction<FA> enhance(
-        LongFunction<FA> func,
+    /**
+     * <p>Enhance an {@link Optional} {@link Function} with a named field or function combiner OR a default value,
+     * IFF the base function is present.</p>
+     *
+     * <p>Create a required function for the specified field and default value, IFF the
+     * main function is present. The base type of the function remains the same, and if present,
+     * will be extended with the required field value or function in the provided combiner.</p>
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param defaultFe The default value of the field, if none is provided
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return the enhanced optional base function
+     */
+    public <FA,FE> Optional<LongFunction<FA>> enhanceOptionalDefaultFunc(
+        Optional<LongFunction<FA>> func,
         String field,
         Class<FE> type,
+        FE defaultFe,
         BiFunction<FA,FE,FA> combiner
     ) {
-        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
-        if (fieldEnhancerFunc.isEmpty()) {
+        if (func.isEmpty()) {
             return func;
         }
-        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
-        return lfa;
+        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
+        LongFunction<FA> faLongFunction = func.get();
+        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
+        return Optional.of(lfa);
     }
 
+    /**
+     * <p>Enhance a {@link Function} with an optional enum function IFF it is defined.</p>
+     * @param func The base function
+     * @param field The field name to derive the named enhancer function from
+     * @param type The type of the field value
+     * @param combiner A {@link BiFunction} which applies the field or function combiner to the base function
+     * @param <FA> The base function result type
+     * @param <FE> The enhancer function result type
+     * @return an (optionally) enhanced base function
+     */
     public <FA,FE extends Enum<FE>> LongFunction<FA> enhanceEnum(
         LongFunction<FA> func,
         String field,
@@ -814,5 +908,10 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
 
     public Map<String, Object> parseStaticCmdMap(String key, String mainField) {
         return tmap.parseStaticCmdMap(key, mainField);
+    }
+
+    @Override
+    public String toString() {
+        return this.tmap.toString();
     }
 }

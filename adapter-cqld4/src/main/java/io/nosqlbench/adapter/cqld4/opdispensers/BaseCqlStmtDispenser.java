@@ -67,7 +67,7 @@ public abstract class BaseCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
         LongFunction<Statement> partial = basefunc;
         partial = op.enhanceEnum(partial, "cl", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
         partial = op.enhanceEnum(partial, "scl", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
-        partial = op.enhance(partial, "idempotent", Boolean.class, Statement::setIdempotent);
+        partial = op.enhanceFuncOptionally(partial, "idempotent", Boolean.class, Statement::setIdempotent);
         return partial;
     }
 
