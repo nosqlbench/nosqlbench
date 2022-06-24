@@ -30,6 +30,14 @@ jobs:
     - name: mvn verify
       run: mvn verify
 
+    - name: pwd
+      if: always()
+      run: pwd
+
+    - name: ls
+      if: always()
+      run: ls
+
     - name: Archive Test Results
       if: always()
       uses: actions/upload-artifact@v1
