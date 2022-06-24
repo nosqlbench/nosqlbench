@@ -54,6 +54,7 @@
         <module>adapters-api</module>
 
         <!-- driver modules -->
+        <module>adapter-http</module>
         <module>adapter-cqld4</module>
         <module>adapter-dynamodb</module>
         <module>adapter-diag</module>
@@ -85,7 +86,6 @@
             <modules>
                 <module>nb</module>
                 <module>driver-tcp</module>
-                <module>driver-http</module>
                 <module>driver-kafka</module>
                 <module>driver-jmx</module>
                 <module>driver-jdbc</module>
