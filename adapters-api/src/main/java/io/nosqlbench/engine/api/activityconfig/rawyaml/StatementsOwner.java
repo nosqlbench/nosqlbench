@@ -79,18 +79,22 @@ public class StatementsOwner extends RawStmtFields {
             List<Map<String,Object>> itemizedMaps = new ArrayList<>();
             for (Map.Entry<String, Object> entries : map.entrySet()) {
                 Object value = entries.getValue();
-                if (value instanceof LinkedHashMap) {
-                    // reset order to favor naming first
-                    LinkedHashMap<String, Object> vmap = (LinkedHashMap<String, Object>) value;
-                    LinkedHashMap<String, Object> cp = new LinkedHashMap<>(vmap);
+                if (value instanceof List listval) {
+                    Map<String,Object> stmtDetails = new LinkedHashMap<>() {{
+                        put("name",entries.getKey());
+                        put("stmt", (List<Object>) listval);
+                    }};
+                    itemizedMaps.add(stmtDetails);
+                } else if (value instanceof LinkedHashMap vmap) {
+                    LinkedHashMap<String, Object> cp = new LinkedHashMap<String,Object>(vmap);
                     vmap.clear();
                     vmap.put("name", entries.getKey());
                     vmap.putAll(cp);
                     itemizedMaps.add(vmap);
-                } else if (value instanceof String) {
-                    Map<String, Object> stmtDetails = new HashMap<>() {{
+                } else if (value instanceof String string) {
+                    Map<String, Object> stmtDetails = new LinkedHashMap<>() {{
                         put("name", entries.getKey());
-                        put("stmt", entries.getValue());
+                        put("stmt", string);
                     }};
                     itemizedMaps.add(stmtDetails);
                 } else {

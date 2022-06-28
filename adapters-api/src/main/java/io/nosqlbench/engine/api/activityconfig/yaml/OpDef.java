@@ -22,10 +22,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class OpDef extends OpTemplate {
     private final static Logger logger = LogManager.getLogger(OpDef.class);
@@ -62,6 +59,8 @@ public class OpDef extends OpTemplate {
             });
         } else if (op instanceof CharSequence) {
             newmap.put("stmt", op.toString());
+        } else if (op instanceof List list) {
+            newmap.put("stmt", list);
         } else {
             throw new BasicError("Unable to coerce a '" + op.getClass().getCanonicalName() + "' into an op template");
         }
