@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.types;
+package io.nosqlbench.nb.spectest.api;
 
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
-import io.nosqlbench.nb.spectest.loaders.STNodePredicates;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicates;
 
 import java.nio.file.Path;
 import java.util.List;

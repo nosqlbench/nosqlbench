@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest;
+package io.nosqlbench.nb.spectest.traversal;
 
-import io.nosqlbench.nb.spectest.traversal.STNodePredicate;
-import org.junit.jupiter.api.Test;
+import com.vladsch.flexmark.util.ast.Node;
 
 import java.util.function.Predicate;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+final class STNodeClassPredicate implements Predicate<Node> {
+    private final Class<? extends Node> matchingClass;
 
-public class STNodePredicateTest {
-
-    @Test
-    public void testInvalidPredicateType() {
-        Predicate<Number> numPredicate = s -> s.longValue()==1_000_000L;
-        assertThatThrownBy(() -> new STNodePredicate(numPredicate))
-            .isInstanceOf(ClassCastException.class);
+    public STNodeClassPredicate(Class<? extends Node> matchingClass) {
+        this.matchingClass = matchingClass;
     }
 
+    @Override
+    public boolean test(Node node) {
+        Class<? extends Node> classToMatch = node.getClass();
+        boolean matches = matchingClass.equals(classToMatch);
+        return matches;
+    }
+
+    @Override
+    public String toString() {
+        return "CLASS(" + matchingClass.getSimpleName() + ")";
+    }
 }

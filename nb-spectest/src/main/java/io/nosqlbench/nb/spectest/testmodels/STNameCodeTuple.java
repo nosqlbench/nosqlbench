@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.testtypes;
+package io.nosqlbench.nb.spectest.testmodels;
 
 import com.vladsch.flexmark.util.ast.Node;
 

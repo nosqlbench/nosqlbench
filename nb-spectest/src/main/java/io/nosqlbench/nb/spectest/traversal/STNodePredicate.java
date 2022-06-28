@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.loaders;
+package io.nosqlbench.nb.spectest.traversal;
 
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.util.ast.Node;
@@ -22,7 +22,6 @@ import com.vladsch.flexmark.util.sequence.BasedSequence;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -57,54 +56,18 @@ public class STNodePredicate implements Predicate<Node>, Supplier<Node> {
 
     private Predicate<Node> resolvePredicate(Object object) {
         if (object instanceof Predicate predicate) {
-            Paragraph paragraph = new Paragraph(BasedSequence.of("test paragraph"));
+            Paragraph paragraph = new Paragraph(BasedSequence.of("type checking"));
+            // assert no runtime type casting issues
             predicate.test(paragraph);
             return predicate;
         } else if (object instanceof Class c) {
-            return new ClassPredicate(c);
+            return new STNodeClassPredicate(c);
         } else if (object instanceof Pattern p) {
-            return new PatternPredicate(p);
+            return new STNodePatternPredicate(p);
         } else if (object instanceof CharSequence cs) {
-            return new PatternPredicate(cs.toString());
+            return new STNodePatternPredicate(cs.toString());
         } else {
             throw new RuntimeException("no Node predicate for type " + object.getClass().getSimpleName());
-        }
-    }
-
-    private final static class ClassPredicate implements Predicate<Node> {
-        private final Class<? extends Node> matchingClass;
-
-        public ClassPredicate(Class<? extends Node> matchingClass) {
-            this.matchingClass = matchingClass;
-        }
-
-        @Override
-        public boolean test(Node node) {
-            Class<? extends Node> classToMatch = node.getClass();
-            boolean matches = matchingClass.equals(classToMatch);
-            return matches;
-        }
-    }
-
-    private final static class PatternPredicate implements Predicate<Node> {
-        private final Pattern pattern;
-
-        private PatternPredicate(Pattern pattern) {
-            this.pattern = pattern;
-        }
-
-        private PatternPredicate(String pattern) {
-            String newPattern = (pattern.matches("^[a-zA-Z0-9]") ? ".*" : "") + pattern + (pattern.matches("[a-zA-Z0-9]$") ? ".*" : "");
-            Pattern compiled = Pattern.compile(newPattern, Pattern.MULTILINE | Pattern.DOTALL);
-            this.pattern = compiled;
-        }
-
-        @Override
-        public boolean test(Node node) {
-            BasedSequence chars = node.getChars();
-            Matcher matcher = pattern.matcher(chars);
-            boolean matches = matcher.matches();
-            return matches;
         }
     }
 
@@ -121,5 +84,10 @@ public class STNodePredicate implements Predicate<Node>, Supplier<Node> {
     @Override
     public Node get() {
         return this.found;
+    }
+
+    @Override
+    public String toString() {
+        return this.predicate.toString();
     }
 }

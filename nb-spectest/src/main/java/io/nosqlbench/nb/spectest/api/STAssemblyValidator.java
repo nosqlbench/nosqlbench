@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.testtypes;
+package io.nosqlbench.nb.spectest.api;
 
-import java.nio.file.Path;
+import io.nosqlbench.nb.spectest.core.STNodeAssembly;
 
-public interface STNodeReference {
-    Path getPath();
-    int getLineNumber();
-
+public interface STAssemblyValidator {
+    void validate(STNodeAssembly assembly);
 }

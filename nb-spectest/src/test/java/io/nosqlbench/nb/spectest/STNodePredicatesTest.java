@@ -21,22 +21,23 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
 import io.nosqlbench.nb.spectest.loaders.STDefaultNodeLoader;
-import io.nosqlbench.nb.spectest.loaders.STNodePredicates;
-import io.nosqlbench.nb.spectest.types.STNodeLoader;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicates;
+import io.nosqlbench.nb.spectest.api.STNodeLoader;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.ref;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class STNodePredicatesTest {
 
     @Test
     public void testBackReferences() {
-        STNodePredicates predicateShouldMatch1 = new STNodePredicates(".*__\\w__.*", 0, 0);
-        STNodePredicates predicateShouldMatch2 = new STNodePredicates("__\\w__", 0, 0);
-        STNodePredicates predicateShouldNotMatch3 = new STNodePredicates("^__\\w__", 0, 0);
-        STNodePredicates predicateShouldNotMatch4 = new STNodePredicates("^__\\w__$", 0, 0);
+        STNodePredicates predicateShouldMatch1 = new STNodePredicates(".*__\\w__.*", ref(0), ref(0));
+        STNodePredicates predicateShouldMatch2 = new STNodePredicates("__\\w__", ref(0), ref(0));
+        STNodePredicates predicateShouldNotMatch3 = new STNodePredicates("^__\\w__", ref(0), ref(0));
+        STNodePredicates predicateShouldNotMatch4 = new STNodePredicates("^__\\w__$", ref(0), ref(0));
         String testMarkdown = """
             paragraph contents with __a__.
 

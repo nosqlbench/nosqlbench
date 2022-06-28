@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.types;
+package io.nosqlbench.nb.spectest.api;
 
 import com.vladsch.flexmark.util.ast.Node;
 import io.nosqlbench.nb.spectest.core.SpecTest;
 import io.nosqlbench.nb.spectest.core.STBuilder;
-import io.nosqlbench.nb.spectest.loaders.STNodePredicate;
-import io.nosqlbench.nb.spectest.loaders.STNodePredicates;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicate;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicates;
 
 import java.nio.file.Path;
 
 public interface STBuilderFacets {
 
-    interface All extends WantsPaths, WantsPathsOrScannersOrValidators, WantsScannersOrValidators {}
+    interface All extends WantsPaths, WantsPathsOrScannersOrValidators, WantsScannersOrValidators, WantsDebuggingOptions {}
 
     interface WantsPaths {
         /**
@@ -94,7 +94,10 @@ public interface STBuilderFacets {
          * is resumed on the next element not included in the result.</P>
          *
          * <P>The predicates can be one of the types supported by {@link STNodePredicate}
-         * and {@link STNodePredicates}.</P>
+         * and {@link STNodePredicates}. These can be wrapped in structural predicate form
+         * by using the helpers from {@link io.nosqlbench.nb.spectest.traversal.STPredicateVerbs},
+         * particularly with an import like
+         * <pre>{@code import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.*;}</pre></P>
          *
          * @param predicates The pattern to match
          * @return this SpecTestBuilder for builder method chaining
@@ -102,10 +105,13 @@ public interface STBuilderFacets {
         WantsValidatorsOrDone matchNodes(Object... predicates);
     }
 
-    interface WantsValidatorsOrDone extends Done{
-        Done validators(STAssemblyValidator... validators);
+    interface WantsValidatorsOrDone extends WantsDebuggingOptions {
+        WantsDebuggingOptions validators(STAssemblyValidator... validators);
     }
 
+    interface WantsDebuggingOptions extends Done {
+        Done debug();
+    }
     interface Done {
         SpecTest build();
     }

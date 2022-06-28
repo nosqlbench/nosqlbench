@@ -35,13 +35,17 @@ public final class STNode {
     private final Path path;
     private final int line;
     private final Node refnode;
-    public CharSequence info;
-    public CharSequence text;
+    private final CharSequence text;
 
     public STNode(Supplier<CharSequence> desc, Node dataNode, Path path) {
         this.description = desc.get().toString();
-        this.text = dataNode.getFirstChild().getChars();
-        this.line = dataNode.getFirstChild().getLineNumber();
+        if (dataNode.getFirstChild()!=null) {
+            this.text = dataNode.getFirstChild().getChars();
+            this.line = dataNode.getFirstChild().getLineNumber();
+        } else {
+            this.text = "";
+            this.line = dataNode.getLineNumber();
+        }
         this.path = path;
         this.refnode = dataNode;
     }
@@ -96,7 +100,6 @@ public final class STNode {
         if (!Objects.equals(description, that.description)) return false;
         if (!Objects.equals(path, that.path)) return false;
         if (!Objects.equals(refnode, that.refnode)) return false;
-        if (!Objects.equals(info, that.info)) return false;
         return Objects.equals(text, that.text);
     }
 
@@ -106,8 +109,11 @@ public final class STNode {
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + line;
         result = 31 * result + (refnode != null ? refnode.hashCode() : 0);
-        result = 31 * result + (info != null ? info.hashCode() : 0);
         result = 31 * result + (text != null ? text.hashCode() : 0);
         return result;
+    }
+
+    public String getText() {
+        return text.toString();
     }
 }

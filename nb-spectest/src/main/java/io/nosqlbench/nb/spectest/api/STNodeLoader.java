@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.types;
+package io.nosqlbench.nb.spectest.api;
 
+import com.vladsch.flexmark.util.ast.Node;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
 
-public interface STAssemblyValidator {
-    void validate(STNodeAssembly assembly);
+import java.nio.file.Path;
+import java.util.List;
+import java.util.function.BiFunction;
+
+public interface STNodeLoader extends BiFunction<Path, Node, List<STNodeAssembly>> {
 }

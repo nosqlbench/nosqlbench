@@ -16,29 +16,24 @@
 
 package io.nosqlbench.nb.spectest.core;
 
-import io.nosqlbench.nb.spectest.testtypes.STNodeReference;
+import io.nosqlbench.nb.spectest.testmodels.STNodeReference;
 
 import java.nio.file.Path;
 
-public class STNameAndCodeTuple implements STNodeReference {
-
-    private final STNode nameNode;
-    private final STNode dataNode;
-    public STNameAndCodeTuple(STNode nameNode, STNode dataNode) {
-        this.nameNode = nameNode;
-        this.dataNode = dataNode;
-    }
+public record STNameAndCodeTuple(
+    STNode nameNode,
+    STNode dataNode
+) implements STNodeReference {
 
     public String getDesc() {
         return nameNode.getDesc();
     }
-
     public String getName() {
-        return nameNode.text.toString();
+        return nameNode.getText();
     }
 
     public String getData() {
-        return dataNode.text.toString();
+        return dataNode.getText();
     }
 
     @Override

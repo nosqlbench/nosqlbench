@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.loaders;
+package io.nosqlbench.nb.spectest.traversal;
 
 import com.vladsch.flexmark.util.ast.Node;
+import io.nosqlbench.nb.spectest.core.STDebug;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * <P>{@link STNodePredicates} is a convenient wrapper around {@link STNodePredicate}
@@ -36,25 +38,20 @@ import java.util.function.Predicate;
  * a regular expression which would match "__a__" or "__b__" and then two more subsequent
  * matches against similar content, for a total of 3 consecutive matching nodes.</p>
  */
-public class STNodePredicates implements Function<Node, Optional<List<Node>>> {
-    final List<Predicate<Node>> predicates;
-    final List<Node> found = new ArrayList<>();
-
-    public STNodePredicates(STNodePredicates predicates) {
-        this.predicates = predicates.predicates;
-    }
+public class STNodePredicates implements Function<Node, Optional<List<Node>>>, STDebug {
+    private final List<Predicate<Node>> predicates = new ArrayList<>();
+    private final List<Node> found = new ArrayList<>();
+    private boolean debug;
 
     public STNodePredicates(Object... predicateSpecs) {
-        this.predicates = new ArrayList<Predicate<Node>>(predicateSpecs.length);
-
         for (int i = 0; i < predicateSpecs.length; i++) {
             if (predicateSpecs[i] instanceof STNodePredicates pspecs) {
                 predicates.addAll(pspecs.predicates);
-            } else if (predicateSpecs[i] instanceof Number number) {
-                if (i > number.intValue()) {
-                    predicates.add(predicates.get(number.intValue()));
+            } else if (predicateSpecs[i] instanceof STArgumentRef number) {
+                if (i > number.argidx()) {
+                    predicates.add(predicates.get(number.argidx()));
                 } else {
-                    throw new InvalidParameterException("predicate reference at " + i + " references invalid position at " + number.intValue());
+                    throw new InvalidParameterException("predicate reference at " + i + " references invalid position at " + number.argidx());
                 }
             } else {
                 predicates.add(new STNodePredicate(predicateSpecs[i]));
@@ -88,4 +85,13 @@ public class STNodePredicates implements Function<Node, Optional<List<Node>>> {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return this.predicates.stream().map(Object::toString).collect(Collectors.joining(","))+")";
+    }
+
+    @Override
+    public void applyDebugging(boolean enabled) {
+        this.debug = enabled;
+    }
 }

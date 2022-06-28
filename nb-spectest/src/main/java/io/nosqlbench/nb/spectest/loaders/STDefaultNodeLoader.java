@@ -20,9 +20,11 @@ import com.vladsch.flexmark.ext.yaml.front.matter.YamlFrontMatterExtension;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
+import io.nosqlbench.nb.spectest.api.STNodeLoader;
+import io.nosqlbench.nb.spectest.core.STDebug;
 import io.nosqlbench.nb.spectest.core.STNode;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
-import io.nosqlbench.nb.spectest.types.STNodeLoader;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicates;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,10 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class STDefaultNodeLoader implements STNodeLoader {
+public class STDefaultNodeLoader implements STNodeLoader, STDebug {
 
     private final STNodePredicates predicates;
     private final Parser parser = Parser.builder().extensions(List.of(YamlFrontMatterExtension.create())).build();
+    private boolean debug;
 
 
     public STDefaultNodeLoader(Object... predicates) {
@@ -55,8 +58,8 @@ public class STDefaultNodeLoader implements STNodeLoader {
     public List<STNodeAssembly> apply(Path path, Node node) {
         List<STNodeAssembly> assemblies = new ArrayList<>();
 
-        if (node==null) {
-            if (path==null) {
+        if (node == null) {
+            if (path == null) {
                 throw new InvalidParameterException("You must provide at least a path.");
             }
             try {
@@ -67,7 +70,7 @@ public class STDefaultNodeLoader implements STNodeLoader {
             }
         }
         if (node instanceof Document d) {
-            node=d.getFirstChild();
+            node = d.getFirstChild();
         }
 
         STHeadingScanner headings = new STHeadingScanner(" > ");
@@ -79,11 +82,25 @@ public class STDefaultNodeLoader implements STNodeLoader {
 
             if (optionalStanza.isPresent()) {
                 List<Node> found = optionalStanza.get();
-                List<STNode> stnodes = found.stream().map(n -> new STNode(headings, n, path)).toList();
-                STNodeAssembly testassy = new STNodeAssembly(stnodes.toArray(new STNode[0]));
+
+                List<STNode> stnodes = found.stream()
+                    .map(
+                        n -> new STNode(headings, n, path)
+                    )
+                    .toList();
+
+                STNodeAssembly testassy = new STNodeAssembly(
+                    stnodes.toArray(
+                        new STNode[0]
+                    )
+                );
+
                 node = found.get(found.size() - 1);
                 headings.index();
                 assemblies.add(testassy);
+                if (debug) {
+                    summarize(testassy);
+                }
             }
             if (node != null) {
                 node = node.getNext();
@@ -91,5 +108,27 @@ public class STDefaultNodeLoader implements STNodeLoader {
         }
 
         return assemblies;
+    }
+
+    private void summarize(STNodeAssembly testassy) {
+        for (STNode stNode : testassy) {
+            String nodeClass = stNode.getRefNode().getClass().getSimpleName();
+            String text = stNode.getRefNode().getChars().toString();
+
+            String[] lines = text.split("\n");
+            String header =lines[0].substring(0,Math.min(lines[0].length(),39));
+            if (lines[0].length()>39) {
+                header=header+"...";
+            }
+            if (!header.endsWith("\n")) {
+                header = header+"\n";
+            }
+            System.out.format("%-20s|%-40s|(%-3d lines)\n",nodeClass,header.replaceAll("\n","\\n"),lines.length);
+        }
+    }
+
+    @Override
+    public void applyDebugging(boolean enabled) {
+        this.debug = enabled;
     }
 }

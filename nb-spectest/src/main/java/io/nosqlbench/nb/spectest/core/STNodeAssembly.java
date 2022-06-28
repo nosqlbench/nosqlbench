@@ -17,7 +17,7 @@
 package io.nosqlbench.nb.spectest.core;
 
 import com.vladsch.flexmark.util.ast.Node;
-import io.nosqlbench.nb.spectest.testtypes.STNamedCodeTuples;
+import io.nosqlbench.nb.spectest.testmodels.STNamedCodeTuples;
 
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
@@ -75,7 +75,7 @@ public class STNodeAssembly extends ArrayList<STNode> {
 
     public String getAsText(int index) {
         assertRange(index);
-        return get(index).text.toString();
+        return get(index).getText();
     }
 
     public Path getPath() {

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.testtypes;
+package io.nosqlbench.nb.spectest.testmodels;
 
-public class STNamedNodes {
+import java.nio.file.Path;
+
+public interface STNodeReference {
+    Path getPath();
+    int getLineNumber();
 
 }

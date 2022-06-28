@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest;
+package io.nosqlbench.nb.spectest.core;
 
-import io.nosqlbench.nb.spectest.traversal.STNodePredicate;
-import org.junit.jupiter.api.Test;
-
-import java.util.function.Predicate;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-public class STNodePredicateTest {
-
-    @Test
-    public void testInvalidPredicateType() {
-        Predicate<Number> numPredicate = s -> s.longValue()==1_000_000L;
-        assertThatThrownBy(() -> new STNodePredicate(numPredicate))
-            .isInstanceOf(ClassCastException.class);
+public interface STDebug {
+    void applyDebugging(boolean enabled);
+    static void applyDebugging(boolean enabled, Object maybeDebuggable) {
+        if (maybeDebuggable instanceof STDebug d) {
+            d.applyDebugging(enabled);
+        }
     }
-
 }

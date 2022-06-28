@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.testtypes;
+package io.nosqlbench.nb.spectest.testmodels;
 
 import io.nosqlbench.nb.spectest.core.STNameAndCodeTuple;
 import io.nosqlbench.nb.spectest.core.STNode;
@@ -67,7 +67,7 @@ public class STNamedCodeTuples {
     public String getTypeSignature() {
         StringBuilder sb = new StringBuilder();
         for (STNameAndCodeTuple tuple : tuples) {
-            sb.append(tuple.getDesc()).append("->");
+            sb.append(tuple.getName()).append("->");
         }
         sb.setLength(sb.length()-"->".length());
         return sb.toString().replaceAll("[^-a-zA-Z0-9<> _]", "");

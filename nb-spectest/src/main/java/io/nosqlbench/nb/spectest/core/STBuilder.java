@@ -17,10 +17,10 @@
 package io.nosqlbench.nb.spectest.core;
 
 import io.nosqlbench.nb.spectest.loaders.STDefaultLoader;
-import io.nosqlbench.nb.spectest.loaders.STNodePredicate;
-import io.nosqlbench.nb.spectest.types.STAssemblyValidator;
-import io.nosqlbench.nb.spectest.types.STBuilderFacets;
-import io.nosqlbench.nb.spectest.types.STPathLoader;
+import io.nosqlbench.nb.spectest.traversal.STNodePredicate;
+import io.nosqlbench.nb.spectest.api.STAssemblyValidator;
+import io.nosqlbench.nb.spectest.api.STBuilderFacets;
+import io.nosqlbench.nb.spectest.api.STPathLoader;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ public abstract class STBuilder implements STBuilderFacets.All {
     protected List<Path> paths = new ArrayList<>();
     protected List<STPathLoader> scanners  = new ArrayList<>();
     protected List<STAssemblyValidator> validators  = new ArrayList<>();
+    protected boolean debug;
 
     @Override
     public STBuilderFacets.WantsPathsOrScannersOrValidators paths(Path... paths) {
@@ -56,9 +57,14 @@ public abstract class STBuilder implements STBuilderFacets.All {
     }
 
     @Override
-    public STBuilderFacets.Done validators(STAssemblyValidator... validators) {
+    public STBuilderFacets.WantsDebuggingOptions validators(STAssemblyValidator... validators) {
         this.validators.addAll(Arrays.asList(validators));
         return this;
     }
 
+    @Override
+    public STBuilderFacets.Done debug() {
+        this.debug=true;
+        return this;
+    }
 }

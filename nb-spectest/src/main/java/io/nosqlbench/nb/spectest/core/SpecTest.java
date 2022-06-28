@@ -19,9 +19,9 @@ package io.nosqlbench.nb.spectest.core;
 import com.vladsch.flexmark.ext.yaml.front.matter.YamlFrontMatterExtension;
 import com.vladsch.flexmark.parser.Parser;
 import io.nosqlbench.nb.spectest.loaders.STFileScanner;
-import io.nosqlbench.nb.spectest.types.STAssemblyValidator;
-import io.nosqlbench.nb.spectest.types.STBuilderFacets;
-import io.nosqlbench.nb.spectest.types.STPathLoader;
+import io.nosqlbench.nb.spectest.api.STAssemblyValidator;
+import io.nosqlbench.nb.spectest.api.STBuilderFacets;
+import io.nosqlbench.nb.spectest.api.STPathLoader;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -73,11 +73,17 @@ public class SpecTest implements Runnable {
     private final List<Path> paths;
     private final List<STPathLoader> pathLoaders;
     private final List<STAssemblyValidator> validators;
+    private final boolean debug;
 
-    private SpecTest(List<Path> paths, List<STPathLoader> pathLoaders, List<STAssemblyValidator> validators) {
+    private SpecTest(List<Path> paths, List<STPathLoader> pathLoaders, List<STAssemblyValidator> validators, boolean debug) {
         this.paths = paths;
         this.pathLoaders = pathLoaders;
         this.validators = validators;
+        this.debug = debug;
+        if (debug) {
+            pathLoaders.forEach(p -> STDebug.applyDebugging(debug,p));
+            validators.forEach(p -> STDebug.applyDebugging(debug,p));
+        }
     }
 
     @Override
@@ -99,7 +105,6 @@ public class SpecTest implements Runnable {
                         testables.add(assembly);
                     }
                 }
-
             }
         }
 
@@ -117,7 +122,7 @@ public class SpecTest implements Runnable {
     private static class Builder extends STBuilder {
         @Override
         public SpecTest build() {
-            return new SpecTest(paths,scanners,validators);
+            return new SpecTest(paths,scanners,validators,debug);
         }
     }
 }

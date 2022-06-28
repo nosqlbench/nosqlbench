@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.spectest.types;
+package io.nosqlbench.nb.spectest.traversal;
 
-import io.nosqlbench.nb.spectest.core.STNodeAssembly;
-
-import java.util.function.Consumer;
-
-public interface STTypedAssembly extends Consumer<STNodeAssembly> {
+/**
+ * A symblic reference to an earlier argument in the same list, to avoid duplication and expose
+ * uniformity in a visual way.
+ * @param argidx The argument index (0-based) of the previous argument to reference
+ */
+public record STArgumentRef(int argidx) {
 }
