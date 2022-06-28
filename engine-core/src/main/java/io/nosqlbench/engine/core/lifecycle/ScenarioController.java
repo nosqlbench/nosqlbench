@@ -26,6 +26,7 @@ import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
+import io.nosqlbench.nb.api.config.standard.ConfigSuggestions;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -323,7 +324,12 @@ public class ScenarioController {
                     .setMaturity(this.minMaturity)
                     .load(activityDef)
                     .orElseThrow(
-                        () -> new RuntimeException("Driver for '" + activityDef + "' was not found.")
+                        () -> new RuntimeException("Driver for '" + activityDef + "' was not found." +
+                            "\nYou can use --list-drivers to see what drivers are supported in this runtime." +
+                            ConfigSuggestions.suggestAlternates(
+                                new ActivityTypeLoader().getAllSelectors(),activityDef.getActivityType(),4)
+                                .orElse("")
+                        )
                     );
 
                 executor = new ActivityExecutor(

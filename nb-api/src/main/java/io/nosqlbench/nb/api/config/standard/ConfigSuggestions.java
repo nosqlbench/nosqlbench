@@ -24,25 +24,51 @@ import java.util.stream.Collectors;
 public class ConfigSuggestions {
 
     public static Optional<String> getForParam(ConfigModel model, String param) {
-        return suggestAlternateCase(model,param)
-            .or(() -> suggestAlternates(model,param,4));
+        return suggestAlternateCase(model, param)
+            .or(() -> suggestAlternates(model, param, 4));
     }
 
     private static Optional<String> suggestAlternateCase(ConfigModel model, String param) {
         for (String cname : model.getNamedParams().keySet()) {
             if (cname.equalsIgnoreCase(param)) {
-                return Optional.of("Did you mean '" + cname + "'?");
+                return Optional.of(" Did you mean '" + cname + "'?");
             }
         }
         return Optional.empty();
     }
 
-    private static Optional<String> suggestAlternates(ConfigModel model, String param, int maxDistance) {
+    public static Optional<String> suggestAlternates(Set<String> candidates, String provided, int maxDistance) {
+        Set<String>[] sorted = new Set[maxDistance+1];
+        for (int i = 0; i < sorted.length; i++) {
+            sorted[i]=new HashSet<String>();
+        }
+        for (String candidate : candidates) {
+            int distance = LevenshteinDistance.getDefaultInstance().apply(provided, candidate);
+            if (distance<=maxDistance) {
+                sorted[distance].add(candidate);
+            }
+        }
+        for (Set<String> set : sorted) {
+            if (set.size()>1) {
+                return Optional.of(" Did you mean one of '" + String.join("','", set) + "' ?");
+            } else if (set.size()==1) {
+                return Optional.of(" Did you mean '" + set.stream().findFirst().get() + "' ?");
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> suggestAlternates(
+        ConfigModel model,
+        String param,
+        int maxDistance
+    ) {
         Map<Integer, Set<String>> suggestions = new HashMap<>();
+
         for (String candidate : model.getNamedParams().keySet()) {
             try {
                 Integer distance = LevenshteinDistance.getDefaultInstance().apply(param, candidate);
-                if (distance>maxDistance) {
+                if (distance > maxDistance) {
                     continue;
                 }
                 Set<String> strings = suggestions.computeIfAbsent(distance, d -> new HashSet<>());
@@ -55,12 +81,12 @@ public class ConfigSuggestions {
         ArrayList<Integer> params = new ArrayList<>(suggestions.keySet());
         Collections.sort(params);
         List<Set<String>> orderedSets = params.stream().map(suggestions::get).collect(Collectors.toList());
-        if (orderedSets.size()==0) {
+        if (orderedSets.size() == 0) {
             return Optional.empty();
-        } else if (orderedSets.get(0).size()==1) {
-            return Optional.of("Did you mean '" + orderedSets.get(0).stream().findFirst().get() +"'?");
+        } else if (orderedSets.get(0).size() == 1) {
+            return Optional.of(" Did you mean '" + orderedSets.get(0).stream().findFirst().get() + "'?");
         } else {
-            return Optional.of("Did you mean one of " + orderedSets.get(0).toString() + "?\n");
+            return Optional.of(" Did you mean one of " + orderedSets.get(0).toString() + "?\n");
         }
     }
 }
