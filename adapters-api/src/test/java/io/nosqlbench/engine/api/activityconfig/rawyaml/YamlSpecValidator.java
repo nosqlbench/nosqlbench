@@ -16,19 +16,16 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.nb.spectest.api.STAssemblyValidator;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
 import io.nosqlbench.nb.spectest.loaders.STDefaultLoader;
-import io.nosqlbench.nb.spectest.testtypes.STNamedCodeTuples;
-import io.nosqlbench.nb.spectest.testtypes.STNodeReference;
-import io.nosqlbench.nb.spectest.types.STAssemblyValidator;
+import io.nosqlbench.nb.spectest.testmodels.STNamedCodeTuples;
+import io.nosqlbench.nb.spectest.testmodels.STNodeReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
@@ -73,14 +70,9 @@ public class YamlSpecValidator implements STAssemblyValidator {
         if (testblock.size() == 6) {
             STNamedCodeTuples tuples = testblock.getAsNameAndCodeTuples();
             String name = tuples.getTypeSignature();
-
-
             System.out.println(testblock.get(0).getDesc());
             System.out.println(testblock.get(0).getLocationRef());
-
-            if (tuples.getTypeSignature().equals("yaml->json->ops")) {
-                testBracket_YamlJsonOps(tuples);
-            }
+            testBracket_YamlJsonOps(tuples);
         } else {
             throw new RuntimeException("Test block sized " + testblock.size() + " unrecognized by test loader.");
         }
@@ -92,13 +84,13 @@ public class YamlSpecValidator implements STAssemblyValidator {
         validateYamlWithJson(
             tuples.get(0).getName(),
             tuples.get(0).getData(),
-            tuples.get(1).getName(),
-            tuples.get(1)
-        );
+            tuples.get(1).getData(),
+            tuples.get(1),
+            false);
 
         validateYamlWithOpsModel(
-            tuples.get(1).getName(),
-            tuples.get(1).getData(),
+            tuples.get(0).getName(),
+            tuples.get(0).getData(),
             tuples.get(2).getData(),
             tuples.get(2)
         );
@@ -118,17 +110,18 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
-                Assertions.assertThat(stmt_objs).isEqualTo(expectedList);
-
+                try {
+                    Assertions.assertThat(stmt_objs).isEqualTo(expectedList);
+                } catch (Throwable t) {
+                    System.out.println("JSON version:\n"+gson.toJson(stmt_objs)+"\n");
+                    throw t;
+                }
+            } else {
+                throw new RuntimeException("The structurally normalized op template must be a list.");
             }
 
             System.out.println("OK");
         } catch (Exception e) {
-//            System.out.println("Error while validating equivalence between the yaml and the rendered op context:");
-//            System.out.println("yaml:");
-//            System.out.println(yaml);
-//            System.out.println("ops:");
-//            System.out.println(json);
             throw new RuntimeException(e);
         }
 
@@ -140,19 +133,24 @@ public class YamlSpecValidator implements STAssemblyValidator {
      * Compare one or more raw yaml docs to JSON5 representation of the same.
      * For clarity in the docs, a single object is allowed in the json5, in which case
      * an error is thrown if the yaml side contains more or less than 1 element.
-     *
-     * @param desc A moniker describing the test
+     *  @param desc A moniker describing the test
      * @param yaml YAML describing a templated workload
      * @param json JSON describing a templated workload
+     * @param debug
      */
-    private void validateYamlWithJson(String desc, String yaml, String json, STNodeReference testset) {
+    private void validateYamlWithJson(String desc, String yaml, String json, STNodeReference testset, boolean debug) {
         System.out.format("%-40s", "- checking yaml->json");
 
 //        StmtsDocList stmts = StatementsLoader.loadString(yaml);
 
         try {
             List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
-            JsonElement elem = JsonParser.parseString(json);
+            JsonElement elem = null;
+            try {
+                elem = JsonParser.parseString(json);
+            } catch (JsonSyntaxException jse) {
+                throw new RuntimeException("Not recongized as JSON:\n" + json);
+            }
             if (elem.isJsonArray()) {
                 Type type = new TypeToken<List<Map<String, Object>>>() {
                 }.getType();
@@ -168,6 +166,8 @@ public class YamlSpecValidator implements STAssemblyValidator {
                     throw new RuntimeException("comparator expected a single object, but found " + docmaps.size());
                 }
                 System.out.println("OK");
+            } else if (elem.isJsonPrimitive()) {
+                throw new RuntimeException("Invalid type: JsonPrimitive types are not compatible with this validator. Objects and Arrays are.");
             } else {
                 System.out.println("ERROR");
                 throw new RuntimeException("unknown type in comparator: " + json);

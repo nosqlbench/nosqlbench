@@ -18,23 +18,23 @@ body of example
 ```
 
 Further, to match the pattern above, these must occur in sequences like the following, with no other
-intervening content:
+intervening content. If the second fenced code section is a JSON array, then each object within
+it is compared pair-wise with the yaml structure as in a multi-doc scenario. The following
+example is actually tested along with the non-empty templates. It is valid because the second
+block is in array form, and thus compares 0 pair-wise elements.
 
 *yaml:*
-
 ```yaml
 # some yaml here
 ```
 
 *json:*
-
-```
+```json5
 []
 ```
 
 *ops:*
-
-```
+```json5
 []
 ```
 

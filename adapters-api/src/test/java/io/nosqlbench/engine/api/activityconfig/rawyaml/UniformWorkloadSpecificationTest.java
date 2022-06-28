@@ -22,20 +22,38 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.util.regex.Pattern;
+import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.*;
 
 public class UniformWorkloadSpecificationTest {
     private final static Logger logger = LogManager.getLogger(UniformWorkloadSpecificationTest.class);
 
+    private final static Object[] mdPredicate = new Object[] {
+        depth(deepany("yaml:"), ".*"), depth(FencedCodeBlock.class, ".*"),
+        depth(deepany("json:"), ".*"), ref(1),
+        depth(deepany("ops:"), ".*"), ref(1)
+
+    };
     @Test
     public void testTemplatedWorkloads() {
         SpecTest specTester = SpecTest.builder()
             .path("target/classes/workload_definition/")
-            .matchNodes(
-                Pattern.compile("\\*(.*?)\\*\n?"), FencedCodeBlock.class, 0, 1, 0 ,1)
+            .matchNodes(mdPredicate)
             .validators(new YamlSpecValidator())
             .build();
         specTester.run();
     }
+
+//    @Test
+//    public void testWithStructuredPredicate() {
+//        SpecTest specTester = SpecTest.builder()
+//            .path("target/classes/workload_definition/op_template_payloads.md")
+//            .matchNodes(mdPredicate)
+//            .validators(new YamlSpecValidator())
+////            .debug()
+//            .build();
+//        specTester.run();
+//    }
+//
+
 
 }
