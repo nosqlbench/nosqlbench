@@ -74,20 +74,20 @@ import java.util.function.Function;
  * matches the driver name.
  * </p>
  *
- * @param <T> The parameter type of the actual operation which will be used
+ * @param <OPTYPE> The parameter type of the actual operation which will be used
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<T extends Op> extends Function<ParsedOp, OpDispenser<? extends T>> {
+public interface OpMapper<OPTYPE extends Op> extends Function<ParsedOp, OpDispenser<? extends OPTYPE>> {
 
     /**
      * Interrogate the parsed command, and provide a new
      *
-     * @param cmd The {@link ParsedOp} which is the parsed version of the user-provided op template.
+     * @param op The {@link ParsedOp} which is the parsed version of the user-provided op template.
      *            This contains all the fields provided by the user, as well as explicit knowledge of
      *            which ones are static and dynamic.
      * @return An OpDispenser which can be used to synthesize real operations.
      */
     @Override
-    OpDispenser<? extends T> apply(ParsedOp cmd);
+    OpDispenser<? extends OPTYPE> apply(ParsedOp op);
 }

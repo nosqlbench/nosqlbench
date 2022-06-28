@@ -43,17 +43,17 @@ import java.util.function.Function;
  * in the core implementation.
  * </P>
  *
- * @param <R> The type of Runnable operation which will be used to wrap
+ * @param <OPTYPE> The type of Runnable operation which will be used to wrap
  *            all operations for this driver adapter. This allows you to
  *            add context or features common to all operations of this
  *            type.
- * @param <S> The type of context space used by this driver to hold
+ * @param <SPACETYPE> The type of context space used by this driver to hold
  *            cached instances of clients, session, or other native driver
  *            esoterica. This is the shared state which might be needed
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<R extends Op, S> {
+public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
 
     /**
      * <p>
@@ -61,7 +61,7 @@ public interface DriverAdapter<R extends Op, S> {
      * An Op Mapper is a function which can look at the parsed
      * fields in a {@link ParsedOp} and create an OpDispenser.
      * An OpDispenser is a function that will produce a special
-     * type {@link R} that this DriverAdapter implements as its
+     * type {@link OPTYPE} that this DriverAdapter implements as its
      * op implementation.</p>
      *
      * <p>
@@ -97,9 +97,9 @@ public interface DriverAdapter<R extends Op, S> {
      * the type of operation for which they are designed.
      * </p>
      *
-     * @return a synthesizer function for {@link R} op generation
+     * @return a synthesizer function for {@link OPTYPE} op generation
      */
-    OpMapper<R> getOpMapper();
+    OpMapper<OPTYPE> getOpMapper();
 
     /**
      * The preprocessor function allows the driver adapter to remap
@@ -144,12 +144,12 @@ public interface DriverAdapter<R extends Op, S> {
      *
      * @return A cache of named objects
      */
-    DriverSpaceCache<? extends S> getSpaceCache();
+    DriverSpaceCache<? extends SPACETYPE> getSpaceCache();
 
     /**
      * @return A function which can initialize a new S
      */
-    default Function<String, ? extends S> getSpaceInitializer(NBConfiguration cfg) {
+    default Function<String, ? extends SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
         return n -> null;
     }
 
