@@ -25,10 +25,7 @@ import io.nosqlbench.adapter.cqld4.*;
 import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.OpGenerator;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.VariableCapture;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -47,7 +44,7 @@ import java.util.Map;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator {
+public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
 
     private final CqlSession session;
     private final int maxpages;

@@ -21,8 +21,9 @@ import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.OpResultSize;
 
-public class DDBQueryOp extends DynamoDBOp {
+public class DDBQueryOp extends DynamoDBOp implements OpResultSize {
 
     private final Table table;
     private final QuerySpec querySpec;

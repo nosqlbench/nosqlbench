@@ -20,8 +20,9 @@ import com.datastax.dse.driver.api.core.graph.GraphResultSet;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatement;
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.OpResultSize;
 
-public class Cqld4ScriptGraphOp implements CycleOp<GraphResultSet> {
+public class Cqld4ScriptGraphOp implements CycleOp<GraphResultSet>, OpResultSize {
     private final CqlSession session;
     private final ScriptGraphStatement stmt;
     private int resultSize=0;

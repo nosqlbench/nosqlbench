@@ -76,12 +76,12 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
     /**
      * {@inheritDoc}
      *
-     * @param value The cycle number which serves as the seed for any
+     * @param cycle The cycle number which serves as the seed for any
      *              generated op fields to be bound into an operation.
      * @return
      */
     @Override
-    public abstract T apply(long value);
+    public abstract T apply(long cycle);
 
     private void configureInstrumentation(ParsedOp pop) {
         this.instrument = pop.takeStaticConfigOr("instrument", false);
@@ -103,7 +103,9 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
     public void onSuccess(long cycleValue, long nanoTime, long resultsize) {
         if (instrument) {
             successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-            resultSizeHistogram.update(resultsize);
+            if (resultsize>-1) {
+                resultSizeHistogram.update(resultsize);
+            }
         }
         if (timerStops!=null) {
             ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);

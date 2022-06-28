@@ -33,9 +33,5 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  * In the standard flow of an activity, either of the above interfaces is called
  * so long as an Op implements one of them.
  */
-public interface Op {
-
-    default long getResultSize() {
-        return 0;
-    }
+public interface Op extends OpResultSize {
 }
