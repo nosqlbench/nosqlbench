@@ -59,6 +59,7 @@
         <module>adapter-dynamodb</module>
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
+        <module>adapter-mongodb</module>
 
 
         <!-- VIRTDATA MODULES -->
