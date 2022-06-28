@@ -17,13 +17,18 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
-import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModelExpander;
+import io.nosqlbench.nb.api.config.standard.Param;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
@@ -156,4 +161,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         StmtsDocList loaded = StatementsLoader.loadPath(logger, (String) workload, "activities");
         return loaded.getConfigModel();
     };
+
+    public Pattern getVersionRegex() {
+        List<RawStmtsDoc> stmtDocs = rawStmtsDocList.getStmtsDocs();
+        return Pattern.compile(stmtDocs.size()>0 ? stmtDocs.get(0).getVersionRegex() : ".*");
+    }
 }

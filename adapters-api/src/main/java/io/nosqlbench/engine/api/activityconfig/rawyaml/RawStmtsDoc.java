@@ -16,9 +16,13 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
+import io.nosqlbench.engine.api.util.AdaptersApiVersionInfo;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * A statements doc can have both a list of statement blocks and/or a
@@ -33,6 +37,7 @@ public class RawStmtsDoc extends StatementsOwner {
 
     private RawScenarios scenarios = new RawScenarios();
     private final List<RawStmtsBlock> blocks = new ArrayList<>();
+    private String versionRegex = ".+";
 
     // no-args ctor is required
     public RawStmtsDoc() {
@@ -45,6 +50,17 @@ public class RawStmtsDoc extends StatementsOwner {
     }
 
     public void setFieldsByReflection(Map<String, Object> properties) {
+        if (properties.containsKey("version_regex")) {
+            String versionRegex = properties.remove("version_regex").toString();
+            if (versionRegex!=null) {
+                Pattern versionpattern = Pattern.compile(versionRegex);
+                String version = new AdaptersApiVersionInfo().getVersion();
+                if (!versionpattern.matcher(version).matches()) {
+                    throw new OpConfigError("Unable to load yaml with this version '" + version + " since " +
+                        "the required version doesn't match version_regex '" + versionRegex + "' from yaml.");
+                }
+            }
+        }
         Object blocksObjects = properties.remove("blocks");
         if (blocksObjects instanceof List) {
             List<Object> blockList = ((List<Object>) blocksObjects);
@@ -79,7 +95,6 @@ public class RawStmtsDoc extends StatementsOwner {
         }
 
         Object scenariosData = properties.remove("scenarios");
-
         if (scenariosData != null) {
             scenarios.setPropertiesByReflection(scenariosData);
         }
@@ -119,6 +134,14 @@ public class RawStmtsDoc extends StatementsOwner {
 
     public void setScenarios(RawScenarios scenarios) {
         this.scenarios = scenarios;
+    }
+
+    public String getVersionRegex() {
+        return this.versionRegex;
+    }
+
+    public void setVersionRegex(String regex) {
+        this.versionRegex = regex;
     }
 
 }
