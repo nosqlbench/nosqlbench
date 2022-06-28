@@ -32,10 +32,10 @@ public class StdoutOpMapper implements OpMapper<StdoutOp> {
     }
 
     @Override
-    public OpDispenser<StdoutOp> apply(ParsedOp cmd) {
-        LongFunction<String> spacefunc = cmd.getAsFunctionOr("space", "default");
+    public OpDispenser<StdoutOp> apply(ParsedOp op) {
+        LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
         LongFunction<StdoutSpace> ctxfunc = (cycle) -> ctxcache.get(spacefunc.apply(cycle));
-        return new StdoutOpDispenser(cmd,ctxfunc);
+        return new StdoutOpDispenser(op,ctxfunc);
     }
 
 }

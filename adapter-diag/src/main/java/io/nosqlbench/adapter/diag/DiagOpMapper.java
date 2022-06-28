@@ -38,11 +38,11 @@ public class DiagOpMapper implements OpMapper<DiagOp>, NBReconfigurable {
     }
 
     @Override
-    public OpDispenser<? extends DiagOp> apply(ParsedOp cmd) {
-        DiagOpDispenser dispenser = new DiagOpDispenser(cmd);
-        LongFunction<String> spaceName = cmd.getAsFunctionOr("space", "default");
+    public OpDispenser<? extends DiagOp> apply(ParsedOp op) {
+        DiagOpDispenser dispenser = new DiagOpDispenser(op);
+        LongFunction<String> spaceName = op.getAsFunctionOr("space", "default");
         LongFunction<DiagSpace> spacef = l -> spaceCache.get(spaceName.apply(l));
-        dispensers.put(cmd.getName(),dispenser);
+        dispensers.put(op.getName(),dispenser);
         return dispenser;
     }
 

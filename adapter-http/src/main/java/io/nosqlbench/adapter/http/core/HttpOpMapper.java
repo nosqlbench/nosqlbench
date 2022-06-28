@@ -35,9 +35,9 @@ public class HttpOpMapper implements OpMapper<HttpOp> {
     }
 
     @Override
-    public OpDispenser<? extends HttpOp> apply(ParsedOp cmd) {
-        LongFunction<String> spaceNameF = cmd.getAsFunctionOr("space", "default");
+    public OpDispenser<? extends HttpOp> apply(ParsedOp op) {
+        LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
         LongFunction<HttpSpace> spaceFunc = l -> spaceCache.get(spaceNameF.apply(l));
-        return new HttpOpDispenser(spaceFunc,cmd);
+        return new HttpOpDispenser(spaceFunc, op);
     }
 }

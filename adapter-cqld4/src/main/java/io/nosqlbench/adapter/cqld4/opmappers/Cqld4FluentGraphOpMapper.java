@@ -54,19 +54,19 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
     }
 
     @Override
-    public OpDispenser<? extends Op> apply(ParsedOp cmd) {
+    public OpDispenser<? extends Op> apply(ParsedOp op) {
         GraphTraversalSource g = DseGraph.g;
 
-        ParsedStringTemplate fluent = cmd.getAsTemplate(target.field).orElseThrow();
+        ParsedStringTemplate fluent = op.getAsTemplate(target.field).orElseThrow();
         String scriptBodyWithRawVarRefs = fluent.getPositionalStatement();
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
-        if (cmd.isDynamic("imports")) {
+        if (op.isDynamic("imports")) {
             throw new OpConfigError("You may only define imports as a static list. Dynamic values are not allowed.");
         }
 
-        List imports = cmd.getOptionalStaticValue("imports", List.class)
+        List imports = op.getOptionalStaticValue("imports", List.class)
             .orElse(List.of("org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__"));
         String[] verifiedClasses = expandClassNames(imports);
         ImportCustomizer importer = new ImportCustomizer();
@@ -79,10 +79,10 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
             return gshell.parse(scriptBodyWithRawVarRefs);
         };
 
-        LongFunction<? extends String> graphnameFunc = cmd.getAsRequiredFunction("graphname");
+        LongFunction<? extends String> graphnameFunc = op.getAsRequiredFunction("graphname");
         Bindings virtdataBindings = new BindingsTemplate(fluent.getBindPoints()).resolveBindings();
 
-        return new Cqld4FluentGraphOpDispenser(cmd, graphnameFunc, sessionFunc, virtdataBindings, supplier);
+        return new Cqld4FluentGraphOpDispenser(op, graphnameFunc, sessionFunc, virtdataBindings, supplier);
     }
 
     private String[] expandClassNames(List l) {

@@ -34,7 +34,7 @@ public class Cqld4GremlinOpMapper implements OpMapper<Cqld4ScriptGraphOp> {
         this.targetFunction = targetFunction;
     }
 
-    public OpDispenser<Cqld4ScriptGraphOp> apply(ParsedOp cmd) {
-        return new Cqld4GremlinOpDispenser(sessionFunc, targetFunction, cmd);
+    public OpDispenser<Cqld4ScriptGraphOp> apply(ParsedOp op) {
+        return new Cqld4GremlinOpDispenser(sessionFunc, targetFunction, op);
     }
 }

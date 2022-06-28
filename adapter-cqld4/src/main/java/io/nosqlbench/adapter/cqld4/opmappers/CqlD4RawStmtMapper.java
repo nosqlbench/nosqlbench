@@ -36,7 +36,7 @@ public class CqlD4RawStmtMapper implements OpMapper<Cqld4CqlOp> {
     }
 
     @Override
-    public OpDispenser<? extends Cqld4CqlOp> apply(ParsedOp cmd) {
-        return new Cqld4RawStmtDispenser(sessionFunc, targetFunction, cmd);
+    public OpDispenser<? extends Cqld4CqlOp> apply(ParsedOp op) {
+        return new Cqld4RawStmtDispenser(sessionFunc, targetFunction, op);
     }
 }

@@ -37,8 +37,8 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
     }
 
     @Override
-    public OpDispenser<DynamoDBOp> apply(ParsedOp cmd) {
-        String space = cmd.getStaticConfigOr("space", "default");
+    public OpDispenser<DynamoDBOp> apply(ParsedOp op) {
+        String space = op.getStaticConfigOr("space", "default");
         DynamoDB ddb = cache.get(space).getDynamoDB();
 
         /*
@@ -46,17 +46,17 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
          * a data structure that can be converted into JSON, bypassing any further
          * specialized type-checking or op-type specific features
          */
-        if (cmd.isDefined("body")) {
+        if (op.isDefined("body")) {
             throw new RuntimeException("This mode is reserved for later. Do not use the 'body' op field.");
 //            return new RawDynamoDBOpDispenser(cmd);
         } else {
-            TypeAndTarget<DynamoDBCmdType,String> cmdType = cmd.getTypeAndTarget(DynamoDBCmdType.class,String.class);
+            TypeAndTarget<DynamoDBCmdType,String> cmdType = op.getTypeAndTarget(DynamoDBCmdType.class,String.class);
             return switch (cmdType.enumId) {
-                case CreateTable -> new DDBCreateTableOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case PutItem -> new DDBPutItemOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case GetItem -> new DDBGetItemOpDispenser(ddb, cmd, cmdType.targetFunction);
-                case Query -> new DDBQueryOpDispenser(ddb, cmd, cmdType.targetFunction);
+                case CreateTable -> new DDBCreateTableOpDispenser(ddb, op, cmdType.targetFunction);
+                case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, op, cmdType.targetFunction);
+                case PutItem -> new DDBPutItemOpDispenser(ddb, op, cmdType.targetFunction);
+                case GetItem -> new DDBGetItemOpDispenser(ddb, op, cmdType.targetFunction);
+                case Query -> new DDBQueryOpDispenser(ddb, op, cmdType.targetFunction);
             };
         }
 

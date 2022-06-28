@@ -46,10 +46,10 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
         this.target = target;
     }
 
-    public OpDispenser<Cqld4CqlOp> apply(ParsedOp cmd) {
+    public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
-        ParsedStringTemplate stmtTpl = cmd.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
-            "No statement was found in the op template:" + cmd
+        ParsedStringTemplate stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
+            "No statement was found in the op template:" + op
         ));
 
         RSProcessors processors = new RSProcessors();
@@ -57,7 +57,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
             processors.add(() -> new CqlFieldCaptureProcessor(stmtTpl.getCaptures()));
         }
 
-        Optional<List> processorList = cmd.getOptionalStaticConfig("processors", List.class);
+        Optional<List> processorList = op.getOptionalStaticConfig("processors", List.class);
 
         processorList.ifPresent(l -> {
             l.forEach(m -> {
@@ -67,7 +67,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
             });
         });
 
-        return new Cqld4PreparedStmtDispenser(sessionFunc, cmd, stmtTpl, processors);
+        return new Cqld4PreparedStmtDispenser(sessionFunc, op, stmtTpl, processors);
 
     }
 }

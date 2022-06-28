@@ -44,28 +44,28 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
      * for it. Since the operations under the CQL driver 4.* do not follow a common type structure, we use the
      * base types in the NoSQLBench APIs and treat them somewhat more generically than with other drivers.
      *
-     * @param cmd The {@link ParsedOp} which is the parsed version of the user-provided op template.
+     * @param op The {@link ParsedOp} which is the parsed version of the user-provided op template.
      *            This contains all the fields provided by the user, as well as explicit knowledge of
      *            which ones are static and dynamic.
      * @return An op dispenser for each provided op command
      */
-    public OpDispenser<? extends Op> apply(ParsedOp cmd) {
+    public OpDispenser<? extends Op> apply(ParsedOp op) {
 
-        LongFunction<String> spaceName = cmd.getAsFunctionOr("space", "default");
+        LongFunction<String> spaceName = op.getAsFunctionOr("space", "default");
         // Since the only needed thing in the Cqld4Space is the session, we can short-circuit
         // to it here instead of stepping down from the cycle to the space to the session
         LongFunction<CqlSession> sessionFunc = l -> cache.get(spaceName.apply(l)).getSession();
 
         CqlD4OpType opType = CqlD4OpType.prepared;
 
-        TypeAndTarget<CqlD4OpType, String> target = cmd.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
+        TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
 
         return switch (target.enumId) {
-            case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
-            case simple -> new CqlD4CqlSimpleStmtMapper(sessionFunc, target.targetFunction).apply(cmd);
-            case prepared -> new CqlD4PreparedStmtMapper(sessionFunc, target).apply(cmd);
-            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc, target.targetFunction).apply(cmd);
-            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc, target).apply(cmd);
+            case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(op);
+            case simple -> new CqlD4CqlSimpleStmtMapper(sessionFunc, target.targetFunction).apply(op);
+            case prepared -> new CqlD4PreparedStmtMapper(sessionFunc, target).apply(op);
+            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc, target.targetFunction).apply(op);
+            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc, target).apply(op);
         };
     }
 
