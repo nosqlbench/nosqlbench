@@ -53,7 +53,6 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                             LongFunction<Boolean> tempDestBoolFunc,
                             LongFunction<String> destTypeStrFunc,
                             LongFunction<String> destNameStrFunc,
-                            LongFunction<Boolean> reuseClntBoolFunc,
                             LongFunction<Boolean> asyncAPIBoolFunc,
                             LongFunction<Integer> txnBatchNumFunc,
                             LongFunction<String> subNameStrFunc,
@@ -68,7 +67,6 @@ public class S4JMsgReadMapper extends S4JOpMapper {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc);
 
@@ -89,7 +87,6 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         String destName = destNameStrFunc.apply(value);
         boolean asyncApi = asyncAPIBoolFunc.apply(value);
         int txnBatchNum = txnBatchNumFunc.apply(value);
-        boolean reuseClnt = reuseClntBoolFunc.apply(value);
         String subName = subNameStrFunc.apply(value);
         float msgAckRatio = msgAckRatioFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
@@ -97,8 +94,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         long readTimeout = readTimeoutFunc.apply(value);
         boolean recvNoWait = recvNoWaitBoolFunc.apply(value);
 
-        int jmsSessionSeqNum = (int)(value % s4JActivity.getMaxNumSessionPerConn());
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getS4jJmsContextWrapper(jmsSessionSeqNum);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 
@@ -118,10 +114,10 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                 destType,
                 subName,
                 msgSelector,
+                msgAckRatio,
                 noLocal,
                 durable,
                 shared,
-                reuseClnt,
                 asyncApi);
         }
         catch (JMSException jmsException) {

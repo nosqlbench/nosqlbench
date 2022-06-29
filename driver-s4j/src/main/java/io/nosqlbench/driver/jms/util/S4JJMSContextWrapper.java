@@ -1,5 +1,7 @@
 package io.nosqlbench.driver.jms.util;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.jms.JMSContext;
 
 /*
@@ -29,4 +31,11 @@ public class S4JJMSContextWrapper {
 
     public String getJmsContextIdentifer() { return jmsContextIdentifer; }
     public JMSContext getJmsContext() { return jmsContext; }
+
+    public String toString() {
+        return new ToStringBuilder(this).
+            append("jmsContextIdentifer", jmsContextIdentifer).
+            append("jmsContext", jmsContext.toString()).
+            toString();
+    }
 }

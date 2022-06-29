@@ -46,7 +46,9 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
 
     private final static Logger logger = LogManager.getLogger(S4JActivity.class);
 
-    // How many sessions per JMS connection (default 1)
+    // How many JMS connections per NB S4J execution
+    private int maxNumConn;
+    // How many sessions per JMS connection
     private int maxNumSessionPerConn;
     private S4JSpaceCache s4JSpaceCache;
     private S4JConnInfo s4JConnInfo;
@@ -94,6 +96,10 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String pulsarSvcUrl =
             activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
 
+        String numConnectionStr =
+            activityDef.getParams().getOptionalString("num_conn").orElse("");
+        maxNumConn = NumberUtils.toInt(numConnectionStr, 1);
+
         String numSessionPerConnStr =
             activityDef.getParams().getOptionalString("num_session").orElse("");
         maxNumSessionPerConn = NumberUtils.toInt(numSessionPerConnStr, 1);
@@ -140,6 +146,7 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
     }
 
     public int getMaxNumSessionPerConn() { return this.maxNumSessionPerConn; }
+    public int getMaxNumConn() { return this.maxNumConn; }
 
     public void processMsgAck(int jmsSessionMode, Message message, float msgAckRatio) {
         if ((jmsSessionMode != Session.AUTO_ACKNOWLEDGE) &&

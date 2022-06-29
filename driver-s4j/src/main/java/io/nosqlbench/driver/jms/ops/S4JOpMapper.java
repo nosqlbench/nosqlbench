@@ -36,7 +36,6 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
     protected final LongFunction<Boolean> tempDestBoolFunc;
     protected final LongFunction<String> destTypeStrFunc;
     protected final LongFunction<String> destNameStrFunc;
-    protected final LongFunction<Boolean> reuseClntBoolFunc;
     protected final LongFunction<Boolean> asyncAPIBoolFunc;
     protected final LongFunction<Integer> txnBatchNumFunc;
 
@@ -46,7 +45,6 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
                        LongFunction<Boolean> tempDestBoolFunc,
                        LongFunction<String> destTypeStrFunc,
                        LongFunction<String> destNameStrFunc,
-                       LongFunction<Boolean> reuseClntBoolFunc,
                        LongFunction<Boolean> asyncAPIBoolFunc,
                        LongFunction<Integer> txnBatchNumFunc)
     {
@@ -56,7 +54,6 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
         this.tempDestBoolFunc = tempDestBoolFunc;
         this.destTypeStrFunc = destTypeStrFunc;
         this.destNameStrFunc = destNameStrFunc;
-        this.reuseClntBoolFunc = reuseClntBoolFunc;
         this.asyncAPIBoolFunc = asyncAPIBoolFunc;
         this.txnBatchNumFunc = txnBatchNumFunc;
     }

@@ -82,41 +82,41 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
 
     @Override
     public void run() {
-        Message recvdMsg;
+        // Please see S4JSpace::getOrCreateJmsConsumer() for async processing
+        if (!asyncApi) {
+            Message recvdMsg;
 
-        try {
-            // By default, if message read time out value is 0, it will block forever
-            // Simulate it as the case for recvNoWait
-            if (recvNoWait || (msgReadTimeout == 0)) {
-                recvdMsg = jmsConsumer.receiveNoWait();
-            } else {
-                recvdMsg = jmsConsumer.receive(msgReadTimeout);
-            }
-            if (this.commitTransact) jmsContext.commit();
+            try {
+                // By default, if message read time out value is 0, it will block forever
+                // Simulate it as the case for recvNoWait
+                if (recvNoWait || (msgReadTimeout == 0)) {
+                    recvdMsg = jmsConsumer.receiveNoWait();
+                } else {
+                    recvdMsg = jmsConsumer.receive(msgReadTimeout);
+                }
+                if (this.commitTransact) jmsContext.commit();
 
-            // Please see S4JActivity::getOrCreateJmsConsumer() for async processing
-            if (!asyncApi) {
                 if (recvdMsg != null) {
                     s4JActivity.processMsgAck(jmsSessionMode, recvdMsg, msgAckRatio);
+
+                    byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
+                    int messageSize = recvdMsgBody.length;
+                    bytesCounter.inc(messageSize);
+                    messageSizeHistogram.update(messageSize);
+
+                    if (logger.isDebugEnabled()) {
+                        // for testing purpose
+                        String myMsgSeq = recvdMsg.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
+                        logger.debug("Sync message receive successful - message ID {} ({}) "
+                            , recvdMsg.getJMSMessageID(), myMsgSeq);
+                    }
+
+                    s4JSpace.incTotalOpResponseCnt();
                 }
-
-                byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
-                int messageSize = recvdMsgBody.length;
-                bytesCounter.inc(messageSize);
-                messageSizeHistogram.update(messageSize);
-
-                if (logger.isDebugEnabled()) {
-                    // for testing purpose
-                    String myMsgSeq = recvdMsg.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-                    logger.debug("Sync message receive successful - message ID {} ({}) "
-                        , recvdMsg.getJMSMessageID(), myMsgSeq);
-                }
-
-                s4JSpace.incTotalOpResponseCnt();
+            } catch (JMSException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Unexpected errors when receiving a JMS message.");
             }
-        } catch (JMSException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected errors when receiving a JMS message.");
         }
     }
 }

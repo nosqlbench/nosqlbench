@@ -80,7 +80,6 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
                 if (logger.isDebugEnabled()) {
                     // for testing purpose
                     String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-
                     logger.debug("Sync message send successful - message ID {} ({}) "
                         , message.getJMSMessageID(), myMsgSeq);
                 }

@@ -22,10 +22,12 @@ package io.nosqlbench.driver.jms;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
+import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
 import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
+import io.nosqlbench.driver.jms.util.S4JMessageListener;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import org.apache.commons.lang3.StringUtils;
@@ -61,9 +63,8 @@ public class S4JSpace {
     // Represents the JMS connection
     private PulsarConnectionFactory s4jConnFactory;
 
-    // - Each S4J space currently represents one JMS connection which could have
-    //   multiple JMS sessions. Multi-connection scenario can be achieved using
-    //   multiple NB processes.
+    // - Each S4J space currently represents a number of JMS connections (\"num_conn\" NB CLI parameter);
+    // - JMS connection can have a number of JMS sessions (\"num_session\" NB CLI parameter).
     // - Each JMS session has its own sets of JMS destinations, producers, consumers, etc.
     private final ConcurrentHashMap<String, S4JJMSContextWrapper> jmsContexts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Destination> jmsDestinations = new ConcurrentHashMap<>();
@@ -85,6 +86,8 @@ public class S4JSpace {
         this.activityDef = s4JActivity.getActivityDef();
     }
 
+    public S4JActivity getS4JActivity() { return this.s4JActivity; }
+
     public CommandTemplate getCmdTpl() { return this.cmdTpl; }
     public void setCmdTpl(CommandTemplate cmdTpl) { this.cmdTpl = cmdTpl; }
 
@@ -92,10 +95,11 @@ public class S4JSpace {
     // Instead, shut down when either one of the following condition is satisfied
     // 1) the total number of the received operation response is the same as the total number of operations being executed;
     // 2) time has passed for 1 minutes
-    private void waitUntilAllOpfinished(String stmtOpType, Instant shutdownStartTime) {
+    private void waitUntilAllOpfinished(String stmtOpType) {
         long totalCycleNum = this.s4JActivity.getActivityDef().getEndCycle();
         long totalResponseCnt = 0;
 
+        Instant shutdownStartTime = Instant.now();
         long timeElapsed = 0;
         do {
             Instant curTime = Instant.now();
@@ -106,16 +110,17 @@ public class S4JSpace {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                 throw new S4JDriverUnexpectedException(e);
             }
-        } while ((totalResponseCnt < totalCycleNum) && (timeElapsed <= 60));
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Total operation (type: {}) response received: {}. Total cycle number: {}",
-                stmtOpType,
-                totalResponseCnt,
-                totalCycleNum);
-        }
+            if (logger.isDebugEnabled()) {
+                logger.debug("shutdownSpace::waitUntilAllOpfinished -- Total operation (type: {}) response received: {}. Total cycle number: {}. Shutdown TimeElapsed: {}",
+                    stmtOpType,
+                    totalResponseCnt,
+                    totalCycleNum,
+                    timeElapsed);
+            }
+        } while ((totalResponseCnt < totalCycleNum) && (timeElapsed <= 5));
     }
 
     // Properly shut down all Pulsar objects (producers, consumers, etc.) that are associated with this space
@@ -129,7 +134,7 @@ public class S4JSpace {
                 S4JActivityUtil.MSG_OP_TYPES.MSG_READ_DURABLE.label,
                 S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED.label,
                 S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label)) {
-                this.waitUntilAllOpfinished(stmtOpType, Instant.now());
+                this.waitUntilAllOpfinished(stmtOpType);
             }
 
             this.txnBatchTrackingCnt.remove();
@@ -142,14 +147,23 @@ public class S4JSpace {
                 if (jmsConsumer != null) jmsConsumer.close();
             }
 
-            for (S4JJMSContextWrapper s4JJMSContextWrapper : jmsContexts.values()) {
-                if (s4JJMSContextWrapper != null) {
-                    JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-                    jmsContext.close();
+            String jmsConnContextIdStr;
+            S4JJMSContextWrapper s4JJMSContextWrapper;
+            for (int i=0; i< s4JActivity.getMaxNumConn(); i++) {
+                for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
+                    jmsConnContextIdStr = getJmsContextIdentifier(i,j);
+                    s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
+                    s4JJMSContextWrapper.getJmsContext().close();
                 }
+
+                jmsConnContextIdStr = getJmsContextIdentifier(i,0);
+                s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
+                s4JJMSContextWrapper.getJmsContext().close();
             }
+
+            s4jConnFactory.close();
         }
-        catch (JMSException e) {
+        catch (JMSException je) {
             throw new RuntimeException("Unexpected error when shutting down S4JSpace!");
         }
     }
@@ -173,10 +187,10 @@ public class S4JSpace {
         totalOpResponseCnt.set(0);
     }
 
-    private String getJmsContextIdentifier(int jmsSessionSeqNum) {
+    private String getJmsContextIdentifier(int jmsConnSeqNum, int jmsSessionSeqNum) {
         return S4JActivityUtil.buildCacheKey(
             this.spaceName,
-            this.s4jConnFactory.toString(),
+            StringUtils.join("conn-", jmsConnSeqNum),
             StringUtils.join("session-", jmsSessionSeqNum));
     }
 
@@ -187,29 +201,45 @@ public class S4JSpace {
                 cfgMap = s4JConnInfo.getS4jConfMap();
                 s4jConnFactory = new PulsarConnectionFactory(cfgMap);
 
+                String curThreadName = Thread.currentThread().getName();
                 int sessionMode = s4JConnInfo.getSessionMode();
 
-                // Establish one JMS connection
-                JMSContext jmsContext = null;
-                if (sessionMode == -1)
-                    jmsContext = s4jConnFactory.createContext();
-                else
-                    jmsContext = s4jConnFactory.createContext(sessionMode);
+                for (int i=0; i< s4JActivity.getMaxNumConn(); i++) {
+                    // Establish a JMS connection
+                    String jmsConnContextIdStr = getJmsContextIdentifier(i,0);
+                    String clientIdStr = Base64.getEncoder().encodeToString(jmsConnContextIdStr.getBytes());
 
-                jmsContext.setExceptionListener(e -> {
+                    JMSContext jmsConnContext = new PulsarJMSContext(s4jConnFactory, sessionMode);
+                    jmsConnContext.setClientID(clientIdStr);
+                    jmsConnContext.setExceptionListener(e -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.error("onException::Unexpected JMS error happened:" + e.getMessage());
+                        }
+                    });
+
+                    S4JJMSContextWrapper jmsContextWrapper = new S4JJMSContextWrapper(jmsConnContextIdStr, jmsConnContext);
+                    jmsContexts.put(jmsConnContextIdStr, jmsContextWrapper);
+
                     if (logger.isDebugEnabled()) {
-                        logger.error("onException::Unexpected JMS error happened:" + e.getMessage());
+                        logger.debug("{} -- {}",
+                            curThreadName,
+                            jmsContextWrapper );
                     }
-                });
 
-                String jmsContextIdStr = getJmsContextIdentifier(0);
-                jmsContexts.put(jmsContextIdStr, new S4JJMSContextWrapper(jmsContextIdStr, jmsContext));
+                    // The rest of the JMSContexts share the same JMS connection, but using separate JMS sessions
+                    for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
+                        String jmsSessionContextIdStr = getJmsContextIdentifier(i, j);
+                        JMSContext jmsSessionContext = jmsConnContext.createContext(jmsConnContext.getSessionMode());
 
-                // The rest of the JMSContexts share the same JMS connection, but using separate JMS sessions
-                for (int i = 1; i < s4JActivity.getMaxNumSessionPerConn(); i++) {
-                    JMSContext newSessionContext = jmsContext.createContext(jmsContext.getSessionMode());
-                    jmsContextIdStr = getJmsContextIdentifier(i);
-                    jmsContexts.put(jmsContextIdStr, new S4JJMSContextWrapper(jmsContextIdStr, newSessionContext));
+                        jmsContextWrapper = new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsSessionContext);
+                        jmsContexts.put(jmsSessionContextIdStr, jmsContextWrapper);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("{} -- {}",
+                                curThreadName,
+                                jmsContextWrapper);
+                        }
+                    }
                 }
             } catch (JMSRuntimeException e) {
                 if (logger.isDebugEnabled()) {
@@ -225,9 +255,33 @@ public class S4JSpace {
     public S4JJMSContextWrapper getS4jJmsContextWrapper(String identifier) {
         return jmsContexts.get(identifier);
     }
-    public S4JJMSContextWrapper getS4jJmsContextWrapper(int jmsSessionSeqNum) {
-        String jmsContextIdStr = getJmsContextIdentifier(jmsSessionSeqNum);
-        return getS4jJmsContextWrapper(jmsContextIdStr);
+
+    // Get the next JMSContext Wrapper in the following approach
+    // - The JMSContext wrapper pool has the following sequence (assuming 3 [c]onnections and 2 [s]essions per connection):
+    //   c0s0, c0s1, c1s0, c1s1, c2s0, c2s1
+    // - When getting the next JMSContext wrapper, always get from the next connection, starting from the first session
+    //   When reaching the end of connection, move back to the first connection, but get the next session.
+    //   e.g. first: c0s0   (0)
+    //        next:  c1s0   (1)
+    //        next:  c2s0   (2)
+    //        next:  c0s1   (3)
+    //        next:  c1s1   (4)
+    //        next:  c2s1   (5)
+    //        next:  c0s0   (6)  <-- repeat the pattern
+    //        next:  c1s0   (7)
+    //        next:  c2s0   (8)
+    //        next:  c0s1   (9)
+    //        ... ...
+    public S4JJMSContextWrapper getNextS4jJmsContextWrapper(long curCycle) {
+        int totalConnNum = s4JActivity.getMaxNumConn();
+        int totalSessionPerConnNum = s4JActivity.getMaxNumSessionPerConn();
+
+        int connSeqNum =  (int) curCycle % totalConnNum;
+        int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
+        String jmsContextIdStr = getJmsContextIdentifier(connSeqNum, sessionSeqNum);
+        S4JJMSContextWrapper s4JJMSContextWrapper = jmsContexts.get(jmsContextIdStr);
+
+        return s4JJMSContextWrapper;
     }
 
     /**
@@ -269,6 +323,17 @@ public class S4JSpace {
         }
     }
 
+    // Get simplified NB thread name
+    private String getSimplifiedNBThreadName(String fullThreadName) {
+        assert (StringUtils.isNotBlank(fullThreadName));
+
+        if (StringUtils.contains(fullThreadName, '/'))
+            return StringUtils.substringAfterLast(fullThreadName, "/");
+        else
+            return fullThreadName;
+    }
+
+
     /**
      * If the JMS producer that corresponds to a destination exists, reuse it; Otherwise, create it
      */
@@ -276,18 +341,11 @@ public class S4JSpace {
         S4JJMSContextWrapper s4JJMSContextWrapper,
         Destination destination,
         String destType,
-        boolean reuseClnt,
         boolean asyncApi) throws JMSException
     {
-        String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifer();
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-
-        String destName = S4JActivityUtil.getDestinationName(destination, destType);
-
-        String producerCacheKey = S4JActivityUtil.buildCacheKey(jmsContextIdStr, "producer");;
-        if (!reuseClnt)
-            producerCacheKey = S4JActivityUtil.buildCacheKey(jmsContextIdStr, "producer", destType, destName);
-
+        String producerCacheKey = S4JActivityUtil.buildCacheKey(
+            getSimplifiedNBThreadName(Thread.currentThread().getName()), "producer");
         JMSProducer jmsProducer = jmsProducers.get(producerCacheKey);
 
         if (jmsProducer == null) {
@@ -334,6 +392,11 @@ public class S4JSpace {
                 });
             }
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("Producer created: {} -- {} -- {}",
+                    producerCacheKey, jmsProducer, s4JJMSContextWrapper);
+            }
+
             jmsProducers.put(producerCacheKey, jmsProducer);
         }
 
@@ -349,42 +412,16 @@ public class S4JSpace {
         String destType,
         String subName,
         String msgSelector,
+        float msgAckRatio,
         boolean nonLocal,
         boolean durable,
         boolean shared,
-        boolean reuseClnt,
         boolean asyncApi) throws JMSException
     {
-        String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifer();
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-
         boolean isTopic = StringUtils.equalsIgnoreCase(destType, S4JActivityUtil.JMS_DEST_TYPES.TOPIC.label);
-        String destName = S4JActivityUtil.getDestinationName(destination, destType);
-
-        String consumerCacheKey = S4JActivityUtil.buildCacheKey(jmsContextIdStr, "consumer");
-        if (!reuseClnt) {
-            if (isTopic) {
-                consumerCacheKey = S4JActivityUtil.buildCacheKey(
-                    jmsContextIdStr,
-                    "consumer",
-                    destType,
-                    destName,
-                    msgSelector,
-                    String.valueOf(nonLocal),
-                    String.valueOf(durable),
-                    String.valueOf(shared)
-                );
-            } else {
-                consumerCacheKey = S4JActivityUtil.buildCacheKey(
-                    jmsContextIdStr,
-                    "consumer",
-                    destType,
-                    destName,
-                    msgSelector,
-                    String.valueOf(nonLocal)
-                );
-            }
-        }
+        String consumerCacheKey = S4JActivityUtil.buildCacheKey(
+            getSimplifiedNBThreadName(Thread.currentThread().getName()), "consumer");
 
         JMSConsumer jmsConsumer = jmsConsumers.get(consumerCacheKey);
         if (jmsConsumer == null) {
@@ -394,20 +431,6 @@ public class S4JSpace {
                 else {
                     if (StringUtils.isBlank(subName)) {
                         throw new RuntimeException("Subscription name is required for receiving messages from a durable or shared topic!");
-                    }
-
-                    if (durable) {
-                        String clientID = jmsContext.getClientID();
-                        if (StringUtils.isBlank(clientID)) {
-                            clientID = Base64.getEncoder().encodeToString(consumerCacheKey.getBytes());
-                            try {
-                                jmsContext.setClientID(clientID);
-                            }
-                            catch (JMSRuntimeException jre) {
-                                jre.printStackTrace();
-                                //throw new RuntimeException("Unable to set Client ID properly for a durable subscription!");
-                            }
-                        }
                     }
 
                     if (durable && !shared)
@@ -423,28 +446,13 @@ public class S4JSpace {
             }
 
             if (asyncApi) {
-                jmsConsumer.setMessageListener(message -> {
-                    try {
-                        int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
-                        Counter bytesCounter = this.s4JActivity.getBytesCounter();
-                        bytesCounter.inc(msgSize);
-                        Histogram messageSizeHistogram = this.s4JActivity.getMessagesizeHistogram();
-                        messageSizeHistogram.update(msgSize);
+                S4JMessageListener messageListener = new S4JMessageListener(jmsContext, this, msgAckRatio);
+                jmsConsumer.setMessageListener(messageListener);
+            }
 
-                        if (logger.isDebugEnabled()) {
-                            // for testing purpose
-                            String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-
-                            logger.debug("onMessage::Async message receive successful - message ID {} ({}) "
-                                , message.getJMSMessageID(), myMsgSeq);
-                        }
-
-                        incTotalOpResponseCnt();
-                    }
-                    catch (JMSException jmsException) {
-                        logger.warn("onMessage::Unexpected error:" + jmsException.getMessage());
-                    }
-                });
+            if (logger.isDebugEnabled()) {
+                logger.debug("Consumer created: {} -- {} -- {}",
+                    consumerCacheKey, jmsConsumer, s4JJMSContextWrapper);
             }
 
             jmsConsumers.put(consumerCacheKey, jmsConsumer);
