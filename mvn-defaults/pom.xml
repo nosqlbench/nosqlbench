@@ -41,7 +41,6 @@
         <jaxb.core.version>2.3.0.1</jaxb.core.version>
         <jaxb.impl.version>2.4.0-b180830.0438</jaxb.impl.version>
         <joda.time.version>2.10.14</joda.time.version>
-        <jmh.version>1.34</jmh.version>
 
         <lz4.version>1.4.1</lz4.version>
         <!--    <metrics.version>4.0.7</metrics.version>-->
@@ -149,12 +148,12 @@
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-core</artifactId>
-                <version>${jmh.version}</version>
+                <version>1.35</version>
             </dependency>
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
-                <version>${jmh.version}</version>
+                <version>1.35</version>
             </dependency>
 
             <dependency>

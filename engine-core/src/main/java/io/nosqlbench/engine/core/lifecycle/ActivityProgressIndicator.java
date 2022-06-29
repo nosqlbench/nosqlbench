@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.api.metrics.PeriodicRunnable;
@@ -76,8 +76,8 @@ public class ActivityProgressIndicator implements Runnable {
 
     @Override
     public void run() {
-        Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
-        for (ProgressMeter meter : progressMeters) {
+        Collection<ProgressMeterDisplay> progressMeterDisplays = sc.getProgressMeters();
+        for (ProgressMeterDisplay meter : progressMeterDisplays) {
 
             boolean lastReport = false;
             if (meter.getRatioComplete() >= 1.0d ||

@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.input;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -150,11 +150,11 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     }
 
     @Override
-    public ProgressMeter getProgressMeter() {
+    public ProgressMeterDisplay getProgressMeter() {
         return new AtomicInputProgress(activityDef.getAlias(), this);
     }
 
-    private static class AtomicInputProgress implements ProgressMeter, CycleMeter {
+    private static class AtomicInputProgress implements ProgressMeterDisplay, CycleMeter {
         private final AtomicInput input;
         private final String name;
 

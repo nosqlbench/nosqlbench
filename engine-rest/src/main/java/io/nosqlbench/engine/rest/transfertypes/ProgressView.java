@@ -18,44 +18,44 @@ package io.nosqlbench.engine.rest.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 
 public class ProgressView {
 
-    private final ProgressMeter progressMeter;
+    private final ProgressMeterDisplay progressMeterDisplay;
 
-    public ProgressView(ProgressMeter progressMeter) {
-        if (progressMeter==null) {
+    public ProgressView(ProgressMeterDisplay progressMeterDisplay) {
+        if (progressMeterDisplay ==null) {
             throw new RuntimeException("Unable to create a view with a null progressMeter");
         }
-        this.progressMeter = progressMeter;
+        this.progressMeterDisplay = progressMeterDisplay;
     }
 
     @JsonProperty("summary")
     public String getProgressDetails() {
-        return progressMeter.getSummary();
+        return progressMeterDisplay.getSummary();
     }
 
     @JsonProperty("min")
     public double getMin() {
-        return progressMeter.getMinValue();
+        return progressMeterDisplay.getMinValue();
     }
 
     @JsonProperty("current")
     public double getCurrent() {
-        return progressMeter.getCurrentValue();
+        return progressMeterDisplay.getCurrentValue();
     }
 
     @JsonProperty("max")
     public double getMax() {
-        return progressMeter.getMaxValue();
+        return progressMeterDisplay.getMaxValue();
     }
 
 
     @JsonProperty("recycles_max")
     public double getRecyclesMax() {
-        if (progressMeter instanceof CycleMeter cm) {
+        if (progressMeterDisplay instanceof CycleMeter cm) {
             return cm.getRecyclesMax();
         } else {
             return Double.NaN;
@@ -64,7 +64,7 @@ public class ProgressView {
 
     @JsonProperty("recycles_current")
     public double getRecyclesCurrent() {
-        if (progressMeter instanceof CycleMeter cm) {
+        if (progressMeterDisplay instanceof CycleMeter cm) {
             return cm.getRecyclesCurrent();
         } else {
             return Double.NaN;
@@ -73,23 +73,23 @@ public class ProgressView {
 
     @JsonProperty("eta_millis")
     public double getEtaMills() {
-        return progressMeter.getProgressETAMillis();
+        return progressMeterDisplay.getProgressETAMillis();
     }
 
     @JsonProperty("name")
     public String getName() {
-        return progressMeter.getProgressName();
+        return progressMeterDisplay.getProgressName();
     }
 
     @JsonProperty("completed")
     public double getProgress() {
-        return progressMeter.getRatioComplete();
+        return progressMeterDisplay.getRatioComplete();
     }
 
     @JsonProperty("state")
     public String getState() {
-        if (progressMeter instanceof StateCapable) {
-            return ((StateCapable)progressMeter).getRunState().toString();
+        if (progressMeterDisplay instanceof StateCapable) {
+            return ((StateCapable) progressMeterDisplay).getRunState().toString();
         } else {
             return "unknown";
         }

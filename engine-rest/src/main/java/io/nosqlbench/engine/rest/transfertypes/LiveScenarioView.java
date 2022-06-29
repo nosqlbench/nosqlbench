@@ -18,7 +18,7 @@ package io.nosqlbench.engine.rest.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 
@@ -72,9 +72,9 @@ public class LiveScenarioView {
             return progressView;
         }
 
-        Collection<? extends ProgressMeter> meters = scenario.getScenarioController().getProgressMeters();
-        for (ProgressMeter progressMeter : meters) {
-            ProgressView meterView = new ProgressView(progressMeter);
+        Collection<? extends ProgressMeterDisplay> meters = scenario.getScenarioController().getProgressMeters();
+        for (ProgressMeterDisplay progressMeterDisplay : meters) {
+            ProgressView meterView = new ProgressView(progressMeterDisplay);
             progressView.add(meterView);
         }
 

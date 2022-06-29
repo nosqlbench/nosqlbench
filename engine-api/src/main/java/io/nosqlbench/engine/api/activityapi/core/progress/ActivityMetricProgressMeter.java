@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.util.Unit;
 
 import java.time.Instant;
 
-public class ActivityMetricProgressMeter implements ProgressMeter, CompletedMeter,  RemainingMeter, ActiveMeter {
+public class ActivityMetricProgressMeter implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter {
 
     private final Activity activity;
     private final Instant startInstant;

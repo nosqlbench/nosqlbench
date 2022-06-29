@@ -20,13 +20,13 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class ProgressDisplay {
-    private final ProgressMeter[] meters;
+    private final ProgressMeterDisplay[] meters;
 
-    public ProgressDisplay(ProgressMeter... meters) {
+    public ProgressDisplay(ProgressMeterDisplay... meters) {
         this.meters = meters;
     }
 
-    public static CharSequence of(ProgressMeter... meters) {
+    public static CharSequence of(ProgressMeterDisplay... meters) {
         return new ProgressDisplay(meters).toString();
     }
 
@@ -37,11 +37,11 @@ public class ProgressDisplay {
             return meters[0].getSummary();
         } else {
             double total = 0d;
-            for (ProgressMeter meter : meters) {
+            for (ProgressMeterDisplay meter : meters) {
                 total += meter.getMaxValue();
             }
-            return "PROGRESS:" + ProgressMeter.format(total / meters.length) + " (" +
-                Arrays.stream(meters).map(ProgressMeter::getSummary).collect(Collectors.joining(","));
+            return "PROGRESS:" + ProgressMeterDisplay.format(total / meters.length) + " (" +
+                Arrays.stream(meters).map(ProgressMeterDisplay::getSummary).collect(Collectors.joining(","));
         }
 
     }

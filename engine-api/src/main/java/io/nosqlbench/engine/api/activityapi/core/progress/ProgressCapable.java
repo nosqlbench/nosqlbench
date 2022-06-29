@@ -20,5 +20,5 @@ package io.nosqlbench.engine.api.activityapi.core.progress;
  * Any type that implements this interface can provide a double indicating relative progress.
  */
 public interface ProgressCapable {
-    ProgressMeter getProgressMeter();
+    ProgressMeterDisplay getProgressMeter();
 }

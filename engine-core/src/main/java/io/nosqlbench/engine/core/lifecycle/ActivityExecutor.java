@@ -17,7 +17,7 @@ package io.nosqlbench.engine.core.lifecycle;
 
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
 import io.nosqlbench.engine.core.annotation.Annotators;
@@ -553,7 +553,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     @Override
-    public ProgressMeter getProgressMeter() {
+    public ProgressMeterDisplay getProgressMeter() {
         return this.activity.getProgressMeter();
     }
 

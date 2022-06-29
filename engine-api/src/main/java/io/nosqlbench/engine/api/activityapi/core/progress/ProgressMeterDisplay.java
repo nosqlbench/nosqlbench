@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityapi.core.progress;
 import java.time.Instant;
 import java.util.Locale;
 
-public interface ProgressMeter {
+public interface ProgressMeterDisplay {
     String getProgressName();
 
     Instant getStartTime();
@@ -44,24 +44,33 @@ public interface ProgressMeter {
         if (Double.isNaN(value)) {
             return "Unknown";
         }
-        return String.format(Locale.US, "%3f%%", (100.0 * value));
+        String formatted = String.format(Locale.US, "%03.0f%%", (100.0 * value));
+        return formatted;
     }
 
     default String getSummary() {
-        StringBuilder sb = new StringBuilder();
 
-        sb.append(getProgressName()).append(":").append(getRatioSummary());
+        StringBuilder legend = new StringBuilder(getProgressName()).append(" (");
+        StringBuilder values = new StringBuilder("(");
 
-        if (this instanceof CompletedMeter completed) {
-            sb.append(" completed:").append(completed.getCompletedCount());
-        }
-        if (this instanceof RemainingMeter pending) {
-            sb.append(" remaining:").append(pending.getRemainingCount());
+        if (this instanceof RemainingMeter remaining) {
+            legend.append("remaining,");
+            values.append(String.format("%.0f,",remaining.getRemainingCount()));
         }
         if (this instanceof ActiveMeter active) {
-            sb.append(" active:").append(active.getActiveOps());
+            legend.append("active,");
+            values.append(String.format("%.0f,",active.getActiveOps()));
         }
-        return sb.toString();
+        if (this instanceof CompletedMeter completed) {
+            legend.append("completed,");
+            values.append(String.format("%.0f,",completed.getCompletedCount()));
+        }
+        legend.setLength(legend.length()-1);
+        values.setLength(values.length()-1);
+
+//        legend.append(" ETA:").append(getETAInstant());
+        String formatted = legend.append(")=").append(values).append(") ").append(getRatioSummary()).toString();
+        return formatted;
     }
 
     default long getProgressETAMillis() {
