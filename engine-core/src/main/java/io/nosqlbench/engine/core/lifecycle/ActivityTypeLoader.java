@@ -150,7 +150,7 @@ public class ActivityTypeLoader {
         if (oda.isPresent()) {
             DriverAdapter<?, ?> driverAdapter = oda.get();
 
-            activityDef.getParams().remove("driver");
+//            activityDef.getParams().remove("driver");
 //            if (driverAdapter instanceof NBConfigurable) {
 //                NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
 //                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");

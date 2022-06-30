@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.ParameterMap;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.nb.annotations.Maturity;
@@ -319,27 +320,31 @@ public class ScenarioController {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());
 
             if (executor == null && createIfMissing) {
+                if (activityDef.getParams().containsKey("driver")) {
+                    ActivityType<?> activityType = new ActivityTypeLoader()
+                        .setMaturity(this.minMaturity)
+                        .load(activityDef)
+                        .orElseThrow(
+                            () -> new RuntimeException("Driver for '" + activityDef + "' was not found." +
+                                "\nYou can use --list-drivers to see what drivers are supported in this runtime." +
+                                ConfigSuggestions.suggestAlternates(
+                                        new ActivityTypeLoader().getAllSelectors(),activityDef.getActivityType(),4)
+                                    .orElse("")
+                            )
+                        );
 
-                ActivityType<?> activityType = new ActivityTypeLoader()
-                    .setMaturity(this.minMaturity)
-                    .load(activityDef)
-                    .orElseThrow(
-                        () -> new RuntimeException("Driver for '" + activityDef + "' was not found." +
-                            "\nYou can use --list-drivers to see what drivers are supported in this runtime." +
-                            ConfigSuggestions.suggestAlternates(
-                                new ActivityTypeLoader().getAllSelectors(),activityDef.getActivityType(),4)
-                                .orElse("")
-                        )
+                    executor = new ActivityExecutor(
+                        activityType.getAssembledActivity(
+                            activityDef,
+                            getActivityMap()
+                        ),
+                        this.sessionId
                     );
+                    activityExecutors.put(activityDef.getAlias(), executor);
+                } else {
+                    new StandardActivityType(activityDef);
+                }
 
-                executor = new ActivityExecutor(
-                    activityType.getAssembledActivity(
-                        activityDef,
-                        getActivityMap()
-                    ),
-                    this.sessionId
-                );
-                activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
         }

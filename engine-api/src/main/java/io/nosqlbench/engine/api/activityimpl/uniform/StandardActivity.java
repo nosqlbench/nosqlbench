@@ -26,16 +26,15 @@ import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is a typed activity which is expected to become the standard
@@ -48,38 +47,64 @@ import java.util.function.Function;
 public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider {
     private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
-    private final DriverAdapter<R, S> adapter;
-    private final OpSequence<OpDispenser<? extends R>> sequence;
+    private final OpSequence<OpDispenser<? extends Op>> sequence;
     private final NBConfigModel yamlmodel;
+    private final ConcurrentHashMap<String, DriverAdapter> adapters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, OpMapper<Op>> mappers = new ConcurrentHashMap<>();
 
-    public StandardActivity(DriverAdapter<R, S> adapter, ActivityDef activityDef) {
+    public StandardActivity(ActivityDef activityDef) {
         super(activityDef);
-        this.adapter = adapter;
+        this.adapters.putAll(adapters);
 
-        if (adapter instanceof NBConfigurable configurable) {
-            NBConfigModel cmodel = configurable.getConfigModel();
-            Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-            if (yaml_loc.isPresent()) {
-                Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-                StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
-                yamlmodel = workload.getConfigModel();
-            }
-            else {
-                yamlmodel= ConfigModel.of(StandardActivity.class).asReadOnly();
-            }
-            NBConfigModel combinedModel = cmodel.add(yamlmodel);
-            NBConfiguration configuration = combinedModel.apply(activityDef.getParams());
-            configurable.applyConfig(configuration);
+        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        if (yaml_loc.isPresent()) {
+            Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+            StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
+            yamlmodel = workload.getConfigModel();
         }
         else {
             yamlmodel= ConfigModel.of(StandardActivity.class).asReadOnly();
         }
 
+        ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
+        Optional<DriverAdapter> defaultAdapter = activityDef.getParams().getOptionalString("driver")
+            .map(s -> ServiceSelector.of(s, adapterLoader).getOne());
+
+        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
+
+
+        List<ParsedOp> pops = new ArrayList<>();
+        for (OpTemplate ot : opTemplates) {
+            String driverName = ot.getOptionalStringParam("driver")
+                .or(() -> activityDef.getParams().getOptionalString("driver"))
+                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
+
+            if (!adapters.containsKey(driverName)) {
+                DriverAdapter adapter = ServiceSelector.of(driverName, adapterLoader).get().orElseThrow(
+                    () -> new OpConfigError("Unable to load driver adapter for name '" + driverName + "'")
+                );
+
+                NBConfigModel combinedModel = yamlmodel;
+                NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+
+                if (adapter instanceof NBConfigurable configurable) {
+                    NBConfigModel adapterModel = configurable.getConfigModel();
+                    combinedModel = adapterModel.add(yamlmodel);
+                    combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+                    configurable.applyConfig(combinedConfig);
+                }
+                adapters.put(driverName,adapter);
+                mappers.put(driverName,adapter.getOpMapper());
+            }
+
+            DriverAdapter adapter = adapters.get(driverName);
+            ParsedOp pop = new ParsedOp(ot,adapter.getConfiguration(),List.of(adapter.getPreprocessor()));
+            pops.add(pop);
+        }
+
         try {
-            OpMapper<R> opmapper = adapter.getOpMapper();
-            Function<Map<String, Object>, Map<String, Object>> preprocessor = adapter.getPreprocessor();
             boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
-            sequence = createOpSourceFromCommands(opmapper, adapter.getConfiguration(), List.of(preprocessor), strict);
+            sequence = createOpSourceFromParsedOps(adapters, mappers, pops);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
@@ -95,40 +120,45 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         setDefaultsFromOpSequence(sequence);
     }
 
-    public OpSequence<OpDispenser<? extends R>> getOpSequence() {
+    public OpSequence<OpDispenser<? extends Op>> getOpSequence() {
         return sequence;
     }
 
-    /**
-     * When an adapter needs to identify an error uniquely for the purposes of
-     * routing it to the correct error handler, or naming it in logs, or naming
-     * metrics, override this method in your activity.
-     *
-     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
-     */
-    @Override
-    public final Function<Throwable, String> getErrorNameMapper() {
-        return adapter.getErrorNameMapper();
-    }
+//    /**
+//     * When an adapter needs to identify an error uniquely for the purposes of
+//     * routing it to the correct error handler, or naming it in logs, or naming
+//     * metrics, override this method in your activity.
+//     *
+//     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
+//     */
+//    @Override
+//    public final Function<Throwable, String> getErrorNameMapper() {
+//        return adapter.getErrorNameMapper();
+//    }
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
 
-        if (adapter instanceof NBReconfigurable configurable) {
-            NBConfigModel cfgModel = configurable.getReconfigModel();
-            NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
-            NBReconfigurable.applyMatching(cfg,List.of(configurable));
+        for (DriverAdapter adapter : adapters.values()) {
+            if (adapter instanceof NBReconfigurable configurable) {
+                NBConfigModel cfgModel = configurable.getReconfigModel();
+                NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
+                NBReconfigurable.applyMatching(cfg,List.of(configurable));
+            }
         }
     }
 
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> cfg) {
-        if (adapter instanceof SyntheticOpTemplateProvider sotp) {
-            return sotp.getSyntheticOpTemplates(stmtsDocList, cfg);
-        } else {
-            return List.of();
+        List<OpTemplate> opTemplates = new ArrayList<>();
+        for (DriverAdapter adapter : adapters.values()) {
+            if (adapter instanceof SyntheticOpTemplateProvider sotp) {
+                List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(stmtsDocList, cfg);
+                opTemplates.addAll(newTemplates);
+            }
         }
+        return opTemplates;
     }
 
 }

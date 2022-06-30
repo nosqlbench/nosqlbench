@@ -51,7 +51,7 @@ public class ScriptExampleTests {
             paramsMap.put(params[i], params[i + 1]);
         }
         String scenarioName = "scenario " + scriptname;
-        System.out.println("=".repeat(29) + " Running ASYNC integration test for: " + scenarioName);
+        System.out.println("=".repeat(29) + " Running integration test for example scenario: " + scenarioName);
         ScenariosExecutor executor = new ScenariosExecutor(ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
 
@@ -236,7 +236,7 @@ public class ScriptExampleTests {
     public void testExceptionPropagationFromActivityInit() {
         ScenarioResult scenarioResult = runScenario("activityiniterror");
         assertThat(scenarioResult.getException()).isPresent();
-        assertThat(scenarioResult.getException().get().getMessage()).contains("Unknown config parameter 'unknown_config'");
+        assertThat(scenarioResult.getException().get().getMessage()).contains("Unable to convert end cycle from invalid");
         assertThat(scenarioResult.getException()).isNotNull();
     }
 

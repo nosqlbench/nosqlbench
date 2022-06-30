@@ -159,6 +159,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .add(Param.optional("seq", String.class, "sequencing algorithm"))
             .add(Param.optional("instrument", Boolean.class))
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
+            .add(Param.optional("driver",String.class))
             .asReadOnly();
     }
 

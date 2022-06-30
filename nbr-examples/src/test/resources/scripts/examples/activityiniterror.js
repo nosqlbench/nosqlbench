@@ -17,7 +17,7 @@
 activitydef1 = {
     "alias" : "erroring_activity_init",
     "driver" : "diag",
-    "cycles" : "0..1500000",
+    "cycles" : "invalid",
     "threads" : "1",
     "targetrate" : "500",
     "unknown_config" : "unparsable",

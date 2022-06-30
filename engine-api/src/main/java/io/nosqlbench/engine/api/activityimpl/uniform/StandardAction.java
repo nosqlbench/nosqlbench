@@ -52,7 +52,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer resultTimer;
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
-    private final OpSequence<OpDispenser<? extends R>> opsequence;
+    private final OpSequence<OpDispenser<? extends Op>> opsequence;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
@@ -69,7 +69,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     @Override
     public int runCycle(long cycle) {
 
-        OpDispenser<? extends R> dispenser;
+        OpDispenser<? extends Op> dispenser;
         Op op = null;
 
         try (Timer.Context ct = bindTimer.time()) {

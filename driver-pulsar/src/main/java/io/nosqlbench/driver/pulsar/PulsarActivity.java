@@ -42,6 +42,7 @@ import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class PulsarActivity extends SimpleActivity implements ActivityDefObserver {
 
@@ -136,7 +137,7 @@ public class PulsarActivity extends SimpleActivity implements ActivityDefObserve
         createPulsarSchemaFromConf();
 
 
-        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this), false);
+        this.sequencer = createOpSequence((ot) -> new ReadyPulsarOp(ot, pulsarCache, this), false, Optional.empty());
         setDefaultsFromOpSequence(sequencer);
         onActivityDefUpdate(activityDef);
 
