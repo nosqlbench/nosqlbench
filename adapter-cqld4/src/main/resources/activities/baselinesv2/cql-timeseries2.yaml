@@ -19,7 +19,7 @@ params:
 bindings:
   machine_id: Mod(TEMPLATE(sources,10000)); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
-  time: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToDate()
+  time: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToJavaInstant()
   cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
   sensor_value: Normal(0.0,5.0); Add(100.0) -> double
   station_id: Div(TEMPLATE(sources,10000));Mod(TEMPLATE(stations,100)); ToHashedUUID() -> java.util.UUID
@@ -68,38 +68,34 @@ blocks:
   rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      idempotent: true
+      instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
     ops:
       insert-rampup: |
         insert into  TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}
-      params:
-        idempotent: true
-        instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
   verify:
-    type: read
     params:
       ratio: 1
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+      instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
     ops:
       select-verify: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
         verify-fields: "*, -cell_timestamp"
-      params:
-        instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
   main-read:
     params:
       ratio: TEMPLATE(read_ratio,1)
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+      instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
     ops:
       select-read: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name}
         limit TEMPLATE(limit,10)
-      params:
-        instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
   main-write:
     type: write
     params:
@@ -114,4 +110,3 @@ blocks:
         params:
         instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
         idempotent: true
-
