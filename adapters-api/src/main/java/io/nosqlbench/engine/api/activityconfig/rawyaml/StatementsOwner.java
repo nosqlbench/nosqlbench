@@ -39,6 +39,9 @@ public class StatementsOwner extends RawStmtFields {
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
 
+        // New change
+        super.setFieldsByReflection(propsmap);
+
         HashSet<String> found = new HashSet<>();
         for (String fname : stmtsFieldNames) {
             if (propsmap.containsKey(fname)) {
