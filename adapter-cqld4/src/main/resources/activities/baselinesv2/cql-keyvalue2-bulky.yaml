@@ -36,11 +36,11 @@ blocks:
       prepared: false
     ops:
       create-keyspace: |
-        create keyspace if not exists TEMPLATE(keyspace:baselines)
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf:1)'}
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
       create-table: |
-        create table if not exists TEMPLATE(keyspace:baselines).TEMPLATE(table:keyvalue) (
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
         key text,
          value text,
          PRIMARY KEY (key)
@@ -50,14 +50,14 @@ blocks:
         prepared: false
       statements:
         create-table: |
-          create table if not exists TEMPLATE(keyspace:baselines).TEMPLATE(table:keyvalue) (
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
           key text,
            value text,
            PRIMARY KEY (key)
           );
   rampup:
     params:
-      cl: TEMPLATE(write_cl:LOCAL_QUORUM)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
       rampup-insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)

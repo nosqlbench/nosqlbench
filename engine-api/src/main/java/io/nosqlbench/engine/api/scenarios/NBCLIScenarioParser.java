@@ -423,7 +423,10 @@ public class NBCLIScenarioParser {
             String match = matcher.group(1);
 
             Matcher innerMatcher = innerTemplatePattern.matcher(match);
-            String[] matchArray = match.split(",");
+            String[] matchArray = match.split("[,:]");
+            if (matchArray.length==1) {
+                matchArray = new String[]{matchArray[0],""};
+            }
 //            if (matchArray.length!=2) {
 //                throw new BasicError("TEMPLATE form must have two arguments separated by a comma, like 'TEMPLATE(a,b), not '" + match +"'");
 //            }

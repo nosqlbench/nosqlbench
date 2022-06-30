@@ -43,8 +43,6 @@ blocks:
           create keyspace if not exists <<keyspace:gqlcf_iot>>
           WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
           AND durable_writes = true;
-        tags:
-          name: create-keyspace
       create-table : |
           create table if not exists <<keyspace:gqlcf_iot>>.<<table:iot>> (
           machine_id UUID,     // source machine

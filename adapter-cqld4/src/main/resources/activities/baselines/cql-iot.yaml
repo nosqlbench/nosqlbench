@@ -13,8 +13,10 @@ scenarios:
     schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 params:
   instrument: TEMPLATE(instrument,false)
+
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
@@ -24,18 +26,15 @@ bindings:
   station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200)
 blocks:
-  - tags:
-      phase: schema
+  schema:
     params:
       prepared: false
-    statements:
-     - create-keyspace: |
+    ops:
+      create-keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
         AND durable_writes = true;
-       tags:
-         name: create-keyspace
-     - create-table : |
+      create-table: |
         create table if not exists <<keyspace:baselines>>.<<table:iot>> (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
@@ -51,18 +50,13 @@ blocks:
          'compaction_window_size': <<expiry_minutes:60>>,
          'compaction_window_unit': 'MINUTES'
         };
-       tags:
-         name: create-table
-     - truncate-table: |
-         truncate table <<keyspace:baselines>>.<<table:iot>>;
-       tags:
-         name: truncate-table
-  - tags:
-      phase: schema-astra
+      truncate-table: |
+        truncate table <<keyspace:baselines>>.<<table:iot>>;
+  schema-astra:
     params:
       prepared: false
-    statements:
-     - create-table-astra : |
+    ops:
+      create-table-astra: |
         create table if not exists <<keyspace:baselines>>.<<table:iot>> (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
@@ -72,69 +66,47 @@ blocks:
         data text,
         PRIMARY KEY ((machine_id, sensor_name), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
-       tags:
-         name: create-table-astra
-  - tags:
-      phase: rampup
+  rampup:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-     - insert-rampup: |
+      instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
+      idempotent: true
+    ops:
+      insert-rampup: |
         insert into  <<keyspace:baselines>>.<<table:iot>>
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}
-       tags:
-         name: insert-rampup
-       params:
-         instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
-         idempotent: true
-  - tags:
-      phase: verify
-      type: read
+  verify:
     params:
       ratio: 1
       cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-     - select-verify: |
-         select * from <<keyspace:baselines>>.<<table:iot>>
-         where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
-       verify-fields: "*, -cell_timestamp"
-       tags:
-         name: select-verify
-       params:
-         instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
-  - tags:
-      phase: main
-      type: read
+      verify-fields: "*, -cell_timestamp"
+      instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
+    ops:
+      select-verify: |
+        select * from <<keyspace:baselines>>.<<table:iot>>
+        where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
+  main-read:
     params:
       ratio: <<read_ratio:1>>
       cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-     - select-read: |
-         select * from <<keyspace:baselines>>.<<table:iot>>
-         where machine_id={machine_id} and sensor_name={sensor_name}
-         limit <<limit:10>>
-       tags:
-         name: select-read
-       params:
-         instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
-
-  - tags:
-      phase: main
-      type: write
+      instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
+    ops:
+      select-read: |
+        select * from <<keyspace:baselines>>.<<table:iot>>
+        where machine_id={machine_id} and sensor_name={sensor_name}
+        limit <<limit:10>>
+  main-write:
     params:
       ratio: <<write_ratio:9>>
       cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-     - insert-main: |
+      idempotent: true
+      instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
+    ops:
+      insert-main: |
         insert into <<keyspace:baselines>>.<<table:iot>>
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}
-       idempotent: true
-       tags:
-         name: insert-main
-       params:
-         instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
 

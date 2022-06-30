@@ -59,11 +59,11 @@ blocks:
          'compaction_window_size': <<expiry_minutes:60>>,
          'compaction_window_unit': 'MINUTES'
         };
-     truncate-table: |
-         truncate table <<keyspace:baselines>>.<<table:iot>>;
+      truncate-table: |
+        truncate table <<keyspace:baselines>>.<<table:iot>>;
   schema-astra:
     ops:
-      create-table-astra : |
+      create-table-astra: |
         create table if not exists <<keyspace:baselines>>.<<table:iot>> (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name

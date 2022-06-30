@@ -98,7 +98,6 @@ blocks:
         where machine_id={machine_id} and sensor_name={sensor_name}
         limit TEMPLATE(limit,10)
   main-write:
-    type: write
     params:
       ratio: TEMPLATE(write_ratio,9)
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
