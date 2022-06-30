@@ -7,11 +7,11 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 params:
   instrument: TEMPLATE(instrument,false)
@@ -101,12 +101,11 @@ blocks:
     params:
       ratio: TEMPLATE(write_ratio,9)
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
+      idempotent: true
     ops:
       insert-main: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}
-        params:
-        instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
-        idempotent: true

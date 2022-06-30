@@ -13,18 +13,18 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString();
   # write a random size of text from 50K to 150K, avg 100K, sampled from a static image of text in memory that is 16MB
   seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000),TEMPLATE(maxtext,150000))); ToString();
-  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)->int); ToString() -> String
-  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)->int); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000),TEMPLATE(maxtext,150000))); ToString();
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000),TEMPLATE(maxtext,150000))); ToString();
 
 blocks:
   schema:

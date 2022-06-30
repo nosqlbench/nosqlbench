@@ -15,17 +15,17 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
-  seq_key: Mod(TEMPLATE(keycount:1000000000)); ToString() -> String
-  seq_value: Hash(); Mod(TEMPLATE(valuecount:1000000000)); ToString() -> String
-  rw_key: TEMPLATE(keydist:Uniform(0,1000000000)->int); ToString() -> String
-  rw_value: Hash(); TEMPLATE(valdist:Uniform(0,1000000000)->int); ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); ToString() -> String
 
 blocks:
   schema:
@@ -33,11 +33,11 @@ blocks:
       prepared: false
     ops:
       create-keyspace: |
-        create keyspace if not exists TEMPLATE(keyspace:baselines)
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf:1)'}
         AND durable_writes = true;
       create-table: |
-        create table if not exists TEMPLATE(keyspace:baselines).TEMPLATE(table:keyvalue) (
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
         key text,
          value text,
          PRIMARY KEY (key)
@@ -47,14 +47,14 @@ blocks:
         prepared: false
       statements:
         create-table: |
-          create table if not exists TEMPLATE(keyspace:baselines).TEMPLATE(table:keyvalue) (
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
           key text,
            value text,
            PRIMARY KEY (key)
           );
   rampup:
     params:
-      cl: TEMPLATE(write_cl:LOCAL_QUORUM)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
       rampup-insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
