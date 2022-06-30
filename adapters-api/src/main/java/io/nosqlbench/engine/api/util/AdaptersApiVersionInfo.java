@@ -16,9 +16,12 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.nb.api.errors.OpConfigError;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class AdaptersApiVersionInfo {
 
@@ -53,4 +56,37 @@ public class AdaptersApiVersionInfo {
                 "</dependency>";
     }
 
+    public void assertNewer(String min_version) {
+        String[] min_components = min_version.split("\\.|-|_");
+        String[] current_components = getVersion().split("\\.|-|_");
+        for (int i = 0; i < min_components.length; i++) {
+            String minField = min_components[i];
+            String currentField = current_components[i];
+            if (minField.matches("\\d+")) {
+                if (currentField.matches("\\d+")) {
+                    if (Integer.parseInt(currentField)<Integer.parseInt(minField)) {
+                        throw new OpConfigError("This workload can only be loaded by a NoSQLBench runtime version " + min_version + " or higher." +
+                            " You are running version " + getVersion());
+                    }
+                }
+                else {
+                    throw new OpConfigError("could not compare min_version '" + min_version + " to current version " + getVersion());
+                }
+            } else {
+                throw new OpConfigError("It is impossible to compare min_version " + min_version + " numerically with " + getVersion());
+            }
+        }
+    }
+
+    public void assertVersionPattern(String versionRegex) {
+        if (versionRegex!=null) {
+            Pattern versionpattern = Pattern.compile(versionRegex);
+            String version = new AdaptersApiVersionInfo().getVersion();
+            if (!versionpattern.matcher(version).matches()) {
+                throw new OpConfigError("Unable to load yaml with this version '" + version + " since " +
+                    "the required version doesn't match version_regex '" + versionRegex + "' from yaml.");
+            }
+        }
+
+    }
 }
