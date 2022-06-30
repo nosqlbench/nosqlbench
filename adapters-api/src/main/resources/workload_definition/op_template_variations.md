@@ -301,3 +301,279 @@ ops:
 ]
 ```
 
+## params at doc level
+
+*yaml:*
+
+```yaml
+params:
+  pname: pvalue
+ops: "my test op"
+```
+
+*json:*
+
+```json5
+{
+  "params": {
+    "pname": "pvalue"
+  },
+  "ops": "my test op"
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "params": {
+      "pname": "pvalue"
+    },
+    "tags": {
+      "name": "block0--stmt1",
+      "block": "block0"
+    },
+    "op": {
+      "stmt": "my test op"
+    },
+    "name": "block0--stmt1"
+  }
+]
+```
+
+## params at block level
+
+*yaml:*
+
+```yaml
+blocks:
+  block1:
+    params:
+      pname: pvalue
+    ops: "my test op"
+```
+
+*json:*
+
+```json5
+{
+  "blocks": {
+    "block1": {
+      "params": {
+        "pname": "pvalue"
+      },
+      "ops": "my test op"
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "params": {
+      "pname": "pvalue"
+    },
+    "tags": {
+      "name": "block1--stmt1",
+      "block": "block1"
+    },
+    "op": {
+      "stmt": "my test op"
+    },
+    "name": "block1--stmt1"
+  }
+]
+```
+
+## params at op level
+
+*yaml:*
+
+```yaml
+blocks:
+  block1:
+    ops:
+      op1:
+        op: "my test op"
+        params:
+          pname: pvalue
+
+```
+
+*json:*
+
+```json5
+{
+  "blocks": {
+    "block1": {
+      "ops": {
+        "op1": {
+          "op": "my test op",
+          "params": {
+            "pname": "pvalue"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "params": {
+      "pname": "pvalue"
+    },
+    "tags": {
+      "name": "block1--op1",
+      "block": "block1"
+    },
+    "op": {
+      "stmt": "my test op"
+    },
+    "name": "block1--op1"
+  }
+]
+```
+
+## params field at op field level is not treated as special
+
+When you put your params within the op fields by name, alongside the other op fields, it is not
+treated specially. This is not disallowed, as there may be scenarios where this is otherwise a valid
+value. Further, params within the op field would not provide any benefit over simply having those
+named values in the op field directly, as this is consulted first for dynamic and static values.
+
+*yaml:*
+
+```yaml
+blocks:
+  block1:
+    ops:
+      op1:
+        op:
+          stmt: "my test op"
+          params:
+            pname: pvalue
+
+```
+
+*json:*
+
+```json5
+{
+  "blocks": {
+    "block1": {
+      "ops": {
+        "op1": {
+          "op": {
+            "stmt": "my test op",
+            "params": {
+              "pname": "pvalue"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "tags": {
+      "name": "block1--op1",
+      "block": "block1"
+    },
+    "op": {
+      "stmt": "my test op",
+      "params": {
+        "pname": "pvalue"
+      }
+    },
+    "name": "block1--op1"
+  }
+]
+```
+
+## params field at op name level is not treated as special
+
+When you are using map-based op template names, and one of them has a name of 'param', it is treated
+just as any other op template name. The fields will not be recognized as param names and values,
+but as op template fields.
+
+*yaml:*
+
+```yaml
+blocks:
+  block1:
+    ops:
+      op1:
+        op:
+          stmt: "my test op"
+      params:
+        pname: pvalue
+```
+
+*json:*
+
+```json5
+{
+  "blocks": {
+    "block1": {
+      "ops": {
+        "op1": {
+          "op": {
+            "stmt": "my test op"
+          }
+        },
+        "params": {
+          "pname": "pvalue"
+        }
+      }
+    }
+  }
+}
+```
+
+*ops:*
+
+```json5
+[
+  {
+    "tags": {
+      "name": "block1--op1",
+      "block": "block1"
+    },
+    "op": {
+      "stmt": "my test op"
+    },
+    "name": "block1--op1"
+  },
+  {
+    "tags": {
+      "name": "block1--params",
+      "block": "block1"
+    },
+    "op": {
+      "pname": "pvalue"
+    },
+    "name": "block1--params"
+  }
+]
+```
+
+
+
+
+
+
