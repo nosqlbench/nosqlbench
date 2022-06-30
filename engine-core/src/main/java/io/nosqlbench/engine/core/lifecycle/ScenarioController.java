@@ -328,7 +328,7 @@ public class ScenarioController {
                             () -> new RuntimeException("Driver for '" + activityDef + "' was not found." +
                                 "\nYou can use --list-drivers to see what drivers are supported in this runtime." +
                                 ConfigSuggestions.suggestAlternates(
-                                        new ActivityTypeLoader().getAllSelectors(),activityDef.getActivityType(),4)
+                                        new ActivityTypeLoader().getAllSelectors(), activityDef.getActivityType(), 4)
                                     .orElse("")
                             )
                         );
@@ -342,7 +342,11 @@ public class ScenarioController {
                     );
                     activityExecutors.put(activityDef.getAlias(), executor);
                 } else {
-                    new StandardActivityType(activityDef);
+                    executor = new ActivityExecutor(
+                        new StandardActivityType(activityDef).getAssembledActivity(
+                            activityDef, getActivityMap()
+                        ), this.sessionId
+                    );
                 }
 
             }
