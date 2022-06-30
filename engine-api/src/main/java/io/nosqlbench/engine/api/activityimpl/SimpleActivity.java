@@ -35,6 +35,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
@@ -48,9 +49,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.AnnotatedType;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
@@ -109,8 +112,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
         if (errorHandler == null) {
             errorHandler = new NBErrorHandler(
                 () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
-                () -> getExceptionMetrics(),
-                getErrorNameMapper());
+                () -> getExceptionMetrics());
         }
         return errorHandler;
     }
@@ -455,8 +457,52 @@ public class SimpleActivity implements Activity, ProgressCapable {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
-        return createOpSequence(opTemplateOFunction, strict);
+        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
     }
+
+    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
+        Map<String, DriverAdapter> adapterCache,
+        Map<String, OpMapper<Op>> mapperCache,
+        List<ParsedOp> pops
+    ) {
+        List<Long> ratios = new ArrayList<>(pops.size());
+
+        for (int i = 0; i < pops.size(); i++) {
+
+            ParsedOp pop = pops.get(i);
+            long ratio = pop.takeStaticConfigOr("ratio", 1);
+            ratios.add(ratio);
+        }
+
+        SequencerType sequencerType = getParams()
+            .getOptionalString("seq")
+            .map(SequencerType::valueOf)
+            .orElse(SequencerType.bucket);
+        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+
+        try {
+            for (int i = 0; i < pops.size(); i++) {
+                long ratio = ratios.get(i);
+                ParsedOp pop = pops.get(i);
+                String adapterName = pop.getOptionalStaticValue("driver", String.class)
+                    .orElseThrow(() -> new OpConfigError(
+                        "Unable to get driver name from ParsedOp:" + pop.toString()
+                    ));
+                OpMapper<Op> opOpMapper = mapperCache.get(adapterName);
+                OpDispenser<? extends Op> dispenser = opOpMapper.apply(pop);
+//                if (strict) {
+//                    optemplate.assertConsumed();
+//                }
+                planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
+            }
+        } catch (Exception e) {
+            throw new OpConfigError(e.getMessage(), workloadSource, e);
+        }
+
+        return planner.resolve();
+
+    }
+
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
         Function<ParsedOp, OpDispenser<? extends O>> opinit,
@@ -467,7 +513,60 @@ public class SimpleActivity implements Activity, ProgressCapable {
         Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
-        return createOpSequence(opTemplateOFunction, strict);
+        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
+    }
+
+    protected List<ParsedOp> loadParsedOps(NBConfiguration cfg, Optional<DriverAdapter> defaultAdapter) {
+        List<ParsedOp> parsedOps = loadOpTemplates(defaultAdapter).stream().map(
+            ot -> new ParsedOp(ot, cfg, List.of())
+        ).toList();
+        return parsedOps;
+    }
+
+    protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter> defaultDriverAdapter) {
+
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+//        StrInterpolator interp = new StrInterpolator(activityDef);
+
+        StmtsDocList stmtsDocList = loadStmtsDocList();
+
+
+        List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
+        List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
+
+        if (filteredOps.size() == 0) {
+            if (unfilteredOps.size() > 0) {
+                throw new BasicError("There were no active statements with tag filter '"
+                    + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
+            } else {
+                if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
+                    filteredOps = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
+                    Objects.requireNonNull(filteredOps);
+                }
+            }
+            if (filteredOps.size() == 0) {
+                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+            }
+        }
+
+        if (filteredOps.size() == 0) {
+            throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
+                "a default driver (driver=___). This includes " +
+                ServiceLoader.load(DriverAdapter.class).stream()
+                    .filter(p -> {
+                        AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
+                        for (AnnotatedType ai : annotatedInterfaces) {
+                            if (ai.getType().equals(SyntheticOpTemplateProvider.class)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    .map(d -> d.get().getAdapterName())
+                    .collect(Collectors.joining(",")));
+        }
+
+        return filteredOps;
     }
 
     /**
@@ -487,46 +586,16 @@ public class SimpleActivity implements Activity, ProgressCapable {
      * where the sequence length is the sum of the ratios.</LI>
      * </OL>
      *
-     * @param opinit A function to map an OpTemplate to the executable operation form required by
-     *               the native driver for this activity.
-     * @param <O>    A holder for an executable operation for the native driver used by this activity.
+     * @param <O>            A holder for an executable operation for the native driver used by this activity.
+     * @param opinit         A function to map an OpTemplate to the executable operation form required by
+     *                       the native driver for this activity.
+     * @param defaultAdapter
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict) {
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-//        StrInterpolator interp = new StrInterpolator(activityDef);
-        SequencerType sequencerType = getParams()
-            .getOptionalString("seq")
-            .map(SequencerType::valueOf)
-            .orElse(SequencerType.bucket);
-        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, Optional<DriverAdapter> defaultAdapter) {
 
-        StmtsDocList stmtsDocList = loadStmtsDocList();
-
-
-        if (stmtsDocList == null) {
-            throw new OpConfigError("No op templates found. You must provide either workload=... or op=...");
-        }
-        List<OpTemplate> beforeFiltering = stmtsDocList.getStmts();
-        List<OpTemplate> stmts = stmtsDocList.getStmts(tagfilter);
-
-        if (stmts.size() == 0) {
-            if (beforeFiltering.size()>0) {
-                throw new BasicError("There were no active statements with tag filter '"
-                    + tagfilter + "', since all " + beforeFiltering.size()+ " were filtered out.");
-            }
-            else {
-                if (this instanceof SyntheticOpTemplateProvider sotp) {
-
-                    stmts = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
-                    Objects.requireNonNull(stmts);
-                }
-            }
-            if (stmts.size()==0) {
-                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
-            }
-        }
+        var stmts = loadOpTemplates(defaultAdapter);
 
         List<Long> ratios = new ArrayList<>(stmts.size());
 
@@ -536,10 +605,13 @@ public class SimpleActivity implements Activity, ProgressCapable {
             ratios.add(ratio);
         }
 
-
+        SequencerType sequencerType = getParams()
+            .getOptionalString("seq")
+            .map(SequencerType::valueOf)
+            .orElse(SequencerType.bucket);
+        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
         try {
-
             for (int i = 0; i < stmts.size(); i++) {
                 long ratio = ratios.get(i);
                 OpTemplate optemplate = stmts.get(i);
