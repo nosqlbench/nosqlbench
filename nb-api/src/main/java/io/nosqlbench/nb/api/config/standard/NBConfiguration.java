@@ -102,7 +102,11 @@ public class NBConfiguration {
 
         Object o = data.get(name);
         if (o == null) {
-            throw new NBConfigError("config param '" + name + "' was not defined.");
+            if (param.getDefaultValue()==null) {
+                throw new NBConfigError("config param '" + name + "' was not defined.");
+            } else {
+                o= param.getDefaultValue();
+            }
         }
         return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name,o,type);
 //        if (type.isAssignableFrom(o.getClass())) {

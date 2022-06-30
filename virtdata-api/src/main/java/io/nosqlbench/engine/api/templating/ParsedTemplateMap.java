@@ -293,7 +293,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     public <T> T takeStaticValue(String field, Class<T> classOfT) {
         if (statics.containsKey(field)) {
             protomap.remove(field);
-            return (T) statics.remove(field);
+            T value = (T) statics.remove(field);
+            return value;
         } else if (isConfig(field)) {
             return getConfig(field);
         }
