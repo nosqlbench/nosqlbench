@@ -50,7 +50,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
     private final LongFunction<String> msgPropRawJsonStrFunc;
     private final LongFunction<String> msgTypeFunc;
     private final LongFunction<String> msgBodyRawJsonStrFunc;
-    private final LongFunction<Boolean> reuseClntBoolFunc;
 
     private final static String s4jOpType = S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label;
     // TODO: calculate total size of sent messages
@@ -61,7 +60,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
                             LongFunction<Boolean> tempDestBoolFunc,
                             LongFunction<String> destTypeStrFunc,
                             LongFunction<String> destNameStrFunc,
-                            LongFunction<Boolean> reuseClntBoolFunc,
                             LongFunction<Boolean> asyncAPIBoolFunc,
                             LongFunction<Integer> txnBatchNumFunc,
                             LongFunction<String> msgHeaderRawJsonStrFunc,
@@ -74,7 +72,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc);
 
@@ -82,7 +79,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         this.msgPropRawJsonStrFunc = msgPropRawJsonStrFunc;
         this.msgTypeFunc = msgTypeFunc;
         this.msgBodyRawJsonStrFunc = msgBodyRawJsonStrFun;
-        this.reuseClntBoolFunc = reuseClntBoolFunc;
     }
 
     private Message createAndSetMessagePayload(S4JJMSContextWrapper s4JJMSContextWrapper, String msgType, String msgBodyRawJsonStr) throws JMSException {
@@ -256,7 +252,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(value);
         String jmsMsgPropertyRawJsonStr = msgPropRawJsonStrFunc.apply(value);
         String jmsMsgBodyRawJsonStr = msgBodyRawJsonStrFunc.apply(value);
-        boolean reuseClnt = reuseClntBoolFunc.apply(value);
         boolean asyncApi = asyncAPIBoolFunc.apply(value);
         int txnBatchNum = txnBatchNumFunc.apply(value);
 
@@ -268,8 +263,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
             throw new S4JDriverParamException("Message payload must be specified and can't be empty!");
         }
 
-        int jmsSessionSeqNum = (int)(value % s4JActivity.getMaxNumSessionPerConn());
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getS4jJmsContextWrapper(jmsSessionSeqNum);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 
@@ -283,7 +277,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
 
         JMSProducer producer;
         try {
-            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, destination, destType, reuseClnt, asyncApi);
+            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, destination, destType, asyncApi);
         }
         catch (JMSException jmsException) {
             throw new S4JDriverUnexpectedException("Unable to create the JMS producer!");

@@ -45,7 +45,6 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
                               LongFunction<Boolean> tempDestBoolFunc,
                               LongFunction<String> destTypeStrFunc,
                               LongFunction<String> destNameStrFunc,
-                              LongFunction<Boolean> reuseClntBoolFunc,
                               LongFunction<Boolean> asyncAPIBoolFunc,
                               LongFunction<Integer> txnBatchNumFunc,
                               LongFunction<String> msgSelectorStrFunc) {
@@ -55,7 +54,6 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc);
 
@@ -69,8 +67,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
         String destName = destNameStrFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
 
-        int jmsSessionSeqNum = (int)(value % s4JActivity.getMaxNumSessionPerConn());
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getS4jJmsContextWrapper(jmsSessionSeqNum);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
         if (tempDest) {

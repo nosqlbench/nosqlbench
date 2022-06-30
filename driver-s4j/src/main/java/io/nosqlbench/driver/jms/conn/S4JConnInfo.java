@@ -18,12 +18,15 @@ package io.nosqlbench.driver.jms.conn;
  */
 
 import com.datastax.oss.pulsar.jms.PulsarJMSConstants;
+import io.nosqlbench.driver.jms.S4JActivity;
 import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JConf;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.jms.JMSContext;
 import javax.jms.Session;
@@ -32,6 +35,7 @@ import java.util.Map;
 
 public class S4JConnInfo {
 
+    private final static Logger logger = LogManager.getLogger(S4JConnInfo.class);
     private final String webSvcUrl;
     private final String pulsarSvcUrl;
     private final int sessionMode;
@@ -85,7 +89,7 @@ public class S4JConnInfo {
 
         if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
             sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
-        else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
+        else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.CLIENT_ACK.label))
             sessionMode = JMSContext.CLIENT_ACKNOWLEDGE;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.DUPS_OK_ACK.label))
             sessionMode = JMSContext.DUPS_OK_ACKNOWLEDGE;
@@ -93,9 +97,13 @@ public class S4JConnInfo {
             sessionMode = JMSContext.SESSION_TRANSACTED;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.INDIVIDUAL_ACK.label))
             sessionMode = PulsarJMSConstants.INDIVIDUAL_ACKNOWLEDGE;
-        else
-            throw new S4JDriverParamException("Invalid session mode string \"" + sessionModeStr + "\". " +
-                "Valid values are: " + S4JActivityUtil.getValidJmsSessionModeList());
+        else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid session mode string \"{}\". Valid values are: {}. Use the default \"auto_ack\" mode!"
+                    ,sessionModeStr, S4JActivityUtil.getValidJmsSessionModeList());
+                sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
+            }
+        }
 
         return sessionMode;
     }

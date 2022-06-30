@@ -139,11 +139,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         LongFunction<String> destNameStrFunc = lookupParameterFunc(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, true, "persistent://public/default/nb4_s4j_test");
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, destNameStrFunc.apply(0));
 
-        // Doc-level parameter: reuse_clnt (default: true)
-        String reuseClntBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_CLNT.label, false, "false");
-        LongFunction<Boolean> reuseClntBoolFunc = (l) -> BooleanUtils.toBoolean(reuseClntBoolStr);
-        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.REUSE_CLNT.label, reuseClntBoolStr);
-
         // Doc-level parameter: async_api (default: false)
         String asyncAPIBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, false, "true");
         LongFunction<Boolean> asyncAPIBoolFunc = (l) -> BooleanUtils.toBoolean(asyncAPIBoolStr);
@@ -159,7 +154,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ.label)) {
@@ -169,7 +163,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED.label)) {
@@ -179,7 +172,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_DURABLE.label)) {
@@ -189,7 +181,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label)) {
@@ -199,7 +190,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_BROWSE.label)) {
@@ -207,7 +197,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
                 tempDestBoolFunc,
                 destTypeStrFunc,
                 destNameStrFunc,
-                reuseClntBoolFunc,
                 asyncAPIBoolFunc,
                 txnBatchNumFunc);
         } else {
@@ -219,7 +208,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> reuseClntBoolFunc,
         LongFunction<Boolean> asyncAPIBoolFunc,
         LongFunction<Integer> txnBatchNumFunc
     ) {
@@ -277,7 +265,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc,
             msgHeaderJsonStrFunc,
@@ -292,7 +279,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> reuseClntBoolFunc,
         LongFunction<Boolean> asyncAPIBoolFunc,
         LongFunction<Integer> txnBatchNumFunc
     ) {
@@ -364,7 +350,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc,
             subNameStrFunc,
@@ -379,7 +364,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         LongFunction<Boolean> tempDestBoolFunc,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> reuseClntBoolFunc,
         LongFunction<Boolean> asyncAPIBoolFunc,
         LongFunction<Integer> txnBatchNumFunc
     ) {
@@ -399,7 +383,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             tempDestBoolFunc,
             destTypeStrFunc,
             destNameStrFunc,
-            reuseClntBoolFunc,
             asyncAPIBoolFunc,
             txnBatchNumFunc,
             msgSelectorStrFunc);

@@ -47,8 +47,6 @@ public class S4JActivityUtil {
         // JMS destination name
         // String value
         DEST_NAME("dest_name"),
-        // Reuse JMS producer across destinations
-        REUSE_CLNT("reuse_clnt"),
         // Asynchronous message processing
         ASYNC_API("async_api"),
         // Transaction batch size
