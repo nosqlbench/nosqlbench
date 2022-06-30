@@ -463,6 +463,7 @@ public class SimpleActivity implements Activity, ProgressCapable {
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
         Map<String, DriverAdapter> adapterCache,
         Map<String, OpMapper<Op>> mapperCache,
+        List<DriverAdapter> adapters,
         List<ParsedOp> pops
     ) {
         List<Long> ratios = new ArrayList<>(pops.size());
@@ -484,12 +485,9 @@ public class SimpleActivity implements Activity, ProgressCapable {
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
-                String adapterName = pop.getOptionalStaticValue("driver", String.class)
-                    .orElseThrow(() -> new OpConfigError(
-                        "Unable to get driver name from ParsedOp:" + pop.toString()
-                    ));
-                OpMapper<Op> opOpMapper = mapperCache.get(adapterName);
-                OpDispenser<? extends Op> dispenser = opOpMapper.apply(pop);
+                DriverAdapter adapter = adapters.get(i);
+                OpMapper opMapper = adapter.getOpMapper();
+                OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
 //                if (strict) {
 //                    optemplate.assertConsumed();
 //                }
