@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class RawStmtFields extends Tags {
     private final static Logger logger = LogManager.getLogger(RawStmtFields.class);
@@ -89,13 +90,10 @@ public class RawStmtFields extends Tags {
     @SuppressWarnings("unchecked")
     public void setFieldsByReflection(Map<String, Object> propsmap) {
 
-        Object descriptionObj = propsmap.remove("description");
-        if (descriptionObj==null) {
-            descriptionObj = propsmap.remove("desc");
-        }
-        if (descriptionObj!=null) {
-            setDescription(descriptionObj.toString());
-        }
+        Optional.ofNullable(propsmap.remove("desc"))
+            .or(() -> Optional.ofNullable(propsmap.remove("description")))
+            .map(Object::toString)
+            .ifPresent(this::setDescription);
 
         Object nameObj = propsmap.remove("name");
         if (nameObj!=null) {
