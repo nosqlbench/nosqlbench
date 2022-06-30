@@ -1,3 +1,5 @@
+min_version: "4.17.15"
+
 description: |
   Run a read/write workload against DynamoDB with varying field sizes and query patterns
 
@@ -5,7 +7,7 @@ scenarios:
   schema: run driver=dynamodb tags=block:schema region=us-east-1
   rampup: run driver=dynamodb tags=block:rampup region=us-east-1
   read: run driver=dynamodb tags=block:read region=us-east-1
-  main: run driver=dynamodb tags=block:main region=us-east-1
+  main: run driver=dynamodb tags=block:"main.*" region=us-east-1
   read01: run driver=dynamodb tags='name:.*main-read-01' region=us-east-1
   delete:
     table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
@@ -39,9 +41,7 @@ params:
   instrument: true
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
+  schema:
     ops:
       create-table:
         CreateTable: TEMPLATE(table,tabular)
@@ -54,10 +54,8 @@ blocks:
         BillingMode: PROVISIONED
         ReadCapacityUnits: "TEMPLATE(rcus,40000)"
         WriteCapacityUnits: "TEMPLATE(wcus,40000)"
-#          BillingMode: PAY_PER_REQUEST
-  - name: rampup
-    tags:
-      phase: rampup
+  #          BillingMode: PAY_PER_REQUEST
+  rampup:
     ops:
       put-items:
         PutItem: TEMPLATE(table,tabular)
@@ -74,9 +72,7 @@ blocks:
            "data6": "{data6}",
            "data7": "{data7}"
           }
-  - name: read
-    tags:
-      phase: read
+  read:
     params:
       ratio: 1
     ops:
@@ -85,7 +81,7 @@ blocks:
         key:
           part: "{part_read}"
           clust: "{clust_read}"
-  - name: main
+  main:
     ops:
       write-all:
         params:
@@ -176,9 +172,7 @@ blocks:
         projection: data0, data1, data2, data3, data4, data5, data6, data7
         Limit: "{limit}"
 
-  - name: delete
-    tags:
-      phase: delete
+  delete:
     ops:
       delete-table:
         DeleteTable: TEMPLATE(table,tabular)

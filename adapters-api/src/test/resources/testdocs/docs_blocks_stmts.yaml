@@ -1,5 +1,6 @@
 name: doc1
-description: a quintessential description
+description: a quintessential description - this is superseded by dedicated specification tests and will be removed
+
 
 scenarios:
   default:

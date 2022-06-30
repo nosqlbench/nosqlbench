@@ -1,4 +1,5 @@
-# nb -v http-rest-tabular rampup-cycles=1E6 main-cycles=1E9 stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
+min_version: "4.17.15"
+
 description: |
   This workload emulates a tabular workload with partitions, clusters, and data fields.
   This should be identical to the cql variant except for:
@@ -8,9 +9,10 @@ description: |
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==block:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
@@ -34,11 +36,10 @@ bindings:
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
-    statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+  schema:
+    ops:
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -48,9 +49,8 @@ blocks:
               "name": "<<keyspace:baselines>>",
               "replicas": <<rf:1>>
           }
-        tags:
-          name: create-keyspace
-      - create-table: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+      create-table:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -82,12 +82,10 @@ blocks:
               },
               "ifNotExists": true
           }
-        tags:
-          name: create-table
-  - tags:
-      phase: schema-astra
-    statements:
-      - create-table-astra: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+  schema-astra:
+    ops:
+      create-table-astra:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -119,13 +117,10 @@ blocks:
               },
               "ifNotExists": true
           }
-        tags:
-          name: create-table-astra
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+  rampup:
+    ops:
+      rampup-insert:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -136,30 +131,22 @@ blocks:
             "clust": "{clust_layout}",
             "data": "{data}"
           }
-        tags:
-          name: rampup-insert
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: 5
-    statements:
-      - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
+    ops:
+      main-select:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: 5
-    statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+    ops:
+      main-write:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -170,5 +157,3 @@ blocks:
             "clust": "{clust_write}",
             "data": "{data_write}"
           }
-        tags:
-          name: main-write

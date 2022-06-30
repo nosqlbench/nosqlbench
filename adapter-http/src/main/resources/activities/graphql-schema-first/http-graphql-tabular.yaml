@@ -1,6 +1,6 @@
-# nb -v run driver=http yaml=http-graphql-tabular tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+min_version: "4.17.15"
 
-# TODO 
+# TODO
 # - do we need a truncate schema / namespace at the end
 # - rest uses limit as it queries only by a single primary key, we can not map this to GQL (also should data be clustering key)
 
@@ -11,13 +11,14 @@ description: |
   - Schema creation GraphQL first, we don't use cql and thus can only create schema with limited options.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
-  Note that stargate_port should reflect the port where GraphQL API V2 is exposed (defaults to 8080). 
+  Note that stargate_port should reflect the port where GraphQL API V2 is exposed (defaults to 8080).
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    man: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
@@ -27,7 +28,6 @@ bindings:
   weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
-
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
   clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
@@ -40,11 +40,12 @@ bindings:
   part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
   clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
+
 blocks:
-  - tags:
-      phase: schema
-    statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+  schema:
+    ops:
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -53,9 +54,8 @@ blocks:
             {
               "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
             }
-        tags:
-          name: create-keyspace
-      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
+      create-gql-schema:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -64,12 +64,10 @@ blocks:
             {
               "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_tabular>>\", schema: \"\"\"\n      type Tabular @cql_input {\n        part: String! @cql_column(partitionKey: true)\n        clust: String! @cql_column(partitionKey: true)\n        data: String! \n      }\n      type SelectTabularResult @cql_payload {\n    \t\tdata: [Tabular]\n    \t\tpagingState: String\n    }\n      type Query {\n        getTabulars(\n          part: String!,\n          clust: String!,\n          pagingState: String @cql_pagingState\n        ): SelectTabularResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertTabular(tabular: TabularInput): Tabular\n    }\n  \"\"\") {\n    version\n  }\n}\n"
             }
-        tags:
-          name: create-gql-schema
-  - tags:
-      phase: schema-astra
-    statements:
-      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
+  schema-astra:
+    ops:
+      create-gql-schema:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -78,13 +76,10 @@ blocks:
             {
               "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_tabular>>\", schema: \"\"\"\n      type Tabular @cql_input {\n        part: String! @cql_column(partitionKey: true)\n        clust: String! @cql_column(partitionKey: true)\n        data: String! \n      }\n      type SelectTabularResult @cql_payload {\n    \t\tdata: [Tabular]\n    \t\tpagingState: String\n    }\n      type Query {\n        getTabulars(\n          part: String!,\n          clust: String!,\n          pagingState: String @cql_pagingState\n        ): SelectTabularResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertTabular(tabular: TabularInput): Tabular\n    }\n  \"\"\") {\n    version\n  }\n}\n"
             }
-        tags:
-          name: create-gql-schema-astra
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+  rampup:
+    ops:
+      rampup-insert:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -93,17 +88,12 @@ blocks:
             {
               "query":"mutation {\n  insertTabular(tabular: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {\n    part\n    clust\n    data\n  }\n}\n"
             }
-        tags:
-          name: rampup-insert
-
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: <<read_ratio:1>>
-    statements:
-      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+    ops:
+      main-select:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -112,17 +102,12 @@ blocks:
             {
               "query":"{\n  getTabulars(part: \"{part_read}\", clust: \"{clust_read}\") {\n    data {\n      part\n      clust\n      data\n    }\n    pagingState\n  }\n}\n"
             }
-        tags:
-          name: main-select
-
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: <<write_ratio:9>>
-    statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+    ops:
+      main-write:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -131,5 +116,3 @@ blocks:
             {
               "query":"mutation {\n  insertTabular(tabular: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {\n    part\n    clust\n    data\n  }\n}\n"
             }
-        tags:
-          name: main-write

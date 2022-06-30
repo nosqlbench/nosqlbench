@@ -28,14 +28,14 @@ scenarios:
   default:
     schema: run tags=phase:schema threads==1
     #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
-    main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
-  default-schema: run tags=phase:schema threads==1
+    main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
+  default-schema: run tags=block:schema threads==1
   #  default-rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
-  default-main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
+  default-main: run tags=block:"main.* cycles===TEMPLATE(main-cycles,0) threads=auto
   astra:
-    schema: run tags=phase:astra-schema threads==1
+    schema: run tags=block:astra-schema threads==1
     #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,0) threads=auto
-    main: run tags=phase:main cycles===TEMPLATE(main-cycles,0) threads=auto
+    main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
 
 params:
   instrument: true
@@ -50,72 +50,49 @@ bindings:
 
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
-    statements:
-      - create-keyspace: |
+  schema:
+    ops:
+      create-keyspace: |
           create keyspace if not exists TEMPLATE(keyspace,baselines)
           WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
           AND durable_writes = true;
-        tags:
-          name: create-keyspace
-      - create-table: |
+      create-table: |
           create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
           key text,
            value text,
            PRIMARY KEY (key)
           );
-  - name: schema-astra
-    tags:
-      phase: schema-astra
+  schema-astra:
     params:
       prepared: false
-    statements:
-      - create-table: |
+    ops:
+      create-table: |
           create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
           key text,
            value text,
            PRIMARY KEY (key)
           );
-        tags:
-          name: create-table-astra
-
-  - name: rampup
-    tags:
-      phase: rampup
+  rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
-    statements:
-      - rampup-insert: |
+    ops:
+      rampup-insert: |
           insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
           (key, value)
           values ({rampup_key},{rampup_value});
-        tags:
-          name: rampup-insert
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: 1
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
-    statements:
-      - main-select: |
+    ops:
+      main-select: |
           select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) where key={read_key};
-        tags:
-          name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: 1
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
-    statements:
-      - main-insert: |
+    ops:
+      main-insert: |
           insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
           (key, value) values ({write_key}, {write_value});
-        tags:
-          name: main-insert
 

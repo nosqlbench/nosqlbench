@@ -1,26 +1,26 @@
-# java -jar nb.jar run driver=cockroachdb workload=postgres-basic tags=phase:rampup cycles=10 \
-#   serverName=localhost databaseName=bank
-# java -jar nb.jar run driver=cockroachdb workload=postgres-basic tags=phase:main cycles=10 serverName=localhost
+min_version: "4.17.15"
+
 description: An example of a basic postgres bank transaction workload
 
 scenarios:
   default:
-    - run driver===cockroachdb tags===phase:main threads=auto cycles=10000000
+    main: |
+      run driver===cockroachdb tags===block:"main.*" threads=auto cycles=10000000
       serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
       password=postgres connectionpool=hikari
       errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
-  rampup:
-    - run driver===cockroachdb tags===phase:rampup threads=auto cycles=<<accounts:1000000>>
+    rampup: |
+      run driver===cockroachdb tags===block:rampup threads=auto cycles=<<accounts:1000000>>
       serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
       password=postgres connectionpool=hikari filler-binding="AlphaNumericString(10)"
       errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
-  rampup-large:
-    - run driver===cockroachdb tags===phase:rampup threads=auto cycles=<<accounts:1000000>>
+    rampup-large: |
+      run driver===cockroachdb tags===block:rampup threads=auto cycles=<<accounts:1000000>>
       serverName=localhost portNumber=5432 databaseName=<<database:bank>> user=postgres
       password=postgres connectionpool=hikari
       errors=SQLTransient.*:warn,count,retry;.*0800.*:warn,count,retry;stop
-  schema:
-    - run driver===cockroachdb tags===phase:schema threads===1 serverName=localhost portNumber=5432
+    schema: |
+      run driver===cockroachdb tags===block:schema threads===1 serverName=localhost portNumber=5432
       databaseName=bank user=postgres password=postgres
 
 bindings:
@@ -31,11 +31,9 @@ bindings:
   filler: <<filler-binding:HashedLineToStringList('data/lorem_ipsum_full.txt', 150, 150)>>; ToString()
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
-    statements:
-      - create-table: |
+  schema:
+    ops:
+      create-table: |
           CREATE TABLE IF NOT EXISTS "<<table:account>>" (
             uuid UUID PRIMARY KEY,
             amount INTEGER,
@@ -44,42 +42,25 @@ blocks:
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             filler TEXT
           );
-        tags:
-          name: create-table
-      - create-indices: |
+      create-indices: |
           CREATE INDEX IF NOT EXISTS amount_idx on "<<table:account>>" (amount);
           CREATE INDEX IF NOT EXISTS updated_at_idx on "<<table:account>>" (updated_at);
-        tags:
-          name: create-indices
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: |
+
+  rampup:
+    ops:
+      rampup-insert: |
           INSERT INTO "<<table:account>>" (uuid, amount, amount_unit, updated_at, created_at, filler)
           VALUES ('{seq_uuid}', {rand_amount}, 'us_cents', '{timestamp}', '{timestamp}', '{filler}')
           ON CONFLICT DO NOTHING;
-        tags:
-          name: rampup-insert
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: <<read_ratio:2>>
-    statements:
-      - main-find: |
+    ops:
+      main-find: |
           SELECT * FROM "<<table:account>>" WHERE uuid = '{rand_uuid}';
-        tags:
-          name: main-find
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: <<write_ratio:1>>
-    statements:
-      - main-insert: |
+    ops:
+      main-insert: |
           UPDATE "<<table:account>>" SET amount = {rand_amount}, updated_at = '{timestamp}' WHERE uuid = '{rand_uuid}';
-        tags:
-          name: main-insert

@@ -11,5 +11,5 @@ bindings:
   cycle: Identity()
   name: NumberNameToCycle()
 
-statements:
-  - cycle: "cycle {cycle}\n"
+ops:
+  cycle: "cycle {cycle}\n"

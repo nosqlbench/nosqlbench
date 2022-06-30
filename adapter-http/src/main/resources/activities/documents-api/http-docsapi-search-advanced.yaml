@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-docsapi-search-advanced tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+min_version: "4.17.15"
 
 description: |
   This workload emulates advanced search filter combinations for the Stargate Documents API.
@@ -16,16 +16,18 @@ description: |
 # complex3: (match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)
 scenarios:
   schema:             run driver=http tags==phase:schema threads==<<threads:1>> cycles==UNDEF
-  rampup-write:       run driver=http tags==phase:rampup-write cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
-  rampup-read:        run driver=http tags==phase:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main:               run driver=http tags==phase:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-in:            run driver=http tags==phase:main,filter:in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-not-in:        run driver=http tags==phase:main,filter:not-in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-mem-and:       run driver=http tags==phase:main,filter:mem-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-mem-or:        run driver=http tags==phase:main,filter:mem-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-complex1:      run driver=http tags==phase:main,filter:complex1 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-complex2:      run driver=http tags==phase:main,filter:complex2 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-complex3:      run driver=http tags==phase:main,filter:complex3 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  rampup:
+    write:            run driver=http tags==name:"rampup-put.*" cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
+    read:             run driver=http tags==phase:"rampup-get.*" cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main:
+    all:               run driver=http tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-in:            run driver=http tags==name:main-get-in,filter:in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-not-in:        run driver=http tags==name:main-get-not-in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-mem-and:       run driver=http tags==name:main-get-mem-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-mem-or:        run driver=http tags==name:main-get-mem-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-complex1:      run driver=http tags==name:main-get-complex1 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-complex2:      run driver=http tags==name:main-get-complex2 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-complex3:      run driver=http tags==name:main-get-complex3 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -53,14 +55,14 @@ bindings:
   match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
   match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
   match3: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
-  
+
   additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
 
 blocks:
-  - tags:
-      phase: schema
+  schema:
     statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -70,18 +72,16 @@ blocks:
               "name": "<<keyspace:docs_search_advanced>>",
               "replicas": <<rf:1>>
           }
-        tags:
-          name: create-keyspace
 
-      - delete-docs-collection: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>
+      delete-docs-collection:
+        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        tags:
-          name: delete-table
         ok-status: "[2-4][0-9][0-9]"
 
-      - create-docs-collection: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections
+      create-docs-collection:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -90,14 +90,11 @@ blocks:
           {
               "name": "<<table:docs_collection>>"
           }
-        tags:
-          name: create-table
-  
-  - name: rampup-write
-    tags:
-      phase: rampup-write
-    statements:
-      - rampup-insert: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>/{seq_key}
+
+  rampup:
+    ops:
+      rampup-put:
+        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -129,201 +126,117 @@ blocks:
             "match3":       {match3}
             {additional_fields}
           }
-        tags:
-          name: rampup-insert
-  
-  - name: rampup-in
-    tags:
-      phase: rampup-read
-      filter: in
-    statements:
+
       # where={"match1":{"$in":[0]}}
-      - rampup-in: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$in":[0]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      rampup-get-in:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$in":[0]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-in
-  
-  - name: rampup-not-in
-    tags:
-      phase: rampup-read
-      filter: not-in
-    statements:
+
       # where={"match2":{"$nin":["false"]}}
-      - rampup-not-in: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$nin":["false"]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      rampup-get-not-in:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$nin":["false"]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-not-in
 
-  - name: rampup-mem-and
-    tags:
-      phase:  rampup-read
-      filter: mem-and
-    statements:
       # where={"match2":{"$eq":"true"},"match3":{"$ne": false}}
-      - rampup-mem-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$eq":"true"},"match3":{"$ne":false}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      rampup-get-mem-and:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$eq":"true"},"match3":{"$ne":false}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-mem-and
 
-  - name: rampup-mem-or
-    tags:
-      phase:  rampup-read
-      filter: mem-or
-    statements:
+      rampup-get-mem-or:
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}
-      - rampup-mem-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-mem-or
 
-  - name: rampup-complex1
-    tags:
-      phase:  rampup-read
-      filter: complex1
-    statements:
       # where={"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}
-      - rampup-complex1: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      rampup-get-complex1:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-complex1
-  
-  - name: rampup-complex2
-    tags:
-      phase:  rampup-read
-      filter: complex2
-    statements:
+
+      rampup-get-complex2:
       # where={"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
-      - rampup-complex2: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-complex2
 
-  - name: rampup-complex3
-    tags:
-      phase:  rampup-read
-      filter: complex3
-    statements:
       # where={"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
-      - rampup-complex3: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      rampup-get-complex3:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: rampup-complex3
 
-  - name: main-in
-    tags:
-      phase: main
-      filter: in
-    statements:
+  main:
+    ops:
       # where={"match1":{"$in":[0]}}
-      - main-in: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$in":[0]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      main-get-in:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match1":{"$in":[0]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-in
-  
-  - name: main-not-in
-    tags:
-      phase: main
-      filter: not-in
-    statements:
+
       # where={"match2":{"$nin":["false"]}}
-      - main-not-in: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$nin":["false"]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      main-get-not-in:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$nin":["false"]}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-not-in
 
-  - name: main-mem-and
-    tags:
-      phase:  main
-      filter: mem-and
-    statements:
       # where={"match2":{"$eq":"true"},"match3":{"$ne": false}}
-      - main-mem-and: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$eq":"true"},"match3":{"$ne":false}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      main-get-mem-and:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"match2":{"$eq":"true"},"match3":{"$ne":false}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-mem-and
 
-  - name: main-mem-or
-    tags:
-      phase:  main
-      filter: mem-or
-    statements:
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}
-      - main-mem-or: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      main-get-mem-or:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$exists":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-mem-or
 
-  - name: main-complex1
-    tags:
-      phase:  main
-      filter: complex1
-    statements:
       # where={"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}
-      - main-complex1: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      main-get-complex1:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"match1":{"$eq":0}},{"$or":[{"match2":{"$eq":"true"}},{"match3":{"$eq":false}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-complex1
-  
-  - name: main-complex2
-    tags:
-      phase:  main
-      filter: complex2
-    statements:
-      # where={"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
-      - main-complex2: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        tags:
-          name: main-complex2
 
-  - name: main-complex3
-    tags:
-      phase:  main
-      filter: complex3
-    statements:
-      # where={"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
-      - main-complex3: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+      # where={"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
+      main-get-complex2:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$and":[{"$or":[{"match1":{"$lte":0}},{"match2":{"$eq":"false"}}]},{"$or":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
-        tags:
-          name: main-complex3
+
+      # where={"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}
+      main-get-complex3:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_search_advanced>>/collections/<<table:docs_collection>>?where=URLENCODE[[{"$or":[{"$and":[{"match1":{"$lte":0}},{"match2":{"$eq":"true"}}]},{"$and":[{"match2":{"$eq":"false"}},{"match3":{"$eq":true}}]}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"

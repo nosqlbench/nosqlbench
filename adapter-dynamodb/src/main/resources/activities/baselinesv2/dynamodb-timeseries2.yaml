@@ -1,4 +1,5 @@
-# nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
+min_version: "4.17.15"
+
 description: |
   This workload emulates a time-series data model and access patterns. This is based on the
   cql-timeseries2 workload. This workload does not do full temporal range scans. Like

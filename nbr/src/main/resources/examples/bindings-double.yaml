@@ -1,4 +1,4 @@
-description: examples of bindings for the double type
+description: examples of bindings that produce doubles
 
 scenarios:
   default: run type===stdout format=readout

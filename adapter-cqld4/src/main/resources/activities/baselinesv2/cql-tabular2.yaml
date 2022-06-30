@@ -20,8 +20,8 @@ description: |
   By default, reads occur at the same ratio as writes, with main
   phase writes writing full rows.
 
-  You can bulk up the size of the payloads by 10x with addzeros='0',
-  by 100x with addzeros='00', and so on, but if you want to go higher
+  You can bulk up the size of the payloads by 10x with addzeroes='0',
+  by 100x with addzeroes='00', and so on, but if you want to go higher
   than 100x, you'll need to modify the workload with a larger reference
   file in the HashedFileExtractToString(...) bindings.
 
@@ -44,14 +44,14 @@ bindings:
   part_layout: Div(<<partsize:1000>>); ToString() -> String
   clust_layout: Mod(<<partsize:1000>>); ToString() -> String
   # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
-  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9TEMPLATE(addzeros,),11TEMPLATE(addzeros,))
-  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18TEMPLATE(addzeros,),22TEMPLATE(addzeros,))
-  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27TEMPLATE(addzeros,),33TEMPLATE(addzeros,))
-  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45TEMPLATE(addzeros,),55TEMPLATE(addzeros,))
-  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72TEMPLATE(addzeros,),88TEMPLATE(addzeros,))
-  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107TEMPLATE(addzeros,),143TEMPLATE(addzeros,))
-  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189TEMPLATE(addzeros,),231TEMPLATE(addzeros,))
-  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306TEMPLATE(addzeros,),374TEMPLATE(addzeros,))
+  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9TEMPLATE(addzeroes,),11TEMPLATE(addzeroes,))
+  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18TEMPLATE(addzeroes,),22TEMPLATE(addzeroes,))
+  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27TEMPLATE(addzeroes,),33TEMPLATE(addzeroes,))
+  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45TEMPLATE(addzeroes,),55TEMPLATE(addzeroes,))
+  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72TEMPLATE(addzeroes,),88TEMPLATE(addzeroes,))
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107TEMPLATE(addzeroes,),143TEMPLATE(addzeroes,))
+  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189TEMPLATE(addzeroes,),231TEMPLATE(addzeroes,))
+  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306TEMPLATE(addzeroes,),374TEMPLATE(addzeroes,))
 
   # for main phase
   # for write

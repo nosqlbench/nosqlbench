@@ -9,8 +9,6 @@ description: |
   population are replaced with new values which never repeat. During the main phase, random partitions are selected for
   upsert, with row values never repeating.
 
-
-
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF

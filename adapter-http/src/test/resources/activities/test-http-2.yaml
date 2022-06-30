@@ -1,4 +1,4 @@
 # A list of statements
-statements:
-  - http://google.com/
-  - http://amazon.com/
+ops:
+  op1: http://google.com/
+  op2: http://amazon.com/

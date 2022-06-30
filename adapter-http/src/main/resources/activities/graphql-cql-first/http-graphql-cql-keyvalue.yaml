@@ -1,4 +1,5 @@
-# nb -v run driver=http yaml=http-graphql-cql-keyvalue tags=phase:schema stargate_host=my_stargate_host host=my_stargate_host auth_token=$AUTH_TOKEN
+min_version: "4.17.15"
+
 description: |
   This workload emulates a key-value data model and access patterns.
   This should be identical to the cql variant except for:
@@ -8,9 +9,10 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    rampup: run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
@@ -27,82 +29,65 @@ bindings:
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
-    statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+  schema:
+    ops:
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
-        tags:
-          name: create-keyspace
-      - create-table: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+      create-table:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_keyvalue>>\"\n    tableName: \"<<table:keyvalue>>\"\n    partitionKeys: [{ name: \"key\", type: { basic: TEXT } }]\n    values: [{ name: \"value\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}"}
-        tags:
-          name: create-table
-  - tags:
-      phase: schema-astra
-    statements:
-      - create-table-astra: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+  schema-astra:
+    ops:
+      create-table-astra:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_keyvalue>>\"\n    tableName: \"<<table:keyvalue>>\"\n    partitionKeys: [{ name: \"key\", type: { basic: TEXT } }]\n    values: [{ name: \"value\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}"}
-        tags:
-          name: create-table-astra
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+  rampup:
+    ops:
+      rampup-insert:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{seq_key}\", value: \"{seq_value}\",}) {value {key, value}}}"}
-        tags:
-          name: rampup-insert
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: <<read_ratio:5>>
-    statements:
-      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+    ops:
+      main-select:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"{<<table:keyvalue>>(value: {key: \"{rw_key}\"}) {values {key, value}}}"}
-        tags:
-          name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: <<write_ratio:5>>
-    statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+    ops:
+      main-write:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{rw_key}\", value: \"{rw_value}\",}) {value {key, value}}}"}
-        tags:
-          name: main-write

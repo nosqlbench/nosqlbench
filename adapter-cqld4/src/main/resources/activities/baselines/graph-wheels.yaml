@@ -1,20 +1,18 @@
+min_version: "4.17.15"
+
 description: creates local graphs which resemble a wagon-wheel topology, using
  DSE Graph, version 6.8 or newer
 
 scenarios:
-  drop-graph: run driver=cqld4 graphname=graph_wheels tags=block:drop-graph cycles===UNDEF
-  creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
-  creategraph-classic: run driver=cqld4 graphname=graph_wheels tags=block:create-graph-classic cycles===UNDEF
-  schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
-  disable-verify: run driver=cqld4 graphname=graph_wheels tags=phase:disable-verify cycles===UNDEF
-  rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1000
-  fluent: run driver=cqld4 graphname=graph_wheels tags=block:fluent cycles=10
   default:
     creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
     schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
     rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1
+  drop-graph: run driver=cqld4 graphname=graph_wheels tags=block:drop-graph cycles===UNDEF
+  creategraph-classic: run driver=cqld4 graphname=graph_wheels tags=block:create-graph-classic cycles===UNDEF
+  fluent: run driver=cqld4 graphname=graph_wheels tags=block:fluent cycles=10
   devmode: run driver=cqld4 graphname=graph_wheels tags=name:dev-mode
-  prodmode: run driver=cqld4 graphname=graph_wheels tags=name:dev-mode
+  prodmode: run driver=cqld4 graphname=graph_wheels tags=name:prod-mode
 
 bindings:
   sessionid: ToEpochTimeUUID()->java.util.UUID; ToString();

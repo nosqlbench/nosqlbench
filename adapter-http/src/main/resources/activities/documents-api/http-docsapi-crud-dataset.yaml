@@ -1,4 +1,4 @@
-# nb -v run driver=http yaml=http-docsapi-crud-dataset tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN dataset_file=path/to/data.json
+min_version: "4.17.15"
 
 description: |
   This workload emulates CRUD operations for the Stargate Documents API.
@@ -7,11 +7,11 @@ description: |
 
 scenarios:
   default:
-    schema:   run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    write:    run driver=http tags==phase:main,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read:     run driver=http tags==phase:main,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update:   run driver=http tags==phase:main,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete:   run driver=http tags==phase:main,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    schema:   run driver=http tags==block:schema threads==1 cycles==UNDEF
+    write:    run driver=http tags==name:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=http tags==name:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=http tags==name:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=http tags==name:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -27,10 +27,10 @@ bindings:
   random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
 
 blocks:
-  - tags:
-      phase: schema
-    statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+  schema:
+    ops:
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -40,18 +40,16 @@ blocks:
               "name": "<<keyspace:docs_crud_dataset>>",
               "replicas": <<rf:1>>
           }
-        tags:
-          name: create-keyspace
 
-      - delete-docs-collection: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>
+      delete-docs-collection:
+        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        tags:
-          name: delete-table
         ok-status: "[2-4][0-9][0-9]"
 
-      - create-docs-collection: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections
+      create-docs-collection:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -60,63 +58,37 @@ blocks:
           {
               "name": "<<table:docs_collection>>"
           }
-        tags:
-          name: create-table
 
-  - name: main-write
-    tags:
-      phase: main
-      type: write
-    statements:
-      - write-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{seq_key}
+  main:
+    bindings:
+      document_json: ModuloLineToString('<<dataset_file>>');
+    ops:
+      write-document:
+        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: "{document_json}"
-        tags:
-          name: write-document
-    bindings:
-      document_json: ModuloLineToString('<<dataset_file>>');
 
-  - name: main-read
-    tags:
-      phase: main
-      type: read
-    statements:
-      - read-document: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{random_key}
+      read-document:
+        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
-        tags:
-          name: read-document
 
-  - name: main-update
-    tags:
-      phase: main
-      type: update
-    statements:
-      - update-document: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{random_key}
+      update-document:
+        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: "{document_json}"
-        tags:
-          name: update-document
-    bindings:
-      document_json: ModuloLineToString('<<dataset_file>>');
 
-  - name: main-delete
-    tags:
-      phase: main
-      type: delete
-    statements:
-      - update-document: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{seq_key}
+      delete-document:
+        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_dataset>>/collections/<<table:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
-        tags:
-          name: delete-document

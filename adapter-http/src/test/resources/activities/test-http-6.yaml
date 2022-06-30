@@ -1,5 +1,5 @@
-statements:
-  - s1: |
+ops:
+  test-http-6: |
       {method} {scheme}://{host}:{port}/{path}?{query} {version}
       Content-Type: {content_type}
       Token: {mybearertoken}

@@ -23,7 +23,8 @@ bindings:
   cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
   sensor_value: Normal(0.0,5.0); Add(100.0) -> double
   station_id: Div(TEMPLATE(sources,10000));Mod(TEMPLATE(stations,100)); ToHashedUUID() -> java.util.UUID
-  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200)
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800TEMPLATE(addzeroes,),1200TEMPLATE(addzeroes,))
+
 blocks:
   schema:
     params:

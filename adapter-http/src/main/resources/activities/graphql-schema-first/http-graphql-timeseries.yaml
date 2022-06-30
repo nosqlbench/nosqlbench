@@ -1,6 +1,6 @@
-# nb -v run driver=http yaml=http-graphql-timeseries tags=phase:schema host=my_stargate_host stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+min_version: "4.17.15"
 
-# TODO 
+# TODO
 # - do we need a truncate schema / namespace at the end
 # - support for a paging state?
 # - infinity is not handled
@@ -15,13 +15,14 @@ description: |
   - Schema creation GraphQL first, we don't use cql and thus can only create schema with limited options.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
-  Note that stargate_port should reflect the port where GraphQL API V2 is exposed (defaults to 8080). 
+  Note that stargate_port should reflect the port where GraphQL API V2 is exposed (defaults to 8080).
 
 scenarios:
   default:
-    - run driver=http tags==phase:schema threads==1 cycles==UNDEF
-    - run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    - run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
@@ -31,18 +32,18 @@ bindings:
   weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
-
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
   time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); StringDateWrapper("yyyy-MM-dd'T'hh:mm:ss'Z");
   sensor_value: Normal(0.0,5.0); Add(100.0) -> double
   station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); URLEncode();
+
 blocks:
-  - tags:
-      phase: schema
-    statements:
-      - create-keyspace: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+  schema:
+    ops:
+      create-keyspace:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -51,9 +52,8 @@ blocks:
             {
               "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_timeseries>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
             }
-        tags:
-          name: create-keyspace
-      - create-gql-schema : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
+      create-gql-schema:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -62,12 +62,10 @@ blocks:
             {
               "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_timeseries>>\", schema: \"\"\"\n      type Iot @cql_input {\n        machine_id: Uuid! @cql_column(partitionKey: true)\n        sensor_name: String! @cql_column(partitionKey: true)\n        time: Timestamp! @cql_column(clusteringOrder: DESC)\n        sensor_value: Float!\n    \tstation_id: Uuid!\n        data: String!\n      }\n      type SelectIotResult @cql_payload {\n    \t\tdata: [Iot]\n    \t\tpagingState: String\n    }\n      type Query {\n        getIots(\n          machine_id: Uuid!,\n          sensor_name: String!,\n          pagingState: String @cql_pagingState\n        ): SelectIotResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertIot(iot: IotInput): Iot\n    }\n  \"\"\") {\n    version\n  }\n}\n"
             }
-        tags:
-          name: create-gql-schema
-  - tags:
-      phase: schema-astra
-    statements:
-      - create-gql-schema: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
+  schema-astra:
+    ops:
+      create-gql-schema:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -78,11 +76,10 @@ blocks:
             }
         tags:
           name: create-gql-schema
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
+  rampup:
+    ops:
+      rampup-insert:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -91,17 +88,13 @@ blocks:
             {
               "query":"mutation {\n  insertIot(iot: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", sensor_value: {sensor_value}, station_id: \"{station_id}\", data: \"{data}\"}) {\n    machine_id\n    sensor_name\n    time\n    sensor_value\n    station_id\n    data\n  }\n}\n"
             }
-        tags:
-          name: rampup-insert
 
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+  main-read:
     params:
       ratio: <<read_ratio:1>>
-    statements:
-      - main-select: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
+    ops:
+      main-select:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -110,17 +103,13 @@ blocks:
             {
               "query":"{\n  getIots(machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\") {\n    data {\n      machine_id\n      sensor_name\n      time\n      sensor_value\n      station_id\n      data\n    }\n  }\n}\n"
             }
-        tags:
-          name: main-select
 
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+  main-write:
     params:
       ratio: <<write_ratio:9>>
-    statements:
-      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
+    ops:
+      main-write:
+        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -129,5 +118,3 @@ blocks:
             {
               "query":"mutation {\n  insertIot(iot: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", sensor_value: {sensor_value}, station_id: \"{station_id}\", data: \"{data}\"}) {\n    machine_id\n    sensor_name\n    time\n    sensor_value\n    station_id\n    data\n  }\n}\n"
             }
-        tags:
-          name: main-write

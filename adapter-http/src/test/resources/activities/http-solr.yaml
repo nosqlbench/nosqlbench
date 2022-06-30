@@ -3,6 +3,6 @@ tags:
 params:
   requestType: GET
 statements:
-  - /solr/test.kv/select?q=value:"{value}"&wt=json&indent=true
+  solr-test: /solr/test.kv/select?q=value:"{value}"&wt=json&indent=true
 bindings:
   value: NumberNameToString()

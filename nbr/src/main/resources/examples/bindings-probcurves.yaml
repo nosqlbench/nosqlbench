@@ -1,6 +1,4 @@
-description: |
-  This set of bindings demonstrates example settings for all
-  of the built-in probability curves.
+description: examples of all probability distributions
 
 scenarios:
   default:

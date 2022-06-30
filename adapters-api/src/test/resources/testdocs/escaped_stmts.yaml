@@ -1,3 +1,5 @@
+description: this is superseded by dedicated specification tests and will be removed
+
 statements:
   stmt1: "This is a \"statement\""
   stmt2: |

@@ -1,3 +1,5 @@
+min_version: "4.17.15"
+
 description: |
   A workload with only text keys and text values. This is based on the CQL keyvalue workloads as found
   in cql-keyvalue2.yaml.
@@ -6,11 +8,12 @@ scenarios:
   default:
     schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=dynamodb tags=='block:main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=dynamodb tags=="block:main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    read: run driver=dynamodb tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    write: run driver=dynamodb tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
   delete:
     table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
-  main-read: run driver=dynamodb tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
-  main-write: run driver=dynamodb tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String

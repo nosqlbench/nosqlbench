@@ -42,7 +42,7 @@ public class StatementsLoaderTest {
             "b2b","Suffix(\"suffix\")"));
     }
 
-    @Test()
+    @Test
     public void testInvalidYamlProperties() {
         Exception caught = null;
         try {
