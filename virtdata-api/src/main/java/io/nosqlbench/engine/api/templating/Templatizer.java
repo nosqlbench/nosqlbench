@@ -63,7 +63,7 @@ public class Templatizer {
                 }
             });
             Map<String, Object> submap = (Map<String, Object>) v;
-            ParsedTemplateMap subtpl = new ParsedTemplateMap(submap, bindings, cfgsources);
+            ParsedTemplateMap subtpl = new ParsedTemplateMap(name, submap, bindings, cfgsources);
             if (subtpl.isStatic()) {
                 result.setValue(submap);
             } else {

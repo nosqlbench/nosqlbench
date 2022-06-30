@@ -87,8 +87,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     private final List<Map<String, Object>> cfgsources;
     private Map<String, Object> specmap;
     private Map<String, String> bindings;
+    private final String name;
 
-    public ParsedTemplateMap(Map<String, Object> map, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
+    public ParsedTemplateMap(String name, Map<String, Object> map, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
+        this.name = name;
         this.cfgsources = cfgsources;
         applyTemplateFields(map, bindings);
         mapsize = statics.size() + dynamics.size();
@@ -131,7 +133,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     }
                 });
                 Map<String, Object> submap = (Map<String, Object>) v;
-                ParsedTemplateMap subtpl = new ParsedTemplateMap(submap, bindings, cfgsources);
+                ParsedTemplateMap subtpl = new ParsedTemplateMap(getName(),submap, bindings, cfgsources);
                 if (subtpl.isStatic()) {
                     statics.put(k, submap);
                     protomap.put(k, submap);
@@ -902,8 +904,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (optionalSpecifiedEnum.isPresent()) {
             return optionalSpecifiedEnum.get();
         }
-        throw new OpConfigError("Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) + " either by key or by fields " + tname + " and " + vname + ". " +
+        throw new OpConfigError("While mapping op template named '" + this.getName() + "', Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) + " either by key or by fields " + tname + " and " + vname + ". " +
             "Fields considered: static:" + statics.keySet() + " dynamic:" + dynamics.keySet());
+    }
+
+    private String getName() {
+        return name;
     }
 
     public <E extends Enum<E>, V> TypeAndTarget<E, V> getTargetEnum(Class<E> enumclass, Class<V> valueClass) {

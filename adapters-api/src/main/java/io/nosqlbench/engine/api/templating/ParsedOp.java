@@ -344,6 +344,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         }
 
         this.tmap = new ParsedTemplateMap(
+            getName(),
             map,
             opTemplate.getBindings(),
             List.of(opTemplate.getParams(),
