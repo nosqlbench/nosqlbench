@@ -25,8 +25,9 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.processors.CqlFieldCaptureProcessor;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
@@ -40,10 +41,12 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
 
     private final LongFunction<CqlSession> sessionFunc;
     private final TypeAndTarget<CqlD4OpType, String> target;
+    private final DriverAdapter adapter;
 
-    public CqlD4PreparedStmtMapper(LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType,String> target) {
+    public CqlD4PreparedStmtMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType,String> target) {
         this.sessionFunc=sessionFunc;
         this.target = target;
+        this.adapter = adapter;
     }
 
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
@@ -67,7 +70,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
             });
         });
 
-        return new Cqld4PreparedStmtDispenser(sessionFunc, op, stmtTpl, processors);
+        return new Cqld4PreparedStmtDispenser(adapter, sessionFunc, op, stmtTpl, processors);
 
     }
 }

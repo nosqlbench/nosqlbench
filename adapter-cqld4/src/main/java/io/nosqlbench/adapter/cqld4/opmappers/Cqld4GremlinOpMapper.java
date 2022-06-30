@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4GremlinOpDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
@@ -28,13 +29,15 @@ import java.util.function.LongFunction;
 public class Cqld4GremlinOpMapper implements OpMapper<Cqld4ScriptGraphOp> {
     private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<String> targetFunction;
+    private final DriverAdapter adapter;
 
-    public Cqld4GremlinOpMapper(LongFunction<CqlSession> session, LongFunction<String> targetFunction) {
+    public Cqld4GremlinOpMapper(DriverAdapter adapter, LongFunction<CqlSession> session, LongFunction<String> targetFunction) {
         this.sessionFunc = session;
         this.targetFunction = targetFunction;
+        this.adapter = adapter;
     }
 
     public OpDispenser<Cqld4ScriptGraphOp> apply(ParsedOp op) {
-        return new Cqld4GremlinOpDispenser(sessionFunc, targetFunction, op);
+        return new Cqld4GremlinOpDispenser(adapter, sessionFunc, targetFunction, op);
     }
 }

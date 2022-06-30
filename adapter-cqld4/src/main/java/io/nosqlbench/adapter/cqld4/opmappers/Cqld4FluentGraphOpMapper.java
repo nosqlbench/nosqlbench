@@ -24,6 +24,7 @@ import groovy.lang.Script;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4FluentGraphOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -37,7 +38,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -46,11 +50,13 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
 
     private final LongFunction<CqlSession> sessionFunc;
     private final TypeAndTarget<CqlD4OpType, String> target;
+    private final DriverAdapter adapter;
     private GraphTraversalSource gtsPlaceHolder;
 
-    public Cqld4FluentGraphOpMapper(LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType, String> target) {
+    public Cqld4FluentGraphOpMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType, String> target) {
         this.sessionFunc = sessionFunc;
         this.target = target;
+        this.adapter = adapter;
     }
 
     @Override
@@ -82,7 +88,7 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
         LongFunction<? extends String> graphnameFunc = op.getAsRequiredFunction("graphname");
         Bindings virtdataBindings = new BindingsTemplate(fluent.getBindPoints()).resolveBindings();
 
-        return new Cqld4FluentGraphOpDispenser(op, graphnameFunc, sessionFunc, virtdataBindings, supplier);
+        return new Cqld4FluentGraphOpDispenser(adapter, op, graphnameFunc, sessionFunc, virtdataBindings, supplier);
     }
 
     private String[] expandClassNames(List l) {

@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.stdout;
 
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
@@ -26,8 +27,8 @@ public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp> {
     private final LongFunction<StdoutSpace> ctxfunc;
     private final LongFunction<String> outFunction;
 
-    public StdoutOpDispenser(ParsedOp cmd, LongFunction<StdoutSpace> ctxfunc) {
-        super(cmd);
+    public StdoutOpDispenser(DriverAdapter adapter, ParsedOp cmd, LongFunction<StdoutSpace> ctxfunc) {
+        super(adapter,cmd);
         this.ctxfunc = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         LongFunction<String> stringfunc = l -> objectFunction.apply(l).toString();

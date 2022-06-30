@@ -21,6 +21,7 @@ import com.datastax.dse.driver.api.core.graph.ScriptGraphStatementBuilder;
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.Optional;
@@ -32,8 +33,8 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp>
     private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<Long> diagFunc;
 
-    public Cqld4GremlinOpDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(cmd);
+    public Cqld4GremlinOpDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter,cmd);
         this.sessionFunc = sessionFunc;
         this.diagFunc = cmd.getAsFunctionOr("diag", 0L);
 

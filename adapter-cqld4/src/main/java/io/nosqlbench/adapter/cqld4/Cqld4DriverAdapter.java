@@ -42,7 +42,7 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
     public OpMapper<Op> getOpMapper() {
         DriverSpaceCache<? extends Cqld4Space> spaceCache = getSpaceCache();
         NBConfiguration config = getConfiguration();
-        return new Cqld4CoreOpMapper(config, spaceCache);
+        return new Cqld4CoreOpMapper(this, config, spaceCache);
     }
 
     @Override

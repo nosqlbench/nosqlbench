@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
 
     private final String name;
+    private final DriverAdapter adapter;
     private boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
@@ -44,15 +45,9 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
     private String[] timerStarts = new String[0];
     private String[] timerStops = new String[0];
 
-
-    // TODO: Consider changing this to "ready op template" or similar
-    @Deprecated
-    public BaseOpDispenser(OpTemplate optpl) {
-        this.name = optpl.getName();
-    }
-
-    public BaseOpDispenser(ParsedOp op) {
+    public BaseOpDispenser(DriverAdapter adapter,ParsedOp op) {
         this.name = op.getName();
+        this.adapter = adapter;
         timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
             .map(s -> s.split(", *"))
             .orElse(null);
@@ -67,6 +62,10 @@ public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
             }
         }
         configureInstrumentation(op);
+    }
+
+    public DriverAdapter getAdapter() {
+        return adapter;
     }
 
 //    public BaseOpDispenser(CommandTemplate cmdtpl) {

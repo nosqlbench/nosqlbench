@@ -21,6 +21,7 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBCreateTableOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.ArrayList;
@@ -114,8 +115,8 @@ public class DDBCreateTableOpDispenser extends BaseOpDispenser<DynamoDBOp> {
     private final LongFunction<String> writeCapacityFunc;
     private final LongFunction<String> billingModeFunc;
 
-    public DDBCreateTableOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
-        super(cmd);
+    public DDBCreateTableOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
+        super(adapter,cmd);
         this.ddb = ddb;
         this.tableNameFunc = l -> targetFunc.apply(l).toString();
         this.keySchemaFunc = resolveKeySchemaFunction(cmd);

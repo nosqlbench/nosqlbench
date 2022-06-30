@@ -21,6 +21,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBPutItemOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
@@ -33,8 +34,8 @@ public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp> {
     private final LongFunction<String> tableNameFunc;
     private final LongFunction<? extends Item> itemfunc;
 
-    public DDBPutItemOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
-        super(cmd);
+    public DDBPutItemOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
+        super(adapter, cmd);
         this.ddb = ddb;
         this.tableNameFunc = l -> targetFunc.apply(l).toString();
         if (cmd.isDefined("item")) {

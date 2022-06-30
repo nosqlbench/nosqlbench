@@ -22,6 +22,7 @@ import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
@@ -33,8 +34,8 @@ public abstract class BaseCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
     private final LongFunction<CqlSession> sessionFunc;
     private final boolean isRetryReplace;
 
-    public BaseCqlStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp op) {
-        super(op);
+    public BaseCqlStmtDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op) {
+        super(adapter, op);
         this.sessionFunc = sessionFunc;
         this.maxpages = op.getStaticConfigOr("maxpages",1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace",false);

@@ -17,9 +17,13 @@
 package io.nosqlbench.adapter.diag;
 
 
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
@@ -35,7 +39,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "diag")
-public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> {
+public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> implements SyntheticOpTemplateProvider {
 
     private final static Logger logger = LogManager.getLogger(DiagDriverAdapter.class);
     private DiagOpMapper mapper;
@@ -47,7 +51,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> {
     @Override
     public synchronized OpMapper<DiagOp> getOpMapper() {
         if (this.mapper == null) {
-            this.mapper = new DiagOpMapper(getSpaceCache());
+            this.mapper = new DiagOpMapper(this, getSpaceCache());
         }
         return this.mapper;
     }
@@ -76,7 +80,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> {
         return List.of(
             stmt -> {
                 if (stmt.matches("^\\w+$")) {
-                    return Optional.of(new LinkedHashMap<String, Object>(Map.of("type",stmt)));
+                    return Optional.of(new LinkedHashMap<String, Object>(Map.of("type", stmt)));
                 } else {
                     return Optional.empty();
                 }
@@ -90,10 +94,14 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> {
         super.applyConfig(cfg);
     }
 
-
     @Override
     public void applyReconfig(NBConfiguration cfg) {
         super.applyReconfig(cfg);
-        NBReconfigurable.applyMatching(cfg,List.of(mapper));
+        NBReconfigurable.applyMatching(cfg, List.of(mapper));
+    }
+
+    @Override
+    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String, Object> params) {
+        return StatementsLoader.loadString("ops: 'log:level=INFO'", params).getStmts();
     }
 }

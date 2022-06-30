@@ -23,6 +23,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBQueryOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.Map;
@@ -138,8 +139,8 @@ public class DDBQueryOpDispenser extends BaseOpDispenser<DynamoDBOp> {
     private final LongFunction<Table> tableFunc;
     private final LongFunction<QuerySpec> querySpecFunc;
 
-    public DDBQueryOpDispenser(DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
-        super(cmd);
+    public DDBQueryOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
+        super(adapter,cmd);
         this.ddb = ddb;
         LongFunction<String> tableNameFunc = l -> targetFunc.apply(l).toString();
         this.tableFunc = l -> ddb.getTable(tableNameFunc.apply(l));

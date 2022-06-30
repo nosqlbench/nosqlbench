@@ -22,6 +22,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import groovy.lang.Script;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
@@ -40,13 +41,14 @@ public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op> {
     private final ThreadLocal<Script> tlScript;
 
     public Cqld4FluentGraphOpDispenser(
+        DriverAdapter adapter,
         ParsedOp optpl,
         LongFunction<? extends String> graphnameFunc,
         LongFunction<CqlSession> sessionFunc,
         Bindings virtdataBindings,
         Supplier<Script> scriptSource
     ) {
-        super(optpl);
+        super(adapter, optpl);
         this.graphnameFunc = graphnameFunc;
         this.sessionFunc = sessionFunc;
         this.virtdataBindings = virtdataBindings;

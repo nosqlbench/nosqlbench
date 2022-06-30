@@ -34,7 +34,7 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        return new MongodbOpMapper(getSpaceCache());
+        return new MongodbOpMapper(this, getSpaceCache());
     }
 
     @Override

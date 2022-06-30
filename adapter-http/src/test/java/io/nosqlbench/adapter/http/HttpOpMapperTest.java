@@ -44,7 +44,7 @@ public class HttpOpMapperTest {
         adapter = new HttpDriverAdapter();
         adapter.applyConfig(cfg);
         DriverSpaceCache<? extends HttpSpace> cache = adapter.getSpaceCache();
-        mapper = new HttpOpMapper(cfg, cache);
+        mapper = new HttpOpMapper(adapter,cfg, cache);
     }
 
     private static ParsedOp parsedOpFor(String yaml) {

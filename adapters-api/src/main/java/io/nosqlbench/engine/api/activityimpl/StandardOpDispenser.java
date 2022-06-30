@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
@@ -25,8 +26,8 @@ public class StandardOpDispenser<T extends Op> extends BaseOpDispenser<T>{
 
     private final LongFunction<T> opfunc;
 
-    public StandardOpDispenser(ParsedOp op, LongFunction<T> opfunc) {
-        super(op);
+    public StandardOpDispenser(DriverAdapter adapter, ParsedOp op, LongFunction<T> opfunc) {
+        super(adapter, op);
         this.opfunc = opfunc;
     }
 

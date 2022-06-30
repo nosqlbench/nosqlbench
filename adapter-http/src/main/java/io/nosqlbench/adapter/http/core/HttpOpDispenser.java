@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.net.URI;
@@ -35,8 +36,8 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp> {
     public static final String DEFAULT_OK_STATUS = "2..";
 
 
-    public HttpOpDispenser(LongFunction<HttpSpace> ctxF, ParsedOp op) {
-        super(op);
+    public HttpOpDispenser(DriverAdapter adapter, LongFunction<HttpSpace> ctxF, ParsedOp op) {
+        super(adapter, op);
         opFunc = getOpFunc(ctxF, op);
     }
 

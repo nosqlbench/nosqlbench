@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.diag;
 import io.nosqlbench.adapter.diag.optasks.DiagTask;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
@@ -38,8 +39,8 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp> implements NBReconf
     private LongFunction<DiagSpace> spaceF;
     private OpFunc opFuncs;
 
-    public DiagOpDispenser(ParsedOp op) {
-        super(op);
+    public DiagOpDispenser(DriverAdapter adapter, ParsedOp op) {
+        super(adapter,op);
         this.opFunc = resolveOpFunc(op);
     }
 

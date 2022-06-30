@@ -23,6 +23,7 @@ import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
@@ -40,8 +41,9 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
     private PreparedStatement preparedStmt;
     private CqlSession boundSession;
 
-    public Cqld4PreparedStmtDispenser(LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedStringTemplate stmtTpl, RSProcessors processors) {
-        super(sessionFunc, op);
+    public Cqld4PreparedStmtDispenser(
+        DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedStringTemplate stmtTpl, RSProcessors processors) {
+        super(adapter, sessionFunc, op);
         if (op.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not supported." +
                 " This would churn the prepared statement cache, defeating the purpose of prepared statements.");

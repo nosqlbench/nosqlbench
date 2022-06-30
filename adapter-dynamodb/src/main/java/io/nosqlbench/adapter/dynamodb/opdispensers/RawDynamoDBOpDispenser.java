@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapter.dynamodb.optypes.RawDynamodOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
@@ -29,8 +30,8 @@ public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp> {
     private final LongFunction<? extends String> jsonFunction;
     private final DynamoDB ddb;
 
-    public RawDynamoDBOpDispenser(DynamoDB ddb, ParsedOp pop) {
-        super(pop);
+    public RawDynamoDBOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp pop) {
+        super(adapter,pop);
         this.ddb = ddb;
 
         String bodytype = pop.getValueType("body").getSimpleName();

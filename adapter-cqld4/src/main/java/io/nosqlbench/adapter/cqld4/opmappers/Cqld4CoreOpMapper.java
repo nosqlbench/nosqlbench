@@ -20,6 +20,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -33,10 +34,12 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
     private final DriverSpaceCache<? extends Cqld4Space> cache;
     private final NBConfiguration cfg;
+    private final DriverAdapter adapter;
 
-    public Cqld4CoreOpMapper(NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
+    public Cqld4CoreOpMapper(DriverAdapter adapter, NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
         this.cfg = config;
         this.cache = cache;
+        this.adapter = adapter;
     }
 
     /**
@@ -61,11 +64,11 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
 
         return switch (target.enumId) {
-            case raw -> new CqlD4RawStmtMapper(sessionFunc, target.targetFunction).apply(op);
-            case simple -> new CqlD4CqlSimpleStmtMapper(sessionFunc, target.targetFunction).apply(op);
-            case prepared -> new CqlD4PreparedStmtMapper(sessionFunc, target).apply(op);
-            case gremlin -> new Cqld4GremlinOpMapper(sessionFunc, target.targetFunction).apply(op);
-            case fluent -> new Cqld4FluentGraphOpMapper(sessionFunc, target).apply(op);
+            case raw -> new CqlD4RawStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);
+            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);
+            case prepared -> new CqlD4PreparedStmtMapper(adapter, sessionFunc, target).apply(op);
+            case gremlin -> new Cqld4GremlinOpMapper(adapter, sessionFunc, target.targetFunction).apply(op);
+            case fluent -> new Cqld4FluentGraphOpMapper(adapter, sessionFunc, target).apply(op);
         };
     }
 

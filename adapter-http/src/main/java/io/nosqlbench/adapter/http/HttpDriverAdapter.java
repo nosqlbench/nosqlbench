@@ -41,7 +41,7 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
     public OpMapper<HttpOp> getOpMapper() {
         DriverSpaceCache<? extends HttpSpace> spaceCache = getSpaceCache();
         NBConfiguration config = getConfiguration();
-        return new HttpOpMapper(config, spaceCache);
+        return new HttpOpMapper(this, config, spaceCache);
     }
 
     @Override

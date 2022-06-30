@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.mongodb.core;
 import com.mongodb.ReadPreference;
 import io.nosqlbench.adapter.mongodb.ops.MongoOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.bson.Document;
@@ -31,8 +32,8 @@ public class MongoOpDispenser extends BaseOpDispenser<Op> {
     private final LongFunction<MongoOp> opFunc;
     private final LongFunction<MongoOp> mongoOpF;
 
-    public MongoOpDispenser(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
-        super(op);
+    public MongoOpDispenser(DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+        super(adapter,op);
         opFunc = createOpFunc(ctxFunc, op);
         this.mongoOpF = createOpFunc(ctxFunc,op);
     }

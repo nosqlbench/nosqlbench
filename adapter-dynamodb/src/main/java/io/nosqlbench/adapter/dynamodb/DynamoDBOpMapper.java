@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.dynamodb.opdispensers.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -30,10 +31,12 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
 
     private final NBConfiguration cfg;
     private final DriverSpaceCache<? extends DynamoDBSpace> cache;
+    private final DriverAdapter adapter;
 
-    public DynamoDBOpMapper(NBConfiguration cfg, DriverSpaceCache<? extends DynamoDBSpace> cache) {
+    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends DynamoDBSpace> cache) {
         this.cfg = cfg;
         this.cache = cache;
+        this.adapter = adapter;
     }
 
     @Override
@@ -52,11 +55,11 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
         } else {
             TypeAndTarget<DynamoDBCmdType,String> cmdType = op.getTypeAndTarget(DynamoDBCmdType.class,String.class);
             return switch (cmdType.enumId) {
-                case CreateTable -> new DDBCreateTableOpDispenser(ddb, op, cmdType.targetFunction);
-                case DeleteTable -> new DDBDeleteTableOpDispenser(ddb, op, cmdType.targetFunction);
-                case PutItem -> new DDBPutItemOpDispenser(ddb, op, cmdType.targetFunction);
-                case GetItem -> new DDBGetItemOpDispenser(ddb, op, cmdType.targetFunction);
-                case Query -> new DDBQueryOpDispenser(ddb, op, cmdType.targetFunction);
+                case CreateTable -> new DDBCreateTableOpDispenser(adapter, ddb, op, cmdType.targetFunction);
+                case DeleteTable -> new DDBDeleteTableOpDispenser(adapter, ddb, op, cmdType.targetFunction);
+                case PutItem -> new DDBPutItemOpDispenser(adapter, ddb, op, cmdType.targetFunction);
+                case GetItem -> new DDBGetItemOpDispenser(adapter, ddb, op, cmdType.targetFunction);
+                case Query -> new DDBQueryOpDispenser(adapter,ddb, op, cmdType.targetFunction);
             };
         }
 

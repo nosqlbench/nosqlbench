@@ -20,6 +20,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
@@ -29,8 +30,8 @@ public class Cqld4SimpleCqlStmtDispenser extends BaseCqlStmtDispenser {
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
 
-    public Cqld4SimpleCqlStmtDispenser(LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(sessionFunc,cmd);
+    public Cqld4SimpleCqlStmtDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter, sessionFunc,cmd);
         this.targetFunction=targetFunction;
         this.stmtFunc =createStmtFunc(cmd);
     }

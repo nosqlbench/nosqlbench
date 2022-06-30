@@ -131,11 +131,13 @@ public class CQLD4PreparedStmtDiagnostics {
             try {
                 bound = CQLD4PreparedStmtDiagnostics.bindStatement(bound, defname, value, type);
             } catch (ClassCastException cce) {
+                String fullValue = value.toString();
+                String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0,100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
                 String errormsg = String.format(
                     "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
                     defname,
                     type.asCql(false, false),
-                    value,
+                    valueToPrint,
                     value.getClass().getCanonicalName()
                 );
                 logger.error(errormsg);

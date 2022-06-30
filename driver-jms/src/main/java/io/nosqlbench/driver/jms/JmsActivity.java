@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -114,7 +115,7 @@ public class JmsActivity extends SimpleActivity {
         messagesizeHistogram = ActivityMetrics.histogram(activityDef, "messagesize", this.getHdrDigits());
 
         if (StringUtils.equalsIgnoreCase(jmsProviderType, JmsUtil.JMS_PROVIDER_TYPES.PULSAR.label )) {
-            this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this), false);
+            this.sequence = createOpSequence((ot) -> new ReadyPulsarJmsOp(ot, this), false, Optional.empty());
         }
 
         setDefaultsFromOpSequence(sequence);

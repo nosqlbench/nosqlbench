@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -27,15 +28,17 @@ import java.util.function.LongFunction;
 public class MongodbOpMapper implements OpMapper<Op> {
 
     private final DriverSpaceCache<? extends MongoSpace> ctxcache;
+    private final DriverAdapter adapter;
 
-    public MongodbOpMapper(DriverSpaceCache<? extends MongoSpace> ctxcache) {
+    public MongodbOpMapper(DriverAdapter adapter, DriverSpaceCache<? extends MongoSpace> ctxcache) {
         this.ctxcache = ctxcache;
+        this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp op) {
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space","default");
         LongFunction<MongoSpace> ctxFunc = l -> ctxcache.get(ctxNamer.apply(l));
-        return new MongoOpDispenser(ctxFunc, op);
+        return new MongoOpDispenser(adapter,ctxFunc, op);
     }
 }
