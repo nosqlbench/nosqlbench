@@ -1,15 +1,13 @@
 min_version: "4.17.15"
 
 description: |
-  A workload with only text keys and text values.
+  A workload with only text keys and text values which range in size from 50K to 150K.
   The CQL Key-Value workload demonstrates the simplest possible schema with payload data. This is useful for measuring
   system capacity most directly in terms of raw operations. As a reference point, it provides some insight around types of
   workloads that are constrained around messaging, threading, and tasking, rather than bulk throughput.
   During preload, all keys are set with a value. During the main phase of the workload, random keys from the known
   population are replaced with new values which never repeat. During the main phase, random partitions are selected for
   upsert, with row values never repeating.
-
-
 
 scenarios:
   default:
@@ -22,10 +20,11 @@ scenarios:
     main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
-  seq_key: Mod(TEMPLATE(keycount:1000000000)); ToString() -> String
-  seq_value: Hash(); Mod(TEMPLATE(valuecount:1000000000)); ToString() -> String
-  rw_key: TEMPLATE(keydist:Uniform(0,1000000000)->int); ToString() -> String
-  rw_value: Hash(); TEMPLATE(valdist:Uniform(0,1000000000)->int); ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString();
+  # write a random size of text from 50K to 150K, avg 100K, sampled from a static image of text in memory that is 16MB
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000),TEMPLATE(maxtext,150000))); ToString();
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)->int); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)->int); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000),TEMPLATE(maxtext,150000))); ToString();
 
 blocks:
   schema:

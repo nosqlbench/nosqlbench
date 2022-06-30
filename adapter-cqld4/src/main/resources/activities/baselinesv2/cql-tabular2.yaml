@@ -1,3 +1,5 @@
+min_version: "4.17.15"
+
 description: |
   A tabular workload with partitions, clusters, and data fields
   This workload contains partitioning and cluster along with a set
@@ -18,159 +20,120 @@ description: |
   By default, reads occur at the same ratio as writes, with main
   phase writes writing full rows.
 
+  You can bulk up the size of the payloads by 10x with addzeros='0',
+  by 100x with addzeros='00', and so on, but if you want to go higher
+  than 100x, you'll need to modify the workload with a larger reference
+  file in the HashedFileExtractToString(...) bindings.
 
 scenarios:
   default:
-    schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10B) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,100M) threads=auto
-  schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
-  rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10B) threads=auto
-  main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,100M) threads=auto
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10B) threads=auto
+    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,100M) threads=auto
   astra:
-    schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 params:
   instrument: true
-bindings:
 
+bindings:
   # for ramp-up and verify phases
   #
   part_layout: Div(<<partsize:1000>>); ToString() -> String
   clust_layout: Mod(<<partsize:1000>>); ToString() -> String
   # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
-  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9,11)
-  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18,22)
-  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27,33)
-  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45,55)
-  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72,88)
-  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107,143)
-  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189,231)
-  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306,374)
+  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9TEMPLATE(addzeros,),11TEMPLATE(addzeros,))
+  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18TEMPLATE(addzeros,),22TEMPLATE(addzeros,))
+  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27TEMPLATE(addzeros,),33TEMPLATE(addzeros,))
+  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45TEMPLATE(addzeros,),55TEMPLATE(addzeros,))
+  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72TEMPLATE(addzeros,),88TEMPLATE(addzeros,))
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107TEMPLATE(addzeros,),143TEMPLATE(addzeros,))
+  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189TEMPLATE(addzeros,),231TEMPLATE(addzeros,))
+  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306TEMPLATE(addzeros,),374TEMPLATE(addzeros,))
 
   # for main phase
   # for write
-  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
 
   # for read
   limit: Uniform(1,10) -> int
-  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
+  schema:
     params:
       prepared: false
-    statements:
-      - create-keyspace: |
-          create keyspace if not exists <<keyspace:baselines>>
-          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
-          AND durable_writes = true;
-        tags:
-          name: create-keyspace
-      - create-table: |
-          create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
-           part text,
-           clust text,
-           data0 text, data1 text, data2 text, data3 text,
-           data4 text, data5 text, data6 text, data7 text,
-           PRIMARY KEY (part,clust)
-          );
-        tags:
-          name: create-table
-  - name: schema-astra
-    tags:
-      phase: schema-astra
+    ops:
+      create-keyspace: |
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+        AND durable_writes = true;
+      create-table: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
+         part text,
+         clust text,
+         data0 text, data1 text, data2 text, data3 text,
+         data4 text, data5 text, data6 text, data7 text,
+         PRIMARY KEY (part,clust)
+        );
+  schema-astra:
     params:
       prepared: false
-    statements:
-      - create-table: |
-          create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
-           part text,
-           clust text,
-           data0 text, data1 text, data2 text, data3 text,
-           data4 text, data5 text, data6 text, data7 text,
-           PRIMARY KEY (part,clust)
-          );
-        tags:
-          name: create-table-astra
-  - name: rampup
-    tags:
-      phase: rampup
+    ops:
+      create-table: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
+         part text,
+         clust text,
+         data0 text, data1 text, data2 text, data3 text,
+         data4 text, data5 text, data6 text, data7 text,
+         PRIMARY KEY (part,clust)
+        );
+  rampup:
     params:
-      cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-      - rampup-insert: |
-          insert into <<keyspace:baselines>>.<<table:tabular>>
-          (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
-          values ({part_layout},{clust_layout},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})
-        tags:
-          name: rampup-insert
-  - name: verify
-    tags:
-      phase: verify
-      type: read
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup-insert: |
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+        (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
+        values ({part_layout},{clust_layout},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})
+  verify:
     params:
-      cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - verify-select: |
-          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_layout} and clust={clust_layout}
-        tags:
-          name: verify-select
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    ops:
+      verify-select: |
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_layout} and clust={clust_layout}
+  main-read:
     params:
       ratio: 1
-      cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - main-select-all: |
-          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-01
-      - main-select-01: |
-          select data0,data1 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-0246
-      - main-select-0246: |
-          select data0,data2,data4,data6 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-1357
-      - main-select-1357: |
-          select data1,data3,data5,data7 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-0123
-      - main-select-0123: |
-          select data0,data1,data2,data3 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-4567
-      - main-select-4567: |
-          select data4,data5,data6,data7 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select-01234567
-      - main-select: |
-          select data0,data1,data2,data3,data4,data5,data6,data7 from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-        tags:
-          name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    ops:
+      main-select-all: |
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-01: |
+        select data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-0246: |
+        select data0,data2,data4,data6 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-1357: |
+        select data1,data3,data5,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-0123: |
+        select data0,data1,data2,data3 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-4567: |
+        select data4,data5,data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select-67: |
+        select data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+      main-select: |
+        select data0,data1,data2,data3,data4,data5,data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
+  main-write:
     params:
       ratio: 8
-      cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-      - main-write: |
-          insert into <<keyspace:baselines>>.<<table:tabular>>
-          (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
-          values ({part_write},{clust_write},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})
-        tags:
-          name: main-write
-
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      main-write: |
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+        (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
+        values ({part_write},{clust_write},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})
