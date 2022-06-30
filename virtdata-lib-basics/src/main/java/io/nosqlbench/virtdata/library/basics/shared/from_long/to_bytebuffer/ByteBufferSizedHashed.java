@@ -44,7 +44,7 @@ public class ByteBufferSizedHashed implements LongFunction<ByteBuffer> {
 
     @Example({
         "ByteBufferSizedHashed(16)",
-        "Functionally identical to HashedtoByteBuffer(16) but using dynamic sizing implementation"
+        "Functionally identical to HashedToByteBuffer(16) but using dynamic sizing implementation"
     })
     @Example({
         "ByteBufferSizedHashed(HashRange(10, 14))",

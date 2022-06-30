@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *
  * Use it like this:<pre>{@code
  *       ResultValueFilterType filterType =
- *           SelectorFilter.of("core", ServiceLoader.load(ResultValueFilterType.class)).get();
+ *           ServiceSelector.of("core", ServiceLoader.load(ResultValueFilterType.class)).get();
  * }</pre>
  *
  * @param <T> The service type
