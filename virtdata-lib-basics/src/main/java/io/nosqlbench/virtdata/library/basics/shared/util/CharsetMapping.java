@@ -52,6 +52,7 @@ public class CharsetMapping {
      * @return An array of characters
      */
     public static char[] rangeFor(String range) {
+        range = range.replaceAll("\\n","\n").replaceAll("\\r","\r");
         List<Character> chars = new ArrayList<>();
         int pos = 0;
         while (pos < range.length()) {
