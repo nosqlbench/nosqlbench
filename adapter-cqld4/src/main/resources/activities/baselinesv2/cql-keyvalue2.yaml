@@ -40,16 +40,16 @@ blocks:
          value text,
          PRIMARY KEY (key)
         );
-    schema-astra:
-      params:
-        prepared: false
-      statements:
-        create-table: |
-          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
-          key text,
-           value text,
-           PRIMARY KEY (key)
-          );
+  schema-astra:
+    params:
+      prepared: false
+    statements:
+      create-table: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
+        key text,
+         value text,
+         PRIMARY KEY (key)
+        );
   rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
