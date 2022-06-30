@@ -64,8 +64,12 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
         if (services.size() == 0) {
             throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
                 (services.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + services.stream().count() + ")");
+        } else if (services.size()==1) {
+            return services.get(0);
         }
-        return services.get(0);
+        throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
+            (services.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + services.stream().count() + ")");
+
     }
 
     public List<? extends T> getAll() {
@@ -91,13 +95,8 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
         List<? extends T> services = getAll();
         if (services.size() == 1) {
             return Optional.of(services.get(0));
+        } else {
+            return Optional.empty();
         }
-        if (services.size()==0) {
-            throw new RuntimeException("No services were found for '" + name + "'.");
-        }
-        throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
-            (services.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + services.stream().count() + ")");
-
-
     }
 }

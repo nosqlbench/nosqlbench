@@ -68,16 +68,22 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
         ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
         Optional<DriverAdapter> defaultAdapter = activityDef.getParams().getOptionalString("driver")
-            .map(s -> ServiceSelector.of(s, adapterLoader).getOne());
+            .flatMap(s -> ServiceSelector.of(s, adapterLoader).get());
 
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
 
 
         List<ParsedOp> pops = new ArrayList<>();
+        List<DriverAdapter> adapterlist = new ArrayList<>();
         for (OpTemplate ot : opTemplates) {
-            String driverName = ot.getOptionalStringParam("driver")
+            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of());
+            String driverName = incompleteOpDef.takeOptionalStaticValue("driver",String.class)
                 .or(() -> activityDef.getParams().getOptionalString("driver"))
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
+
+//            String driverName = ot.getOptionalStringParam("driver")
+//                .or(() -> activityDef.getParams().getOptionalString("driver"))
+//                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
             if (!adapters.containsKey(driverName)) {
                 DriverAdapter adapter = ServiceSelector.of(driverName, adapterLoader).get().orElseThrow(
@@ -98,13 +104,15 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             }
 
             DriverAdapter adapter = adapters.get(driverName);
+            adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot,adapter.getConfiguration(),List.of(adapter.getPreprocessor()));
+            Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
 
         try {
             boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
-            sequence = createOpSourceFromParsedOps(adapters, mappers, pops);
+            sequence = createOpSourceFromParsedOps(adapters, mappers, adapterlist, pops);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
