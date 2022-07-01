@@ -190,3 +190,4 @@
 - 2bcdb4afc fix: driver-jms/pom.xml to reduce vulnerabilities
 - d117ef0a6 (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 0a504106f update docker file for nb5
+- c4cbd8a75 (HEAD -> main) fix release flow
