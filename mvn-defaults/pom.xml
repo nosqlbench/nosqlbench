@@ -371,7 +371,7 @@
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>20.3.6</version>
+                <version>20.3.6.1</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
