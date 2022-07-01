@@ -63,8 +63,8 @@ public class RawYamlStatementLoaderTest {
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
         List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
-        assertThat(rawStmtsDoc.getDesc()).isEqualTo("a quintessential" +
-            " description");
+        assertThat(rawStmtsDoc.getDesc()).isEqualTo(
+            "a quintessential description - this is superseded by dedicated specification tests and will be removed");
 
         RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
