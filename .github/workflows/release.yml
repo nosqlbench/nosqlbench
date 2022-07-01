@@ -180,7 +180,7 @@ jobs:
           pwd
           ls -l
           mkdir staging
-          cp nb/target/nb.jar nb/target/nb staging
+          cp nb5/target/nb5.jar nb5/target/nb5 staging
 
       - name: upload artifacts
         uses: actions/upload-artifact@v1
@@ -226,8 +226,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb/target/nb.jar
-          asset_name: nb.jar
+          asset_path: nb5/target/nb5.jar
+          asset_name: nb5.jar
           asset_content_type: application/octet-stream
 
       - name: upload nb binary to github release
@@ -237,8 +237,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb/target/nb
-          asset_name: nb
+          asset_path: nb5/target/nb5
+          asset_name: nb5
           asset_content_type: application/octet-stream
 
 #  docs:
