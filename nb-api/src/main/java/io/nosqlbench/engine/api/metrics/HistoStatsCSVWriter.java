@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2022 nosqlbench
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    Copyright 2016 jshook
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ * /
  */
 
 package io.nosqlbench.engine.api.metrics;
@@ -61,19 +62,19 @@ public class HistoStatsCSVWriter {
 
     public void outputStartTime(long startTime) {
         writer.format(
-                Locale.US,
-                "#[StartTime: %.3f (seconds since epoch), %s]\n",
-                startTime / 1000.0,
-                new Date(startTime)
+            Locale.US,
+            "#[StartTime: %.3f (seconds since epoch), %s]\n",
+            startTime / 1000.0,
+            new Date(startTime)
         );
         writer.flush();
     }
 
     public void outputTimeUnit(TimeUnit timeUnit) {
         writer.format(
-                Locale.US,
-                "#[TimeUnit: %s]\n",
-                timeUnit.toString()
+            Locale.US,
+            "#[TimeUnit: %s]\n",
+            timeUnit.toString()
         );
         writer.flush();
     }
@@ -92,15 +93,15 @@ public class HistoStatsCSVWriter {
         csvLine.append(",").append(len);
         csvLine.append(",").append(h.getTotalCount());
         csvLine.append(",").append(h.getMinValue());
-        csvLine.append(",").append(h.getValueAtPercentile(0.25D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.50D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.75D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.90D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.95D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.98D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.99D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.999D));
-        csvLine.append(",").append(h.getValueAtPercentile(0.9999D));
+        csvLine.append(",").append(h.getValueAtPercentile(25.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(50.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(75.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(90.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(95.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(98.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.00D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.90D));
+        csvLine.append(",").append(h.getValueAtPercentile(99.99D));
         csvLine.append(",").append(h.getMaxValue());
         writer.println(csvLine);
 
