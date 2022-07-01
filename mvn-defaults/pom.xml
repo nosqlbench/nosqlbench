@@ -19,7 +19,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.17.18</version>
+    <version>4.17.19-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -90,7 +90,7 @@
     <scm>
         <url>scm:git:https://github.com/nosqlbench/nosqlbench.git</url>
         <!--        <tag>nosqlbench-2.0.102-SNAPSHOT</tag>-->
-        <tag>nosqlbench-4.17.18</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
