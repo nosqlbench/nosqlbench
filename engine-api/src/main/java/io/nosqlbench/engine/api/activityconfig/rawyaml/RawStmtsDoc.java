@@ -46,6 +46,15 @@ public class RawStmtsDoc extends StatementsOwner {
     }
 
     public void setFieldsByReflection(Map<String, Object> properties) {
+        if (properties.containsKey("version_regex")) {
+            String versionRegex = properties.remove("version_regex").toString();
+            new NbYamlVersionCheck().assertVersionPattern(versionRegex);
+        }
+        if (properties.containsKey("min_version")) {
+            String min_version = properties.remove("min_version").toString();
+            new NbYamlVersionCheck().assertNewer(min_version);
+        }
+
         Object blocksObjects = properties.remove("blocks");
         if (blocksObjects instanceof List) {
             List<Object> blockList = ((List<Object>) blocksObjects);

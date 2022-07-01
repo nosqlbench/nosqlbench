@@ -1,3 +1,1 @@
-- 4078eb40a (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #611 from yabinmeng/nb4-maintenance
-- 6a33761f2 Merge remote-tracking branch 'origin/nb4-maintenance' into nb4-maintenance
-- 62848fa9b Added multi-connection support. Fixed a couple of issues (producer count, message ack ratio) Improved message aysnc ack method
+- 514964b11 (HEAD -> nb4-maintenance, origin/nb4-maintenance) added yaml version check awareness and basic unit test
