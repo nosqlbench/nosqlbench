@@ -2,13 +2,13 @@ package io.nosqlbench.engine.cli;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 public class NBCLIScenarioParserTest {
 
@@ -151,10 +150,8 @@ public class NBCLIScenarioParserTest {
     public void testThatScenarioUrlsAreSupported() {
         //TODO: This might change?
         String urlScenario = "https://raw.githubusercontent.com/nosqlbench/nosqlbench/main/engine-cli/src/test/resources/activities/scenario-test.yaml";
-
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ urlScenario, "schema-only", "cycles-test=20"});
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.size()).isGreaterThan(0);
+        String[] args = {urlScenario, "schema-only", "cycles-test=20"};
+        assertThatThrownBy(() -> new NBCLIOptions(args)).hasMessageContaining("This workload can only be loaded by a NoSQLBench runtime version");
     }
 
     @Test
