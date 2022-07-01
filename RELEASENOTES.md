@@ -1,16 +1,3 @@
-- 099dd990f (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #605 from yabinmeng/nb4-maintenance
-- bc9cea349 Merge remote-tracking branch 'origin/nb4-maintenance' into nb4-maintenance
-- 137a63c95 Add transaction support and individual acknowledgement mode
-- 96f0aef36 Merge pull request #603 from yabinmeng/nb4-maintenance
-- 3f62a1a7f Disable Snyk
-- efe835eed Catch up the latest upstream update
-- b085eed77 Merge branch 'nosqlbench:nb4-maintenance' into nb4-maintenance
-- d6da880fe force build for snyk check
-- 9da0cc3e3 force build for snyk check
-- ccc1bfb09 actions debugging for snyk
-- 94168a272 move snyk into build sanity check to streamline actions
-- c7471a2df actions debugging for snyk
-- 465eaa855 actions debugging for snyk
-- fa93499c4 actions debugging for snyk
-- 7cd0aacdd actions debugging for snyk
-- 934bff89f add snyk scanning to nb4-maintenance branch with SARIF upload integration
+- 4078eb40a (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #611 from yabinmeng/nb4-maintenance
+- 6a33761f2 Merge remote-tracking branch 'origin/nb4-maintenance' into nb4-maintenance
+- 62848fa9b Added multi-connection support. Fixed a couple of issues (producer count, message ack ratio) Improved message aysnc ack method
