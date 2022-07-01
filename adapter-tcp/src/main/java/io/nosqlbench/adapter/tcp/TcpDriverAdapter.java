@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.activitytype.diag;
+package io.nosqlbench.adapter.tcp;
 
-public class DiagDummyError extends RuntimeException {
-    public DiagDummyError(String s) {
-        super(s);
+import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.nb.annotations.Service;
+
+@Service(value= DriverAdapter.class,selector = "tcp")
+public class TcpDriverAdapter extends BaseDriverAdapter<Op,TcpAdapterSpace> {
+
+    @Override
+    public OpMapper<Op> getOpMapper() {
+        return new TcpOpMapper(this);
     }
 }

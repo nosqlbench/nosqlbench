@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.activitytype.diag;
+package io.nosqlbench.adapter.tcp;
 
-public class DiagResult {
+public class TcpAdapterSpace {
+    private final String name;
+
+    public TcpAdapterSpace(String name) {
+        this.name = name;
+    }
 }

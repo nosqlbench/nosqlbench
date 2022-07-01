@@ -17,6 +17,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>adapter-tcp</artifactId>
+    <packaging>jar</packaging>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
@@ -25,11 +27,12 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>driver-diag</artifactId>
-    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>A nosqlbench ActivityType (AT) driver module;
-        Provides a diagnostic activity that logs input at some interval
+    <description>
+        An nosqlbench ActivityType (AT) driver module;
+        Provides TCP client and server stdout content.
+        As a client, connects to a server and pushes content.
+        As a server, waits for connections and then pushes content to clients.
     </description>
 
     <dependencies>
@@ -37,11 +40,9 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.17.15-SNAPSHOT</version>
-            <scope>compile</scope>
+          <version>4.17.15-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
-
 
 </project>

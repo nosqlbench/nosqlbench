@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of operation
  */
-public abstract class BaseOpDispenser<T> implements OpDispenser<T> {
+public abstract class BaseOpDispenser<T extends Op> implements OpDispenser<T> {
 
     private final String name;
     private final DriverAdapter adapter;

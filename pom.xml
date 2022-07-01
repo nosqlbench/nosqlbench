@@ -54,13 +54,13 @@
         <module>adapters-api</module>
 
         <!-- driver modules -->
-        <module>adapter-http</module>
-        <module>adapter-cqld4</module>
-        <module>adapter-dynamodb</module>
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
+        <module>adapter-cqld4</module>
+        <module>adapter-http</module>
+        <module>adapter-tcp</module>
+        <module>adapter-dynamodb</module>
         <module>adapter-mongodb</module>
-
 
         <!-- VIRTDATA MODULES -->
 
