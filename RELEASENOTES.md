@@ -1,1 +1,2 @@
-- 514964b11 (HEAD -> nb4-maintenance, origin/nb4-maintenance) added yaml version check awareness and basic unit test
+- d32c35c63 (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #621 from yabinmeng/nb4-maintenance
+- bf295b4ba Merge branch 'nosqlbench:nb4-maintenance' into nb4-maintenance
