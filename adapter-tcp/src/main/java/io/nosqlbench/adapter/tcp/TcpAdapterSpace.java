@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.tcp;
 
-import io.nosqlbench.activitytype.tcpserver.TCPServerActivity;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.util.SSLKsFactory;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -28,10 +27,7 @@ import org.apache.logging.log4j.Logger;
 import javax.net.SocketFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.BlockingQueue;
 
 public class TcpAdapterSpace {
 
