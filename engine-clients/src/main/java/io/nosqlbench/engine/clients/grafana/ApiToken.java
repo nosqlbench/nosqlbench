@@ -18,11 +18,22 @@ package io.nosqlbench.engine.clients.grafana;
 
 public class ApiToken {
     private String name;
+    private final String hashed;
     private String key;
+    private final int id;
 
     public ApiToken(String name, String key) {
+        this(1, name, key, null);
+    }
+
+    public ApiToken(int id, String name, String key) {
+        this(id, name, key, null);
+    }
+    public ApiToken(int id, String name, String key, String hashed) {
+        this.id = id;
         this.name = name;
         this.key = key;
+        this.hashed = hashed;
     }
 
     public String getName() {
@@ -41,11 +52,20 @@ public class ApiToken {
         this.key = key;
     }
 
+    public String getHashed() {
+        return hashed;
+    }
+
     @Override
     public String toString() {
         return "ApiToken{" +
-                "name='" + name + '\'' +
-                ", key='" + key + '\'' +
-                '}';
+            "name='" + name + '\'' +
+            ", hashed='" + hashed + '\'' +
+            ", key='" + key + '\'' +
+            '}';
+    }
+
+    public int getId() {
+        return this.id;
     }
 }
