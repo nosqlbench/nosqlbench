@@ -24,11 +24,17 @@ public class ApiTokenRequest {
     private final String name;
     private final String role;
     private final long ttl;
+    private final int id;
 
-    public ApiTokenRequest(String name, String role, long ttl) {
+    public ApiTokenRequest(String name, String role, long ttl, int id) {
         this.name = name;
         this.role = checkRole(role);
         this.ttl = ttl;
+        this.id = id;
+    }
+
+    public ApiTokenRequest(String name, String role, long ttl) {
+        this(name, role, ttl, 1);
     }
 
     private String checkRole(String role) {
@@ -36,6 +42,10 @@ public class ApiTokenRequest {
             throw new RuntimeException("Role '" + role + "' must be one of " + VALID_ROLES);
         }
         return role;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
