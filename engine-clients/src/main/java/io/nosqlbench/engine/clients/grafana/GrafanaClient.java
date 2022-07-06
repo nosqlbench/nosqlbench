@@ -20,8 +20,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.engine.clients.grafana.annotator.GrafanaMetricsAnnotator;
+import io.nosqlbench.engine.clients.grafana.authorizers.CurlCmdInjector;
+import io.nosqlbench.engine.clients.grafana.authorizers.RawSocketInjector;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
-import io.nosqlbench.engine.clients.prometheus.*;
+import io.nosqlbench.engine.clients.prometheus.PMatrixData;
+import io.nosqlbench.engine.clients.prometheus.PromQueryResult;
+import io.nosqlbench.engine.clients.prometheus.PromSeriesLookupResult;
+import io.nosqlbench.nb.api.NBEnvironment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -43,6 +50,7 @@ import java.util.regex.Pattern;
  */
 public class GrafanaClient {
 
+    private final static Logger logger = LogManager.getLogger(GrafanaClient.class);
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final GrafanaClientConfig config;
     private List<GDataSource> datasources;
@@ -194,18 +202,19 @@ public class GrafanaClient {
 
         HttpResponse<String> response = null;
         try {
-            response = client.send(rqb.build(), HttpResponse.BodyHandlers.ofString());
+            HttpRequest request = rqb.build();
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             if (e.getMessage().contains("WWW-Authenticate header missing")) {
                 throw new RuntimeException("Java HttpClient was not authorized, and it saw no WWW-Authenticate header" +
-                        " in the response, so this is probably Grafana telling you that the auth scheme failed. Normally " +
-                        "this error would be thrown by Java HttpClient:" + e.getMessage());
+                    " in the response, so this is probably Grafana telling you that the auth scheme failed. Normally " +
+                    "this error would be thrown by Java HttpClient:" + e.getMessage());
             }
             throw new RuntimeException(e);
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Creating annotation failed with status code " + response.statusCode() + " at " +
-                    "baseuri " + config.getBaseUri() + ": " + response.body());
+                "baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
         GAnnotation savedGAnnotation = gson.fromJson(body, GAnnotation.class);
@@ -226,7 +235,7 @@ public class GrafanaClient {
 
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Getting list of dashboards failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
         Type dblist = new TypeToken<List<GDashboardInfo>>() {
@@ -249,8 +258,8 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Getting dashboard snapshot for key '" + snapshotKey + "' failed with status " +
-                    "code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                "code " + response.statusCode() +
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
 
         String body = response.body();
@@ -282,7 +291,7 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Getting dashboard snapshots failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
 
@@ -307,7 +316,7 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Getting dashboard by uid (" + uid + ") failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
 
@@ -331,7 +340,7 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Creating snapshot for snid (" + snid + ") failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
 
@@ -486,7 +495,7 @@ public class GrafanaClient {
             try {
                 if (keyfilePath.toString().contains(File.separator)) {
                     Files.createDirectories(keyfilePath.getParent(),
-                            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
+                        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
                 }
                 Files.writeString(keyfilePath, apiToken.getKey());
             } catch (Exception e) {
@@ -495,20 +504,31 @@ public class GrafanaClient {
         }
 
         GrafanaMetricsAnnotator.AuthWrapper authHeaderSupplier = new GrafanaMetricsAnnotator.AuthWrapper(
-                "Authorization",
-                new GrafanaKeyFileReader(keyfilePath),
-                s -> "Bearer " + s
+            "Authorization",
+            new GrafanaKeyFileReader(keyfilePath),
+            s -> "Bearer " + s
         );
         config.addHeaderSource(authHeaderSupplier);
     }
 
     public ApiToken createApiToken(String name, String role, long ttl) {
         ApiTokenRequest r = new ApiTokenRequest(name, role, ttl);
-        ApiToken token = postApiTokenRequest(r, ApiToken.class, "gen api token");
-        return token;
+        Optional<ApiToken> token = postApiTokenRequest(r, "gen api token");
+        if (token.isPresent()) {
+            logger.info("authorized grafana client via built-in authorizer");
+            return token.get();
+        } else {
+            Path path = NBEnvironment.INSTANCE
+                .interpolate("$NBSTATEDIR/grafana/grafana.db")
+                .or(() -> Optional.of("~/.nosqlbench/grafana/grafana_apikey"))
+                .map(Path::of).orElseThrow();
+            throw new RuntimeException("Unable to authorize local grafana client with any" +
+                " built in local authorizer. Please store a grafana API key at:\n" + path
+                + "\n and start again.");
+        }
     }
 
-    private <T> T postApiTokenRequest(Object request, Class<? extends T> clazz, String desc) {
+    private Optional<ApiToken> postApiTokenRequest(Object request, String desc) {
         HttpRequest rq = config.newJsonPOST("api/auth/keys", request);
         HttpClient client = config.newClient();
 
@@ -516,20 +536,34 @@ public class GrafanaClient {
         try {
             response = client.send(rq, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            if (e.getMessage()!=null && e.getMessage().contains("WWW-Authenticate header missing")) {
-                throw new RuntimeException("Java HttpClient was not authorized, and it saw no WWW-Authenticate header" +
-                        " in the response, so this is probably Grafana telling you that the auth scheme failed. Normally " +
-                        "this error would be thrown by Java HttpClient:" + e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("WWW-Authenticate header missing")) {
+                try {
+                    Optional<ApiToken> token = Optional.empty();
+
+                    if (request instanceof ApiTokenRequest apirq) {
+                        token = RawSocketInjector.submit(apirq, rq);
+                        if (token.isPresent()) {
+                            return token;
+                        }
+                        token = CurlCmdInjector.submit(apirq, rq);
+                        if (token.isPresent()) {
+                            return token;
+                        }
+
+                    }
+                } catch (Exception e2) {
+                    logger.error("Error while using secondary method to init grafana client key after auth failure: " + e2, e2);
+                    throw e2;
+                }
             }
-            throw new RuntimeException(e);
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Request to grafana failed with status code " + response.statusCode() + "\n" +
-                    " while trying to '" + desc + "'\n at baseuri " + config.getBaseUri() + ": " + response.body());
+                " while trying to '" + desc + "'\n at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
-        T result = gson.fromJson(body, clazz);
-        return result;
+        ApiToken result = gson.fromJson(body, ApiToken.class);
+        return Optional.ofNullable(result);
     }
 
     public <T> T doProxyQuery(String dsname, String path, String query, TypeToken<? extends T> asType) {
@@ -542,7 +576,7 @@ public class GrafanaClient {
 
         HttpClient client = config.newClient();
         HttpRequest.Builder rqb =
-                config.newRequest("api/datasources/proxy/" + dsid + "/" + composedQuery);
+            config.newRequest("api/datasources/proxy/" + dsid + "/" + composedQuery);
         rqb.setHeader("Accept", "application/json");
         rqb = rqb.GET();
 
@@ -554,7 +588,7 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Executing proxy query failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body() + " for datasource '" + dsid + "' and query '" + query + "'");
+                " at baseuri " + config.getBaseUri() + ": " + response.body() + " for datasource '" + dsid + "' and query '" + query + "'");
         }
         String body = response.body();
         T result = gson.fromJson(body, asType.getType());
@@ -563,9 +597,9 @@ public class GrafanaClient {
 
     private GDataSource getCachedDatasource(String dsname) {
         return getCachedDatasources().stream()
-                .filter(gd -> gd.getName().equals(dsname))
-                .findFirst()
-                .orElseThrow();
+            .filter(gd -> gd.getName().equals(dsname))
+            .findFirst()
+            .orElseThrow();
     }
 
     public Map<String, Set<String>> resolveAllTplValues(List<GTemplate> tpls, String timeStart, String timeEnd) {
@@ -600,8 +634,8 @@ public class GrafanaClient {
                     long startSpec = GTimeUnit.epochSecondsFor(timeStart);
                     long endSpec = GTimeUnit.epochSecondsFor(timeEnd);
                     String q = "api/v1/series?match[]=" + URLEncoder.encode(tpl.getQuery()) +
-                            "&start=" + startSpec +
-                            "&end=" + endSpec;
+                        "&start=" + startSpec +
+                        "&end=" + endSpec;
                     PromSeriesLookupResult psr = doProxyQuery("prometheus", "api/v1/series", q, new TypeToken<PromSeriesLookupResult>() {
                     });
                     for (PromSeriesLookupResult.Element elem : psr.getData()) {
@@ -640,7 +674,7 @@ public class GrafanaClient {
             long startSpec = GTimeUnit.epochSecondsFor(startTime);
             long endSpec = GTimeUnit.epochSecondsFor(endTime);
             return "api/v1/series?match[]=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&start=" + startSpec +
-                    "&end=" + endSpec;
+                "&end=" + endSpec;
         } else {
             throw new RuntimeException("Unknown query target type '" + type + "'");
         }
@@ -659,7 +693,7 @@ public class GrafanaClient {
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RuntimeException("Getting datasources failed with status code " + response.statusCode() +
-                    " at baseuri " + config.getBaseUri() + ": " + response.body());
+                " at baseuri " + config.getBaseUri() + ": " + response.body());
         }
         String body = response.body();
 
@@ -684,14 +718,14 @@ public class GrafanaClient {
             // http://44.242.139.57:3000/api/datasources/proxy/1/api/v1/query_range?query=result%7Btype%3D%22avg_rate%22%2Cavg_of%3D%221m%22%2Calias%3D~%22keyvalue_main_001%22%7D&start=1608534000&end=1608620400&step=300
             // http://44.242.139.57:3000/api/datasources/proxy/1/api/v1/query_range?query=result%7Btype%3D%22avg_rate%22%2Cavg_of%3D%221m%22%2Calias%3D%7E%22%28.*%29%22%7D&start=1608611971&end=1608622771&step=300
             String path = "api/v1/query_range?query=" +
-                    URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300";
+                URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300";
 
             PromQueryResult<PMatrixData> vectorData = doProxyQuery(
-                    datasource,
-                    "api/v1/query_range",
-                    "query=" + URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300",
-                    new TypeToken<PromQueryResult<PMatrixData>>() {
-                    });
+                datasource,
+                "api/v1/query_range",
+                "query=" + URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300",
+                new TypeToken<PromQueryResult<PMatrixData>>() {
+                });
             System.out.println(vectorData);
             return null;
         } else {
