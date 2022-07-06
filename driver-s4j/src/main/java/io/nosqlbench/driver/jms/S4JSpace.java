@@ -153,12 +153,12 @@ public class S4JSpace {
                 for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
                     jmsConnContextIdStr = getJmsContextIdentifier(i,j);
                     s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
-                    s4JJMSContextWrapper.getJmsContext().close();
+                    if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
                 }
 
                 jmsConnContextIdStr = getJmsContextIdentifier(i,0);
                 s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
-                s4JJMSContextWrapper.getJmsContext().close();
+                if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
             }
 
             s4jConnFactory.close();

@@ -32,6 +32,12 @@ public class S4JJMSContextWrapper {
     public String getJmsContextIdentifer() { return jmsContextIdentifer; }
     public JMSContext getJmsContext() { return jmsContext; }
 
+    public void close() {
+        if (jmsContext != null) {
+            jmsContext.close();
+        }
+    }
+
     public String toString() {
         return new ToStringBuilder(this).
             append("jmsContextIdentifer", jmsContextIdentifer).
