@@ -127,7 +127,7 @@ blocks:
       phase: "mrds"
     statements:
       - name: "s1"
-        optype: "msg_read_shared_durable"
+        optype: "msg_Read_shared_durable"
 
         ## Subscription name
         subscription_name: "sub-mrds"

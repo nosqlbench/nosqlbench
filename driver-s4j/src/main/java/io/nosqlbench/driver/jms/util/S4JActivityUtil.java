@@ -78,7 +78,7 @@ public class S4JActivityUtil {
         // Topic only
         MSG_READ_SHARED("msg_read_shared"),
         MSG_READ_DURABLE("msg_read_durable"),
-        MSG_READ_SHARED_DURABLE("msg_read_shared_durable"),
+        MSG_READ_SHARED_DURABLE("msg_Read_shared_durable"),
         // Queue only
         // - QueueBrowser
         MSG_BROWSE("msg_browse");
