@@ -153,7 +153,12 @@ public class S4JSpace {
                 for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
                     jmsConnContextIdStr = getJmsContextIdentifier(i,j);
                     s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
-                    s4JJMSContextWrapper.getJmsContext().close();
+                    if (s4JJMSContextWrapper != null) {
+                        JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
+                        if (jmsContext != null) {
+                            jmsContext.close();
+                        }
+                    }
                 }
 
                 jmsConnContextIdStr = getJmsContextIdentifier(i,0);
@@ -199,6 +204,8 @@ public class S4JSpace {
             Map<String, Object> cfgMap = new HashMap<>();
             try {
                 cfgMap = s4JConnInfo.getS4jConfMap();
+
+                logger.info("S4J Pulsar connection parameters: {}", s4JConnInfo.toString());
                 s4jConnFactory = new PulsarConnectionFactory(cfgMap);
 
                 String curThreadName = Thread.currentThread().getName();
@@ -243,9 +250,10 @@ public class S4JSpace {
                 }
             } catch (JMSRuntimeException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JConnInfo.toString());
+                    logger.debug("[ERROR] Unable to initialize JMS connection factory with the provided S4J Pulsar connection parameters.");
+                    e.printStackTrace();
                 }
-                throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getMessage());
+                throw new RuntimeException("Unable to initialize JMS connection factory with the following error message: " + e.getMessage());
             }
         }
     }
