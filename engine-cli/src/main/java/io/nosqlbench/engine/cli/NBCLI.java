@@ -199,7 +199,12 @@ public class NBCLI implements Function<String[], Integer> {
             Map<String, String> dashboardOptions = Map.of(
                 DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
                 DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
-                DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays())
+                DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
+                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY,"10m",
+                DockerMetricsManager.GRAPHITE_CACHE_SIZE,"5000",
+                DockerMetricsManager.GRAPHITE_LOG_LEVEL,globalOptions.getGraphiteLogLevel(),
+                DockerMetricsManager.GRAPHITE_LOG_FORMAT,"logfmt"
+
             );
             dmh.startMetrics(dashboardOptions);
             String warn = "Docker Containers are started, for grafana and prometheus, hit" +

@@ -62,6 +62,7 @@ public class RawSocketInjector {
             String rqProtocol = """
                 POST __PATH__ HTTP/1.1
                 Host: __HOST__:__PORT__
+                Connection: close
                 Authorization: __AUTHORIZATION__
                 User-Agent: **nb**
                 Accept: */*
@@ -87,7 +88,8 @@ public class RawSocketInjector {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(fromServer));
             CharBuffer inbuf = CharBuffer.allocate(1000000);
-            while (reader.ready() && (reader.read(inbuf)) >= 0) {
+
+            while (reader.read(inbuf) >= 0) {
             }
             inbuf.flip();
             String response = inbuf.toString();
@@ -98,6 +100,7 @@ public class RawSocketInjector {
             String[] statusAndHeaders = headersAndBody[0].split("\r\n", 2);
             if (!statusAndHeaders[0].contains("200 OK")) {
                 logger.error("Status was unexpected: '" + statusAndHeaders[0] + "'");
+                logger.error("response was:\n" + response);
                 return Optional.empty();
             }
 
@@ -110,6 +113,7 @@ public class RawSocketInjector {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             ApiToken apiToken = gson.fromJson(headersAndBody[1], ApiToken.class);
+            logger.info("Authorized local grafana client with Socket client: " + apiToken.toString());
             return Optional.of(apiToken);
 
         } catch (Exception e) {

@@ -47,6 +47,10 @@ public class DockerMetricsManager {
     public static final String GRAFANA_TAG = "grafana_tag";
     public static final String PROM_TAG = "prom_tag";
     public static final String TSDB_RETENTION = "tsdb_days";
+    public static final String GRAPHITE_SAMPLE_EXPIRY = "graphite_sample_expiry";
+    public static final String GRAPHITE_CACHE_SIZE = "graphite_cache_size";
+    public static final String GRAPHITE_LOG_LEVEL = "graphite_log_level";
+    public static final String GRAPHITE_LOG_FORMAT = "graphite_log_format";
 
     private final DockerHelper dh;
 
@@ -60,7 +64,12 @@ public class DockerMetricsManager {
 
     public void startMetrics(Map<String, String> options) {
 
-        String ip = startGraphite();
+        String ip = startGraphite(
+                options.get(GRAPHITE_SAMPLE_EXPIRY),
+                options.get(GRAPHITE_CACHE_SIZE),
+                options.get(GRAPHITE_LOG_LEVEL),
+                options.get(GRAPHITE_LOG_FORMAT)
+            );
 
         startPrometheus(ip, options.get(PROM_TAG), options.get(TSDB_RETENTION));
 
@@ -141,12 +150,18 @@ public class DockerMetricsManager {
 
         String reload = "http://localhost:9090/-/reload";
         List<String> linkNames = new ArrayList();
+        linkNames.add("graphite-exporter");
         dh.startDocker(PROMETHEUS_IMG, tag, name, port, volumeDescList, envList, cmdList, reload, linkNames);
 
         logger.info("prometheus started and listening");
     }
 
-    private String startGraphite() {
+    private String startGraphite(
+        String graphite_sample_expiry,
+        String graphite_cache_size,
+        String graphite_log_level,
+        String graphite_log_format
+    ) {
 
         logger.info("preparing to start graphite exporter container...");
 
@@ -165,7 +180,13 @@ public class DockerMetricsManager {
         String reload = null;
         List<String> linkNames = new ArrayList();
 
-        List<String> cmdOpts = Arrays.asList("--graphite.mapping-config=/tmp/graphite_mapping.conf");
+        List<String> cmdOpts = Arrays.asList(
+            "--graphite.mapping-config=/tmp/graphite_mapping.conf",
+            "--graphite.sample-expiry="+graphite_sample_expiry,
+            "--graphite.cache-size="+graphite_cache_size,
+            "--log.level="+graphite_log_level,
+            "--log.format="+graphite_log_format
+        );
 
         dh.startDocker(GRAPHITE_EXPORTER_IMG, tag, name, port, volumeDescList, envList, cmdOpts, reload, linkNames);
 
@@ -214,7 +235,7 @@ public class DockerMetricsManager {
             throw new DockerInitError("IP for graphite container not found");
         }
 
-        datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
+        datasource = datasource.replace("!!!GRAPHITE_IP!!!", "graphite-exporter");
 
         File nosqlbenchDir = new File(userHome, "/.nosqlbench/");
         mkdir(nosqlbenchDir);

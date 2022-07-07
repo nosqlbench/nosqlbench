@@ -126,12 +126,28 @@ public class Cqld4Space {
 //        builder.withCompression(ProtocolOptions.Compression.NONE);
 //
         Optional<String> usernameOpt = cfg.getOptional("username");
+        Optional<String> userfileOpt = cfg.getOptional("userfile");
         Optional<String> passwordOpt = cfg.getOptional("password");
         Optional<String> passfileOpt = cfg.getOptional("passfile");
 
+
+        String username = null;
         if (usernameOpt.isPresent()) {
-            String username = usernameOpt.get();
-            String password;
+            username = usernameOpt.get();
+        } else if (userfileOpt.isPresent()) {
+            Path path = Paths.get(userfileOpt.get());
+            try {
+                username = Files.readAllLines(path).get(0);
+            } catch (IOException e) {
+                String error = "Error while reading username from file:" + usernameOpt.get();
+                logger.error(error, e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        String password;
+        if (username != null) {
+
             if (passwordOpt.isPresent()) {
                 password = passwordOpt.get();
             } else if (passfileOpt.isPresent()) {
@@ -139,7 +155,7 @@ public class Cqld4Space {
                 try {
                     password = Files.readAllLines(path).get(0);
                 } catch (IOException e) {
-                    String error = "Error while reading password from file:" + passfileOpt;
+                    String error = "Error while reading password from file:" + passfileOpt.get();
                     logger.error(error, e);
                     throw new RuntimeException(e);
                 }
@@ -151,25 +167,34 @@ public class Cqld4Space {
             builder.withAuthCredentials(username, password);
         }
 
-        cfg.getOptional("whitelist").ifPresent(wl -> {
-            List<InetSocketAddress> addrs = Arrays
-                .stream(wl.split(","))
-                .map(this::toSocketAddr)
-                .toList();
-            builder.withNodeDistanceEvaluator(new NodeFilterToDistanceEvaluatorAdapter(n -> {
-                return (n.getBroadcastAddress().isPresent() && addrs.contains(n.getBroadcastAddress().get()))
-                ||(n.getBroadcastRpcAddress().isPresent() && addrs.contains(n.getBroadcastRpcAddress().get()))
-                    ||(n.getListenAddress().isPresent() && addrs.contains(n.getListenAddress().get()));
-            }));
-        });
 
-        cfg.getOptional("cloud_proxy_address").ifPresent(cpa -> {
-            String[] addr = cpa.split(":",2);
-            if (addr.length==1) {
-                throw new RuntimeException("cloud_proxy_address must be specified in host:port form.");
-            }
-            builder.withCloudProxyAddress(InetSocketAddress.createUnresolved(addr[0],Integer.parseInt(addr[1])));
-        });
+        cfg.getOptional("whitelist").
+
+            ifPresent(wl ->
+
+            {
+                List<InetSocketAddress> addrs = Arrays
+                    .stream(wl.split(","))
+                    .map(this::toSocketAddr)
+                    .toList();
+                builder.withNodeDistanceEvaluator(new NodeFilterToDistanceEvaluatorAdapter(n -> {
+                    return (n.getBroadcastAddress().isPresent() && addrs.contains(n.getBroadcastAddress().get()))
+                        || (n.getBroadcastRpcAddress().isPresent() && addrs.contains(n.getBroadcastRpcAddress().get()))
+                        || (n.getListenAddress().isPresent() && addrs.contains(n.getListenAddress().get()));
+                }));
+            });
+
+        cfg.getOptional("cloud_proxy_address").
+
+            ifPresent(cpa ->
+
+            {
+                String[] addr = cpa.split(":", 2);
+                if (addr.length == 1) {
+                    throw new RuntimeException("cloud_proxy_address must be specified in host:port form.");
+                }
+                builder.withCloudProxyAddress(InetSocketAddress.createUnresolved(addr[0], Integer.parseInt(addr[1])));
+            });
 
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(cfg);
 
@@ -257,14 +282,15 @@ public class Cqld4Space {
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(Cqld4Space.class)
             .add(Param.optional("localdc"))
-            .add(Param.optional("secureconnectbundle"))
+            .add(Param.optional(List.of("secureconnectbundle","scb")))
             .add(Param.optional("hosts"))
-            .add(Param.optional("driverconfig",String.class))
-            .add(Param.optional("username",String.class,"user name (see also password and passfile)"))
+            .add(Param.optional("driverconfig", String.class))
+            .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
+            .add(Param.optional("userfile", String.class, "file to load the username from"))
             .add(Param.optional("password", String.class, "password (see also passfile)"))
-            .add(Param.optional("passfile",String.class,"file to load the password from"))
-            .add(Param.optional("whitelist",String.class,"list of whitelist hosts addresses"))
-            .add(Param.optional("cloud_proxy_address",String.class,"Cloud Proxy Address"))
+            .add(Param.optional("passfile", String.class, "file to load the password from"))
+            .add(Param.optional("whitelist", String.class, "list of whitelist hosts addresses"))
+            .add(Param.optional("cloud_proxy_address", String.class, "Cloud Proxy Address"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())
             .add(new OptionHelpers(new OptionsMap()).getConfigModel())

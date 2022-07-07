@@ -97,6 +97,7 @@ public class NBCLIOptions {
     private static final String DASH_VVV_TRACE = "-vvv";
     private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
+    private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
     private final static String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION_.summary";
@@ -183,6 +184,7 @@ public class NBCLIOptions {
     private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
+    private String graphitelogLevel="info";
 
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
@@ -211,6 +213,10 @@ public class NBCLIOptions {
 
     public String getLogfileLoggingPattern() {
         return logfileLoggingPattern;
+    }
+
+    public String getGraphiteLogLevel() {
+        return this.graphitelogLevel;
     }
 
     public enum Mode {
@@ -338,6 +344,10 @@ public class NBCLIOptions {
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
+                    break;
+                case GRAPHITE_LOG_LEVEL:
+                    arglist.removeFirst();
+                    graphitelogLevel=arglist.removeFirst();
                     break;
                 case METRICS_PREFIX:
                     arglist.removeFirst();

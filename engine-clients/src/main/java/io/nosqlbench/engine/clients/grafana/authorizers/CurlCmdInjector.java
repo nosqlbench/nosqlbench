@@ -24,10 +24,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.http.HttpRequest;
 import java.nio.CharBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class CurlCmdInjector {
@@ -45,8 +48,21 @@ public class CurlCmdInjector {
                 .replace("ROLE", apirq.getRole())
                 .replaceAll("\n", "");
 
+            String binname=null;
+            for (String potentialPath : new String[]{"/bin", "/usr/bin", "/usr/local/bin"}) {
+                String filename = potentialPath+ File.separator + "curl";
+                if (Files.exists(Path.of(filename))) {
+                    binname=filename;
+                    break;
+                }
+            }
+            if (binname==null) {
+                logger.error("Unable to find binary path for curl command");
+                return Optional.empty();
+            }
+
             String[] args = new String[]{
-                "/usr/bin/curl", "-s", "-XPOST", rq.uri().toString(),
+                binname, "-s", "-XPOST", rq.uri().toString(),
                 "-H", "Content-Type: application/json",
                 "-d", requestJson
             };
