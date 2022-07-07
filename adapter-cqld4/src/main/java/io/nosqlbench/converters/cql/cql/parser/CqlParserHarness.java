@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.lang.parser;
+package io.nosqlbench.converters.cql.cql.parser;
 
-import io.nosqlbench.virtdata.lang.cqlast.CqlAstBuilder;
-import io.nosqlbench.virtdata.lang.generated.CqlLexer;
-import io.nosqlbench.virtdata.lang.generated.CqlParser;
+import io.nosqlbench.converters.cql.cql.cqlast.CqlAstBuilder;
+import io.nosqlbench.converters.cql.generated.CqlLexer;
+import io.nosqlbench.converters.cql.generated.CqlParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;

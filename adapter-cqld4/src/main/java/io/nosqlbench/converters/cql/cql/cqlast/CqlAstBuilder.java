@@ -14,23 +14,38 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.lang.cqlast;
+package io.nosqlbench.converters.cql.cql.cqlast;
 
-import io.nosqlbench.virtdata.lang.generated.CqlParser;
-import io.nosqlbench.virtdata.lang.generated.CqlParserBaseListener;
+import io.nosqlbench.converters.cql.generated.CqlParser;
+import io.nosqlbench.converters.cql.generated.CqlParserBaseListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CqlAstBuilder extends CqlParserBaseListener {
 
-    CqlKeyspace keyspace = new CqlKeyspace();
+    List<CqlKeyspace> keyspaces = new ArrayList<>():
+    CqlKeyspace lastKeyspace = null;
+
+    @Override
+    public void enterKeyspace(CqlParser.KeyspaceContext ctx) {
+        lastKeyspace = new CqlKeyspace();
+        this.keyspaces.add(lastKeyspace);
+    }
+
+    @Override
+    public void exitKeyspace(CqlParser.KeyspaceContext ctx) {
+        lastKeyspace.setKeyspaceName(ctx.OBJECT_NAME().getSymbol().getText());
+    }
 
     @Override
     public void enterCreateTable(CqlParser.CreateTableContext ctx) {
-        keyspace.addTable();
+        lastKeyspace.addTable();
     }
 
     @Override
     public void exitCreateTable(CqlParser.CreateTableContext ctx) {
-        keyspace.setTableName(ctx.table().OBJECT_NAME().getSymbol().getText());
+        lastKeyspace.setTableName(ctx.table().OBJECT_NAME().getSymbol().getText());
     }
 
     @Override
@@ -41,7 +56,7 @@ public class CqlAstBuilder extends CqlParserBaseListener {
     @Override
     public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
         System.out.println("here");
-        keyspace.addTableColumn(
+        lastKeyspace.addTableColumn(
             ctx.dataType().dataTypeName().getText(),
             ctx.column().OBJECT_NAME().getSymbol().getText()
         );
@@ -50,7 +65,8 @@ public class CqlAstBuilder extends CqlParserBaseListener {
     @Override
     public String toString() {
         return "CqlAstBuilder{" +
-            "keyspace=" + keyspace +
+            "keyspaces=" + keyspaces +
+            ", lastKeyspace=" + lastKeyspace +
             '}';
     }
 }

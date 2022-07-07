@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.lang.parser;
+package io.nosqlbench.converters.cql.cql.parser;
 
 import org.junit.jupiter.api.Test;
 

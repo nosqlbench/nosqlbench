@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.lang.cqlast;
+package io.nosqlbench.converters.cql.cql.cqlast;
 
 public class CqlField {
     String name;

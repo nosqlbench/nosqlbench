@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.lang.cqlast;
+package io.nosqlbench.converters.cql.cql.cqlast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CqlKeyspace {
+    String keyspaceName= "";
     List<CqlTable> tables = new ArrayList<>();
     CqlTable lastAddedTable = null;
+
+    public CqlKeyspace() {
+    }
+
+    public void setKeyspaceName(String name) {
+        this.keyspaceName=name;
+    }
 
     public void addTable() {
         lastAddedTable = new CqlTable();
@@ -42,9 +51,10 @@ public class CqlKeyspace {
 
     @Override
     public String toString() {
-        return "CqlKeyspace{" +
-            "tables=" + tables +
-            ", lastAddedTable=" + lastAddedTable +
-            '}';
+        return "keyspace:" + keyspaceName+"\n"+
+            " tables:\n"+
+            (tables.stream().map(Object::toString)
+                .map(s -> "  "+s)
+                .collect(Collectors.joining("\n")));
     }
 }

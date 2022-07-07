@@ -91,4 +91,31 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.10.1</version>
+                <configuration>
+                    <sourceDirectory>src/main/java/io/nosqlbench/converters/cql/cql/grammars</sourceDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>io.nosqlbench.converters.cql.generated</argument>
+                    </arguments>
+                    <outputDirectory>src/main/java/io/nosqlbench/converters/cql/generated</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
 </project>
