@@ -18,35 +18,64 @@ package io.nosqlbench.converters.cql.cql.cqlast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CqlTable {
     String name = "";
-    List<CqlField> fields = new ArrayList();
+    String keyspace = "";
+    List<CqlColumnDef> coldefs = new ArrayList();
+    String refddl;
 
     public CqlTable() {
     }
 
-    public CqlTable(String tableName) {
-        this.name = name;
-    }
-
-    public void addcolumnDef(CqlField cqlField) {
-        this.fields.add(cqlField);
+    public void addcolumnDef(CqlColumnDef cqlField) {
+        this.coldefs.add(cqlField);
     }
 
     public void setName(String tableName) {
-        this.name = name;
+        this.name = tableName;
     }
 
     public void addcolumnDef(String type, String fieldName) {
-        fields.add(new CqlField(type, fieldName));
+        coldefs.add(new CqlColumnDef(type, fieldName));
     }
 
     @Override
     public String toString() {
-        return "CqlTable{" +
-            "name='" + name + '\'' +
-            ", fields=" + fields +
-            '}';
+        return "cql table: '" + this.name + "':\n"
+            + this.coldefs.stream()
+            .map(Object::toString)
+            .map(s -> "   " +s)
+            .collect(Collectors.joining("\n"));
+    }
+
+    public List<CqlColumnDef> getColumnDefinitions() {
+        return this.coldefs;
+    }
+
+    public String getTableName() {
+        return this.name;
+    }
+
+    public void setKeyspace(String keyspace) {
+        this.keyspace=keyspace;
+    }
+
+    public String getRefDdl() {
+        return this.refddl;
+    }
+
+    public void setRefDdl(String refddl) {
+        this.refddl=refddl;
+    }
+
+    public String getRefddl() {
+        return refddl;
+    }
+
+
+    public String getKeySpace() {
+        return this.keyspace;
     }
 }

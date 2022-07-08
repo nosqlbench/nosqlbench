@@ -16,7 +16,8 @@
 
 package io.nosqlbench.converters.cql.cql.parser;
 
-import io.nosqlbench.converters.cql.cql.cqlast.CqlAstBuilder;
+import io.nosqlbench.converters.cql.cql.cqlast.CqlModel;
+import io.nosqlbench.converters.cql.cql.cqlast.CqlModelBuilder;
 import io.nosqlbench.converters.cql.generated.CqlLexer;
 import io.nosqlbench.converters.cql.generated.CqlParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -25,11 +26,24 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class CqlParserHarness {
-    private final static Logger logger  = LogManager.getLogger(CqlParserHarness.class);
 
-    public void parse(String input) {
+public class CqlModelParser {
+    private final static Logger logger  = LogManager.getLogger(CqlModelParser.class);
+
+    public static CqlModel parse(Path path) {
+        try {
+            String ddl = Files.readString(path);
+            return parse(ddl);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static CqlModel parse(String input) {
 
         try {
             CodePointCharStream cstream = CharStreams.fromString(input);
@@ -39,36 +53,12 @@ public class CqlParserHarness {
             CqlParser parser = new CqlParser(tokens);
 
 
-            CqlAstBuilder astListener = new CqlAstBuilder();
+            CqlModelBuilder astListener = new CqlModelBuilder();
             parser.addParseListener(astListener);
 
             CqlParser.RootContext keyspaceParser = parser.root();
-            String tree = keyspaceParser.toStringTree();
 
-//            System.out.println("parsetree:\n" + tree);
-            System.out.println(astListener.toString());
-
-
-
-
-//            VirtDataParser.VirtdataFlowContext virtdataFlowContext = parser.virtdataFlow();
-//            logger.trace("parse tree: " + virtdataFlowContext.toStringTree(parser));
-
-//            if (astListener.hasErrors()) {
-//                System.out.println(astListener.getErrorNodes());
-//            }
-
-//            VirtDataAST ast = astListener.getModel();
-//            List<VirtDataFlow> flows = ast.getFlows();
-//            if (flows.size() > 1) {
-//                throw new RuntimeException("Only one flow expected here.");
-//            }
-//
-//            if (astListener.hasErrors()) {
-//                throw new RuntimeException("Error parsing input '" + input + "'");
-//            }
-//
-//            return new ParseResult(flows.get(0));
+            return astListener.getModel();
 
         } catch (Exception e) {
             logger.warn("Error while parsing flow:" + e.getMessage());

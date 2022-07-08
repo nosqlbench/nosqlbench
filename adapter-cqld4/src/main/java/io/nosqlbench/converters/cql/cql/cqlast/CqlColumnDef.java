@@ -16,20 +16,25 @@
 
 package io.nosqlbench.converters.cql.cql.cqlast;
 
-public class CqlField {
+public class CqlColumnDef {
     String name;
     String type;
 
-    public CqlField(String type, String name) {
+    public CqlColumnDef(String type, String name) {
         this.type = type;
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
-        return "CqlField{" +
-            "name='" + name + '\'' +
-            ", type='" + type + '\'' +
-            '}';
+        return "    " + this.name + " " + this.type + ",";
     }
 }

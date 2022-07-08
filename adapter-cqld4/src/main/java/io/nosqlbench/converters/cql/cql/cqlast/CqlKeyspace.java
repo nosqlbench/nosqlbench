@@ -16,14 +16,9 @@
 
 package io.nosqlbench.converters.cql.cql.cqlast;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class CqlKeyspace {
     String keyspaceName= "";
-    List<CqlTable> tables = new ArrayList<>();
-    CqlTable lastAddedTable = null;
+    String refddl;
 
     public CqlKeyspace() {
     }
@@ -32,29 +27,23 @@ public class CqlKeyspace {
         this.keyspaceName=name;
     }
 
-    public void addTable() {
-        lastAddedTable = new CqlTable();
-        tables.add(lastAddedTable);
+    public String getKeyspaceName() {
+        return this.keyspaceName;
     }
 
-    public void addColumnDef(String type, String name) {
-        lastAddedTable.addcolumnDef(new CqlField(type, name));
-    }
-
-    public void setTableName(String tableName) {
-        lastAddedTable.setName(tableName);
-    }
-
-    public void addTableColumn(String type, String fieldName) {
-        lastAddedTable.addcolumnDef(type,fieldName);
+    public void setRefDdl(String refddl) {
+        this.refddl = refddl;
     }
 
     @Override
     public String toString() {
-        return "keyspace:" + keyspaceName+"\n"+
-            " tables:\n"+
-            (tables.stream().map(Object::toString)
-                .map(s -> "  "+s)
-                .collect(Collectors.joining("\n")));
+        return "CqlKeyspace{" +
+            "keyspaceName='" + keyspaceName + '\'' +
+            ", refddl='" + refddl + '\'' +
+            '}';
+    }
+
+    public String getRefddl() {
+        return refddl;
     }
 }

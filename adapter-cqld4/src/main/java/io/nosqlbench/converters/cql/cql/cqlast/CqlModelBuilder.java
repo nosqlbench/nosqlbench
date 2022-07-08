@@ -18,55 +18,63 @@ package io.nosqlbench.converters.cql.cql.cqlast;
 
 import io.nosqlbench.converters.cql.generated.CqlParser;
 import io.nosqlbench.converters.cql.generated.CqlParserBaseListener;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class CqlAstBuilder extends CqlParserBaseListener {
-
-    List<CqlKeyspace> keyspaces = new ArrayList<>():
-    CqlKeyspace lastKeyspace = null;
+public class CqlModelBuilder extends CqlParserBaseListener {
+    CqlModel model = new CqlModel();
 
     @Override
-    public void enterKeyspace(CqlParser.KeyspaceContext ctx) {
-        lastKeyspace = new CqlKeyspace();
-        this.keyspaces.add(lastKeyspace);
+    public void enterCreateKeyspace(CqlParser.CreateKeyspaceContext ctx) {
+        model.newKeyspace();
     }
 
     @Override
-    public void exitKeyspace(CqlParser.KeyspaceContext ctx) {
-        lastKeyspace.setKeyspaceName(ctx.OBJECT_NAME().getSymbol().getText());
-    }
-
-    @Override
-    public void enterCreateTable(CqlParser.CreateTableContext ctx) {
-        lastKeyspace.addTable();
-    }
-
-    @Override
-    public void exitCreateTable(CqlParser.CreateTableContext ctx) {
-        lastKeyspace.setTableName(ctx.table().OBJECT_NAME().getSymbol().getText());
-    }
-
-    @Override
-    public void enterColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
-        System.out.println("here");
-    }
-
-    @Override
-    public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
-        System.out.println("here");
-        lastKeyspace.addTableColumn(
-            ctx.dataType().dataTypeName().getText(),
-            ctx.column().OBJECT_NAME().getSymbol().getText()
+    public void exitCreateKeyspace(CqlParser.CreateKeyspaceContext ctx) {
+        model.saveKeyspace(
+            ctx.keyspace().getText(),
+            textOf(ctx)
         );
     }
 
     @Override
+    public void enterCreateTable(CqlParser.CreateTableContext ctx) {
+        model.newTable();
+    }
+
+    @Override
+    public void exitCreateTable(CqlParser.CreateTableContext ctx) {
+        model.saveTable(
+            ctx.keyspace().OBJECT_NAME().getText(),
+            ctx.table().OBJECT_NAME().getText(),
+            textOf(ctx)
+        );
+    }
+
+    private String textOf(ParserRuleContext ctx) {
+        int startIndex = ctx.start.getStartIndex();
+        int stopIndex = ctx.stop.getStopIndex();
+        Interval interval = Interval.of(startIndex, stopIndex);
+        String text = ctx.start.getInputStream().getText(interval);
+        return text;
+    }
+
+    @Override
+    public void enterColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
+    }
+
+    @Override
+    public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
+        model.saveColumnDefinition(ctx.dataType().getText(),ctx.column().getText());
+    }
+
+    @Override
     public String toString() {
-        return "CqlAstBuilder{" +
-            "keyspaces=" + keyspaces +
-            ", lastKeyspace=" + lastKeyspace +
-            '}';
+        return model.toString();
+    }
+
+
+    public CqlModel getModel() {
+        return model;
     }
 }
