@@ -2,13 +2,13 @@ package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,11 +18,15 @@ package io.nosqlbench.virtdata.library.basics.tests.long_string;
  */
 
 
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer.ByteBufferSizedHashed;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.AlphaNumericString;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.LongToIntFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,6 +55,20 @@ public class AlphaNumericStringTest {
             String value = alphaNumeric.apply(cycle);
             assertThat(value.length()).isEqualTo(20);
             assertThat(seen).contains(value);
+        }
+    }
+
+    @Test
+    public void testAlphaNumericStringWithHashRange() {
+        LongToIntFunction sizeFunc = new HashRange(10, 20);
+        AlphaNumericString alphaNumeric = new AlphaNumericString(sizeFunc);
+        Set<String> seen = new HashSet<>();
+
+        for (long cycle = 0; cycle < 10; cycle++) {
+            String value = alphaNumeric.apply(cycle);
+            assertThat(value.length()).isGreaterThanOrEqualTo(10).isLessThanOrEqualTo(20);
+            assertThat(seen).doesNotContain(value);
+            seen.add(value);
         }
     }
 }
