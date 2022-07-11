@@ -63,6 +63,25 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <version>3.2.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/java/io/nosqlbench/virtdata/lang/generated</directory>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.interp</include>
+                                <include>**/*.tokens</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                    <followSymlinks>false</followSymlinks>
+                </configuration>
+            </plugin>
+
         </plugins>
 
     </build>

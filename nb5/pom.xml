@@ -75,7 +75,7 @@
             <artifactId>adapter-cqld4</artifactId>
             <version>4.17.20-SNAPSHOT</version>
         </dependency>
-        
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
