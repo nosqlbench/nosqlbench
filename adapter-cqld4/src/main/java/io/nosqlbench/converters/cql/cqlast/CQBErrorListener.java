@@ -20,12 +20,15 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
-public class CQBErrorListener extends BaseErrorListener {
+public class CQBErrorListener extends BaseErrorListener implements Supplier<List<String>> {
     List<String> errors = new ArrayList<>();
 
     private final Path origin;
@@ -37,20 +40,35 @@ public class CQBErrorListener extends BaseErrorListener {
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         String locref= getLocationRef(origin,line, charPositionInLine);
-        String errmsg = "Error in " + origin.toString()+ "\n:"+locref;
+        String errmsg = "Error in " + origin.toString()+ ":\n" +
+            e.toString() + ":\n"+locref;
         errors.add(errmsg);
     }
 
     public String getLocationRef(Path srcpath, int line, int charPositionInLine) {
-        boolean inij = System.getProperty("sun.java.command","").toLowerCase(Locale.ROOT).contains("intellij");
-        Path vcwd = Path.of(".").toAbsolutePath().normalize();
-        vcwd = inij ? vcwd.getParent().normalize() : vcwd;
-        Path relpath = vcwd.relativize(srcpath.toAbsolutePath());
-        if (inij) {
-            relpath = Path.of("local/verizon/");
-//            relpath = Path.of(relpath.toString().replace("target/classes/","src/main/resources/"));
+        Path cwd = Path.of(".").toAbsolutePath().normalize();
+        Path vcwd = cwd;
+
+        while (vcwd!=null) {
+            if (Files.exists(Path.of(vcwd + File.separator + ".git"))) {
+                break;
+            }
+            vcwd = vcwd.getParent();
         }
-        return "\t at (" + relpath + ":" + line+":"+charPositionInLine + ")";
+
+        boolean inij = System.getProperty("sun.java.command","").toLowerCase(Locale.ROOT).contains("intellij");
+        vcwd = inij ? cwd.getParent().normalize() : vcwd;
+
+        Path relpath = vcwd.relativize(srcpath.toAbsolutePath());
+
+        if (inij) {
+            relpath = Path.of(relpath.toString().replace("target/classes/","src/main/resources/"));
+        }
+        return "\tat (" + relpath + ":" + line+":"+charPositionInLine + ")";
     }
 
+    @Override
+    public List<String> get() {
+        return this.errors;
+    }
 }

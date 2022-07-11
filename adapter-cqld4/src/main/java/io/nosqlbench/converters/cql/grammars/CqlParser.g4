@@ -367,8 +367,9 @@ dropIndex
    ;
 
 // TODO: update to https://docs.datastax.com/en/dse/6.8/cql/cql/cql_reference/cql_commands/cqlCreateTable.html
+// TODO: Update optional sequence for compact storage [options] clustering order [options] as documented above
 createTable
-   : kwCreate kwTable ifNotExist? (keyspace DOT)? table syntaxBracketLr columnDefinitionList syntaxBracketRr (withElement (kwAnd tableOptions)*)?
+   : kwCreate kwTable ifNotExist? (keyspace DOT)? table syntaxBracketLr columnDefinitionList syntaxBracketRr (kwWith tableOptions (kwAnd tableOptions)*)?
    ;
 
 withElement
@@ -386,15 +387,22 @@ tableOptions
 tableOptionItem
    : tableOptionName OPERATOR_EQ tableOptionValue
    | tableOptionName OPERATOR_EQ optionHash
+   | kwCompactStorage
+   | clusteringOrder
    ;
 
 tableOptionName
    : OBJECT_NAME
    ;
 
+kwCompactStorage
+   : K_COMPACT K_STORAGE
+   ;
+
 tableOptionValue
    : stringLiteral
    | floatLiteral
+   | booleanLiteral
    ;
 
 optionHash
@@ -447,7 +455,7 @@ compoundKey
    ;
 
 compositeKey
-   : syntaxBracketLr partitionKeyList syntaxBracketRr (syntaxComma clusteringKeyList)
+   : syntaxBracketLr partitionKeyList syntaxBracketRr (syntaxComma clusteringKeyList)?
    ;
 
 partitionKeyList
@@ -778,11 +786,15 @@ column
    ;
 
 dataType
-   : dataTypeName dataTypeDefinition?
+   : dataTypeName
+   | K_FROZEN syntaxBracketLa dataType syntaxBracketRa
+   | K_SET syntaxBracketLa dataType syntaxBracketRa
+   | K_LIST syntaxBracketLa dataType syntaxBracketRa
+   | K_MAP syntaxBracketLa dataType syntaxComma dataType syntaxBracketRa
    ;
 
 dataTypeName
-   : OBJECT_NAME
+   : (keyspace DOT)? OBJECT_NAME
    | K_TIMESTAMP
    | K_SET
    | K_ASCII
@@ -794,7 +806,7 @@ dataTypeName
    | K_DECIMAL
    | K_DOUBLE
    | K_FLOAT
-   | K_FROZEN
+//   | K_FROZEN
    | K_INET
    | K_INT
    | K_LIST
@@ -812,8 +824,11 @@ dataTypeName
    ;
 
 dataTypeDefinition
-   : syntaxBracketLa dataTypeName (syntaxComma dataTypeName)* syntaxBracketRa
-   | syntaxBracketLa dataType syntaxBracketRa
+   : syntaxBracketLa dataType syntaxBracketRa
+   | syntaxBracketLa dataTypeName (syntaxBracketLa dataTypeName syntaxBracketRa) syntaxBracketRa
+   | syntaxBracketLa dataTypeName (syntaxComma dataTypeName)* syntaxBracketRa
+   | syntaxBracketLa dataTypeName (syntaxComma syntaxBracketLa dataTypeName syntaxBracketRa)* syntaxBracketRa
+//   | syntaxBracketLa dataTypeName (syntaxComma dataTypeDefinition)* syntaxBracketRa
    ;
 
 orderDirection

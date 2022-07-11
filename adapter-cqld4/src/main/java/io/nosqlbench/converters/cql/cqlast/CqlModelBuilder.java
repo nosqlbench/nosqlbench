@@ -28,10 +28,11 @@ import java.util.List;
 public class CqlModelBuilder extends CqlParserBaseListener {
 
     private final CQBErrorListener errorListener;
-    CqlModel model = new CqlModel();
+    private final CqlModel model;
 
     public CqlModelBuilder(CQBErrorListener errorListener) {
         this.errorListener = errorListener;
+        this.model = new CqlModel(errorListener);
     }
 
     @Override

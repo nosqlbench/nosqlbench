@@ -65,7 +65,7 @@ public class CqlModelParser {
             CqlModel model = cqlModelBuilder.getModel();
             if (model.getErrors().size()>0) {
                 System.out.println(model.getErrors());
-                throw new RuntimeException("Unable to render model for unparsable input with " + model.getErrors() + " errors");
+                throw new RuntimeException("Unable to render model for unparsable input with errors:\n" + model.getErrors());
             } else {
                 return model;
             }

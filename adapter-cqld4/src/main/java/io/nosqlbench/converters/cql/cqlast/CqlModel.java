@@ -16,31 +16,31 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CqlModel {
 
+    private final Supplier<List<String>> errors;
     Map<String, CqlKeyspace> keyspaces = new LinkedHashMap<>();
+
     Map<String, Map<String, CqlTable>> tables = new LinkedHashMap<>();
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
-
-    List<String> errors = new ArrayList<>();
 
     transient
     CqlKeyspace keyspace = null;
     transient
     CqlTable table;
 
+
+    public CqlModel(Supplier<List<String>> errorSource) {
+        this.errors = errorSource;
+    }
+
+    public List<String> getErrors() {
+        return errors.get();
+    }
 
     public void newKeyspace() {
         keyspace = new CqlKeyspace();
@@ -87,12 +87,12 @@ public class CqlModel {
         for (String ks : keyspaces.keySet()) {
             CqlKeyspace keyspace = keyspaces.get(ks);
             sb.append("keyspace '").append(keyspace.getKeyspaceName()).append("':\n");
-            sb.append(keyspace.toString()).append("\n");
+            sb.append(keyspace).append("\n");
 
             tables.getOrDefault(ks,Map.of()).values().stream()
                 .forEach(table -> {
                     sb.append("table '").append(table.getTableName()).append("':\n");
-                    sb.append(table.toString());
+                    sb.append(table);
                 });
         }
         return sb.toString();

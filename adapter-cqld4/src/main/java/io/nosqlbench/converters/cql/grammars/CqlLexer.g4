@@ -87,7 +87,8 @@ K_KEYS: 'KEYS';
 K_KEYSPACE: 'KEYSPACE';
 K_KEYSPACES: 'KEYSPACES';
 K_LANGUAGE: 'LANGUAGE';
-K_LEVEL: 'LEVEL';
+// Disabled because there was no definitive reference to this as a bare keyword in the specs
+//K_LEVEL: 'LEVEL';
 K_LIMIT: 'LIMIT';
 K_LOCAL_ONE: 'LOCAL_ONE';
 K_LOCAL_QUORUM: 'LOCAL_QUORUM';

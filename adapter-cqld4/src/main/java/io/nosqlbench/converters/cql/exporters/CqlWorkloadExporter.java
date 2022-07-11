@@ -77,10 +77,10 @@ public class CqlWorkloadExporter {
         }
         Path srcpath = Path.of(args[0]);
         if (!srcpath.toString().endsWith(".cql")) {
-            throw new RuntimeException("File '" + srcpath.toString() + "' must end in .cql");
+            throw new RuntimeException("File '" + srcpath + "' must end in .cql");
         }
         if (!Files.exists(srcpath)) {
-            throw new RuntimeException("File '" + srcpath.toString() + "' does not exist.");
+            throw new RuntimeException("File '" + srcpath + "' does not exist.");
         }
 
         Path target = Path.of(srcpath.toString().replace("\\.cql", "\\.yaml"));
@@ -91,7 +91,7 @@ public class CqlWorkloadExporter {
             throw new RuntimeException("Target file must end in .yaml");
         }
         if (Files.exists(target) && !target.toString().startsWith("_")) {
-            throw new RuntimeException("Target file '" + target.toString() + "' exists. Please remove it first or use a different target file name.");
+            throw new RuntimeException("Target file '" + target + "' exists. Please remove it first or use a different target file name.");
         }
 
         CqlWorkloadExporter exporter = new CqlWorkloadExporter(srcpath);
@@ -128,7 +128,7 @@ public class CqlWorkloadExporter {
             model.getAllTables()
                 .stream()
                 .collect(Collectors.toMap(
-                    t -> "insert-" + t.getTableName(),
+                    t -> "insert-" + t.getKeySpace()+"__"+t.getTableName(),
                     this::genUpsertTemplate)
                 )
         );
@@ -137,7 +137,7 @@ public class CqlWorkloadExporter {
             model.getAllTables()
                 .stream()
                 .collect(Collectors.toMap(
-                    t -> "select-" + t.getTableName(),
+                    t -> "select-" + t.getKeySpace()+"__"+t.getTableName(),
                     this::genSelectTemplate)
                 ));
 
@@ -150,7 +150,7 @@ public class CqlWorkloadExporter {
         Map<String, String> rampupOpTemplates = model.getAllTables()
             .stream()
             .collect(Collectors.toMap(
-                t -> "insert-" + t.getTableName(),
+                t -> "insert-" + t.getKeySpace()+"__"+t.getTableName(),
                 this::genUpsertTemplate)
             );
 
