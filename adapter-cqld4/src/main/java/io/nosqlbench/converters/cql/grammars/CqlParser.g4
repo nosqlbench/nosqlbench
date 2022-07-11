@@ -375,7 +375,7 @@ withElement
    ;
 
 clusteringOrder
-   : kwClustering kwOrder kwBy syntaxBracketLr column orderDirection? syntaxBracketRr
+   : kwClustering kwOrder kwBy syntaxBracketLr column orderDirection? ( syntaxComma column orderDirection? )* syntaxBracketRr
    ;
 
 tableOptions
@@ -812,6 +812,7 @@ dataTypeName
 
 dataTypeDefinition
    : syntaxBracketLa dataTypeName (syntaxComma dataTypeName)* syntaxBracketRa
+   | syntaxBracketLa dataType syntaxBracketRa
    ;
 
 orderDirection

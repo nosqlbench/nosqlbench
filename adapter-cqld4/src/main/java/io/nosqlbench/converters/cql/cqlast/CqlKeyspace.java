@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.cql.cqlast;
+package io.nosqlbench.converters.cql.cqlast;
 
-public class CqlColumnDef {
-    String name;
-    String type;
+public class CqlKeyspace {
+    String keyspaceName= "";
+    String refddl;
 
-    public CqlColumnDef(String type, String name) {
-        this.type = type;
-        this.name = name;
+    public CqlKeyspace() {
     }
 
-    public String getName() {
-        return name;
+    public void setKeyspaceName(String name) {
+        this.keyspaceName=name;
     }
 
-    public String getType() {
-        return type;
+    public String getKeyspaceName() {
+        return this.keyspaceName;
+    }
+
+    public void setRefDdl(String refddl) {
+        this.refddl = refddl;
     }
 
     @Override
     public String toString() {
-        return "    " + this.name + " " + this.type + ",";
+        return "CqlKeyspace{" +
+            "keyspaceName='" + keyspaceName + '\'' +
+            ", refddl='" + refddl + '\'' +
+            '}';
+    }
+
+    public String getRefddl() {
+        return refddl;
     }
 }

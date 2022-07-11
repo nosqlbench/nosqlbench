@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.cql.cqlast;
+package io.nosqlbench.converters.cql.cqlast;
 
 import java.util.ArrayList;
 import java.util.List;

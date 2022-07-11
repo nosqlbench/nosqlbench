@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.cql.parser;
+package io.nosqlbench.converters.cql.parser;
 
-import io.nosqlbench.converters.cql.cql.cqlast.CqlModel;
-import io.nosqlbench.converters.cql.cql.cqlast.CqlModelBuilder;
+import io.nosqlbench.converters.cql.cqlast.CqlModel;
+import io.nosqlbench.converters.cql.cqlast.CqlModelBuilder;
 import io.nosqlbench.converters.cql.generated.CqlLexer;
 import io.nosqlbench.converters.cql.generated.CqlParser;
 import org.antlr.v4.runtime.CharStreams;

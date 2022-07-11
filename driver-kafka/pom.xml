@@ -64,17 +64,18 @@
         </dependency>
 
     </dependencies>
-    <repositories>
-        <repository>
-            <id>confluent</id>
-            <name>Confluent Maven Repo</name>
-            <layout>default</layout>
-            <url>https://packages.confluent.io/maven/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>confluent</id>-->
+<!--            <name>Confluent Maven Repo</name>-->
+<!--            <layout>default</layout>-->
+<!--            <url>https://packages.confluent.io/maven/</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>false</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
+<!--    </repositories>-->
     <!--    <profiles>-->
     <!--        <profile>-->
     <!--            <id>shade</id>-->

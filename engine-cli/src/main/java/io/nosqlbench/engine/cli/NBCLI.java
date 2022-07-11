@@ -53,6 +53,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -224,6 +226,22 @@ public class NBCLI implements Function<String[], Integer> {
             annotatorsConfig = "[{type:'log',level:'info'}]";
         }
 
+        if (args.length > 0 && args[0].toLowerCase().equals("cqlgen")) {
+            String exporterImpl = "io.nosqlbench.converters.cql.exporters.CqlWorkloadExporter";
+            String[] exporterArgs = Arrays.copyOfRange(args, 1, args.length);
+            try {
+                Class<?> genclass = Class.forName(exporterImpl);
+                Method main = genclass.getMethod("main", new String[0].getClass());
+                Object result = main.invoke(null, new Object[]{exporterArgs});
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("cql workload exporter implementation " + exporterImpl + " was not found in this runtime.");
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                System.out.println("Error in app: " + e.toString());
+                e.printStackTrace();
+                throw new RuntimeException("error while invoking " + exporterImpl + ": " + e.toString(),e);
+            }
+            return EXIT_OK;
+        }
         if (args.length > 0 && args[0].toLowerCase().equals("export-docs")) {
             BundledMarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
             return EXIT_OK;

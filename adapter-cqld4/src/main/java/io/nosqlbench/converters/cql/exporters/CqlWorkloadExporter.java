@@ -1,12 +1,28 @@
-package io.nosqlbench.converters.cql.cql.exporters;
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.nosqlbench.converters.cql.exporters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.converters.cql.cql.cqlast.CqlColumnDef;
-import io.nosqlbench.converters.cql.cql.cqlast.CqlKeyspace;
-import io.nosqlbench.converters.cql.cql.cqlast.CqlModel;
-import io.nosqlbench.converters.cql.cql.cqlast.CqlTable;
-import io.nosqlbench.converters.cql.cql.parser.CqlModelParser;
+import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
+import io.nosqlbench.converters.cql.cqlast.CqlKeyspace;
+import io.nosqlbench.converters.cql.cqlast.CqlModel;
+import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Dump;
@@ -16,7 +32,11 @@ import org.snakeyaml.engine.v2.common.NonPrintableStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.representer.BaseRepresenter;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +58,43 @@ public class CqlWorkloadExporter {
 
     public CqlWorkloadExporter(Path path) {
         this.model = CqlModelParser.parse(path);
+    }
+
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml");
+        }
+        Path srcpath = Path.of(args[0]);
+        if (!srcpath.toString().endsWith(".cql")) {
+            throw new RuntimeException("File '" + srcpath.toString() + "' must end in .cql");
+        }
+        if (!Files.exists(srcpath)) {
+            throw new RuntimeException("File '" + srcpath.toString() + "' does not exist.");
+        }
+
+        Path target = Path.of(srcpath.toString().replace("\\.cql", "\\.yaml"));
+        if (args.length == 2) {
+            target = Path.of(args[1]);
+        }
+        if (!target.toString().endsWith(".yaml")) {
+            throw new RuntimeException("Target file must end in .yaml");
+        }
+        if (Files.exists(target) && !target.toString().startsWith("_")) {
+            throw new RuntimeException("Target file '" + target.toString() + "' exists. Please remove it first or use a different target file name.");
+        }
+
+        CqlWorkloadExporter exporter = new CqlWorkloadExporter(srcpath);
+        String workload = exporter.getWorkloadAsYaml();
+        try {
+            Files.write(
+                target,
+                workload.getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Map<String, Object> getWorkload() {
@@ -108,13 +165,13 @@ public class CqlWorkloadExporter {
 
     private String genPredicatePart(CqlColumnDef def) {
         String typeName = def.getType();
-        CqlLiteralFormat cqlLiteralFormat = null;
-        try {
-            cqlLiteralFormat = CqlLiteralFormat.valueOf(typeName);
-        } catch (IllegalArgumentException iae) {
-            cqlLiteralFormat = CqlLiteralFormat.UNKNOWN;
+
+        CqlLiteralFormat cqlLiteralFormat =
+            CqlLiteralFormat.valueOfCqlType(typeName).orElse(CqlLiteralFormat.UNKNOWN);
+        if (cqlLiteralFormat == CqlLiteralFormat.UNKNOWN) {
             logger.warn("Unknown literal format for " + typeName);
         }
+
         return def.getName() + "=" + cqlLiteralFormat.format("{" + def.getName() + "}");
     }
 
