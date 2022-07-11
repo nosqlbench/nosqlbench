@@ -366,8 +366,9 @@ dropIndex
    : kwDrop kwIndex ifExist? (keyspace DOT)? indexName
    ;
 
+// TODO: update to https://docs.datastax.com/en/dse/6.8/cql/cql/cql_reference/cql_commands/cqlCreateTable.html
 createTable
-   : kwCreate kwTable ifNotExist? (keyspace DOT)? table syntaxBracketLr columnDefinitionList syntaxBracketRr withElement?
+   : kwCreate kwTable ifNotExist? (keyspace DOT)? table syntaxBracketLr columnDefinitionList syntaxBracketRr (withElement (kwAnd tableOptions)*)?
    ;
 
 withElement

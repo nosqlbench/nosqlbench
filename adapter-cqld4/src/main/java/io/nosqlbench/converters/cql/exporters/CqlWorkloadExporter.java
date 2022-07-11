@@ -42,6 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The unit of generation is simply everything that is provided to the exporter together.
+ * Thus if you feed it one create statement at a time, it will yield a workload with just that,
+ * and if you feed it an elaborate schema, it will generate a workload inclusive of all
+ * provided elements.
+ */
 public class CqlWorkloadExporter {
 
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);
@@ -52,8 +58,12 @@ public class CqlWorkloadExporter {
         this.model = model;
     }
 
+    public CqlWorkloadExporter(String ddl, Path srcpath) {
+        this.model = CqlModelParser.parse(ddl, srcpath);
+    }
+
     public CqlWorkloadExporter(String ddl) {
-        this.model = CqlModelParser.parse(ddl);
+        this.model = CqlModelParser.parse(ddl, null);
     }
 
     public CqlWorkloadExporter(Path path) {

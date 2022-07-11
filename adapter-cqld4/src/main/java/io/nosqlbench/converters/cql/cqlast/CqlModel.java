@@ -16,6 +16,7 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,16 @@ public class CqlModel {
 
     Map<String, CqlKeyspace> keyspaces = new LinkedHashMap<>();
     Map<String, Map<String, CqlTable>> tables = new LinkedHashMap<>();
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
+
+    List<String> errors = new ArrayList<>();
 
     transient
     CqlKeyspace keyspace = null;

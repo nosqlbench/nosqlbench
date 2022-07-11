@@ -20,9 +20,30 @@ import io.nosqlbench.converters.cql.generated.CqlParser;
 import io.nosqlbench.converters.cql.generated.CqlParserBaseListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import java.util.List;
 
 public class CqlModelBuilder extends CqlParserBaseListener {
+
+    private final CQBErrorListener errorListener;
     CqlModel model = new CqlModel();
+
+    public CqlModelBuilder(CQBErrorListener errorListener) {
+        this.errorListener = errorListener;
+    }
+
+    @Override
+    public void visitErrorNode(ErrorNode node) {
+        System.out.println("error parsing: " + node.toString());
+        ParseTree parent = node.getParent();
+        String errorNodeType = parent.getClass().getSimpleName();
+        System.out.println("error type: " + errorNodeType);
+        System.out.println("source interval: " + node.getSourceInterval());
+
+        super.visitErrorNode(node);
+    }
 
     @Override
     public void enterCreateKeyspace(CqlParser.CreateKeyspaceContext ctx) {
@@ -77,4 +98,9 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     public CqlModel getModel() {
         return model;
     }
+
+    public List<String> getErrors() {
+        return model.getErrors();
+    }
+
 }

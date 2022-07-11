@@ -16,6 +16,7 @@
 
 package io.nosqlbench.converters.cql.parser;
 
+import io.nosqlbench.converters.cql.cqlast.CQBErrorListener;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlModelBuilder;
 import io.nosqlbench.converters.cql.generated.CqlLexer;
@@ -34,31 +35,40 @@ import java.nio.file.Path;
 public class CqlModelParser {
     private final static Logger logger  = LogManager.getLogger(CqlModelParser.class);
 
+
     public static CqlModel parse(Path path) {
         try {
             String ddl = Files.readString(path);
-            return parse(ddl);
+            return parse(ddl, path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static CqlModel parse(String input) {
+    public static CqlModel parse(String input, Path origin) {
 
         try {
             CodePointCharStream cstream = CharStreams.fromString(input);
+            CQBErrorListener errorListener = new CQBErrorListener(origin);
 
             CqlLexer lexer = new CqlLexer(cstream);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CqlParser parser = new CqlParser(tokens);
 
 
-            CqlModelBuilder astListener = new CqlModelBuilder();
-            parser.addParseListener(astListener);
+            CqlModelBuilder cqlModelBuilder = new CqlModelBuilder(errorListener);
+            parser.addParseListener(cqlModelBuilder);
+            parser.addErrorListener(errorListener);
 
             CqlParser.RootContext keyspaceParser = parser.root();
 
-            return astListener.getModel();
+            CqlModel model = cqlModelBuilder.getModel();
+            if (model.getErrors().size()>0) {
+                System.out.println(model.getErrors());
+                throw new RuntimeException("Unable to render model for unparsable input with " + model.getErrors() + " errors");
+            } else {
+                return model;
+            }
 
         } catch (Exception e) {
             logger.warn("Error while parsing flow:" + e.getMessage());
@@ -67,4 +77,7 @@ public class CqlModelParser {
         }
     }
 
+    public static void parse(String ddl) {
+        parse(ddl,null);
+    }
 }
