@@ -75,13 +75,7 @@
             <artifactId>adapter-cqld4</artifactId>
             <version>4.17.20-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-mongodb</artifactId>
-            <version>4.17.20-SNAPSHOT</version>
-        </dependency>
-
+        
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
@@ -159,7 +153,7 @@
             <dependencies>
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
-                    <artifactId>driver-mongodb</artifactId>
+                    <artifactId>adapter-mongodb</artifactId>
                     <version>4.17.20-SNAPSHOT</version>
                 </dependency>
             </dependencies>
