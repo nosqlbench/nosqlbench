@@ -205,6 +205,29 @@ public class S4JActivityUtil {
         return Arrays.stream(JMS_MESSAGE_TYPES.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
+    // JMS Message Types
+    public enum JMS_MSG_PROP_TYPES {
+        SHORT("short"),
+        INT("int"),
+        LONG("long"),
+        FLOAT("float"),
+        DOUBLE("double"),
+        STRING("string"),
+        BOOLEAN("boolean"),
+        BYTE("byte");
+
+        public final String label;
+        JMS_MSG_PROP_TYPES(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidJmsMsgPropType(String type) {
+        return Arrays.stream(JMS_MSG_PROP_TYPES.values()).anyMatch(t -> t.label.equals(type));
+    }
+    public static String getValidJmsMsgPropTypeList() {
+        return Arrays.stream(JMS_MSG_PROP_TYPES.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
+
     ///////
     // Check it is valid "dest_type" and "optype" combination:
     // > optype: msg_send and msg_read  --> applicable to both Topic and Queue
