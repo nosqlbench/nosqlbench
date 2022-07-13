@@ -17,6 +17,9 @@
 package io.nosqlbench.datamappers.functions.double_to_cqlduration;
 
 import com.datastax.oss.driver.api.core.data.CqlDuration;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.DoubleFunction;
 
@@ -25,6 +28,8 @@ import java.util.function.DoubleFunction;
  * by setting months to zero, and using the fractional part as part
  * of a day, assuming 24-hour days.
  */
+@Categories({Category.datetime})
+@ThreadSafeMapper
 public class ToCqlDuration implements DoubleFunction<CqlDuration> {
 
     private final static double NS_PER_DAY = 1_000_000_000L * 60 * 60 * 24;
