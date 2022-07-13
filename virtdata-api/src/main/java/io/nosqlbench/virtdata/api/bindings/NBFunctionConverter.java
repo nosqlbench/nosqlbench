@@ -55,6 +55,10 @@ import java.util.function.*;
  */
 public class NBFunctionConverter {
 
+    public static LongFunction<Object> adapt(DoubleToIntFunction f, LongFunction<Integer> i1, Object i2) {
+        return f::applyAsInt;
+    }
+
     public static LongUnaryOperator adapt(LongToDoubleFunction f, LongUnaryOperator placeholder) {
         return v -> (long) (f.applyAsDouble(v) % Long.MAX_VALUE);
     }
