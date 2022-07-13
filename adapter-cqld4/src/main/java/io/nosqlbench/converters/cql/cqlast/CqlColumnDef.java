@@ -21,7 +21,8 @@ import io.nosqlbench.nb.api.labels.Labeled;
 import java.util.Map;
 
 public class CqlColumnDef implements Labeled {
-    private String refddl;
+    private String refDefinitionDdl;
+    private String refTypeDefddl;
     private String table;
     private String keyspace;
     private final String name;
@@ -30,15 +31,18 @@ public class CqlColumnDef implements Labeled {
     public CqlColumnDef(String colname, String typedef, String refColumnDdl) {
         this.type = typedef;
         this.name = colname;
-        this.refddl = refColumnDdl;
+        this.refDefinitionDdl = refColumnDdl;
     }
 
     public String getRefddl() {
-        return refddl;
+        return refDefinitionDdl;
     }
 
-    public void setRefddl(String refddl) {
-        this.refddl = refddl;
+    public void setTypedfRefDdl(String textOfTypeDefOnly) {
+        this.refTypeDefddl = textOfTypeDefOnly;
+    }
+    public void setDefinitionRefDdl(String textOfWholeDefinition) {
+        this.refDefinitionDdl = textOfWholeDefinition;
     }
 
     public void setType(String type) {

@@ -44,7 +44,7 @@ public class CqlType {
         return this.name;
     }
 
-    public void addField(String name, String typedef) {
+    public void addField(String name, String typedef, String typedefRefDdl) {
         this.fields.put(name, typedef);
     }
 

@@ -29,19 +29,18 @@ public class CqlModelFixup implements Function<CqlModel,CqlModel> {
     public CqlModel apply(CqlModel model) {
         List<String> toReplace = model.getTypes().stream().map(t -> t.getKeyspace() + "." + t.getName()).toList();
         for (CqlTable table : model.getAllTables()) {
-            String table_ddl = table.getRefddl();
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
                 String coldefDdl = coldef.getRefddl();
                 for (String searchFor : toReplace) {
                     if (coldefDdl.contains(searchFor)) {
                         String typedef = coldef.getType();
                         coldef.setType("blob");
-                        coldef.setRefddl(coldef.getRefddl().replaceAll(typedef,"blob"));
-                        table_ddl= table_ddl.replaceAll(typedef,"blob");
+                        String replaced = coldef.getRefddl().replace(typedef, "blob");
+                        coldef.setDefinitionRefDdl(replaced);
+                        table.setRefDdl(table.getRefddl().replace(typedef,"blob"));
                     }
                 }
             }
-            table.setRefDdl(table_ddl);
         }
 
         return model;

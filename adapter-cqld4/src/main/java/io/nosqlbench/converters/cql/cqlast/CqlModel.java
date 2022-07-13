@@ -126,8 +126,8 @@ public class CqlModel {
         udt = new CqlType();
     }
 
-    public void addTypeField(String name, String typedef) {
-        udt.addField(name, typedef);
+    public void addTypeField(String name, String typedef, String typedefRefDdl) {
+        udt.addField(name, typedef, typedefRefDdl);
     }
 
     public void saveType(String keyspace, String name, String refddl) {

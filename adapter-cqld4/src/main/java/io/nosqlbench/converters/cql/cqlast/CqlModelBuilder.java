@@ -121,7 +121,8 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         for (int idx = 0; idx < columns.size(); idx++) {
             model.addTypeField(
                 columns.get(idx).getText(),
-                dataTypes.get(idx).getText()
+                dataTypes.get(idx).getText(),
+                textOf(dataTypes.get(idx))
             );
         }
 
@@ -136,8 +137,8 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     @Override
     public void exitCreateTable(CqlParser.CreateTableContext ctx) {
         model.saveTable(
-            ctx.keyspace().OBJECT_NAME().getText(),
-            ctx.table().OBJECT_NAME().getText(),
+            ctx.keyspace().getText(),
+            ctx.table().getText(),
             textOf(ctx)
         );
     }
@@ -158,7 +159,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
         model.saveColumnDefinition(
             ctx.column().getText(),
-            ctx.dataType().getText(),
+            textOf(ctx.dataType()),
             ctx.primaryKeyColumn() != null,
             textOf(ctx)
         );
