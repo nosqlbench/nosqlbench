@@ -16,7 +16,11 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
-public class CqlKeyspace {
+import io.nosqlbench.nb.api.labels.Labeled;
+
+import java.util.Map;
+
+public class CqlKeyspace implements Labeled {
     String keyspaceName= "";
     String refddl;
 
@@ -45,5 +49,12 @@ public class CqlKeyspace {
 
     public String getRefddl() {
         return refddl;
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return Map.of(
+            "keyspace", keyspaceName
+        );
     }
 }

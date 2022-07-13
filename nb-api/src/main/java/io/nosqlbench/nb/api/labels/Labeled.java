@@ -16,8 +16,34 @@
 
 package io.nosqlbench.nb.api.labels;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public interface Labeled {
     Map<String, String> getLabels();
+
+    default Map<String, String> getLabelsAnd(String... keyvalues) {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>(getLabels());
+        for (int idx = 0; idx < keyvalues.length; idx+=2) {
+            map.put(keyvalues[0],keyvalues[1]);
+        }
+        return map;
+    }
+
+    static MapLabels forMap(Map<String,String> labels) {
+        return new MapLabels(labels);
+    }
+
+    class MapLabels implements Labeled {
+        private final Map<String, String> labels;
+
+        public MapLabels(Map<String,String> labels) {
+            this.labels = labels;
+        }
+
+        @Override
+        public Map<String, String> getLabels() {
+            return labels;
+        }
+    }
 }

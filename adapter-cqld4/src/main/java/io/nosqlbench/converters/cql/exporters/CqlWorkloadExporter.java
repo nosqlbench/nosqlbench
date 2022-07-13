@@ -33,13 +33,10 @@ import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.representer.BaseRepresenter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,29 +46,37 @@ import java.util.stream.Collectors;
  * provided elements.
  */
 public class CqlWorkloadExporter {
-
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);
+    public final static String DEFAULT_NAMING_TEMPLATE = "[OPTYPE-][COLUMN-][TYPEDEF][-TABLE!][-KEYSPACE]";
 
+    private final Map<String, String> defaultBindings = new DefaultCqlBindings();
+
+    private final NamingFolio namer;
     private final CqlModel model;
 
     public CqlWorkloadExporter(CqlModel model) {
+        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = model;
     }
 
     public CqlWorkloadExporter(String ddl, Path srcpath) {
+        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(ddl, srcpath);
     }
 
     public CqlWorkloadExporter(String ddl) {
+        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(ddl, null);
     }
 
     public CqlWorkloadExporter(Path path) {
+        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(path);
     }
 
-
     public static void main(String[] args) {
+        logger.info("running CQL workload exporter with args:" + Arrays.toString(args));
+
         if (args.length == 0) {
             throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml");
         }
@@ -83,12 +88,18 @@ public class CqlWorkloadExporter {
             throw new RuntimeException("File '" + srcpath + "' does not exist.");
         }
 
-        Path target = Path.of(srcpath.toString().replace("\\.cql", "\\.yaml"));
+        Path target = null;
         if (args.length == 2) {
             target = Path.of(args[1]);
+            logger.info("using output path as '" + target + "'");
+        } else {
+            target = Path.of(srcpath.toString().replace(".cql", ".yaml"));
+            logger.info("assumed output path as '" + target + "'");
+
         }
+
         if (!target.toString().endsWith(".yaml")) {
-            throw new RuntimeException("Target file must end in .yaml");
+            throw new RuntimeException("Target file must end in .yaml, but it is '" + target + "'");
         }
         if (Files.exists(target) && !target.toString().startsWith("_")) {
             throw new RuntimeException("Target file '" + target + "' exists. Please remove it first or use a different target file name.");
@@ -97,9 +108,9 @@ public class CqlWorkloadExporter {
         CqlWorkloadExporter exporter = new CqlWorkloadExporter(srcpath);
         String workload = exporter.getWorkloadAsYaml();
         try {
-            Files.write(
+            Files.writeString(
                 target,
-                workload.getBytes(StandardCharsets.UTF_8),
+                workload,
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
             );
         } catch (IOException e) {
@@ -108,16 +119,15 @@ public class CqlWorkloadExporter {
     }
 
     public Map<String, Object> getWorkload() {
-        Map<String, Object> workload = new LinkedHashMap<>();
+        namer.populate(model);
 
-        for (CqlKeyspace ks : model.getKeyspaces().values()) {
-            workload.put("bindings", getDefaultCqlBindings());
-            Map<String, Object> blocks = new LinkedHashMap<>();
-            workload.put("blocks", blocks);
-            blocks.put("schema", genSchemaBlock(model));
-            blocks.put("rampup", genRampupBlock(model));
-            blocks.put("main", genMainBlock(model));
-        }
+        Map<String, Object> workload = new LinkedHashMap<>();
+        workload.put("bindings", defaultBindings);
+        Map<String, Object> blocks = new LinkedHashMap<>();
+        workload.put("blocks", blocks);
+        blocks.put("schema", genSchemaBlock(model));
+        blocks.put("rampup", genRampupBlock(model));
+        blocks.put("main", genMainBlock(model));
         return workload;
     }
 
@@ -127,17 +137,14 @@ public class CqlWorkloadExporter {
         mainOpTemplates.putAll(
             model.getAllTables()
                 .stream()
-                .collect(Collectors.toMap(
-                    t -> "insert-" + t.getKeySpace()+"__"+t.getTableName(),
-                    this::genUpsertTemplate)
-                )
+                .collect(Collectors.toMap(namer::nameFor, this::genUpsertTemplate))
         );
 
         mainOpTemplates.putAll(
             model.getAllTables()
                 .stream()
                 .collect(Collectors.toMap(
-                    t -> "select-" + t.getKeySpace()+"__"+t.getTableName(),
+                    t -> namer.nameFor(t, "optype", "select"),
                     this::genSelectTemplate)
                 ));
 
@@ -150,27 +157,39 @@ public class CqlWorkloadExporter {
         Map<String, String> rampupOpTemplates = model.getAllTables()
             .stream()
             .collect(Collectors.toMap(
-                t -> "insert-" + t.getKeySpace()+"__"+t.getTableName(),
-                this::genUpsertTemplate)
+                    t -> namer.nameFor(t, "optype", "rampup-insert"),
+                    this::genUpsertTemplate
+                )
             );
 
         return Map.of("ops", rampupOpTemplates);
     }
 
     private String genSelectTemplate(CqlTable table) {
-        List<CqlColumnDef> cdefs = table.getColumnDefinitions();
+
         return "select * from " + table.getKeySpace() + "." + table.getTableName() +
             "\n WHERE " + genPredicateTemplate(table);
 
     }
 
     private String genPredicateTemplate(CqlTable table) {
-        return table.getColumnDefinitions()
-            .stream()
-            .map(this::genPredicatePart)
-            .collect(Collectors.joining("\n AND "))
-            + ";";
+        StringBuilder sb = new StringBuilder();
+        List<CqlColumnDef> pkeys = new ArrayList<>();
+        for (String pkey : table.getPartitionKeys()) {
+            CqlColumnDef coldef = table.getColumnDefForName(pkey);
+            pkeys.add(coldef);
+        }
+        for (String ccol : table.getClusteringColumns()) {
+            CqlColumnDef coldef = table.getColumnDefForName(ccol);
+            pkeys.add(coldef);
+        }
 
+        pkeys.stream().map(this::genPredicatePart)
+            .forEach(p -> {
+                sb.append(p).append("\n  AND ");
+            });
+        sb.setLength(sb.length() - "\n  AND ".length());
+        return sb.toString();
     }
 
     private String genPredicatePart(CqlColumnDef def) {
@@ -182,15 +201,20 @@ public class CqlWorkloadExporter {
             logger.warn("Unknown literal format for " + typeName);
         }
 
-        return def.getName() + "=" + cqlLiteralFormat.format("{" + def.getName() + "}");
+        return def.getName() + "=" + cqlLiteralFormat.format("{" + namer.nameFor(def) + "}");
     }
 
 
     private String genUpsertTemplate(CqlTable table) {
         List<CqlColumnDef> cdefs = table.getColumnDefinitions();
         return "insert into " + table.getKeySpace() + "." + table.getTableName() + "\n ( "
-            + cdefs.stream().map(cd -> cd.getName()).collect(Collectors.joining(" , ")) +
-            " )\n values\n (" + cdefs.stream().map(cd -> cd.getName()).collect(Collectors.joining("},{", "{", "}"))
+            + cdefs.stream().map(cd -> cd.getName())
+            .collect(Collectors.joining(" , ")) +
+            " )\n values\n (" +
+            cdefs
+                .stream()
+                .map(cd -> namer.nameFor(cd))
+                .collect(Collectors.joining("},{", "{", "}"))
             + ");";
     }
 
@@ -207,6 +231,7 @@ public class CqlWorkloadExporter {
             .build();
         BaseRepresenter r;
         Dump dump = new Dump(dumpSettings);
+
         Map<String, Object> workload = getWorkload();
         return dump.dumpToString(workload);
     }
@@ -243,10 +268,4 @@ public class CqlWorkloadExporter {
         return schemablock;
     }
 
-    private Map<String, Object> getDefaultCqlBindings() {
-        return Map.of(
-            "text", "NumberNameToString()",
-            "timestamp", "yaddayaddayadda"
-        );
-    }
 }

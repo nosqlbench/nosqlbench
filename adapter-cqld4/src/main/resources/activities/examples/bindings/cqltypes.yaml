@@ -1,0 +1,35 @@
+blocks:
+  schema:
+    ops:
+      create-keyspace: |
+        create keyspace if not exists <<keyspace:baselines>>
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+        AND durable_writes = true;
+      create-table: |
+        CREATE TABLE baselines.alltypes (
+          id text PRIMARY KEY,
+          f_bigint bigint,
+          f_blob blob,
+          f_boolean boolean,
+          f_date date,
+          f_decimal decimal,
+          f_double double,
+          f_duration duration,
+          f_float float,
+          f_frozen frozen<list<int>>,
+          f_list list<text>,
+          f_map map<text, text>,
+          f_set set<text>,
+          f_smallint smallint,
+          f_text text,
+          f_time time,
+          f_timestamp timestamp,
+          f_timeuuid timeuuid,
+          f_tinyint tinyint,
+          f_uuid uuid,
+          f_varchar text,
+          f_varint varint,
+          f_ascii ascii,
+          f_inet inet,
+          f_int int
+        )

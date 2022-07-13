@@ -16,9 +16,7 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class CqlModel {
@@ -59,14 +57,17 @@ public class CqlModel {
 
     public void saveTable(String keyspace, String text, String refddl) {
         table.setKeyspace(keyspace);
-        table.setName(text);
+        table.setTable(text);
         table.setRefDdl(refddl);
         this.tables.computeIfAbsent(keyspace, ks->new LinkedHashMap<>()).put(text, table);
         table = null;
     }
 
-    public void saveColumnDefinition(String coltype, String colname) {
-        table.addcolumnDef(coltype, colname);
+    public void saveColumnDefinition(String colname, String coltype, boolean isPrimaryKey) {
+        this.table.addcolumnDef(colname, coltype);
+        if (isPrimaryKey) {
+            this.table.addPartitionKey(colname);
+        }
     }
 
     public Map<String, CqlKeyspace> getKeyspaces() {
@@ -96,5 +97,25 @@ public class CqlModel {
                 });
         }
         return sb.toString();
+    }
+
+    /**
+     * Get all the keyspace names which have been referenced in any way, whether or not
+     * this was in a keyspace definition or some other DDL like table or udt names.
+     * @return A list of all known keyspace names
+     */
+    public Set<String> getAllKnownKeyspaceNames() {
+        Set<String> ksnames = new LinkedHashSet<>();
+        ksnames.addAll(this.keyspaces.keySet());
+        ksnames.addAll(this.tables.keySet());
+        return ksnames;
+    }
+
+    public void addPartitionKey(String partitionKey) {
+        table.addPartitionKey(partitionKey);
+    }
+
+    public void addClusteringColumn(String ccolumn) {
+        table.addClusteringColumn(ccolumn);
     }
 }

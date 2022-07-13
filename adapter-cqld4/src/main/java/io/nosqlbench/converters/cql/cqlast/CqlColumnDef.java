@@ -16,13 +16,19 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
-public class CqlColumnDef {
-    String name;
-    String type;
+import io.nosqlbench.nb.api.labels.Labeled;
 
-    public CqlColumnDef(String type, String name) {
-        this.type = type;
-        this.name = name;
+import java.util.Map;
+
+public class CqlColumnDef implements Labeled {
+    private String table;
+    private String keyspace;
+    private final String name;
+    private final String type;
+
+    public CqlColumnDef(String colname, String typedef) {
+        this.type = typedef;
+        this.name = colname;
     }
 
     public String getName() {
@@ -33,8 +39,34 @@ public class CqlColumnDef {
         return type;
     }
 
+    public String getTable() {
+        return table;
+    }
+
+    public String getKeyspace() {
+        return keyspace;
+    }
+
     @Override
     public String toString() {
-        return "    " + this.name + " " + this.type + ",";
+        return getLabels().toString();
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return Map.of(
+            "column", name,
+            "typedef", type,
+            "table", table,
+            "keyspace", keyspace
+        );
+    }
+
+    public void setKeyspace(String keyspace) {
+        this.keyspace = keyspace;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
     }
 }

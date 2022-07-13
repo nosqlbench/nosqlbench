@@ -16,15 +16,21 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.nb.api.labels.Labeled;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CqlTable {
-    String name = "";
+public class CqlTable implements Labeled {
+    String table = "";
     String keyspace = "";
-    List<CqlColumnDef> coldefs = new ArrayList();
+    List<CqlColumnDef> coldefs = new ArrayList<>();
+
     String refddl;
+    List<String> partitionKeys = new ArrayList<>();
+    List<String> clusteringColumns = new ArrayList<>();
 
     public CqlTable() {
     }
@@ -33,17 +39,20 @@ public class CqlTable {
         this.coldefs.add(cqlField);
     }
 
-    public void setName(String tableName) {
-        this.name = tableName;
+    public void setTable(String tableName) {
+        this.table = tableName;
+        for (CqlColumnDef coldef : coldefs) {
+            coldef.setTable(tableName);
+        }
     }
 
-    public void addcolumnDef(String type, String fieldName) {
-        coldefs.add(new CqlColumnDef(type, fieldName));
+    public void addcolumnDef(String colname, String typedef) {
+        coldefs.add(new CqlColumnDef(colname, typedef));
     }
 
     @Override
     public String toString() {
-        return "cql table: '" + this.name + "':\n"
+        return "cql table: '" + this.table + "':\n"
             + this.coldefs.stream()
             .map(Object::toString)
             .map(s -> "   " +s)
@@ -55,11 +64,14 @@ public class CqlTable {
     }
 
     public String getTableName() {
-        return this.name;
+        return this.table;
     }
 
     public void setKeyspace(String keyspace) {
         this.keyspace=keyspace;
+        for (CqlColumnDef coldef : coldefs) {
+            coldef.setKeyspace(keyspace);
+        }
     }
 
     public String getRefDdl() {
@@ -77,5 +89,40 @@ public class CqlTable {
 
     public String getKeySpace() {
         return this.keyspace;
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return Map.of(
+            "keyspace", this.keyspace,
+            "table", this.table
+        );
+    }
+
+    public void addPartitionKey(String pkey) {
+        this.partitionKeys.add(pkey);
+    }
+
+    public void addClusteringColumn(String ccol) {
+        this.clusteringColumns.add(ccol);
+    }
+
+    public List<String> getPartitionKeys() {
+        return this.partitionKeys;
+    }
+
+    public List<String> getClusteringColumns() {
+        return this.clusteringColumns;
+    }
+
+    public String typedefForColumn(String colname) {
+        return coldefs.stream()
+            .filter(c -> c.getName().equalsIgnoreCase(colname))
+            .map(CqlColumnDef::getType).findFirst().orElseThrow();
+    }
+
+    public CqlColumnDef getColumnDefForName(String colname) {
+        return coldefs.stream().filter(c -> c.getName().equalsIgnoreCase(colname))
+            .findFirst().orElseThrow();
     }
 }

@@ -65,6 +65,35 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     }
 
     @Override
+    public void exitPrimaryKeyColumn(CqlParser.PrimaryKeyColumnContext ctx) {
+        super.exitPrimaryKeyColumn(ctx);
+    }
+
+    @Override
+    public void exitPrimaryKeyDefinition(CqlParser.PrimaryKeyDefinitionContext ctx) {
+        if (ctx.singlePrimaryKey()!=null) {
+            model.addPartitionKey(ctx.singlePrimaryKey().column().getText());
+        } else if (ctx.compositeKey()!=null) {
+            for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
+                model.addPartitionKey(pkctx.column().getText());
+            }
+            for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
+                model.addClusteringColumn(ccol.column().getText());
+            }
+        } else if (ctx.compoundKey()!=null) {
+            model.addClusteringColumn(ctx.compoundKey().partitionKey().column().getText());
+            for (CqlParser.ClusteringKeyContext ccol : ctx.compoundKey().clusteringKeyList().clusteringKey()) {
+                model.addClusteringColumn(ccol.column().getText());
+            }
+        }
+    }
+
+    @Override
+    public void exitSinglePrimaryKey(CqlParser.SinglePrimaryKeyContext ctx) {
+        super.exitSinglePrimaryKey(ctx);
+    }
+
+    @Override
     public void exitCreateTable(CqlParser.CreateTableContext ctx) {
         model.saveTable(
             ctx.keyspace().OBJECT_NAME().getText(),
@@ -87,7 +116,11 @@ public class CqlModelBuilder extends CqlParserBaseListener {
 
     @Override
     public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
-        model.saveColumnDefinition(ctx.dataType().getText(),ctx.column().getText());
+        model.saveColumnDefinition(
+            ctx.column().getText(),
+            ctx.dataType().getText(),
+            ctx.primaryKeyColumn()!=null
+        );
     }
 
     @Override

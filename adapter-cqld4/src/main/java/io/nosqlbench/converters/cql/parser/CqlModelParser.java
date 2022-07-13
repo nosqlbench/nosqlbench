@@ -55,7 +55,6 @@ public class CqlModelParser {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             CqlParser parser = new CqlParser(tokens);
 
-
             CqlModelBuilder cqlModelBuilder = new CqlModelBuilder(errorListener);
             parser.addParseListener(cqlModelBuilder);
             parser.addErrorListener(errorListener);
