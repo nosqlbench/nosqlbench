@@ -35,7 +35,9 @@ public enum CqlLiteralFormat {
     DOUBLE,
     FLOAT,
     UNKNOWN,
-    TIMESTAMP;
+    TIMESTAMP,
+    TIMEUUID,
+    VARINT;
 
     private final Function<String, String> literalFormat;
     CqlLiteralFormat() {

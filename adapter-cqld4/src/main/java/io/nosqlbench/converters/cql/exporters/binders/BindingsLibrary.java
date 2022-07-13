@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.binders;
 
-public record Binding(String name, String recipe) {
+import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 
+import java.util.Optional;
+
+public interface BindingsLibrary {
+    Optional<Binding> resolveBindingsFor(CqlColumnDef def);
 }

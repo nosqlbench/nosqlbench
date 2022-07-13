@@ -77,20 +77,20 @@ public class CqlModelBuilder extends CqlParserBaseListener {
 
     @Override
     public void exitPrimaryKeyDefinition(CqlParser.PrimaryKeyDefinitionContext ctx) {
-        if (ctx.singlePrimaryKey()!=null) {
+        if (ctx.singlePrimaryKey() != null) {
             model.addPartitionKey(ctx.singlePrimaryKey().column().getText());
-        } else if (ctx.compositeKey()!=null) {
-            if (ctx.compositeKey().partitionKeyList()!=null) {
+        } else if (ctx.compositeKey() != null) {
+            if (ctx.compositeKey().partitionKeyList() != null) {
                 for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
                     model.addPartitionKey(pkctx.column().getText());
                 }
             }
-            if (ctx.compositeKey().clusteringKeyList()!=null) {
+            if (ctx.compositeKey().clusteringKeyList() != null) {
                 for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
                     model.addClusteringColumn(ccol.column().getText());
                 }
             }
-        } else if (ctx.compoundKey()!=null) {
+        } else if (ctx.compoundKey() != null) {
             model.addClusteringColumn(ctx.compoundKey().partitionKey().column().getText());
             for (CqlParser.ClusteringKeyContext ccol : ctx.compoundKey().clusteringKeyList().clusteringKey()) {
                 model.addClusteringColumn(ccol.column().getText());
@@ -109,7 +109,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         String keyspace = ctx.keyspace().getText();
         String name = ctx.type_().getText();
         String refddl = textOf(ctx);
-        model.saveType(keyspace,name,refddl);
+        model.saveType(keyspace, name, refddl);
     }
 
 
@@ -159,7 +159,8 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         model.saveColumnDefinition(
             ctx.column().getText(),
             ctx.dataType().getText(),
-            ctx.primaryKeyColumn()!=null
+            ctx.primaryKeyColumn() != null,
+            textOf(ctx)
         );
     }
 

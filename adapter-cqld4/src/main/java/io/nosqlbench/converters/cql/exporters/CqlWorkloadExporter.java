@@ -22,6 +22,8 @@ import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 import io.nosqlbench.converters.cql.cqlast.CqlKeyspace;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.converters.cql.exporters.binders.*;
+import io.nosqlbench.converters.cql.exporters.transformers.CqlModelFixup;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -48,29 +51,45 @@ import java.util.stream.Collectors;
 public class CqlWorkloadExporter {
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);
     public final static String DEFAULT_NAMING_TEMPLATE = "[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]";
-    public static final String DEFAULT_REPLICATION = "\n 'class': 'SimpleStrategy',\n 'replication_factor': 'TEMPLATE(rf:1)'\n";
+    public static final String DEFAULT_REPLICATION = """
+        'class': 'SimpleStrategy',
+        'replication_factor': 'TEMPLATE(rf:1)'
+        """;
 
     private final BindingsLibrary defaultBindings = new DefaultCqlBindings();
 
     private final NamingFolio namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
     private final BindingsAccumulator bindings = new BindingsAccumulator(namer, List.of(defaultBindings));
-    private final CqlModel model;
+    private CqlModel model;
     private final Map<String, String> bindingsMap = new LinkedHashMap<>();
+    private final List<Function<CqlModel, CqlModel>> transformers = List.of(new CqlModelFixup());
 
     public CqlWorkloadExporter(CqlModel model) {
         this.model = model;
+        for (Function<CqlModel, CqlModel> transformer : transformers) {
+            this.model = transformer.apply(this.model);
+        }
     }
 
     public CqlWorkloadExporter(String ddl, Path srcpath) {
         this.model = CqlModelParser.parse(ddl, srcpath);
+        for (Function<CqlModel, CqlModel> transformer : transformers) {
+            this.model = transformer.apply(this.model);
+        }
     }
 
     public CqlWorkloadExporter(String ddl) {
         this.model = CqlModelParser.parse(ddl, null);
+        for (Function<CqlModel, CqlModel> transformer : transformers) {
+            this.model = transformer.apply(this.model);
+        }
     }
 
     public CqlWorkloadExporter(Path path) {
         this.model = CqlModelParser.parse(path);
+        for (Function<CqlModel, CqlModel> transformer : transformers) {
+            this.model = transformer.apply(this.model);
+        }
     }
 
     public static void main(String[] args) {
@@ -148,44 +167,54 @@ public class CqlWorkloadExporter {
     private Map<String, Object> genMainBlock(CqlModel model) {
         Map<String, String> mainOpTemplates = new LinkedHashMap<>();
 
-        mainOpTemplates.putAll(
-            model.getAllTables()
-                .stream()
-                .collect(Collectors.toMap(
-                    t -> namer.nameFor(t, "optype", "insert"),
-                    this::genUpsertTemplate))
-        );
+        for (CqlTable table : model.getAllTables()) {
+            Optional<String> template = this.genInsertTemplate(table);
+            if (template.isPresent()) {
+                mainOpTemplates.put(namer.nameFor(table, "optype", "insert"),
+                    template.get());
+            } else {
+                throw new RuntimeException("Unable to generate main insert template for table '" + table + "'");
+            }
+        }
 
-        mainOpTemplates.putAll(
-            model.getAllTables()
-                .stream()
-                .collect(Collectors.toMap(
-                    t -> namer.nameFor(t, "optype", "select"),
-                    this::genSelectTemplate)
-                ));
-
+        for (CqlTable table : model.getAllTables()) {
+            Optional<String> template = this.genSelectTemplate(table);
+            if (template.isPresent()) {
+                mainOpTemplates.put(namer.nameFor(table, "optype", "select"),
+                    template.get());
+            } else {
+                throw new RuntimeException("Unable to generate main select template for table '" + table + "'");
+            }
+        }
 
         return Map.of("ops", mainOpTemplates);
     }
 
 
     private Map<String, Object> genRampupBlock(CqlModel model) {
-        Map<String, String> rampupOpTemplates = model.getAllTables()
-            .stream()
-            .collect(Collectors.toMap(
-                    t -> namer.nameFor(t, "optype", "rampup-insert"),
-                    this::genUpsertTemplate
-                )
-            );
+        Map<String, String> rampupOpTemplates = new LinkedHashMap<>();
+
+        for (CqlTable table : model.getAllTables()) {
+            Optional<String> insert = genInsertTemplate(table);
+            if (insert.isPresent()) {
+                rampupOpTemplates.put(namer.nameFor(table, "optype", "insert"), insert.get());
+            } else {
+                throw new RuntimeException("Unable to create rampup template for table '" + table + "'");
+            }
+        }
 
         return Map.of("ops", rampupOpTemplates);
     }
 
-    private String genSelectTemplate(CqlTable table) {
+    private Optional<String> genSelectTemplate(CqlTable table) {
 
-        return "select * from " + table.getKeySpace() + "." + table.getTableName() +
-            "\n WHERE " + genPredicateTemplate(table);
-
+        try {
+            return Optional.of("select * from " + table.getKeySpace() + "." + table.getTableName() +
+                "\n WHERE " + genPredicateTemplate(table));
+        } catch (UnresolvedBindingException ube) {
+            logger.error(ube);
+            return Optional.empty();
+        }
     }
 
     private String genPredicateTemplate(CqlTable table) {
@@ -223,21 +252,25 @@ public class CqlWorkloadExporter {
     }
 
 
-    private String genUpsertTemplate(CqlTable table) {
-        List<CqlColumnDef> cdefs = table.getColumnDefinitions();
-        return "insert into " +
-            table.getKeySpace() + "." + table.getTableName() + "\n" +
-            " ( " + cdefs.stream().map(CqlColumnDef::getName)
-            .collect(Collectors.joining(" , ")) +
-            " )\n values\n (" +
-            cdefs
-                .stream()
-                .map(cd -> {
-                    Binding binding = bindings.forColumn(cd);
-                    return binding.name();
-                })
-                .collect(Collectors.joining("},{", "{", "}"))
-            + ");";
+    private Optional<String> genInsertTemplate(CqlTable table) {
+        try {
+            List<CqlColumnDef> cdefs = table.getColumnDefinitions();
+            return Optional.of("insert into " +
+                table.getKeySpace() + "." + table.getTableName() + "\n" +
+                " ( " + cdefs.stream().map(CqlColumnDef::getName)
+                .collect(Collectors.joining(" , ")) +
+                " )\n values\n (" +
+                cdefs
+                    .stream()
+                    .map(cd -> {
+                        Binding binding = bindings.forColumn(cd);
+                        return binding.name();
+                    })
+                    .collect(Collectors.joining("},{", "{", "}"))
+                + ");");
+        } catch (UnresolvedBindingException ube) {
+            return Optional.empty();
+        }
     }
 
     public String getWorkloadAsYaml() {

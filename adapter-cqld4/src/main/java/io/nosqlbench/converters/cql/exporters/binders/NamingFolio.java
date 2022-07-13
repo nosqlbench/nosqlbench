@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.binders;
 
 import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.converters.cql.exporters.ElementNamer;
 import io.nosqlbench.nb.api.labels.Labeled;
 
 import java.util.*;
@@ -42,6 +43,7 @@ public class NamingFolio {
     private final Map<String, Labeled> graph = new LinkedHashMap<>();
     private final ElementNamer namer;
     public final static String DEFAULT_NAMER_SPEC = "[COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
+    NamingStyle namingStyle = NamingStyle.SymbolicType;
 
     public NamingFolio(String namerspec) {
         this.namer = new ElementNamer(

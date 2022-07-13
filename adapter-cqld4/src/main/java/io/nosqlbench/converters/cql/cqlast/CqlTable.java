@@ -48,8 +48,8 @@ public class CqlTable implements Labeled {
         }
     }
 
-    public void addcolumnDef(String colname, String typedef) {
-        coldefs.add(new CqlColumnDef(colname, typedef));
+    public void addcolumnDef(String colname, String typedef, String refColumnDdl) {
+        coldefs.add(new CqlColumnDef(colname, typedef, refColumnDdl));
     }
 
     @Override

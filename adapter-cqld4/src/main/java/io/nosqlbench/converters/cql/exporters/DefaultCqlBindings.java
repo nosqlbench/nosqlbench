@@ -17,6 +17,8 @@
 package io.nosqlbench.converters.cql.exporters;
 
 import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
+import io.nosqlbench.converters.cql.exporters.binders.Binding;
+import io.nosqlbench.converters.cql.exporters.binders.BindingsLibrary;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.content.Content;
@@ -55,7 +57,7 @@ public class DefaultCqlBindings implements BindingsLibrary {
     }
 
     @Override
-    public Optional<String> resolveBindingsFor(CqlColumnDef def) {
-        return Optional.ofNullable(bindings.get(def.getType()));
+    public Optional<Binding> resolveBindingsFor(CqlColumnDef def) {
+        return Optional.ofNullable(new Binding(def.getType(),bindings.get(def.getType())));
     }
 }

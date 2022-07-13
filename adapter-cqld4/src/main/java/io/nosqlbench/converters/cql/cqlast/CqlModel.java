@@ -62,8 +62,8 @@ public class CqlModel {
         table = null;
     }
 
-    public void saveColumnDefinition(String colname, String coltype, boolean isPrimaryKey) {
-        this.table.addcolumnDef(colname, coltype);
+    public void saveColumnDefinition(String colname, String coltype, boolean isPrimaryKey, String refddl) {
+        this.table.addcolumnDef(colname, coltype, refddl);
         if (isPrimaryKey) {
             this.table.addPartitionKey(colname);
         }

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
+import io.nosqlbench.converters.cql.exporters.binders.NamingFolio;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.binders;
 
 import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 
-import java.util.Optional;
+public class UnresolvedBindingException extends RuntimeException {
+    private final CqlColumnDef def;
 
-public interface BindingsLibrary {
-    Optional<String> resolveBindingsFor(CqlColumnDef def);
+    public UnresolvedBindingException(CqlColumnDef def) {
+        this.def = def;
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage() + " (for column def '" + def.toString() + "')";
+    }
 }

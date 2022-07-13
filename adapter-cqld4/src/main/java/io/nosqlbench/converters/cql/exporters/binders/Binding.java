@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.binders;
 
-import java.util.Map;
+public record Binding(String name, String recipe) {
 
-public interface LabeledElement {
-    Map<String, String> getLabels();
 }

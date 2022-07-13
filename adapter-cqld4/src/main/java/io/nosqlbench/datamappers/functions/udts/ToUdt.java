@@ -18,6 +18,8 @@ package io.nosqlbench.datamappers.functions.udts;
 
 import com.datastax.oss.driver.api.core.data.UdtValue;
 import com.datastax.oss.driver.api.core.type.DataType;
+import com.datastax.oss.driver.api.core.type.DataTypes;
+import com.datastax.oss.driver.api.core.type.MapType;
 import com.datastax.oss.driver.api.core.type.UserDefinedType;
 import com.datastax.oss.driver.internal.core.type.UserDefinedTypeBuilder;
 import io.nosqlbench.converters.cql.cqlast.CqlType;
@@ -37,6 +39,7 @@ public class ToUdt implements LongFunction<UdtValue> {
     private final String spec;
     private final CqlType typeinfo;
     private final UserDefinedType udt;
+
     public ToUdt(String spec) {
         this.spec=spec;
         typeinfo = CqlModelParser.parseCqlType(spec);
@@ -46,6 +49,32 @@ public class ToUdt implements LongFunction<UdtValue> {
             builder.withField(name,dataType);
         });
         this.udt = builder.build();
+
+        {
+
+            /**
+             * map<frozen<mcs_or_prod.cust_dfnd_key>,frozen<mcs_or_prod.cust_dfnd_value>>
+             * CREATE TYPE mcs_or_prod.cust_dfnd_key (
+             *     info_column_nme text,
+             *     eff_dt text,
+             *     acct_no int );
+             * CREATE TYPE mcs_or_prod.cust_dfnd_value (
+             *     info_column_value text,
+             *     end_dt text );
+             */
+            UserDefinedType mcs_or_prod__cust_dfnd_key =
+                new UserDefinedTypeBuilder("mcs_or_prod", "cust_dfnd_key")
+                .withField("info_column_nme", DataTypes.TEXT)
+                .withField("eff_dt", DataTypes.TEXT)
+                .withField("acct_no", DataTypes.INT)
+                .build();
+            UserDefinedType mcs_or_prod__cust_dfnd_value =
+                new UserDefinedTypeBuilder("mcs_or_prod","cust_dfnd_value")
+                .withField("info_column_value",DataTypes.TEXT)
+                .withField("end_dt",DataTypes.TEXT)
+                .build();
+            MapType testType = DataTypes.mapOf(mcs_or_prod__cust_dfnd_key, mcs_or_prod__cust_dfnd_value);
+        }
     }
 
     private DataType resolveDataType(String typedef) {
