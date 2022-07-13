@@ -41,7 +41,7 @@ public class NamingFolio {
 
     private final Map<String, Labeled> graph = new LinkedHashMap<>();
     private final ElementNamer namer;
-    public final static String DEFAULT_NAMER_SPEC = "[COLUMN][-TYPEDEF]_[TABLE][-KEYSPACE]";
+    public final static String DEFAULT_NAMER_SPEC = "[COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
 
     public NamingFolio(String namerspec) {
         this.namer = new ElementNamer(

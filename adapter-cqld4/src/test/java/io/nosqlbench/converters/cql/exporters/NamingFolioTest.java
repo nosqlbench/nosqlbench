@@ -26,7 +26,7 @@ public class NamingFolioTest {
 
     @Test
     public void testBindingFolio() {
-        NamingFolio folio = new NamingFolio();
+        NamingFolio folio = new NamingFolio("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]");
         folio.addFieldRef(Map.of("column","c1","typedef","t1","table","tb1","keyspace","ks1"));
         assertThat(folio.getNames()).containsExactly("c1-t1-tb1-ks1");
         folio.addFieldRef("c2","t2","tb2","ks2");
