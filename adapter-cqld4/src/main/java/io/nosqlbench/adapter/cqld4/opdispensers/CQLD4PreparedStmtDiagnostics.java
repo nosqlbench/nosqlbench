@@ -24,8 +24,7 @@ import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.data.CqlDuration;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.data.UdtValue;
-import com.datastax.oss.driver.api.core.type.*;
-import com.datastax.oss.driver.internal.core.type.PrimitiveType;
+import com.datastax.oss.driver.api.core.type.DataType;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +37,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.UUID;
 import java.util.*;
 import java.util.function.LongFunction;
 
@@ -54,8 +54,9 @@ public class CQLD4PreparedStmtDiagnostics {
 
     public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname, Object colval, DataType coltype) {
 
-        if (coltype instanceof PrimitiveType pt) {
-            return switch (pt.getProtocolCode()) {
+//        if (coltype instanceof PrimitiveType pt) {
+        try {
+            BoundStatement reproduce_error_with_custom_dataType = switch (coltype.getProtocolCode()) {
                 case CUSTOM -> throw new OpConfigError("Error with Custom DataType");
                 case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
                 case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
@@ -64,7 +65,9 @@ public class CQLD4PreparedStmtDiagnostics {
                 case DECIMAL -> bound.setBigDecimal(colname, (BigDecimal) colval);
                 case DOUBLE -> bound.setDouble(colname, (double) colval);
                 case FLOAT -> bound.setFloat(colname, (float) colval);
-                case INT, SMALLINT, TINYINT -> bound.setInt(colname, (int) colval);
+                case INT -> bound.setInt(colname, (int) colval);
+                case SMALLINT -> bound.setShort(colname, (short) colval);
+                case TINYINT -> bound.setByte(colname, (byte) colval);
                 case TIMESTAMP -> bound.setInstant(colname, (Instant) colval);
                 case TIMEUUID, UUID -> bound.setUuid(colname, (UUID) colval);
                 case VARINT -> bound.setBigInteger(colname, (BigInteger) colval);
@@ -102,8 +105,14 @@ public class CQLD4PreparedStmtDiagnostics {
                 }
                 default -> throw new RuntimeException("Unknown CQL type for diagnostic (type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
             };
+            return reproduce_error_with_custom_dataType;
+
+        } catch (Exception e) {
+            throw e;
         }
-        throw new IllegalStateException("Unexpected value: " + coltype);
+
+//        }
+//        throw new IllegalStateException("Unexpected value: " + coltype);
 
     }
 
@@ -130,9 +139,9 @@ public class CQLD4PreparedStmtDiagnostics {
             DataType type = def.getType();
             try {
                 bound = CQLD4PreparedStmtDiagnostics.bindStatement(bound, defname, value, type);
-            } catch (ClassCastException cce) {
+            } catch (Exception e) {
                 String fullValue = value.toString();
-                String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0,100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
+                String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0, 100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
                 String errormsg = String.format(
                     "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
                     defname,
@@ -141,7 +150,7 @@ public class CQLD4PreparedStmtDiagnostics {
                     value.getClass().getCanonicalName()
                 );
                 logger.error(errormsg);
-                throw new OpConfigError(errormsg, cce);
+                throw new OpConfigError(errormsg, e);
 
             }
         }
