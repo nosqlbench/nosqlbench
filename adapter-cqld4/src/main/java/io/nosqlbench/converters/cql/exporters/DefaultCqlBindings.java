@@ -16,39 +16,44 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
+import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.nb.api.content.Content;
+import io.nosqlbench.nb.api.content.NBIO;
 
-public class DefaultCqlBindings extends LinkedHashMap<String,String> {{
-    putAll(Map.of(
-        "text","NumberNameToString();",
-        "int","ToString();",
-        "bigint", "ToLong();",
-        "blob", "ByteBufferSizedHashed(30);",
-        "boolean", "ToBoolean();",
-        "date", "ToDate();",
-        "decimal", "ToBigDecimal();",
-        "double", "ToDouble()",
-        "duration", "ToCqlDuration();")
-    );
-    putAll(Map.of(
-        "float","ToFloat()",
-        "frozen<list<int>>","ListSizedHashed(HashRange(3,7),ToInt()));",
-        "list<text>","ListStepped(Identity(),NumberNameToString(),NumberNameToString())",
-        "map<text,text>","MapSized(3, Combinations('A-Z;0-9'), NumberNameToString(), ToString());",
-        "set<text>","SetSized(HashRange(3,4),Identity(),NumberNameToString()));",
-        "smallint","ToShort();")
-    );
-    putAll(Map.of(
-        "time","StartingEpochMillis('2022-01-01 00:00:00Z');",
-        "timestamp","ToDate();",
-        "timeuuid","ToTimeUUID();",
-        "tinyint","ToByte();",
-        "uuid","ToUUID();",
-        "varint","ToBigDecimal();",
-        "inet","ToInetAddress();"
-    ));
-    put(
-        "id_int","ToString()"
-    );
-}}
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Optional;
+
+public class DefaultCqlBindings implements BindingsLibrary {
+
+    private final Map<String, String> bindings;
+
+    public DefaultCqlBindings() {
+        String yamlContent = NBIO.all()
+            .name("bindings")
+            .extension("yaml", "yml")
+            .first()
+            .map(Content::asString)
+            .or(() -> loadLocal("bindings.yaml"))
+            .orElseThrow(() -> new RuntimeException("Unable to load bindings.yaml"));
+        StmtsDocList stmtsDocs = StatementsLoader.loadString(yamlContent, Map.of());
+        this.bindings = stmtsDocs.getDocBindings();
+    }
+
+    private Optional<String> loadLocal(String path) {
+        try {
+            InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
+            byte[] bytes = stream.readAllBytes();
+            return Optional.of(new String(bytes));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<String> resolveBindingsFor(CqlColumnDef def) {
+        return Optional.ofNullable(bindings.get(def.getType()));
+    }
+}

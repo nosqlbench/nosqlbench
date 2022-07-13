@@ -1,0 +1,26 @@
+# reference: https://github.com/datastax/java-driver/tree/4.x/manual/core
+bindings:
+ ascii: NumberNameToString();
+ text: NumberNameToString();
+ int: ToInt();
+ bigint: Identity();
+ blob: ByteBufferSizedHashed(30);
+ boolean: ToBoolean();
+ date: EpochMillisToJavaLocalDate();
+ decimal: ToBigDecimal();
+ double: ToDouble()
+ duration: ToCqlDurationNanos();
+ float: ToFloat()
+ frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
+ list<text>: ListStepped(NumberNameToString(),NumberNameToString())
+ map<text,text>: MapSized(3, Combinations('A-Z;0-9'), NumberNameToString(), ToString());
+ set<text>: SetSized(HashRange(3,4),NumberNameToString()));
+ smallint: ToShort();
+ time: StartingEpochMillis('2022-01-01 00:00:00'); ToLocalTime();
+ timestamp: ToJavaInstant();
+ timeuuid: ToEpochTimeUUID();
+ tinyint: ToByte();
+ uuid: ToUUID();
+ varint: ToBigInt();
+ inet: ToInetAddress();
+
