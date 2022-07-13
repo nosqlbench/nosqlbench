@@ -47,30 +47,28 @@ import java.util.stream.Collectors;
  */
 public class CqlWorkloadExporter {
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);
-    public final static String DEFAULT_NAMING_TEMPLATE = "[OPTYPE-][COLUMN-][TYPEDEF][-TABLE!][-KEYSPACE]";
+    public final static String DEFAULT_NAMING_TEMPLATE = "[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]";
 
-    private final Map<String, String> defaultBindings = new DefaultCqlBindings();
+    private final BindingsLibrary defaultBindings = new DefaultCqlBindings();
 
-    private final NamingFolio namer;
+    private final NamingFolio namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
+    private final BindingsAccumulator bindings = new BindingsAccumulator(namer, List.of(defaultBindings));
     private final CqlModel model;
+    private final Map<String, String> bindingsMap = new LinkedHashMap<>();
 
     public CqlWorkloadExporter(CqlModel model) {
-        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = model;
     }
 
     public CqlWorkloadExporter(String ddl, Path srcpath) {
-        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(ddl, srcpath);
     }
 
     public CqlWorkloadExporter(String ddl) {
-        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(ddl, null);
     }
 
     public CqlWorkloadExporter(Path path) {
-        namer = new NamingFolio(DEFAULT_NAMING_TEMPLATE);
         this.model = CqlModelParser.parse(path);
     }
 
@@ -122,12 +120,13 @@ public class CqlWorkloadExporter {
         namer.populate(model);
 
         Map<String, Object> workload = new LinkedHashMap<>();
-        workload.put("bindings", defaultBindings);
+        workload.put("bindings", bindingsMap);
         Map<String, Object> blocks = new LinkedHashMap<>();
         workload.put("blocks", blocks);
         blocks.put("schema", genSchemaBlock(model));
         blocks.put("rampup", genRampupBlock(model));
         blocks.put("main", genMainBlock(model));
+        bindingsMap.putAll(bindings.getAccumulatedBindings());
         return workload;
     }
 
@@ -137,7 +136,9 @@ public class CqlWorkloadExporter {
         mainOpTemplates.putAll(
             model.getAllTables()
                 .stream()
-                .collect(Collectors.toMap(namer::nameFor, this::genUpsertTemplate))
+                .collect(Collectors.toMap(
+                    t -> namer.nameFor(t, "optype", "insert"),
+                    this::genUpsertTemplate))
         );
 
         mainOpTemplates.putAll(
@@ -201,19 +202,25 @@ public class CqlWorkloadExporter {
             logger.warn("Unknown literal format for " + typeName);
         }
 
-        return def.getName() + "=" + cqlLiteralFormat.format("{" + namer.nameFor(def) + "}");
+        Binding binding = bindings.forColumn(def);
+
+        return def.getName() + "=" + cqlLiteralFormat.format("{" + binding.name() + "}");
     }
 
 
     private String genUpsertTemplate(CqlTable table) {
         List<CqlColumnDef> cdefs = table.getColumnDefinitions();
-        return "insert into " + table.getKeySpace() + "." + table.getTableName() + "\n ( "
-            + cdefs.stream().map(cd -> cd.getName())
+        return "insert into " +
+            table.getKeySpace() + "." + table.getTableName() + "\n" +
+            " ( " + cdefs.stream().map(CqlColumnDef::getName)
             .collect(Collectors.joining(" , ")) +
             " )\n values\n (" +
             cdefs
                 .stream()
-                .map(cd -> namer.nameFor(cd))
+                .map(cd -> {
+                    Binding binding = bindings.forColumn(cd);
+                    return binding.name();
+                })
                 .collect(Collectors.joining("},{", "{", "}"))
             + ");";
     }

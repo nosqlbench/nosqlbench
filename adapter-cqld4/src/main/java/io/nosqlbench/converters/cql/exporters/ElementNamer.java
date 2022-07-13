@@ -47,6 +47,10 @@ public class ElementNamer implements Function<Map<String, String>, String> {
         Pattern pattern = Pattern.compile("(?<prefix>[^\\]]+)?\\[(?<section>(?<pre>.*?)(?<name>[A-Z]+)(?<required>!)?(?<post>.*?))?]");
         Matcher scanner = pattern.matcher(template);
         while (scanner.find()) {
+            if (scanner.group("prefix")!=null) {
+                String prefix = scanner.group("prefix");
+                sections.add(new Section(null, prefix, true));
+            }
             if (scanner.group("section")!=null) {
                 Section section = new Section(
                     scanner.group("name").toLowerCase(),
@@ -55,10 +59,6 @@ public class ElementNamer implements Function<Map<String, String>, String> {
                         + scanner.group("post"),
                     scanner.group("required") != null);
                 sections.add(section);
-            }
-            if (scanner.group("prefix")!=null) {
-                String prefix = scanner.group("prefix");
-                sections.add(new Section(null, prefix, true));
             }
         }
     }

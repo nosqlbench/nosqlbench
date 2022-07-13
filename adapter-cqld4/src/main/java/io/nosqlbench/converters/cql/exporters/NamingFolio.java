@@ -24,6 +24,13 @@ import io.nosqlbench.nb.api.labels.Labeled;
 import java.util.*;
 
 /**
+ * The purpose of this class is to put all the logic/complexity of name condensing into one place.
+ * Basically if you have identifiers that are globally unique within the active namespace,
+ * <EM>WITHOUT</EM> using fully qualified names, then it is easier for users to use short names.
+ * For example, if you have a column named "score" which is used as an int in one table and as
+ * a double in another, then you must include the type information to provide two distinct identifiers
+ * for the purpose of mapping bindings.
+ *
  * This will be a pre-built inverted index of all field which need to have bindings assigned.
  * A field reference is presumed to be unique within the scope from which the traversal to
  * the working set has a single path.
