@@ -17,6 +17,8 @@
 package io.nosqlbench.converters.cql.exporters;
 
 import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BindingsAccumulator {
+    private final static Logger logger = LogManager.getLogger("CQL-GENERATOR");
 
     private final NamingFolio namer;
     private final List<BindingsLibrary> libraries;
@@ -44,7 +47,9 @@ public class BindingsAccumulator {
                 return newBinding;
             }
         }
-        throw new RuntimeException("Unable to find a binding for column def '" + def + "'");
+        logger.error("Unable to find a binding for column def '" + def + "', installing 'TBD' place-holder until this is supported. This workload will not be functional until then.");
+        return new Binding(name, "TBD");
+//        throw new RuntimeException("Unable to find a binding for column def '" + def + "'");
     }
 
     private void registerBinding(Binding newBinding) {

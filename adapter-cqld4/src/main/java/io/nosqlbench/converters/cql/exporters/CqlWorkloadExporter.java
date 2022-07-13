@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 public class CqlWorkloadExporter {
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);
     public final static String DEFAULT_NAMING_TEMPLATE = "[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]";
+    public static final String DEFAULT_REPLICATION = "\n 'class': 'SimpleStrategy',\n 'replication_factor': 'TEMPLATE(rf:1)'\n";
 
     private final BindingsLibrary defaultBindings = new DefaultCqlBindings();
 
@@ -120,14 +121,28 @@ public class CqlWorkloadExporter {
         namer.populate(model);
 
         Map<String, Object> workload = new LinkedHashMap<>();
+        workload.put("description", "Auto-generated workload from source schema.");
+        workload.put("scenarios", genScenarios(model));
         workload.put("bindings", bindingsMap);
         Map<String, Object> blocks = new LinkedHashMap<>();
         workload.put("blocks", blocks);
         blocks.put("schema", genSchemaBlock(model));
+        blocks.put("truncate", genTruncateBlock(model));
         blocks.put("rampup", genRampupBlock(model));
         blocks.put("main", genMainBlock(model));
         bindingsMap.putAll(bindings.getAccumulatedBindings());
         return workload;
+    }
+
+    private Map<String, Object> genScenarios(CqlModel model) {
+        return Map.of(
+            "default", Map.of(
+                "schema", "run driver=cql tags=block:schema threads===UNDEF cycles===UNDEF",
+                "rampup", "run driver=cql tags=block:rampup threads=auto cycles===TEMPLATE(rampup-cycles,10000)",
+                "main", "run driver=cql tags=block:main threads=auto cycles===TEMPLATE(main-cycles,10000)"
+            ),
+            "truncate", "run driver=cql tags=block:truncate threads===UNDEF cycles===UNDEF"
+        );
     }
 
     private Map<String, Object> genMainBlock(CqlModel model) {
@@ -230,7 +245,8 @@ public class CqlWorkloadExporter {
             .setDefaultFlowStyle(FlowStyle.BLOCK)
             .setIndent(2)
             .setDefaultScalarStyle(ScalarStyle.PLAIN)
-            .setMaxSimpleKeyLength(100)
+            .setMaxSimpleKeyLength(1000)
+            .setWidth(100)
             .setSplitLines(true)
             .setIndentWithIndicator(true)
             .setMultiLineFlow(true)
@@ -258,12 +274,26 @@ public class CqlWorkloadExporter {
         return Map.of();
     }
 
+    private Map<String, Object> genTruncateBlock(CqlModel model) {
+        Map<String, Object> truncateblock = new LinkedHashMap<>();
+        Map<String, Object> ops = new LinkedHashMap<>();
+        truncateblock.put("ops", ops);
+
+        for (CqlTable table : model.getAllTables()) {
+            ops.put(
+                namer.nameFor(table, "optype", "truncate"),
+                "truncate " + table.getKeySpace() + "." + table.getTableName() + ";"
+            );
+        }
+        return truncateblock;
+    }
+
     private Map<String, Object> genSchemaBlock(CqlModel model) {
         Map<String, Object> schemablock = new LinkedHashMap<>();
         Map<String, Object> ops = new LinkedHashMap<>();
 
         for (CqlKeyspace ks : model.getKeyspaces().values()) {
-            ops.put("create-keyspace-" + ks.getKeyspaceName(), ks.getRefddl());
+            ops.put("create-keyspace-" + ks.getKeyspaceName(), ks.getRefDdlWithReplFields(DEFAULT_REPLICATION));
         }
         for (String ksname : model.getTablesByKeyspace().keySet()) {
             for (CqlTable cqltable : model.getTablesByKeyspace().get(ksname).values()) {

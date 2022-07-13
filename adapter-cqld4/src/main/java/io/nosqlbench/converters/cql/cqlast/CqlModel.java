@@ -23,13 +23,12 @@ public class CqlModel {
 
     private final Supplier<List<String>> errors;
     Map<String, CqlKeyspace> keyspaces = new LinkedHashMap<>();
-
     Map<String, Map<String, CqlTable>> tables = new LinkedHashMap<>();
+    Map<String, Map<String, CqlType>> types = new LinkedHashMap<>();
 
-    transient
-    CqlKeyspace keyspace = null;
-    transient
-    CqlTable table;
+    transient CqlKeyspace keyspace = null;
+    transient CqlTable table;
+    transient CqlType udt;
 
 
     public CqlModel(Supplier<List<String>> errorSource) {
@@ -117,5 +116,37 @@ public class CqlModel {
 
     public void addClusteringColumn(String ccolumn) {
         table.addClusteringColumn(ccolumn);
+    }
+
+    public void setReplicationText(String repldata) {
+        keyspace.setRefReplDdl(repldata);
+    }
+
+    public void newType() {
+        udt = new CqlType();
+    }
+
+    public void addTypeField(String name, String typedef) {
+        udt.addField(name, typedef);
+    }
+
+    public void saveType(String keyspace, String name, String refddl) {
+        udt.setKeyspace(keyspace);
+        udt.setRefddl(refddl);
+        udt.setName(name);
+        Map<String, CqlType> ksTypes = this.types.computeIfAbsent(keyspace, ks -> new LinkedHashMap<>());
+        ksTypes.put(udt.getName(),udt);
+        udt=null;
+    }
+
+    public List<CqlType> getTypes() {
+        ArrayList<CqlType> list = new ArrayList<>();
+        for (Map<String, CqlType> cqlTypesByKeyspace : types.values()) {
+            for (CqlType cqlType : cqlTypesByKeyspace.values()) {
+                list.add(cqlType);
+            }
+        }
+        return list;
+
     }
 }

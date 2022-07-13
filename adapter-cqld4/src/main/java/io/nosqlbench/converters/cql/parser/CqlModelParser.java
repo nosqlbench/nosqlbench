@@ -19,6 +19,7 @@ package io.nosqlbench.converters.cql.parser;
 import io.nosqlbench.converters.cql.cqlast.CQBErrorListener;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlModelBuilder;
+import io.nosqlbench.converters.cql.cqlast.CqlType;
 import io.nosqlbench.converters.cql.generated.CqlLexer;
 import io.nosqlbench.converters.cql.generated.CqlParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -30,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 
 public class CqlModelParser {
@@ -43,6 +45,15 @@ public class CqlModelParser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static CqlType parseCqlType(String input) {
+        CqlModel parsed = parse(input, null);
+        List<CqlType> types = parsed.getTypes();
+        if (types.size()!=1) {
+            throw new RuntimeException("error parsing typedef");
+        }
+        return types.get(0);
     }
 
     public static CqlModel parse(String input, Path origin) {
@@ -59,7 +70,7 @@ public class CqlModelParser {
             parser.addParseListener(cqlModelBuilder);
             parser.addErrorListener(errorListener);
 
-            CqlParser.RootContext keyspaceParser = parser.root();
+            parser.root();
 
             CqlModel model = cqlModelBuilder.getModel();
             if (model.getErrors().size()>0) {

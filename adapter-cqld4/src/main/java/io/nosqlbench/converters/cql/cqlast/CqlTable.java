@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.labels.Labeled;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CqlTable implements Labeled {
@@ -28,7 +29,8 @@ public class CqlTable implements Labeled {
     String keyspace = "";
     List<CqlColumnDef> coldefs = new ArrayList<>();
 
-    String refddl;
+    private String refddl;
+
     List<String> partitionKeys = new ArrayList<>();
     List<String> clusteringColumns = new ArrayList<>();
 
@@ -122,7 +124,15 @@ public class CqlTable implements Labeled {
     }
 
     public CqlColumnDef getColumnDefForName(String colname) {
-        return coldefs.stream().filter(c -> c.getName().equalsIgnoreCase(colname))
-            .findFirst().orElseThrow();
+        Optional<CqlColumnDef> def = coldefs
+            .stream()
+            .filter(c -> c.getName().equalsIgnoreCase(colname))
+            .findFirst();
+        if (!def.isPresent()) {
+            throw new RuntimeException("Unable to find column definition in table '" +
+            this.getTableName() + "' for column '" + colname + "'");
+        }
+        return def.orElseThrow();
     }
+
 }

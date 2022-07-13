@@ -23,6 +23,7 @@ import java.util.Map;
 public class CqlKeyspace implements Labeled {
     String keyspaceName= "";
     String refddl;
+    private String refReplDdl;
 
     public CqlKeyspace() {
     }
@@ -56,5 +57,13 @@ public class CqlKeyspace implements Labeled {
         return Map.of(
             "keyspace", keyspaceName
         );
+    }
+
+    public void setRefReplDdl(String refReplDdl) {
+        this.refReplDdl=refReplDdl;
+    }
+
+    public String getRefDdlWithReplFields(String replFields) {
+        return refddl.replace(refReplDdl,replFields);
     }
 }

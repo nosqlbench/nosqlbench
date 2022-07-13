@@ -60,6 +60,12 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     }
 
     @Override
+    public void exitReplicationList(CqlParser.ReplicationListContext ctx) {
+        String repldata = textOf(ctx);
+        model.setReplicationText(repldata);
+    }
+
+    @Override
     public void enterCreateTable(CqlParser.CreateTableContext ctx) {
         model.newTable();
     }
@@ -74,11 +80,15 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         if (ctx.singlePrimaryKey()!=null) {
             model.addPartitionKey(ctx.singlePrimaryKey().column().getText());
         } else if (ctx.compositeKey()!=null) {
-            for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
-                model.addPartitionKey(pkctx.column().getText());
+            if (ctx.compositeKey().partitionKeyList()!=null) {
+                for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
+                    model.addPartitionKey(pkctx.column().getText());
+                }
             }
-            for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
-                model.addClusteringColumn(ccol.column().getText());
+            if (ctx.compositeKey().clusteringKeyList()!=null) {
+                for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
+                    model.addClusteringColumn(ccol.column().getText());
+                }
             }
         } else if (ctx.compoundKey()!=null) {
             model.addClusteringColumn(ctx.compoundKey().partitionKey().column().getText());
@@ -86,6 +96,36 @@ public class CqlModelBuilder extends CqlParserBaseListener {
                 model.addClusteringColumn(ccol.column().getText());
             }
         }
+    }
+
+
+    @Override
+    public void enterCreateType(CqlParser.CreateTypeContext ctx) {
+        model.newType();
+    }
+
+    @Override
+    public void exitCreateType(CqlParser.CreateTypeContext ctx) {
+        String keyspace = ctx.keyspace().getText();
+        String name = ctx.type_().getText();
+        String refddl = textOf(ctx);
+        model.saveType(keyspace,name,refddl);
+    }
+
+
+    // HERE consider building hierarchic type model
+    @Override
+    public void exitTypeMemberColumnList(CqlParser.TypeMemberColumnListContext ctx) {
+        List<CqlParser.ColumnContext> columns = ctx.column();
+        List<CqlParser.DataTypeContext> dataTypes = ctx.dataType();
+        for (int idx = 0; idx < columns.size(); idx++) {
+            model.addTypeField(
+                columns.get(idx).getText(),
+                dataTypes.get(idx).getText()
+            );
+        }
+
+//        dataTypes.get(0).dataType().get(0).dataType().get(0)
     }
 
     @Override

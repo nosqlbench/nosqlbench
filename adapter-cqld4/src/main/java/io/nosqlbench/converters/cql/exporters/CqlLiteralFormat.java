@@ -34,7 +34,8 @@ public enum CqlLiteralFormat {
     DECIMAL,
     DOUBLE,
     FLOAT,
-    UNKNOWN;
+    UNKNOWN,
+    TIMESTAMP;
 
     private final Function<String, String> literalFormat;
     CqlLiteralFormat() {
