@@ -50,6 +50,8 @@ public class CqlParserHarnessTest {
         var data = exporter.getWorkloadAsYaml();
 
     }
+
+    @Disabled
     @Test
     public void testGenBasicWorkload() {
         CqlWorkloadExporter exporter = new CqlWorkloadExporter(ddl);
