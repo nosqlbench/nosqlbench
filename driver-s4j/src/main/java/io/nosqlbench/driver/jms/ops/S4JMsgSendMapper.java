@@ -23,7 +23,9 @@ import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -229,14 +231,56 @@ public class S4JMsgSendMapper extends S4JOpMapper {
             }
         }
 
+        // Each key in the property json file may include value type information, such as:
+        // - key(string): value
+        // The above format specifies a message property that has "key" as the property key
+        // and "value" as the property value; and the type of the property value is "string"
+        //
+        // If the value type is not specified, use "string" as the default value type.
         Message outMessage = message;
         for (Map.Entry<String, String> entry : jmsMsgProperties.entrySet()) {
-            String key = entry.getKey();
+            String rawKeyStr = entry.getKey();
             String value = entry.getValue();
-            outMessage.setObjectProperty(entry.getKey(), value);
 
-            messageSize += key.length();
-            messageSize += value.length();
+            if (! StringUtils.isAnyBlank(rawKeyStr, value)) {
+                String key = rawKeyStr;
+                String valueType = S4JActivityUtil.JMS_MSG_PROP_TYPES.STRING.label;
+
+                if (StringUtils.contains(rawKeyStr, '(')) {
+                    key = StringUtils.substringBefore(rawKeyStr, "(").trim();
+                    valueType = StringUtils.substringAfter(rawKeyStr, "(");
+                    valueType = StringUtils.substringBefore(valueType, ")").trim();
+                }
+
+                if (StringUtils.isBlank(valueType)) {
+                    outMessage.setStringProperty(entry.getKey(), value);
+                }
+                else {
+                    if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.SHORT.label))
+                        outMessage.setShortProperty(key, NumberUtils.toShort(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.INT.label))
+                        outMessage.setIntProperty(key, NumberUtils.toInt(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.LONG.label))
+                        outMessage.setLongProperty(key, NumberUtils.toLong(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.FLOAT.label))
+                        outMessage.setFloatProperty(key, NumberUtils.toFloat(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.DOUBLE.label))
+                        outMessage.setDoubleProperty(key, NumberUtils.toDouble(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.BOOLEAN.label))
+                        outMessage.setBooleanProperty(key, BooleanUtils.toBoolean(value));
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.STRING.label))
+                        outMessage.setStringProperty(key, value);
+                    else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.BYTE.label))
+                        outMessage.setByteProperty(key, NumberUtils.toByte(value));
+                    else
+                        throw new S4JDriverParamException(
+                            "Unsupported JMS message property value type (\"" + valueType + "\"). " +
+                                "Value types are: \"" + S4JActivityUtil.getValidJmsMsgPropTypeList() + "\"");
+                }
+
+                messageSize += key.length();
+                messageSize += value.length();
+            }
         }
 
         message.setStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP, String.valueOf(messageSize));

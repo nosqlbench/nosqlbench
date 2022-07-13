@@ -213,7 +213,7 @@ public class S4JSpace {
                     jmsConnContext.setClientID(clientIdStr);
                     jmsConnContext.setExceptionListener(e -> {
                         if (logger.isDebugEnabled()) {
-                            logger.error("onException::Unexpected JMS error happened:" + e.getMessage());
+                            logger.error("onException::Unexpected JMS error happened:" + e);
                         }
                     });
 
@@ -245,7 +245,7 @@ public class S4JSpace {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JConnInfo.toString());
                 }
-                throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getMessage());
+                throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
             }
         }
     }

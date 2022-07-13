@@ -51,43 +51,48 @@ public class S4JConnInfo {
         this.s4jConfMap.put("webServiceUrl", this.webSvcUrl);
         this.s4jConfMap.put("brokerServiceUrl", this.pulsarSvcUrl);
 
-        Map<String, Object> s4jMiscConfMap = this.inputS4JConf.getS4jMiscConfMap();
-        if (!s4jMiscConfMap.isEmpty()) {
-            this.s4jConfMap.putAll(s4jMiscConfMap);
-        }
+        if (this.inputS4JConf != null) {
+            Map<String, Object> s4jMiscConfMap = this.inputS4JConf.getS4jMiscConfMap();
+            if (!s4jMiscConfMap.isEmpty()) {
+                this.s4jConfMap.putAll(s4jMiscConfMap);
+            }
 
-        if (!validTransactSetting(sessionMode, s4jMiscConfMap)) {
-            String errMsg =
-                "S4J config parameter \"enableTransaction\" needs to be set to \"true\" " +
-                    "in order to support JMS transaction - sessionModeStr:\"" + sessionModeStr + "\"(" + sessionMode + ")";
-            throw new S4JDriverParamException(errMsg);
-        }
+            if (!validTransactSetting(sessionMode, s4jMiscConfMap)) {
+                String errMsg =
+                    "S4J config parameter \"enableTransaction\" needs to be set to \"true\" " +
+                        "in order to support JMS transaction - sessionModeStr:\"" + sessionModeStr + "\"(" + sessionMode + ")";
+                throw new S4JDriverParamException(errMsg);
+            }
 
-        Map<String, Object> clientCfgMap = this.inputS4JConf.getClientConfMap();
-        if (!clientCfgMap.isEmpty()) {
-            this.s4jConfMap.putAll(clientCfgMap);
-        }
+            Map<String, Object> clientCfgMap = this.inputS4JConf.getClientConfMap();
+            if (!clientCfgMap.isEmpty()) {
+                this.s4jConfMap.putAll(clientCfgMap);
+            }
 
-        Map<String, Object> producerCfgMap = this.inputS4JConf.getProducerConfMap();
-        if (!producerCfgMap.isEmpty()) {
-            this.s4jConfMap.put("producerConfig", producerCfgMap);
-        }
+            Map<String, Object> producerCfgMap = this.inputS4JConf.getProducerConfMap();
+            if (!producerCfgMap.isEmpty()) {
+                this.s4jConfMap.put("producerConfig", producerCfgMap);
+            }
 
-        Map<String, Object> consumerCfgMap = this.inputS4JConf.getConsumerConfMap();
-        if (!consumerCfgMap.isEmpty()) {
-            this.s4jConfMap.put("consumerConfig", consumerCfgMap);
-        }
+            Map<String, Object> consumerCfgMap = this.inputS4JConf.getConsumerConfMap();
+            if (!consumerCfgMap.isEmpty()) {
+                this.s4jConfMap.put("consumerConfig", consumerCfgMap);
+            }
 
-        Map<String, Object> jmsCfgMap = this.inputS4JConf.getJmsConfMap();
-        if (!jmsCfgMap.isEmpty()) {
-            this.s4jConfMap.putAll(jmsCfgMap);
+            Map<String, Object> jmsCfgMap = this.inputS4JConf.getJmsConfMap();
+            if (!jmsCfgMap.isEmpty()) {
+                this.s4jConfMap.putAll(jmsCfgMap);
+            }
         }
     }
 
     private int getSessionModeFromStr(String sessionModeStr) {
+        // default ack mode: auto_ack
         int sessionMode = -1;
 
-        if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
+        if (StringUtils.isBlank(sessionModeStr))
+            sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
+        else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.AUTO_ACK.label))
             sessionMode = JMSContext.AUTO_ACKNOWLEDGE;
         else if (StringUtils.equalsIgnoreCase(sessionModeStr, S4JActivityUtil.JMS_SESSION_MODES.CLIENT_ACK.label))
             sessionMode = JMSContext.CLIENT_ACKNOWLEDGE;
