@@ -283,7 +283,7 @@ public class Cqld4Space {
         return ConfigModel.of(Cqld4Space.class)
             .add(Param.optional("localdc"))
             .add(Param.optional(List.of("secureconnectbundle","scb")))
-            .add(Param.optional("hosts"))
+            .add(Param.optional(List.of("hosts","host")))
             .add(Param.optional("driverconfig", String.class))
             .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
             .add(Param.optional("userfile", String.class, "file to load the username from"))
