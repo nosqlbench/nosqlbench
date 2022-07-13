@@ -104,12 +104,14 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.10.1</version>
                 <configuration>
-                    <sourceDirectory>src/main/java/io/nosqlbench/converters/cql/grammars</sourceDirectory>
+                    <sourceDirectory>src/main/java/io/nosqlbench/converters/cql/grammars
+                    </sourceDirectory>
                     <arguments>
                         <argument>-package</argument>
                         <argument>io.nosqlbench.converters.cql.generated</argument>
                     </arguments>
-                    <outputDirectory>src/main/java/io/nosqlbench/converters/cql/generated</outputDirectory>
+                    <outputDirectory>src/main/java/io/nosqlbench/converters/cql/generated
+                    </outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -128,7 +130,8 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>src/main/java/io/nosqlbench/converters/cql/generated</directory>
+                            <directory>src/main/java/io/nosqlbench/converters/cql/generated
+                            </directory>
                             <includes>
                                 <include>**/*.java</include>
                                 <include>**/*.interp</include>
@@ -140,5 +143,23 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.md</include>
+                    <include>**/*.yaml</include>
+                    <include>**/*.txt</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </resource>
+
+        </resources>
+
     </build>
 </project>

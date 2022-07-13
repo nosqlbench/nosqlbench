@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 public class CqlParserHarnessTest {
 
     private final static String ksddl = """
@@ -51,8 +53,7 @@ public class CqlParserHarnessTest {
     @Test
     public void testGenBasicWorkload() {
         CqlWorkloadExporter exporter = new CqlWorkloadExporter(ddl);
-        var workloadData = exporter.getWorkloadAsYaml();
-        System.out.println("# generated workload:\n"+workloadData);
+        assertThatThrownBy(() ->  exporter.getWorkloadAsYaml()).isInstanceOf(RuntimeException.class);
     }
 
     @Test
@@ -64,7 +65,7 @@ public class CqlParserHarnessTest {
     @Test
     public void testCqlParserHarnessKeyspace() {
         CqlModelParser harness = new CqlModelParser();
-        harness.parse("""
+        CqlModelParser.parse("""
             CREATE KEYSPACE cycling
               WITH REPLICATION = {\s
                'class' : 'SimpleStrategy',\s
@@ -77,7 +78,7 @@ public class CqlParserHarnessTest {
     @Disabled
     public void testCqlParserHarnessTable() {
         CqlModelParser harness = new CqlModelParser();
-        harness.parse("""
+        CqlModelParser.parse("""
             CREATE TABLE cycling.race_winners (
                race_name text,\s
                race_position int,\s

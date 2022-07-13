@@ -22,6 +22,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.nb.api.content.Content;
 import io.nosqlbench.nb.api.content.NBIO;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +45,8 @@ public class DefaultCqlBindings implements BindingsLibrary {
 
     private Optional<String> loadLocal(String path) {
         try {
-            InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
+            String resourceName = getClass().getPackageName().replaceAll("\\.", File.separator)+File.separator+path;
+            InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceName);
             byte[] bytes = stream.readAllBytes();
             return Optional.of(new String(bytes));
         } catch (Exception e) {
