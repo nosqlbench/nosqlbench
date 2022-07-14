@@ -242,11 +242,17 @@ public class CqlWorkloadExporter {
 
 
     private int readRatioFor(CqlTable table) {
+        if (table.getTableAttributes().size()==0) {
+            return 1;
+        }
         double weighted_reads = Double.parseDouble(table.getTableAttributes().get("weighted_reads"));
         return (int) (weighted_reads * DEFAULT_RESOLUTION);
     }
 
     private int writeRatioFor(CqlTable table) {
+        if (table.getTableAttributes().size()==0) {
+            return 1;
+        }
         double weighted_writes = Double.parseDouble(table.getTableAttributes().get("weighted_writes"));
         return (int) (weighted_writes * DEFAULT_RESOLUTION);
     }
