@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -46,7 +47,7 @@ public class CqlParserHarnessTest {
 
     @Test
     public void testAllTypes() {
-        CqlWorkloadExporter exporter = new CqlWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"));
+        CqlWorkloadExporter exporter = new CqlWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"), List.of());
         var data = exporter.getWorkloadAsYaml();
 
     }
@@ -54,7 +55,7 @@ public class CqlParserHarnessTest {
     @Disabled
     @Test
     public void testGenBasicWorkload() {
-        CqlWorkloadExporter exporter = new CqlWorkloadExporter(ddl);
+        CqlWorkloadExporter exporter = new CqlWorkloadExporter(ddl, List.of());
         assertThatThrownBy(() ->  exporter.getWorkloadAsYaml()).isInstanceOf(RuntimeException.class);
     }
 

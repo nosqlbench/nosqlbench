@@ -24,6 +24,7 @@ import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
 import io.nosqlbench.converters.cql.exporters.binders.*;
 import io.nosqlbench.converters.cql.exporters.transformers.CqlModelFixup;
+import io.nosqlbench.converters.cql.exporters.transformers.RatioCalculator;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,31 +63,32 @@ public class CqlWorkloadExporter {
     private final BindingsAccumulator bindings = new BindingsAccumulator(namer, List.of(defaultBindings));
     private CqlModel model;
     private final Map<String, String> bindingsMap = new LinkedHashMap<>();
-    private final List<Function<CqlModel, CqlModel>> transformers = List.of(new CqlModelFixup());
+    private final int DEFAULT_RESOLUTION = 10000;
 
-    public CqlWorkloadExporter(CqlModel model) {
+    public CqlWorkloadExporter(CqlModel model, List<Function<CqlModel, CqlModel>> transformers) {
         this.model = model;
         for (Function<CqlModel, CqlModel> transformer : transformers) {
             this.model = transformer.apply(this.model);
         }
     }
 
-    public CqlWorkloadExporter(String ddl, Path srcpath) {
+    public CqlWorkloadExporter(String ddl, Path srcpath, List<Function<CqlModel, CqlModel>> transformers) {
         this.model = CqlModelParser.parse(ddl, srcpath);
         for (Function<CqlModel, CqlModel> transformer : transformers) {
             this.model = transformer.apply(this.model);
         }
     }
 
-    public CqlWorkloadExporter(String ddl) {
+    public CqlWorkloadExporter(String ddl, List<Function<CqlModel, CqlModel>> transformers) {
         this.model = CqlModelParser.parse(ddl, null);
         for (Function<CqlModel, CqlModel> transformer : transformers) {
             this.model = transformer.apply(this.model);
         }
     }
 
-    public CqlWorkloadExporter(Path path) {
+    public CqlWorkloadExporter(Path path, List<Function<CqlModel, CqlModel>> transformers) {
         this.model = CqlModelParser.parse(path);
+
         for (Function<CqlModel, CqlModel> transformer : transformers) {
             this.model = transformer.apply(this.model);
         }
@@ -107,7 +109,7 @@ public class CqlWorkloadExporter {
         }
 
         Path target = null;
-        if (args.length == 2) {
+        if (args.length >= 2) {
             target = Path.of(args[1]);
             logger.info("using output path as '" + target + "'");
         } else {
@@ -123,7 +125,25 @@ public class CqlWorkloadExporter {
             throw new RuntimeException("Target file '" + target + "' exists. Please remove it first or use a different target file name.");
         }
 
-        CqlWorkloadExporter exporter = new CqlWorkloadExporter(srcpath);
+        CqlSchemaStats schemaStats = null;
+        if (args.length == 3) {
+            Path statspath = Path.of(args[2]);
+            try {
+                CqlSchemaStatsParser parser = new CqlSchemaStatsParser();
+                schemaStats = parser.parse(statspath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
+        List<Function<CqlModel, CqlModel>> transformers = List.of(
+            new CqlModelFixup(), // elide UDTs in lieu of blobs for now
+            new StatsEnhancer(schemaStats), // add keyspace, schema and table stats from nodetool
+            new RatioCalculator() // Normalize read and write fraction over total ops in unit interval
+        );
+
+        CqlWorkloadExporter exporter = new CqlWorkloadExporter(srcpath, transformers);
+
         String workload = exporter.getWorkloadAsYaml();
         try {
             Files.writeString(
@@ -135,6 +155,7 @@ public class CqlWorkloadExporter {
             e.printStackTrace();
         }
     }
+
 
     public Map<String, Object> getWorkload() {
         namer.populate(model);
@@ -165,41 +186,84 @@ public class CqlWorkloadExporter {
     }
 
     private Map<String, Object> genMainBlock(CqlModel model) {
-        Map<String, String> mainOpTemplates = new LinkedHashMap<>();
+        Map<String, Object> mainOpTemplates = new LinkedHashMap<>();
 
         for (CqlTable table : model.getAllTables()) {
-            Optional<String> template = this.genInsertTemplate(table);
-            if (template.isPresent()) {
-                mainOpTemplates.put(namer.nameFor(table, "optype", "insert"),
-                    template.get());
+
+            if (!isCounterTable(table)) {
+
+                Optional<String> insertTemplate = this.genInsertTemplate(table);
+                if (insertTemplate.isPresent()) {
+                    mainOpTemplates.put(namer.nameFor(table, "optype", "insert"),
+                        Map.of(
+                            "stmt", insertTemplate.get(),
+                            "ratio", writeRatioFor(table)
+                        )
+                    );
+                } else {
+                    throw new RuntimeException("Unable to generate main insert template for table '" + table + "'");
+                }
+            } else {
+                logger.info("skipped insert for counter table '" + table.getTableName() + "'");
+            }
+
+            Optional<String> updateTemplate = this.genUpdateTemplate(table);
+            if (updateTemplate.isPresent()) {
+                mainOpTemplates.put(namer.nameFor(table, "optype", "update"),
+                    Map.of(
+                        "stmt", updateTemplate.get(),
+                        "ratio", writeRatioFor(table)
+                    )
+                );
             } else {
                 throw new RuntimeException("Unable to generate main insert template for table '" + table + "'");
             }
-        }
 
-        for (CqlTable table : model.getAllTables()) {
-            Optional<String> template = this.genSelectTemplate(table);
-            if (template.isPresent()) {
+
+            Optional<String> selectTemplate = this.genSelectTemplate(table);
+            if (selectTemplate.isPresent()) {
                 mainOpTemplates.put(namer.nameFor(table, "optype", "select"),
-                    template.get());
+                    Map.of("stmt", selectTemplate.get(),
+                        "ratio", readRatioFor(table))
+                );
             } else {
                 throw new RuntimeException("Unable to generate main select template for table '" + table + "'");
             }
+
         }
 
         return Map.of("ops", mainOpTemplates);
+    }
+
+    private boolean isCounterTable(CqlTable table) {
+        return table.getColumnDefinitions().stream()
+            .anyMatch(cd -> cd.getTrimmedTypedef().equalsIgnoreCase("counter"));
+    }
+
+
+    private int readRatioFor(CqlTable table) {
+        double weighted_reads = Double.parseDouble(table.getTableAttributes().get("weighted_reads"));
+        return (int) (weighted_reads * DEFAULT_RESOLUTION);
+    }
+
+    private int writeRatioFor(CqlTable table) {
+        double weighted_writes = Double.parseDouble(table.getTableAttributes().get("weighted_writes"));
+        return (int) (weighted_writes * DEFAULT_RESOLUTION);
     }
 
 
     private Map<String, Object> genRampupBlock(CqlModel model) {
         Map<String, String> rampupOpTemplates = new LinkedHashMap<>();
 
+
         for (CqlTable table : model.getAllTables()) {
-            Optional<String> insert = genInsertTemplate(table);
-            if (insert.isPresent()) {
-                rampupOpTemplates.put(namer.nameFor(table, "optype", "insert"), insert.get());
-            } else {
-                throw new RuntimeException("Unable to create rampup template for table '" + table + "'");
+            if (!isCounterTable(table)) {
+                Optional<String> insert = genInsertTemplate(table);
+                if (insert.isPresent()) {
+                    rampupOpTemplates.put(namer.nameFor(table, "optype", "insert"), insert.get());
+                } else {
+                    throw new RuntimeException("Unable to create rampup template for table '" + table + "'");
+                }
             }
         }
 
@@ -238,19 +302,46 @@ public class CqlWorkloadExporter {
     }
 
     private String genPredicatePart(CqlColumnDef def) {
-        String typeName = def.getType();
-
-        CqlLiteralFormat cqlLiteralFormat =
-            CqlLiteralFormat.valueOfCqlType(typeName).orElse(CqlLiteralFormat.UNKNOWN);
-        if (cqlLiteralFormat == CqlLiteralFormat.UNKNOWN) {
-            logger.warn("Unknown literal format for " + typeName);
-        }
-
+        String typeName = def.getTrimmedTypedef();
         Binding binding = bindings.forColumn(def);
 
-        return def.getName() + "=" + cqlLiteralFormat.format("{" + binding.name() + "}");
+        return def.getName() + "={" + binding.name() + "}";
     }
 
+    private Optional<String> genUpdateTemplate(CqlTable table) {
+        try {
+
+            return Optional.of("""
+                 update KEYSPACE.TABLE
+                  set ASSIGNMENTS
+                  where PREDICATES;
+                """
+                .replaceAll("KEYSPACE", table.getKeySpace())
+                .replaceAll("TABLE", table.getTableName())
+                .replaceAll("PREDICATES", genPredicateTemplate(table))
+                .replaceAll("ASSIGNMENTS", genAssignments(table)));
+
+        } catch (UnresolvedBindingException ube) {
+            return Optional.empty();
+        }
+    }
+
+    private String genAssignments(CqlTable table) {
+        StringBuilder sb = new StringBuilder();
+        for (CqlColumnDef coldef : table.getNonKeyColumnDefinitions()) {
+            if (coldef.isCounter()) {
+                sb.append(coldef.getName()).append("=")
+                    .append(coldef.getName()).append("+").append("{").append(bindings.forColumn(coldef).name()).append("}")
+                    .append(", ");
+            } else {
+                sb.append(coldef.getName()).append("=")
+                    .append("{").append(bindings.forColumn(coldef).name()).append("}")
+                    .append(", ");
+            }
+        }
+        sb.setLength(sb.length() - ", ".length());
+        return sb.toString();
+    }
 
     private Optional<String> genInsertTemplate(CqlTable table) {
         try {
@@ -264,9 +355,9 @@ public class CqlWorkloadExporter {
                     .stream()
                     .map(cd -> {
                         Binding binding = bindings.forColumn(cd);
-                        return binding.name();
+                        return "{" + binding.name() + "}";
                     })
-                    .collect(Collectors.joining("},{", "{", "}"))
+                    .collect(Collectors.joining(","))
                 + ");");
         } catch (UnresolvedBindingException ube) {
             return Optional.empty();

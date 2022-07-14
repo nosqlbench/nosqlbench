@@ -18,12 +18,24 @@ package io.nosqlbench.converters.cql.cqlast;
 
 import io.nosqlbench.nb.api.labels.Labeled;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CqlKeyspace implements Labeled {
     String keyspaceName= "";
     String refddl;
     private String refReplDdl;
+
+    public Map<String, String> getKeyspaceAttributes() {
+        return keyspaceAttributes;
+    }
+
+    public void setKeyspaceAttributes(Map<String, String> keyspaceAttributes) {
+        this.keyspaceAttributes = keyspaceAttributes;
+    }
+
+    Map<String,String> keyspaceAttributes = new HashMap<String,String>();
+
 
     public CqlKeyspace() {
     }

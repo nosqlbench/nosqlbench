@@ -466,22 +466,23 @@ public class SimpleActivity implements Activity, ProgressCapable {
         List<DriverAdapter> adapters,
         List<ParsedOp> pops
     ) {
-        List<Long> ratios = new ArrayList<>(pops.size());
-
-        for (int i = 0; i < pops.size(); i++) {
-
-            ParsedOp pop = pops.get(i);
-            long ratio = pop.takeStaticConfigOr("ratio", 1);
-            ratios.add(ratio);
-        }
-
-        SequencerType sequencerType = getParams()
-            .getOptionalString("seq")
-            .map(SequencerType::valueOf)
-            .orElse(SequencerType.bucket);
-        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
-
         try {
+
+            List<Long> ratios = new ArrayList<>(pops.size());
+
+            for (int i = 0; i < pops.size(); i++) {
+
+                ParsedOp pop = pops.get(i);
+                long ratio = pop.takeStaticConfigOr("ratio", 1);
+                ratios.add(ratio);
+            }
+
+            SequencerType sequencerType = getParams()
+                .getOptionalString("seq")
+                .map(SequencerType::valueOf)
+                .orElse(SequencerType.bucket);
+            SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
@@ -493,11 +494,13 @@ public class SimpleActivity implements Activity, ProgressCapable {
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
+
+            return planner.resolve();
+
         } catch (Exception e) {
             throw new OpConfigError(e.getMessage(), workloadSource, e);
         }
 
-        return planner.resolve();
 
     }
 

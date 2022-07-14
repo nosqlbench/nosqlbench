@@ -57,6 +57,10 @@ public class CqlColumnDef implements Labeled {
         return type;
     }
 
+    public String getTrimmedTypedef() {
+        return type.replaceAll(" ","");
+    }
+
     public String getTable() {
         return table;
     }
@@ -86,5 +90,9 @@ public class CqlColumnDef implements Labeled {
 
     public void setTable(String table) {
         this.table = table;
+    }
+
+    public boolean isCounter() {
+        return getTrimmedTypedef().equalsIgnoreCase("counter");
     }
 }

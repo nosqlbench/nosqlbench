@@ -16,6 +16,8 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
+import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
+
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,6 +47,10 @@ public enum CqlLiteralFormat {
     }
     CqlLiteralFormat(Function<String,String> modifier) {
         this.literalFormat = modifier;
+    }
+
+    public static String formatBindType(CqlColumnDef cd, String valueref) {
+        return CqlLiteralFormat.valueOfCqlType(cd.getTrimmedTypedef()).orElse(CqlLiteralFormat.UNKNOWN).format(valueref);
     }
 
     public String format(String value) {

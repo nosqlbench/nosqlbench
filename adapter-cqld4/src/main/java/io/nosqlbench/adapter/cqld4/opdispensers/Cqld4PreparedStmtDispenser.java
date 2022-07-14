@@ -25,6 +25,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,7 +65,11 @@ public class Cqld4PreparedStmtDispenser extends BaseCqlStmtDispenser {
 
         String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
         boundSession = getSessionFunc().apply(0);
-        preparedStmt = boundSession.prepare(preparedQueryString);
+        try {
+            preparedStmt = boundSession.prepare(preparedQueryString);
+        } catch (Exception e) {
+            throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
+        }
 
         LongFunction<Statement> boundStmtFunc = c -> {
             Object[] apply = fieldsF.apply(c);

@@ -18,10 +18,7 @@ package io.nosqlbench.converters.cql.cqlast;
 
 import io.nosqlbench.nb.api.labels.Labeled;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CqlTable implements Labeled {
@@ -30,6 +27,16 @@ public class CqlTable implements Labeled {
     List<CqlColumnDef> coldefs = new ArrayList<>();
 
     private String refddl;
+
+    public Map<String, String> getTableAttributes() {
+        return tableAttributes;
+    }
+
+    public void setTableAttributes(Map<String, String> tableAttributes) {
+        this.tableAttributes = tableAttributes;
+    }
+
+    Map<String,String> tableAttributes = new HashMap<String,String>();
 
     List<String> partitionKeys = new ArrayList<>();
     List<String> clusteringColumns = new ArrayList<>();
@@ -117,12 +124,6 @@ public class CqlTable implements Labeled {
         return this.clusteringColumns;
     }
 
-    public String typedefForColumn(String colname) {
-        return coldefs.stream()
-            .filter(c -> c.getName().equalsIgnoreCase(colname))
-            .map(CqlColumnDef::getType).findFirst().orElseThrow();
-    }
-
     public CqlColumnDef getColumnDefForName(String colname) {
         Optional<CqlColumnDef> def = coldefs
             .stream()
@@ -135,4 +136,10 @@ public class CqlTable implements Labeled {
         return def.orElseThrow();
     }
 
+    public List<CqlColumnDef> getNonKeyColumnDefinitions() {
+        return coldefs.stream()
+            .filter(n -> !partitionKeys.contains(n.getName()))
+            .filter(n -> !clusteringColumns.contains(n.getName()))
+            .toList();
+    }
 }

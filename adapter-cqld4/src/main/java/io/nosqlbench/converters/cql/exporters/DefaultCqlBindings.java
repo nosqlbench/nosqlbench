@@ -58,6 +58,9 @@ public class DefaultCqlBindings implements BindingsLibrary {
 
     @Override
     public Optional<Binding> resolveBindingsFor(CqlColumnDef def) {
-        return Optional.ofNullable(new Binding(def.getType(),bindings.get(def.getType())));
+        String typedef = def.getTrimmedTypedef();
+        String recipe = bindings.get(def.getTrimmedTypedef());
+        Binding optionalBinding = new Binding(typedef, recipe);
+        return Optional.ofNullable(optionalBinding);
     }
 }

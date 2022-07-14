@@ -26,6 +26,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BindPointParserTest {
 
     @Test
+    public void testSpecialCharsInRefBindPoint() {
+        BindPointParser bpp = new BindPointParser();
+        assertThat(bpp.apply("test {list<one>}", Map.of())).isEqualTo(
+            new BindPointParser.Result(
+                List.of("test ","list<one>",""),
+                List.of(BindPoint.of("list<one>",null, BindPoint.Type.reference)))
+        );
+    }
+
+    @Test
     public void testSingleRefTypeBindPoint() {
         BindPointParser bpp = new BindPointParser();
         assertThat(bpp.apply("test {one}", Map.of())).isEqualTo(

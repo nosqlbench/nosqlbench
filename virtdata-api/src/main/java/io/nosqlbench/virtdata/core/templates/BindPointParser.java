@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public class BindPointParser implements BiFunction<String, Map<String, String>, BindPointParser.Result> {
 
-    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile("(\\{((?<anchor>\\w+[-_\\d\\w.]*)})|(\\{\\{(?<extended>(?!}}).+?)}}))");
+    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile("(\\{((?<anchor>\\w+[-_<>,\\d\\w.]*)})|(\\{\\{(?<extended>(?!}}).+?)}}))");
     public final static String DEFINITION = "DEFINITION";
 
 
