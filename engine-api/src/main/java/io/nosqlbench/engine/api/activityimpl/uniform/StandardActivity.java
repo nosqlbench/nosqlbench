@@ -29,7 +29,6 @@ import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTempl
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.ServiceSelector;
-import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

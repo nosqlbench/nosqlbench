@@ -29,7 +29,6 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.util.SSLKsFactory;
-import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;

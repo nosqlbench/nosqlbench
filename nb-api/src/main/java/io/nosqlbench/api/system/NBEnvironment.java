@@ -58,7 +58,7 @@ public class NBEnvironment {
     public static final String NBLIBS = "NBLIBDIR";
 
     // package private for testing
-    NBEnvironment() {
+    public NBEnvironment() {
     }
 
     public final static NBEnvironment INSTANCE = new NBEnvironment();

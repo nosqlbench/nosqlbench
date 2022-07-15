@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.jmx;
 
 import io.nosqlbench.engine.api.util.SSLKsFactory;
-import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import javax.management.remote.JMXConnector;

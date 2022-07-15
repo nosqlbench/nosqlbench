@@ -23,7 +23,6 @@ import com.datastax.oss.driver.api.core.config.TypedDriverOption;
 import com.datastax.oss.driver.internal.core.connection.ExponentialReconnectionPolicy;
 import com.datastax.oss.driver.internal.core.specex.ConstantSpeculativeExecutionPolicy;
 import io.nosqlbench.api.config.standard.*;
-import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

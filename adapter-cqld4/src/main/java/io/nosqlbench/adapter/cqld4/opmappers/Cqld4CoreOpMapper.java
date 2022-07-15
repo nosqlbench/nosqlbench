@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -25,12 +26,14 @@ import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
 public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
+    private final static Logger logger = LogManager.getLogger(Cqld4CoreOpMapper.class);
 
     private final DriverSpaceCache<? extends Cqld4Space> cache;
     private final NBConfiguration cfg;
@@ -62,6 +65,8 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
         CqlD4OpType opType = CqlD4OpType.prepared;
 
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
+
+        logger.info("Using " + target.enumId + " statement form for '" + op.getName());
 
         return switch (target.enumId) {
             case raw -> new CqlD4RawStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);

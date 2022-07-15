@@ -25,7 +25,6 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
-import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.api.errors.OpConfigError;
 
 import java.util.Optional;

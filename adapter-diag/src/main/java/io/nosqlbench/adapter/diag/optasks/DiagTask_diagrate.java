@@ -21,7 +21,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.*;
 
 import java.util.Map;
 
