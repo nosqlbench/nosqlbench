@@ -48,6 +48,8 @@ import java.util.stream.Collectors;
  * Thus if you feed it one create statement at a time, it will yield a workload with just that,
  * and if you feed it an elaborate schema, it will generate a workload inclusive of all
  * provided elements.
+ *
+ * @see <a href="https://cassandra.apache.org/doc/trunk/cassandra/cql/index.html">Apache Cassandra CQL Docs</a>
  */
 public class CqlWorkloadExporter {
     private final static Logger logger = LogManager.getLogger(CqlWorkloadExporter.class);

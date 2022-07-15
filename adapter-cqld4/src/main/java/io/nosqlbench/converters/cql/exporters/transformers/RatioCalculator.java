@@ -25,6 +25,9 @@ public class RatioCalculator implements Function<CqlModel,CqlModel> {
 
     @Override
     public CqlModel apply(CqlModel model) {
+        if (!model.hasStats()) {
+            return model;
+        }
         double totalReads = 0.0d;
         double totalWrites = 0.0d;
         double totalSpace = 0.0d;
