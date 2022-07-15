@@ -16,10 +16,12 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.api.config.NBNamedElement;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class CqlType {
+public class CqlType implements NBNamedElement {
     private String keyspace;
     private String name;
     private String refddl;

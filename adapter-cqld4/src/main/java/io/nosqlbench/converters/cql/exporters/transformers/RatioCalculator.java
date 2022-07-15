@@ -33,7 +33,7 @@ public class RatioCalculator implements Function<CqlModel,CqlModel> {
         double totalSpace = 0.0d;
         double totalOps=0.0d;
 
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             String local_read_count = table.getTableAttributes().get("Local read count");
             double reads = Double.parseDouble(local_read_count);
             totalReads+=reads;
@@ -49,7 +49,7 @@ public class RatioCalculator implements Function<CqlModel,CqlModel> {
             totalSpace+=space;
         }
 
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             double reads = Double.parseDouble(table.getTableAttributes().get("Local read count"));
             double writes = Double.parseDouble(table.getTableAttributes().get("Local write count"));
 

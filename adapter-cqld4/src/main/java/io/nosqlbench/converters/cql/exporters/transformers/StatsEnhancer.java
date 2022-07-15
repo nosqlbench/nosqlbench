@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.transformers;
 
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.converters.cql.exporters.CqlKeyspaceStats;
+import io.nosqlbench.converters.cql.exporters.CqlSchemaStats;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -34,13 +36,13 @@ public class StatsEnhancer implements Function<CqlModel, CqlModel> {
         if (schemaStats != null) {
             //TODO: rewrite this in something resembling an efficient way
             CqlKeyspaceStats ksStats = null;
-            for (String ksName : model.getKeyspaces().keySet()) {
+            for (String ksName : model.getKeyspacesByName().keySet()) {
                 if ((ksStats = schemaStats.getKeyspace(ksName)) != null) {
-                    model.getKeyspaces().get(ksName).setKeyspaceAttributes(ksStats.getKeyspaceAttributes());
-                    Map<String, CqlTable> ksTables = model.getTablesByKeyspace().get(ksName);
+                    model.getKeyspacesByName().get(ksName).setKeyspaceAttributes(ksStats.getKeyspaceAttributes());
+                    Map<String, CqlTable> ksTables = model.getTablesByNameByKeyspace().get(ksName);
                     for (String tableName : ksTables.keySet()) {
                         if (ksStats.getKeyspaceTable(tableName) != null) {
-                            model.getTablesByKeyspace().get(ksName).get(tableName)
+                            model.getTablesByNameByKeyspace().get(ksName).get(tableName)
                                 .setTableAttributes(ksStats.getKeyspaceTable(tableName).getAttributes());
                         }
                     }

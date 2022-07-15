@@ -77,7 +77,7 @@ public class NamingFolio {
 
 
     public void populate(CqlModel model) {
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
                 addFieldRef(coldef.getLabels());
             }

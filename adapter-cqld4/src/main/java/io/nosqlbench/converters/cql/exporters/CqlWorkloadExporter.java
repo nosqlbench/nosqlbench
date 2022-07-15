@@ -25,6 +25,7 @@ import io.nosqlbench.converters.cql.cqlast.CqlTable;
 import io.nosqlbench.converters.cql.exporters.binders.*;
 import io.nosqlbench.converters.cql.exporters.transformers.CqlModelFixup;
 import io.nosqlbench.converters.cql.exporters.transformers.RatioCalculator;
+import io.nosqlbench.converters.cql.exporters.transformers.StatsEnhancer;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -190,7 +191,7 @@ public class CqlWorkloadExporter {
     private Map<String, Object> genMainBlock(CqlModel model) {
         Map<String, Object> mainOpTemplates = new LinkedHashMap<>();
 
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
 
             if (!isCounterTable(table)) {
 
@@ -206,7 +207,7 @@ public class CqlWorkloadExporter {
                     throw new RuntimeException("Unable to generate main insert template for table '" + table + "'");
                 }
             } else {
-                logger.info("skipped insert for counter table '" + table.getTableName() + "'");
+                logger.info("skipped insert for counter table '" + table.getName() + "'");
             }
 
             Optional<String> updateTemplate = this.genUpdateTemplate(table);
@@ -264,7 +265,7 @@ public class CqlWorkloadExporter {
         Map<String, String> rampupOpTemplates = new LinkedHashMap<>();
 
 
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             if (!isCounterTable(table)) {
                 Optional<String> insert = genInsertTemplate(table);
                 if (insert.isPresent()) {
@@ -281,7 +282,7 @@ public class CqlWorkloadExporter {
     private Optional<String> genSelectTemplate(CqlTable table) {
 
         try {
-            return Optional.of("select * from " + table.getKeySpace() + "." + table.getTableName() +
+            return Optional.of("select * from " + table.getKeySpace() + "." + table.getName() +
                 "\n WHERE " + genPredicateTemplate(table));
         } catch (UnresolvedBindingException ube) {
             logger.error(ube);
@@ -325,7 +326,7 @@ public class CqlWorkloadExporter {
                   where PREDICATES;
                 """
                 .replaceAll("KEYSPACE", table.getKeySpace())
-                .replaceAll("TABLE", table.getTableName())
+                .replaceAll("TABLE", table.getName())
                 .replaceAll("PREDICATES", genPredicateTemplate(table))
                 .replaceAll("ASSIGNMENTS", genAssignments(table)));
 
@@ -355,7 +356,7 @@ public class CqlWorkloadExporter {
         try {
             List<CqlColumnDef> cdefs = table.getColumnDefinitions();
             return Optional.of("insert into " +
-                table.getKeySpace() + "." + table.getTableName() + "\n" +
+                table.getKeySpace() + "." + table.getName() + "\n" +
                 " ( " + cdefs.stream().map(CqlColumnDef::getName)
                 .collect(Collectors.joining(" , ")) +
                 " )\n values\n (" +
@@ -411,10 +412,10 @@ public class CqlWorkloadExporter {
         Map<String, Object> ops = new LinkedHashMap<>();
         truncateblock.put("ops", ops);
 
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             ops.put(
                 namer.nameFor(table, "optype", "truncate"),
-                "truncate " + table.getKeySpace() + "." + table.getTableName() + ";"
+                "truncate " + table.getKeySpace() + "." + table.getName() + ";"
             );
         }
         return truncateblock;
@@ -424,12 +425,12 @@ public class CqlWorkloadExporter {
         Map<String, Object> schemablock = new LinkedHashMap<>();
         Map<String, Object> ops = new LinkedHashMap<>();
 
-        for (CqlKeyspace ks : model.getKeyspaces().values()) {
-            ops.put("create-keyspace-" + ks.getKeyspaceName(), ks.getRefDdlWithReplFields(DEFAULT_REPLICATION));
+        for (CqlKeyspace ks : model.getKeyspacesByName().values()) {
+            ops.put("create-keyspace-" + ks.getName(), ks.getRefDdlWithReplFields(DEFAULT_REPLICATION));
         }
-        for (String ksname : model.getTablesByKeyspace().keySet()) {
-            for (CqlTable cqltable : model.getTablesByKeyspace().get(ksname).values()) {
-                ops.put("create-table-" + ksname + "." + cqltable.getTableName(), cqltable.getRefDdl());
+        for (String ksname : model.getTablesByNameByKeyspace().keySet()) {
+            for (CqlTable cqltable : model.getTablesByNameByKeyspace().get(ksname).values()) {
+                ops.put("create-table-" + ksname + "." + cqltable.getName(), cqltable.getRefDdl());
             }
         }
 

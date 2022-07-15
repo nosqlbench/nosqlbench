@@ -58,7 +58,7 @@ public class CqlModel {
 
     public void saveTable(String keyspace, String text, String refddl) {
         table.setKeyspace(keyspace);
-        table.setTable(text);
+        table.setName(text);
         table.setRefDdl(refddl);
         this.tables.computeIfAbsent(keyspace, ks->new LinkedHashMap<>()).put(text, table);
         table = null;
@@ -71,15 +71,26 @@ public class CqlModel {
         }
     }
 
-    public Map<String, CqlKeyspace> getKeyspaces() {
+    public Map<String, CqlKeyspace> getKeyspacesByName() {
         return keyspaces;
     }
 
-    public Map<String, Map<String, CqlTable>> getTablesByKeyspace() {
+    public List<CqlKeyspace> getKeyspaces() {
+        return new ArrayList<>(this.keyspaces.values());
+    }
+
+    public Map<String, Map<String, CqlTable>> getTablesByNameByKeyspace() {
         return tables;
     }
 
-    public List<CqlTable> getAllTables() {
+    public List<CqlTable> getTablesForKeyspace(String ksname) {
+        Map<String, CqlTable> tables = this.tables.get(ksname);
+        if (tables!=null) {
+            return new ArrayList<>(tables.values());
+        }
+    }
+
+    public List<CqlTable> getTables() {
         return tables.values().stream().flatMap(m->m.values().stream()).toList();
     }
 
@@ -88,12 +99,12 @@ public class CqlModel {
         StringBuilder sb = new StringBuilder();
         for (String ks : keyspaces.keySet()) {
             CqlKeyspace keyspace = keyspaces.get(ks);
-            sb.append("keyspace '").append(keyspace.getKeyspaceName()).append("':\n");
+            sb.append("keyspace '").append(keyspace.getName()).append("':\n");
             sb.append(keyspace).append("\n");
 
             tables.getOrDefault(ks,Map.of()).values().stream()
                 .forEach(table -> {
-                    sb.append("table '").append(table.getTableName()).append("':\n");
+                    sb.append("table '").append(table.getName()).append("':\n");
                     sb.append(table);
                 });
         }
@@ -149,6 +160,5 @@ public class CqlModel {
             }
         }
         return list;
-
     }
 }

@@ -28,7 +28,7 @@ public class CqlModelFixup implements Function<CqlModel,CqlModel> {
     @Override
     public CqlModel apply(CqlModel model) {
         List<String> toReplace = model.getTypes().stream().map(t -> t.getKeyspace() + "." + t.getName()).toList();
-        for (CqlTable table : model.getAllTables()) {
+        for (CqlTable table : model.getTables()) {
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
                 String coldefDdl = coldef.getRefddl();
                 for (String searchFor : toReplace) {

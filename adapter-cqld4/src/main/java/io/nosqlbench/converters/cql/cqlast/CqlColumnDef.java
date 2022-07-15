@@ -16,16 +16,17 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 
 import java.util.Map;
 
-public class CqlColumnDef implements Labeled {
+public class CqlColumnDef implements NBNamedElement, Labeled {
     private String refDefinitionDdl;
     private String refTypeDefddl;
     private String table;
     private String keyspace;
-    private final String name;
+    private String name;
     private String type;
 
     public CqlColumnDef(String colname, String typedef, String refColumnDdl) {
@@ -94,5 +95,9 @@ public class CqlColumnDef implements Labeled {
 
     public boolean isCounter() {
         return getTrimmedTypedef().equalsIgnoreCase("counter");
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

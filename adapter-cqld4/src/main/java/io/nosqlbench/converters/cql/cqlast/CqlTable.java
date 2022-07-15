@@ -16,17 +16,23 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CqlTable implements Labeled {
-    String table = "";
+public class CqlTable implements NBNamedElement, Labeled {
+    String name = "";
     String keyspace = "";
     List<CqlColumnDef> coldefs = new ArrayList<>();
-
+    Map<String, String> tableAttributes = new HashMap<String, String>();
+    List<String> partitionKeys = new ArrayList<>();
+    List<String> clusteringColumns = new ArrayList<>();
     private String refddl;
+
+    public CqlTable() {
+    }
 
     public Map<String, String> getTableAttributes() {
         return tableAttributes;
@@ -36,20 +42,12 @@ public class CqlTable implements Labeled {
         this.tableAttributes = tableAttributes;
     }
 
-    Map<String,String> tableAttributes = new HashMap<String,String>();
-
-    List<String> partitionKeys = new ArrayList<>();
-    List<String> clusteringColumns = new ArrayList<>();
-
-    public CqlTable() {
-    }
-
     public void addcolumnDef(CqlColumnDef cqlField) {
         this.coldefs.add(cqlField);
     }
 
-    public void setTable(String tableName) {
-        this.table = tableName;
+    public void setName(String tableName) {
+        this.name = tableName;
         for (CqlColumnDef coldef : coldefs) {
             coldef.setTable(tableName);
         }
@@ -61,10 +59,10 @@ public class CqlTable implements Labeled {
 
     @Override
     public String toString() {
-        return "cql table: '" + this.table + "':\n"
+        return "cql table: '" + this.name + "':\n"
             + this.coldefs.stream()
             .map(Object::toString)
-            .map(s -> "   " +s)
+            .map(s -> "   " + s)
             .collect(Collectors.joining("\n"));
     }
 
@@ -72,12 +70,12 @@ public class CqlTable implements Labeled {
         return this.coldefs;
     }
 
-    public String getTableName() {
-        return this.table;
+    public String getName() {
+        return this.name;
     }
 
     public void setKeyspace(String keyspace) {
-        this.keyspace=keyspace;
+        this.keyspace = keyspace;
         for (CqlColumnDef coldef : coldefs) {
             coldef.setKeyspace(keyspace);
         }
@@ -88,7 +86,7 @@ public class CqlTable implements Labeled {
     }
 
     public void setRefDdl(String refddl) {
-        this.refddl=refddl;
+        this.refddl = refddl;
     }
 
     public String getRefddl() {
@@ -104,7 +102,7 @@ public class CqlTable implements Labeled {
     public Map<String, String> getLabels() {
         return Map.of(
             "keyspace", this.keyspace,
-            "table", this.table
+            "table", this.name
         );
     }
 
@@ -131,7 +129,7 @@ public class CqlTable implements Labeled {
             .findFirst();
         if (!def.isPresent()) {
             throw new RuntimeException("Unable to find column definition in table '" +
-            this.getTableName() + "' for column '" + colname + "'");
+                this.getName() + "' for column '" + colname + "'");
         }
         return def.orElseThrow();
     }
@@ -142,4 +140,5 @@ public class CqlTable implements Labeled {
             .filter(n -> !clusteringColumns.contains(n.getName()))
             .toList();
     }
+
 }

@@ -16,12 +16,13 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CqlKeyspace implements Labeled {
+public class CqlKeyspace implements NBNamedElement, Labeled {
     String keyspaceName= "";
     String refddl;
     private String refReplDdl;
@@ -44,7 +45,7 @@ public class CqlKeyspace implements Labeled {
         this.keyspaceName=name;
     }
 
-    public String getKeyspaceName() {
+    public String getName() {
         return this.keyspaceName;
     }
 
