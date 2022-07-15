@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

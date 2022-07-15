@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
-import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;

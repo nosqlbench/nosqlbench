@@ -18,9 +18,9 @@ package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
-import io.nosqlbench.nb.api.config.params.Element;
-import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.api.config.params.Element;
+import io.nosqlbench.api.config.params.NBParams;
 
 import java.util.*;
 import java.util.ServiceLoader.Provider;

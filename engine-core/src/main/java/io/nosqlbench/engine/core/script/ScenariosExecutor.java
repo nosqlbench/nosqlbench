@@ -20,7 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

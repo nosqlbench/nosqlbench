@@ -18,11 +18,11 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.api.util.Tagged;
-import io.nosqlbench.nb.api.config.params.Element;
-import io.nosqlbench.nb.api.config.params.NBParams;
-import io.nosqlbench.nb.api.config.standard.NBTypeConverter;
-import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.api.engine.util.Tagged;
+import io.nosqlbench.api.config.params.Element;
+import io.nosqlbench.api.config.params.NBParams;
+import io.nosqlbench.api.config.standard.NBTypeConverter;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 
 import java.util.LinkedHashMap;

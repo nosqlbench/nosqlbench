@@ -21,11 +21,11 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.nb.api.config.params.Synonyms;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.content.NBPathsAPI;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.config.params.Synonyms;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.content.NBPathsAPI;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

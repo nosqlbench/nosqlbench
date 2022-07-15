@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nb.api;
 
-import io.nosqlbench.nb.api.metadata.SystemId;
+import io.nosqlbench.api.metadata.SystemId;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

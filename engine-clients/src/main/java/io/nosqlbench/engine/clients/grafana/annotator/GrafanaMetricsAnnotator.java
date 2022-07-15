@@ -16,17 +16,17 @@
 
 package io.nosqlbench.engine.clients.grafana.annotator;
 
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Annotator;
+import io.nosqlbench.api.config.params.ParamsParser;
+import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.OnError;
-import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.annotations.Annotator;
-import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.config.standard.*;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.metadata.SystemId;
+import io.nosqlbench.api.errors.OnError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

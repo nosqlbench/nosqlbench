@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.nb.api.config.params.Synonyms;
+import io.nosqlbench.api.config.params.Synonyms;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

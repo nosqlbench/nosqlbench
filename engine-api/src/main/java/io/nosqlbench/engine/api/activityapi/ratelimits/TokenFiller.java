@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.NBNamedElement;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

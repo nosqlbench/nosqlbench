@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 /**
  * Decorator interface for getting notified when an activities parameters are changed at runtime.

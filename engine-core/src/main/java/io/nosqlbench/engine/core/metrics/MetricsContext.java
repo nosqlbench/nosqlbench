@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import io.nosqlbench.engine.api.activityapi.core.MetricRegistryService;
+import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = MetricRegistryService.class, selector = "metrics-context")

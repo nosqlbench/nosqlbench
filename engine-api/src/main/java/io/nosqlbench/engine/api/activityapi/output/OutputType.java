@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityapi.output;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 
 public interface OutputType {
 

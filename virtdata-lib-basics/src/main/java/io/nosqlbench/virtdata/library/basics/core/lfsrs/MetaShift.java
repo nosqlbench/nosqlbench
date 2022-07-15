@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.library.basics.core.lfsrs;
 
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

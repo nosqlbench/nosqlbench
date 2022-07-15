@@ -25,7 +25,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

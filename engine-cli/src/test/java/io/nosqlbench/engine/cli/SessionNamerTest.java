@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.nb.api.metadata.SessionNamer;
+import io.nosqlbench.api.metadata.SessionNamer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

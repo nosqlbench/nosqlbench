@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.nondeterministic.to_int;
 
-import io.nosqlbench.nb.api.metadata.Indexed;
+import io.nosqlbench.api.metadata.Indexed;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;

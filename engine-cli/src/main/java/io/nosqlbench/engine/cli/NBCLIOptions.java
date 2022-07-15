@@ -17,12 +17,12 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.NBEnvironment;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.logging.NBLogLevel;
+import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.logging.NBLogLevel;
 
 import java.io.File;
 import java.io.IOException;

@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.config.params.ParamsParser;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import io.nosqlbench.virtdata.core.templates.StringBindings;

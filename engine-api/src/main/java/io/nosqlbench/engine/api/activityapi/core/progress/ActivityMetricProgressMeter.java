@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityapi.core.progress;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.api.engine.util.Unit;
 
 import java.time.Instant;
 

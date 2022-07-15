@@ -17,7 +17,7 @@
 package io.nosqlbench.virtdata.core.bindings;
 
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.api.config.standard.NBMapConfigurable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;

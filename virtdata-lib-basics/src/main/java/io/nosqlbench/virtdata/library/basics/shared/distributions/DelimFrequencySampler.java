@@ -23,7 +23,7 @@ package io.nosqlbench.virtdata.library.basics.shared.distributions;
  */
 
 
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;

@@ -16,17 +16,17 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.docapi.Docs;
-import io.nosqlbench.docapi.DocsBinder;
+import io.nosqlbench.api.docsapi.Docs;
+import io.nosqlbench.api.docsapi.DocsBinder;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 
 import java.util.List;
 import java.util.Map;

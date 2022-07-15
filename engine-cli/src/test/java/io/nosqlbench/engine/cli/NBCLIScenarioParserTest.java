@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

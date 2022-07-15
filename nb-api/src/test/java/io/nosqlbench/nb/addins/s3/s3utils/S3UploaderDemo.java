@@ -19,7 +19,7 @@ package io.nosqlbench.nb.addins.s3.s3utils;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import io.nosqlbench.nb.addins.s3.s3urlhandler.S3ClientCache;
+import io.nosqlbench.addins.s3.s3urlhandler.S3ClientCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

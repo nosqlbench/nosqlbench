@@ -20,8 +20,8 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.api.metrics.PeriodicRunnable;
-import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.api.engine.metrics.PeriodicRunnable;
+import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

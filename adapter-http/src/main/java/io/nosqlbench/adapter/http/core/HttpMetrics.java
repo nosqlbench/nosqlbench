@@ -17,8 +17,8 @@
 package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.api.NBNamedElement;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
 public class HttpMetrics implements NBNamedElement {
     private final HttpSpace space;

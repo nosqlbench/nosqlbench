@@ -18,7 +18,7 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import org.junit.jupiter.api.Test;

@@ -26,7 +26,7 @@ import io.nosqlbench.engine.clients.grafana.transfer.*;
 import io.nosqlbench.engine.clients.prometheus.PMatrixData;
 import io.nosqlbench.engine.clients.prometheus.PromQueryResult;
 import io.nosqlbench.engine.clients.prometheus.PromSeriesLookupResult;
-import io.nosqlbench.nb.api.NBEnvironment;
+import io.nosqlbench.api.system.NBEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

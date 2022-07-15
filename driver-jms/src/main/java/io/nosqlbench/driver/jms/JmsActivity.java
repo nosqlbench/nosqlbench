@@ -27,10 +27,10 @@ import io.nosqlbench.driver.jms.util.JmsUtil;
 import io.nosqlbench.driver.jms.util.PulsarConfig;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.Destination;

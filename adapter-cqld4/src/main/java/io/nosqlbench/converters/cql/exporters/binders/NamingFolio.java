@@ -20,7 +20,7 @@ import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
 import io.nosqlbench.converters.cql.exporters.ElementNamer;
-import io.nosqlbench.nb.api.labels.Labeled;
+import io.nosqlbench.api.labels.Labeled;
 
 import java.util.*;
 

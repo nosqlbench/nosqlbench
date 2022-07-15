@@ -16,8 +16,9 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.NBNamedElement;
-import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.api.config.standard.NBConfigurable;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -38,7 +39,7 @@ import java.util.function.BiFunction;
  * interface.
  *
  * Tasks may be evented for updates from the activity params at runtime by implementing
- * the {@link io.nosqlbench.nb.api.config.standard.NBReconfigurable} interface.
+ * the {@link NBReconfigurable} interface.
  */
 public interface DiagTask extends
     BiFunction<Long,Map<String,Object>, Map<String,Object>>,

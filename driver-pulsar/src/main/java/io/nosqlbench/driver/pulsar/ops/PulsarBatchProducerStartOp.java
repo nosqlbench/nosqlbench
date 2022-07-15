@@ -16,7 +16,7 @@
 
 package io.nosqlbench.driver.pulsar.ops;
 
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.pulsar.client.api.*;
 

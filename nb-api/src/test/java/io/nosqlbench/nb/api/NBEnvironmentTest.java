@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api;
 
+import io.nosqlbench.api.system.NBEnvironment;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

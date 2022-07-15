@@ -16,6 +16,8 @@
 
 package io.nosqlbench.nb.api.annotations;
 
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Layer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 
 public interface ResultValueFilterType {
 

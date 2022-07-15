@@ -16,8 +16,9 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.util.SSLKsFactory;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;

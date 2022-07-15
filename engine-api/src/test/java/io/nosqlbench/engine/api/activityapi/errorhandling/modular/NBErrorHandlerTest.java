@@ -21,7 +21,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;

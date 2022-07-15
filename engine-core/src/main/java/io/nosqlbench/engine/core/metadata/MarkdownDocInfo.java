@@ -17,12 +17,12 @@
 package io.nosqlbench.engine.core.metadata;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

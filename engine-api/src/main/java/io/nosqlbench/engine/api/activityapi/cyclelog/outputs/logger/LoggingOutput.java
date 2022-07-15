@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.outputs.logger;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

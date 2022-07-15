@@ -16,7 +16,7 @@
 
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.docapi.DocsBinder;
+import io.nosqlbench.api.docsapi.DocsBinder;
 import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
 
 /**

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
-import io.nosqlbench.nb.api.labels.Labeled;
+import io.nosqlbench.api.labels.Labeled;
 
 import java.util.*;
 import java.util.stream.Collectors;

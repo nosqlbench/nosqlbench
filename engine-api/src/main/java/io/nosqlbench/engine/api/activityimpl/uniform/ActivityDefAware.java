@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 public interface ActivityDefAware {
     void setActivityDef(ActivityDef activiytDef);

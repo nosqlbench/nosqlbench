@@ -27,11 +27,12 @@ import com.datastax.oss.driver.internal.core.loadbalancing.helper.NodeFilterToDi
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
-import io.nosqlbench.engine.api.util.SSLKsFactory;
+import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.api.engine.util.SSLKsFactory;
 import io.nosqlbench.nb.api.config.standard.*;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

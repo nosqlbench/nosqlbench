@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityconfig;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.config.params.Element;
-import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.api.config.params.Element;
+import io.nosqlbench.api.config.params.NBParams;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 

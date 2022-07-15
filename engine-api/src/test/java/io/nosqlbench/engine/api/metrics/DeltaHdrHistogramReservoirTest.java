@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Snapshot;
-import org.junit.jupiter.api.Test;
+import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 
 public class DeltaHdrHistogramReservoirTest {
 

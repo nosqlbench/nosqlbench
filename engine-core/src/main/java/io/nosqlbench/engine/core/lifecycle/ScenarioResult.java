@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.*;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 import org.apache.logging.log4j.LogManager;

@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.type.DataType;
 import com.datastax.oss.protocol.internal.ProtocolConstants;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 
 /**
  * @see <a href="https://github.com/apache/cassandra/blob/bf96367f4d55692017e144980cf17963e31df127/doc/native_protocol_v5.spec">native protocol v5</a>

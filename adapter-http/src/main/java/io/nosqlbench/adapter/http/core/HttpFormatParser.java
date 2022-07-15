@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapter.http.core;
 
-import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.config.params.ParamsParser;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.BindPointParser;
 
 import java.net.URLEncoder;

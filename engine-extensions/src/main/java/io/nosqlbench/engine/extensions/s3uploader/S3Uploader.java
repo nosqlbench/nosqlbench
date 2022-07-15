@@ -21,11 +21,11 @@ import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.MetricRegistry;
-import io.nosqlbench.nb.addins.s3.s3urlhandler.S3ClientCache;
-import io.nosqlbench.nb.addins.s3.s3urlhandler.S3UrlFields;
-import io.nosqlbench.nb.api.NBEnvironment;
-import io.nosqlbench.nb.api.metadata.ScenarioMetadata;
-import io.nosqlbench.nb.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.addins.s3.s3urlhandler.S3ClientCache;
+import io.nosqlbench.addins.s3.s3urlhandler.S3UrlFields;
+import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.api.metadata.ScenarioMetadata;
+import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;

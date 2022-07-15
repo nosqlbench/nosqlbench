@@ -16,10 +16,10 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
-import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.api.config.standard.ConfigModel;
+import io.nosqlbench.api.config.standard.NBConfigModel;
+import io.nosqlbench.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.api.config.standard.Param;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;

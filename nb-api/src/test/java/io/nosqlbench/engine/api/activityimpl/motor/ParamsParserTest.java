@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.motor;
 
-import io.nosqlbench.nb.api.config.params.ParamsParser;
+import io.nosqlbench.api.config.params.ParamsParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

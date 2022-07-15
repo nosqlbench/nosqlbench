@@ -16,7 +16,7 @@
 
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.docapi.DocsBinder;
+import io.nosqlbench.api.docsapi.DocsBinder;
 
 /**
  * At runtime, any instances of this service will be used to find

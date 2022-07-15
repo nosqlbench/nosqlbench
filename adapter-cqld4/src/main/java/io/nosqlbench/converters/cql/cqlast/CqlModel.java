@@ -30,7 +30,9 @@ public class CqlModel {
     transient CqlTable table;
     transient CqlType udt;
 
-
+    public boolean hasStats() {
+        return keyspaces.size()>0 && keyspaces.values().iterator().next().keyspaceAttributes!=null;
+    }
     public CqlModel(Supplier<List<String>> errorSource) {
         this.errors = errorSource;
     }

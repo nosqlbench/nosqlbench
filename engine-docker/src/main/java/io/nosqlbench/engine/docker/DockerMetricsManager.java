@@ -28,8 +28,8 @@ import com.github.dockerjava.api.model.ContainerNetworkSettings;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

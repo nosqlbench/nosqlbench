@@ -16,7 +16,7 @@
 
 package io.nosqlbench.docapi;
 
-import io.nosqlbench.docexporter.BundledMarkdownExporter;
+import io.nosqlbench.api.docsapi.docexporter.BundledMarkdownExporter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle;
 
-import io.nosqlbench.nb.api.metadata.Indexed;
+import io.nosqlbench.api.metadata.Indexed;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -16,10 +16,10 @@
 
 package io.nosqlbench.nb.api.pathutil;
 
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.ResolverForClasspath;
-import io.nosqlbench.nb.api.content.ResolverForFilesystem;
-import io.nosqlbench.nb.api.content.ResolverForURL;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.ResolverForClasspath;
+import io.nosqlbench.api.content.ResolverForFilesystem;
+import io.nosqlbench.api.content.ResolverForURL;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;

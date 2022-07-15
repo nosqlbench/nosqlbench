@@ -17,10 +17,10 @@
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular;
 
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBMapConfigurable;
-import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.api.config.standard.ConfigModel;
+import io.nosqlbench.api.config.standard.NBConfigModel;
+import io.nosqlbench.api.config.standard.NBMapConfigurable;
+import io.nosqlbench.api.config.standard.Param;
 
 import java.util.Map;
 

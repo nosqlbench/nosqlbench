@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;

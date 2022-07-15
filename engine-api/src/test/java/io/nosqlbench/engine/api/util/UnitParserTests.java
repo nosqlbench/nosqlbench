@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.api.engine.util.Unit;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 

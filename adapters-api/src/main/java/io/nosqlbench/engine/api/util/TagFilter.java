@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.util;
 
+import io.nosqlbench.api.engine.util.Tagged;
+
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;

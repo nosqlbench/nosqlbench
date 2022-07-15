@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 /**
  * A MotorDispenser is created for each Activity instance within a scenario.

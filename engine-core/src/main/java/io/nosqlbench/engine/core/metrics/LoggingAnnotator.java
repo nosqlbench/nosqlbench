@@ -16,9 +16,10 @@
 
 package io.nosqlbench.engine.core.metrics;
 
+import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.annotations.Annotator;
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Annotator;
 import io.nosqlbench.nb.api.config.standard.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

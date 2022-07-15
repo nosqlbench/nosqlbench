@@ -16,8 +16,10 @@
 
 package io.nosqlbench.nb.api.markdown.aggregator;
 
-import io.nosqlbench.nb.api.content.PathContent;
-import io.nosqlbench.nb.api.markdown.types.MarkdownInfo;
+import io.nosqlbench.api.content.PathContent;
+import io.nosqlbench.api.markdown.aggregator.MarkdownDocs;
+import io.nosqlbench.api.markdown.aggregator.ParsedMarkdown;
+import io.nosqlbench.api.markdown.types.MarkdownInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

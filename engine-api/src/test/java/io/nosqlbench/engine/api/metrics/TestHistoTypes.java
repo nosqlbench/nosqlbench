@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.Snapshot;
+import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.action;
 
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.ParameterMap;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

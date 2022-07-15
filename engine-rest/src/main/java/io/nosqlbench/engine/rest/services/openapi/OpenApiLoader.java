@@ -18,8 +18,8 @@ package io.nosqlbench.engine.rest.services.openapi;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.logging;
 
-import io.nosqlbench.nb.api.logging.NBLogLevel;
+import io.nosqlbench.api.logging.NBLogLevel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;

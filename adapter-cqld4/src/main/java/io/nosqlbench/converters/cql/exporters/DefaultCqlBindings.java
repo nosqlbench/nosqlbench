@@ -21,8 +21,8 @@ import io.nosqlbench.converters.cql.exporters.binders.Binding;
 import io.nosqlbench.converters.cql.exporters.binders.BindingsLibrary;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 
 import java.io.File;
 import java.io.InputStream;

@@ -17,11 +17,11 @@
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.docsys.DocsysDefaultAppPath;
-import io.nosqlbench.docapi.Docs;
+import io.nosqlbench.api.docsapi.Docs;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.handlers.FavIconHandler;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletRegistration;
 import org.apache.logging.log4j.LogManager;

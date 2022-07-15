@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.engine.api.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.util.Unit;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

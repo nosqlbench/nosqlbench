@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.core.templates;
 
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 
 import java.util.ArrayList;
 import java.util.List;

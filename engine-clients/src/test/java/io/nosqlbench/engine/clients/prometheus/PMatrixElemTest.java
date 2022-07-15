@@ -19,7 +19,7 @@ package io.nosqlbench.engine.clients.prometheus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

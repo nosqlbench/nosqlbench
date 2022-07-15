@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.extensions.histologger;
 
 import com.codahale.metrics.MetricRegistry;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;

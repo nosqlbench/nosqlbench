@@ -16,6 +16,10 @@
 
 package io.nosqlbench.nb.api.content;
 
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.content.NBIORelativizer;
+import io.nosqlbench.api.content.NBPathsAPI;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

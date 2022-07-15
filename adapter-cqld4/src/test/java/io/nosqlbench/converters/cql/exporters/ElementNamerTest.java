@@ -16,7 +16,7 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
-import io.nosqlbench.nb.api.labels.Labeled;
+import io.nosqlbench.api.labels.Labeled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

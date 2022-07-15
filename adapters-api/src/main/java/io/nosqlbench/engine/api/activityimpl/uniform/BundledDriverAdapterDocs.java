@@ -16,12 +16,12 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.docapi.BundledMarkdownManifest;
-import io.nosqlbench.docapi.Docs;
-import io.nosqlbench.docapi.DocsBinder;
+import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.api.docsapi.Docs;
+import io.nosqlbench.api.docsapi.DocsBinder;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 
 import java.util.List;
 

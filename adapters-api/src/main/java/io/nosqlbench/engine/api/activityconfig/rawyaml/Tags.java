@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.util.Tagged;
+import io.nosqlbench.api.engine.util.Tagged;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.testutils.Perf;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.testutils.Perf;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

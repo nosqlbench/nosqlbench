@@ -16,10 +16,9 @@
 package io.nosqlbench.engine.core.script;
 
 import com.codahale.metrics.MetricRegistry;
-import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ActivityProgressIndicator;
@@ -28,11 +27,11 @@ import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.annotations.Layer;
-import io.nosqlbench.nb.api.metadata.ScenarioMetadata;
-import io.nosqlbench.nb.api.metadata.ScenarioMetadataAware;
-import io.nosqlbench.nb.api.metadata.SystemId;
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.metadata.ScenarioMetadata;
+import io.nosqlbench.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.api.metadata.SystemId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.*;

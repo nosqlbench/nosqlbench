@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.library.random;
 
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.DeprecatedFunction;
 import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;

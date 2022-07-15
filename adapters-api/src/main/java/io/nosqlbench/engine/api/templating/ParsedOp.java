@@ -16,14 +16,15 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.standard.NBConfigError;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
-import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
-import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
+import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
@@ -454,7 +455,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      *                     (op fields, op params, activity params)
      * @param <T>          The type of the value to return
      * @return A configuration value
-     * @throws io.nosqlbench.nb.api.config.standard.NBConfigError if the named field is defined dynamically,
+     * @throws NBConfigError if the named field is defined dynamically,
      *                                                            as in this case, it is presumed that the parameter is not supported unless it is defined statically.
      */
     public <T> T getStaticConfigOr(String name, T defaultValue) {

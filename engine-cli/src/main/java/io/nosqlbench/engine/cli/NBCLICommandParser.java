@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 
 import java.security.InvalidParameterException;
 import java.util.*;

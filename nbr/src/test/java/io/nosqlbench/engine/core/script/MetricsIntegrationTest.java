@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.core.script;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.engine.api.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

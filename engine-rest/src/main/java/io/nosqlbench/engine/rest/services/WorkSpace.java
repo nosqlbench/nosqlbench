@@ -21,8 +21,8 @@ import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceItemView;
 import io.nosqlbench.engine.rest.transfertypes.WorkspaceView;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

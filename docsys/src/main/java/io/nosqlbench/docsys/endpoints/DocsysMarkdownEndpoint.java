@@ -16,9 +16,9 @@
 
 package io.nosqlbench.docsys.endpoints;
 
-import io.nosqlbench.docapi.Docs;
-import io.nosqlbench.docapi.DocsBinder;
-import io.nosqlbench.docapi.DocsNameSpace;
+import io.nosqlbench.api.docsapi.Docs;
+import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.api.docsapi.DocsNameSpace;
 import io.nosqlbench.docsys.api.WebServiceObject;
 import io.nosqlbench.docsys.core.DocsysPathLoader;
 import io.nosqlbench.docsys.core.PathWalker;

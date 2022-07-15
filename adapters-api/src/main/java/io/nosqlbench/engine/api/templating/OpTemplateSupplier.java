@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 
 import java.util.List;
 import java.util.Optional;

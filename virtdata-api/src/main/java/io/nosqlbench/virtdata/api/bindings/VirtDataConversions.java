@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.api.bindings;
 
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.errors.BasicError;
 
 import java.lang.reflect.*;
 import java.security.InvalidParameterException;

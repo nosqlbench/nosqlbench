@@ -20,7 +20,7 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
-import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.lifecycle.ShutdownManager;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
 import org.apache.logging.log4j.Logger;

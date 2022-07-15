@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.extensions.files;
 
-import io.nosqlbench.nb.api.content.NBIO;
+import io.nosqlbench.api.content.NBIO;
 
 public class FileAccess {
 

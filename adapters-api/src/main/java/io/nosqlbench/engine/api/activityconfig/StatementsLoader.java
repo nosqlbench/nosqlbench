@@ -20,9 +20,9 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.nb.api.content.Content;
-import io.nosqlbench.nb.api.content.NBIO;
-import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,9 +43,7 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            if (params.containsKey(k)) {
-                 params.remove(k);
-            }
+            params.remove(k);
         });
         return layered;
     }
@@ -61,9 +59,7 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawStmtsDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            if (params.containsKey(k)) {
-                 params.remove(k);
-            }
+            params.remove(k);
         });
         return layered;
     }

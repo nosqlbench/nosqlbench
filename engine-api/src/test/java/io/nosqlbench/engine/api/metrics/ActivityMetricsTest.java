@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

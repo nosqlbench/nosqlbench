@@ -16,6 +16,9 @@
 
 package io.nosqlbench.engine.api.metrics;
 
+import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.api.engine.metrics.HistoIntervalLogger;
+import io.nosqlbench.api.engine.metrics.NicerHistogram;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;

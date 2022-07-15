@@ -59,12 +59,16 @@ public class CQBErrorListener extends BaseErrorListener implements Supplier<List
         boolean inij = System.getProperty("sun.java.command","").toLowerCase(Locale.ROOT).contains("intellij");
         vcwd = inij ? cwd.getParent().normalize() : vcwd;
 
-        Path relpath = vcwd.relativize(srcpath.toAbsolutePath());
+
+        Path path = srcpath.toAbsolutePath();
+        if (vcwd!=null) {
+            path = vcwd.relativize(srcpath.toAbsolutePath());
+        }
 
         if (inij) {
-            relpath = Path.of(relpath.toString().replace("target/classes/","src/main/resources/"));
+            path = Path.of(path.toString().replace("target/classes/","src/main/resources/"));
         }
-        return "\tat (" + relpath + ":" + line+":"+charPositionInLine + ")";
+        return "\tat (" + path + ":" + line+":"+charPositionInLine + ")";
     }
 
     @Override
