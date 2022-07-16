@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters;
+package io.nosqlbench.converters.cql.exporters.transformers;
 
+import io.nosqlbench.converters.cql.exporters.CGKeyspaceStats;
+import io.nosqlbench.converters.cql.exporters.CGSchemaStats;
+import io.nosqlbench.converters.cql.exporters.CGTableStats;
 import org.apache.commons.math4.util.Pair;
 
 import java.io.BufferedReader;
@@ -28,12 +31,12 @@ public class CqlSchemaStatsParser {
     private static final String KEYSPACE = "Keyspace";
     private static final String TABLE = "Table";
 
-    CqlSchemaStats stats = null;
-    CqlKeyspaceStats currentKeyspace = null;
-    CqlTableStats currentTable = null;
+    CGSchemaStats stats = null;
+    CGKeyspaceStats currentKeyspace = null;
+    CGTableStats currentTable = null;
 
-    public CqlSchemaStats parse(Path statspath) throws IOException {
-        this.stats = new CqlSchemaStats();
+    public CGSchemaStats parse(Path statspath) throws IOException {
+        this.stats = new CGSchemaStats();
         BufferedReader reader = Files.newBufferedReader(statspath);
         String currentLine = reader.readLine(); //ignore 1st line
         while((currentLine = reader.readLine()) != null) {
@@ -66,7 +69,7 @@ public class CqlSchemaStatsParser {
     private boolean evalForTable(String currentLine) {
         if (currentLine.startsWith(TABLE)) {
             writeCurrentTable();
-            currentTable = new CqlTableStats();
+            currentTable = new CGTableStats();
             currentTable.setTableName(currentLine.split(":")[1].trim());
             return true;
         }
@@ -77,7 +80,7 @@ public class CqlSchemaStatsParser {
         if (currentLine.startsWith(KEYSPACE)) {
             writeCurrentTable();
             writeCurrentKeyspace();
-            currentKeyspace = new CqlKeyspaceStats();
+            currentKeyspace = new CGKeyspaceStats();
             currentKeyspace.setKeyspaceName(currentLine.split(":")[1].trim());
             currentTable = null;
             return true;

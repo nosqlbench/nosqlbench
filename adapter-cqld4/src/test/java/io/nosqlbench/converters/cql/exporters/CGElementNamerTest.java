@@ -25,30 +25,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-public class ElementNamerTest {
+public class CGElementNamerTest {
 
     @Test
     public void testNonRequiredFields() {
-        ElementNamer namer = new ElementNamer("[ABC---][,deFGH][__IJ__]");
+        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(Map.of())).isEqualTo("");
     }
 
     @Test
     public void testLiteralTweens() {
-        ElementNamer namer = new ElementNamer("[ABC---]!-23[,deFGH])(*&[__IJ__]");
+        CGElementNamer namer = new CGElementNamer("[ABC---]!-23[,deFGH])(*&[__IJ__]");
         assertThat(namer.apply(Map.of("abc","123"))).isEqualTo("123---!-23)(*&");
     }
 
 
     @Test
     public void testPartialFields() {
-        ElementNamer namer = new ElementNamer("[ABC---][,deFGH][__IJ__]");
+        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(Map.of("abc", "base"))).isEqualTo("base---");
     }
 
     @Test
     public void testLabeledFields() {
-        ElementNamer namer = new ElementNamer("[ABC---][,deFGH][__IJ__]");
+        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         Labeled mylabeled = new Labeled() {
             @Override
             public Map<String, String> getLabels() {
@@ -60,7 +60,7 @@ public class ElementNamerTest {
 
     @Test
     public void testCasedSectionName() {
-        ElementNamer namer = new ElementNamer("[ABC---][,deFGH][__IJ__]");
+        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(
             Map.of(
                 "abc", "1111",
@@ -72,7 +72,7 @@ public class ElementNamerTest {
 
     @Test
     public void testRequiredFieldsPresent() {
-        ElementNamer namer = new ElementNamer("[ABC!---!]");
+        CGElementNamer namer = new CGElementNamer("[ABC!---!]");
         Labeled mylabeled = new Labeled() {
             @Override
             public Map<String, String> getLabels() {
@@ -87,7 +87,7 @@ public class ElementNamerTest {
 
     @Test
     public void testRequiredFieldsMissing() {
-        ElementNamer namer = new ElementNamer("[ABC!---!]");
+        CGElementNamer namer = new CGElementNamer("[ABC!---!]");
         Labeled mylabeled = new Labeled() {
             @Override
             public Map<String, String> getLabels() {

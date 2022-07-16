@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ElementNamer implements Function<Map<String, String>, String> {
+public class CGElementNamer implements Function<Map<String, String>, String> {
 
     public final static String _DEFAULT_TEMPLATE = "[PREFIX-][OPTYPE-][KEYSPACE__][TABLE][-DATATYPE]";
 
@@ -41,7 +41,7 @@ public class ElementNamer implements Function<Map<String, String>, String> {
     private final String spec;
     private final List<Function<String, String>> transformers = new ArrayList<>();
 
-    public ElementNamer(String template, List<Function<String,String>> transformers) {
+    public CGElementNamer(String template, List<Function<String,String>> transformers) {
         this.spec = template;
         this.transformers.addAll(transformers);
         Pattern pattern = Pattern.compile("(?<prefix>[^\\]]+)?\\[(?<section>(?<pre>.*?)(?<name>[A-Z]+)(?<required>!)?(?<post>.*?))?]");
@@ -63,11 +63,11 @@ public class ElementNamer implements Function<Map<String, String>, String> {
         }
     }
 
-    public ElementNamer(String template) {
+    public CGElementNamer(String template) {
         this(template, List.of());
     }
 
-    public ElementNamer() {
+    public CGElementNamer() {
         this(_DEFAULT_TEMPLATE, List.of());
     }
 

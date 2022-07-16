@@ -28,6 +28,8 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     private String keyspace;
     private String name;
     private String type;
+    private int position;
+    private ColType coltype;
 
     public CqlColumnDef(String colname, String typedef, String refColumnDdl) {
         this.type = typedef;
@@ -35,7 +37,7 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
         this.refDefinitionDdl = refColumnDdl;
     }
 
-    public String getRefddl() {
+    public String getDefinitionDdl() {
         return refDefinitionDdl;
     }
 

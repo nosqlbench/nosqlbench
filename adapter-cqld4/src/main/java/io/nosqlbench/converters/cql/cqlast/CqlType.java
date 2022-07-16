@@ -27,8 +27,11 @@ public class CqlType implements NBNamedElement {
     private String refddl;
     private final Map<String,String> fields = new LinkedHashMap<>();
 
-    public void setKeyspace(String keyspace) {
-        this.keyspace = keyspace;
+    public void setKeyspace(String newksname) {
+        this.keyspace = newksname;
+        if (refddl!=null) {
+            this.refddl = this.refddl.replaceAll(this.keyspace,newksname);
+        }
     }
     public void setName(String name) {
         this.name = name;
@@ -52,5 +55,9 @@ public class CqlType implements NBNamedElement {
 
     public Map<String, String> getFields() {
         return fields;
+    }
+
+    public String getRefDdl() {
+        return this.refddl;
     }
 }

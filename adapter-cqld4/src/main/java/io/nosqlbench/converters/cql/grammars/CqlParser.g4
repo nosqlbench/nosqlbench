@@ -755,6 +755,7 @@ decimalLiteral
 floatLiteral
    : DECIMAL_LITERAL
    | FLOAT_LITERAL
+   | REAL_LITERAL
    ;
 
 stringLiteral

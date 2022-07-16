@@ -18,14 +18,14 @@ package io.nosqlbench.converters.cql.exporters.transformers;
 
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.converters.cql.exporters.CGTableStats;
 
-import java.util.function.Function;
-
-public class RatioCalculator implements Function<CqlModel,CqlModel> {
+public class CGRatioCalculator implements CGModelTransformer {
 
     @Override
     public CqlModel apply(CqlModel model) {
         if (!model.hasStats()) {
+            // TODO: True this up
             return model;
         }
         double totalReads = 0.0d;
@@ -33,30 +33,34 @@ public class RatioCalculator implements Function<CqlModel,CqlModel> {
         double totalSpace = 0.0d;
         double totalOps=0.0d;
 
-        for (CqlTable table : model.getTables()) {
-            String local_read_count = table.getTableAttributes().get("Local read count");
+        for (CqlTable table : model.getTableDefs()) {
+            CGTableStats tableAttributes = table.getTableAttributes();
+            if (tableAttributes==null) {
+                continue;
+            }
+            String local_read_count = tableAttributes.getAttribute("Local read count");
             double reads = Double.parseDouble(local_read_count);
             totalReads+=reads;
             totalOps+=reads;
 
-            String local_write_count = table.getTableAttributes().get("Local write count");
+            String local_write_count = table.getTableAttributes().getAttribute("Local write count");
             double writes = Double.parseDouble(local_write_count);
             totalWrites += writes;
             totalOps+=writes;
 
-            String space_used_total = table.getTableAttributes().get("Space used (total)");
+            String space_used_total = table.getTableAttributes().getAttribute("Space used (total)");
             double space = Double.parseDouble(space_used_total);
             totalSpace+=space;
         }
 
-        for (CqlTable table : model.getTables()) {
-            double reads = Double.parseDouble(table.getTableAttributes().get("Local read count"));
-            double writes = Double.parseDouble(table.getTableAttributes().get("Local write count"));
+        for (CqlTable table : model.getTableDefs()) {
+            double reads = Double.parseDouble(table.getTableAttributes().getAttribute("Local read count"));
+            double writes = Double.parseDouble(table.getTableAttributes().getAttribute("Local write count"));
 
-            table.getTableAttributes().put("weighted_reads", String.valueOf(reads / totalOps));
-            table.getTableAttributes().put("weighted_writes", String.valueOf(writes / totalOps));
+            table.getTableAttributes().setAttribute("weighted_reads", String.valueOf(reads / totalOps));
+            table.getTableAttributes().setAttribute("weighted_writes", String.valueOf(writes / totalOps));
 
-            table.getTableAttributes().put("weighted_space", String.valueOf(Double.parseDouble(table.getTableAttributes().get("Space used (total)")) / totalReads));
+            table.getTableAttributes().setAttribute("weighted_space", String.valueOf(Double.parseDouble(table.getTableAttributes().getAttribute("Space used (total)")) / totalReads));
         }
 
         return model;

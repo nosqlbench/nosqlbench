@@ -18,31 +18,24 @@ package io.nosqlbench.converters.cql.cqlast;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.converters.cql.exporters.CGKeyspaceStats;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class CqlKeyspace implements NBNamedElement, Labeled {
     String keyspaceName= "";
     String refddl;
     private String refReplDdl;
-    Map<String,String> keyspaceAttributes = new HashMap<String,String>();
-
-    public Map<String, String> getKeyspaceAttributes() {
-        return keyspaceAttributes;
-    }
-
-    public void setKeyspaceAttributes(Map<String, String> keyspaceAttributes) {
-        this.keyspaceAttributes = keyspaceAttributes;
-    }
-
-
+    CGKeyspaceStats stats;
 
     public CqlKeyspace() {
     }
 
-    public void setKeyspaceName(String name) {
-        this.keyspaceName=name;
+    public void setKeyspaceName(String newname) {
+        if (this.refddl!=null) {
+            this.refddl = refddl.replaceAll(this.keyspaceName, newname);
+        }
+        this.keyspaceName=newname;
     }
 
     public String getName() {
@@ -72,11 +65,23 @@ public class CqlKeyspace implements NBNamedElement, Labeled {
         );
     }
 
-    public void setRefReplDdl(String refReplDdl) {
-        this.refReplDdl=refReplDdl;
+    public void setRefReplDdl(String newRefReplDdl) {
+        if (this.refddl!=null) {
+            this.refddl=this.refddl.replaceAll(this.refReplDdl,newRefReplDdl);
+        }
+        this.refReplDdl=newRefReplDdl;
     }
 
     public String getRefDdlWithReplFields(String replFields) {
-        return refddl.replace(refReplDdl,replFields);
+        refddl.replace(refReplDdl,replFields);
+        return refddl;
+    }
+
+    public String getReplRefDdl() {
+        return this.refReplDdl;
+    }
+
+    public void setStats(CGKeyspaceStats ksstats) {
+        this.stats=ksstats;
     }
 }

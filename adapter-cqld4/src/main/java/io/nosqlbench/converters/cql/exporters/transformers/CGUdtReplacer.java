@@ -21,23 +21,22 @@ import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
 
 import java.util.List;
-import java.util.function.Function;
 
-public class CqlModelFixup implements Function<CqlModel,CqlModel> {
+public class CGUdtReplacer implements CGModelTransformer {
 
     @Override
     public CqlModel apply(CqlModel model) {
         List<String> toReplace = model.getTypes().stream().map(t -> t.getKeyspace() + "." + t.getName()).toList();
-        for (CqlTable table : model.getTables()) {
+        for (CqlTable table : model.getTableDefs()) {
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
-                String coldefDdl = coldef.getRefddl();
+                String coldefDdl = coldef.getDefinitionDdl();
                 for (String searchFor : toReplace) {
                     if (coldefDdl.contains(searchFor)) {
                         String typedef = coldef.getType();
                         coldef.setType("blob");
-                        String replaced = coldef.getRefddl().replace(typedef, "blob");
+                        String replaced = coldef.getDefinitionDdl().replace(typedef, "blob");
                         coldef.setDefinitionRefDdl(replaced);
-                        table.setRefDdl(table.getRefddl().replace(typedef,"blob"));
+                        table.setRefDdl(table.getRefDdl().replace(typedef,"blob"));
                     }
                 }
             }

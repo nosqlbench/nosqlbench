@@ -1,0 +1,59 @@
+text_transformers:
+  - class: CGRegexReplacer
+    config:
+      replacers:
+        - /a/b/
+
+model_transformers:
+
+  # filters in or out keyspaces
+  - class: CGKeyspaceFilter
+    config:
+      include:
+        - dba_info
+        - vzw_order
+        - mcs_or_prod
+        - prod_parallel_test
+        - vzw_common
+        - vzw_soe
+
+  # replaces the replication settings with the provided values here,
+  # specifed as a text block to be put inside the curly braces
+  - class: CGReplicationSettingInjector
+    config:
+      replication_fields: |
+        'class': 'SimpleStrategy',
+        'replication_factor': 'TEMPLATE(rf:1)'
+
+# This is more appropriately handled in the scenario selections, which now
+# contain all or partial schema blocks
+#  # Removes Keyspace DDL statements
+#  - class: CGKeySpaceDDLRemover
+
+  # Adds IF NOT EXIST to all DDL
+  - class: CGIfNotExistsInjector
+
+  # Replaces UDTs with blobs until we have full UDT generation capability
+  - class: CGUdtReplacer
+
+  # Reads a configured file path containing nodetool histogram stats output
+  - class: CGGenStatsInjector
+    config:
+      path: histogram
+
+  # Uses nodetool histogram stats to weight reads and writes over all ops
+  - class: CGRatioCalculator
+
+# This needs support of the AST, without relying on the refddl text images
+# In other words, it doesn't work reliably with the substitution methods
+# Don't enable it until the next revision
+#  # replaces names of keyspaces, tables, and columns with generated values
+#  - class: CGNameObfuscator
+
+naming_template: "[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]"
+
+partition_multiplier: 30
+
+
+
+

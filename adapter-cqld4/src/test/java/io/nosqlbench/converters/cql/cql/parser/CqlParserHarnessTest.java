@@ -16,13 +16,13 @@
 
 package io.nosqlbench.converters.cql.cql.parser;
 
-import io.nosqlbench.converters.cql.exporters.CqlWorkloadExporter;
+import io.nosqlbench.converters.cql.exporters.CGWorkloadExporter;
+import io.nosqlbench.converters.cql.exporters.transformers.CGTransformersInit;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -47,7 +47,8 @@ public class CqlParserHarnessTest {
 
     @Test
     public void testAllTypes() {
-        CqlWorkloadExporter exporter = new CqlWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"), List.of());
+        CGWorkloadExporter exporter = new CGWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"), new CGTransformersInit());
+        exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]");
         var data = exporter.getWorkloadAsYaml();
 
     }
@@ -55,7 +56,7 @@ public class CqlParserHarnessTest {
     @Disabled
     @Test
     public void testGenBasicWorkload() {
-        CqlWorkloadExporter exporter = new CqlWorkloadExporter(ddl, List.of());
+        CGWorkloadExporter exporter = new CGWorkloadExporter(ddl, new CGTransformersInit());
         assertThatThrownBy(() ->  exporter.getWorkloadAsYaml()).isInstanceOf(RuntimeException.class);
     }
 

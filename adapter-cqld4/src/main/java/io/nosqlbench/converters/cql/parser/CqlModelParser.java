@@ -16,7 +16,7 @@
 
 package io.nosqlbench.converters.cql.parser;
 
-import io.nosqlbench.converters.cql.cqlast.CQBErrorListener;
+import io.nosqlbench.converters.cql.cqlast.CGErrorListener;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlModelBuilder;
 import io.nosqlbench.converters.cql.cqlast.CqlType;
@@ -41,7 +41,11 @@ public class CqlModelParser {
     public static CqlModel parse(Path path) {
         try {
             String ddl = Files.readString(path);
-            return parse(ddl, path);
+            logger.info("read " + ddl.length() + " character DDL file, parsing");
+            CqlModel parsed = parse(ddl, path);
+            logger.info("parsed cql model: " + parsed.getSummaryLine());
+            return parsed;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +64,7 @@ public class CqlModelParser {
 
         try {
             CodePointCharStream cstream = CharStreams.fromString(input);
-            CQBErrorListener errorListener = new CQBErrorListener(origin);
+            CGErrorListener errorListener = new CGErrorListener(origin);
 
             CqlLexer lexer = new CqlLexer(cstream);
             CommonTokenStream tokens = new CommonTokenStream(lexer);

@@ -227,7 +227,7 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         if (args.length > 0 && args[0].toLowerCase().equals("cqlgen")) {
-            String exporterImpl = "io.nosqlbench.converters.cql.exporters.CqlWorkloadExporter";
+            String exporterImpl = "io.nosqlbench.converters.cql.exporters.CGWorkloadExporter";
             String[] exporterArgs = Arrays.copyOfRange(args, 1, args.length);
             try {
                 Class<?> genclass = Class.forName(exporterImpl);

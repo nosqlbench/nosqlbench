@@ -28,12 +28,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-public class CQBErrorListener extends BaseErrorListener implements Supplier<List<String>> {
+public class CGErrorListener extends BaseErrorListener implements Supplier<List<String>> {
     List<String> errors = new ArrayList<>();
 
     private final Path origin;
 
-    public CQBErrorListener(Path origin) {
+    public CGErrorListener(Path origin) {
         this.origin = origin;
     }
 

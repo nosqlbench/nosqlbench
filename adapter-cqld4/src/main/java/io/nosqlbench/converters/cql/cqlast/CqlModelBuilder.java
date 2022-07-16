@@ -22,17 +22,28 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class CqlModelBuilder extends CqlParserBaseListener {
+    private final static Logger logger = LogManager.getLogger(CqlModelBuilder.class);
 
-    private final CQBErrorListener errorListener;
+    private final CGErrorListener errorListener;
     private final CqlModel model;
+    private long counted;
 
-    public CqlModelBuilder(CQBErrorListener errorListener) {
+    public CqlModelBuilder(CGErrorListener errorListener) {
         this.errorListener = errorListener;
         this.model = new CqlModel(errorListener);
+    }
+
+    @Override
+    public void exitEveryRule(ParserRuleContext ctx) {
+        if ((counted++&0b11111111111111)==0b10000000000000) {
+            logger.trace("parsed " + counted + " elements...");
+        }
     }
 
     @Override
@@ -40,8 +51,8 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         System.out.println("error parsing: " + node.toString());
         ParseTree parent = node.getParent();
         String errorNodeType = parent.getClass().getSimpleName();
-        System.out.println("error type: " + errorNodeType);
-        System.out.println("source interval: " + node.getSourceInterval());
+//        System.out.println("error type: " + errorNodeType);
+//        System.out.println("source interval: " + node.getSourceInterval());
 
         super.visitErrorNode(node);
     }

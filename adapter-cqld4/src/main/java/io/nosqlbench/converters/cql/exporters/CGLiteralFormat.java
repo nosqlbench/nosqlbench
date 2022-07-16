@@ -22,7 +22,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
-public enum CqlLiteralFormat {
+public enum CGLiteralFormat {
     TEXT(v -> "\""+v+"\""),
     ASCII(v -> "\""+v+"\""),
     VARCHAR(v -> "\""+v+"\""),
@@ -42,23 +42,23 @@ public enum CqlLiteralFormat {
     VARINT;
 
     private final Function<String, String> literalFormat;
-    CqlLiteralFormat() {
+    CGLiteralFormat() {
         this.literalFormat=v->v;
     }
-    CqlLiteralFormat(Function<String,String> modifier) {
+    CGLiteralFormat(Function<String,String> modifier) {
         this.literalFormat = modifier;
     }
 
     public static String formatBindType(CqlColumnDef cd, String valueref) {
-        return CqlLiteralFormat.valueOfCqlType(cd.getTrimmedTypedef()).orElse(CqlLiteralFormat.UNKNOWN).format(valueref);
+        return CGLiteralFormat.valueOfCqlType(cd.getTrimmedTypedef()).orElse(CGLiteralFormat.UNKNOWN).format(valueref);
     }
 
     public String format(String value) {
         return this.literalFormat.apply(value);
     }
 
-    public static Optional<CqlLiteralFormat> valueOfCqlType(String typename) {
-        for (CqlLiteralFormat value : CqlLiteralFormat.values()) {
+    public static Optional<CGLiteralFormat> valueOfCqlType(String typename) {
+        for (CGLiteralFormat value : CGLiteralFormat.values()) {
             if (typename.toUpperCase(Locale.ROOT).equals(value.toString().toUpperCase(Locale.ROOT))) {
                 return Optional.of(value);
             }

@@ -18,15 +18,20 @@ package io.nosqlbench.converters.cql.cqlast;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.converters.cql.exporters.CGTableStats;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CqlTable implements NBNamedElement, Labeled {
     String name = "";
     String keyspace = "";
     List<CqlColumnDef> coldefs = new ArrayList<>();
-    Map<String, String> tableAttributes = new HashMap<String, String>();
+    CGTableStats tableAttributes = null;
     List<String> partitionKeys = new ArrayList<>();
     List<String> clusteringColumns = new ArrayList<>();
     private String refddl;
@@ -34,11 +39,11 @@ public class CqlTable implements NBNamedElement, Labeled {
     public CqlTable() {
     }
 
-    public Map<String, String> getTableAttributes() {
+    public CGTableStats getTableAttributes() {
         return tableAttributes;
     }
 
-    public void setTableAttributes(Map<String, String> tableAttributes) {
+    public void setTableAttributes(CGTableStats tableAttributes) {
         this.tableAttributes = tableAttributes;
     }
 
@@ -74,11 +79,18 @@ public class CqlTable implements NBNamedElement, Labeled {
         return this.name;
     }
 
-    public void setKeyspace(String keyspace) {
-        this.keyspace = keyspace;
+    public void setKeyspace(String newKsName) {
         for (CqlColumnDef coldef : coldefs) {
             coldef.setKeyspace(keyspace);
+            if (coldef.getDefinitionDdl()!=null) {
+                coldef.setDefinitionRefDdl(coldef.getDefinitionDdl().replaceAll(keyspace,newKsName));
+            }
         }
+        if (this.refddl!=null) {
+            this.refddl = this.refddl.replaceAll(this.keyspace,newKsName);
+        }
+        this.keyspace = newKsName;
+
     }
 
     public String getRefDdl() {
@@ -87,10 +99,6 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public void setRefDdl(String refddl) {
         this.refddl = refddl;
-    }
-
-    public String getRefddl() {
-        return refddl;
     }
 
 
@@ -132,6 +140,13 @@ public class CqlTable implements NBNamedElement, Labeled {
                 this.getName() + "' for column '" + colname + "'");
         }
         return def.orElseThrow();
+    }
+
+    public void renameColumns(Function<String,String> renamer) {
+        for (CqlColumnDef coldef : coldefs) {
+            coldef.setName(renamer.apply(coldef.getName()));
+        }
+
     }
 
     public List<CqlColumnDef> getNonKeyColumnDefinitions() {

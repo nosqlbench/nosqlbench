@@ -219,7 +219,7 @@ fragment HEX_DIGIT: [0-9A-F];
 
 fragment DEC_DIGIT: [0-9];
 
-fragment EXPONENT_NUM_PART: 'E' '-'? DEC_DIGIT+;
+fragment EXPONENT_NUM_PART: 'E' ('-'|'+') ? DEC_DIGIT+;
 
 
 

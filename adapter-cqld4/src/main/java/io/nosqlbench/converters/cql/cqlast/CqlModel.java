@@ -16,23 +16,93 @@
 
 package io.nosqlbench.converters.cql.cqlast;
 
+import io.nosqlbench.converters.cql.exporters.CGKeyspaceStats;
+import io.nosqlbench.converters.cql.exporters.CGSchemaStats;
+import io.nosqlbench.converters.cql.exporters.CGTableStats;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * This model contains definition level details for schema elements which are parsed from the
+ * Antlr4 CQL grammar.
+ * Because keyspace, table, column, and type elements are handled sometimes in different ways,
+ * these are stored in separate data structures.
+ * When you see a *refddl or similar field, this is a copy of the text image from the original
+ * parsed syntax. These are used for populating schema blocks without doing a full parse.
+ * If you update either the refddl or the actual AST level elements for any of the types in this
+ * model, you are required to update the other version along with it, using string substitution
+ * if necessary.
+ */
 public class CqlModel {
+    private final static Logger logger = LogManager.getLogger(CqlModel.class);
 
     private final Supplier<List<String>> errors;
-    Map<String, CqlKeyspace> keyspaces = new LinkedHashMap<>();
-    Map<String, Map<String, CqlTable>> tables = new LinkedHashMap<>();
+    Map<String, CqlKeyspace> keyspaceDefs = new LinkedHashMap<>();
+    Map<String, Map<String, CqlTable>> tableDefs = new LinkedHashMap<>();
     Map<String, Map<String, CqlType>> types = new LinkedHashMap<>();
+
+   CGSchemaStats schemaStats = null;
+
+    public CGSchemaStats getKeyspaceAttributes() {
+        return schemaStats;
+    }
+
+    public void setKeyspaceAttributes(CGSchemaStats schemaStats) {
+        this.schemaStats = schemaStats;
+        for (String statsKeyspacename : schemaStats.getKeyspaces().keySet()) {
+            CGKeyspaceStats keyspaceStats = schemaStats.getKeyspace(statsKeyspacename);
+            if (keyspaceDefs.containsKey(statsKeyspacename)) {
+                logger.debug("setting         keyspace stats for '" + statsKeyspacename + "'");
+                keyspaceDefs.get(statsKeyspacename).setStats(keyspaceStats);
+            } else {
+                logger.debug("       skipping keyspace stats for '" + statsKeyspacename + "'");
+            }
+
+            for (String statsTableName : keyspaceStats.getKeyspaceTables().keySet()) {
+                CGTableStats tableStats = keyspaceStats.getKeyspaceTables().get(statsTableName);
+                Map<String, CqlTable> modelTables = tableDefs.get(statsKeyspacename);
+                if (modelTables!=null) {
+                    CqlTable modelTable = modelTables.get(statsTableName);
+                    if (modelTable!=null) {
+                        logger.debug("setting table stats for '" + statsKeyspacename+"."+statsTableName+"'");
+                        modelTable.setTableAttributes(tableStats);
+                    } else {
+                        logger.debug("       skipping table stats for '" + statsKeyspacename + "."+statsTableName+"'");
+                    }
+                } else {
+                    logger.debug("       SKIPPING stats for all tables in keyspace '" + statsKeyspacename + "'");
+                }
+            }
+        }
+//        schemaStats.getKeyspaces().forEach((ksname, ksstats) -> {
+//            CqlKeyspace modelKs = getKeyspacesByName().get(ksname);
+//            if (modelKs!=null) {
+//                modelKs.setStats(ksstats);
+//                ksstats.getKeyspaceTables().forEach((tbname, tbstats) -> {
+//                    Map<String, CqlTable> tabledefs = tableDefs.get(ksname);
+//                    if (tabledefs!=null) {
+//                        for (CqlTable tabledef : tabledefs.values()) {
+//                            tabledef.setTableAttributes(tbstats);
+//                        }
+//                    }
+//                });
+//
+//            }
+//        });
+
+    }
 
     transient CqlKeyspace keyspace = null;
     transient CqlTable table;
     transient CqlType udt;
 
     public boolean hasStats() {
-        return keyspaces.size()>0 && keyspaces.values().iterator().next().getKeyspaceAttributes().size()!=0;
+        return schemaStats!=null;
     }
+
     public CqlModel(Supplier<List<String>> errorSource) {
         this.errors = errorSource;
     }
@@ -48,7 +118,7 @@ public class CqlModel {
     public void saveKeyspace(String text,String refddl) {
         keyspace.setKeyspaceName(text);
         keyspace.setRefDdl(refddl);
-        this.keyspaces.put(text, keyspace);
+        this.keyspaceDefs.put(text, keyspace);
         keyspace=null;
     }
 
@@ -60,7 +130,7 @@ public class CqlModel {
         table.setKeyspace(keyspace);
         table.setName(text);
         table.setRefDdl(refddl);
-        this.tables.computeIfAbsent(keyspace, ks->new LinkedHashMap<>()).put(text, table);
+        this.tableDefs.computeIfAbsent(keyspace, ks->new LinkedHashMap<>()).put(text, table);
         table = null;
     }
 
@@ -72,37 +142,38 @@ public class CqlModel {
     }
 
     public Map<String, CqlKeyspace> getKeyspacesByName() {
-        return keyspaces;
+        return keyspaceDefs;
     }
 
-    public List<CqlKeyspace> getKeyspaces() {
-        return new ArrayList<>(this.keyspaces.values());
+    public List<CqlKeyspace> getKeyspaceDefs() {
+        return new ArrayList<>(this.keyspaceDefs.values());
     }
 
     public Map<String, Map<String, CqlTable>> getTablesByNameByKeyspace() {
-        return tables;
+        return tableDefs;
     }
 
     public List<CqlTable> getTablesForKeyspace(String ksname) {
-        Map<String, CqlTable> tables = this.tables.get(ksname);
+        Map<String, CqlTable> tables = this.tableDefs.get(ksname);
         if (tables!=null) {
             return new ArrayList<>(tables.values());
         }
+        return List.of();
     }
 
-    public List<CqlTable> getTables() {
-        return tables.values().stream().flatMap(m->m.values().stream()).toList();
+    public List<CqlTable> getTableDefs() {
+        return tableDefs.values().stream().flatMap(m->m.values().stream()).toList();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (String ks : keyspaces.keySet()) {
-            CqlKeyspace keyspace = keyspaces.get(ks);
+        for (String ks : keyspaceDefs.keySet()) {
+            CqlKeyspace keyspace = keyspaceDefs.get(ks);
             sb.append("keyspace '").append(keyspace.getName()).append("':\n");
             sb.append(keyspace).append("\n");
 
-            tables.getOrDefault(ks,Map.of()).values().stream()
+            tableDefs.getOrDefault(ks,Map.of()).values().stream()
                 .forEach(table -> {
                     sb.append("table '").append(table.getName()).append("':\n");
                     sb.append(table);
@@ -118,8 +189,8 @@ public class CqlModel {
      */
     public Set<String> getAllKnownKeyspaceNames() {
         Set<String> ksnames = new LinkedHashSet<>();
-        ksnames.addAll(this.keyspaces.keySet());
-        ksnames.addAll(this.tables.keySet());
+        ksnames.addAll(this.keyspaceDefs.keySet());
+        ksnames.addAll(this.tableDefs.keySet());
         return ksnames;
     }
 
@@ -160,5 +231,63 @@ public class CqlModel {
             }
         }
         return list;
+    }
+
+    public void removeKeyspaceDef(String ksname) {
+        this.keyspaceDefs.remove(ksname);
+    }
+
+    public void removeTablesForKeyspace(String ksname) {
+        this.tableDefs.remove(ksname);
+    }
+
+    public void removeTypesForKeyspace(String name) {
+        this.types.remove(name);
+    }
+
+    public String getSummaryLine() {
+        return "keyspaces: " + keyspaceDefs.size() + ", tables: " + getTableDefs().size()  +
+            ", columns: " + getTableDefs().stream().mapToInt(t -> t.getColumnDefinitions().size()).sum() +
+            ", types: " + getTypes().size();
+    }
+
+    public void renamekeyspace(String keyspaceName, String newKeyspaceName) {
+        if (this.keyspaceDefs.containsKey(keyspaceName)) {
+            CqlKeyspace keyspace = this.keyspaceDefs.remove(keyspaceName);
+            keyspace.setKeyspaceName(newKeyspaceName);
+            this.keyspaceDefs.put(newKeyspaceName, keyspace);
+        }
+        if (this.tableDefs.containsKey(keyspaceName)) {
+            Map<String, CqlTable> tablesForKeyspace = this.tableDefs.remove(keyspaceName);
+            if (tablesForKeyspace!=null) {
+                for (CqlTable table : tablesForKeyspace.values()) {
+                    table.setKeyspace(newKeyspaceName);
+                }
+            }
+            this.tableDefs.put(newKeyspaceName, tablesForKeyspace);
+        }
+        if (this.types.containsKey(keyspaceName)) {
+            Map<String, CqlType> typesForKeyspace = this.types.remove(keyspaceName);
+            if (typesForKeyspace!=null) {
+                for (CqlType cqltype : typesForKeyspace.values()) {
+                    cqltype.setKeyspace(newKeyspaceName);
+                }
+            }
+            this.types.put(newKeyspaceName,typesForKeyspace);
+        }
+    }
+
+    public void renameTable(String keyspaceName, String tableName, String newTableName) {
+        Map<String, CqlTable> tablesInKeyspace = tableDefs.get(keyspaceName);
+        CqlTable table = tablesInKeyspace.remove(tableName);
+        table.setName(newTableName);
+        tablesInKeyspace.put(newTableName,table);
+    }
+
+    public void renameType(String keyspaceName, String typeName, String newTypeName) {
+        Map<String,CqlType> typesInKeyspace = types.get(keyspaceName);
+        CqlType cqlType = typesInKeyspace.remove(typeName);
+        cqlType.setName(newTypeName);
+        typesInKeyspace.put(newTypeName,cqlType);
     }
 }

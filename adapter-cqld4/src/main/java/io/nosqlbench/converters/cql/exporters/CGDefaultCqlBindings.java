@@ -29,11 +29,11 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
-public class DefaultCqlBindings implements BindingsLibrary {
+public class CGDefaultCqlBindings implements BindingsLibrary {
 
     private final Map<String, String> bindings;
 
-    public DefaultCqlBindings() {
+    public CGDefaultCqlBindings() {
         String yamlContent = NBIO.all()
             .name("bindings")
             .extension("yaml", "yml")

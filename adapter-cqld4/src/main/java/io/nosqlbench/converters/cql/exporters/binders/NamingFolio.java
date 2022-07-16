@@ -19,7 +19,7 @@ package io.nosqlbench.converters.cql.exporters.binders;
 import io.nosqlbench.converters.cql.cqlast.CqlColumnDef;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
-import io.nosqlbench.converters.cql.exporters.ElementNamer;
+import io.nosqlbench.converters.cql.exporters.CGElementNamer;
 import io.nosqlbench.api.labels.Labeled;
 
 import java.util.*;
@@ -41,19 +41,19 @@ import java.util.*;
 public class NamingFolio {
 
     private final Map<String, Labeled> graph = new LinkedHashMap<>();
-    private final ElementNamer namer;
+    private final CGElementNamer namer;
     public final static String DEFAULT_NAMER_SPEC = "[COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
     NamingStyle namingStyle = NamingStyle.SymbolicType;
 
     public NamingFolio(String namerspec) {
-        this.namer = new ElementNamer(
+        this.namer = new CGElementNamer(
             namerspec,
             List.of(s -> s.toLowerCase().replaceAll("[^a-zA-Z0-9_-]", ""))
         );
     }
 
     public NamingFolio() {
-        this.namer = new ElementNamer(DEFAULT_NAMER_SPEC);
+        this.namer = new CGElementNamer(DEFAULT_NAMER_SPEC);
     }
 
     public void addFieldRef(Map<String, String> labels) {
@@ -76,8 +76,8 @@ public class NamingFolio {
     }
 
 
-    public void populate(CqlModel model) {
-        for (CqlTable table : model.getTables()) {
+    public void informNamerOfAllKnownNames(CqlModel model) {
+        for (CqlTable table : model.getTableDefs()) {
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
                 addFieldRef(coldef.getLabels());
             }

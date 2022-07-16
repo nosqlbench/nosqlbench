@@ -19,12 +19,12 @@ package io.nosqlbench.converters.cql.exporters;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CqlKeyspaceStats {
+public class CGKeyspaceStats {
     String keyspaceName;
 
     Map<String,String> keyspaceAttributes = new HashMap<String,String>();
 
-    Map<String, CqlTableStats> keyspaceTables = new HashMap<String, CqlTableStats>();
+    Map<String, CGTableStats> keyspaceTables = new HashMap<String, CGTableStats>();
     public String getKeyspaceName() {
         return keyspaceName;
     }
@@ -49,19 +49,19 @@ public class CqlKeyspaceStats {
         this.keyspaceAttributes.put(attributeName, attributeVal);
     }
 
-    public Map<String, CqlTableStats> getKeyspaceTables() {
+    public Map<String, CGTableStats> getKeyspaceTables() {
         return keyspaceTables;
     }
 
-    public CqlTableStats getKeyspaceTable(String tableName) {
+    public CGTableStats getKeyspaceTable(String tableName) {
         return keyspaceTables.get(tableName);
     }
 
-    public void setKeyspaceTables(Map<String, CqlTableStats> keyspaceTables) {
+    public void setKeyspaceTables(Map<String, CGTableStats> keyspaceTables) {
         this.keyspaceTables = keyspaceTables;
     }
 
-    public void setKeyspaceTable(String tableName, CqlTableStats tableAttributes) {
+    public void setKeyspaceTable(String tableName, CGTableStats tableAttributes) {
         this.keyspaceTables.put(tableName, tableAttributes);
     }
 

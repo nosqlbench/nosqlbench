@@ -19,33 +19,23 @@ package io.nosqlbench.converters.cql.exporters;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CqlTableStats {
-    String tableName;
+public class CGSchemaStats {
+    Map<String, CGKeyspaceStats> keyspaces = new HashMap<String, CGKeyspaceStats>();
 
-    Map<String,String> attributes = new HashMap<String,String>();
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public Map<String, CGKeyspaceStats> getKeyspaces() {
+        return keyspaces;
     }
 
-    public String getTableName() {
-        return tableName;
+    public void setKeyspaces(Map<String, CGKeyspaceStats> keyspaces) {
+        this.keyspaces = keyspaces;
     }
 
-    public Map<String, String> getAttributes() {
-        return attributes;
+    public CGKeyspaceStats getKeyspace(String keyspaceName) {
+        return keyspaces.get(keyspaceName);
     }
 
-    public String getAttribute(String attributeName) {
-        return attributes.get(attributeName);
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-    }
-
-    public void setAttribute(String attributeName, String attributeVal) {
-        attributes.put(attributeName, attributeVal);
+    public void setKeyspace(CGKeyspaceStats keyspace) {
+        this.keyspaces.put(keyspace.getKeyspaceName(), keyspace);
     }
 
 }
