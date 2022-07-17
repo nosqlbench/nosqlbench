@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 
 public class CGCachingNameRemapper {
-    private final LongFunction<String> namefunc;
+    private LongFunction<String> namefunc;
     private final Map<String,String> remapped = new HashMap<>();
     private long index=0;
 
@@ -56,5 +56,9 @@ public class CGCachingNameRemapper {
 
     public Function<String, String> mapperForType(Labeled cqlTable, String prefix) {
         return in -> this.nameForType(cqlTable.getClass().getSimpleName(),in, prefix);
+    }
+
+    public void setNamingFunction(LongFunction<String> namerFunc) {
+        this.namefunc = namerFunc;
     }
 }

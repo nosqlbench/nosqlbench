@@ -42,7 +42,7 @@ public class CqlModelParser {
         try {
             String ddl = Files.readString(path);
             logger.info("read " + ddl.length() + " character DDL file, parsing");
-            CqlModel parsed = parse(ddl, path);
+            CqlModel parsed = parse(ddl, null);
             logger.info("parsed cql model: " + parsed.getSummaryLine());
             return parsed;
 
@@ -61,7 +61,6 @@ public class CqlModelParser {
     }
 
     public static CqlModel parse(String input, Path origin) {
-
         try {
             CodePointCharStream cstream = CharStreams.fromString(input);
             CGErrorListener errorListener = new CGErrorListener(origin);
@@ -91,7 +90,4 @@ public class CqlModelParser {
         }
     }
 
-    public static void parse(String ddl) {
-        parse(ddl,null);
-    }
 }

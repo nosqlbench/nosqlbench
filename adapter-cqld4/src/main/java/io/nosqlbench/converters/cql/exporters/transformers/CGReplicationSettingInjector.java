@@ -21,7 +21,7 @@ import io.nosqlbench.converters.cql.cqlast.CqlModel;
 
 import java.util.Map;
 
-public class CGReplicationSettingInjector implements CGModelTransformer, CGTransformerConfigType {
+public class CGReplicationSettingInjector implements CGModelTransformer, CGTransformerConfigurable {
     private String replicationFields;
 
     @Override

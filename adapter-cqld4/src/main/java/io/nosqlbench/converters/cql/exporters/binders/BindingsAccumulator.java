@@ -79,6 +79,9 @@ public class BindingsAccumulator {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> binding = library.resolveBindingsFor(def);
             if (binding.isPresent()) {
+                if (binding.get().getRecipe()==null) {
+                    throw new RuntimeException("Binding returned from library " + library + "' was null, for def '" + def + "'");
+                }
                 return binding;
             }
         }

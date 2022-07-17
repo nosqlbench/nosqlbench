@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConfigType {
+public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConfigurable {
     private CGSchemaStats schemaStats = null;
 
     public CGGenStatsInjector() {

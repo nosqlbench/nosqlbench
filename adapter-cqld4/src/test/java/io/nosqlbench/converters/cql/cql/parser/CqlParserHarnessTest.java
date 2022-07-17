@@ -17,7 +17,7 @@
 package io.nosqlbench.converters.cql.cql.parser;
 
 import io.nosqlbench.converters.cql.exporters.CGWorkloadExporter;
-import io.nosqlbench.converters.cql.exporters.transformers.CGTransformersInit;
+import io.nosqlbench.converters.cql.exporters.transformers.CGModelTransformers;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class CqlParserHarnessTest {
 
     @Test
     public void testAllTypes() {
-        CGWorkloadExporter exporter = new CGWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"), new CGTransformersInit());
+        CGWorkloadExporter exporter = new CGWorkloadExporter(Path.of("src/test/resources/testschemas/cql_alltypes.cql"), new CGModelTransformers());
         exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]");
         var data = exporter.getWorkloadAsYaml();
 
@@ -56,13 +56,13 @@ public class CqlParserHarnessTest {
     @Disabled
     @Test
     public void testGenBasicWorkload() {
-        CGWorkloadExporter exporter = new CGWorkloadExporter(ddl, new CGTransformersInit());
+        CGWorkloadExporter exporter = new CGWorkloadExporter(ddl, new CGModelTransformers());
         assertThatThrownBy(() ->  exporter.getWorkloadAsYaml()).isInstanceOf(RuntimeException.class);
     }
 
     @Test
     public void testCqlParserHarnessCombined() {
-        CqlModelParser.parse(ddl);
+        CqlModelParser.parse(ddl, null);
     }
 
     @Disabled
@@ -75,7 +75,7 @@ public class CqlParserHarnessTest {
                'class' : 'SimpleStrategy',\s
                'replication_factor' : 1\s
               };
-            """);
+            """, null);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class CqlParserHarnessTest {
                race_position int,\s
                cyclist_name FROZEN<fullname>,\s
                PRIMARY KEY (race_name, race_position));
-            """);
+            """, null);
     }
 
 

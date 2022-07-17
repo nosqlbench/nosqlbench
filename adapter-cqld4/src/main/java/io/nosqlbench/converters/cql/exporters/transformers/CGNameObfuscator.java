@@ -25,14 +25,19 @@ package io.nosqlbench.converters.cql.exporters.transformers;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
 import io.nosqlbench.converters.cql.cqlast.CqlTable;
 import io.nosqlbench.converters.cql.cqlast.CqlType;
+import io.nosqlbench.virtdata.core.bindings.DataMapper;
+import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CGNameObfuscator implements CGModelTransformer {
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.LongFunction;
+
+public class CGNameObfuscator implements CGModelTransformer, CGTransformerConfigurable {
     private final static Logger logger = LogManager.getLogger(CGNameObfuscator.class);
 
     private final CGCachingNameRemapper remapper = new CGCachingNameRemapper();
-    private Object keyspaceName;
 
     @Override
     public CqlModel apply(CqlModel model) {
@@ -56,8 +61,17 @@ public class CGNameObfuscator implements CGModelTransformer {
             type.renameColumns(remapper.mapperForType(type, "typ"));
         }
 
-
         return model;
 
+    }
+
+    @Override
+    public void accept(Map<String, ?> stringMap) {
+        Object namer = stringMap.get("namer");
+        Optional<DataMapper<String>> optionalMapper = VirtData.getOptionalMapper(namer.toString());
+        LongFunction<String> namerFunc = optionalMapper.orElseThrow(
+            () -> new RuntimeException("Unable to resolve obfuscator namer '" + namer + "'")
+        );
+        remapper.setNamingFunction(namerFunc);
     }
 }

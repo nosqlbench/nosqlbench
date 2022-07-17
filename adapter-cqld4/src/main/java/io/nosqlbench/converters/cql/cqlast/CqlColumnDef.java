@@ -26,11 +26,11 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     private String keyspace;
     private String name;
     private String type;
-    private int position;
-    private ColType coltype;
+    private final int position;
 
     public CqlColumnDef(CqlTable table, int position, String colname, String typedef) {
         this.table = table;
+        this.position=position;
         this.type = typedef;
         this.name = colname;
     }

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfigType {
+public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfigurable {
 
     private List<Pattern> patterns = List.of(Pattern.compile(".*"));
     private final static Logger logger = LogManager.getLogger(CGKeyspaceFilter.class);

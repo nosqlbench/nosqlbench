@@ -1,9 +1,15 @@
-# unimplemented
-#text_transformers:
+text_transformers:
 #  - class: CGRegexReplacer
 #    config:
 #      replacers:
-#        - /a/b/
+#        - - '(\s*)(options|role|roles|permissions|permission|date|key|timestamp|type|keys) ([a-zA-Z][a-zA-Z<>_-]*)(,?)'
+#          - '$1base$2 $3$4'
+#        - - '(.*PRIMARY KEY .*?)\b(options|role|roles|permissions|permission|date|key|timestamp|type|keys)\b(.*)'
+#          - '$1base$2$3'
+#        - - '(.*CLUSTERING ORDER BY.+?)\b(options|role|roles|permissions|permission|date|key|timestamp|type|keys)\b(.*)'
+#          - '$1base$2$3'
+#        - - '(.*CREATE TABLE system_auth\.)(options|role|roles|permissions|permission|date|key|timestamp|type|keys)\b(.*)'
+#          - '$1base$2$3'
 
 model_transformers:
 
@@ -12,9 +18,9 @@ model_transformers:
     config:
       include:
         - dba_info
-        - vzw_order
         - mcs_or_prod
         - prod_parallel_test
+        - vzw_order
         - vzw_common
         - vzw_soe
 
@@ -48,6 +54,8 @@ model_transformers:
 
   # replaces names of keyspaces, tables, and columns with generated values
   - class: CGNameObfuscator
+    config:
+      namer: Combinations('0-9;0-9;0-9;0-9;0-9');
 
 naming_template: "[OPTYPE-][KEYSPACE-][TYPE-][NAME]"
 

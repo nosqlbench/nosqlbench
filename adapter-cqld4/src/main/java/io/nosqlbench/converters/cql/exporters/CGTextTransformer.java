@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.converters.cql.exporters.transformers;
+package io.nosqlbench.converters.cql.exporters;
 
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-public interface CGTransformerConfigType extends Consumer<Map<String, ?>> {
+public interface CGTextTransformer extends Function<String,String> {
+
+    @Override
+    String apply(String input);
 }

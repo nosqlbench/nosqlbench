@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.converters.cql.cqlast.*;
 import io.nosqlbench.converters.cql.exporters.binders.*;
-import io.nosqlbench.converters.cql.exporters.transformers.CGTransformersInit;
+import io.nosqlbench.converters.cql.exporters.transformers.CGModelTransformers;
 import io.nosqlbench.converters.cql.parser.CqlModelParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,7 +75,7 @@ public class CGWorkloadExporter {
     private boolean elideUnusedTables;
     private Map<String, List<String>> blockplan = Map.of();
 
-    public CGWorkloadExporter(CqlModel model, CGTransformersInit transformers) {
+    public CGWorkloadExporter(CqlModel model, CGModelTransformers transformers) {
         this.model = model;
         for (Function<CqlModel, CqlModel> transformer : transformers.get()) {
             CqlModel modified = transformer.apply(this.model);
@@ -83,16 +83,27 @@ public class CGWorkloadExporter {
         }
     }
 
-    public CGWorkloadExporter(String ddl, Path srcpath, CGTransformersInit transformers) {
+    public CGWorkloadExporter(String ddl, Path srcpath, CGModelTransformers transformers) {
         this(CqlModelParser.parse(ddl, srcpath), transformers);
     }
 
-    public CGWorkloadExporter(String ddl, CGTransformersInit transformers) {
+    public CGWorkloadExporter(String ddl, CGModelTransformers transformers) {
         this(ddl, null, transformers);
     }
 
-    public CGWorkloadExporter(Path path, CGTransformersInit transformers) {
+    public CGWorkloadExporter(Path path, CGModelTransformers transformers) {
         this(CqlModelParser.parse(path), transformers);
+    }
+
+    private String loadFile(Path path) {
+        try {
+            String ddl = Files.readString(path);
+            logger.info("read " + ddl.length() + " character DDL file");
+            return ddl;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public static void main(String[] args) {
@@ -132,14 +143,32 @@ public class CGWorkloadExporter {
         CGWorkloadExporter exporter;
         if (Files.exists(cfgpath)) {
             try {
-                CGTransformersInit transformers = new CGTransformersInit();
+                CGModelTransformers modelTransformers = new CGModelTransformers();
+                CGTextTransformers textTransformers = new CGTextTransformers();
                 String configfile = Files.readString(cfgpath);
                 Map cfgmap = yaml.loadAs(configfile, Map.class);
+
                 if (cfgmap.containsKey("model_transformers")) {
-                    transformers.accept((List<Map<String, ?>>) cfgmap.get("model_transformers"));
+                    modelTransformers.accept((List<Map<String, ?>>) cfgmap.get("model_transformers"));
                 }
 
-                exporter = new CGWorkloadExporter(srcpath, transformers);
+                Object txtr = cfgmap.get("text_transformers");
+                if (txtr!=null) {
+                    textTransformers.accept((List<Map<String,?>>) cfgmap.get("text_transformers"));
+                }
+
+                String ddl;
+                try {
+                    ddl = Files.readString(srcpath);
+                    logger.info("read " + ddl.length() + " character DDL file, parsing");
+                    if (textTransformers!=null) {
+                        ddl = textTransformers.process(ddl);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                exporter = new CGWorkloadExporter(ddl, srcpath, modelTransformers);
 
                 String defaultNamingTemplate = cfgmap.get("naming_template").toString();
                 exporter.setNamingTemplate(defaultNamingTemplate);
@@ -286,13 +315,14 @@ public class CGWorkloadExporter {
 
     private LinkedHashMap<String, Object> genScenarios(CqlModel model) {
         return new LinkedHashMap<>() {{
+
             put("default",
                 new LinkedHashMap<>() {{
                     put("schema", "run driver=cql tags=block:schema-.* threads===UNDEF cycles===UNDEF");
                     put("rampup", "run driver=cql tags=block:rampup-.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
                     put("main", "run driver=cql tags=block:main-.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
-
                 }});
+
             put("truncate", "run driver=cql tags=block:truncate-.* threads===UNDEF cycles===UNDEF");
             put("schema-keyspaces", "run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF");
             put("schema-types", "run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF");
@@ -324,7 +354,7 @@ public class CGWorkloadExporter {
 
     private String genScanSyntax(CqlTable table) {
         return """
-            select * from  KEYSPACE.TABLE
+            select * from KEYSPACE.TABLE
             where PREDICATE
             LIMIT;
             """
@@ -429,7 +459,7 @@ public class CGWorkloadExporter {
             return bindings.forColumn(columnDef);
         }
         modulo = quantizeModuloByMagnitude(modulo,1);
-        logger.info("Set partition modulo for " + tableDef.getFullName() + " to " + modulo);
+        logger.debug("Set partition modulo for " + tableDef.getFullName() + " to " + modulo);
         Binding binding = bindings.forColumn(columnDef, "Mod(" + modulo + "L); ");
         return binding;
     }
@@ -477,7 +507,6 @@ public class CGWorkloadExporter {
             return 1;
         }
         return readRatioFor(table) + writeRatioFor(table);
-
     }
 
     private int readRatioFor(CqlTable table) {
@@ -624,7 +653,7 @@ public class CGWorkloadExporter {
             ops.put(
                 namer.nameFor(table, "optype", "drop", "blockname", blockname),
                 Map.of(
-                    "simple", "drop table " + table.getFullName() + ";",
+                    "simple", "drop table if exists " + table.getFullName() + ";",
                     "timeout", timeouts.get("drop")
                 )
             );
@@ -640,7 +669,7 @@ public class CGWorkloadExporter {
             ops.put(
                 namer.nameFor(type, "optype", "drop-type", "blockname", blockname),
                 Map.of(
-                    "simple", "drop type " + type.getKeyspace() + "." + type.getName() + ";",
+                    "simple", "drop type if exists " + type.getKeyspace() + "." + type.getName() + ";",
                     "timeout", timeouts.get("drop")
                 )
             );
@@ -656,7 +685,7 @@ public class CGWorkloadExporter {
             ops.put(
                 namer.nameFor(type, "optype", "drop-keyspace", "blockname", blockname),
                 Map.of(
-                    "simple", "drop keyspace " + type.getKeyspace() + ";",
+                    "simple", "drop keyspace if exists " + type.getKeyspace() + ";",
                     "timeout", timeouts.get("drop")
                 )
             );
@@ -677,7 +706,6 @@ public class CGWorkloadExporter {
                     "simple", "truncate " + table.getFullName() + ";",
                     "timeout", timeouts.get("truncate")
                 )
-
             );
         }
         return truncateblock;

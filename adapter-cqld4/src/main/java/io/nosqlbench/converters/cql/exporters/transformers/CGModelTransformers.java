@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CGTransformersInit implements Consumer<List<Map<String, ?>>>, Supplier<List<CGModelTransformer>> {
-    private final static Logger logger = LogManager.getLogger(CGTransformersInit.class);
-    private List<CGModelTransformer> transformers = new ArrayList<>();
+public class CGModelTransformers implements Consumer<List<Map<String, ?>>>, Supplier<List<CGModelTransformer>> {
+    private final static Logger logger = LogManager.getLogger(CGModelTransformers.class);
+    private final List<CGModelTransformer> transformers = new ArrayList<>();
 
-    public CGTransformersInit() {
+    public CGModelTransformers() {
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CGTransformersInit implements Consumer<List<Map<String, ?>>>, Suppl
 
 
             // Configure Transformer IFF ...
-            if (transformer instanceof CGTransformerConfigType configurable) {
+            if (transformer instanceof CGTransformerConfigurable configurable) {
                 Object cfgvalues = cfgmap.get("config");
                 if (cfgvalues instanceof Map txconfigmap) {
                     configurable.accept((txconfigmap));

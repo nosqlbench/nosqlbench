@@ -14,6 +14,8 @@ bindings:
  frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
  list<text>: ListStepped(NumberNameToString(),NumberNameToString())
  map<text,text>: MapSized(3, Combinations('A-Z;0-9'), NumberNameToString(), ToString());
+ map<int,int>: MapSized(3, ToInt(), ToInt());
+ counter: HashRange(1,3);
  set<text>: SetSized(HashRange(3,4),NumberNameToString()));
  smallint: ToShort();
  time: StartingEpochMillis('2022-01-01 00:00:00'); ToLocalTime();
