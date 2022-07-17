@@ -288,19 +288,19 @@ public class CGWorkloadExporter {
         return new LinkedHashMap<>() {{
             put("default",
                 new LinkedHashMap<>() {{
-                    put("schema", "run driver=cql tags=block:'schema-.*' threads===UNDEF cycles===UNDEF");
-                    put("rampup", "run driver=cql tags=block:'rampup-.*' threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
-                    put("main", "run driver=cql tags=block:'main-.*' threads=auto cycles===TEMPLATE(main-cycles,10000)");
+                    put("schema", "run driver=cql tags=block:schema-.* threads===UNDEF cycles===UNDEF");
+                    put("rampup", "run driver=cql tags=block:rampup-.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
+                    put("main", "run driver=cql tags=block:main-.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
 
                 }});
-            put("truncate", "run driver=cql tags=block:'truncate-.*' threads===UNDEF cycles===UNDEF");
-            put("schema-keyspaces", "run driver=cql tags=block:'schema-keyspaces' threads===UNDEF cycles===UNDEF");
-            put("schema-types", "run driver=cql tags=block:'schema-types' threads===UNDEF cycles===UNDEF");
-            put("schema-tables", "run driver=cql tags=block:'schema-tables' threads===UNDEF cycles===UNDEF");
-            put("drop", "run driver=cql tags=block:'drop-.*' threads===UNDEF cycles===UNDEF");
-            put("drop-tables", "run driver=cql tags=block:'drop-tables' threads===UNDEF cycles===UNDEF");
-            put("drop-types", "run driver=cql tags=block:'drop-types' threads===UNDEF cycles===UNDEF");
-            put("drop-keyspaces", "run driver=cql tags=block:'drop-keyspaces' threads===UNDEF cycles===UNDEF");
+            put("truncate", "run driver=cql tags=block:truncate-.* threads===UNDEF cycles===UNDEF");
+            put("schema-keyspaces", "run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF");
+            put("schema-types", "run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF");
+            put("schema-tables", "run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF");
+            put("drop", "run driver=cql tags=block:drop-.* threads===UNDEF cycles===UNDEF");
+            put("drop-tables", "run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF");
+            put("drop-types", "run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF");
+            put("drop-keyspaces", "run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF");
 
         }};
     }
