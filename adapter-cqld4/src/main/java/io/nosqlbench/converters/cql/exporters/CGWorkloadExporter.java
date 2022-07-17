@@ -325,7 +325,7 @@ public class CGWorkloadExporter {
     private String genScanSyntax(CqlTable table) {
         return """
             select * from  KEYSPACE.TABLE
-            PREDICATE
+            where PREDICATE
             LIMIT;
             """
             .replace("KEYSPACE", table.getKeySpace())
@@ -355,7 +355,7 @@ public class CGWorkloadExporter {
     private String genSelectSyntax(CqlTable table) {
         return """
             select * from  KEYSPACE.TABLE
-            PREDICATE
+            where PREDICATE
             LIMIT;
             """
             .replace("KEYSPACE", table.getKeySpace())
