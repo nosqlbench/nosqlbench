@@ -16,37 +16,37 @@
 
 package io.nosqlbench.converters.cql.exporters.transformers;
 
-import io.nosqlbench.converters.cql.cqlast.CqlKeyspace;
 import io.nosqlbench.converters.cql.cqlast.CqlModel;
-import io.nosqlbench.converters.cql.cqlast.CqlTable;
-import io.nosqlbench.converters.cql.cqlast.CqlType;
 
+/**
+ * @deprecated Superseded by direct rendering from AST in generator
+ */
 public class CGIfNotExistsInjector implements CGModelTransformer {
 
     @Override
     public CqlModel apply(CqlModel model) {
-        for (CqlKeyspace keyspace : model.getKeyspaceDefs()) {
-            keyspace.setRefDdl(keyspace.getRefddl().replaceAll(
-                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
-                "$1IF NOT EXISTS "
-            ));
-        }
-        for (CqlTable table : model.getTableDefs()) {
-            String refddl = table.getRefDdl();
-            String replaced = refddl.replaceAll(
-                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
-                "$1IF NOT EXISTS "
-            );
-
-            table.setRefDdl(replaced);
-        }
-        for (CqlType type : model.getTypes()) {
-            type.setRefddl(type.getRefDdl().replaceAll(
-                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
-                "$1IF NOT EXISTS "
-            ));
-
-        }
+//        for (CqlKeyspace keyspace : model.getKeyspaceDefs()) {
+//            keyspace.setRefDdl(keyspace.getRefddl().replaceAll(
+//                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
+//                "$1IF NOT EXISTS "
+//            ));
+//        }
+//        for (CqlTable table : model.getTableDefs()) {
+//            String refddl = table.getRefDdl();
+//            String replaced = refddl.replaceAll(
+//                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
+//                "$1IF NOT EXISTS "
+//            );
+//
+//            table.setRefDdl(replaced);
+//        }
+//        for (CqlType type : model.getTypes()) {
+//            type.setRefddl(type.getRefDdl().replaceAll(
+//                "(?m)(?s)(?i)(\\s*CREATE (TABLE|KEYSPACE|TYPE) +)(?!IF NOT EXISTS)",
+//                "$1IF NOT EXISTS "
+//            ));
+//
+//        }
         return model;
     }
 }

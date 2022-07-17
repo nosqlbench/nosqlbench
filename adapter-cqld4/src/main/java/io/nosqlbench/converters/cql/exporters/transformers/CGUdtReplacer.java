@@ -29,14 +29,10 @@ public class CGUdtReplacer implements CGModelTransformer {
         List<String> toReplace = model.getTypes().stream().map(t -> t.getKeyspace() + "." + t.getName()).toList();
         for (CqlTable table : model.getTableDefs()) {
             for (CqlColumnDef coldef : table.getColumnDefinitions()) {
-                String coldefDdl = coldef.getDefinitionDdl();
+                String typedef = coldef.getTrimmedTypedef();
                 for (String searchFor : toReplace) {
-                    if (coldefDdl.contains(searchFor)) {
-                        String typedef = coldef.getType();
-                        coldef.setType("blob");
-                        String replaced = coldef.getDefinitionDdl().replace(typedef, "blob");
-                        coldef.setDefinitionRefDdl(replaced);
-                        table.setRefDdl(table.getRefDdl().replace(typedef,"blob"));
+                    if (typedef.contains(searchFor)) {
+                        coldef.setTypeDef("blob");
                     }
                 }
             }

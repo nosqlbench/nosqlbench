@@ -18,13 +18,19 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
+import com.datastax.oss.driver.api.core.config.DriverExecutionProfile;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.metadata.Node;
+import com.datastax.oss.driver.api.core.metadata.token.Token;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
+import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public abstract class BaseCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
@@ -67,8 +73,23 @@ public abstract class BaseCqlStmtDispenser extends BaseOpDispenser<Cqld4CqlOp> {
     protected LongFunction<Statement> getEnhancedStmtFunc(LongFunction<Statement> basefunc, ParsedOp op) {
         LongFunction<Statement> partial = basefunc;
         partial = op.enhanceEnum(partial, "cl", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
+        partial = op.enhanceEnum(partial, "consistency_level", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
         partial = op.enhanceEnum(partial, "scl", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
+        partial = op.enhanceEnum(partial, "serial_consistency_level", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
         partial = op.enhanceFuncOptionally(partial, "idempotent", Boolean.class, Statement::setIdempotent);
+        partial = op.enhanceFuncOptionally(partial, "timeout", double.class, (statement, l) -> statement.setTimeout(Duration.ofMillis((long)(l*1000L))));
+        partial = op.enhanceFuncOptionally(partial, "custom_payload", Map.class, Statement::setCustomPayload);
+        partial = op.enhanceFuncOptionally(partial, "execution_profile", DriverExecutionProfile.class, Statement::setExecutionProfile);
+        partial = op.enhanceFuncOptionally(partial, "execution_profile_name", String.class, Statement::setExecutionProfileName);
+        partial = op.enhanceFuncOptionally(partial, "node", Node.class, Statement::setNode);
+        partial = op.enhanceFuncOptionally(partial, "now_in_seconds", int.class, Statement::setNowInSeconds);
+        partial = op.enhanceFuncOptionally(partial, "page_size", int.class, Statement::setPageSize);
+        partial = op.enhanceFuncOptionally(partial, "query_timestamp", long.class, Statement::setQueryTimestamp);
+        partial = op.enhanceFuncOptionally(partial, "routing_key", ByteBuffer.class, Statement::setRoutingKey);
+        partial = op.enhanceFuncOptionally(partial, "routing_keys", ByteBuffer[].class, Statement::setRoutingKey);
+        partial = op.enhanceFuncOptionally(partial, "routing_token", Token.class, Statement::setRoutingToken);
+        partial = op.enhanceFuncOptionally(partial, "tracing", boolean.class, Statement::setTracing);
+
         return partial;
     }
 

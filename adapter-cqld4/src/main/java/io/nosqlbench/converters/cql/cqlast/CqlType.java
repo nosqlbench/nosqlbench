@@ -17,15 +17,17 @@
 package io.nosqlbench.converters.cql.cqlast;
 
 import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.labels.Labeled;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
-public class CqlType implements NBNamedElement {
+public class CqlType implements NBNamedElement, Labeled {
     private String keyspace;
     private String name;
     private String refddl;
-    private final Map<String,String> fields = new LinkedHashMap<>();
+    private Map<String,String> fields = new LinkedHashMap<>();
 
     public void setKeyspace(String newksname) {
         this.keyspace = newksname;
@@ -37,10 +39,6 @@ public class CqlType implements NBNamedElement {
         this.name = name;
     }
 
-    public void setRefddl(String ddl) {
-        this.refddl = ddl;
-    }
-
     public String getKeyspace() {
         return keyspace;
     }
@@ -49,7 +47,7 @@ public class CqlType implements NBNamedElement {
         return this.name;
     }
 
-    public void addField(String name, String typedef, String typedefRefDdl) {
+    public void addField(String name, String typedef) {
         this.fields.put(name, typedef);
     }
 
@@ -57,7 +55,18 @@ public class CqlType implements NBNamedElement {
         return fields;
     }
 
-    public String getRefDdl() {
-        return this.refddl;
+    @Override
+    public Map<String, String> getLabels() {
+        return Map.of(
+            "keyspace", this.keyspace,
+            "type","udt",
+            "name",name
+        );
+    }
+
+    public void renameColumns(Function<String, String> renamer) {
+        Map<String,String> newColumns = new LinkedHashMap<>();
+        fields.forEach((k,v)->newColumns.put(renamer.apply(k),v));
+        this.fields = newColumns;
     }
 }

@@ -24,17 +24,14 @@ import java.util.Map;
 
 public class CqlKeyspace implements NBNamedElement, Labeled {
     String keyspaceName= "";
-    String refddl;
-    private String refReplDdl;
     CGKeyspaceStats stats;
+    private boolean isDurableWrites;
+    private String replicationData;
 
     public CqlKeyspace() {
     }
 
     public void setKeyspaceName(String newname) {
-        if (this.refddl!=null) {
-            this.refddl = refddl.replaceAll(this.keyspaceName, newname);
-        }
         this.keyspaceName=newname;
     }
 
@@ -42,46 +39,42 @@ public class CqlKeyspace implements NBNamedElement, Labeled {
         return this.keyspaceName;
     }
 
-    public void setRefDdl(String refddl) {
-        this.refddl = refddl;
-    }
 
     @Override
     public String toString() {
         return "CqlKeyspace{" +
             "keyspaceName='" + keyspaceName + '\'' +
-            ", refddl='" + refddl + '\'' +
+            ", stats=" + stats +
+            ", isDurableWrites=" + isDurableWrites +
+            ", replicationData='" + replicationData + '\'' +
             '}';
-    }
-
-    public String getRefddl() {
-        return refddl;
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", keyspaceName
+            "name", keyspaceName,
+            "type","keyspace"
         );
-    }
-
-    public void setRefReplDdl(String newRefReplDdl) {
-        if (this.refddl!=null) {
-            this.refddl=this.refddl.replaceAll(this.refReplDdl,newRefReplDdl);
-        }
-        this.refReplDdl=newRefReplDdl;
-    }
-
-    public String getRefDdlWithReplFields(String replFields) {
-        refddl.replace(refReplDdl,replFields);
-        return refddl;
-    }
-
-    public String getReplRefDdl() {
-        return this.refReplDdl;
     }
 
     public void setStats(CGKeyspaceStats ksstats) {
         this.stats=ksstats;
+    }
+
+    public boolean isDurableWrites() {
+        return isDurableWrites;
+    }
+
+    public void setDurableWrites(boolean isDurableWrites) {
+        this.isDurableWrites = isDurableWrites;
+    }
+
+    public void setReplicationData(String repldata) {
+        this.replicationData = repldata;
+    }
+
+    public String getReplicationData() {
+        return this.replicationData;
     }
 }

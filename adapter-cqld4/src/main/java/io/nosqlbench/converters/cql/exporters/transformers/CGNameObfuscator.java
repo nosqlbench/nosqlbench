@@ -38,19 +38,22 @@ public class CGNameObfuscator implements CGModelTransformer {
     public CqlModel apply(CqlModel model) {
 
         for (String keyspaceName : model.getAllKnownKeyspaceNames()) {
-            String newKeyspaceName = remapper.nameForType("keyspace",keyspaceName);
+            String newKeyspaceName = remapper.nameForType("keyspace",keyspaceName,"ks_");
             model.renamekeyspace(keyspaceName,newKeyspaceName);
         }
+
         for (CqlTable cqlTable : model.getTableDefs()) {
             String tablename = cqlTable.getName();
-            String newTableName = remapper.nameFor(cqlTable);
-            model.renameTable(cqlTable.getKeySpace(), tablename, newTableName);
-            cqlTable.renameColumns(remapper.mapperForType(cqlTable));
+            String newTableName = remapper.nameFor(cqlTable,"tbl_");
+            model.renameTable(cqlTable, newTableName);
+            cqlTable.renameColumns(remapper.mapperForType(cqlTable, "col_"));
         }
+
         for (CqlType type : model.getTypes()) {
             String typeName = type.getName();
-            String newTypeName = remapper.nameFor(type);
+            String newTypeName = remapper.nameFor(type,"typ_");
             model.renameType(type.getKeyspace(),typeName,newTypeName);
+            type.renameColumns(remapper.mapperForType(type, "typ"));
         }
 
 

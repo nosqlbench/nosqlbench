@@ -31,34 +31,51 @@ public class BindingsAccumulator {
     private final NamingFolio namer;
     private final List<BindingsLibrary> libraries;
     private final Map<String, String> accumulated = new LinkedHashMap<>();
+    private final Map<String,String> accumulatedByRecipe = new LinkedHashMap<>();
     private final NamingStyle namingStyle = NamingStyle.SymbolicType;
-    LinkedHashMap<String,Integer> counts = new LinkedHashMap<>();
+    private final LinkedHashMap<String,Integer> counts = new LinkedHashMap<>();
+    private long enumeration=0L;
 
     public BindingsAccumulator(NamingFolio namer, List<BindingsLibrary> libraries) {
         this.namer = namer;
         this.libraries = libraries;
     }
 
-    public Binding forColumn(CqlColumnDef def, String... extra) {
+    public Binding forColumn(CqlColumnDef def, String... prefixes) {
+        return forColumn(def,Map.of(), prefixes);
+    }
+    public Binding forColumn(CqlColumnDef def, Map<String,String> extra, String... prefixes) {
         for (BindingsLibrary library : libraries) {
-            Optional<Binding> binding = switch (namingStyle) {
+            Optional<Binding> optionalBinding = switch (namingStyle) {
                 case FullyQualified -> this.resolveFullyQualifiedBinding(def, extra);
                 case SymbolicType -> this.resolveSymbolicBinding(def, extra);
                 case CondensedKeyspace -> this.resolvedCondensedBinding(def, extra);
             };
-            if (binding.isPresent()) {
-                registerBinding(binding.get());
-                return binding.get();
+
+            if (optionalBinding.isPresent()) {
+                Binding binding = optionalBinding.get();
+
+                if (prefixes.length>0) {
+                    binding = binding.withPreFunctions(prefixes).withNameIncrement(++enumeration);
+                    String extant = accumulatedByRecipe.get(binding.getRecipe());
+                    if (extant!=null) {
+                        binding= new Binding(extant,accumulated.get(extant));
+                    }
+                }
+
+                registerBinding(binding);
+                return binding;
             }
         }
         throw new UnresolvedBindingException(def);
     }
 
-    private Optional<Binding> resolvedCondensedBinding(CqlColumnDef def, String[] extra) {
+
+    private Optional<Binding> resolvedCondensedBinding(CqlColumnDef def, Map<String,String> extra) {
         throw new RuntimeException("Implement me!");
     }
 
-    private Optional<Binding> resolveSymbolicBinding(CqlColumnDef def, String[] extra) {
+    private Optional<Binding> resolveSymbolicBinding(CqlColumnDef def, Map<String,String> extra) {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> binding = library.resolveBindingsFor(def);
             if (binding.isPresent()) {
@@ -69,13 +86,13 @@ public class BindingsAccumulator {
 
     }
 
-    private Optional<Binding> resolveFullyQualifiedBinding(CqlColumnDef def, String[] extra) {
+    private Optional<Binding> resolveFullyQualifiedBinding(CqlColumnDef def, Map<String,String> extra) {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> bindingRecipe = library.resolveBindingsFor(def);
             if (bindingRecipe.isPresent()) {
                 Binding found = bindingRecipe.get();
                 String name = namer.nameFor(def, extra);
-                Binding renamedBinding = new Binding(name,found.recipe());
+                Binding renamedBinding = new Binding(name,found.getRecipe());
                 return Optional.of(renamedBinding);
             }
         }
@@ -83,8 +100,9 @@ public class BindingsAccumulator {
     }
 
     private void registerBinding(Binding newBinding) {
-        String name = newBinding.name();
-        accumulated.put(name, newBinding.recipe());
+        String name = newBinding.getName();
+        accumulated.put(name, newBinding.getRecipe());
+        accumulatedByRecipe.put(newBinding.getRecipe(), name);
         counts.put(name, counts.get(name)==null? 1 : counts.get(name)+1);
     }
 

@@ -20,23 +20,25 @@ import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 import io.nosqlbench.converters.cql.exporters.CGTableStats;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CqlTable implements NBNamedElement, Labeled {
     String name = "";
     String keyspace = "";
-    List<CqlColumnDef> coldefs = new ArrayList<>();
     CGTableStats tableAttributes = null;
-    List<String> partitionKeys = new ArrayList<>();
-    List<String> clusteringColumns = new ArrayList<>();
-    private String refddl;
+    int[] partitioning = new int[0];
+    int[] clustering = new int[0];
+    List<String> clusteringOrders = new ArrayList<>();
+    List<CqlColumnDef> coldefs = new ArrayList<>();
+    private boolean compactStorage;
 
     public CqlTable() {
+    }
+
+    public boolean isCompactStorage() {
+        return compactStorage;
     }
 
     public CGTableStats getTableAttributes() {
@@ -53,13 +55,10 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public void setName(String tableName) {
         this.name = tableName;
-        for (CqlColumnDef coldef : coldefs) {
-            coldef.setTable(tableName);
-        }
     }
 
-    public void addcolumnDef(String colname, String typedef, String refColumnDdl) {
-        coldefs.add(new CqlColumnDef(colname, typedef, refColumnDdl));
+    public void addcolumnDef(String colname, String typedef, int position) {
+        coldefs.add(new CqlColumnDef(this, coldefs.size(), colname, typedef));
     }
 
     @Override
@@ -81,26 +80,11 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public void setKeyspace(String newKsName) {
         for (CqlColumnDef coldef : coldefs) {
-            coldef.setKeyspace(keyspace);
-            if (coldef.getDefinitionDdl()!=null) {
-                coldef.setDefinitionRefDdl(coldef.getDefinitionDdl().replaceAll(keyspace,newKsName));
-            }
-        }
-        if (this.refddl!=null) {
-            this.refddl = this.refddl.replaceAll(this.keyspace,newKsName);
+            coldef.setKeyspace(newKsName);
         }
         this.keyspace = newKsName;
 
     }
-
-    public String getRefDdl() {
-        return this.refddl;
-    }
-
-    public void setRefDdl(String refddl) {
-        this.refddl = refddl;
-    }
-
 
     public String getKeySpace() {
         return this.keyspace;
@@ -110,24 +94,50 @@ public class CqlTable implements NBNamedElement, Labeled {
     public Map<String, String> getLabels() {
         return Map.of(
             "keyspace", this.keyspace,
-            "table", this.name
+            "name", this.name,
+            "type", "table"
         );
     }
 
     public void addPartitionKey(String pkey) {
-        this.partitionKeys.add(pkey);
+        int[] newdefs = new int[partitioning.length + 1];
+        System.arraycopy(partitioning, 0, newdefs, 0, partitioning.length);
+        for (int i = 0; i < coldefs.size(); i++) {
+            if (coldefs.get(i).getName().equals(pkey)) {
+                newdefs[newdefs.length - 1] = i;
+                break;
+            }
+        }
+        this.partitioning = newdefs;
     }
 
     public void addClusteringColumn(String ccol) {
-        this.clusteringColumns.add(ccol);
+        int[] newdefs = new int[clustering.length + 1];
+        System.arraycopy(clustering, 0, newdefs, 0, clustering.length);
+        for (int i = 0; i < coldefs.size(); i++) {
+            if (coldefs.get(i).getName().equals(ccol)) {
+                newdefs[newdefs.length - 1] = i;
+                break;
+            }
+        }
+        this.clustering = newdefs;
     }
 
+    public void addTableClusteringOrder(String colname, String order) {
+        clusteringOrders.add(order);
+    }
+
+    public List<String> getClusteringOrders() {
+        return clusteringOrders;
+    }
+
+
     public List<String> getPartitionKeys() {
-        return this.partitionKeys;
+        return Arrays.stream(partitioning).mapToObj(i -> this.coldefs.get(i).getName()).toList();
     }
 
     public List<String> getClusteringColumns() {
-        return this.clusteringColumns;
+        return Arrays.stream(clustering).mapToObj(i -> this.coldefs.get(i).getName()).toList();
     }
 
     public CqlColumnDef getColumnDefForName(String colname) {
@@ -142,18 +152,43 @@ public class CqlTable implements NBNamedElement, Labeled {
         return def.orElseThrow();
     }
 
-    public void renameColumns(Function<String,String> renamer) {
+    public void renameColumns(Function<String, String> renamer) {
         for (CqlColumnDef coldef : coldefs) {
             coldef.setName(renamer.apply(coldef.getName()));
         }
-
     }
 
     public List<CqlColumnDef> getNonKeyColumnDefinitions() {
-        return coldefs.stream()
-            .filter(n -> !partitionKeys.contains(n.getName()))
-            .filter(n -> !clusteringColumns.contains(n.getName()))
-            .toList();
+        int last = partitioning[partitioning.length - 1];
+        last = (clustering.length > 0 ? clustering[clustering.length - 1] : last);
+        List<CqlColumnDef> nonkeys = new ArrayList<>();
+        for (int nonkey = last; nonkey < coldefs.size(); nonkey++) {
+            nonkeys.add(coldefs.get(nonkey));
+        }
+        return nonkeys;
     }
 
+    public void setCompactStorage(boolean isCompactStorage) {
+        this.compactStorage = isCompactStorage;
+    }
+
+    public String getFullName() {
+        return (this.keyspace != null ? this.keyspace + "." : "") + this.name;
+    }
+
+    public boolean isPartitionKey(int position) {
+        return position < partitioning.length;
+    }
+
+    public boolean isLastPartitionKey(int position) {
+        return position == partitioning.length - 1;
+    }
+
+    public boolean isClusteringColumn(int position) {
+        return clustering.length > 0 && position < clustering[clustering.length - 1] && position >= clustering[0];
+    }
+
+    public boolean isLastClusteringColumn(int position) {
+        return clustering.length > 0 && position == clustering[clustering.length - 1];
+    }
 }

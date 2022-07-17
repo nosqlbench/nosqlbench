@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class CqlModelBuilder extends CqlParserBaseListener {
     private final static Logger logger = LogManager.getLogger(CqlModelBuilder.class);
@@ -33,6 +34,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     private final CGErrorListener errorListener;
     private final CqlModel model;
     private long counted;
+    private int colindex;
 
     public CqlModelBuilder(CGErrorListener errorListener) {
         this.errorListener = errorListener;
@@ -41,7 +43,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
-        if ((counted++&0b11111111111111)==0b10000000000000) {
+        if ((counted++ & 0b11111111111111) == 0b10000000000000) {
             logger.trace("parsed " + counted + " elements...");
         }
     }
@@ -51,8 +53,8 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         System.out.println("error parsing: " + node.toString());
         ParseTree parent = node.getParent();
         String errorNodeType = parent.getClass().getSimpleName();
-//        System.out.println("error type: " + errorNodeType);
-//        System.out.println("source interval: " + node.getSourceInterval());
+
+        logger.info("PARSE ERROR: " + errorNodeType + "\n"+ node.getSourceInterval());
 
         super.visitErrorNode(node);
     }
@@ -73,7 +75,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     @Override
     public void exitReplicationList(CqlParser.ReplicationListContext ctx) {
         String repldata = textOf(ctx);
-        model.setReplicationText(repldata);
+        model.setReplicationData(repldata);
     }
 
     @Override
@@ -102,7 +104,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
                 }
             }
         } else if (ctx.compoundKey() != null) {
-            model.addClusteringColumn(ctx.compoundKey().partitionKey().column().getText());
+            model.addPartitionKey(ctx.compoundKey().partitionKey().getText());
             for (CqlParser.ClusteringKeyContext ccol : ctx.compoundKey().clusteringKeyList().clusteringKey()) {
                 model.addClusteringColumn(ccol.column().getText());
             }
@@ -119,8 +121,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     public void exitCreateType(CqlParser.CreateTypeContext ctx) {
         String keyspace = ctx.keyspace().getText();
         String name = ctx.type_().getText();
-        String refddl = textOf(ctx);
-        model.saveType(keyspace, name, refddl);
+        model.saveType(keyspace, name);
     }
 
 
@@ -132,8 +133,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         for (int idx = 0; idx < columns.size(); idx++) {
             model.addTypeField(
                 columns.get(idx).getText(),
-                dataTypes.get(idx).getText(),
-                textOf(dataTypes.get(idx))
+                dataTypes.get(idx).getText()
             );
         }
 
@@ -149,10 +149,50 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     public void exitCreateTable(CqlParser.CreateTableContext ctx) {
         model.saveTable(
             ctx.keyspace().getText(),
-            ctx.table().getText(),
-            textOf(ctx)
+            ctx.table().getText()
         );
     }
+
+    @Override
+    public void exitOrderDirection(CqlParser.OrderDirectionContext ctx) {
+    }
+
+    @Override
+    public void exitTableOptionItem(CqlParser.TableOptionItemContext ctx) {
+        if (ctx.kwCompactStorage()!=null) {
+            model.setTableCompactStorage(true);
+        }
+        super.exitTableOptionItem(ctx);
+    }
+
+    @Override
+    public void exitDurableWrites(CqlParser.DurableWritesContext ctx) {
+        model.setKeyspaceDurableWrites(ctx.booleanLiteral().getText());
+
+
+    }
+
+    @Override
+    public void exitClusteringOrder(CqlParser.ClusteringOrderContext ctx) {
+
+        List<String> columns = ctx.children.stream()
+            .filter(c -> c instanceof CqlParser.ColumnContext)
+            .map(c -> c.getText())
+            .toList();
+
+        List<String> orders = ctx.children.stream()
+            .filter(c -> c instanceof CqlParser.OrderDirectionContext)
+            .map(c -> c.getText())
+            .toList();
+
+        IntStream.range(0, columns.size())
+            .forEach(i -> model.addClusteringOrder(columns.get(i), orders.get(i)));
+    }
+
+//    @Override
+//    public void exitColumn(CqlParser.ColumnContext ctx) {
+//        super.exitColumn(ctx);
+//    }
 
     private String textOf(ParserRuleContext ctx) {
         int startIndex = ctx.start.getStartIndex();
@@ -167,12 +207,17 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     }
 
     @Override
+    public void enterColumnDefinitionList(CqlParser.ColumnDefinitionListContext ctx) {
+        this.colindex = 0;
+    }
+
+    @Override
     public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
         model.saveColumnDefinition(
             ctx.column().getText(),
             textOf(ctx.dataType()),
             ctx.primaryKeyColumn() != null,
-            textOf(ctx)
+            colindex++
         );
     }
 

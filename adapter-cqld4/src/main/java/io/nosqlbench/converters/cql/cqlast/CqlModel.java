@@ -77,22 +77,6 @@ public class CqlModel {
                 }
             }
         }
-//        schemaStats.getKeyspaces().forEach((ksname, ksstats) -> {
-//            CqlKeyspace modelKs = getKeyspacesByName().get(ksname);
-//            if (modelKs!=null) {
-//                modelKs.setStats(ksstats);
-//                ksstats.getKeyspaceTables().forEach((tbname, tbstats) -> {
-//                    Map<String, CqlTable> tabledefs = tableDefs.get(ksname);
-//                    if (tabledefs!=null) {
-//                        for (CqlTable tabledef : tabledefs.values()) {
-//                            tabledef.setTableAttributes(tbstats);
-//                        }
-//                    }
-//                });
-//
-//            }
-//        });
-
     }
 
     transient CqlKeyspace keyspace = null;
@@ -117,7 +101,6 @@ public class CqlModel {
 
     public void saveKeyspace(String text,String refddl) {
         keyspace.setKeyspaceName(text);
-        keyspace.setRefDdl(refddl);
         this.keyspaceDefs.put(text, keyspace);
         keyspace=null;
     }
@@ -126,16 +109,15 @@ public class CqlModel {
         table = new CqlTable();
     }
 
-    public void saveTable(String keyspace, String text, String refddl) {
+    public void saveTable(String keyspace, String text) {
         table.setKeyspace(keyspace);
         table.setName(text);
-        table.setRefDdl(refddl);
         this.tableDefs.computeIfAbsent(keyspace, ks->new LinkedHashMap<>()).put(text, table);
         table = null;
     }
 
-    public void saveColumnDefinition(String colname, String coltype, boolean isPrimaryKey, String refddl) {
-        this.table.addcolumnDef(colname, coltype, refddl);
+    public void saveColumnDefinition(String colname, String typedef, boolean isPrimaryKey, int position) {
+        this.table.addcolumnDef(colname, typedef, position);
         if (isPrimaryKey) {
             this.table.addPartitionKey(colname);
         }
@@ -202,21 +184,16 @@ public class CqlModel {
         table.addClusteringColumn(ccolumn);
     }
 
-    public void setReplicationText(String repldata) {
-        keyspace.setRefReplDdl(repldata);
-    }
-
     public void newType() {
         udt = new CqlType();
     }
 
-    public void addTypeField(String name, String typedef, String typedefRefDdl) {
-        udt.addField(name, typedef, typedefRefDdl);
+    public void addTypeField(String name, String typedef) {
+        udt.addField(name, typedef);
     }
 
-    public void saveType(String keyspace, String name, String refddl) {
+    public void saveType(String keyspace, String name) {
         udt.setKeyspace(keyspace);
-        udt.setRefddl(refddl);
         udt.setName(name);
         Map<String, CqlType> ksTypes = this.types.computeIfAbsent(keyspace, ks -> new LinkedHashMap<>());
         ksTypes.put(udt.getName(),udt);
@@ -277,11 +254,11 @@ public class CqlModel {
         }
     }
 
-    public void renameTable(String keyspaceName, String tableName, String newTableName) {
-        Map<String, CqlTable> tablesInKeyspace = tableDefs.get(keyspaceName);
-        CqlTable table = tablesInKeyspace.remove(tableName);
+    public void renameTable(CqlTable extant, String newTableName) {
+        Map<String, CqlTable> tablesInKs = tableDefs.get(extant.getKeySpace());
+        CqlTable table = tablesInKs.get(extant.getName());
         table.setName(newTableName);
-        tablesInKeyspace.put(newTableName,table);
+        tablesInKs.put(table.getName(),table);
     }
 
     public void renameType(String keyspaceName, String typeName, String newTypeName) {
@@ -289,5 +266,25 @@ public class CqlModel {
         CqlType cqlType = typesInKeyspace.remove(typeName);
         cqlType.setName(newTypeName);
         typesInKeyspace.put(newTypeName,cqlType);
+    }
+
+    public void setTableCompactStorage(boolean isCompactStorage) {
+        table.setCompactStorage(isCompactStorage);
+    }
+
+    public void setKeyspaceDurableWrites(String booleanLiteral) {
+        keyspace.setDurableWrites(Boolean.parseBoolean(booleanLiteral));
+    }
+
+    public void setReplicationData(String repldata) {
+        keyspace.setReplicationData(repldata);
+    }
+
+    public Map<String, Map<String, CqlType>> getTypesByKeyspaceAndName() {
+        return types;
+    }
+
+    public void addClusteringOrder(String colname, String order) {
+        table.addTableClusteringOrder(colname, order);
     }
 }

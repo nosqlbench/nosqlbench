@@ -25,8 +25,13 @@ public interface Labeled {
     default Map<String, String> getLabelsAnd(String... keyvalues) {
         LinkedHashMap<String, String> map = new LinkedHashMap<>(getLabels());
         for (int idx = 0; idx < keyvalues.length; idx+=2) {
-            map.put(keyvalues[0],keyvalues[1]);
+            map.put(keyvalues[idx],keyvalues[idx+1]);
         }
+        return map;
+    }
+    default Map<String, String> getLabelsAnd(Map<String,String> extra) {
+        LinkedHashMap<String,String> map = new LinkedHashMap<>(getLabels());
+        map.putAll(extra);
         return map;
     }
 

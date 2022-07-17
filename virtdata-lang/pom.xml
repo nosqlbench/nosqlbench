@@ -78,7 +78,7 @@
                             </includes>
                         </fileset>
                     </filesets>
-                    <followSymlinks>false</followSymlinks>
+                    <followSymLinks>false</followSymLinks>
                 </configuration>
             </plugin>
 

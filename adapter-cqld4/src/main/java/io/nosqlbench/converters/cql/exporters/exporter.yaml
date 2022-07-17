@@ -1,8 +1,9 @@
-text_transformers:
-  - class: CGRegexReplacer
-    config:
-      replacers:
-        - /a/b/
+# unimplemented
+#text_transformers:
+#  - class: CGRegexReplacer
+#    config:
+#      replacers:
+#        - /a/b/
 
 model_transformers:
 
@@ -30,8 +31,9 @@ model_transformers:
 #  # Removes Keyspace DDL statements
 #  - class: CGKeySpaceDDLRemover
 
-  # Adds IF NOT EXIST to all DDL
-  - class: CGIfNotExistsInjector
+#  This is now a generator behavior that is done automatically
+#  # Adds IF NOT EXIST to all DDL
+#  - class: CGIfNotExistsInjector
 
   # Replaces UDTs with blobs until we have full UDT generation capability
   - class: CGUdtReplacer
@@ -44,15 +46,59 @@ model_transformers:
   # Uses nodetool histogram stats to weight reads and writes over all ops
   - class: CGRatioCalculator
 
-# This needs support of the AST, without relying on the refddl text images
-# In other words, it doesn't work reliably with the substitution methods
-# Don't enable it until the next revision
-#  # replaces names of keyspaces, tables, and columns with generated values
-#  - class: CGNameObfuscator
+  # replaces names of keyspaces, tables, and columns with generated values
+  - class: CGNameObfuscator
 
-naming_template: "[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]"
+naming_template: "[OPTYPE-][KEYSPACE-][TYPE-][NAME]"
 
-partition_multiplier: 30
+# for more distinction in metric names if needed:
+#naming_template: "[BLOCKNAME-][OPTYPE-][KEYSPACE-][TYPE-][NAME]"
+
+# how many partitions the primary key is limited to, compared to the value
+# found in the node tool stats. If you have the actual value from complete
+# statistics, this can be 1.0, but it is generally not accurate to take
+# stats from one node. This allows for sizing up those estimates according
+# to anecdotal information.
+
+partition_multiplier: 30.0
+
+# Timeouts for each operation category. These are specified in terms of seconds.
+# fractional values are allowed. If not specified, all operations will default to
+# using 10 seconds. Internally, these are configured as milliseconds.
+timeouts:
+  create: 60.0
+  truncate: 900.0
+  drop: 900.0
+  scan: 30.0
+  select: 10.0
+  insert: 10.0
+  update: 10.0
+  delete: 10.0
+
+# if this is set, and the total ratio for a table is 0.0D, then it will
+# not be added to the table DDL
+elide_unused_tables: false
+
+# future use, not active right now
+blockplan:
+  # not needed when tags=block:'schema.*'
+  # schema: schema-keyspaces, schema-tables, schema-types
+  schema-keyspaces: schema-keyspaces
+  schema-tables: schema-tables
+  schema-types: schema-types
+  truncate-tables: truncate-tables
+  drop-types: drop-types
+  drop-tables: drop-tables
+  drop-keyspaces: drop-keyspaces
+  # not needed when tags=block:'drop.*'
+  # drop: drop-types, drop-tables, drop-keyspaces
+  rampup: insert
+  main-insert: insert
+  main-select: select
+  main-scan: scan-10
+  main-update: update
+  # not needed when tags=block:'main.*'
+  # main: insert, select, scan-10, update
 
 
 

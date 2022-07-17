@@ -27,7 +27,7 @@ public class CGReplicationSettingInjector implements CGModelTransformer, CGTrans
     @Override
     public CqlModel apply(CqlModel model) {
         for (CqlKeyspace keyspace : model.getKeyspaceDefs()) {
-            keyspace.setRefReplDdl(this.replicationFields);
+            keyspace.setReplicationData(this.replicationFields);
         }
         return model;
     }

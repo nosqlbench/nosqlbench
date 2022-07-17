@@ -131,6 +131,97 @@ names for the classic form have not changed.
         gremlin: >-
           g.V().hasLabel("device").has("deviceid", UUID.fromString('{deviceid})')
 
+## CQL Op Template - Optional Fields
+
+If any of these are provided as op template fields or as op params, or
+as activity params, then they will have the described effect. The calls
+to set these parameters on an individual statement are only incurred if
+they are provided. Otherwise, defaults are used. These options can be
+applied to any of the statement forms above.
+
+```yaml
+params:
+
+  # Set the consistency level for this statement
+  # For Astra, use only LOCAL_QUORUM
+  # Otherwise, one of
+  # ALL|EACH_QUORUM|QUORUM|LOCAL_QUORUM|ONE|TWO|THREE|LOCAL_ONE|ANY
+  cl: LOCAL_QUORUM
+  # or consistency_level: ...
+
+  # Set the serial consistency level for this statement.
+  # Note, you probably don't need this unless you are using LWTs
+  # SERIAL ~ QUORUM, LOCAL_SERIAL ~ LOCAL_QUORUM
+  scl: LOCAL_SERIAL
+  # or serial_consistency_level: ...
+
+  # Set a statement as idempotent. This is important for determining
+  # when ops can be trivially retried with no concern for unexpected
+  # mutation in the event that it succeeds multiple times.
+  # true or false
+  idempotent: false
+
+  # Set the timeout for the operation, from the driver's perspective,
+  # in seconds. "2 seconds" is the default, but DDL statements, truncate or drop
+  # statements will generally need more. If you want millisconds, just use
+  # fractional seconds, like 0.500
+  timeout: 2.0
+
+  ## The following options are meant for advanced testing scenarios only,
+  ## and are not generally meant to be used in typical application-level,
+  ## data mode, performance or scale testing. These expose properties
+  ## which should not be set for general use. These allow for very specific
+  ## scenarios to be constructed for core system-level testing.
+  ## Some of them will only work with specially provided bindings which
+  ## can provide the correct instantiated object type.
+
+  # replace the payload with a map of String->ByteBuffer for this operation
+  # type: Map<String, ByteBuffer>
+  custom_payload: ...
+
+  # set an instantiated ExecutionProfile to be used for this operation
+  # type: com.datastax.oss.driver.api.core.config.DriverExecutionProfile
+  execution_profile: ...
+
+  # set a named execution profile to be used for this operation
+  # type: String
+  execution_profile_name: ...
+
+  # set a resolved target node to be used for this operation
+  # type: com.datastax.oss.driver.api.core.metadata.Node
+  node: ...
+
+  # set the timestamp to be used as the "now" reference for this operation
+  # type: int
+  now_in_seconds: ...
+
+  # set the page size for this operation
+  # type: int
+  page_size: ...
+
+  # set the query timestamp for this operation (~ USING TIMESTAMP)
+  # type: long
+  query_timestamp:
+
+  # set the routing key for this operation, as a single bytebuffer
+  # type: ByteArray
+  routing_key: ...
+
+  # set the routing key for this operation as an array of bytebuffers
+  # type: ByteArray[]
+  routing_keys: ...
+
+  # set the routing token for this operation
+  # type: com.datastax.oss.driver.api.core.metadata.token.Token
+  routing_token: ...
+
+  # enable (or disable) tracing for this operation
+  # This should be used with great care, as tracing imposed overhead
+  # far and above most point queries or writes. Use it sparsely or only
+  # for functional investigation
+  # type: boolean
+  tracing: ...
+```
 
 ## Driver Cache
 
@@ -140,6 +231,8 @@ simply set a `space` parameter in your op templates, with a dynamic value.
 __WARNING__: If you use the driver cache feature, be aware that creating a large
 number of driver instances will be very expensive. Generally driver instances are meant
 to be initialized and then shared throughout the life-cycle of an application process.
+Thus, if you are doing multi-instance driver testing, it is best to use bindings
+functions for the `space` parameter which have bounded cardinality per host.
 
 
 

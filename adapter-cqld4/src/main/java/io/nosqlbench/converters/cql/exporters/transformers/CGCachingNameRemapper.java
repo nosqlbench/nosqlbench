@@ -17,7 +17,7 @@
 package io.nosqlbench.converters.cql.exporters.transformers;
 
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.converters.cql.cqlast.CqlTable;
+import io.nosqlbench.api.labels.Labeled;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
 
 import java.util.HashMap;
@@ -37,25 +37,24 @@ public class CGCachingNameRemapper {
         this.namefunc = function;
     }
 
-    public synchronized String nameForType(String type, String originalName) {
-        String canonical = type+"__"+originalName;
-        return getOrCreateName(canonical);
+    public synchronized String nameForType(String type, String originalName, String prefix) {
+        String canonical = type+"_"+originalName;
+        return getOrCreateName(canonical, prefix);
     }
-    public synchronized String nameFor(NBNamedElement element) {
-        String canonical = element.getClass().getSimpleName()+"--"+element.getName();
-        return getOrCreateName(canonical);
+    public synchronized String nameFor(NBNamedElement element, String prefix) {
+        String canonical = element.getClass().getSimpleName()+"-"+element.getName();
+        return getOrCreateName(canonical, prefix);
     }
 
-    private String getOrCreateName(String canonical) {
+    private String getOrCreateName(String canonical, String prefix) {
         if (!remapped.containsKey(canonical)) {
-            String newname = namefunc.apply(index++);
+            String newname = prefix+namefunc.apply(index++);
             remapped.put(canonical,newname);
         }
         return remapped.get(canonical);
     }
 
-
-    public Function<String, String> mapperForType(CqlTable cqlTable) {
-        return in -> this.nameForType(cqlTable.getClass().getSimpleName(),in);
+    public Function<String, String> mapperForType(Labeled cqlTable, String prefix) {
+        return in -> this.nameForType(cqlTable.getClass().getSimpleName(),in, prefix);
     }
 }

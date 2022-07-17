@@ -16,6 +16,37 @@
 
 package io.nosqlbench.converters.cql.exporters.binders;
 
-public record Binding(String name, String recipe) {
+public class Binding {
+    String name;
+    String recipe;
 
+    public Binding(String name, String recipe) {
+        this.name = name;
+        this.recipe = recipe;
+    }
+
+    public Binding withPreFunctions(String... prefixes) {
+        StringBuilder sb = new StringBuilder();
+        for (String prefix : prefixes) {
+            String toAdd=prefix.trim();
+            if (!toAdd.endsWith(";")) {
+                toAdd+=";";
+            }
+            sb.append(toAdd);
+        }
+        sb.append(recipe);
+        return new Binding(getName(),sb.toString());
+    }
+
+    public String getRecipe() {
+        return recipe;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Binding withNameIncrement(long l) {
+        return new Binding(name+ l,recipe);
+    }
 }

@@ -42,7 +42,7 @@ public class NamingFolio {
 
     private final Map<String, Labeled> graph = new LinkedHashMap<>();
     private final CGElementNamer namer;
-    public final static String DEFAULT_NAMER_SPEC = "[COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
+    public final static String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
     NamingStyle namingStyle = NamingStyle.SymbolicType;
 
     public NamingFolio(String namerspec) {
@@ -75,6 +75,12 @@ public class NamingFolio {
         return name;
     }
 
+    public String nameFor(Labeled labeled, Map<String,String> fields) {
+        Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
+        String name = namer.apply(labelsPlus);
+        return name;
+
+    }
 
     public void informNamerOfAllKnownNames(CqlModel model) {
         for (CqlTable table : model.getTableDefs()) {
