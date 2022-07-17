@@ -153,15 +153,15 @@ public class CGWorkloadExporter {
                 }
 
                 Object txtr = cfgmap.get("text_transformers");
-                if (txtr!=null) {
-                    textTransformers.accept((List<Map<String,?>>) cfgmap.get("text_transformers"));
+                if (txtr != null) {
+                    textTransformers.accept((List<Map<String, ?>>) cfgmap.get("text_transformers"));
                 }
 
                 String ddl;
                 try {
                     ddl = Files.readString(srcpath);
                     logger.info("read " + ddl.length() + " character DDL file, parsing");
-                    if (textTransformers!=null) {
+                    if (textTransformers != null) {
                         ddl = textTransformers.process(ddl);
                     }
                 } catch (IOException e) {
@@ -318,16 +318,16 @@ public class CGWorkloadExporter {
 
             put("default",
                 new LinkedHashMap<>() {{
-                    put("schema", "run driver=cql tags=block:schema-.* threads===UNDEF cycles===UNDEF");
-                    put("rampup", "run driver=cql tags=block:rampup-.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
-                    put("main", "run driver=cql tags=block:main-.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
+                    put("schema", "run driver=cql tags=block:schema.* threads===UNDEF cycles===UNDEF");
+                    put("rampup", "run driver=cql tags=block:rampup.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
+                    put("main", "run driver=cql tags=block:main.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
                 }});
 
-            put("truncate", "run driver=cql tags=block:truncate-.* threads===UNDEF cycles===UNDEF");
+            put("truncate", "run driver=cql tags=block:truncate.* threads===UNDEF cycles===UNDEF");
             put("schema-keyspaces", "run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF");
             put("schema-types", "run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF");
             put("schema-tables", "run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF");
-            put("drop", "run driver=cql tags=block:drop-.* threads===UNDEF cycles===UNDEF");
+            put("drop", "run driver=cql tags=block:drop.* threads===UNDEF cycles===UNDEF");
             put("drop-tables", "run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF");
             put("drop-types", "run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF");
             put("drop-keyspaces", "run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF");
@@ -403,14 +403,16 @@ public class CGWorkloadExporter {
         Map<String, Object> ops = new LinkedHashMap<>();
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
-            ops.put(
-                namer.nameFor(table, "optype", "insert", "blockname", blockname),
-                Map.of(
-                    "prepared", genInsertSyntax(table),
-                    "timeout", timeouts.get("insert"),
-                    "ratio", writeRatioFor(table)
-                )
-            );
+            if (!isCounterTable(table)) {
+                ops.put(
+                    namer.nameFor(table, "optype", "insert", "blockname", blockname),
+                    Map.of(
+                        "prepared", genInsertSyntax(table),
+                        "timeout", timeouts.get("insert"),
+                        "ratio", writeRatioFor(table)
+                    )
+                );
+            }
         }
         return blockdata;
     }
@@ -447,18 +449,18 @@ public class CGWorkloadExporter {
 
     private Binding dividedBinding(CqlColumnDef columnDef, CqlTable tableDef) {
         CGTableStats stats = tableDef.getTableAttributes();
-        if (stats==null) {
+        if (stats == null) {
             return bindings.forColumn(columnDef);
         }
         String partitionsSpec = stats.getAttribute("Number of partitions (estimate)");
-        if (partitionsSpec==null) {
+        if (partitionsSpec == null) {
         }
         double estimatedPartitions = Double.parseDouble(partitionsSpec);
-        long modulo = (long)(estimatedPartitions*=partitionMultiplier);
-        if (modulo==0) {
+        long modulo = (long) (estimatedPartitions *= partitionMultiplier);
+        if (modulo == 0) {
             return bindings.forColumn(columnDef);
         }
-        modulo = quantizeModuloByMagnitude(modulo,1);
+        modulo = quantizeModuloByMagnitude(modulo, 1);
         logger.debug("Set partition modulo for " + tableDef.getFullName() + " to " + modulo);
         Binding binding = bindings.forColumn(columnDef, "Mod(" + modulo + "L); ");
         return binding;
@@ -467,12 +469,12 @@ public class CGWorkloadExporter {
     public static long quantizeModuloByMagnitude(long modulo, int significand) {
         double initial = modulo;
         double log10 = Math.log10(initial);
-        int zeroes = (int)log10;
-        zeroes = Math.max(1,zeroes-(significand-1));
-        long fractional = (long) Math.pow(10,zeroes);
-        long partial = ((long)initial/fractional) * fractional;
-        long nextPartial = partial+fractional;
-        if (Math.abs(initial-partial)<=Math.abs(initial-nextPartial)) {
+        int zeroes = (int) log10;
+        zeroes = Math.max(1, zeroes - (significand - 1));
+        long fractional = (long) Math.pow(10, zeroes);
+        long partial = ((long) initial / fractional) * fractional;
+        long nextPartial = partial + fractional;
+        if (Math.abs(initial - partial) <= Math.abs(initial - nextPartial)) {
             return partial;
         } else {
             return nextPartial;
