@@ -40,67 +40,63 @@ public class S4JMsgReadMapper extends S4JOpMapper {
     private final boolean durable;
     private final boolean shared;
     private final LongFunction<String> subNameStrFunc;
-    private final LongFunction<Float> msgAckRatioFunc;
+    private final float msgAckRatio;
     private final LongFunction<String> msgSelectorStrFunc;
-    private final LongFunction<Boolean> noLocalBoolFunc;
+    private final boolean noLocalBool;
     private final LongFunction<Long> readTimeoutFunc;
-    private final LongFunction<Boolean> recvNoWaitBoolFunc;
+    private final boolean recvNoWaitBool;
 
     public S4JMsgReadMapper(S4JSpace s4JSpace,
                             S4JActivity s4JActivity,
                             boolean durable,
                             boolean shared,
-                            LongFunction<Boolean> tempDestBoolFunc,
+                            boolean tempDestBool,
                             LongFunction<String> destTypeStrFunc,
                             LongFunction<String> destNameStrFunc,
-                            LongFunction<Boolean> asyncAPIBoolFunc,
-                            LongFunction<Integer> txnBatchNumFunc,
+                            boolean asyncAPIBool,
+                            int txnBatchNum,
+                            boolean blockingMsgRecvBool,
                             LongFunction<String> subNameStrFunc,
-                            LongFunction<Float> msgAckRatioFunc,
+                            float msgAckRatio,
                             LongFunction<String> msgSelectorStrFunc,
-                            LongFunction<Boolean> noLocalBoolFunc,
+                            boolean noLocalBool,
                             LongFunction<Long> readTimeoutFunc,
-                            LongFunction<Boolean> recvNoWaitBoolFunc) {
+                            boolean recvNoWaitBool) {
         super(s4JSpace,
             s4JActivity,
             S4JActivityUtil.getMsgReadOpType(durable,shared),
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc);
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool);
 
         this.durable = durable;
         this.shared = shared;
         this.subNameStrFunc = subNameStrFunc;
-        this.msgAckRatioFunc = msgAckRatioFunc;
+        this.msgAckRatio = msgAckRatio;
         this.msgSelectorStrFunc = msgSelectorStrFunc;
-        this.noLocalBoolFunc = noLocalBoolFunc;
+        this.noLocalBool = noLocalBool;
         this.readTimeoutFunc = readTimeoutFunc;
-        this.recvNoWaitBoolFunc = recvNoWaitBoolFunc;
+        this.recvNoWaitBool = recvNoWaitBool;
     }
 
     @Override
     public S4JOp apply(long value) {
-        boolean tempDest = tempDestBoolFunc.apply(value);
         String destType = destTypeStrFunc.apply(value);
         String destName = destNameStrFunc.apply(value);
-        boolean asyncApi = asyncAPIBoolFunc.apply(value);
-        int txnBatchNum = txnBatchNumFunc.apply(value);
         String subName = subNameStrFunc.apply(value);
-        float msgAckRatio = msgAckRatioFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
-        boolean noLocal = noLocalBoolFunc.apply(value);
         long readTimeout = readTimeoutFunc.apply(value);
-        boolean recvNoWait = recvNoWaitBoolFunc.apply(value);
 
         S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-        boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
+        boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 
         Destination destination;
         try {
-            destination = s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDest, destType, destName);
+            destination = s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDestBool, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new RuntimeException("Unable to create the JMS destination!");
@@ -115,10 +111,10 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                 subName,
                 msgSelector,
                 msgAckRatio,
-                noLocal,
+                noLocalBool,
                 durable,
                 shared,
-                asyncApi);
+                asyncAPIBool);
         }
         catch (JMSException jmsException) {
             throw new RuntimeException("Unable to create the JMS consumer!");
@@ -132,11 +128,12 @@ public class S4JMsgReadMapper extends S4JOpMapper {
             s4JActivity,
             jmsContext,
             destination,
-            asyncApi,
+            asyncAPIBool,
+            blockingMsgRecvBool,
             consumer,
             msgAckRatio,
             readTimeout,
-            recvNoWait,
+            recvNoWaitBool,
             commitTransaction);
     }
 }

@@ -19,11 +19,9 @@ package io.nosqlbench.driver.jms;
 
 
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
+import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
@@ -58,7 +56,8 @@ public class S4JSpace {
 
     private CommandTemplate cmdTpl;
 
-    private AtomicLong totalOpResponseCnt = new AtomicLong(0);
+    private final AtomicLong totalOpResponseCnt = new AtomicLong(0);
+    private final AtomicLong nullMsgRecvCnt = new AtomicLong(0);
 
     // Represents the JMS connection
     private PulsarConnectionFactory s4jConnFactory;
@@ -73,9 +72,7 @@ public class S4JSpace {
     private final ConcurrentHashMap<String, QueueBrowser> queueBrowsers = new ConcurrentHashMap<>();
 
     // Keep track the transaction count per thread
-    private ThreadLocal<Integer> txnBatchTrackingCnt = ThreadLocal.withInitial(() -> {
-        return Integer.valueOf(0);
-    });
+    private final ThreadLocal<Integer> txnBatchTrackingCnt = ThreadLocal.withInitial(() -> 0);
 
     private final S4JActivity s4JActivity;
     private final ActivityDef activityDef;
@@ -91,20 +88,43 @@ public class S4JSpace {
     public CommandTemplate getCmdTpl() { return this.cmdTpl; }
     public void setCmdTpl(CommandTemplate cmdTpl) { this.cmdTpl = cmdTpl; }
 
+    private String buildExecSummaryString(
+        String stmtOpType,
+        long totalCycleNum,
+        long totalResponseCnt,
+        long totalNullMsgCnt,
+        long timeElapsed )
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+            .append("shutdownSpace::waitUntilAllOpFinished -- ")
+            .append("operation type: ").append(stmtOpType).append("; ")
+            .append("cycle number: ").append(totalCycleNum).append("; ")
+            .append("response received: ").append(totalResponseCnt).append("; ");
+        if (S4JActivityUtil.isMsgReadOpType(stmtOpType)) {
+            stringBuilder.append("null msg received: ").append(totalNullMsgCnt).append("; ");
+        }
+        stringBuilder.append("shutdown time elapsed: ").append(timeElapsed);
+
+        return stringBuilder.toString();
+    }
+
     // When completing NB execution, don't shut down right away because otherwise, async operation processing may fail.
     // Instead, shut down when either one of the following condition is satisfied
     // 1) the total number of the received operation response is the same as the total number of operations being executed;
     // 2) time has passed for 1 minutes
-    private void waitUntilAllOpfinished(String stmtOpType) {
+    private void waitUntilAllOpFinished(String stmtOpType) {
         long totalCycleNum = this.s4JActivity.getActivityDef().getEndCycle();
-        long totalResponseCnt = 0;
+        long totalResponseCnt;
+        long totalNullMsgCnt;
 
         Instant shutdownStartTime = Instant.now();
-        long timeElapsed = 0;
+        long timeElapsed;
         do {
             Instant curTime = Instant.now();
             timeElapsed = Duration.between(shutdownStartTime, curTime).toSeconds();
             totalResponseCnt = this.getTotalOpResponseCnt();
+            totalNullMsgCnt = this.getTotalNullMsgRecvdCnt();
 
             // Sleep for 1 second
             try {
@@ -113,14 +133,14 @@ public class S4JSpace {
                  throw new S4JDriverUnexpectedException(e);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("shutdownSpace::waitUntilAllOpfinished -- Total operation (type: {}) response received: {}. Total cycle number: {}. Shutdown TimeElapsed: {}",
-                    stmtOpType,
-                    totalResponseCnt,
-                    totalCycleNum,
-                    timeElapsed);
+            if (logger.isTraceEnabled()) {
+                logger.trace(
+                    buildExecSummaryString(stmtOpType, totalCycleNum, totalResponseCnt, totalNullMsgCnt, timeElapsed));
             }
         } while ((totalResponseCnt < totalCycleNum) && (timeElapsed <= 5));
+
+        logger.info(
+            buildExecSummaryString(stmtOpType, totalCycleNum, totalResponseCnt, totalNullMsgCnt, timeElapsed));
     }
 
     // Properly shut down all Pulsar objects (producers, consumers, etc.) that are associated with this space
@@ -128,13 +148,9 @@ public class S4JSpace {
         try {
             // for message send and receive operations, async processing is possible
             String stmtOpType = this.cmdTpl.getStatic("optype");
-            if (StringUtils.equalsAnyIgnoreCase(stmtOpType,
-                S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label,
-                S4JActivityUtil.MSG_OP_TYPES.MSG_READ.label,
-                S4JActivityUtil.MSG_OP_TYPES.MSG_READ_DURABLE.label,
-                S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED.label,
-                S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label)) {
-                this.waitUntilAllOpfinished(stmtOpType);
+            if ( S4JActivityUtil.isMsgSendOpType(stmtOpType) ||
+                 S4JActivityUtil.isMsgReadOpType(stmtOpType) ) {
+                waitUntilAllOpFinished(stmtOpType);
             }
 
             this.txnBatchTrackingCnt.remove();
@@ -164,7 +180,8 @@ public class S4JSpace {
             s4jConnFactory.close();
         }
         catch (JMSException je) {
-            throw new RuntimeException("Unexpected error when shutting down S4JSpace!");
+            je.printStackTrace();
+            throw new S4JDriverUnexpectedException("Unexpected error when shutting down S4JSpace!");
         }
     }
 
@@ -174,7 +191,7 @@ public class S4JSpace {
 
     public void incTxnBatchTrackingCnt() {
         int curVal = getTxnBatchTrackingCnt();
-        txnBatchTrackingCnt.set(Integer.valueOf(curVal + 1));
+        txnBatchTrackingCnt.set(curVal + 1);
     }
 
     public long getTotalOpResponseCnt() {
@@ -187,6 +204,14 @@ public class S4JSpace {
         totalOpResponseCnt.set(0);
     }
 
+    public long getTotalNullMsgRecvdCnt() {
+        return nullMsgRecvCnt.get();
+    }
+    public long incTotalNullMsgRecvdCnt() {
+        return nullMsgRecvCnt.incrementAndGet();
+    }
+    public void resetTotalNullMsgRecvdCnt() { nullMsgRecvCnt.set(0); }
+
     private String getJmsContextIdentifier(int jmsConnSeqNum, int jmsSessionSeqNum) {
         return S4JActivityUtil.buildCacheKey(
             this.spaceName,
@@ -194,9 +219,37 @@ public class S4JSpace {
             StringUtils.join("session-", jmsSessionSeqNum));
     }
 
+    // Create JMSContext that represents a new JMS connection
+    private JMSContext createConnLvlJMSContext(
+        PulsarConnectionFactory s4jConnFactory,
+        S4JConnInfo s4JConnInfo,
+        int sessionMode)
+    {
+        boolean useCredentialsEnable = s4JConnInfo.isUseCredentialsEnabled();
+        JMSContext jmsConnContext;
+
+        if (!useCredentialsEnable)
+            jmsConnContext = s4jConnFactory.createContext(sessionMode);
+        else {
+            String userName = s4JConnInfo.getCredentialUserName();
+            String passWord = s4JConnInfo.getCredentialPassword();
+
+            // Password must be in "token:<token vale>" format
+            if (! StringUtils.startsWith(passWord, "token:")) {
+                throw new S4JDriverParamException(
+                    "When 'jms.useCredentialsFromCreateConnection' is enabled, " +
+                        "the provided password must be in format 'token:<token_value_...> ");
+            }
+
+            jmsConnContext = s4jConnFactory.createContext(userName, passWord, sessionMode);
+        }
+
+        return jmsConnContext;
+    }
+
     public void initializeS4JConnectionFactory(S4JConnInfo s4JConnInfo) {
         if (s4jConnFactory == null) {
-            Map<String, Object> cfgMap = new HashMap<>();
+            Map<String, Object> cfgMap;
             try {
                 cfgMap = s4JConnInfo.getS4jConfMap();
                 s4jConnFactory = new PulsarConnectionFactory(cfgMap);
@@ -209,7 +262,7 @@ public class S4JSpace {
                     String jmsConnContextIdStr = getJmsContextIdentifier(i,0);
                     String clientIdStr = Base64.getEncoder().encodeToString(jmsConnContextIdStr.getBytes());
 
-                    JMSContext jmsConnContext = new PulsarJMSContext(s4jConnFactory, sessionMode);
+                    JMSContext jmsConnContext = createConnLvlJMSContext(s4jConnFactory, s4JConnInfo, sessionMode);
                     jmsConnContext.setClientID(clientIdStr);
                     jmsConnContext.setExceptionListener(e -> {
                         if (logger.isDebugEnabled()) {
@@ -279,9 +332,8 @@ public class S4JSpace {
         int connSeqNum =  (int) curCycle % totalConnNum;
         int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
         String jmsContextIdStr = getJmsContextIdentifier(connSeqNum, sessionSeqNum);
-        S4JJMSContextWrapper s4JJMSContextWrapper = jmsContexts.get(jmsContextIdStr);
 
-        return s4JJMSContextWrapper;
+        return jmsContexts.get(jmsContextIdStr);
     }
 
     /**
@@ -356,11 +408,10 @@ public class S4JSpace {
                     @Override
                     public void onCompletion(Message message) {
                         try {
-                            if (logger.isDebugEnabled()) {
+                            if (logger.isTraceEnabled()) {
                                 // for testing purpose
                                 String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-
-                                logger.debug("onCompletion::Async message send successful - message ID {} ({}) "
+                                logger.trace("onCompletion::Async message send successful - message ID {} ({}) "
                                     , message.getJMSMessageID(), myMsgSeq);
                             }
 

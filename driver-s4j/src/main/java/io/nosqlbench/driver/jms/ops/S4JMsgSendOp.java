@@ -21,6 +21,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.jms.S4JActivity;
 import io.nosqlbench.driver.jms.S4JSpace;
+import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,17 +87,9 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
 
                 s4JSpace.incTotalOpResponseCnt();
             }
-
-        } catch (MessageFormatRuntimeException mfre) {
-            logger.error("Invalid message is specified - " + mfre.getMessage());
-        } catch (InvalidDestinationRuntimeException idre) {
-            logger.error("Invalid destination is specified - " + idre.getMessage());
-        } catch (MessageNotWriteableRuntimeException mnwre) {
-            logger.error("Set value to a read-only message property - " + mnwre.getMessage());
-        } catch (JMSRuntimeException jre) {
-            logger.error("An internal error happened when sending the message - " + jre.getMessage());
-        } catch (JMSException je) {
-            logger.error("Unexpected error - " + je.getMessage());
+        } catch (JMSException e) {
+            e.printStackTrace();
+            throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
         }
     }
 }

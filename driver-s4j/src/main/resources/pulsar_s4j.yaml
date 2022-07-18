@@ -11,7 +11,13 @@ params:
   temporary_dest: "false"
   dest_type: "topic"
   dest_name: "mys4jtest_t"
+  # default: true
   async_api: "false"
+  # whether to wait indefinitely (as the default behavior)
+  # - only applies when "async_api" is false (synchronous API)
+  # - only applies to message receiving
+  # - default: false
+  blocking_msg_recv: "false"
 
 blocks:
   ###################

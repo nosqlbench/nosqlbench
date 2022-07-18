@@ -34,9 +34,9 @@ public class S4JMessageListener implements MessageListener {
     private final static Logger logger = LogManager.getLogger(S4JSpace.class);
 
     private final float msgAckRatio;
-    private JMSContext jmsContext;
-    private S4JSpace s4JSpace;
-    private S4JActivity s4JActivity;
+    private final JMSContext jmsContext;
+    private final S4JSpace s4JSpace;
+    private final S4JActivity s4JActivity;
 
     public S4JMessageListener(JMSContext jmsContext, S4JSpace s4JSpace, float msgAckRatio) {
         this.jmsContext = jmsContext;
@@ -57,15 +57,17 @@ public class S4JMessageListener implements MessageListener {
                 Histogram messageSizeHistogram = this.s4JActivity.getMessagesizeHistogram();
                 messageSizeHistogram.update(msgSize);
 
-                if (logger.isDebugEnabled()) {
+                if (logger.isTraceEnabled()) {
                     // for testing purpose
                     String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-
-                    logger.debug("onMessage::Async message receive successful - message ID {} ({}) "
+                    logger.trace("onMessage::Async message receive successful - message ID {} ({}) "
                         , message.getJMSMessageID(), myMsgSeq);
                 }
 
                 s4JSpace.incTotalOpResponseCnt();
+            }
+            else {
+                s4JSpace.incTotalNullMsgRecvdCnt();
             }
         }
         catch (JMSException jmsException) {

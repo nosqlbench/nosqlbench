@@ -33,29 +33,32 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
     protected final S4JActivity s4JActivity;
     protected final String s4jOpType;
 
-    protected final LongFunction<Boolean> tempDestBoolFunc;
+    protected final boolean tempDestBool;
     protected final LongFunction<String> destTypeStrFunc;
     protected final LongFunction<String> destNameStrFunc;
-    protected final LongFunction<Boolean> asyncAPIBoolFunc;
-    protected final LongFunction<Integer> txnBatchNumFunc;
+    protected final boolean asyncAPIBool;
+    protected final int txnBatchNum;
+    protected final boolean blockingMsgRecvBool;
 
     public S4JOpMapper(S4JSpace s4JSpace,
                        S4JActivity s4JActivity,
                        String s4jOpType,
-                       LongFunction<Boolean> tempDestBoolFunc,
+                       boolean tempDestBool,
                        LongFunction<String> destTypeStrFunc,
                        LongFunction<String> destNameStrFunc,
-                       LongFunction<Boolean> asyncAPIBoolFunc,
-                       LongFunction<Integer> txnBatchNumFunc)
+                       boolean asyncAPIBool,
+                       int txnBatchNum,
+                       boolean blockingMsgRecvBool)
     {
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
         this.s4jOpType = s4jOpType;
-        this.tempDestBoolFunc = tempDestBoolFunc;
+        this.tempDestBool =  tempDestBool;
         this.destTypeStrFunc = destTypeStrFunc;
         this.destNameStrFunc = destNameStrFunc;
-        this.asyncAPIBoolFunc = asyncAPIBoolFunc;
-        this.txnBatchNumFunc = txnBatchNumFunc;
+        this.asyncAPIBool = asyncAPIBool;
+        this.txnBatchNum = txnBatchNum;
+        this.blockingMsgRecvBool = blockingMsgRecvBool;
     }
 
     protected boolean commitTransaction(int txnBatchNum, int jmsSessionMode, long curCycleNum) {
@@ -68,7 +71,6 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
 
             if ( ( (txnBatchTackingCnt >=  txnBatchNum) && ((txnBatchTackingCnt % txnBatchNum) == 0) ) ||
                  (curCycleNum == (s4JActivity.getActivityDef().getCycleCount() - 1)) ) {
-                commitTransaction = true;
                 if (logger.isDebugEnabled()) {
                     logger.debug("Commit transaction ({}, {}, {})",
                         txnBatchTackingCnt,
@@ -82,6 +84,6 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
             s4JSpace.incTxnBatchTrackingCnt();
         }
 
-        return commitTransaction;
+        return !commitTransaction;
     }
 }

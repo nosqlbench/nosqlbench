@@ -54,16 +54,15 @@ public class S4JMsgSendMapper extends S4JOpMapper {
     private final LongFunction<String> msgBodyRawJsonStrFunc;
 
     private final static String s4jOpType = S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label;
-    // TODO: calculate total size of sent messages
-    private long totalMsgSize = 0;
 
     public S4JMsgSendMapper(S4JSpace s4JSpace,
                             S4JActivity s4JActivity,
-                            LongFunction<Boolean> tempDestBoolFunc,
+                            boolean tempDestBool,
                             LongFunction<String> destTypeStrFunc,
                             LongFunction<String> destNameStrFunc,
-                            LongFunction<Boolean> asyncAPIBoolFunc,
-                            LongFunction<Integer> txnBatchNumFunc,
+                            boolean asyncAPIBool,
+                            int txnBatchNum,
+                            boolean blockingMsgRecvBool,
                             LongFunction<String> msgHeaderRawJsonStrFunc,
                             LongFunction<String> msgPropRawJsonStrFunc,
                             LongFunction<String> msgTypeFunc,
@@ -71,11 +70,12 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         super(s4JSpace,
             s4JActivity,
             S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label,
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc);
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool);
 
         this.msgHeaderRawJsonStrFunc = msgHeaderRawJsonStrFunc;
         this.msgPropRawJsonStrFunc = msgPropRawJsonStrFunc;
@@ -146,7 +146,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
     }
 
     private Message updateMessageHeaders(S4JJMSContextWrapper s4JJMSContextWrapper, Message message, String msgType, String msgHeaderRawJsonStr) throws JMSException {
-        int messageSize = Integer.valueOf(message.getStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP));
+        int messageSize = Integer.parseInt(message.getStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP));
 
         // Check if msgHeaderRawJsonStr is a valid JSON string with a collection of key/value pairs
         // - if Yes, convert it to a map
@@ -204,18 +204,18 @@ public class S4JMsgSendMapper extends S4JOpMapper {
                     }*/
                 } catch (NumberFormatException nfe) {
                     logger.warn("Incorrect value format ('{}') for the message header field ('{}')!",
-                        value.toString(), msgHeaderKey);
+                        value, msgHeaderKey);
                 }
             }
         }
 
-        message.setStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP, String.valueOf(messageSize));
+        outMessage.setStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP, String.valueOf(messageSize));
 
         return outMessage;
     }
 
     private Message updateMessageProperties(Message message, String msgPropertyRawJsonStr) throws JMSException {
-        int messageSize = Integer.valueOf(message.getStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP));
+        int messageSize = Integer.parseInt(message.getStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP));
 
         // Check if jmsMsgPropertyRawJsonStr is a valid JSON string with a collection of key/value pairs
         // - if Yes, convert it to a map
@@ -237,7 +237,6 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         // and "value" as the property value; and the type of the property value is "string"
         //
         // If the value type is not specified, use "string" as the default value type.
-        Message outMessage = message;
         for (Map.Entry<String, String> entry : jmsMsgProperties.entrySet()) {
             String rawKeyStr = entry.getKey();
             String value = entry.getValue();
@@ -253,25 +252,25 @@ public class S4JMsgSendMapper extends S4JOpMapper {
                 }
 
                 if (StringUtils.isBlank(valueType)) {
-                    outMessage.setStringProperty(entry.getKey(), value);
+                    message.setStringProperty(entry.getKey(), value);
                 }
                 else {
                     if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.SHORT.label))
-                        outMessage.setShortProperty(key, NumberUtils.toShort(value));
+                        message.setShortProperty(key, NumberUtils.toShort(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.INT.label))
-                        outMessage.setIntProperty(key, NumberUtils.toInt(value));
+                        message.setIntProperty(key, NumberUtils.toInt(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.LONG.label))
-                        outMessage.setLongProperty(key, NumberUtils.toLong(value));
+                        message.setLongProperty(key, NumberUtils.toLong(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.FLOAT.label))
-                        outMessage.setFloatProperty(key, NumberUtils.toFloat(value));
+                        message.setFloatProperty(key, NumberUtils.toFloat(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.DOUBLE.label))
-                        outMessage.setDoubleProperty(key, NumberUtils.toDouble(value));
+                        message.setDoubleProperty(key, NumberUtils.toDouble(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.BOOLEAN.label))
-                        outMessage.setBooleanProperty(key, BooleanUtils.toBoolean(value));
+                        message.setBooleanProperty(key, BooleanUtils.toBoolean(value));
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.STRING.label))
-                        outMessage.setStringProperty(key, value);
+                        message.setStringProperty(key, value);
                     else if (StringUtils.equalsIgnoreCase(valueType, S4JActivityUtil.JMS_MSG_PROP_TYPES.BYTE.label))
-                        outMessage.setByteProperty(key, NumberUtils.toByte(value));
+                        message.setByteProperty(key, NumberUtils.toByte(value));
                     else
                         throw new S4JDriverParamException(
                             "Unsupported JMS message property value type (\"" + valueType + "\"). " +
@@ -285,19 +284,16 @@ public class S4JMsgSendMapper extends S4JOpMapper {
 
         message.setStringProperty(S4JActivityUtil.NB_MSG_SIZE_PROP, String.valueOf(messageSize));
 
-        return outMessage;
+        return message;
     }
 
     @Override
     public S4JOp apply(long value) {
-        boolean tempDest = tempDestBoolFunc.apply(value);
         String destType = destTypeStrFunc.apply(value);
         String destName = destNameStrFunc.apply(value);
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(value);
         String jmsMsgPropertyRawJsonStr = msgPropRawJsonStrFunc.apply(value);
         String jmsMsgBodyRawJsonStr = msgBodyRawJsonStrFunc.apply(value);
-        boolean asyncApi = asyncAPIBoolFunc.apply(value);
-        int txnBatchNum = txnBatchNumFunc.apply(value);
 
         if (!S4JActivityUtil.isValidOptypeAndDestTypeCombo(s4jOpType, destType)) {
             throw new S4JDriverParamException("Invalid S4J 'optype' value (\"" + s4jOpType + "\") for destination type (\"" + destType + "\")");
@@ -309,11 +305,11 @@ public class S4JMsgSendMapper extends S4JOpMapper {
 
         S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-        boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
+        boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 
         Destination destination;
         try {
-            destination = s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDest, destType, destName);
+            destination = s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDestBool, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new S4JDriverUnexpectedException("Unable to create the JMS destination!");
@@ -321,7 +317,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
 
         JMSProducer producer;
         try {
-            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, destination, destType, asyncApi);
+            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, destination, destType, asyncAPIBool);
         }
         catch (JMSException jmsException) {
             throw new S4JDriverUnexpectedException("Unable to create the JMS producer!");
@@ -378,7 +374,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
             s4JActivity,
             jmsContext,
             destination,
-            asyncApi,
+            asyncAPIBool,
             producer,
             message,
             commitTransaction);

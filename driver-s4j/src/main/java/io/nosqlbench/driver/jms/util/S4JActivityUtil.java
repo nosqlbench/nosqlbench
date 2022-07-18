@@ -51,7 +51,9 @@ public class S4JActivityUtil {
         ASYNC_API("async_api"),
         // Transaction batch size
         // - Only relevant when session mode is SESSION_TRANSACTED
-        TXN_BATCH_NUM("txn_batch_num");
+        TXN_BATCH_NUM("txn_batch_num"),
+        // Whether to use blocking message receiving as the default behavior
+        BLOCKING_MSG_RECV("blocking_msg_recv");
 
         public final String label;
 
@@ -252,9 +254,22 @@ public class S4JActivityUtil {
         return validCombo;
     }
 
+    public static boolean isMsgSendOpType(String opType) {
+        return StringUtils.equalsAnyIgnoreCase(opType,
+            MSG_OP_TYPES.MSG_SEND.label );
+    }
+
+    public static boolean isMsgReadOpType(String opType) {
+        return StringUtils.equalsAnyIgnoreCase(opType,
+            MSG_OP_TYPES.MSG_READ.label,
+            MSG_OP_TYPES.MSG_READ_DURABLE.label,
+            MSG_OP_TYPES.MSG_READ_SHARED.label,
+            MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label );
+    }
+
     ///////
     // Convert JSON string to a key/value map
-    public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
+    public static Map convertJsonToMap(String jsonStr) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(jsonStr, Map.class);
     }
