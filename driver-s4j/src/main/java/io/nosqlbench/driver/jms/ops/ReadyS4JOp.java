@@ -125,148 +125,126 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         }
         String stmtOpType = cmdTpl.getStatic("optype");
 
-        // Doc-level parameter: temporary_dest (default: false)
+        // Doc-level parameter: temporary_dest (default: false) -- static
         String tempDestBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label, false, "false");
-        LongFunction<Boolean> tempDestBoolFunc = (l) -> BooleanUtils.toBoolean(tempDestBoolStr);
+        boolean tempDestBool = BooleanUtils.toBoolean(tempDestBoolStr);
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.TEMP_DEST.label, tempDestBoolStr);
 
-        // Doc-level parameter: dest_type (default: Topic)
+        // Doc-level parameter: dest_type (default: Topic) -- static
+        // TODO - this can be extended to dynamic (dynamically choosing between 'Queue' and 'Topic')
         String destTypeStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label, false, S4JActivityUtil.JMS_DEST_TYPES.TOPIC.label);
         LongFunction<String> destTypeStrFunc = (l) -> destTypeStr;
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_TYPE.label, destTypeStr);
 
-        // Doc-level parameter: dest_name
+        // Doc-level parameter: dest_name - dynamic
         LongFunction<String> destNameStrFunc = lookupParameterFunc(S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, true, "persistent://public/default/nb4_s4j_test");
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.DEST_NAME.label, destNameStrFunc.apply(0));
 
-        // Doc-level parameter: async_api (default: false)
+        // Doc-level parameter: async_api (default: true) - static
         String asyncAPIBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, false, "true");
-        LongFunction<Boolean> asyncAPIBoolFunc = (l) -> BooleanUtils.toBoolean(asyncAPIBoolStr);
+        boolean asyncAPIBool = BooleanUtils.toBoolean(asyncAPIBoolStr);
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, asyncAPIBoolStr);
 
-        // Doc-level parameter: txn_batch_num
+        // Doc-level parameter: txn_batch_num - static
         String txnBatchNumStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, false, "0");
-        LongFunction<Integer> txnBatchNumFunc = (l) -> NumberUtils.toInt(txnBatchNumStr, 0);
+        int txnBatchNum = NumberUtils.toInt(txnBatchNumStr, 0);
         logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, txnBatchNumStr);
+
+        // Doc-level parameter: blocking_msg_recv (default: false) - static
+        String blockingMsgRecvBoolStr = lookupStaticParameter(S4JActivityUtil.DOC_LEVEL_PARAMS.BLOCKING_MSG_RECV.label, false, "false");
+        boolean blockingMsgRecvBool = BooleanUtils.toBoolean(blockingMsgRecvBoolStr);
+        logger.info("{}: {}", S4JActivityUtil.DOC_LEVEL_PARAMS.BLOCKING_MSG_RECV.label, blockingMsgRecvBoolStr);
 
         if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_SEND.label)) {
             return resolveMsgSend(
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ.label)) {
             return resolveMsgRead(
                 false,
                 false,
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED.label)) {
             return resolveMsgRead(
                 false,
                 true,
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_DURABLE.label)) {
             return resolveMsgRead(
                 true,
                 false,
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_READ_SHARED_DURABLE.label)) {
             return resolveMsgRead(
                 true,
                 true,
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else if (StringUtils.equalsIgnoreCase(stmtOpType, S4JActivityUtil.MSG_OP_TYPES.MSG_BROWSE.label)) {
             return resolveMsgBrowse(
-                tempDestBoolFunc,
+                tempDestBool,
                 destTypeStrFunc,
                 destNameStrFunc,
-                asyncAPIBoolFunc,
-                txnBatchNumFunc);
+                asyncAPIBool,
+                txnBatchNum,
+                blockingMsgRecvBool);
         } else {
             throw new RuntimeException("Unsupported JMS operation type");
         }
     }
 
     private LongFunction<S4JOp> resolveMsgSend(
-        LongFunction<Boolean> tempDestBoolFunc,
+        boolean tempDestBool,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc,
-        LongFunction<Integer> txnBatchNumFunc
+        boolean asyncAPIBool,
+        int txnBatchNum,
+        boolean blockingMsgRecvBool
     ) {
         // JMS message headers
-        LongFunction<String> msgHeaderJsonStrFunc;
-        if (cmdTpl.isStatic("msg_header")) {
-            msgHeaderJsonStrFunc = (l) -> cmdTpl.getStatic("msg_header");
-        } else if (cmdTpl.isDynamic("msg_header")) {
-            msgHeaderJsonStrFunc = (l) -> cmdTpl.getDynamic("msg_property", l);
-        } else {
-            msgHeaderJsonStrFunc = (l) -> null;
-        }
+        LongFunction<String> msgHeaderJsonStrFunc = lookupParameterFunc("msg_header");
 
         // JMS message properties
-        LongFunction<String> msgPropJsonStrFunc;
-        if (cmdTpl.isStatic("msg_property")) {
-            msgPropJsonStrFunc = (l) -> cmdTpl.getStatic("msg_property");
-        } else if (cmdTpl.isDynamic("msg_property")) {
-            msgPropJsonStrFunc = (l) -> cmdTpl.getDynamic("msg_property", l);
-        } else {
-            msgPropJsonStrFunc = (l) -> null;
-        }
+        LongFunction<String> msgPropJsonStrFunc = lookupParameterFunc("msg_property");
 
         // JMS message type
-        LongFunction<String> msgTypeFunc;
-        if (cmdTpl.containsKey("msg_type")) {
-            if (cmdTpl.isStatic("msg_type")) {
-                msgTypeFunc = (l) -> cmdTpl.getStatic("msg_type");
-            } else if (cmdTpl.isDynamic("msg_type")) {
-                msgTypeFunc = (l) -> cmdTpl.getDynamic("msg_type", l);
-            } else {
-                msgTypeFunc = (l) -> null;
-            }
-        } else {
-            throw new RuntimeException("JMS message send:: \"msg_type\" field must be specified!");
-        }
+        LongFunction<String> msgTypeFunc = lookupParameterFunc("msg_type");
 
         // JMS message body
-        LongFunction<String> msgBodyRawJsonStrFunc;
-        if (cmdTpl.containsKey("msg_body")) {
-            if (cmdTpl.isStatic("msg_body")) {
-                msgBodyRawJsonStrFunc = (l) -> cmdTpl.getStatic("msg_body");
-            } else if (cmdTpl.isDynamic("msg_body")) {
-                msgBodyRawJsonStrFunc = (l) -> cmdTpl.getDynamic("msg_body", l);
-            } else {
-                msgBodyRawJsonStrFunc = (l) -> null;
-            }
-        } else {
-            throw new RuntimeException("JMS message send:: \"msg_body\" field must be specified!");
-        }
+        LongFunction<String> msgBodyRawJsonStrFunc = lookupParameterFunc("msg_body");
 
         return new S4JMsgSendMapper(
             s4JSpace,
             s4JActivity,
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc,
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool,
             msgHeaderJsonStrFunc,
             msgPropJsonStrFunc,
             msgTypeFunc,
@@ -276,51 +254,30 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
     private LongFunction<S4JOp> resolveMsgRead(
         boolean durableConsumer,                    // only relevant for Topic
         boolean sharedConsumer,                     // only relevant for Topic
-        LongFunction<Boolean> tempDestBoolFunc,
+        boolean tempDestBool,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc,
-        LongFunction<Integer> txnBatchNumFunc
+        boolean asyncAPIBool,
+        int txnBatchNum,
+        boolean blockingMsgRecvBool
     ) {
         // subscription name - only relevant for Topic
-        LongFunction<String> subNameStrFunc = (l) -> null;
-        if (cmdTpl.containsKey("subscription_name")) {
-            if (cmdTpl.isStatic("subscription_name")) {
-                subNameStrFunc = (l) -> cmdTpl.getStatic("subscription_name");
-            } else {
-                subNameStrFunc = (l) -> cmdTpl.getDynamic("subscription_name", l);
-            }
-        }
+        LongFunction<String> subNameStrFunc = lookupParameterFunc("subscription_name");
 
         // message acknowledgement ratio
-        LongFunction<Float> msgAckRatioFunc = (l) -> 1.0f;
-        if (cmdTpl.containsKey("msg_ack_ratio")) {
-            if (cmdTpl.isStatic("msg_ack_ratio")) {
-                msgAckRatioFunc = (l) -> NumberUtils.toFloat(cmdTpl.getStatic("msg_ack_ratio"), 1.0f);
-            } else {
-                throw new RuntimeException("\"" + "msg_ack_ratio" + "\" parameter cannot be dynamic!");
-            }
-        }
+        String msgAckRatioStr = lookupStaticParameter("msg_ack_ratio");
+        float msgAckRatio = NumberUtils.toFloat(msgAckRatioStr);
+        if (msgAckRatio < 0)
+            msgAckRatio = 0.0f;
+        else if (msgAckRatio > 1)
+            msgAckRatio = 1.0f;
 
         // message selector - only relevant for Topic
-        LongFunction<String> msgSelectorStrFunc = (l) -> null;
-        if (cmdTpl.containsKey("msg_selector")) {
-            if (cmdTpl.isStatic("msg_selector")) {
-                msgSelectorStrFunc = (l) -> cmdTpl.getStatic("msg_selector");
-            } else {
-                throw new RuntimeException("\"" + "msg_selector" + "\" parameter cannot be dynamic!");
-            }
-        }
+        LongFunction<String> msgSelectorStrFunc = lookupParameterFunc("msg_selector");
 
         // non local
-        LongFunction<Boolean> noLocalBoolFunc = (l) -> false;
-        if (cmdTpl.containsKey("no_local")) {
-            if (cmdTpl.isStatic("no_local")) {
-                noLocalBoolFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic("no_local"));
-            } else {
-                throw new RuntimeException("\"" + "no_local" + "\" parameter cannot be dynamic!");
-            }
-        }
+        String noLocalBoolStr = lookupStaticParameter("no_local");
+        boolean noLocalBool = BooleanUtils.toBoolean(noLocalBoolStr);
 
         // read timeout
         LongFunction<Long> readTimeoutFunc = (l) -> 0L;
@@ -333,58 +290,48 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         }
 
         // receive no wait
-        LongFunction<Boolean> recvNoWaitBoolFunc = (l) -> false;
-        if (cmdTpl.containsKey("no_wait")) {
-            if (cmdTpl.isStatic("no_wait")) {
-                recvNoWaitBoolFunc = (l) -> BooleanUtils.toBoolean(cmdTpl.getStatic("no_wait"));
-            } else {
-                throw new RuntimeException("\"" + "no_wait" + "\" parameter cannot be dynamic!");
-            }
-        }
+        String recvNoWaitBoolStr = lookupStaticParameter("no_wait");
+        boolean recvNoWaitBool = BooleanUtils.toBoolean(recvNoWaitBoolStr);
 
         return new S4JMsgReadMapper(
             s4JSpace,
             s4JActivity,
             durableConsumer,
             sharedConsumer,
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc,
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool,
             subNameStrFunc,
-            msgAckRatioFunc,
+            msgAckRatio,
             msgSelectorStrFunc,
-            noLocalBoolFunc,
+            noLocalBool,
             readTimeoutFunc,
-            recvNoWaitBoolFunc);
+            recvNoWaitBool);
     }
 
     private LongFunction<S4JOp> resolveMsgBrowse(
-        LongFunction<Boolean> tempDestBoolFunc,
+        boolean tempDestBool,
         LongFunction<String> destTypeStrFunc,
         LongFunction<String> destNameStrFunc,
-        LongFunction<Boolean> asyncAPIBoolFunc,
-        LongFunction<Integer> txnBatchNumFunc
+        boolean asyncAPIBool,
+        int txnBatchNum,
+        boolean blockingMsgRecvBool
     ) {
-        // message selector - only relevant for Topic
-        LongFunction<String> msgSelectorStrFunc = (l) -> null;
-        if (cmdTpl.containsKey("msg_selector")) {
-            if (cmdTpl.isStatic("msg_selector")) {
-                msgSelectorStrFunc = (l) -> cmdTpl.getStatic("msg_selector");
-            } else {
-                throw new RuntimeException("\"" + "msg_selector" + "\" parameter cannot be dynamic!");
-            }
-        }
+        LongFunction<String> msgSelectorStrFunc =
+            lookupParameterFunc("msg_selector", false, "");
 
         return new S4JMsgBrowseMapper(
             s4JSpace,
             s4JActivity,
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc,
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool,
             msgSelectorStrFunc);
     }
 }

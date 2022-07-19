@@ -21,8 +21,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.driver.jms.S4JActivity;
 import io.nosqlbench.driver.jms.S4JSpace;
+import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,12 +32,12 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
 
     private final static Logger logger = LogManager.getLogger(S4JMsgReadOp.class);
 
-    private S4JSpace s4JSpace;
+    private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
     private final JMSContext jmsContext;
     private final int jmsSessionMode;
-    private final Destination destination;
     private final boolean asyncApi;
+    private final boolean blockingMsgRecv;
     private final JMSConsumer jmsConsumer;
     private final float msgAckRatio;
     private final long msgReadTimeout;
@@ -52,6 +52,7 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                         JMSContext jmsContext,
                         Destination destination,
                         boolean asyncApi,
+                        boolean blockingMsgRecv,
                         JMSConsumer consumer,
                         float msgAckRatio,
                         long readTimeout,
@@ -61,21 +62,13 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
         this.s4JActivity = s4JActivity;
         this.jmsContext = jmsContext;
         this.jmsSessionMode = jmsContext.getSessionMode();
-        this.destination = destination;
         this.asyncApi = asyncApi;
+        this.blockingMsgRecv = blockingMsgRecv;
         this.jmsConsumer = consumer;
-
         this.msgAckRatio = msgAckRatio;
-        if (msgAckRatio < 0)
-            msgAckRatio = 0.0f;
-        else if (msgAckRatio > 1)
-            msgAckRatio = 1.0f;
-
         this.msgReadTimeout = readTimeout;
         this.recvNoWait = recvNoWait;
-
         this.commitTransact = commitTransact;
-
         this.bytesCounter = s4JActivity.getBytesCounter();
         this.messageSizeHistogram = s4JActivity.getMessagesizeHistogram();
     }
@@ -87,11 +80,14 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
             Message recvdMsg;
 
             try {
-                // By default, if message read time out value is 0, it will block forever
-                // Simulate it as the case for recvNoWait
-                if (recvNoWait || (msgReadTimeout == 0)) {
+                // blocking message receiving only applies to synchronous API
+                if (blockingMsgRecv) {
+                    recvdMsg = jmsConsumer.receive();
+                }
+                else if (recvNoWait) {
                     recvdMsg = jmsConsumer.receiveNoWait();
                 } else {
+                    // timeout value 0 means to wait forever
                     recvdMsg = jmsConsumer.receive(msgReadTimeout);
                 }
                 if (this.commitTransact) jmsContext.commit();
@@ -113,9 +109,12 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
 
                     s4JSpace.incTotalOpResponseCnt();
                 }
+                else {
+                    s4JSpace.incTotalNullMsgRecvdCnt();
+                }
             } catch (JMSException e) {
                 e.printStackTrace();
-                throw new RuntimeException("Unexpected errors when receiving a JMS message.");
+                throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
             }
         }
     }

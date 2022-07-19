@@ -86,6 +86,25 @@ public class S4JConnInfo {
         }
     }
 
+    public boolean isUseCredentialsEnabled() {
+        boolean enabled = false;
+        if (s4jConfMap.containsKey("jms.useCredentialsFromCreateConnection")) {
+            enabled = BooleanUtils.toBoolean(s4jConfMap.get("jms.useCredentialsFromCreateConnection").toString());
+        }
+        return enabled;
+    }
+
+    public String getCredentialUserName() {
+        return "dummy";
+    }
+
+    public String getCredentialPassword() {
+        if (s4jConfMap.containsKey("authParams"))
+            return s4jConfMap.get("authParams").toString();
+        else
+            return "";
+    }
+
     private int getSessionModeFromStr(String sessionModeStr) {
         // default ack mode: auto_ack
         int sessionMode = -1;

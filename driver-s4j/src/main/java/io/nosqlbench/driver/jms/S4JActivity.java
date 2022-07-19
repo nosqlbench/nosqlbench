@@ -23,7 +23,6 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
 import io.nosqlbench.driver.jms.ops.ReadyS4JOp;
 import io.nosqlbench.driver.jms.ops.S4JOp;
-import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JConf;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;

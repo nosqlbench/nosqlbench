@@ -42,27 +42,28 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
     public S4JMsgBrowseMapper(S4JSpace s4JSpace,
                               S4JActivity s4JActivity,
-                              LongFunction<Boolean> tempDestBoolFunc,
+                              boolean tempDestBool,
                               LongFunction<String> destTypeStrFunc,
                               LongFunction<String> destNameStrFunc,
-                              LongFunction<Boolean> asyncAPIBoolFunc,
-                              LongFunction<Integer> txnBatchNumFunc,
+                              boolean asyncAPIBool,
+                              int txnBatchNum,
+                              boolean blockingMsgRecvBool,
                               LongFunction<String> msgSelectorStrFunc) {
         super(s4JSpace,
             s4JActivity,
             S4JActivityUtil.MSG_OP_TYPES.MSG_BROWSE.label,
-            tempDestBoolFunc,
+            tempDestBool,
             destTypeStrFunc,
             destNameStrFunc,
-            asyncAPIBoolFunc,
-            txnBatchNumFunc);
+            asyncAPIBool,
+            txnBatchNum,
+            blockingMsgRecvBool);
 
         this.msgSelectorStrFunc = msgSelectorStrFunc;
     }
 
     @Override
     public S4JOp apply(long value) {
-        boolean tempDest = tempDestBoolFunc.apply(value);
         String destType = destTypeStrFunc.apply(value);
         String destName = destNameStrFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
@@ -70,7 +71,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
         S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
-        if (tempDest) {
+        if (tempDestBool) {
             throw new RuntimeException("Can't use temporary destination for a QueueBrowser !");
         }
 
@@ -80,7 +81,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
 
         Queue queue;
         try {
-            queue = (Queue)s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDest, destType, destName);
+            queue = (Queue)s4JSpace.getOrCreateJmsDestination(s4JJMSContextWrapper, tempDestBool, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new RuntimeException("Unable to create the JMS destination!");
