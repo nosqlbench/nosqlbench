@@ -30,7 +30,7 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
 
     public CqlColumnDef(CqlTable table, int position, String colname, String typedef) {
         this.table = table;
-        this.position=position;
+        this.position = position;
         this.type = typedef;
         this.name = colname;
     }
@@ -48,7 +48,7 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     }
 
     public String getTrimmedTypedef() {
-        return type.replaceAll(" ","");
+        return type.replaceAll(" ", "");
     }
 
     public String getTableName() {
@@ -92,18 +92,21 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     }
 
     public String getSyntax() {
-        return getName()+" "+getTrimmedTypedef();
+        return getName() + " " + getTrimmedTypedef();
     }
 
     public boolean isPartitionKey() {
         return table.isPartitionKey(position);
     }
+
     public boolean isLastPartitionKey() {
         return table.isLastPartitionKey(position);
     }
+
     public boolean isClusteringColumn() {
         return table.isClusteringColumn(position);
     }
+
     public boolean isLastClusteringColumn() {
         return table.isLastClusteringColumn(position);
     }
@@ -113,6 +116,6 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     }
 
     public String getFullName() {
-        return getKeyspace()+"."+getTable().getName()+"."+getName()+"(column)";
+        return getKeyspace() + "." + getTable().getName() + "." + getName() + "(column)";
     }
 }

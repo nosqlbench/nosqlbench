@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.*;
 
 public class UniformWorkloadSpecificationTest {
+
     private final static Logger logger = LogManager.getLogger(UniformWorkloadSpecificationTest.class);
 
     private final static Object[] mdPredicate = new Object[] {
