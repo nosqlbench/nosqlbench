@@ -290,6 +290,7 @@ public class Cqld4Space {
             .add(Param.optional("password", String.class, "password (see also passfile)"))
             .add(Param.optional("passfile", String.class, "file to load the password from"))
             .add(Param.optional("whitelist", String.class, "list of whitelist hosts addresses"))
+            .add(Param.optional("showstmt", Boolean.class, "show the contents of the statement in the log"))
             .add(Param.optional("cloud_proxy_address", String.class, "Cloud Proxy Address"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())

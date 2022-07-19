@@ -53,6 +53,27 @@ Configure from multiple sources:
 
     driverconfig=myconfig.json
 
+### Basic Cqld4 driver options
+
+- **hosts** & **localdc** - (required unless using scb) - Set the endpoint and local datacenter name
+  for the driver.
+  - example: `host=mydsehost localdc=testdc1`
+- **driverconfig** - (explained above) - set the configuration source for the driver.
+- **username** OR **userfile** - (optional, only one may be used) - If you need to specify a
+  username but want to put it in a file instead, simply use the `userfile=myfile` option. It is
+  not uncommon to say `userfile=userfile`.
+* **password** OR **passfile** - (optional, only one may be used) - Fi you need to specify a
+  password but want to put it ina  file instead, simply use the `passfile=mypassfile` option. It
+  is not uncommon to say `passfile=passfile`.
+* **showstmt** - enable per-statement diagnostics whic show as much of the statement as possible
+  for the given statement type. *WARNING* - Do not use this for performance testing, only for
+  diagnostics.
+* **maxpages** - configure the maximum number of pages allowed in a CQL result set. This is
+  configured to `maxpages=1` by default, so that users will be aware of any paging that occurs
+  by default. If you expect and want to allow paging in your operation, then set this number
+  higher. A *synthetic* exception is generated as `UnexpectedPagingException` by default when
+  the number of pages exceeds maxpages.
+
 ### Activity level Driver Config
 
 The activity parameters which are provided by the driver are exposed as `driver.<name>`. Any
@@ -69,22 +90,22 @@ well. Where possible, a backwards-compatible option helper was provided so that 
 not possible as some options were no longer supported, or changed so much that there was no longer a
 direct mapping that would work consistently across versions. You can try to use the previous
 options, like `pooling` and so on. If the option is not supported as such, it will cause an error
-with an explanation. Otherwise, these helper options will simply set the equivalent options
-in the driver profile to achieve the same effect. As stated above, it is highly recommended that
-driver settings be captured in a configuration file and set with `driverconfig=<file>.json`
+with an explanation. Otherwise, these helper options will simply set the equivalent options in the
+driver profile to achieve the same effect. As stated above, it is highly recommended that driver
+settings be captured in a configuration file and set with `driverconfig=<file>.json`
 
 ## Statement Forms
 
 The CQLd4 driver supports idiomatic usage of all the main statement APIs within the native Java
 driver. The syntax for specifying these types is simplified as well, using only a single
-`type` field which allows values of simple, prepared, raw, gremlin, fluent, and so on.
-The previous form of specifing `type: cql` and optional modifiers like `prepared` and
-`parameterized` is deprecated now, sinces all the forms are explicitly supported by a
-well-defined type name.
+`type` field which allows values of simple, prepared, raw, gremlin, fluent, and so on. The previous
+form of specifing `type: cql` and optional modifiers like `prepared` and
+`parameterized` is deprecated now, sinces all the forms are explicitly supported by a well-defined
+type name.
 
-The previous form will work, but you will get a warning, as these should be deprecated
-going forward. It is best to use the forms in the examples below. The defaults and field
-names for the classic form have not changed.
+The previous form will work, but you will get a warning, as these should be deprecated going
+forward. It is best to use the forms in the examples below. The defaults and field names for the
+classic form have not changed.
 
 ## CQLd4 Op Template Examples
 
@@ -133,11 +154,10 @@ names for the classic form have not changed.
 
 ## CQL Op Template - Optional Fields
 
-If any of these are provided as op template fields or as op params, or
-as activity params, then they will have the described effect. The calls
-to set these parameters on an individual statement are only incurred if
-they are provided. Otherwise, defaults are used. These options can be
-applied to any of the statement forms above.
+If any of these are provided as op template fields or as op params, or as activity params, then they
+will have the described effect. The calls to set these parameters on an individual statement are
+only incurred if they are provided. Otherwise, defaults are used. These options can be applied to
+any of the statement forms above.
 
 ```yaml
 params:
@@ -166,6 +186,17 @@ params:
   # statements will generally need more. If you want millisconds, just use
   # fractional seconds, like 0.500
   timeout: 2.0
+
+  # Set the maximum number of allowed pages for this request before a
+  # UnexpectedPagingException is thrown.
+  maxpages: 1
+
+  # Set the LWT rebinding behavior for this statement. If set to true, then
+  # any statement result which was not applied will be retried with the
+  # conditional fields set to the currently visible values. This makes all LWT
+  # statements do another round trip of retrying (assuming the data doesn't
+  # match the preconditions) in order to test LWT performance.
+  retryreplace: true
 
   ## The following options are meant for advanced testing scenarios only,
   ## and are not generally meant to be used in typical application-level,
@@ -225,14 +256,14 @@ params:
 
 ## Driver Cache
 
-Like all driver adapters, the CQLd4 driver has the ability to use multiple low-level
-driver instances for the purposes of advanced testing. To take advantage of this,
-simply set a `space` parameter in your op templates, with a dynamic value.
-__WARNING__: If you use the driver cache feature, be aware that creating a large
-number of driver instances will be very expensive. Generally driver instances are meant
-to be initialized and then shared throughout the life-cycle of an application process.
-Thus, if you are doing multi-instance driver testing, it is best to use bindings
-functions for the `space` parameter which have bounded cardinality per host.
+Like all driver adapters, the CQLd4 driver has the ability to use multiple low-level driver
+instances for the purposes of advanced testing. To take advantage of this, simply set a `space`
+parameter in your op templates, with a dynamic value.
+__WARNING__: If you use the driver cache feature, be aware that creating a large number of driver
+instances will be very expensive. Generally driver instances are meant to be initialized and then
+shared throughout the life-cycle of an application process. Thus, if you are doing multi-instance
+driver testing, it is best to use bindings functions for the `space` parameter which have bounded
+cardinality per host.
 
 
 

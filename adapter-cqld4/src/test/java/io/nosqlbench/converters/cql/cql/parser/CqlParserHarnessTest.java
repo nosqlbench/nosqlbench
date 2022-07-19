@@ -16,9 +16,9 @@
 
 package io.nosqlbench.converters.cql.cql.parser;
 
-import io.nosqlbench.converters.cql.exporters.CGWorkloadExporter;
-import io.nosqlbench.converters.cql.exporters.transformers.CGModelTransformers;
-import io.nosqlbench.converters.cql.parser.CqlModelParser;
+import io.nosqlbench.cqlgen.exporter.CGWorkloadExporter;
+import io.nosqlbench.cqlgen.exporter.transformers.CGModelTransformers;
+import io.nosqlbench.cqlgen.parser.CqlModelParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

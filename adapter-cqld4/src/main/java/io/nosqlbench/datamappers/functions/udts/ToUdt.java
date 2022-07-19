@@ -22,8 +22,8 @@ import com.datastax.oss.driver.api.core.type.DataTypes;
 import com.datastax.oss.driver.api.core.type.MapType;
 import com.datastax.oss.driver.api.core.type.UserDefinedType;
 import com.datastax.oss.driver.internal.core.type.UserDefinedTypeBuilder;
-import io.nosqlbench.converters.cql.cqlast.CqlType;
-import io.nosqlbench.converters.cql.parser.CqlModelParser;
+import io.nosqlbench.cqlgen.model.CqlType;
+import io.nosqlbench.cqlgen.parser.CqlModelParser;
 
 import java.util.function.LongFunction;
 

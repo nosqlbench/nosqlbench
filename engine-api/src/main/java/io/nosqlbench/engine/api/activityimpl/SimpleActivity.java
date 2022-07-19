@@ -487,6 +487,10 @@ public class SimpleActivity implements Activity, ProgressCapable {
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
+                if (ratio==0) {
+                    logger.info("skipped mapping op '" + pop.getName() + "'");
+                    continue;
+                }
                 DriverAdapter adapter = adapters.get(i);
                 OpMapper opMapper = adapter.getOpMapper();
                 OpDispenser<? extends Op> dispenser = opMapper.apply(pop);

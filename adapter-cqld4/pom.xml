@@ -104,13 +104,13 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>4.10.1</version>
                 <configuration>
-                    <sourceDirectory>src/main/java/io/nosqlbench/converters/cql/grammars
+                    <sourceDirectory>src/main/java/io/nosqlbench/cqlgen/grammars
                     </sourceDirectory>
                     <arguments>
                         <argument>-package</argument>
-                        <argument>io.nosqlbench.converters.cql.generated</argument>
+                        <argument>io.nosqlbench.cqlgen.generated</argument>
                     </arguments>
-                    <outputDirectory>src/main/java/io/nosqlbench/converters/cql/generated
+                    <outputDirectory>src/main/java/io/nosqlbench/cqlgen/generated
                     </outputDirectory>
                 </configuration>
                 <executions>
@@ -130,7 +130,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>src/main/java/io/nosqlbench/converters/cql/generated
+                            <directory>src/main/java/io/nosqlbench/cqlgen/generated
                             </directory>
                             <includes>
                                 <include>**/*.java</include>

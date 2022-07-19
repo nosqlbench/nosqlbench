@@ -16,6 +16,7 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
+import io.nosqlbench.cqlgen.exporter.CGColumnRebinder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,10 +25,10 @@ public class CGWorkloadExporterTest {
 
     @Test
     public void testQuantizer() {
-        assertThat(CGWorkloadExporter.quantizeModuloByMagnitude(23L,1)).isEqualTo(20L);
-        assertThat(CGWorkloadExporter.quantizeModuloByMagnitude(234234343L,2)).isEqualTo(230000000L);
-        assertThat(CGWorkloadExporter.quantizeModuloByMagnitude(275234343L,3)).isEqualTo(275000000L);
-        assertThat(CGWorkloadExporter.quantizeModuloByMagnitude(275734343L,3)).isEqualTo(276000000L);
+        assertThat(CGColumnRebinder.quantizeModuloByMagnitude(23L,1)).isEqualTo(20L);
+        assertThat(CGColumnRebinder.quantizeModuloByMagnitude(234234343L,2)).isEqualTo(230000000L);
+        assertThat(CGColumnRebinder.quantizeModuloByMagnitude(275234343L,3)).isEqualTo(275000000L);
+        assertThat(CGColumnRebinder.quantizeModuloByMagnitude(275734343L,3)).isEqualTo(276000000L);
     }
 
 }

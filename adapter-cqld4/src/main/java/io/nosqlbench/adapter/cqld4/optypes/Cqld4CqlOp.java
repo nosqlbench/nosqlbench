@@ -32,11 +32,8 @@ import java.util.Map;
 
 
 // TODO: add statement filtering
-// TODO: add statement pre and post processing for trace capture and start timer op
+// TODO: add statement post processing for trace capture
 // TODO: add trace capture
-// TODO: add start timer op
-// TODO: add stop timer op
-// TODO: add showcql equivalent
 // TODO: add/document max tries exhausted exception
 // TODO: add/document UnexpectedPagingException
 // TODO: add/document chnge unapplied exception
