@@ -36,7 +36,7 @@ public class CGColumnRebinder {
     }
 
     public Binding forColumn(CqlColumnDef cdef) {
-        if (cdef.isLastPartitionKey()) {
+        if (cdef.isPartitionKey()) {
             return dividedBinding(cdef);
         } else {
             return accumulator.forColumn(cdef);
