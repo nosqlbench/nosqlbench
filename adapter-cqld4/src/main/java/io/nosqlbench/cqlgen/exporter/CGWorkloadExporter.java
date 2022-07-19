@@ -324,6 +324,11 @@ public class CGWorkloadExporter {
                     put("main", "run driver=cql tags=block:main.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
                 }});
 
+            put("main-insert", "run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)");
+            put("main-select", "run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)");
+            put("main-scan", "run driver=cql tags=block:main-scan threads=auto cycles===TEMPLATE(main-cycles,10000)");
+            put("main-update", "run driver=cql tags=block:main-update threads=auto cycles===TEMPLATE(main-cycles,10000)");
+
             put("truncate", "run driver=cql tags=block:truncate.* threads===UNDEF cycles===UNDEF");
             put("schema-keyspaces", "run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF");
             put("schema-types", "run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF");
