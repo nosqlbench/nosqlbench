@@ -1,6 +1,18 @@
-- 481fb5855 (HEAD -> main) test fix
+- 1d1c96f9b (HEAD -> main, origin/main, origin/cqlast, cqlast) checkpoint: paths and packages cleanup, tri-state filtering on keyspaces, more efficient init, LOCAL_QUORUM
+- e79b09ace Skip inserts on counter tables, simplify multi-block tag predicates
+- fbd8947e7 checkpoint: * fixed binding null issue with warning for none found * configurable naming support in obfuscator * partial implementation of text transformer
+- 562978c9c fix quotes in scenarios
+- 1d1916439 fixed syntax error in scan and select predicates
+- c0cb4c022 checkpoint; many fixes and enhancements: * use config file with modular elements * eliminated opaque DDL hacks, generating everything from AST data now * (thus) obfuscation supported * weighting based on partition counts * (from weighting) Modulo bindings with quantized cardinalities * binding re-use for identical definitions * custom timeouts supported by op type * extended CQL driver properties * name-based workload phases
+- fb200e0b5 checkpoint: exporter.yaml config and many transformers added (see the file)
+- 2af5f2c39 first cut of obfuscator
+- 4e08b65f2 package refactoring
+- 789cc6243 package refactoring
+- 09fd16a63 preprocessor fix for ratio calculations
+- 804830c1e update release, cqlgen alpha
+- 481fb5855 test fix
 - 6252efe33 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 080d9005e (origin/cqlast, cqlast) checkpoint:  various fixes to enable rampup and main phases  inclusion of Mark Wolters stats parsing; ratio injection based on nodetool stats  allow bind point names to include angle brackets  disable raw format processing
+- 080d9005e checkpoint:  various fixes to enable rampup and main phases  inclusion of Mark Wolters stats parsing; ratio injection based on nodetool stats  allow bind point names to include angle brackets  disable raw format processing
 - 71fd51225 fix bug in udt elision
 - fd3461fd2 checkpoint: simplify binding names, swap blob in for udts, naming styles, literal formats
 - 652d9928c fix broken test because of UDT work-around
@@ -14,7 +26,7 @@
 - 2721ac23a additional function conversions
 - 0ff3e38a2 add missing binding functions for new types
 - 1df842123 externalize default cql bindings to included yaml for quick turnarounds
-- 7f7bccff3 (origin/main) Merge pull request #629 from nosqlbench/snyk-upgrade-dbdb217b3dd78ed0bd77509c85ec9c17
+- 7f7bccff3 Merge pull request #629 from nosqlbench/snyk-upgrade-dbdb217b3dd78ed0bd77509c85ec9c17
 - d77f954c7 Merge pull request #630 from nosqlbench/snyk-upgrade-14dd905926d5e7c9c2df7da69e96cadc
 - 6dbac0502 Merge pull request #631 from nosqlbench/snyk-upgrade-f3a9737bbf5e4220f562b2a4b4e32fb0
 - 264c70014 Merge pull request #632 from nosqlbench/snyk-upgrade-0d62ded5a5662f2eb3db91caeef3e739
