@@ -30,10 +30,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExceptionTimerMetrics {
     private final ConcurrentHashMap<String, Timer> timers = new ConcurrentHashMap<>();
+    private final Timer allerrors;
     private final ActivityDef activityDef;
 
     public ExceptionTimerMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
+        allerrors = ActivityMetrics.timer(
+            activityDef,
+            "errortimers.ALL",
+            activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4)
+        );
     }
 
     public void update(String name, long nanosDuration) {
@@ -42,11 +48,12 @@ public class ExceptionTimerMetrics {
             synchronized (timers) {
                 timer = timers.computeIfAbsent(
                     name,
-                    k -> ActivityMetrics.timer(activityDef, "exceptions." + name, activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                    k -> ActivityMetrics.timer(activityDef, "errortimers." + name, activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
                 );
             }
         }
         timer.update(nanosDuration, TimeUnit.NANOSECONDS);
+        allerrors.update(nanosDuration, TimeUnit.NANOSECONDS);
     }
 
     public List<Timer> getTimers() {
