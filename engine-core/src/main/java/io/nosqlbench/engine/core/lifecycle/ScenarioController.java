@@ -185,7 +185,7 @@ public class ScenarioController {
         }
 
         scenariologger.debug("STOP " + activityDef.getAlias());
-        activityExecutor.stopActivity();
+        activityExecutor.stopActivity(false);
     }
 
     /**
@@ -219,6 +219,71 @@ public class ScenarioController {
             ActivityDef adef = aliasToDef(alias);
             scenariologger.debug("STOP " + adef.getAlias());
             stop(adef);
+        }
+    }
+
+    /**
+     * <p>Force stopping an activity, given an activity def. The only part of the activity def that is important is the
+     * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
+     * <p>For example, sc.forceStop("alias=foo")</p>
+     *
+     * @param activityDef An activity def, including at least the alias parameter.
+     */
+    public synchronized void forceStop(ActivityDef activityDef) {
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", activityDef.getAlias())
+            .detail("command", "forceStop")
+            .detail("params", activityDef.toString())
+            .build());
+
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
+        if (activityExecutor == null) {
+            throw new RuntimeException("could not force stopping missing activity:" + activityDef);
+        }
+        RunState runstate = activityExecutor.getActivity().getRunState();
+        if (runstate != RunState.Running) {
+            logger.warn("NOT forcing stopping activity '" + activityExecutor.getActivity().getAlias() + "' because it is in state '" + runstate + "'");
+            return;
+        }
+
+        scenariologger.debug("FORCE_STOP " + activityDef.getAlias());
+        activityExecutor.stopActivity(true);
+    }
+
+    /**
+     * <p>Stop an activity, given an activity def map. The only part of the map that is important is the
+     * alias parameter. This method retains the map signature to provide convenience for scripting.</p>
+     *
+     * @param activityDefMap A map, containing at least the alias parameter
+     */
+    public synchronized void forceStop(Map<String, String> activityDefMap) {
+        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+        forceStop(ad);
+    }
+
+    /**
+     * Stop an activity, given the name by which it is known already in the scenario. This causes the
+     * activity to stop all threads, but keeps the thread objects handy for starting again. This can be useful
+     * for certain testing scenarios in which you want to stop some workloads and start others based on other conditions.
+     *
+     * Alternately, you can provide one or more aliases in the same command, and all matching names will be stopped.
+     *
+     * @param spec The name of the activity that is already known to the scenario
+     */
+    public synchronized void forceStop(String spec) {
+        logger.debug("request->STOP '" + spec + "'");
+        List<String> aliases = Arrays.asList(spec.split("[,; ]"));
+        List<String> matched = aliases.stream()
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
+        for (String alias : matched) {
+            ActivityDef adef = aliasToDef(alias);
+            scenariologger.debug("STOP " + adef.getAlias());
+            forceStop(adef);
         }
     }
 

@@ -2,13 +2,13 @@ package io.nosqlbench.engine.cli;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,6 +38,7 @@ public class Cmd {
         run(),
         start(),
         stop(Arg.of("alias_name")),
+        forceStop(Arg.of("alias_name")),
         script(Arg.of("script_path", s -> s)),
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),

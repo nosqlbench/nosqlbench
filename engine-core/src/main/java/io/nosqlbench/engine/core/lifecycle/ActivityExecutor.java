@@ -128,19 +128,23 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     /**
      * Simply stop the motors
+     *
+     * @param forcing whether to force (without trying to wait) the activity to reach stopped/finished state
      */
-    public synchronized void stopActivity() {
-        activitylogger.debug("STOP/before alias=(" + activity.getAlias() + ")");
+    public synchronized void stopActivity(boolean forcing) {
+        activitylogger.debug("STOP/before alias=(" + activity.getAlias() + "), forcing=(" + forcing + ")");
 
         activity.setRunState(RunState.Stopping);
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
-        motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
+        if (!forcing) {
+            motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
+        }
         activity.shutdownActivity();
         activity.closeAutoCloseables();
         activity.setRunState(RunState.Stopped);
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
-        activitylogger.debug("STOP/after alias=(" + activity.getAlias() + ")");
+        activitylogger.debug("STOP/after alias=(" + activity.getAlias() + "), forcing=(" + forcing + ")");
         Annotators.recordAnnotation(Annotation.newBuilder()
                 .session(sessionId)
                 .interval(this.startedAt, this.stoppedAt)
