@@ -56,7 +56,7 @@ public class ActivityExecutorTest {
         ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
         ad.setThreads(1);
         ae.startActivity();
-        ae.stopActivity();
+        ae.stopActivity(false);
         ae.startActivity();
         ae.awaitCompletion(15000);
         assertThat(idisp.getInput(10).getInputSegment(3)).isNull();

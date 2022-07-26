@@ -2,13 +2,13 @@ package io.nosqlbench.engine.cli;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -32,6 +32,7 @@ public class NBCLICommandParser {
     private static final String RUN = "run";
     private static final String AWAIT = "await";
     private static final String STOP = "stop";
+    private static final String FORCE_STOP = "forceStop";
     private static final String ACTIVITY = "activity";
     private static final String SCENARIO = "scenario";
     private static final String WAIT_MILLIS = "waitmillis";
@@ -40,7 +41,7 @@ public class NBCLICommandParser {
         addAll(
                 Arrays.asList(
                         SCRIPT, ACTIVITY, SCENARIO, RUN, START,
-                        FRAGMENT, STOP, AWAIT, WAIT_MILLIS
+                        FRAGMENT, STOP, FORCE_STOP, AWAIT, WAIT_MILLIS
                 )
         );
     }};
@@ -61,6 +62,7 @@ public class NBCLICommandParser {
                 case RUN:
                 case AWAIT:
                 case STOP:
+                case FORCE_STOP:
                 case WAIT_MILLIS:
                     cmd = Cmd.parseArg(arglist, canonicalizer);
                     cmdList.add(cmd);

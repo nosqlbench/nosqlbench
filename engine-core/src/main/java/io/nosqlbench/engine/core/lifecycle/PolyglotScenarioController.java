@@ -2,13 +2,13 @@ package io.nosqlbench.engine.core.lifecycle;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -143,6 +143,30 @@ public class PolyglotScenarioController {
             controller.stop(spec.asString());
         } else if (spec.hasMembers()) {
             controller.stop(spec.as(Map.class));
+        } else {
+            throw new RuntimeException("unknown base type for graal polyglot: " + spec.toString());
+        }
+    }
+
+    public synchronized void forceStop(Object o) {
+        if (o instanceof Value) {
+            forceStop((Value) o);
+        } else if (o instanceof Map) {
+            controller.forceStop((Map<String, String>) o);
+        } else if (o instanceof String) {
+            controller.forceStop(o.toString());
+        } else {
+            throw new RuntimeException("unknown type " + o.getClass().getCanonicalName());
+        }
+    }
+
+    private synchronized void forceStopValue(Value spec) {
+        if (spec.isHostObject()) {
+            controller.forceStop((ActivityDef) spec.asHostObject());
+        } else if (spec.isString()) {
+            controller.forceStop(spec.asString());
+        } else if (spec.hasMembers()) {
+            controller.forceStop(spec.as(Map.class));
         } else {
             throw new RuntimeException("unknown base type for graal polyglot: " + spec.toString());
         }
