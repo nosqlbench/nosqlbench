@@ -201,4 +201,8 @@ public class CqlTable implements NBNamedElement, Labeled {
     public void setComputedStats(ComputedTableStats stats) {
         this.computedTableStats = stats;
     }
+
+    public boolean hasStats() {
+        return this.computedTableStats!=null;
+    }
 }

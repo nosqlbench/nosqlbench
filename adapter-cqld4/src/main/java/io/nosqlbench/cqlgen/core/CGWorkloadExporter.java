@@ -18,6 +18,8 @@ package io.nosqlbench.cqlgen.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.spi.BundledApp;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;
@@ -52,7 +54,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://cassandra.apache.org/doc/trunk/cassandra/cql/index.html">Apache Cassandra CQL Docs</a>
  */
-@Service(value= BundledApp.class,selector = "cqlgen")
+@Service(value = BundledApp.class, selector = "cqlgen")
 public class CGWorkloadExporter implements BundledApp {
     private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.class);
     private CGColumnRebinder binder;
@@ -122,67 +124,63 @@ public class CGWorkloadExporter implements BundledApp {
         }
 
         Yaml yaml = new Yaml();
-        Path cfgpath = Path.of("cqlgen.conf");
-
         CGWorkloadExporter exporter;
 
-        if (Files.exists(cfgpath)) {
-            try {
-                CGModelTransformers modelTransformers = new CGModelTransformers();
-                CGTextTransformers textTransformers = new CGTextTransformers();
-                String configfile = Files.readString(cfgpath);
-                Map cfgmap = yaml.loadAs(configfile, Map.class);
-
-                if (cfgmap.containsKey("model_transformers")) {
-                    modelTransformers.accept((List<Map<String, ?>>) cfgmap.get("model_transformers"));
-                }
-
-                Object txtr = cfgmap.get("text_transformers");
-                if (txtr != null) {
-                    textTransformers.accept((List<Map<String, ?>>) cfgmap.get("text_transformers"));
-                }
-
-                String ddl;
-                try {
-                    ddl = Files.readString(srcpath);
-                    logger.info("read " + ddl.length() + " character DDL file, parsing");
-                    if (textTransformers != null) {
-                        ddl = textTransformers.process(ddl);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-
-                String defaultNamingTemplate = cfgmap.get("naming_template").toString();
-                setNamingTemplate(defaultNamingTemplate);
-
-                String partition_multipler = cfgmap.get("partition_multiplier").toString();
-                setPartitionMultiplier(Double.parseDouble(partition_multipler));
-
-                configureTimeouts(cfgmap.get("timeouts"));
-
-                configureBlocks(cfgmap.get("blockplan"));
-                configureQuantizerDigits(cfgmap.get("quantizer_digits"));
-
-                this.model = CqlModelParser.parse(ddl, srcpath);
-
-                String workload = getWorkloadAsYaml();
-                try {
-                    Files.writeString(
-                        target,
-                        workload,
-                        StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
-                    );
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        Content<?> cqlgencfg = NBIO.local().prefix("cqlgen").name("cqlgen").extension("conf").one();
+        if (cqlgencfg == null) {
+            throw new RuntimeException("Unable to load cqlgen.conf");
         }
+        Map cfgmap = yaml.loadAs(cqlgencfg.getInputStream(), Map.class);
+
+        CGModelTransformers modelTransformers = new CGModelTransformers();
+        CGTextTransformers textTransformers = new CGTextTransformers();
+
+        if (cfgmap.containsKey("model_transformers")) {
+            modelTransformers.accept((List<Map<String, ?>>) cfgmap.get("model_transformers"));
+        }
+
+//        Object txtr = cfgmap.get("text_transformers");
+//        if (txtr != null) {
+//            textTransformers.accept((List<Map<String, ?>>) cfgmap.get("text_transformers"));
+//        }
+
+        String ddl;
+        try {
+            ddl = Files.readString(srcpath);
+            logger.info("read " + ddl.length() + " character DDL file, parsing");
+            if (textTransformers != null) {
+                ddl = textTransformers.process(ddl);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        String defaultNamingTemplate = cfgmap.get("naming_template").toString();
+        setNamingTemplate(defaultNamingTemplate);
+
+        String partition_multipler = cfgmap.get("partition_multiplier").toString();
+        setPartitionMultiplier(Double.parseDouble(partition_multipler));
+
+        configureTimeouts(cfgmap.get("timeouts"));
+
+        configureBlocks(cfgmap.get("blockplan"));
+        configureQuantizerDigits(cfgmap.get("quantizer_digits"));
+
+        this.model = CqlModelParser.parse(ddl, srcpath);
+        this.model = modelTransformers.apply(this.model);
+
+        String workload = getWorkloadAsYaml();
+        try {
+            Files.writeString(
+                target,
+                workload,
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return 0;
     }
 
@@ -470,17 +468,18 @@ public class CGWorkloadExporter implements BundledApp {
     }
 
     private int totalRatioFor(CqlTable table) {
-        if (table.getTableAttributes() == null || table.getTableAttributes().size() == 0) {
+        if (table.hasStats()) {
+            return readRatioFor(table) + writeRatioFor(table);
+        } else {
             return 1;
         }
-        return readRatioFor(table) + writeRatioFor(table);
     }
 
     private int readRatioFor(CqlTable table) {
         if (table.getTableAttributes() == null || table.getTableAttributes().size() == 0) {
             return 1;
         }
-        double weighted_reads = Double.parseDouble(table.getTableAttributes().getAttribute("weighted_reads"));
+        double weighted_reads = table.getComputedStats().getWeightedReadsOfTotal();
         return (int) (weighted_reads * DEFAULT_RESOLUTION);
     }
 
@@ -488,7 +487,7 @@ public class CGWorkloadExporter implements BundledApp {
         if (table.getTableAttributes() == null || table.getTableAttributes().size() == 0) {
             return 1;
         }
-        double weighted_writes = Double.parseDouble(table.getTableAttributes().getAttribute("weighted_writes"));
+        double weighted_writes = table.getComputedStats().getWeightedWritesOfTotal();
         return (int) (weighted_writes * DEFAULT_RESOLUTION);
     }
 

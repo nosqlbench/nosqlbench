@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
+import io.nosqlbench.cqlgen.model.CqlModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,9 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class CGModelTransformers implements Consumer<List<Map<String, ?>>>, Supplier<List<CGModelTransformer>> {
+public class CGModelTransformers implements
+    Consumer<List<Map<String, ?>>>,
+    Supplier<List<CGModelTransformer>>,
+    Function<CqlModel,CqlModel> {
     private final static Logger logger = LogManager.getLogger(CGModelTransformers.class);
     private final List<CGModelTransformer> transformers = new ArrayList<>();
 
@@ -85,5 +90,13 @@ public class CGModelTransformers implements Consumer<List<Map<String, ?>>>, Supp
     @Override
     public List<CGModelTransformer> get() {
         return this.transformers;
+    }
+
+    @Override
+    public CqlModel apply(CqlModel cqlModel) {
+        for (CGModelTransformer transformer : transformers) {
+            cqlModel=transformer.apply(cqlModel);
+        }
+        return cqlModel;
     }
 }

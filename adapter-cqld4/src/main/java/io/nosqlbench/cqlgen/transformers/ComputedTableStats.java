@@ -57,4 +57,12 @@ public class ComputedTableStats {
     public double getOpShareOfTotalOps() {
         return opShareOfTotalOps;
     }
+
+    public double getWeightedReadsOfTotal() {
+        return this.readShareOfTotalOps;
+    }
+
+    public double getWeightedWritesOfTotal() {
+        return this.writeShareOfTotalWrites;
+    }
 }
