@@ -18,7 +18,8 @@ package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
-import io.nosqlbench.cqlgen.exporter.CGTableStats;
+import io.nosqlbench.cqlgen.core.CGTableStats;
+import io.nosqlbench.cqlgen.transformers.ComputedTableStats;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,6 +34,7 @@ public class CqlTable implements NBNamedElement, Labeled {
     List<String> clusteringOrders = new ArrayList<>();
     List<CqlColumnDef> coldefs = new ArrayList<>();
     private boolean compactStorage;
+    private ComputedTableStats computedTableStats;
 
     public CqlTable() {
     }
@@ -190,5 +192,13 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public boolean isLastClusteringColumn(int position) {
         return clustering.length > 0 && position == clustering[clustering.length - 1];
+    }
+
+    public ComputedTableStats getComputedStats() {
+        return this.computedTableStats;
+    }
+
+    public void setComputedStats(ComputedTableStats stats) {
+        this.computedTableStats = stats;
     }
 }

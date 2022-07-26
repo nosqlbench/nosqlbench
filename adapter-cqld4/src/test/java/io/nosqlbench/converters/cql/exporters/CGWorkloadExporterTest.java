@@ -16,7 +16,7 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
-import io.nosqlbench.cqlgen.exporter.CGColumnRebinder;
+import io.nosqlbench.cqlgen.core.CGColumnRebinder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

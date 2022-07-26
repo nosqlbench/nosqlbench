@@ -18,7 +18,7 @@ package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
-import io.nosqlbench.cqlgen.exporter.CGKeyspaceStats;
+import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 
 import java.util.Map;
 
