@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.userlibs.apps;
 
+import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.VirtDataGenDocsApp;
 import io.nosqlbench.virtdata.userlibs.apps.valuesapp.VirtDataCheckPerfApp;
@@ -25,7 +27,8 @@ import java.util.Arrays;
 /**
  * This just routes the user to the correct sub-app depending on the leading verb, stripping it off in the process.
  */
-public class VirtDataMainApp {
+@Service(value=BundledApp.class, selector = "virtdata")
+public class VirtDataMainApp implements BundledApp {
 
     private final static String APP_TESTMAPPER = "testmapper";
     private final static String APP_GENDOCS = "gendocs";
@@ -37,9 +40,14 @@ public class VirtDataMainApp {
     }
 
     public static void main(String[] args) {
+        new VirtDataMainApp().appMain(args);
+    }
+
+    @Override
+    public int appMain(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DIAGNOSE +")");
-            return;
+            return 1;
         }
 
         String appSelection = args[0];
@@ -57,5 +65,6 @@ public class VirtDataMainApp {
         } else {
             System.err.println("Error in command line. The first argument must one of " + String.join(",", names));
         }
+        return 0;
     }
 }
