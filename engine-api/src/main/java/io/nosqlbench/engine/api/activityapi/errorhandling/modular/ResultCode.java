@@ -36,7 +36,7 @@ public class ResultCode implements ErrorHandler, NBMapConfigurable {
 
     @Override
     public void applyConfig(Map<String, ?> providedConfig) {
-        this.code = Byte.valueOf(providedConfig.get("code").toString());
+        this.code = Byte.parseByte(providedConfig.get("code").toString());
     }
 
     @Override
