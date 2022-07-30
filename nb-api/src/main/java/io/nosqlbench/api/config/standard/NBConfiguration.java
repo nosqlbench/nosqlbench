@@ -83,11 +83,29 @@ public class NBConfiguration {
         } else {
             return value;
         }
-
     }
 
-    public String get(String name) {
-        return get(name, String.class);
+    /**
+     * Get a config value or object by name. This uses type inference (as a generic method)
+     * in addition to the internal model for type checking and ergonomic use. If you do not
+     * call this within an assignment or context where the Java compiler knows what type you
+     * are expecting, then use {@link #get(String, Class)} instead.
+     * @param name The name of the configuration parameter
+     * @param <T> The (inferred) generic type of the configuration value
+     * @return The value of type T, matching the config model type for the provided field name
+     */
+    public <T> T get(String name) {
+        Param<T> param = (Param<T>)model.getNamedParams().get(name);
+        Object object = this.data.get(name);
+        if (param.type.isInstance(object)) {
+            return (T) object;
+        } else if (param.type.isAssignableFrom(object.getClass())) {
+            return param.type.cast(object);
+        } else if (NBTypeConverter.canConvert(object, param.type)) {
+            return NBTypeConverter.convert(object, param.type);
+        } else {
+            throw new NBConfigError("Unable to assign config value for field '" + name + "' of type '" + object.getClass().getCanonicalName() + "' to the required return type '" + param.type.getCanonicalName() + "' as specified in the config model for '" + model.getOf().getCanonicalName());
+        }
     }
 
     public <T> T get(String name, Class<? extends T> type) {
