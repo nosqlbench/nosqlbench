@@ -23,6 +23,8 @@ import io.nosqlbench.cqlgen.model.CqlTable;
 
 public class CGRatioCalculator implements CGModelTransformer {
 
+    private String name;
+
     @Override
     public CqlModel apply(CqlModel model) {
         if (!model.hasStats()) {
@@ -77,5 +79,14 @@ public class CGRatioCalculator implements CGModelTransformer {
         return model;
     }
 
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

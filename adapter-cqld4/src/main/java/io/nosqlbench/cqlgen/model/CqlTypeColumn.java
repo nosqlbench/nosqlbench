@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.cqlgen.api;
+package io.nosqlbench.cqlgen.model;
 
-import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.cqlgen.model.CqlModel;
+public class CqlTypeColumn extends CqlColumnBase {
+    CqlType type;
 
-import java.util.function.Function;
+    public CqlTypeColumn(String colname, String typedef) {
+        super(colname, typedef);
+    }
 
-/**
- * Most of the functionality of {@link CqlModel} preparation is handled with transformers.
- * The type and order of transformers is important, as one transformer may be responsible
- * for preparing the model for one or more downstream transformers.
- */
-public interface CGModelTransformer extends Function<CqlModel,CqlModel>, NBNamedElement {
     @Override
-    CqlModel apply(CqlModel model);
-    void setName(String name);
+    protected String getParentFullName() {
+        return type.getFullName();
+    }
+
+    public CqlType getType() {
+        return type;
+    }
+
+    public void setType(CqlType type) {
+        this.type = type;
+    }
 }

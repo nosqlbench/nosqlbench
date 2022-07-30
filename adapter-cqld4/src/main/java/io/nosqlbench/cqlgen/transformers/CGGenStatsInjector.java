@@ -27,6 +27,7 @@ import java.util.Map;
 
 public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConfigurable {
     private CGSchemaStats schemaStats = null;
+    private String name;
 
     public CGGenStatsInjector() {
     }
@@ -37,6 +38,11 @@ public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConf
             model.setKeyspaceAttributes(schemaStats);
         }
         return model;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -60,5 +66,10 @@ public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConf
         } else {
             throw new RuntimeException("stats injector requires a map for it's config value");
         }
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

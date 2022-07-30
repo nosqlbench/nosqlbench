@@ -16,19 +16,19 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Objects;
 import java.util.function.LongFunction;
 
 public class CGCachingNameRemapper {
     private LongFunction<String> namefunc;
     private final Map<String,String> remapped = new HashMap<>();
-    private long index=0;
+    private final Map<String,String> prefixmap = new HashMap<>();
+    private final Map<String,Long> indexmap = new HashMap<>();
 
     public CGCachingNameRemapper() {
         this.namefunc = new Combinations("a-z;a-z;a-z;a-z;a-z;a-z;");
@@ -37,28 +37,53 @@ public class CGCachingNameRemapper {
         this.namefunc = function;
     }
 
-    public synchronized String nameForType(String type, String originalName, String prefix) {
-        String canonical = type+"_"+originalName;
-        return getOrCreateName(canonical, prefix);
-    }
-    public synchronized String nameFor(NBNamedElement element, String prefix) {
-        String canonical = element.getClass().getSimpleName()+"-"+element.getName();
-        return getOrCreateName(canonical, prefix);
+//    public synchronized String nameForType(String type, String originalName, String prefix) {
+//        String canonical = type+"_"+originalName;
+//        return getOrCreateName(canonical, prefix);
+//    }
+
+//    public synchronized String nameFor(NBNamedElement element) {
+//        String prefix = prefixmap.get(element.getClass().getSimpleName());
+//        String canonical = element.getClass().getSimpleName()+"-"+element.getName();
+//        return getOrCreateName(canonical, prefix);
+//    }
+
+
+    private long indexforType(String type) {
+        long newvalue = indexmap.computeIfAbsent(type, t -> 0L)+1;
+        indexmap.put(type,newvalue);
+        return newvalue;
     }
 
-    private String getOrCreateName(String canonical, String prefix) {
+    public synchronized String nameFor(Map<String,String> labels) {
+        String type = labels.get("type");
+        Objects.requireNonNull(type);
+        String name = labels.get("name");
+        Objects.requireNonNull(name);
+        String canonical = type+"-"+name;
+        String prefix = prefixmap.getOrDefault(type,"");
         if (!remapped.containsKey(canonical)) {
-            String newname = prefix+namefunc.apply(index++);
+            long indexForType=indexforType(type);
+            String newname = (prefix!=null?prefix:"")+namefunc.apply(indexForType);
             remapped.put(canonical,newname);
         }
         return remapped.get(canonical);
     }
 
-    public Function<String, String> mapperForType(Labeled cqlTable, String prefix) {
-        return in -> this.nameForType(cqlTable.getClass().getSimpleName(),in, prefix);
+    public synchronized String nameFor(Labeled element) {
+        Map<String, String> labels = element.getLabels();
+        return nameFor(labels);
     }
 
+    //    public Function<String, String> mapperForType(Labeled cqlTable, String prefix) {
+//        return in -> this.nameForType(cqlTable.getClass().getSimpleName(),in, prefix);
+//    }
+//
     public void setNamingFunction(LongFunction<String> namerFunc) {
         this.namefunc = namerFunc;
+    }
+    public void setTypePrefixes(Map<String,String> prefixesByLabeledType) {
+        this.prefixmap.clear();
+        this.prefixmap.putAll(prefixesByLabeledType);
     }
 }

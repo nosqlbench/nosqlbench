@@ -16,6 +16,8 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
+import io.nosqlbench.api.config.standard.NBConfigurable;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
 import io.nosqlbench.cqlgen.model.CqlModel;
@@ -27,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,9 +53,11 @@ public class CGModelTransformers implements
             // Instantiate Transformer
 
             String classname = cfgmap.get("class").toString();
+            String name = Optional.ofNullable(cfgmap.get("name")).orElseThrow().toString();
+
             if (!classname.contains(".")) {
                 String newname = CGNameObfuscator.class.getPackageName() + "." + classname;
-                logger.info("qualified transformer '" + classname + "' as '" + newname + "'");
+                logger.debug("qualified transformer '" + classname + "' as '" + newname + "'");
                 classname = newname;
             }
             Class<?> txclass = null;
@@ -63,6 +68,7 @@ public class CGModelTransformers implements
                 Object instance = ctor.newInstance();
                 if (instance instanceof CGModelTransformer t) {
                     transformer = t;
+                    t.setName(name);
                 } else {
                     throw new RuntimeException("Object " + instance.getClass().getName() + " is not a " + CGModelTransformer.class.getName());
                 }
@@ -70,7 +76,16 @@ public class CGModelTransformers implements
                 throw new RuntimeException(e);
             }
 
+            if (transformer instanceof NBConfigurable nbc) {
+                Object cfg = cfgmap.get("config");
+                if (cfg instanceof Map tcfgmap) {
+                    NBConfiguration configuration = nbc.getConfigModel().apply((Map<String, ?>) cfg);
+                    nbc.applyConfig(configuration);
+                } else {
+                    throw new RuntimeException("config for " + nbc.getClass().getSimpleName() + " must be map.");
+                }
 
+            }
             // Configure Transformer IFF ...
             if (transformer instanceof CGTransformerConfigurable configurable) {
                 Object cfgvalues = cfgmap.get("config");

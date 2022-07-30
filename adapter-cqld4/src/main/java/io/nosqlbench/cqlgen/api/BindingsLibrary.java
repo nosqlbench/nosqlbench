@@ -17,7 +17,7 @@
 package io.nosqlbench.cqlgen.api;
 
 import io.nosqlbench.cqlgen.binders.Binding;
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 
 import java.util.Optional;
 
@@ -26,5 +26,5 @@ import java.util.Optional;
  * to map a column definition to a binding function.
  */
 public interface BindingsLibrary {
-    Optional<Binding> resolveBindingsFor(CqlColumnDef def);
+    Optional<Binding> resolveBindingsFor(CqlColumnBase def);
 }

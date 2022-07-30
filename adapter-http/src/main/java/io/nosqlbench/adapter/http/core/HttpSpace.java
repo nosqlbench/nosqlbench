@@ -71,7 +71,7 @@ public class HttpSpace implements NBNamedElement {
     public synchronized void applyConfig(NBConfiguration cfg) {
         this.followRedirects =
             HttpClient.Redirect.valueOf(
-                cfg.get("follow_redirects").toUpperCase(Locale.ROOT)
+                cfg.get("follow_redirects", String.class).toUpperCase(Locale.ROOT)
             );
         this.timeout = Duration.ofMillis(cfg.get("timeout", long.class));
         this.timeoutMillis = cfg.get("timeout", long.class);

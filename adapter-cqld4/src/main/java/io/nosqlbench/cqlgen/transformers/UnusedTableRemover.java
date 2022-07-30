@@ -29,6 +29,7 @@ import java.util.Map;
 public class UnusedTableRemover implements CGModelTransformer, CGTransformerConfigurable {
     private final static Logger logger = LogManager.getLogger(UnusedTableRemover.class);
     private double minimumThreshold = 0.0001;
+    private String name;
 
     @Override
     public CqlModel apply(CqlModel model) {
@@ -44,13 +45,18 @@ public class UnusedTableRemover implements CGModelTransformer, CGTransformerConf
             double weightedOps = Double.parseDouble(weightedOpsSpec);
             if (weightedOps < minimumThreshold) {
                 logger.info(String.format(
-                    "removing table " + table.getKeySpace() + "." + table.getName() + " with minimum weighted_ops of %1.5f under %1.5f",
+                    "removing table " + table.getKeyspace().getName() + "." + table.getName() + " with minimum weighted_ops of %1.5f under %1.5f",
                     weightedOps, minimumThreshold)
                 );
-                model.getTableDefsByKeyspaceThenTable().get(table.getKeySpace()).remove(table.getName());
+                table.getKeyspace().removeTable(table);
             }
         }
         return model;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -63,5 +69,10 @@ public class UnusedTableRemover implements CGModelTransformer, CGTransformerConf
         } else {
             throw new RuntimeException("unused table remover requires a Map for its config value.");
         }
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

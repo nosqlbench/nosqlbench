@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.cqlgen.api;
+package io.nosqlbench.cqlgen.model;
 
-import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.cqlgen.model.CqlModel;
+public enum FieldPosition {
+    /**
+     * This field is used in the partitioning key(s) for a table
+     */
+    Partitioning,
+    /**
+     * This field is used in the clustering value(s) for a table
+     */
+    Clustering,
+    /**
+     * This field is a non-key field for a table
+     */
+    NonKey,
 
-import java.util.function.Function;
-
-/**
- * Most of the functionality of {@link CqlModel} preparation is handled with transformers.
- * The type and order of transformers is important, as one transformer may be responsible
- * for preparing the model for one or more downstream transformers.
- */
-public interface CGModelTransformer extends Function<CqlModel,CqlModel>, NBNamedElement {
-    @Override
-    CqlModel apply(CqlModel model);
-    void setName(String name);
+    /**
+     * This field is used in a type definition
+     */
+    TypeDef
 }

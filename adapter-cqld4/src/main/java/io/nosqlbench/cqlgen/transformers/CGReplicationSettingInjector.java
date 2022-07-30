@@ -18,20 +18,26 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
-import io.nosqlbench.cqlgen.model.CqlKeyspace;
+import io.nosqlbench.cqlgen.model.CqlKeyspaceDef;
 import io.nosqlbench.cqlgen.model.CqlModel;
 
 import java.util.Map;
 
 public class CGReplicationSettingInjector implements CGModelTransformer, CGTransformerConfigurable {
     private String replicationFields;
+    private String name;
 
     @Override
     public CqlModel apply(CqlModel model) {
-        for (CqlKeyspace keyspace : model.getKeyspaceDefs()) {
+        for (CqlKeyspaceDef keyspace : model.getKeyspaceDefs()) {
             keyspace.setReplicationData(this.replicationFields);
         }
         return model;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -43,5 +49,10 @@ public class CGReplicationSettingInjector implements CGModelTransformer, CGTrans
         } else {
             throw new RuntimeException("replication settings injector requires a map for its config value.");
         }
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

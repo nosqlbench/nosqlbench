@@ -21,42 +21,42 @@ import io.nosqlbench.api.labels.Labeled;
 
 import java.util.Map;
 
-public class CqlColumnDef implements NBNamedElement, Labeled {
-    private CqlTable table;
-    private String keyspace;
-    private String name;
-    private String type;
-    private final int position;
+/**
+ * Not anchored to a parent, as it could be a table or a type.
+ * All access to these must be through their parent element.
+ */
+public abstract class CqlColumnBase implements NBNamedElement, Labeled {
 
-    public CqlColumnDef(CqlTable table, int position, String colname, String typedef) {
-        this.table = table;
-        this.position = position;
-        this.type = typedef;
+    private String name;
+    private String typedef;
+    private FieldPosition position;
+
+    public CqlColumnBase(String colname, String typedef) {
+        this.typedef = typedef;
         this.name = colname;
     }
 
+    public void setPosition(FieldPosition position) {
+        this.position = position;
+    }
+
+    public FieldPosition getPosition() {
+        return this.position;
+    }
     public void setTypeDef(String type) {
-        this.type = type;
+        this.typedef = type;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getType() {
-        return type;
+    public String getTypedef() {
+        return typedef;
     }
 
     public String getTrimmedTypedef() {
-        return type.replaceAll(" ", "");
-    }
-
-    public String getTableName() {
-        return table.getName();
-    }
-
-    public String getKeyspace() {
-        return keyspace;
+        return typedef.replaceAll(" ", "");
     }
 
     @Override
@@ -68,19 +68,9 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
     public Map<String, String> getLabels() {
         return Map.of(
             "name", name,
-            "typedef", type,
-            "table", table.getName(),
-            "keyspace", keyspace,
+            "typedef", typedef,
             "type", "column"
         );
-    }
-
-    public void setKeyspace(String keyspace) {
-        this.keyspace = keyspace;
-    }
-
-    public void setTable(CqlTable table) {
-        this.table = table;
     }
 
     public boolean isCounter() {
@@ -95,27 +85,10 @@ public class CqlColumnDef implements NBNamedElement, Labeled {
         return getName() + " " + getTrimmedTypedef();
     }
 
-    public boolean isPartitionKey() {
-        return table.isPartitionKey(position);
-    }
-
-    public boolean isLastPartitionKey() {
-        return table.isLastPartitionKey(position);
-    }
-
-    public boolean isClusteringColumn() {
-        return table.isClusteringColumn(position);
-    }
-
-    public boolean isLastClusteringColumn() {
-        return table.isLastClusteringColumn(position);
-    }
-
-    public CqlTable getTable() {
-        return this.table;
-    }
-
     public String getFullName() {
-        return getKeyspace() + "." + getTable().getName() + "." + getName() + "(column)";
+        return getParentFullName() + "." + getName();
     }
+
+    protected abstract String getParentFullName();
+
 }

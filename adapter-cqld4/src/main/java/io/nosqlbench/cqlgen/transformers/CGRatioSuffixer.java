@@ -29,6 +29,7 @@ public class CGRatioSuffixer implements CGModelTransformer, NBConfigurable {
 
     private double resolution;
     private String format;
+    private String name;
 
     @Override
     public CqlModel apply(CqlModel model) {
@@ -39,26 +40,34 @@ public class CGRatioSuffixer implements CGModelTransformer, NBConfigurable {
 
         for (CqlTable tableDef : model.getTableDefs()) {
             double opshare = tableDef.getComputedStats().getOpShareOfTotalOps();
-            String newname = String.format(this.format, tableDef.getName(), opshare);
-            model.renameTable(tableDef,newname);
+            double multiplier = Math.pow(10.0, resolution+1);
+            long value = (long) (opshare*multiplier);
+            String newname = String.format(this.format, tableDef.getName(), value);
+            tableDef.setName(newname);
         }
 
         return model;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
         this.format = cfg.get("format", String.class);
-        if (!format.contains("NAME")) {
-            throw new RuntimeException("format config param for the CGRatioSuffixer must contain 'NAME', but it is '" + format + "'");
+        if (!format.contains("%1$s")) {
+            throw new RuntimeException("format config param for the CGRatioSuffixer must contain '%1$s', but it is '" + format + "'");
         }
-        Pattern pattern = Pattern.compile("%(2\\$)?(?<resolution>\\d+)d");
+        Pattern pattern = Pattern.compile(".*?%2\\$(?<resolution>\\d+)d.*");
         Matcher matcher = pattern.matcher(format);
         if (!matcher.matches()) {
             throw new RuntimeException("Could not find the required decimal format specifier for the format config parameter of " + CGRatioSuffixer.class);
         }
-        this.resolution = Double.parseDouble(matcher.group("resolution"));
+        this.resolution = Double.parseDouble(matcher.group("resolution"))-1;
+        this.resolution=Math.max(resolution,2);
 
     }
 
@@ -69,5 +78,10 @@ public class CGRatioSuffixer implements CGModelTransformer, NBConfigurable {
                 "The format specifier as in Java String.format, with a required string format for the first arg, and a required decimal format for the second."
             ))
             .asReadOnly();
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

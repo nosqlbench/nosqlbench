@@ -22,62 +22,137 @@
  */
 package io.nosqlbench.cqlgen.transformers;
 
+import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
-import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
-import io.nosqlbench.cqlgen.model.CqlModel;
-import io.nosqlbench.cqlgen.model.CqlTable;
-import io.nosqlbench.cqlgen.model.CqlType;
+import io.nosqlbench.cqlgen.model.*;
+import io.nosqlbench.cqlgen.transformers.namecache.*;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.LongFunction;
 
-public class CGNameObfuscator implements CGModelTransformer, CGTransformerConfigurable {
+public class CGNameObfuscator implements CGModelTransformer, NBConfigurable {
     private final static Logger logger = LogManager.getLogger(CGNameObfuscator.class);
 
+    NameCache cache = new NameCache();
     private final CGCachingNameRemapper remapper = new CGCachingNameRemapper();
+    private String name;
+    private String mapfile;
 
     @Override
     public CqlModel apply(CqlModel model) {
+        remapper.setTypePrefixes(Map.of("keyspace", "ks_", "type", "typ_", "table", "tb_", "column","col_"));
 
-        for (String keyspaceName : model.getAllKnownKeyspaceNames()) {
-            String newKeyspaceName = remapper.nameForType("keyspace", keyspaceName, "ks_");
-            model.renamekeyspace(keyspaceName, newKeyspaceName);
+        if (mapfile != null) {
+            cache = NameCache.loadOrCreate(Path.of(mapfile));
         }
 
-        for (CqlTable cqlTable : model.getTableDefs()) {
-            String tablename = cqlTable.getName();
-            String newTableName = remapper.nameFor(cqlTable, "tbl_");
-            model.renameTable(cqlTable, newTableName);
-            cqlTable.renameColumns(remapper.mapperForType(cqlTable, "col_"));
+        for (CqlKeyspaceDef keyspaceDef : model.getKeyspaceDefs()) {
+            NamedKeyspace namedKeyspace = cache.keyspace(keyspaceDef.getName());
+            String newKeyspaceName = namedKeyspace.computeAlias(keyspaceDef, remapper::nameFor);
+            keyspaceDef.setKeyspaceName(newKeyspaceName);
+
+            for (CqlType typeDef : keyspaceDef.getTypeDefs()) {
+                NamedType namedType = namedKeyspace.type(typeDef.getName());
+                String typeDefName = namedType.computeAlias(typeDef,remapper::nameFor);
+                namedType.setName(typeDefName);
+
+                for (CqlTypeColumn columnDef : typeDef.getColumnDefs()) {
+                    NamedColumn namedTypeColumn = namedType.column(columnDef.getName());
+                    String newColumnName = namedTypeColumn.computeAlias(columnDef,remapper::nameFor);
+                    columnDef.setName(newColumnName);
+                }
+            }
+
+            for (CqlTable table : keyspaceDef.getTableDefs()) {
+
+                NamedTable namedTable = namedKeyspace.table(table.getName());
+                String newTableName = namedTable.computeAlias(table,remapper::nameFor);
+                table.setName(newTableName);
+
+                for (CqlColumnBase columnDef : table.getColumnDefs()) {
+                    NamedColumn namedTableColumn = namedTable.column(columnDef.getName());
+                    String newColumnName = namedTableColumn.computeAlias(columnDef,remapper::nameFor);
+                    columnDef.setName(newColumnName);
+                }
+
+            }
+
         }
 
-        for (CqlType type : model.getTypeDefs()) {
-            String typeName = type.getName();
-            String newTypeName = remapper.nameFor(type, "typ_");
-            model.renameType(type.getKeyspace(), typeName, newTypeName);
-            type.renameColumns(remapper.mapperForType(type, "typ"));
-        }
+//        for (String keyspaceName : model.getAllKnownKeyspaceNames()) {
+//            Map<String, String> labels = Map.of("type", "keyspace", "name", keyspaceName);
+//            NamedKeyspace cachedKeyspace = cache.keyspace(keyspaceName);
+//            cachedKeyspace.computeAlias(labels, remapper::nameFor);
+////            model.renamekeyspace(keyspaceName, alias);
+//        }
+//
+//        for (CqlTable cqlTable : model.getTableDefs()) {
+//            String tablename = cqlTable.getName();
+//            NamedTable cachedTable = cache.keyspace(cqlTable.getKeyspaceName()).table(tablename);
+//            String alias = cachedTable.computeAlias(cqlTable, remapper::nameFor);
+//            model.renameTable(cqlTable, alias);
+//
+//            for (CqlColumnBase coldef : cqlTable.getColumnDefs()) {
+//                NamedColumn cachedColumn = cache.keyspace(cqlTable.getKeyspaceName()).table(tablename).column(coldef.getName());
+//                cachedColumn.computeAlias(coldef, remapper::nameFor);
+////                model.renameColumn(coldef, colalias);
+//            }
+//        }
+//
+//        for (CqlType type : model.getTypeDefs()) {
+//            String typeName = type.getName();
+//            NamedType cachedType = cache.keyspace(type.getKeyspace()).type(typeName);
+//            cachedType.computeAlias(type, remapper::nameFor);
+////            model.renameType(type.getKeyspace(), typeName, alias);
+//
+////            Function<String, String> colmapper = remapper.mapperForType(type, "typ");
+//            Map<String, String> newdefs = new LinkedHashMap<>();
+//
+//            Set<String> keys = type.getFields().keySet();
+//            for (String key : keys) {
+//                NamedColumn cachedColdef = cache.keyspace(type.getKeyspace()).type(typeName).column(key);
+//                cachedColdef.computeAlias(Map.of("type", "column", "name", key), remapper::nameFor);
+////                String def = type.getFields().get(key);
+////                newdefs.put(colalias, def);
+////                type.setFields(newdefs);
+//            }
+//        }
 
+        if (mapfile!=null) {
+            cache.setPath(mapfile);
+            cache.Save();
+        }
         return model;
 
     }
 
     @Override
-    public void accept(Object configObject) {
-        if (configObject instanceof Map cfgmap) {
-            Object namer = cfgmap.get("namer");
-            Optional<DataMapper<String>> optionalMapper = VirtData.getOptionalMapper(namer.toString());
-            LongFunction<String> namerFunc = optionalMapper.orElseThrow(
-                () -> new RuntimeException("Unable to resolve obfuscator namer '" + namer + "'")
-            );
-            remapper.setNamingFunction(namerFunc);
-        } else {
-            throw new RuntimeException("name obfuscator requires a map for its configuration value.");
-        }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+        String namer = cfg.get("namer");
+        DataMapper<String> namerFunc = VirtData.getMapper(namer);
+        this.remapper.setNamingFunction(namerFunc);
+        this.mapfile = cfg.getOptional("mapfile").orElse(null);
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(CGNameObfuscator.class)
+            .add(Param.defaultTo("namer", "Combinations('0-9;0-9;0-9;0-9;0-9')"))
+            .add(Param.optional("mapfile", String.class))
+            .asReadOnly();
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

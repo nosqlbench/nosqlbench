@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.core;
 
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
@@ -58,7 +58,7 @@ public class CGDefaultCqlBindings implements BindingsLibrary {
     }
 
     @Override
-    public Optional<Binding> resolveBindingsFor(CqlColumnDef def) {
+    public Optional<Binding> resolveBindingsFor(CqlColumnBase def) {
         String typedef = def.getTrimmedTypedef();
         String recipe = bindings.get(def.getTrimmedTypedef());
         Binding optionalBinding = new Binding(typedef, recipe);

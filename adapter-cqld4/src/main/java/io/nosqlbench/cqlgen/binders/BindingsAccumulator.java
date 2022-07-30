@@ -17,7 +17,7 @@
 package io.nosqlbench.cqlgen.binders;
 
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,10 +42,10 @@ public class BindingsAccumulator {
         this.libraries = libraries;
     }
 
-    public Binding forColumn(CqlColumnDef def, String... prefixes) {
+    public Binding forColumn(CqlColumnBase def, String... prefixes) {
         return forColumn(def,Map.of(), prefixes);
     }
-    public Binding forColumn(CqlColumnDef def, Map<String,String> extra, String... prefixes) {
+    public Binding forColumn(CqlColumnBase def, Map<String,String> extra, String... prefixes) {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> optionalBinding = switch (namingStyle) {
                 case FullyQualified -> this.resolveFullyQualifiedBinding(def, extra);
@@ -72,11 +72,11 @@ public class BindingsAccumulator {
     }
 
 
-    private Optional<Binding> resolvedCondensedBinding(CqlColumnDef def, Map<String,String> extra) {
+    private Optional<Binding> resolvedCondensedBinding(CqlColumnBase def, Map<String,String> extra) {
         throw new RuntimeException("Implement me!");
     }
 
-    private Optional<Binding> resolveSymbolicBinding(CqlColumnDef def, Map<String,String> extra) {
+    private Optional<Binding> resolveSymbolicBinding(CqlColumnBase def, Map<String,String> extra) {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> binding = library.resolveBindingsFor(def);
             if (binding.isPresent()) {
@@ -90,7 +90,7 @@ public class BindingsAccumulator {
 
     }
 
-    private Optional<Binding> resolveFullyQualifiedBinding(CqlColumnDef def, Map<String,String> extra) {
+    private Optional<Binding> resolveFullyQualifiedBinding(CqlColumnBase def, Map<String,String> extra) {
         for (BindingsLibrary library : libraries) {
             Optional<Binding> bindingRecipe = library.resolveBindingsFor(def);
             if (bindingRecipe.isPresent()) {

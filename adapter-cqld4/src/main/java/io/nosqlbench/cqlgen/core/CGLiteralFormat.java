@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.core;
 
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public enum CGLiteralFormat {
         this.literalFormat = modifier;
     }
 
-    public static String formatBindType(CqlColumnDef cd, String valueref) {
+    public static String formatBindType(CqlColumnBase cd, String valueref) {
         return CGLiteralFormat.valueOfCqlType(cd.getTrimmedTypedef()).orElse(CGLiteralFormat.UNKNOWN).format(valueref);
     }
 

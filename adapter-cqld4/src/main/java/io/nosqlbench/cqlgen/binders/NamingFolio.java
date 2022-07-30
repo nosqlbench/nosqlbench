@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.binders;
 
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
@@ -84,7 +84,7 @@ public class NamingFolio {
 
     public void informNamerOfAllKnownNames(CqlModel model) {
         for (CqlTable table : model.getTableDefs()) {
-            for (CqlColumnDef coldef : table.getColumnDefinitions()) {
+            for (CqlColumnBase coldef : table.getColumnDefs()) {
                 addFieldRef(coldef.getLabels());
             }
         }

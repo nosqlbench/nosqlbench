@@ -16,9 +16,10 @@
 
 package io.nosqlbench.cqlgen.core;
 
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;
+import io.nosqlbench.cqlgen.model.CqlTableColumn;
+import io.nosqlbench.cqlgen.model.FieldPosition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,16 +36,15 @@ public class CGColumnRebinder {
         this.quantizerDigits = quantizerDigits;
     }
 
-    public Binding forColumn(CqlColumnDef cdef) {
-        if (cdef.isPartitionKey()) {
+    public Binding forColumn(CqlTableColumn cdef) {
+        if (cdef.getPosition()== FieldPosition.Partitioning) {
             return dividedBinding(cdef);
         } else {
             return accumulator.forColumn(cdef);
         }
     }
 
-
-    private Binding dividedBinding(CqlColumnDef column) {
+    private Binding dividedBinding(CqlTableColumn column) {
         CGTableStats stats = column.getTable().getTableAttributes();
         if (stats == null) {
             return accumulator.forColumn(column);

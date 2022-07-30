@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
+import io.nosqlbench.cqlgen.model.CqlKeyspaceDef;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +26,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -33,6 +33,12 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
 
     private final static Logger logger = LogManager.getLogger(CGKeyspaceFilter.class);
     private List<TriStateFilter> patterns;
+    private String name;
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
     private enum InclExcl {
         include,
@@ -47,8 +53,8 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
 
     @Override
     public CqlModel apply(CqlModel model) {
-        Set<String> keyspacenames = model.getAllKnownKeyspaceNames();
-        for (String keyspace : keyspacenames) {
+        List<String> ksnames = model.getKeyspaceDefs().stream().map(CqlKeyspaceDef::getName).toList();
+        for (String keyspace : ksnames) {
             Action action = Action.inderminate;
             for (TriStateFilter pattern : patterns) {
                 action = pattern.apply(keyspace);
@@ -59,8 +65,6 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
                     case remove:
                         logger.info("removing all definitions in " + keyspace + " with exclusion pattern " + pattern);
                         model.removeKeyspaceDef(keyspace);
-                        model.removeTablesForKeyspace(keyspace);
-                        model.removeTypesForKeyspace(keyspace);
                     case inderminate:
                 }
             }
@@ -71,6 +75,11 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
         }
 
         return model;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     private static class TriStateFilter implements Function<String, Action> {

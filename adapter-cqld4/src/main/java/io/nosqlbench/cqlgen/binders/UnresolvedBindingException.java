@@ -16,12 +16,12 @@
 
 package io.nosqlbench.cqlgen.binders;
 
-import io.nosqlbench.cqlgen.model.CqlColumnDef;
+import io.nosqlbench.cqlgen.model.CqlColumnBase;
 
 public class UnresolvedBindingException extends RuntimeException {
-    private final CqlColumnDef def;
+    private final CqlColumnBase def;
 
-    public UnresolvedBindingException(CqlColumnDef def) {
+    public UnresolvedBindingException(CqlColumnBase def) {
         this.def = def;
     }
 
