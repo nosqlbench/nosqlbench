@@ -31,10 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExceptionHistoMetrics {
     private final ConcurrentHashMap<String, Histogram> histos = new ConcurrentHashMap<>();
+    private final Histogram allerrors;
     private final ActivityDef activityDef;
 
     public ExceptionHistoMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
+        allerrors = ActivityMetrics.histogram(activityDef, "errorhistos.ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     public void update(String name, long magnitude) {
@@ -48,6 +50,7 @@ public class ExceptionHistoMetrics {
             }
         }
         h.update(magnitude);
+        allerrors.update(magnitude);
     }
 
 

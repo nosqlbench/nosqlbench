@@ -18,21 +18,23 @@ package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
-import io.nosqlbench.cqlgen.exporter.CGTableStats;
+import io.nosqlbench.cqlgen.core.CGTableStats;
+import io.nosqlbench.cqlgen.transformers.ComputedTableStats;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CqlTable implements NBNamedElement, Labeled {
+    private CqlKeyspaceDef keyspace;
     String name = "";
-    String keyspace = "";
     CGTableStats tableAttributes = null;
     int[] partitioning = new int[0];
     int[] clustering = new int[0];
     List<String> clusteringOrders = new ArrayList<>();
-    List<CqlColumnDef> coldefs = new ArrayList<>();
+    List<CqlTableColumn> coldefs = new ArrayList<>();
     private boolean compactStorage;
+    private ComputedTableStats computedTableStats;
 
     public CqlTable() {
     }
@@ -45,20 +47,16 @@ public class CqlTable implements NBNamedElement, Labeled {
         return tableAttributes;
     }
 
-    public void setTableAttributes(CGTableStats tableAttributes) {
+    public void setStats(CGTableStats tableAttributes) {
         this.tableAttributes = tableAttributes;
     }
 
-    public void addcolumnDef(CqlColumnDef cqlField) {
+    public void addcolumnDef(CqlTableColumn cqlField) {
         this.coldefs.add(cqlField);
     }
 
     public void setName(String tableName) {
         this.name = tableName;
-    }
-
-    public void addcolumnDef(String colname, String typedef, int position) {
-        coldefs.add(new CqlColumnDef(this, coldefs.size(), colname, typedef));
     }
 
     @Override
@@ -70,7 +68,7 @@ public class CqlTable implements NBNamedElement, Labeled {
             .collect(Collectors.joining("\n"));
     }
 
-    public List<CqlColumnDef> getColumnDefinitions() {
+    public List<CqlTableColumn> getColumnDefs() {
         return this.coldefs;
     }
 
@@ -78,22 +76,14 @@ public class CqlTable implements NBNamedElement, Labeled {
         return this.name;
     }
 
-    public void setKeyspace(String newKsName) {
-        for (CqlColumnDef coldef : coldefs) {
-            coldef.setKeyspace(newKsName);
-        }
-        this.keyspace = newKsName;
-
-    }
-
-    public String getKeySpace() {
-        return this.keyspace;
+    public void setKeyspace(CqlKeyspaceDef keyspace) {
+        this.keyspace = keyspace;
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", this.keyspace,
+            "keyspace", this.getName(),
             "name", this.name,
             "type", "table"
         );
@@ -140,8 +130,8 @@ public class CqlTable implements NBNamedElement, Labeled {
         return Arrays.stream(clustering).mapToObj(i -> this.coldefs.get(i).getName()).toList();
     }
 
-    public CqlColumnDef getColumnDefForName(String colname) {
-        Optional<CqlColumnDef> def = coldefs
+    public CqlTableColumn getColumnDefForName(String colname) {
+        Optional<CqlTableColumn> def = coldefs
             .stream()
             .filter(c -> c.getName().equalsIgnoreCase(colname))
             .findFirst();
@@ -153,15 +143,15 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public void renameColumns(Function<String, String> renamer) {
-        for (CqlColumnDef coldef : coldefs) {
+        for (CqlTableColumn coldef : coldefs) {
             coldef.setName(renamer.apply(coldef.getName()));
         }
     }
 
-    public List<CqlColumnDef> getNonKeyColumnDefinitions() {
+    public List<CqlTableColumn> getNonKeyColumnDefinitions() {
         int last = partitioning[partitioning.length - 1];
         last = (clustering.length > 0 ? clustering[clustering.length - 1] : last);
-        List<CqlColumnDef> nonkeys = new ArrayList<>();
+        List<CqlTableColumn> nonkeys = new ArrayList<>();
         for (int nonkey = last; nonkey < coldefs.size(); nonkey++) {
             nonkeys.add(coldefs.get(nonkey));
         }
@@ -173,7 +163,7 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public String getFullName() {
-        return (this.keyspace != null ? this.keyspace + "." : "") + this.name;
+        return (this.keyspace != null ? this.keyspace.getName() + "." : "") + this.name;
     }
 
     public boolean isPartitionKey(int position) {
@@ -190,5 +180,24 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public boolean isLastClusteringColumn(int position) {
         return clustering.length > 0 && position == clustering[clustering.length - 1];
+    }
+
+    public ComputedTableStats getComputedStats() {
+        return this.computedTableStats;
+    }
+
+    public void setComputedStats(ComputedTableStats stats) {
+        this.computedTableStats = stats;
+    }
+
+    public boolean hasStats() {
+        return this.computedTableStats!=null;
+    }
+
+    public CqlKeyspaceDef getKeyspace() {
+        return this.keyspace;
+    }
+
+    public void getReferenceErrors(List<String> errors) {
     }
 }

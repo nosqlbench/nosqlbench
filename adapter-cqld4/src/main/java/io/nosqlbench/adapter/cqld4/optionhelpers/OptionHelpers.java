@@ -257,8 +257,6 @@ public class OptionHelpers implements NBConfigurable {
         add("defaultidempotence","",(m,v) -> {});
 
         add("drivermetrics","",(m,v) -> {});
-
-
     }
 
     public void add(String name, String description, Modifier modifier) {

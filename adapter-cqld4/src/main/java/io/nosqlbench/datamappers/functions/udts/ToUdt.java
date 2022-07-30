@@ -43,11 +43,11 @@ public class ToUdt implements LongFunction<UdtValue> {
     public ToUdt(String spec) {
         this.spec=spec;
         typeinfo = CqlModelParser.parseCqlType(spec);
-        UserDefinedTypeBuilder builder = new UserDefinedTypeBuilder(typeinfo.getKeyspace(), typeinfo.getName());
-        typeinfo.getFields().forEach((name,typedef) -> {
-            DataType dataType = resolveDataType(typedef);
-            builder.withField(name,dataType);
-        });
+        UserDefinedTypeBuilder builder = new UserDefinedTypeBuilder(typeinfo.getKeyspace().getName(), typeinfo.getName());
+//        typeinfo.getFields().forEach((name,typedef) -> {
+//            DataType dataType = resolveDataType(typedef);
+//            builder.withField(name,dataType);
+//        });
         this.udt = builder.build();
 
         {
