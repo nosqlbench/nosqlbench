@@ -33,6 +33,7 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,10 +41,21 @@ import org.apache.logging.log4j.Logger;
 
 import javax.jms.*;
 
-
 public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
 
     private final static Logger logger = LogManager.getLogger(S4JActivity.class);
+
+    // Maximum time length to execute S4J operations (e.g. message send or consume)
+    // - when NB execution passes this threshold, it is simply NoOp
+    // - 0 means no maximum time constraint. S4JOp is always executed until NB execution cycle finishes
+    private long maxS4JOpTimeInSec;
+    private long s4JActivityStartTimeMills;
+
+    // Whether to keep track of the received message count, which includes
+    // - total received message count
+    // - received null message count (only relevant when non-blocking message receiving is used)
+    // By default, this setting is disabled
+    private boolean trackingMsgRecvCnt;
 
     // How many JMS connections per NB S4J execution
     private int maxNumConn;
@@ -95,6 +107,15 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String pulsarSvcUrl =
             activityDef.getParams().getOptionalString("service_url").orElse("pulsar://localhost:6650");
 
+        String maxS4JOpTimeInSecStr =
+            activityDef.getParams().getOptionalString("max_s4jop_time").orElse("0");
+        maxS4JOpTimeInSec = NumberUtils.toLong(maxS4JOpTimeInSecStr, 0);
+        if (maxS4JOpTimeInSec < 0) maxS4JOpTimeInSec = 0;
+
+        String trackingMsgRecvCntStr =
+            activityDef.getParams().getOptionalString("track_msg_cnt").orElse("false");
+        trackingMsgRecvCnt = BooleanUtils.toBoolean(trackingMsgRecvCntStr);
+
         String numConnectionStr =
             activityDef.getParams().getOptionalString("num_conn").orElse("");
         maxNumConn = NumberUtils.toInt(numConnectionStr, 1);
@@ -143,6 +164,13 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
             return super.getCycleLimiter();
         }
     }
+
+    public long getS4JActivityStartTimeMills() { return this.s4JActivityStartTimeMills; }
+    public void setS4JActivityStartTimeMills(long startTime) { this.s4JActivityStartTimeMills = startTime; }
+
+    public long getMaxS4JOpTimeInSec() { return this.maxS4JOpTimeInSec; }
+
+    public boolean isTrackingMsgRecvCnt() { return trackingMsgRecvCnt; }
 
     public int getMaxNumSessionPerConn() { return this.maxNumSessionPerConn; }
     public int getMaxNumConn() { return this.maxNumConn; }

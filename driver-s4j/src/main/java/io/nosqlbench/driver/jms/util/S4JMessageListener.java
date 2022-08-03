@@ -29,6 +29,9 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+/**
+ *  Used for async message consumption
+ */
 public class S4JMessageListener implements MessageListener {
 
     private final static Logger logger = LogManager.getLogger(S4JSpace.class);
@@ -39,6 +42,9 @@ public class S4JMessageListener implements MessageListener {
     private final S4JActivity s4JActivity;
 
     public S4JMessageListener(JMSContext jmsContext, S4JSpace s4JSpace, float msgAckRatio) {
+        assert (jmsContext != null);
+        assert (s4JSpace != null);
+
         this.jmsContext = jmsContext;
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JSpace.getS4JActivity();
@@ -64,10 +70,14 @@ public class S4JMessageListener implements MessageListener {
                         , message.getJMSMessageID(), myMsgSeq);
                 }
 
-                s4JSpace.incTotalOpResponseCnt();
+                if (s4JActivity.isTrackingMsgRecvCnt()) {
+                    s4JSpace.incTotalOpResponseCnt();
+                }
             }
             else {
-                s4JSpace.incTotalNullMsgRecvdCnt();
+                if (s4JActivity.isTrackingMsgRecvCnt()) {
+                    s4JSpace.incTotalNullMsgRecvdCnt();
+                }
             }
         }
         catch (JMSException jmsException) {

@@ -21,6 +21,17 @@ package io.nosqlbench.driver.jms.ops;
  */
 public abstract class S4JTimeTrackOp implements S4JOp {
 
+    protected final long curNBCycleNum;
+    protected final long s4jOpStartTimeMills;
+    protected final long maxS4jOpDurationInSec;
+
+    public S4JTimeTrackOp(long curCycleNum, long s4jOpStartTimeMills, long maxS4jOpDurationInSec) {
+        this.curNBCycleNum = curCycleNum;
+        this.s4jOpStartTimeMills = s4jOpStartTimeMills;
+        this.maxS4jOpDurationInSec = maxS4jOpDurationInSec;
+        assert (this.maxS4jOpDurationInSec >= 0);
+    }
+
     public void run(Runnable timeTracker) {
         try {
             this.run();

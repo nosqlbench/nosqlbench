@@ -47,10 +47,10 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
 
-    public S4JMsgReadOp(S4JSpace s4JSpace,
+    public S4JMsgReadOp(long curNBCycleNum,
+                        S4JSpace s4JSpace,
                         S4JActivity s4JActivity,
                         JMSContext jmsContext,
-                        Destination destination,
                         boolean asyncApi,
                         boolean blockingMsgRecv,
                         JMSConsumer consumer,
@@ -58,6 +58,8 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                         long readTimeout,
                         boolean recvNoWait,
                         boolean commitTransact) {
+        super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
+
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
         this.jmsContext = jmsContext;
@@ -69,52 +71,69 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
         this.msgReadTimeout = readTimeout;
         this.recvNoWait = recvNoWait;
         this.commitTransact = commitTransact;
+
         this.bytesCounter = s4JActivity.getBytesCounter();
         this.messageSizeHistogram = s4JActivity.getMessagesizeHistogram();
     }
 
     @Override
     public void run() {
-        // Please see S4JSpace::getOrCreateJmsConsumer() for async processing
-        if (!asyncApi) {
-            Message recvdMsg;
+        long timeElapsedMills = System.currentTimeMillis() - s4jOpStartTimeMills;
 
-            try {
-                // blocking message receiving only applies to synchronous API
-                if (blockingMsgRecv) {
-                    recvdMsg = jmsConsumer.receive();
-                }
-                else if (recvNoWait) {
-                    recvdMsg = jmsConsumer.receiveNoWait();
-                } else {
-                    // timeout value 0 means to wait forever
-                    recvdMsg = jmsConsumer.receive(msgReadTimeout);
-                }
-                if (this.commitTransact) jmsContext.commit();
+        // If maximum S4J operation duration is specified, only receive messages
+        // before the maximum duration threshold is reached. Otherwise, this is
+        // just no-op.
+        if ( (maxS4jOpDurationInSec == 0) || (timeElapsedMills <= (maxS4jOpDurationInSec*1000)) ) {
 
-                if (recvdMsg != null) {
-                    s4JActivity.processMsgAck(jmsSessionMode, recvdMsg, msgAckRatio);
+            // Please see S4JSpace::getOrCreateJmsConsumer() for async processing
+            if (!asyncApi) {
+                Message recvdMsg;
 
-                    byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
-                    int messageSize = recvdMsgBody.length;
-                    bytesCounter.inc(messageSize);
-                    messageSizeHistogram.update(messageSize);
-
-                    if (logger.isDebugEnabled()) {
-                        // for testing purpose
-                        String myMsgSeq = recvdMsg.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-                        logger.debug("Sync message receive successful - message ID {} ({}) "
-                            , recvdMsg.getJMSMessageID(), myMsgSeq);
+                try {
+                    // blocking message receiving only applies to synchronous API
+                    if (blockingMsgRecv) {
+                        recvdMsg = jmsConsumer.receive();
+                    } else if (recvNoWait) {
+                        recvdMsg = jmsConsumer.receiveNoWait();
+                    } else {
+                        // timeout value 0 means to wait forever
+                        recvdMsg = jmsConsumer.receive(msgReadTimeout);
                     }
+                    if (this.commitTransact) jmsContext.commit();
 
-                    s4JSpace.incTotalOpResponseCnt();
+                    if (recvdMsg != null) {
+                        s4JActivity.processMsgAck(jmsSessionMode, recvdMsg, msgAckRatio);
+
+                        byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
+                        int messageSize = recvdMsgBody.length;
+                        bytesCounter.inc(messageSize);
+                        messageSizeHistogram.update(messageSize);
+
+                        if (logger.isDebugEnabled()) {
+                            // for testing purpose
+                            String myMsgSeq = recvdMsg.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
+                            logger.debug("Sync message receive successful - message ID {} ({}) "
+                                , recvdMsg.getJMSMessageID(), myMsgSeq);
+                        }
+
+                        if (s4JActivity.isTrackingMsgRecvCnt()) {
+                            s4JSpace.incTotalOpResponseCnt();
+                        }
+                    } else {
+                        if (s4JActivity.isTrackingMsgRecvCnt()) {
+                            s4JSpace.incTotalNullMsgRecvdCnt();
+                        }
+                    }
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                    throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
                 }
-                else {
-                    s4JSpace.incTotalNullMsgRecvdCnt();
-                }
-            } catch (JMSException e) {
-                e.printStackTrace();
-                throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
+            }
+        }
+        else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("NB cycle number {} is no-op (maxS4jOpDurationInSec: {}, timeElapsedMills: {})",
+                    curNBCycleNum, maxS4jOpDurationInSec, timeElapsedMills);
             }
         }
     }

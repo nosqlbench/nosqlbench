@@ -26,16 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.jms.*;
 import java.util.function.LongFunction;
 
-/**
- * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
- * enough state to define a pulsar operation such that it can be executed, measured, and possibly
- * retried if needed.
- *
- * This function doesn't act *as* the operation. It merely maps the construction logic into
- * a simple functional type, given the component functions.
- *
- * For additional parameterization, the command template is also provided.
- */
 public class S4JMsgBrowseMapper extends S4JOpMapper {
 
     private final LongFunction<String> msgSelectorStrFunc;
@@ -99,6 +89,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
         }
 
         return new S4JMsgBrowseOp(
+            value,
             s4JActivity,
             jmsContext,
             queue,

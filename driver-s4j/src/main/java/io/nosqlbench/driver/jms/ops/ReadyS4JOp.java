@@ -47,7 +47,7 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
 
     public ReadyS4JOp(OpTemplate optpl, S4JSpaceCache s4JSpaceCache, S4JActivity s4JActivity) {
         this.optpl = optpl;
-        this.cmdTpl = new CommandTemplate(optpl);
+        this.cmdTpl = new CommandTemplate(this.optpl);
         this.s4JActivity = s4JActivity;
 
         String client_name = lookupStaticParameter("client", false, "default");
@@ -56,6 +56,7 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
 
         // Initialize JMS connection and sessions
         this.s4JSpace.initializeS4JConnectionFactory(s4JActivity.getS4JConnInfo());
+        this.s4JActivity.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
         this.s4JSpace.resetTotalOpResponseCnt();
 
