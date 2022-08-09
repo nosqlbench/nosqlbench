@@ -1,0 +1,166 @@
+description: Auto-generated workload from source schema.
+scenarios:
+  default:
+    schema: run driver=cql tags=block:schema.* threads===UNDEF cycles===UNDEF
+    rampup: run driver=cql tags=block:rampup.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)
+    main: run driver=cql tags=block:main.* threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main-insert: run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main-select: run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main-scan: run driver=cql tags=block:main-scan threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main-update: run driver=cql tags=block:main-update threads=auto cycles===TEMPLATE(main-cycles,10000)
+  truncate: run driver=cql tags=block:truncate.* threads===UNDEF cycles===UNDEF
+  schema-keyspaces: run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF
+  schema-types: run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF
+  schema-tables: run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF
+  drop: run driver=cql tags=block:drop.* threads===UNDEF cycles===UNDEF
+  drop-tables: run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF
+  drop-types: run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF
+  drop-keyspaces: run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF
+bindings:
+  text: NumberNameToString();
+  bigint: Identity();
+  blob: ByteBufferSizedHashed(30);
+  boolean: ToBoolean();
+  date: EpochMillisToJavaLocalDate();
+  decimal: ToBigDecimal();
+  double: ToDouble()
+  duration: ToCqlDurationNanos();
+  float: ToFloat()
+  frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
+  list<text>: ListStepped(NumberNameToString(),NumberNameToString())
+  map<text,text>: MapSized(3, Combinations('A-Z;0-9'), NumberNameToString(), ToString());
+  set<text>: SetSized(HashRange(3,4),NumberNameToString()));
+  smallint: ToShort();
+  time: StartingEpochMillis('2022-01-01 00:00:00'); ToLocalTime();
+  timestamp: ToJavaInstant();
+  timeuuid: ToEpochTimeUUID();
+  tinyint: ToByte();
+  uuid: ToUUID();
+  varint: ToBigInt();
+  ascii: NumberNameToString();
+  inet: ToInetAddress();
+  int: ToInt();
+blocks:
+  schema-keyspaces:
+    params:
+      timeout: 60.0
+    ops:
+      create-keyspace-ks_00001:
+        simple: |
+          create keyspace ks_00001
+          with replication = {'class': 'SimpleStrategy',
+          'replication_factor': 'TEMPLATE(rf:1)'
+          }
+           and durable writes = false;
+  schema-tables:
+    params:
+      timeout: 60.0
+    ops:
+      create-tb_00001-table-tb_00001:
+        simple: |
+          create table if not exists ks_00001.tb_00001 (
+          col_00001 text,
+          col_00002 bigint,
+          col_00003 blob,
+          col_00004 boolean,
+          col_00005 date,
+          col_00006 decimal,
+          col_00007 double,
+          col_00008 duration,
+          col_00009 float,
+          col_00010 frozen<list<int>>,
+          col_00011 list<text>,
+          col_00012 map<text,text>,
+          col_00013 set<text>,
+          col_00014 smallint,
+          col_00015 text,
+          col_00016 time,
+          col_00017 timestamp,
+          col_00018 timeuuid,
+          col_00019 tinyint,
+          col_00020 uuid,
+          col_00021 text,
+          col_00022 varint,
+          col_00023 ascii,
+          col_00024 inet,
+          col_00025 int,
+          primary key ((col_00001))
+          );
+  schema-types:
+    params: {
+      }
+    ops: {
+      }
+  truncate-tables:
+    params:
+      timeout: 900.0
+    ops:
+      truncate-tb_00001-table-tb_00001:
+        simple: truncate ks_00001.tb_00001;
+  drop-types:
+    params: {
+      }
+    ops: {
+      }
+  drop-tables:
+    params:
+      timeout: 900.0
+    ops:
+      drop-tb_00001-table-tb_00001:
+        simple: drop table if exists ks_00001.tb_00001;
+  drop-keyspaces:
+    params: {
+      }
+    ops: {
+      }
+  rampup:
+    params:
+      timeout: 10.0
+    ops:
+      insert-tb_00001-table-tb_00001:
+        prepared: |
+          insert into ks_00001.tb_00001
+          ( col_00001, col_00002, col_00003, col_00004, col_00005, col_00006, col_00007, col_00008, col_00009, col_00010, col_00011, col_00012, col_00013, col_00014, col_00015, col_00016, col_00017, col_00018, col_00019, col_00020, col_00021, col_00022, col_00023, col_00024, col_00025 )
+          VALUES
+          ( {text}, {bigint}, {blob}, {boolean}, {date}, {decimal}, {double}, {duration}, {float}, {frozen<list<int>>}, {list<text>}, {map<text,text>}, {set<text>}, {smallint}, {text}, {time}, {timestamp}, {timeuuid}, {tinyint}, {uuid}, {text}, {varint}, {ascii}, {inet}, {int} );
+        ratio: 1
+  main-insert:
+    params:
+      timeout: 10.0
+    ops:
+      insert-tb_00001-table-tb_00001:
+        prepared: |
+          insert into ks_00001.tb_00001
+          ( col_00001, col_00002, col_00003, col_00004, col_00005, col_00006, col_00007, col_00008, col_00009, col_00010, col_00011, col_00012, col_00013, col_00014, col_00015, col_00016, col_00017, col_00018, col_00019, col_00020, col_00021, col_00022, col_00023, col_00024, col_00025 )
+          VALUES
+          ( {text}, {bigint}, {blob}, {boolean}, {date}, {decimal}, {double}, {duration}, {float}, {frozen<list<int>>}, {list<text>}, {map<text,text>}, {set<text>}, {smallint}, {text}, {time}, {timestamp}, {timeuuid}, {tinyint}, {uuid}, {text}, {varint}, {ascii}, {inet}, {int} );
+        ratio: 1
+  main-select:
+    params:
+      timeout: 10.0
+    ops:
+      select-tb_00001-table-tb_00001:
+        prepared: |
+          select * from  ks_00001.tb_00001
+          where col_00001={text}
+           LIMIT 10;
+        ratio: 1
+  main-scan:
+    params:
+      timeout: 30.0
+    ops:
+      scan-tb_00001-table-tb_00001:
+        prepared: "select * from ks_00001.tb_00001\nwhere \n LIMIT 10;\n"
+        ratio: 1
+  main-update:
+    params:
+      timeout: 10.0
+    ops:
+      update-tb_00001-table-tb_00001:
+        prepared: |
+          update ks_00001.tb_00001
+          set col_00001={text}, col_00002={bigint}, col_00003={blob}, col_00004={boolean}, col_00005={date}, col_00006={decimal}, col_00007={double}, col_00008={duration}, col_00009={float}, col_00010={frozen<list<int>>}, col_00011={list<text>}, col_00012={map<text,text>}, col_00013={set<text>}, col_00014={smallint}, col_00015={text}, col_00016={time}, col_00017={timestamp}, col_00018={timeuuid}, col_00019={tinyint}, col_00020={uuid}, col_00021={text}, col_00022={varint}, col_00023={ascii}, col_00024={inet}, col_00025={int}
+          where col_00001={text};
+        ratio: 1
+params:
+  cl: LOCAL_QUORUM
