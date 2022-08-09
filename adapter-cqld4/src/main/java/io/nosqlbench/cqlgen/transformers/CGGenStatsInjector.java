@@ -20,12 +20,18 @@ import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
 import io.nosqlbench.cqlgen.core.CGSchemaStats;
 import io.nosqlbench.cqlgen.model.CqlModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Map;
 
 public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConfigurable {
+    private final static Logger logger = LogManager.getLogger(CGGenStatsInjector.class);
+
     private CGSchemaStats schemaStats = null;
     private String name;
 
@@ -51,6 +57,15 @@ public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConf
 
             String histogramPath = config.get("path").toString();
             if (histogramPath != null) {
+                if (!Files.exists(Path.of(histogramPath))) {
+                    logger.error("Unable to load tablestats file from '" + histogramPath + "' because it doesn't exists.");
+                    Object onmissing = config.get("onmissing");
+                    if (onmissing==null || !String.valueOf(onmissing).toLowerCase(Locale.ROOT).equals("skip")) {
+                        throw new RuntimeException("Unable to continue. onmissing=" + onmissing.toString());
+                    } else {
+                        return;
+                    }
+                }
                 CGSchemaStats schemaStats = null;
                 Path statspath = Path.of(histogramPath);
                 try {
@@ -61,7 +76,6 @@ public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConf
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
-
             } else schemaStats = null;
         } else {
             throw new RuntimeException("stats injector requires a map for it's config value");
