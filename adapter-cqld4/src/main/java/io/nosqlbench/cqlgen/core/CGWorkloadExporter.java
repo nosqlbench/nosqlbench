@@ -214,10 +214,10 @@ public class CGWorkloadExporter implements BundledApp {
         workload.put("scenarios", genScenarios(model));
         workload.put("bindings", new LinkedHashMap<String, String>());
         Map<String, Object> blocks = new LinkedHashMap<>();
-        workload.put("blocks", blocks);
         workload.put("params", new LinkedHashMap<>(
             Map.of("cl", "LOCAL_QUORUM")
         ));
+        workload.put("blocks", blocks);
 
         for (Map.Entry<String, List<String>> blocknameAndComponents : blockplan.entrySet()) {
             String blockname = blocknameAndComponents.getKey();
