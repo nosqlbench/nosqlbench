@@ -40,6 +40,7 @@ public class CqlParserHarnessTest {
     private final static String ddl = ksddl + tbddl;
 
 
+    @Disabled
     @Test
     public void testAllTypes() {
         CGWorkloadExporter exporter = new CGWorkloadExporter();
