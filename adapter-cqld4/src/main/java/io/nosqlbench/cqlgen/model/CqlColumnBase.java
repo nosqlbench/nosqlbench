@@ -21,26 +21,22 @@ import io.nosqlbench.api.labels.Labeled;
 
 import java.util.Map;
 
-/**
- * Not anchored to a parent, as it could be a table or a type.
- * All access to these must be through their parent element.
- */
 public abstract class CqlColumnBase implements NBNamedElement, Labeled {
 
     private String name;
     private String typedef;
-    private FieldPosition position;
+    private ColumnPosition position=ColumnPosition.NonKey;
 
-    public CqlColumnBase(String colname, String typedef) {
+    protected CqlColumnBase(String colname, String typedef) {
         this.typedef = typedef;
         this.name = colname;
     }
 
-    public void setPosition(FieldPosition position) {
+    public void setPosition(ColumnPosition position) {
         this.position = position;
     }
 
-    public FieldPosition getPosition() {
+    public ColumnPosition getPosition() {
         return this.position;
     }
     public void setTypeDef(String type) {
@@ -68,7 +64,6 @@ public abstract class CqlColumnBase implements NBNamedElement, Labeled {
     public Map<String, String> getLabels() {
         return Map.of(
             "name", name,
-            "typedef", typedef,
             "type", "column"
         );
     }

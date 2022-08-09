@@ -16,11 +16,16 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class CqlTypeColumn extends CqlColumnBase {
+
     CqlType type;
 
-    public CqlTypeColumn(String colname, String typedef) {
+    public CqlTypeColumn(String colname, String typedef, CqlType usertype) {
         super(colname, typedef);
+        this.setType(usertype);
     }
 
     @Override
@@ -34,5 +39,12 @@ public class CqlTypeColumn extends CqlColumnBase {
 
     public void setType(CqlType type) {
         this.type = type;
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        Map<String,String> map = new LinkedHashMap<>(super.getLabels());
+        map.put("name",type.getName());
+        return map;
     }
 }

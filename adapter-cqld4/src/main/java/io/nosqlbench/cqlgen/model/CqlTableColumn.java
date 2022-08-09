@@ -16,11 +16,16 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CqlTableColumn extends CqlColumnBase {
 
     private CqlTable table;
-    public CqlTableColumn(String colname, String typedef) {
+
+    public CqlTableColumn(String colname, String typedef, CqlTable table) {
         super(colname, typedef);
+        setTable(table);
     }
 
     @Override
@@ -34,5 +39,12 @@ public class CqlTableColumn extends CqlColumnBase {
 
     public void setTable(CqlTable table) {
         this.table = table;
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        HashMap<String, String> map = new HashMap<>(super.getLabels());
+        map.put("table",getTable().getName());
+        return map;
     }
 }

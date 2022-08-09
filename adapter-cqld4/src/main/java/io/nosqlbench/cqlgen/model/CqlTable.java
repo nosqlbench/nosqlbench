@@ -52,6 +52,7 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public void addcolumnDef(CqlTableColumn cqlField) {
+        cqlField.setTable(this);
         this.coldefs.add(cqlField);
     }
 
@@ -83,34 +84,48 @@ public class CqlTable implements NBNamedElement, Labeled {
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", this.getName(),
+            "keyspace", this.keyspace.getName(),
             "name", this.name,
             "type", "table"
         );
     }
 
     public void addPartitionKey(String pkey) {
-        int[] newdefs = new int[partitioning.length + 1];
-        System.arraycopy(partitioning, 0, newdefs, 0, partitioning.length);
-        for (int i = 0; i < coldefs.size(); i++) {
-            if (coldefs.get(i).getName().equals(pkey)) {
-                newdefs[newdefs.length - 1] = i;
+        int[] new_partitioning = partitioning;
+        for (int idx = 0; idx < coldefs.size(); idx++) {
+            if (coldefs.get(idx).getName().equals(pkey)) {
+                coldefs.get(idx).setPosition(ColumnPosition.Partitioning);
+                new_partitioning = new int[partitioning.length + 1];
+                System.arraycopy(partitioning, 0, new_partitioning, 0, partitioning.length);
+                new_partitioning[new_partitioning.length - 1] = idx;
                 break;
             }
         }
-        this.partitioning = newdefs;
+        if (new_partitioning==partitioning) {
+            throw new RuntimeException("Unable to assign partition key '" + pkey + "' to a known column of the same name.");
+        } else {
+            this.partitioning = new_partitioning;
+        }
+
     }
 
     public void addClusteringColumn(String ccol) {
-        int[] newdefs = new int[clustering.length + 1];
-        System.arraycopy(clustering, 0, newdefs, 0, clustering.length);
+        int[] new_clustering = clustering;
+
         for (int i = 0; i < coldefs.size(); i++) {
             if (coldefs.get(i).getName().equals(ccol)) {
-                newdefs[newdefs.length - 1] = i;
+                coldefs.get(i).setPosition(ColumnPosition.Clustering);
+                new_clustering= new int[clustering.length + 1];
+                System.arraycopy(clustering, 0, new_clustering, 0, clustering.length);
+                new_clustering[new_clustering.length - 1] = i;
                 break;
             }
         }
-        this.clustering = newdefs;
+        if (new_clustering == clustering) {
+            throw new RuntimeException("Unable to assign clustering field '" + ccol + " to a known column of the same name.");
+        } else {
+            this.clustering = new_clustering;
+        }
     }
 
     public void addTableClusteringOrder(String colname, String order) {

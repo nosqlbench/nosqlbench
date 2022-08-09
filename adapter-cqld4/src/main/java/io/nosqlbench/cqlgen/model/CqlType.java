@@ -48,6 +48,7 @@ public class CqlType implements NBNamedElement, Labeled {
 
     public void addColumn(CqlTypeColumn def) {
         this.columnDefs.add(this.columnDefs.size(),def);
+        def.setPosition(ColumnPosition.TypeDef);
     }
 
     public List<CqlTypeColumn> columns() {

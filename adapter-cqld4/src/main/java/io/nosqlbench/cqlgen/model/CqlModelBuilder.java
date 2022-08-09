@@ -38,11 +38,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     private int colindex;
     private CqlKeyspaceDef keyspace;
     private CqlType usertype;
-    transient CqlTable table;
-
-
-
-
+    private CqlTable table;
 
     public CqlModelBuilder(CGErrorListener errorListener) {
         this.errorListener = errorListener;
@@ -62,14 +58,14 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         ParseTree parent = node.getParent();
         String errorNodeType = parent.getClass().getSimpleName();
 
-        logger.info("PARSE ERROR: " + errorNodeType + "\n"+ node.getSourceInterval());
+        logger.info("PARSE ERROR: " + errorNodeType + "\n" + node.getSourceInterval());
 
         super.visitErrorNode(node);
     }
 
     @Override
     public void enterCreateKeyspace(CqlParser.CreateKeyspaceContext ctx) {
-        this.keyspace=new CqlKeyspaceDef();
+        this.keyspace = new CqlKeyspaceDef();
     }
 
     @Override
@@ -106,25 +102,31 @@ public class CqlModelBuilder extends CqlParserBaseListener {
 
     @Override
     public void exitPrimaryKeyDefinition(CqlParser.PrimaryKeyDefinitionContext ctx) {
+        // PRIMARY KEY (PK)
         if (ctx.singlePrimaryKey() != null) {
             addPartitionKey(ctx.singlePrimaryKey().column().getText());
-        } else if (ctx.compositeKey() != null) {
-            if (ctx.compositeKey().partitionKeyList() != null) {
-                for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
-                    addPartitionKey(pkctx.column().getText());
+        } else
+            // PRIMARY KEY (PK, ck, ...)
+            if (ctx.compositeKey() != null) {
+                if (ctx.compositeKey().partitionKeyList() != null) {
+                    for (CqlParser.PartitionKeyContext pkctx : ctx.compositeKey().partitionKeyList().partitionKey()) {
+                        addPartitionKey(pkctx.column().getText());
+                    }
                 }
-            }
-            if (ctx.compositeKey().clusteringKeyList() != null) {
-                for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
+                // PRIMARY KEY ((pk,...),(CK,...))
+                if (ctx.compositeKey().clusteringKeyList() != null) {
+                    for (CqlParser.ClusteringKeyContext ccol : ctx.compositeKey().clusteringKeyList().clusteringKey()) {
+                        addClusteringColumn(ccol.column().getText());
+                    }
+                }
+            } else
+                // PRIMARY KEY ((PK), CK, ...)
+                if (ctx.compoundKey() != null) {
+                addPartitionKey(ctx.compoundKey().partitionKey().getText());
+                for (CqlParser.ClusteringKeyContext ccol : ctx.compoundKey().clusteringKeyList().clusteringKey()) {
                     addClusteringColumn(ccol.column().getText());
                 }
             }
-        } else if (ctx.compoundKey() != null) {
-            addPartitionKey(ctx.compoundKey().partitionKey().getText());
-            for (CqlParser.ClusteringKeyContext ccol : ctx.compoundKey().clusteringKeyList().clusteringKey()) {
-                addClusteringColumn(ccol.column().getText());
-            }
-        }
     }
 
     @Override
@@ -140,21 +142,18 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         usertype.setDefined();
         model.addType(keyspace, usertype);
         usertype.validate();
-        usertype=null;
+        usertype = null;
     }
 
-
-    // HERE consider building hierarchic type model
     @Override
     public void exitTypeMemberColumnList(CqlParser.TypeMemberColumnListContext ctx) {
         List<CqlParser.ColumnContext> columns = ctx.column();
         List<CqlParser.DataTypeContext> dataTypes = ctx.dataType();
         for (int idx = 0; idx < columns.size(); idx++) {
             addTypeField(
-                new CqlTypeColumn(columns.get(idx).getText(),dataTypes.get(idx).getText()));
+                new CqlTypeColumn(columns.get(idx).getText(), dataTypes.get(idx).getText(), usertype)
+            );
         }
-
-//        dataTypes.get(0).dataType().get(0).dataType().get(0)
     }
 
     @Override
@@ -165,18 +164,9 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     @Override
     public void exitCreateTable(CqlParser.CreateTableContext ctx) {
         table.setName(ctx.table().getText());
-        saveTable(
-            ctx.keyspace().getText(),
-            ctx.table().getText()
-        );
+        model.addTable(ctx.keyspace().getText(), table);
+        table = null;
     }
-
-    private void saveTable(String ksname, String tableName) {
-        table.setName(tableName);
-        model.addTable(ksname, table);
-        table=null;
-    }
-
 
     @Override
     public void exitOrderDirection(CqlParser.OrderDirectionContext ctx) {
@@ -184,7 +174,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
 
     @Override
     public void exitTableOptionItem(CqlParser.TableOptionItemContext ctx) {
-        table.setCompactStorage(ctx.kwCompactStorage()!=null);
+        table.setCompactStorage(ctx.kwCompactStorage() != null);
     }
 
     @Override
@@ -209,12 +199,6 @@ public class CqlModelBuilder extends CqlParserBaseListener {
             .forEach(i -> table.addTableClusteringOrder(columns.get(i), orders.get(i)));
     }
 
-
-//    @Override
-//    public void exitColumn(CqlParser.ColumnContext ctx) {
-//        super.exitColumn(ctx);
-//    }
-
     private String textOf(ParserRuleContext ctx) {
         int startIndex = ctx.start.getStartIndex();
         int stopIndex = ctx.stop.getStopIndex();
@@ -224,21 +208,32 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     }
 
     @Override
-    public void enterColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
-    }
-
-    @Override
     public void enterColumnDefinitionList(CqlParser.ColumnDefinitionListContext ctx) {
         this.colindex = 0;
     }
 
     @Override
     public void exitColumnDefinition(CqlParser.ColumnDefinitionContext ctx) {
-        addColumnDefinition(
-            ctx.column().getText(),
-            textOf(ctx.dataType()),
-            ctx.primaryKeyColumn() != null
-        );
+
+        if (usertype != null) {
+            CqlTypeColumn coldef = new CqlTypeColumn(
+                ctx.column().getText(),
+                ctx.dataType().getText(),
+                usertype
+            );
+            usertype.addColumn(coldef);
+        } else if (table != null) {
+            CqlTableColumn coldef = new CqlTableColumn(
+                ctx.column().getText(),
+                ctx.dataType().getText(),
+                table
+            );
+            table.addcolumnDef(coldef);
+            if (ctx.primaryKeyColumn() != null) {
+                table.addPartitionKey(ctx.column().getText());
+            }
+        }
+
     }
 
     @Override
@@ -255,19 +250,6 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         return model.getErrors();
     }
 
-    private void addColumnDefinition(String colname, String typedef, boolean isPrimaryKey) {
-        if (table != null) {
-            table.addcolumnDef(new CqlTableColumn(colname, typedef));
-            if (isPrimaryKey) {
-                this.table.addPartitionKey(colname);
-            }
-        } else if (usertype != null) {
-            usertype.addColumn(
-                new CqlTypeColumn(colname, typedef)
-            );
-        }
-    }
-
     public void addPartitionKey(String partitionKey) {
         table.addPartitionKey(partitionKey);
     }
@@ -279,7 +261,6 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     public void addTypeField(CqlTypeColumn coldef) {
         this.usertype.addColumn(coldef);
     }
-
 
 
 }
