@@ -40,10 +40,10 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
     private final JMSProducer jmsProducer;
     private final Message message;
     private final boolean commitTransact;
-
     private final Counter bytesCounter;
     private final Histogram messageSizeHistogram;
-    public S4JMsgSendOp(S4JSpace s4JSpace,
+    public S4JMsgSendOp(long curNBCycleNum,
+                        S4JSpace s4JSpace,
                         S4JActivity s4JActivity,
                         JMSContext jmsContext,
                         Destination destination,
@@ -51,6 +51,8 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
                         JMSProducer producer,
                         Message message,
                         boolean commitTransact) {
+        super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
+
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
         this.jmsContext = jmsContext;
@@ -66,30 +68,45 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
 
     @Override
     public void run() {
-        try {
-            jmsProducer.send(destination, message);
-            if (this.commitTransact) {
-                jmsContext.commit();
-            }
+        long timeElapsedMills = System.currentTimeMillis() - s4jOpStartTimeMills;
 
-            int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
-            this.bytesCounter.inc(msgSize);
-            this.messageSizeHistogram.update(msgSize);
-
-            // Please see S4JActivity::getOrCreateJmsProducer() for async processing
-            if (!asyncApi) {
-                if (logger.isDebugEnabled()) {
-                    // for testing purpose
-                    String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-                    logger.debug("Sync message send successful - message ID {} ({}) "
-                        , message.getJMSMessageID(), myMsgSeq);
+        // If maximum S4J operation duration is specified, only publish messages
+        // before the maximum duration threshold is reached. Otherwise, this is
+        // just no-op.
+        if ( (maxS4jOpDurationInSec == 0) || (timeElapsedMills <= (maxS4jOpDurationInSec*1000)) ) {
+            try {
+                jmsProducer.send(destination, message);
+                if (this.commitTransact) {
+                    jmsContext.commit();
                 }
 
-                s4JSpace.incTotalOpResponseCnt();
+                int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
+                this.bytesCounter.inc(msgSize);
+                this.messageSizeHistogram.update(msgSize);
+
+                // Please see S4JActivity::getOrCreateJmsProducer() for async processing
+                if (!asyncApi) {
+                    if (logger.isDebugEnabled()) {
+                        // for testing purpose
+                        String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
+                        logger.debug("Sync message send successful - message ID {} ({}) "
+                            , message.getJMSMessageID(), myMsgSeq);
+                    }
+
+                    if (s4JActivity.isTrackingMsgRecvCnt()) {
+                        s4JSpace.incTotalOpResponseCnt();
+                    }
+                }
+            } catch (JMSException e) {
+                e.printStackTrace();
+                throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
             }
-        } catch (JMSException e) {
-            e.printStackTrace();
-            throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
+        }
+        else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("NB cycle number {} is no-op (maxS4jOpDurationInSec: {}, timeElapsedMills: {})",
+                    curNBCycleNum, maxS4jOpDurationInSec, timeElapsedMills);
+            }
         }
     }
 }

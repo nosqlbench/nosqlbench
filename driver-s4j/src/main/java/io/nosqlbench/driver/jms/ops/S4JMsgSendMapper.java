@@ -35,16 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-/**
- * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
- * enough state to define a pulsar operation such that it can be executed, measured, and possibly
- * retried if needed.
- *
- * This function doesn't act *as* the operation. It merely maps the construction logic into
- * a simple functional type, given the component functions.
- *
- * For additional parameterization, the command template is also provided.
- */
 public class S4JMsgSendMapper extends S4JOpMapper {
 
     private final static Logger logger = LogManager.getLogger(S4JMsgSendMapper.class);
@@ -317,7 +307,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
 
         JMSProducer producer;
         try {
-            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, destination, destType, asyncAPIBool);
+            producer = s4JSpace.getOrCreateJmsProducer(s4JJMSContextWrapper, asyncAPIBool);
         }
         catch (JMSException jmsException) {
             throw new S4JDriverUnexpectedException("Unable to create the JMS producer!");
@@ -370,6 +360,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         }
 
         return new S4JMsgSendOp(
+            value,
             s4JSpace,
             s4JActivity,
             jmsContext,

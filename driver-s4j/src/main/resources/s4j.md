@@ -30,6 +30,10 @@ In the above NB CLI command, the S4J driver specific parameters are listed as be
 * session_mode: the session mode used when creating a JMS session
 * web_url: the URL of the Pulsar web service
 * service_url: the URL of the Pulsar native protocol service
+* (optional) max_s4jop_time: maximum time (in seconds) to execute the actual S4J operations (e.g. message sending or receiving). If NB execution time is beyond this limit, each NB cycle is just a no-op. Please NOTE:
+  * this is useful when controlled NB execution is needed with NB CLI scripting.
+  * if this parameter is not specified or the value is 0, it means no time limitation. Every single NB cycle will trigger an actual S4J operation.
+* (optional) track_msg_cnt: When set to true (with default as false), the S4J driver will keep track of the confirmed response count for message sending and receiving.
 
 Other NB engine parameters are straight forward:
 * driver: must be **s4j**

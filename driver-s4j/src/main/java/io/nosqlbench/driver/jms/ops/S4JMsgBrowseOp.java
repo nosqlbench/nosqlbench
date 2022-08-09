@@ -29,41 +29,50 @@ import java.util.Iterator;
 public class S4JMsgBrowseOp extends S4JTimeTrackOp {
 
     private final static Logger logger = LogManager.getLogger(S4JMsgBrowseOp.class);
-
-    private final S4JActivity s4JActivity;
-    private final JMSContext jmsContext;
-    private final Queue queue;
     private final QueueBrowser jmsQueueBrowser;
-    public S4JMsgBrowseOp(S4JActivity s4JActivity,
+
+    public S4JMsgBrowseOp(long curNBCycleNum,
+                          S4JActivity s4JActivity,
                           JMSContext jmsContext,
                           Queue queue,
                           QueueBrowser browser) {
-        this.s4JActivity = s4JActivity;
-        this.jmsContext = jmsContext;
-        this.queue = queue;
+        super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
+
         this.jmsQueueBrowser = browser;
     }
 
     @Override
     public void run() {
+        long timeElapsedMills = System.currentTimeMillis() - s4jOpStartTimeMills;
 
-        try {
-            Enumeration<Message> enumeration = jmsQueueBrowser.getEnumeration();
+        // If maximum S4J operation duration is specified, only browsing messages
+        // before the maximum duration threshold is reached. Otherwise, this is
+        // just no-op.
+        if ( (maxS4jOpDurationInSec == 0) || (timeElapsedMills <= (maxS4jOpDurationInSec*1000)) ) {
+            try {
+                Enumeration<Message> enumeration = jmsQueueBrowser.getEnumeration();
 
-            if (enumeration != null) {
-                for (Iterator<Message> it = enumeration.asIterator(); it.hasNext(); ) {
-                    Message msg = it.next();
-                    if (logger.isTraceEnabled()) {
-                        if (msg != null) {
-                            byte[] msgBody = msg.getBody(byte[].class);
-                            logger.trace("browsing message with payload={}", Arrays.toString(msgBody));
+                if (enumeration != null) {
+                    for (Iterator<Message> it = enumeration.asIterator(); it.hasNext(); ) {
+                        Message msg = it.next();
+                        if (logger.isTraceEnabled()) {
+                            if (msg != null) {
+                                byte[] msgBody = msg.getBody(byte[].class);
+                                logger.trace("browsing message with payload={}", Arrays.toString(msgBody));
+                            }
                         }
                     }
                 }
+            } catch (JMSException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to acknowledge the received JMS message.");
             }
-        } catch (JMSException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to acknowledge the received JMS message.");
+        }
+        else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("NB cycle number {} is no-op (maxS4jOpDuration: {}, timeElapsedMills: {})",
+                    curNBCycleNum, maxS4jOpDurationInSec, timeElapsedMills);
+            }
         }
     }
 }

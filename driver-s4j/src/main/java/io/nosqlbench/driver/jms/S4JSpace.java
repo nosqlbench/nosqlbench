@@ -24,6 +24,7 @@ import io.nosqlbench.driver.jms.conn.S4JConnInfo;
 import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
+import io.nosqlbench.driver.jms.util.S4JCompletionListener;
 import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
 import io.nosqlbench.driver.jms.util.S4JMessageListener;
 import io.nosqlbench.engine.api.activityimpl.ActivityDef;
@@ -33,13 +34,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.jms.*;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -56,7 +53,12 @@ public class S4JSpace {
 
     private CommandTemplate cmdTpl;
 
+    // Total number of acknowledgement received
+    // - this can apply to both message production and consumption
+    // - for message consumption, this only applies to non-null messages received (which is for async API)
     private final AtomicLong totalOpResponseCnt = new AtomicLong(0);
+    // Total number of null messages received
+    // - only applicable to message consumption
     private final AtomicLong nullMsgRecvCnt = new AtomicLong(0);
 
     // Represents the JMS connection
@@ -89,22 +91,26 @@ public class S4JSpace {
     public void setCmdTpl(CommandTemplate cmdTpl) { this.cmdTpl = cmdTpl; }
 
     private String buildExecSummaryString(
-        String stmtOpType,
         long totalCycleNum,
+        String stmtOpType,
+        boolean trackingMsgCnt,
+        long timeElapsedMills,
         long totalResponseCnt,
-        long totalNullMsgCnt,
-        long timeElapsed )
+        long totalNullMsgCnt)
     {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
             .append("shutdownSpace::waitUntilAllOpFinished -- ")
-            .append("operation type: ").append(stmtOpType).append("; ")
             .append("cycle number: ").append(totalCycleNum).append("; ")
-            .append("response received: ").append(totalResponseCnt).append("; ");
-        if (S4JActivityUtil.isMsgReadOpType(stmtOpType)) {
-            stringBuilder.append("null msg received: ").append(totalNullMsgCnt).append("; ");
+            .append("operation type: ").append(stmtOpType).append("; ")
+            .append("shutdown time elapsed: ").append(timeElapsedMills).append("ms; ");
+
+        if (trackingMsgCnt) {
+            stringBuilder.append("response received: ").append(totalResponseCnt).append("; ");
+            if (S4JActivityUtil.isMsgReadOpType(stmtOpType)) {
+                stringBuilder.append("null msg received: ").append(totalNullMsgCnt).append("; ");
+            }
         }
-        stringBuilder.append("shutdown time elapsed: ").append(timeElapsed);
 
         return stringBuilder.toString();
     }
@@ -112,56 +118,61 @@ public class S4JSpace {
     // When completing NB execution, don't shut down right away because otherwise, async operation processing may fail.
     // Instead, shut down when either one of the following condition is satisfied
     // 1) the total number of the received operation response is the same as the total number of operations being executed;
-    // 2) time has passed for 1 minutes
-    private void waitUntilAllOpFinished(String stmtOpType) {
-        long totalCycleNum = this.s4JActivity.getActivityDef().getEndCycle();
-        long totalResponseCnt;
-        long totalNullMsgCnt;
+    // 2) time has passed for 30 seconds
+    private void waitUntilAllOpFinished(long shutdownStartTimeMills, String stmtOpType) {
+        long totalCycleNum = this.activityDef.getEndCycle();
+        long totalResponseCnt = 0;
+        long totalNullMsgCnt = 0;
+        long timeElapsedMills = 0;
 
-        Instant shutdownStartTime = Instant.now();
-        long timeElapsed;
+        boolean trackingMsgCnt = this.s4JActivity.isTrackingMsgRecvCnt();
+        boolean continueChk;
+
         do {
-            Instant curTime = Instant.now();
-            timeElapsed = Duration.between(shutdownStartTime, curTime).toSeconds();
-            totalResponseCnt = this.getTotalOpResponseCnt();
-            totalNullMsgCnt = this.getTotalNullMsgRecvdCnt();
-
-            // Sleep for 1 second
+            // Sleep for 2 second
             try {
-                TimeUnit.SECONDS.sleep(1);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
-                 throw new S4JDriverUnexpectedException(e);
+                throw new S4JDriverUnexpectedException(e);
+            }
+
+            long curTimeMills = System.currentTimeMillis();
+            timeElapsedMills = curTimeMills - shutdownStartTimeMills;
+            continueChk = (timeElapsedMills <= 30000);
+
+            if (trackingMsgCnt) {
+                totalResponseCnt = this.getTotalOpResponseCnt();
+                totalNullMsgCnt = this.getTotalNullMsgRecvdCnt();
+                continueChk = continueChk && (totalResponseCnt < totalCycleNum);
             }
 
             if (logger.isTraceEnabled()) {
                 logger.trace(
-                    buildExecSummaryString(stmtOpType, totalCycleNum, totalResponseCnt, totalNullMsgCnt, timeElapsed));
+                    buildExecSummaryString(
+                        totalCycleNum, stmtOpType, trackingMsgCnt,
+                        timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
             }
-        } while ((totalResponseCnt < totalCycleNum) && (timeElapsed <= 5));
+        } while (continueChk);
 
         logger.info(
-            buildExecSummaryString(stmtOpType, totalCycleNum, totalResponseCnt, totalNullMsgCnt, timeElapsed));
+            buildExecSummaryString(
+                totalCycleNum, stmtOpType, trackingMsgCnt,
+                timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
     }
 
     // Properly shut down all Pulsar objects (producers, consumers, etc.) that are associated with this space
     public void shutdownSpace() {
+        long shutdownStartTimeMills = System.currentTimeMillis();
+
         try {
             // for message send and receive operations, async processing is possible
             String stmtOpType = this.cmdTpl.getStatic("optype");
             if ( S4JActivityUtil.isMsgSendOpType(stmtOpType) ||
                  S4JActivityUtil.isMsgReadOpType(stmtOpType) ) {
-                waitUntilAllOpFinished(stmtOpType);
+                waitUntilAllOpFinished(shutdownStartTimeMills, stmtOpType);
             }
 
             this.txnBatchTrackingCnt.remove();
-
-            for (QueueBrowser queueBrowser : queueBrowsers.values()) {
-                if (queueBrowser != null) queueBrowser.close();
-            }
-
-            for (JMSConsumer jmsConsumer : jmsConsumers.values()) {
-                if (jmsConsumer != null) jmsConsumer.close();
-            }
 
             String jmsConnContextIdStr;
             S4JJMSContextWrapper s4JJMSContextWrapper;
@@ -179,8 +190,8 @@ public class S4JSpace {
 
             s4jConnFactory.close();
         }
-        catch (JMSException je) {
-            je.printStackTrace();
+        catch (Exception e) {
+            e.printStackTrace();
             throw new S4JDriverUnexpectedException("Unexpected error when shutting down S4JSpace!");
         }
     }
@@ -391,8 +402,6 @@ public class S4JSpace {
      */
     public JMSProducer getOrCreateJmsProducer(
         S4JJMSContextWrapper s4JJMSContextWrapper,
-        Destination destination,
-        String destType,
         boolean asyncApi) throws JMSException
     {
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
@@ -404,43 +413,7 @@ public class S4JSpace {
             jmsProducer = jmsContext.createProducer();
 
             if (asyncApi) {
-                jmsProducer.setAsync(new CompletionListener() {
-                    @Override
-                    public void onCompletion(Message message) {
-                        try {
-                            if (logger.isTraceEnabled()) {
-                                // for testing purpose
-                                String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-                                logger.trace("onCompletion::Async message send successful - message ID {} ({}) "
-                                    , message.getJMSMessageID(), myMsgSeq);
-                            }
-
-                            long totalResponseCnt = incTotalOpResponseCnt();
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("... async op response received so far: {}", totalResponseCnt);
-                            }
-                        }
-                        catch (JMSException jmsException) {
-                            logger.warn("onCompletion::Error retrieving message property - {}", jmsException.getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onException(Message message, Exception e) {
-                        try {
-                            if (logger.isDebugEnabled()) {
-                                // for testing purpose
-                                String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-
-                                logger.debug("onException::Async message send failed - message ID {} ({}) "
-                                    , message.getJMSMessageID(), myMsgSeq);
-                            }
-                        }
-                        catch (JMSException jmsException) {
-                            logger.warn("onException::Unexpected error: " + jmsException.getMessage());
-                        }
-                    }
-                });
+                jmsProducer.setAsync(new S4JCompletionListener(this));
             }
 
             if (logger.isDebugEnabled()) {
@@ -497,8 +470,8 @@ public class S4JSpace {
             }
 
             if (asyncApi) {
-                S4JMessageListener messageListener = new S4JMessageListener(jmsContext, this, msgAckRatio);
-                jmsConsumer.setMessageListener(messageListener);
+                jmsConsumer.setMessageListener(
+                    new S4JMessageListener(jmsContext, this, msgAckRatio));
             }
 
             if (logger.isDebugEnabled()) {

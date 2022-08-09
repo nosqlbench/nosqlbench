@@ -25,16 +25,6 @@ import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
 import javax.jms.*;
 import java.util.function.LongFunction;
 
-/**
- * This maps a set of specifier functions to a pulsar operation. The pulsar operation contains
- * enough state to define a pulsar operation such that it can be executed, measured, and possibly
- * retried if needed.
- *
- * This function doesn't act *as* the operation. It merely maps the construction logic into
- * a simple functional type, given the component functions.
- *
- * For additional parameterization, the command template is also provided.
- */
 public class S4JMsgReadMapper extends S4JOpMapper {
 
     private final boolean durable;
@@ -124,10 +114,10 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         if (readTimeout < 0) readTimeout = 0;
 
         return new S4JMsgReadOp(
+            value,
             s4JSpace,
             s4JActivity,
             jmsContext,
-            destination,
             asyncAPIBool,
             blockingMsgRecvBool,
             consumer,
