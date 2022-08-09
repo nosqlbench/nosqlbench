@@ -43,8 +43,8 @@ public class CqlParserHarnessTest {
     @Test
     public void testAllTypes() {
         CGWorkloadExporter exporter = new CGWorkloadExporter();
-        exporter.appMain(new String[]{"src/test/resources/testschemas/cql_alltypes.cql"});
-        exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE!]-[KEYSPACE]");
+        exporter.appMain(new String[]{"src/test/resources/testschemas/cql_alltypes.cql","_alltypes.yaml"});
+        exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE-]-[KEYSPACE]");
         var data = exporter.getWorkloadAsYaml();
 
     }
