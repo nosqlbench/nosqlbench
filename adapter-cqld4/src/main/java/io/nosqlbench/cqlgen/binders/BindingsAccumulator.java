@@ -21,10 +21,7 @@ import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class BindingsAccumulator {
     private final static Logger logger = LogManager.getLogger("CQL-GENERATOR");
@@ -111,6 +108,11 @@ public class BindingsAccumulator {
     }
 
     public Map<String, String> getAccumulatedBindings() {
+        Map<String,Set<String>> inverted = new HashMap<>();
+        accumulated.forEach((k,v) -> {
+            inverted.computeIfAbsent(v,def -> new HashSet<>()).add(k);
+        });
+        logger.info("computed " + accumulated.size() + " raw bindings, consisting of " + inverted.size() + " unique definitions.");
         return accumulated;
     }
 }
