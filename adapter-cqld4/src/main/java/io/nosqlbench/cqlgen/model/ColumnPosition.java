@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.model;
 
-public enum FieldPosition {
+public enum ColumnPosition {
     /**
      * This field is used in the partitioning key(s) for a table
      */

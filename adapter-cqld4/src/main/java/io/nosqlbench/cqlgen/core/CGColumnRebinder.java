@@ -19,7 +19,7 @@ package io.nosqlbench.cqlgen.core;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;
 import io.nosqlbench.cqlgen.model.CqlTableColumn;
-import io.nosqlbench.cqlgen.model.FieldPosition;
+import io.nosqlbench.cqlgen.model.ColumnPosition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +37,7 @@ public class CGColumnRebinder {
     }
 
     public Binding forColumn(CqlTableColumn cdef) {
-        if (cdef.getPosition()== FieldPosition.Partitioning) {
+        if (cdef.getPosition()== ColumnPosition.Partitioning) {
             return dividedBinding(cdef);
         } else {
             return accumulator.forColumn(cdef);
