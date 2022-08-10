@@ -22,7 +22,7 @@
     <name>docsys</name>
     <url>http://nosqlbench.io/</url>
     <properties>
-        <jersey.version>3.0.4</jersey.version>
+        <jersey.version>3.0.5</jersey.version>
     </properties>
 
     <parent>
