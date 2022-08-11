@@ -1,2 +1,16 @@
-- d32c35c63 (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #621 from yabinmeng/nb4-maintenance
-- bf295b4ba Merge branch 'nosqlbench:nb4-maintenance' into nb4-maintenance
+- 03d392fdf (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #684 from yabinmeng/nb4-maintenance
+- c8f0bdd2d ReadMe update for max_s4jop_time" and "track_msg_cnt" CLI options
+- 9196cabeb Add "max_s4jop_time" and "track_msg_cnt" CLI options - when the NB execution time exceeds "max_s4jop_time" threshold, the NB S4J becomes no-op (no message production or consumption any more) - when "track_msg_cnt" is false, don't keep track of S4J operation response count
+- 22e875e70 Merge pull request #675 from yabinmeng/nb4-maintenance
+- b6969ab9c Add "forceStop" option in NB CLI scripting. This allows shutdown the activity directly without trying to wait for the activity changes its state to stopped/finished.
+- 3e6ee8136 Merge pull request #664 from yabinmeng/nb4-maintenance
+- fb2339202 - Upgrade S4J version to 2.4.3 to pick up the latest feature addition; - Add count for received null message (consumer) - Add option for the default message receiving behavior (blocking or not) - Code cleanup
+- 9efd252bd Merge pull request #635 from yabinmeng/nb4-maintenance
+- 87086871f NB S4J: set message ack mode to be auto_ack if the NB S4J CLI "session_mode" parameter is not provided (or empty string)
+- 1be4f475a NB S4J: add support for message property value type
+- de0dd357e Add support for using a sizing function as a parameter to AlphaNumericString()
+- 77665a6cb Add document for NB S4J driver
+- a2559652f Merge pull request #627 from yabinmeng/nb4-maintenance
+- 9a944cdf3 optype typo fix and add NPE prevention during shutdown
+- b0887c3a1 Revert "optype typo fix and add NPE prevention during shutdown"
+- 5c039f8c0 optype typo fix and add NPE prevention during shutdown
