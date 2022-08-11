@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>pulsar-jms</artifactId>
-            <version>2.4.2</version>
+            <version>2.4.3</version>
         </dependency>
 
     </dependencies>
