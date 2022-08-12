@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-alpine
+FROM eclipse-temurin:17-jdk
 RUN apk --no-cache add curl
 
 COPY nb5/target/nb5.jar nb5.jar
