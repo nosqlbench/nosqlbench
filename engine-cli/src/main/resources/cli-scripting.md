@@ -88,9 +88,16 @@ To start an activity and then wait for it to complete before continuing:
 run <pram>=<value> ...
 ~~~
 
-To stop an activity by its alias:
+To stop an activity by its alias while first waiting for
+a required thread (aka motor/slot) entering a specific SlotState:
 ~~~
 stop <activity alias>
+~~~
+
+To stop an activity by its alias without first waiting for
+a required thread (aka motor/slot) entering a specific SlotState:
+~~~
+forceStop <activity alias>
 ~~~
 
 To wait for a particular activity that has been started to complete before continuing:
