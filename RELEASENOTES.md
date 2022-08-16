@@ -29,3 +29,5 @@
 - 51ac5e9ef fix: upgrade org.eclipse.jetty:jetty-servlets from 11.0.10 to 11.0.11
 - 3ea9ed096 fix: upgrade org.eclipse.jetty:jetty-servlet from 11.0.10 to 11.0.11
 - 4b6547af3 fix: upgrade org.eclipse.jetty:jetty-rewrite from 11.0.10 to 11.0.11
+- 83d7451f8 (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 3703e58e8 github actions updates
