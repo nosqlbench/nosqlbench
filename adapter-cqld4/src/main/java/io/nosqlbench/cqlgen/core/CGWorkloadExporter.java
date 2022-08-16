@@ -86,11 +86,11 @@ public class CGWorkloadExporter implements BundledApp {
     private CGExporterConfig config;
 
     public static void main(String[] args) {
-        new CGWorkloadExporter().appMain(args);
+        new CGWorkloadExporter().applyAsInt(args);
     }
 
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         this.config = new CGExporterConfig(args);
 
         logger.info("running CQL workload exporter with args:" + Arrays.toString(args));

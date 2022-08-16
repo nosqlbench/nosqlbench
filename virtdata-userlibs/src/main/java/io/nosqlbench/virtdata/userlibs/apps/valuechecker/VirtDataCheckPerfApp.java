@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
+package io.nosqlbench.virtdata.userlibs.apps.valuechecker;
 
 import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
@@ -59,7 +59,7 @@ public class VirtDataCheckPerfApp {
             runData = checker.call();
             System.out.println(runData.toString());
         } catch (Exception e) {
-            throw new RuntimeException("Error while checking performance: " + e.toString(), e);
+            throw new RuntimeException("Error while checking performance: " + e, e);
         }
 
     }

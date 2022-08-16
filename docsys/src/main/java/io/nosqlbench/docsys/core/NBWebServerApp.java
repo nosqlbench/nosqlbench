@@ -34,7 +34,7 @@ public class NBWebServerApp implements BundledApp {
     private static final Logger logger = LogManager.getLogger(NBWebServerApp.class);
 
     public static void main(String[] args) {
-        new NBWebServerApp().appMain(args);
+        new NBWebServerApp().applyAsInt(args);
     }
 
     private static boolean deleteDirectory(File directoryToBeDeleted) {
@@ -144,7 +144,7 @@ public class NBWebServerApp implements BundledApp {
     }
 
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         if (args.length > 0 && args[0].contains("help")) {
             showHelp();
         } else if (args.length > 0 && args[0].contains("generate")) {

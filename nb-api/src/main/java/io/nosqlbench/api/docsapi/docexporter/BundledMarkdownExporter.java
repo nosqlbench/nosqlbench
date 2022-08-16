@@ -30,11 +30,11 @@ import java.util.List;
 public class BundledMarkdownExporter implements BundledApp {
 
     public static void main(String[] args) {
-        new BundledMarkdownExporter().appMain(args);
+        new BundledMarkdownExporter().applyAsInt(args);
 
     }
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         final OptionParser parser = new OptionParser();
 
         OptionSpec<String> zipfileSpec = parser.accepts("zipfile", "zip file to write to")

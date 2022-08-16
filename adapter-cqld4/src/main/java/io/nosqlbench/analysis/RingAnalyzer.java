@@ -27,7 +27,7 @@ public class RingAnalyzer implements BundledApp {
     private final static Logger logger = LogManager.getLogger(RingAnalyzer.class);
 
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         RingAnalyzerConfig cfg = new RingAnalyzerConfig();
         CommandLine cli = new CommandLine(cfg);
         CommandLine.ParseResult cl = cli.parseArgs(args);

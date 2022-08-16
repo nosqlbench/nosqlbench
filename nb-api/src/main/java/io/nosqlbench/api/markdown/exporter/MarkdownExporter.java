@@ -37,7 +37,7 @@ public class MarkdownExporter implements BundledApp, Runnable {
     private Set<DocScope> scopeSet;
 
     public static void main(String[] args) {
-        new MarkdownExporter().appMain(args);
+        new MarkdownExporter().applyAsInt(args);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class MarkdownExporter implements BundledApp, Runnable {
 
 
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         final OptionParser parser = new OptionParser();
 
         OptionSpec<String> basedir = parser.accepts("basedir", "base directory to write to")

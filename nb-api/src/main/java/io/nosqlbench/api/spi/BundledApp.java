@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.spi;
 
-public interface BundledApp {
-    int appMain(String[] args);
+import java.util.function.ToIntFunction;
+
+public interface BundledApp extends ToIntFunction<String[]> {
+
 }

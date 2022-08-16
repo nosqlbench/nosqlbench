@@ -182,7 +182,7 @@ public class NBCLI implements Function<String[], Integer> {
                 String[] appargs = Arrays.copyOfRange(args, 1, args.length);
                 logger.info("invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
                 globalOptions.setWantsStackTraces(true);
-                int result = app.appMain(appargs);
+                int result = app.applyAsInt(appargs);
                 return result;
             }
         }

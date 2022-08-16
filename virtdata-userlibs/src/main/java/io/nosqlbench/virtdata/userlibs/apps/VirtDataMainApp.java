@@ -40,11 +40,11 @@ public class VirtDataMainApp implements BundledApp {
     }
 
     public static void main(String[] args) {
-        new VirtDataMainApp().appMain(args);
+        new VirtDataMainApp().applyAsInt(args);
     }
 
     @Override
-    public int appMain(String[] args) {
+    public int applyAsInt(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DIAGNOSE +")");
             return 1;
