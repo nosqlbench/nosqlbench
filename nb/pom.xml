@@ -70,13 +70,6 @@
         <!-- Everything below this line constitutes the delta between nb and nb5 -->
         <!-- All driver-* modules should be migrated to adapter-* modules and added to nb5 -->
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-http</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
-        </dependency>
-
-
         <!--        <dependency>-->
         <!--            <groupId>io.nosqlbench</groupId>-->
         <!--            <artifactId>driver-kafka</artifactId>-->
@@ -86,20 +79,8 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-tcp</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>driver-jmx</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>driver-mongodb</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.22-SNAPSHOT</version>
         </dependency>
 
         <dependency>

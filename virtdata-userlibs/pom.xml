@@ -41,14 +41,14 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>4.17.22-SNAPSHOT</version>
             <artifactId>virtdata-lib-basics</artifactId>
+            <version>4.17.22-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <version>4.17.22-SNAPSHOT</version>
             <artifactId>virtdata-lib-curves4</artifactId>
+            <version>4.17.22-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
