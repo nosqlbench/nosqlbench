@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
+package io.nosqlbench.virtdata.userlibs.apps.valuechecker;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
@@ -36,7 +36,6 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
     private final long end;
     private final long start;
     private final boolean isolated;
-    //    private final Semaphore semaphore;
     private final ReentrantLock lock;
     private final Condition goTime;
     private final ConcurrentLinkedDeque<Throwable> errors = new ConcurrentLinkedDeque<>();
@@ -60,7 +59,6 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
         this.start = start;
         this.end = end;
         this.isolated = isolated;
-//        this.semaphore = new Semaphore(threads,false);
         this.lock = new ReentrantLock();
         this.goTime = lock.newCondition();
     }

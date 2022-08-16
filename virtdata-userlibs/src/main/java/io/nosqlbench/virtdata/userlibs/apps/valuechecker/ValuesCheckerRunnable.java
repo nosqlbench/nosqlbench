@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
+package io.nosqlbench.virtdata.userlibs.apps.valuechecker;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;

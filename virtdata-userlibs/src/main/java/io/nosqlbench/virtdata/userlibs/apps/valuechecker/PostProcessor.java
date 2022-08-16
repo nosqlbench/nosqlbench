@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
+package io.nosqlbench.virtdata.userlibs.apps.valuechecker;
 
-public class ValuesCheckerExceptionHandler implements Thread.UncaughtExceptionHandler {
-
-    private final ValuesCheckerCoordinator coordinator;
-
-    public ValuesCheckerExceptionHandler(ValuesCheckerCoordinator coordinator) {
-        this.coordinator = coordinator;
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        coordinator.handleException(t, e);
-    }
+public interface PostProcessor extends AutoCloseable {
+    void process(Object[] values);
 }

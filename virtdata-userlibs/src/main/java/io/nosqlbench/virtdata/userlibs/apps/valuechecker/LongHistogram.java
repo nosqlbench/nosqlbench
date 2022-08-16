@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.userlibs.apps.valuesapp;
+package io.nosqlbench.virtdata.userlibs.apps.valuechecker;
 
 public class LongHistogram implements PostProcessor {
 

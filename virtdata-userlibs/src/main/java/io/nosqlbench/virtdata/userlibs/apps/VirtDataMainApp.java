@@ -20,7 +20,7 @@ import io.nosqlbench.api.spi.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.VirtDataGenDocsApp;
-import io.nosqlbench.virtdata.userlibs.apps.valuesapp.VirtDataCheckPerfApp;
+import io.nosqlbench.virtdata.userlibs.apps.valuechecker.VirtDataCheckPerfApp;
 
 import java.util.Arrays;
 
