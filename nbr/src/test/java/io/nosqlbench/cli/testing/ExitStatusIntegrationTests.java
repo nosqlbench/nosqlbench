@@ -34,9 +34,10 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_badparam", 15,
-                java, "-jar", JARNAME, "--logs-dir", "logs/test",
+                java, "-jar", JARNAME, "--logs-dir", "logs/test/badparam/",
             "badparam"
         );
+        assertThat(result.exception).isNull();
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("Scenario stopped due to error");
         assertThat(result.exitStatus).isEqualTo(2);
@@ -47,9 +48,10 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_initexception", 15,
-                java, "-jar", JARNAME, "--logs-dir", "logs/test", "run",
+                java, "-jar", JARNAME, "--logs-dir", "logs/test/initerror", "run",
             "driver=diag", "op=initdelay:initdelay=notanumber"
         );
+        assertThat(result.exception).isNull();
         String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("For input string: \"notanumber\"");
         assertThat(result.exitStatus).isEqualTo(2);
@@ -75,9 +77,10 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
-                java, "-jar", JARNAME, "--logs-dir", "logs/test", "run",
+                java, "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop", "run",
             "driver=diag", "cyclerate=5", "op=erroroncycle:erroroncycle=10", "cycles=2000", "-vvv"
         );
+        assertThat(result.exception).isNull();
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was requested to stop on cycle 10");
         assertThat(result.exitStatus).isEqualTo(2);

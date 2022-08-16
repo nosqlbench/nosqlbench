@@ -65,6 +65,8 @@ public class ProcessInvoker {
             }
             if (process != null) {
                 result.exitStatus = process.exitValue();
+            } else {
+                result.exitStatus=255;
             }
         }
         return result;
