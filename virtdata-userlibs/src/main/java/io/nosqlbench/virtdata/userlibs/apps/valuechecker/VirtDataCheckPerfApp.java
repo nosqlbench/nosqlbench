@@ -26,7 +26,9 @@ public class VirtDataCheckPerfApp {
     private final static Logger logger  = LogManager.getLogger(VirtDataCheckPerfApp.class);
 
     public static void main(String[] args) {
-        if (args.length==5) {
+        if (args.length==1) {
+            checkperf(new String[]{args[0],"1","1","1","1"});
+        } else if (args.length==5) {
             checkperf(args);
         } else {
             System.out.println(" ARGS: checkperf 'specifier' threads bufsize start end");
