@@ -97,6 +97,7 @@ public class NBConfiguration {
     public <T> T get(String name) {
         Param<T> param = (Param<T>)model.getNamedParams().get(name);
         Object object = this.data.get(name);
+        object=object!=null?object: param.getDefaultValue();
         if (param.type.isInstance(object)) {
             return (T) object;
         } else if (param.type.isAssignableFrom(object.getClass())) {
