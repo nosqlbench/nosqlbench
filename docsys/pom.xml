@@ -22,7 +22,7 @@
     <name>docsys</name>
     <url>http://nosqlbench.io/</url>
     <properties>
-        <jersey.version>3.0.4</jersey.version>
+        <jersey.version>3.0.5</jersey.version>
     </properties>
 
     <parent>
@@ -50,22 +50,22 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>11.0.10</version>
+            <version>11.0.11</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
-            <version>11.0.10</version>
+            <version>11.0.11</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>11.0.10</version>
+            <version>11.0.11</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-rewrite</artifactId>
-            <version>11.0.10</version>
+            <version>11.0.11</version>
         </dependency>
 
         <dependency>
