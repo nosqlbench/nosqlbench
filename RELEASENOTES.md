@@ -35,3 +35,9 @@
 - f811fd3aa (origin/main) github actions fix testing
 - 83d7451f8 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 3703e58e8 github actions updates
+- 1dcade630 (HEAD -> main) remove curl in lieu of direct HTTP grafana auth, fix docker deps
+- 99a7be3a2 (origin/main) test stabilization
+- 061d529b8 stabilize exit status integration tests
+- f811fd3aa github actions fix testing
+- 83d7451f8 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 3703e58e8 github actions updates
