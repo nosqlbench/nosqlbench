@@ -1,3 +1,4 @@
+- force-build
 - 6c3dc2bcf (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 80fdb2530 add values summarizer to help debug bindings
 - a0344d65c make BundledApps implement primitive interface
