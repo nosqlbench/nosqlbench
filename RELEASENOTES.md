@@ -1,71 +1,31 @@
-- 14af21a09 (HEAD -> main) disable test with bad path
-- e5f717e6d merge fixups
-- 653fa101f (origin/main) Merge pull request #676 from nosqlbench/snyk-upgrade-cfefabf42e43b5078e4e2907deb83ef7
-- bda5b612e Merge pull request #677 from nosqlbench/snyk-upgrade-0fa3cbe4c2b98d8419cfe6bae03e0c2e
-- 68e4f3d91 Merge pull request #679 from nosqlbench/snyk-upgrade-ec8523b0ab5374dc8051318f65e77d8c
-- 29d3f3918 Merge pull request #680 from nosqlbench/snyk-upgrade-0877a5fda8da66b121fb0a2cc2005c0a
-- bedb3e128 Merge pull request #681 from nosqlbench/snyk-upgrade-f55e81f924eba94c8baa35d37766a2ed
-- 2f9019ab1 Merge pull request #682 from nosqlbench/snyk-fix-78809789da284e09e5b87a11beec5299
-- 51aa6f95a Merge pull request #683 from nosqlbench/snyk-fix-f7e68c9e718186b8be9dc56b47e079c5
-- ce322bab1 Merge pull request #685 from nosqlbench/snyk-fix-d7a7a426d95107a5a629892ad32f1a36
-- 46a5c9995 Merge pull request #686 from nosqlbench/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.4.1
-- 9c8c5f912 Merge pull request #687 from yabinmeng/main
-- 38b6e73e7 add test file
-- 3a3ebc320 update test to support reference checking
-- e8cb418b1 provide summary of generated bindings in cqlgen
-- ae4214233 moderate refactoring of module builder, better separation from model
-- f8c4fbe22 include field position in model for renderer
-- 01ea83030 hoist params to earlier in workload yaml
-- e8b26b104 allow skipping tablestats, update namer
-- 8b5052d39 change default textual bindings for cqlgen from NumberNameToString() to ToString()
-- 0d85dc02b 1) Remove NB Pulsar batch processing. By default, Pulsar client API batches message sending with configurable parameters. Update README file accordingly. 2) Remove "driver-jms" module (which is practically useless). Starlight for JMS (S4J) driver that is currently available in "nb4-maintenance" branch will be used for JMS oriented testing against Apache Pulsar.
-- 7b0c6d07e 1) Remove NB Pulsar batch processing. By default, Pulsar client API batches message sending with configurable parameters. Update README file accordingly. 2) Remove "driver-jms" module (which is practically useless). Starlight for JMS (S4J) driver that is currently available in "nb4-maintenance" branch will be used for JMS oriented testing against Apache Pulsar.
-- 8f1a29c31 (origin/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.4.1) build(deps): bump postgresql in /driver-cockroachdb
-- 067e86941 (origin/snyk-fix-d7a7a426d95107a5a629892ad32f1a36) fix: driver-cockroachdb/pom.xml to reduce vulnerabilities
-- 8de258a05 (origin/snyk-fix-f7e68c9e718186b8be9dc56b47e079c5) fix: driver-kafka/pom.xml to reduce vulnerabilities
-- caf105222 (origin/snyk-fix-78809789da284e09e5b87a11beec5299) fix: driver-pulsar/pom.xml to reduce vulnerabilities
-- 5db30dab7 Merge branch 'cqlast'
-- 9b3077458 (origin/cqlast, cqlast) version fixes
-- 564485fc4 more generic signature for config get()
-- ac6eeed52 version fixes
-- fab797fd0 cqlgen checkpoint: hierarchic model, ref checking, builder handles transients, transformers are named
-- e1689098d (origin/snyk-upgrade-f55e81f924eba94c8baa35d37766a2ed) fix: upgrade net.java.dev.jna:jna-platform from 5.11.0 to 5.12.1
-- c08865d55 (origin/snyk-upgrade-0877a5fda8da66b121fb0a2cc2005c0a) fix: upgrade net.java.dev.jna:jna from 5.11.0 to 5.12.1
-- 5dc479c97 (origin/snyk-upgrade-ec8523b0ab5374dc8051318f65e77d8c) fix: upgrade com.github.oshi:oshi-core-java11 from 6.1.6 to 6.2.1
-- 9528ee003 (origin/snyk-upgrade-0fa3cbe4c2b98d8419cfe6bae03e0c2e) fix: upgrade org.apache.logging.log4j:log4j-jcl from 2.17.2 to 2.18.0
-- b4b995889 (origin/snyk-upgrade-cfefabf42e43b5078e4e2907deb83ef7) fix: upgrade com.datastax.oss:pulsar-jms from 2.4.1 to 2.4.2
-- 298daee08 Merge pull request #666 from nosqlbench/snyk-upgrade-64a5deb563f750be5bd42c8c5b871c41
-- 2322bc598 Merge pull request #668 from nosqlbench/snyk-upgrade-2c5c12ca681b571105da822310b9fec6
-- 120bccdfd Merge pull request #671 from nosqlbench/snyk-upgrade-5a5222b3a11446c6cdda59c035b4c528
-- 4d5a804d3 Merge pull request #672 from nosqlbench/snyk-upgrade-65042f022f7d1107032e365f3a6054a9
-- a4385b420 Merge pull request #673 from nosqlbench/snyk-upgrade-e40d8d0b2178e40f8dff24a5ca05aeef
-- f3c0d001a cqlgen fixes
-- ab03cfc54 start ring analyzer with picocli experiment
-- 043c578e3 repoint cqld4 dependencies to adapters path
-- cec49d9d1 register bundled apps as services
-- 21ca1d1b2 minor fixes
-- bc63a2842 improve unrecognized command error
-- c20261bce implement stable naming for labeled elements
-- c98d5ffc6 cqlgen improvements and improved structure
-- 9f16004bc Merge pull request #674 from nosqlbench/feature/gh-actions
-- c397379f8 (origin/feature/gh-actions) Upgrade checkout and setup-java actions from v2 to v3
-- 306201322 Upgrade CodeQL from v1 to v2 and setup depandabot for gh-action updates for future
-- 89b7cce90 update docs for error-handlers with new .ALL metric and consistent naming
-- e59025f93 set error metric names to "error*" instead of "exception*" for consistency.
-- aab64975f (origin/snyk-upgrade-e40d8d0b2178e40f8dff24a5ca05aeef) fix: upgrade org.apache.logging.log4j:log4j-api from 2.17.2 to 2.18.0
-- a1cc7284a (origin/snyk-upgrade-65042f022f7d1107032e365f3a6054a9) fix: upgrade org.apache.logging.log4j:log4j-slf4j18-impl from 2.17.2 to 2.18.0
-- 7247b6dc1 (origin/snyk-upgrade-5a5222b3a11446c6cdda59c035b4c528) fix: upgrade org.apache.logging.log4j:log4j-core from 2.17.2 to 2.18.0
-- 2d610b12d (origin/snyk-upgrade-2c5c12ca681b571105da822310b9fec6) fix: upgrade io.dropwizard.metrics:metrics-graphite from 4.2.9 to 4.2.10
-- 35bc8dc44 (origin/snyk-upgrade-64a5deb563f750be5bd42c8c5b871c41) fix: upgrade org.apache.pulsar:pulsar-client from 2.10.0 to 2.10.1
-- 67f107730 Merge pull request #644 from nosqlbench/snyk-upgrade-9133a7ddd41d98985ecc7f5777752bfe
-- 4beee4646 Merge pull request #642 from nosqlbench/snyk-upgrade-b4fca24ed54938c8817400fe5d39f986
-- 4757381c6 Merge pull request #645 from nosqlbench/snyk-upgrade-d47ef7bfc16a8f11421387ad2016043f
-- 10a18da40 Merge pull request #643 from nosqlbench/snyk-upgrade-aac8b539d28201f6cf284ad4fb057e03
-- b2112489d Merge pull request #646 from nosqlbench/snyk-upgrade-be4a6a22f838e38dbae97b7ef3c7254a
-- 9d488bc9e Merge pull request #662 from nosqlbench/snyk-fix-3d983ea7a1d45448777c999ebbfe43f8
-- 952d431bf Merge pull request #663 from nosqlbench/snyk-fix-e90c2b995e9745e77a0cf81aa99487ca
-- 6c88c4a0c fix release for partition cardinality
-- 30f67d900 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 080b40b08 minor formatting fixes
-- 1df11fa77 add main scenarios for main sections separately
-- 279bb2242 fix for cardinality estimates: rebind all patition keys with the same modulo
+- 6c3dc2bcf (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 80fdb2530 add values summarizer to help debug bindings
+- a0344d65c make BundledApps implement primitive interface
+- b395f1491 fix get() bug in NBConfiguration
+- 380b3cbae introduce picocli to standard libs
+- f255c5ec0 packagename refactoring
+- 6e929e704 pom deps cleanup
+- b2152d77b pom version sync
+- 52a9958fb provide defaults on virtdata app
+- bec33d01b Merge pull request #693 from nosqlbench/snyk-upgrade-2d44458efe71a88127b49c639aaa55ba
+- 8e0932d48 Merge pull request #694 from nosqlbench/snyk-upgrade-f8de4dddc2c8c9a2b5408006041af849
+- ad6fae668 Merge pull request #695 from nosqlbench/snyk-upgrade-ac9e2765b3e50ce583426c72726f52a9
+- d1b9a3c8a Merge pull request #696 from nosqlbench/snyk-upgrade-db679aa5855dd362e8c34ac3e80e6e85
+- 3bf24e154 Merge pull request #697 from nosqlbench/snyk-upgrade-0696fa22830a638a03e581cdb376cae4
+- 6001f3c46 Merge pull request #698 from weideng1/patch-2
+- 427179996 Set base to 17-jdk so this image can run on arm64
+- bd4b94b94 (origin/snyk-upgrade-0696fa22830a638a03e581cdb376cae4) fix: upgrade io.netty:netty-handler from 4.1.78.Final to 4.1.79.Final
+- b7cf7fcdd (origin/snyk-upgrade-db679aa5855dd362e8c34ac3e80e6e85) fix: upgrade org.graalvm.sdk:graal-sdk from 21.3.2.1 to 21.3.3
+- f5d95a3ad (origin/snyk-upgrade-ac9e2765b3e50ce583426c72726f52a9) fix: upgrade io.swagger.core.v3:swagger-models from 2.2.1 to 2.2.2
+- 217ef3346 (origin/snyk-upgrade-f8de4dddc2c8c9a2b5408006041af849) fix: upgrade org.eclipse.jetty:jetty-server from 11.0.10 to 11.0.11
+- b1a344f7d (origin/snyk-upgrade-2d44458efe71a88127b49c639aaa55ba) fix: upgrade com.datastax.oss:pulsar-jms from 2.4.2 to 2.4.3
+- 87302800f Merge pull request #688 from nosqlbench/snyk-upgrade-5e345ff69ee1209de1b840fc9d71a5e5
+- f0e429b36 Merge pull request #689 from nosqlbench/snyk-upgrade-23a28ced9c29b3006bea868c9dd4782b
+- d1bb3286c Merge pull request #690 from nosqlbench/snyk-upgrade-5c45904744f916b0364e5e16bd9396fa
+- a6c57c6c2 Merge pull request #691 from nosqlbench/snyk-upgrade-036a1efc3828eea43fc068601f2f07fe
+- d73df5f54 Merge pull request #692 from nosqlbench/snyk-upgrade-61e05aaa943a86c5c0d7cd9ec7943c02
+- aa34187b8 fix: upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.262 to 1.12.264
+- 9c229fd08 fix: upgrade org.glassfish.jersey.inject:jersey-hk2 from 3.0.4 to 3.0.5
+- 51ac5e9ef fix: upgrade org.eclipse.jetty:jetty-servlets from 11.0.10 to 11.0.11
+- 3ea9ed096 fix: upgrade org.eclipse.jetty:jetty-servlet from 11.0.10 to 11.0.11
+- 4b6547af3 fix: upgrade org.eclipse.jetty:jetty-rewrite from 11.0.10 to 11.0.11
