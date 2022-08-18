@@ -38,11 +38,19 @@ public class MongoOp implements CycleOp<Document> {
     @Override
     public Document apply(long value) {
         Document document = client.getDatabase(database).runCommand(rqBson);
-        int ok = document.getInteger("ok",0);
-        if (ok!=1) {
-            throw new MongoOpFailedException(rqBson, ok, document);
+        int okcode =0;
+
+        Object ok = document.get("ok");
+        if (ok instanceof Number n) {
+            okcode = n.intValue();
         }
-        this.resultSize = document.getInteger("n");
+        if (okcode!=1) {
+            throw new MongoOpFailedException(rqBson, okcode, document);
+        }
+        Object nObj=document.get("n");
+        if (nObj instanceof Number n) {
+            this.resultSize = n.intValue();
+        }
         return document;
     }
 
