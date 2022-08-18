@@ -267,7 +267,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: javadoc
-          path: nosqlbench-*-javadoc.jar
       - run: ls -la
       - name: unpackage javadoc
         run: unzip nosqlbench-*-javadoc.jar
