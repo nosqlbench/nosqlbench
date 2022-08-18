@@ -1,44 +1,5 @@
-- force-build
-- 6c3dc2bcf (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 80fdb2530 add values summarizer to help debug bindings
-- a0344d65c make BundledApps implement primitive interface
-- b395f1491 fix get() bug in NBConfiguration
-- 380b3cbae introduce picocli to standard libs
-- f255c5ec0 packagename refactoring
-- 6e929e704 pom deps cleanup
-- b2152d77b pom version sync
-- 52a9958fb provide defaults on virtdata app
-- bec33d01b Merge pull request #693 from nosqlbench/snyk-upgrade-2d44458efe71a88127b49c639aaa55ba
-- 8e0932d48 Merge pull request #694 from nosqlbench/snyk-upgrade-f8de4dddc2c8c9a2b5408006041af849
-- ad6fae668 Merge pull request #695 from nosqlbench/snyk-upgrade-ac9e2765b3e50ce583426c72726f52a9
-- d1b9a3c8a Merge pull request #696 from nosqlbench/snyk-upgrade-db679aa5855dd362e8c34ac3e80e6e85
-- 3bf24e154 Merge pull request #697 from nosqlbench/snyk-upgrade-0696fa22830a638a03e581cdb376cae4
-- 6001f3c46 Merge pull request #698 from weideng1/patch-2
-- 427179996 Set base to 17-jdk so this image can run on arm64
-- bd4b94b94 (origin/snyk-upgrade-0696fa22830a638a03e581cdb376cae4) fix: upgrade io.netty:netty-handler from 4.1.78.Final to 4.1.79.Final
-- b7cf7fcdd (origin/snyk-upgrade-db679aa5855dd362e8c34ac3e80e6e85) fix: upgrade org.graalvm.sdk:graal-sdk from 21.3.2.1 to 21.3.3
-- f5d95a3ad (origin/snyk-upgrade-ac9e2765b3e50ce583426c72726f52a9) fix: upgrade io.swagger.core.v3:swagger-models from 2.2.1 to 2.2.2
-- 217ef3346 (origin/snyk-upgrade-f8de4dddc2c8c9a2b5408006041af849) fix: upgrade org.eclipse.jetty:jetty-server from 11.0.10 to 11.0.11
-- b1a344f7d (origin/snyk-upgrade-2d44458efe71a88127b49c639aaa55ba) fix: upgrade com.datastax.oss:pulsar-jms from 2.4.2 to 2.4.3
-- 87302800f Merge pull request #688 from nosqlbench/snyk-upgrade-5e345ff69ee1209de1b840fc9d71a5e5
-- f0e429b36 Merge pull request #689 from nosqlbench/snyk-upgrade-23a28ced9c29b3006bea868c9dd4782b
-- d1bb3286c Merge pull request #690 from nosqlbench/snyk-upgrade-5c45904744f916b0364e5e16bd9396fa
-- a6c57c6c2 Merge pull request #691 from nosqlbench/snyk-upgrade-036a1efc3828eea43fc068601f2f07fe
-- d73df5f54 Merge pull request #692 from nosqlbench/snyk-upgrade-61e05aaa943a86c5c0d7cd9ec7943c02
-- aa34187b8 fix: upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.262 to 1.12.264
-- 9c229fd08 fix: upgrade org.glassfish.jersey.inject:jersey-hk2 from 3.0.4 to 3.0.5
-- 51ac5e9ef fix: upgrade org.eclipse.jetty:jetty-servlets from 11.0.10 to 11.0.11
-- 3ea9ed096 fix: upgrade org.eclipse.jetty:jetty-servlet from 11.0.10 to 11.0.11
-- 4b6547af3 fix: upgrade org.eclipse.jetty:jetty-rewrite from 11.0.10 to 11.0.11
-- 83d7451f8 (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 3703e58e8 github actions updates
-- 061d529b8 (HEAD -> main) stabilize exit status integration tests
-- f811fd3aa (origin/main) github actions fix testing
-- 83d7451f8 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 3703e58e8 github actions updates
-- 1dcade630 (HEAD -> main) remove curl in lieu of direct HTTP grafana auth, fix docker deps
-- 99a7be3a2 (origin/main) test stabilization
-- 061d529b8 stabilize exit status integration tests
-- f811fd3aa github actions fix testing
-- 83d7451f8 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 3703e58e8 github actions updates
+- ef491bfde (HEAD -> main) javadoc deploymen testing
+- 28a1c6665 start tracking feature news in a file
+- 6b97a8448 update mongodb driver version
+- 3695fd0d9 add mongodb to nb5 artifact
+- 09c1b8196 interpret mongodb ok field as float
