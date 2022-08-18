@@ -54,6 +54,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-mongodb</artifactId>
+            <version>4.17.25-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
             <version>4.17.25-SNAPSHOT</version>
         </dependency>
