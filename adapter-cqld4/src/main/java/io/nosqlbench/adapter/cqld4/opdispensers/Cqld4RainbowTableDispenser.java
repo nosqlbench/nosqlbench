@@ -24,7 +24,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4RainbowTableDispenser extends Cqld4BaseOpDispenser {
+public class CqlD4RainbowTableDispenser extends BaseOpDispenser<Cqld4RainbowTableOp> {
    
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
@@ -40,8 +40,8 @@ public class CqlD4RainbowTableDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4RainbowTable apply(long value) {
-        return new Cqld4RainbowTable(
+    public Cqld4RainbowTableOp apply(long value) {
+        return new Cqld4RainbowTableOp(
             getSessionFunc().apply(value),
             (RainbowTable) stmtFunc.apply(value),
             getMaxPages(),

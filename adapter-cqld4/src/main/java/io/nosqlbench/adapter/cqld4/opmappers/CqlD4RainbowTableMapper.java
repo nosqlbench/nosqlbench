@@ -26,7 +26,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4RainbowTableMapper implements OpMapper<Cqld4CqlOp> {
+public class CqlD4RainbowTableMapper implements OpMapper<Cqld4RainbowTableOp> {
     private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<String> targetFunction;
     private final DriverAdapter adapter;

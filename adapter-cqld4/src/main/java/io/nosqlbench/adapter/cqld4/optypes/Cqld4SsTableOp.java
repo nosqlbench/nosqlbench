@@ -20,23 +20,18 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 
 // Need to create SsTableStatement
-public class Cqld4SsTableOp extends Cqld4CqlOp {
+public class Cqld4SsTableOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize  {
     private final CqlSession session;
     private final SsTableStatement stmt;
 
+    // Rename ResultSet to something more appropriate
+    public final ResultSet apply(long cycle) {
+        // TODO: actually write to sstables
+        // sstable passed to shared memory object
+    }
+    
     public Cqld4SsTableOp(CqlSession session, SsTableStatement stmt, int maxpages, boolean retryreplace) {
-        super(session, maxpages,retryreplace, new RSProcessors());
-        this.stmt = stmt;
-    }
 
-    @Override
-    public SsTableStatement getStmt() {
-        return stmt;
-    }
-
-    @Override
-    public String getQueryString() {
-        return stmt.getQuery();
     }
 
 }

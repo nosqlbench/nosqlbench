@@ -24,7 +24,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4SsTableDispenser extends Cqld4BaseOpDispenser {
+public class CqlD4SsTableDispenser extends BaseOpDispenser<Cqld4SsTableOp> {
     
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
@@ -40,7 +40,7 @@ public class CqlD4SsTableDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4SSTable apply(long value) {
+    public Cqld4SsTableOp apply(long value) {
         return new CqlD4SsTable(
             getSessionFunc().apply(value),
             (SsTable) stmtFunc.apply(value),
