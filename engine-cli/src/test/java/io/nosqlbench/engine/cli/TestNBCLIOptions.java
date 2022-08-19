@@ -205,7 +205,7 @@ public class TestNBCLIOptions {
     @Test
     public void listScripts() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scripts"});
-        assertThat(opts.wantsScriptList()).isTrue();
+        assertThat(opts.wantsListScripts()).isTrue();
     }
 
     @Test

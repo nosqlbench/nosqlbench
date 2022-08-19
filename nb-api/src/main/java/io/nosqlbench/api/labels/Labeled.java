@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.labels;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,6 +31,7 @@ public interface Labeled {
         }
         return map;
     }
+
     default Map<String, String> getLabelsAnd(Map<String,String> extra) {
         LinkedHashMap<String,String> map = new LinkedHashMap<>(getLabels());
         map.putAll(extra);
@@ -50,5 +53,21 @@ public interface Labeled {
         public Map<String, String> getLabels() {
             return labels;
         }
+    }
+
+    default String linearized(Map<String,String> and) {
+        StringBuilder sb= new StringBuilder();
+        Map<String, String> allLabels = this.getLabelsAnd(and);
+        ArrayList<String> sortedLabels = new ArrayList<>(allLabels.keySet());
+        Collections.sort(sortedLabels);
+        for (String label : sortedLabels) {
+            sb.append(label).append(":").append(allLabels.get(label)).append((","));
+        }
+        sb.setLength(sb.length()-",".length());
+        return sb.toString();
+    }
+
+    default String linearized(String... and) {
+        return linearized(getLabelsAnd(and));
     }
 }

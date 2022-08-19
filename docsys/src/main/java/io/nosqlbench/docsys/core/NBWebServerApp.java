@@ -16,7 +16,9 @@
 
 package io.nosqlbench.docsys.core;
 
+import io.nosqlbench.api.spi.BundledApp;
 import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
+import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,24 +29,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-public class NBWebServerApp {
+@Service(value=NBWebServerApp.class,selector="appserver")
+public class NBWebServerApp implements BundledApp {
     private static final Logger logger = LogManager.getLogger(NBWebServerApp.class);
 
     public static void main(String[] args) {
-        if (args.length > 0 && args[0].contains("help")) {
-            showHelp();
-        } else if (args.length > 0 && args[0].contains("generate")) {
-            try {
-                String[] genargs = Arrays.copyOfRange(args, 1, args.length);
-                logger.info("Generating with args [" + String.join("][", args) + "]");
-                generate(genargs);
-            } catch (IOException e) {
-                logger.error("could not generate files with command " + String.join(" ", args));
-                e.printStackTrace();
-            }
-        } else {
-            runServer(args);
-        }
+        new NBWebServerApp().applyAsInt(args);
     }
 
     private static boolean deleteDirectory(File directoryToBeDeleted) {
@@ -151,5 +141,24 @@ public class NBWebServerApp {
 
     private static void listTopics() {
 
+    }
+
+    @Override
+    public int applyAsInt(String[] args) {
+        if (args.length > 0 && args[0].contains("help")) {
+            showHelp();
+        } else if (args.length > 0 && args[0].contains("generate")) {
+            try {
+                String[] genargs = Arrays.copyOfRange(args, 1, args.length);
+                logger.info("Generating with args [" + String.join("][", args) + "]");
+                generate(genargs);
+            } catch (IOException e) {
+                logger.error("could not generate files with command " + String.join(" ", args));
+                e.printStackTrace();
+            }
+        } else {
+            runServer(args);
+        }
+        return 0;
     }
 }

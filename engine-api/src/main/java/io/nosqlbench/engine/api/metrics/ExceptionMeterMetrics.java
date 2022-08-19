@@ -29,10 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExceptionMeterMetrics {
     private final ConcurrentHashMap<String, Meter> meters = new ConcurrentHashMap<>();
+    private final Meter allerrors;
     private final ActivityDef activityDef;
 
     public ExceptionMeterMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
+        allerrors = ActivityMetrics.meter(activityDef, "errormeters.ALL");
     }
 
     public void mark(String name) {
@@ -41,11 +43,12 @@ public class ExceptionMeterMetrics {
             synchronized (meters) {
                 c = meters.computeIfAbsent(
                     name,
-                    k -> ActivityMetrics.meter(activityDef, "exceptions." + name)
+                    k -> ActivityMetrics.meter(activityDef, "errormeters." + name)
                 );
             }
         }
         c.mark();
+        allerrors.mark();
     }
 
     public List<Meter> getMeters() {

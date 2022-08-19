@@ -150,18 +150,18 @@ public class ReadyPulsarOp extends BaseOpDispenser<PulsarOp> {
         else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.MSG_READ.label)) {
             return resolveMsgRead(clientSpace, topicUriFunc, asyncApiFunc);
         }
-        // Regular/non-admin operation: batch message processing - batch start
-        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
-            return resolveMsgBatchSendStart(clientSpace, topicUriFunc, asyncApiFunc);
-        }
-        // Regular/non-admin operation: batch message processing - message sending (producer)
-        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label)) {
-            return resolveMsgBatchSend(clientSpace, asyncApiFunc);
-        }
-        // Regular/non-admin operation: batch message processing - batch send
-        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label)) {
-            return resolveMsgBatchSendEnd(clientSpace, asyncApiFunc);
-        }
+//        // Regular/non-admin operation: batch message processing - batch start
+//        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_START.label)) {
+//            return resolveMsgBatchSendStart(clientSpace, topicUriFunc, asyncApiFunc);
+//        }
+//        // Regular/non-admin operation: batch message processing - message sending (producer)
+//        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND.label)) {
+//            return resolveMsgBatchSend(clientSpace, asyncApiFunc);
+//        }
+//        // Regular/non-admin operation: batch message processing - batch send
+//        else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.BATCH_MSG_SEND_END.label)) {
+//            return resolveMsgBatchSendEnd(clientSpace, asyncApiFunc);
+//        }
         // Regular/non-admin operation: end-to-end message processing - sending message
         else if (StringUtils.equalsIgnoreCase(stmtOpType, PulsarActivityUtil.OP_TYPES.E2E_MSG_PROC_SEND.label)) {
             return resolveMsgSend(clientSpace, topicUriFunc, asyncApiFunc, useTransactionFunc, seqTrackingFunc);

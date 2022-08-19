@@ -1,4 +1,6 @@
-- 30f67d900 (HEAD -> main, origin/main, origin/cqlast, cqlast) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 080b40b08 minor formatting fixes
-- 1df11fa77 add main scenarios for main sections separately
-- 279bb2242 fix for cardinality estimates: rebind all patition keys with the same modulo
+- ef491bfde (HEAD -> main) javadoc deploymen testing
+- 28a1c6665 start tracking feature news in a file
+- 6b97a8448 update mongodb driver version
+- 3695fd0d9 add mongodb to nb5 artifact
+- 09c1b8196 interpret mongodb ok field as float
+- 6930742e6 (HEAD -> main) javadoc deployment testing

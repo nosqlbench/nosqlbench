@@ -19,6 +19,8 @@ package io.nosqlbench.api.markdown.exporter;
 import io.nosqlbench.api.markdown.aggregator.MarkdownDocs;
 import io.nosqlbench.api.markdown.types.DocScope;
 import io.nosqlbench.api.markdown.types.MarkdownInfo;
+import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.nb.annotations.Service;
 import joptsimple.*;
 
 import java.nio.file.Path;
@@ -27,35 +29,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MarkdownExporter implements Runnable {
+@Service(value = BundledApp.class, selector = "markdown-exporter")
+public class MarkdownExporter implements BundledApp, Runnable {
 
     public static final String APP_NAME = "exporter";
-    private final Path basePath;
-    private final Set<DocScope> scopeSet;
-
-    public MarkdownExporter(Path basePath, Set<DocScope> scopeSet) {
-        this.basePath = basePath;
-        this.scopeSet = scopeSet;
-    }
+    private Path basePath;
+    private Set<DocScope> scopeSet;
 
     public static void main(String[] args) {
-        final OptionParser parser = new OptionParser();
-
-        OptionSpec<String> basedir = parser.accepts("basedir", "base directory to write to")
-            .withRequiredArg().ofType(String.class).defaultsTo(".");
-
-        OptionSpec<String> docScopes = parser.accepts("scopes", "scopes of documentation to export")
-            .withRequiredArg().ofType(String.class).defaultsTo(DocScope.ANY.toString());
-
-        parser.acceptsAll(List.of("-h","--help","help"),"Display help").forHelp();
-
-        OptionSet options = parser.parse(args);
-
-        Path basePath = Path.of(basedir.value(options));
-        Set<DocScope> scopeSet = docScopes.values(options).stream().map(DocScope::valueOf).collect(Collectors.toSet());
-
-
-        new MarkdownExporter(basePath,scopeSet).run();
+        new MarkdownExporter().applyAsInt(args);
     }
 
     @Override
@@ -65,4 +47,25 @@ public class MarkdownExporter implements Runnable {
     }
 
 
+    @Override
+    public int applyAsInt(String[] args) {
+        final OptionParser parser = new OptionParser();
+
+        OptionSpec<String> basedir = parser.accepts("basedir", "base directory to write to")
+            .withRequiredArg().ofType(String.class).defaultsTo(".");
+
+        OptionSpec<String> docScopes = parser.accepts("scopes", "scopes of documentation to export")
+            .withRequiredArg().ofType(String.class).defaultsTo(DocScope.ANY.toString());
+
+        parser.acceptsAll(List.of("-h", "--help", "help"), "Display help").forHelp();
+
+        OptionSet options = parser.parse(args);
+
+        Path basePath = Path.of(basedir.value(options));
+        Set<DocScope> scopeSet = docScopes.values(options).stream().map(DocScope::valueOf).collect(Collectors.toSet());
+        this.basePath = basePath;
+        this.scopeSet = scopeSet;
+        run();
+        return 0;
+    }
 }

@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.engine.clients.grafana.annotator.GrafanaMetricsAnnotator;
-import io.nosqlbench.engine.clients.grafana.authorizers.CurlCmdInjector;
 import io.nosqlbench.engine.clients.grafana.authorizers.RawSocketInjector;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
 import io.nosqlbench.engine.clients.prometheus.PMatrixData;
@@ -545,11 +544,6 @@ public class GrafanaClient {
                         if (token.isPresent()) {
                             return token;
                         }
-                        token = CurlCmdInjector.submit(apirq, rq);
-                        if (token.isPresent()) {
-                            return token;
-                        }
-
                     }
                 } catch (Exception e2) {
                     logger.error("Error while using secondary method to init grafana client key after auth failure: " + e2, e2);

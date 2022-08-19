@@ -29,10 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExceptionCountMetrics {
     private final ConcurrentHashMap<String, Counter> counters = new ConcurrentHashMap<>();
+    private final Counter allerrors;
     private final ActivityDef activityDef;
 
     public ExceptionCountMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
+        allerrors=ActivityMetrics.counter(activityDef, "errorcounts.ALL");
     }
 
     public void count(String name) {
@@ -46,6 +48,7 @@ public class ExceptionCountMetrics {
             }
         }
         c.inc();
+        allerrors.inc();
     }
 
     public List<Counter> getCounters() {

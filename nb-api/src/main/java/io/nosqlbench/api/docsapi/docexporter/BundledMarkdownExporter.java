@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.docsapi.docexporter;
 
+import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.nb.annotations.Service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -24,14 +26,19 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-public class BundledMarkdownExporter {
+@Service(value=BundledApp.class,selector = "export-docs")
+public class BundledMarkdownExporter implements BundledApp {
 
     public static void main(String[] args) {
+        new BundledMarkdownExporter().applyAsInt(args);
 
+    }
+    @Override
+    public int applyAsInt(String[] args) {
         final OptionParser parser = new OptionParser();
 
         OptionSpec<String> zipfileSpec = parser.accepts("zipfile", "zip file to write to")
-                .withOptionalArg().ofType(String.class).defaultsTo("exported_docs.zip");
+            .withOptionalArg().ofType(String.class).defaultsTo("exported_docs.zip");
 
         OptionSpec<?> helpSpec = parser.acceptsAll(List.of("help", "h", "?"), "Display help").forHelp();
         OptionSet options = parser.parse(args);
@@ -46,6 +53,6 @@ public class BundledMarkdownExporter {
         String zipfile = options.valueOf(zipfileSpec);
 
         new BundledMarkdownZipExporter(new BundledFrontmatterInjector()).exportDocs(Path.of(zipfile));
+        return 0;
     }
-
 }

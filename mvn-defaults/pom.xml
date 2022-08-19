@@ -19,7 +19,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.17.21-SNAPSHOT</version>
+    <version>4.17.26-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -40,7 +40,6 @@
         <jaxb.api.version>2.4.0-b180830.0359</jaxb.api.version>
         <jaxb.core.version>2.3.0.1</jaxb.core.version>
         <jaxb.impl.version>2.4.0-b180830.0438</jaxb.impl.version>
-        <joda.time.version>2.10.14</joda.time.version>
 
         <lz4.version>1.4.1</lz4.version>
         <!--    <metrics.version>4.0.7</metrics.version>-->
@@ -96,16 +95,22 @@
     <dependencyManagement>
         <dependencies>
 
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>4.6.3</version>
+            </dependency>
+
             <!-- due to https://github.com/oshi/oshi/issues/1289 -->
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.11.0</version>
+                <version>5.12.1</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>5.11.0</version>
+                <version>5.12.1</version>
             </dependency>
 
             <dependency>
@@ -184,7 +189,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.78.Final</version>
+                <version>4.1.79.Final</version>
             </dependency>
 
             <dependency>
@@ -260,7 +265,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.1.6</version>
+                <version>6.2.1</version>
             </dependency>
 
             <dependency>
@@ -296,7 +301,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>${joda.time.version}</version>
+                <version>2.10.14</version>
             </dependency>
 
             <dependency>
@@ -355,7 +360,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>21.3.2.1</version>
+                <version>21.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
@@ -408,7 +413,7 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.17.2</version>
+            <version>2.18.0</version>
         </dependency>
 
 <!--        Removed due to a possible conflict-->

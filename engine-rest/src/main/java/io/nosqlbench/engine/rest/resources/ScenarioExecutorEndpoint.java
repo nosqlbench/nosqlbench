@@ -122,7 +122,10 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         }
 
         args = substituteFilenames(rq, args);
-        NBCLICommandParser.parse(args, cmdList, workspace.asIncludes());
+        Optional<List<Cmd>> parsed = NBCLICommandParser.parse(args, workspace.asIncludes());
+        if (!parsed.isPresent()) {
+            return Response.serverError().entity("Unable to render command stream from provided command spec.").build();
+        }
         ScriptBuffer buffer = new BasicScriptBuffer();
         buffer.add(cmdList.toArray(new Cmd[0]));
 

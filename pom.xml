@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.21-SNAPSHOT</version>
+        <version>4.17.26-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -92,7 +92,6 @@
                 <module>driver-jdbc</module>
                 <module>driver-cockroachdb</module>
                 <module>driver-pulsar</module>
-                <module>driver-jms</module>
 
             </modules>
         </profile>
@@ -127,9 +126,33 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                </configuration>
+                <!-- NO Executions by default for main project builds.
+                     This plugin should be called directly on the command line
+                     The site plugin appears to be broken or at least not properly maintained,
+                     so invoking via the site phase is more trouble than it is worth.
+                     -->
+                <!--                <executions>-->
+                <!--                </executions>-->
+            </plugin>
         </plugins>
 
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.9</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <developers>
         <developer>

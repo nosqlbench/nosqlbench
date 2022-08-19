@@ -19,27 +19,26 @@ package io.nosqlbench.cqlgen.model;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.labels.Labeled;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Objects;
 
 public class CqlType implements NBNamedElement, Labeled {
-    private String keyspace;
-    private String name;
-    private String refddl;
-    private Map<String,String> fields = new LinkedHashMap<>();
 
-    public void setKeyspace(String newksname) {
-        this.keyspace = newksname;
-        if (refddl!=null) {
-            this.refddl = this.refddl.replaceAll(this.keyspace,newksname);
-        }
+    private String name;
+    private CqlKeyspaceDef keyspace;
+    private List<CqlTypeColumn> columnDefs = new ArrayList<>();
+    private volatile boolean defined;
+
+    public void setKeyspace(CqlKeyspaceDef keyspace) {
+        this.keyspace = keyspace;
     }
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getKeyspace() {
+    public CqlKeyspaceDef getKeyspace() {
         return keyspace;
     }
 
@@ -47,26 +46,48 @@ public class CqlType implements NBNamedElement, Labeled {
         return this.name;
     }
 
-    public void addField(String name, String typedef) {
-        this.fields.put(name, typedef);
+    public void addColumn(CqlTypeColumn def) {
+        this.columnDefs.add(this.columnDefs.size(),def);
+        def.setPosition(ColumnPosition.TypeDef);
     }
 
-    public Map<String, String> getFields() {
-        return fields;
+    public List<CqlTypeColumn> columns() {
+        return columnDefs;
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", this.keyspace,
-            "type","udt",
+            "keyspace", keyspace.getName(),
+            "type","type",
             "name",name
         );
     }
 
-    public void renameColumns(Function<String, String> renamer) {
-        Map<String,String> newColumns = new LinkedHashMap<>();
-        fields.forEach((k,v)->newColumns.put(renamer.apply(k),v));
-        this.fields = newColumns;
+    public void setColumnDefs(List<CqlTypeColumn> columnDefs) {
+        this.columnDefs = columnDefs;
+    }
+
+    public List<CqlTypeColumn> getColumnDefs() {
+        return columnDefs;
+    }
+
+    public String getFullName() {
+        return keyspace.getName()+"."+getName();
+    }
+
+    public void getReferenceErrors(List<String> errors) {
+        if (!defined) {
+            errors.add("type " + this.getName() + " was referenced but not defined.");
+        }
+    }
+
+    public void validate() {
+        Objects.requireNonNull(this.name);
+        Objects.requireNonNull(this.keyspace);
+    }
+
+    public void setDefined() {
+        this.defined=true;
     }
 }

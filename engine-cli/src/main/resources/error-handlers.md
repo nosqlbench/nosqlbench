@@ -15,12 +15,15 @@ The currently supported handler verbs, like `stop` above, are:
 
 * **ignore** If an error matches this verb in a handler chain, then it
   will be silently ignored.
-* **counter** Count each uniquely named error with a counter metric.
-* **meter** Meter each uniquely named error with a meter metric.
+* **counter** Count each uniquely named error with a counter metric. These will show up in
+  metrics as `...errorcounts.<name>` and `...errorcounts.ALL`.
+* **meter** Meter each uniquely named error with a meter metric. These will show up in metrics
+  as `...errormeters.<name>` and `...errormeters.ALL`.
 * **histogram** Track the session time of each uniquely named error with a
-  histogram.
+  histogram. This will show as `...errorhistos.<name>` and `...errorhistos.ALL`.
 * **timer** Count, Meter, and Track session times of each uniquely named
   error with a timer metric, which combines the three forms above.
+  This will show as `...errortimers.<name>` and `...errortimers.ALL`.
 * **warn** Log a warning to the log with the error details.
 * **stop** Allow the error to propagate through the stack to cause the
   activity to be stopped.

@@ -61,6 +61,7 @@ public class NBCLIOptions {
 
     // Discovery
     private static final String HELP = "--help";
+    private static final String LIST_COMMANDS = "--list-commands";
     private static final String LIST_METRICS = "--list-metrics";
     private static final String LIST_DRIVERS = "--list-drivers";
     private static final String LIST_ACTIVITY_TYPES = "--list-activity-types";
@@ -69,6 +70,7 @@ public class NBCLIOptions {
     private static final String LIST_SCENARIOS = "--list-scenarios";
     private static final String LIST_INPUT_TYPES = "--list-input-types";
     private static final String LIST_OUTPUT_TYPES = "--list-output-types";
+    private static final String LIST_APPS = "--list-apps";
     private static final String VERSION_COORDS = "--version-coords";
     private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
@@ -128,7 +130,7 @@ public class NBCLIOptions {
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
 
-    private final LinkedList<Cmd> cmdList = new LinkedList<>();
+    private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax = 0;
     private boolean wantsVersionShort = false;
     private boolean wantsVersionCoords = false;
@@ -160,8 +162,8 @@ public class NBCLIOptions {
     private Map<String, String> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
     private boolean dockerMetrics = false;
-    private boolean wantsScenariosList = false;
-    private boolean wantsScriptList = false;
+    private boolean wantsListScenarios = false;
+    private boolean wantsListScripts = false;
     private String wantsToCopyWorkload = null;
     private boolean wantsWorkloadsList = false;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
@@ -185,7 +187,16 @@ public class NBCLIOptions {
     private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
     private String graphitelogLevel="info";
+    private boolean wantsListCommands = false;
+    private boolean wantsListApps = false;
 
+    public boolean isWantsListApps() {
+        return wantsListApps;
+    }
+
+    public boolean getWantsListCommands() {
+        return wantsListCommands;
+    }
     public String getAnnotatorsConfig() {
         return annotatorsConfig;
     }
@@ -517,6 +528,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     showScript = true;
                     break;
+                case LIST_COMMANDS:
+                    arglist.removeFirst();
+                    this.wantsListCommands = true;
+                    break;
                 case LIST_METRICS:
                     arglist.removeFirst();
                     arglist.addFirst("start");
@@ -596,15 +611,19 @@ public class NBCLIOptions {
                     break;
                 case LIST_SCENARIOS:
                     arglist.removeFirst();
-                    wantsScenariosList = true;
+                    wantsListScenarios = true;
                     break;
                 case LIST_SCRIPTS:
                     arglist.removeFirst();
-                    wantsScriptList = true;
+                    wantsListScripts = true;
                     break;
                 case LIST_WORKLOADS:
                     arglist.removeFirst();
                     wantsWorkloadsList = true;
+                    break;
+                case LIST_APPS:
+                    arglist.removeFirst();
+                    wantsListApps= true;
                     break;
                 case SCRIPT_FILE:
                     arglist.removeFirst();
@@ -619,7 +638,31 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-        NBCLICommandParser.parse(arglist, cmdList);
+        Optional<List<Cmd>> commands = NBCLICommandParser.parse(arglist);
+        if (commands.isPresent()) {
+            this.cmdList.addAll(commands.get());
+        } else {
+            String arg = arglist.peekFirst();
+            Objects.requireNonNull(arg);
+            String helpmsg = """
+                Could not recognize command 'ARG'.
+                This means that all of the following searches for a compatible command failed:
+                1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
+                2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
+                3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
+                4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
+                5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
+                6. apps: no application named ARG was bundled in PROG.
+
+                You can discover available ways to invoke PROG by using the various --list-* commands:
+                [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+                """
+                .replaceAll("ARG",arg)
+                .replaceAll("PROG","nb5")
+                .replaceAll("INCLUDES", String.join(",",this.wantsIncludes()));
+            throw new BasicError(helpmsg);
+
+        }
     }
 
 
@@ -859,11 +902,11 @@ public class NBCLIOptions {
     }
 
     public boolean wantsScenariosList() {
-        return wantsScenariosList;
+        return wantsListScenarios;
     }
 
-    public boolean wantsScriptList() {
-        return wantsScriptList;
+    public boolean wantsListScripts() {
+        return wantsListScripts;
     }
 
     public boolean wantsToCopyResource() {

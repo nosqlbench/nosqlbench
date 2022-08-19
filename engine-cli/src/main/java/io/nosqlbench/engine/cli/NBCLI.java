@@ -16,14 +16,21 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.docsapi.docexporter.BundledMarkdownExporter;
-import io.nosqlbench.docsys.core.NBWebServerApp;
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.content.Content;
+import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.logging.NBLogLevel;
+import io.nosqlbench.api.metadata.SessionNamer;
+import io.nosqlbench.api.metadata.SystemId;
+import io.nosqlbench.api.spi.BundledApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.*;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
@@ -35,16 +42,8 @@ import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.core.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.api.logging.NBLogLevel;
-import io.nosqlbench.api.markdown.exporter.MarkdownExporter;
-import io.nosqlbench.api.metadata.SessionNamer;
-import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.virtdata.userlibs.apps.VirtDataMainApp;
+import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -53,15 +52,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,6 +172,21 @@ public class NBCLI implements Function<String[], Integer> {
         logger.info("command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
         logger.info("client-hardware: " + SystemId.getHostSummary());
 
+
+        // Invoke any bundled app which matches the name of the first non-option argument, if it exists.
+        // If it does not, continue with no fanfare. Let it drop through to other command resolution methods.
+        if (args.length>0 && args[0].matches("\\w[\\w\\d-_.]+")) {
+            ServiceSelector<BundledApp> apploader = ServiceSelector.of(args[0], ServiceLoader.load(BundledApp.class));
+            BundledApp app = apploader.get().orElse(null);
+            if (app!=null) {
+                String[] appargs = Arrays.copyOfRange(args, 1, args.length);
+                logger.info("invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
+                globalOptions.setWantsStackTraces(true);
+                int result = app.applyAsInt(appargs);
+                return result;
+            }
+        }
+
         boolean dockerMetrics = globalOptions.wantsDockerMetrics();
         String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
@@ -226,40 +235,6 @@ public class NBCLI implements Function<String[], Integer> {
             annotatorsConfig = "[{type:'log',level:'info'}]";
         }
 
-        if (args.length > 0 && args[0].toLowerCase().equals("cqlgen")) {
-            String exporterImpl = "io.nosqlbench.cqlgen.exporter.CGWorkloadExporter";
-            String[] exporterArgs = Arrays.copyOfRange(args, 1, args.length);
-            try {
-                Class<?> genclass = Class.forName(exporterImpl);
-                Method main = genclass.getMethod("main", new String[0].getClass());
-                Object result = main.invoke(null, new Object[]{exporterArgs});
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("cql workload exporter implementation " + exporterImpl + " was not found in this runtime.");
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                System.out.println("Error in app: " + e.toString());
-                e.printStackTrace();
-                throw new RuntimeException("error while invoking " + exporterImpl + ": " + e.toString(),e);
-            }
-            return EXIT_OK;
-        }
-        if (args.length > 0 && args[0].toLowerCase().equals("export-docs")) {
-            BundledMarkdownExporter.main(Arrays.copyOfRange(args,1,args.length));
-            return EXIT_OK;
-        }
-        if (args.length > 0 && args[0].toLowerCase().equals("virtdata")) {
-            VirtDataMainApp.main(Arrays.copyOfRange(args, 1, args.length));
-            return EXIT_OK;
-        }
-        if (args.length > 0 && args[0].toLowerCase().matches("docserver|appserver")) {
-            NBWebServerApp.main(Arrays.copyOfRange(args, 1, args.length));
-            return EXIT_OK;
-        }
-        if (args.length > 0 && args[0].toLowerCase().equals(MarkdownExporter.APP_NAME)
-        ) {
-            MarkdownExporter.main(Arrays.copyOfRange(args, 1, args.length));
-            return EXIT_OK;
-        }
-
         NBCLIOptions options = new NBCLIOptions(args);
         logger = LogManager.getLogger("NBCLI");
 
@@ -282,6 +257,20 @@ public class NBCLI implements Function<String[], Integer> {
             return EXIT_OK;
         }
 
+        if (options.isWantsListApps()) {
+            ServiceLoader<BundledApp> loader = ServiceLoader.load(BundledApp.class);
+            for (ServiceLoader.Provider<BundledApp> provider : loader.stream().toList()) {
+                Class<? extends BundledApp> appType = provider.type();
+                String name = appType.getAnnotation(Service.class).selector();
+                System.out.println(String.format("%-40s %s",name,appType.getCanonicalName()));
+            }
+            return EXIT_OK;
+        }
+
+        if (options.getWantsListCommands()) {
+            NBCLICommandParser.RESERVED_WORDS.forEach(System.out::println);
+            return EXIT_OK;
+        }
         if (options.wantsActivityTypes()) {
             new ActivityTypeLoader().getAllSelectors().forEach(System.out::println);
             return EXIT_OK;
@@ -297,7 +286,7 @@ public class NBCLI implements Function<String[], Integer> {
             return EXIT_OK;
         }
 
-        if (options.wantsScriptList()) {
+        if (options.wantsListScripts()) {
             NBCLIScripts.printScripts(true, options.wantsIncludes());
             return EXIT_OK;
         }

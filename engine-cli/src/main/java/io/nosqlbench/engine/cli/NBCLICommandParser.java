@@ -16,14 +16,19 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 
+/**
+ * This parser will return a non-empty optional if there is no error.
+ * If the optional is empty, then it means some part of the command structure
+ * was not recognized.
+ */
 public class NBCLICommandParser {
+
     private static final String FRAGMENT = "fragment";
     private static final String SCRIPT = "script";
     private static final String START = "start";
@@ -37,21 +42,20 @@ public class NBCLICommandParser {
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
                 Arrays.asList(
-                        SCRIPT, ACTIVITY, SCENARIO, RUN, START,
-                        FRAGMENT, STOP, AWAIT, WAIT_MILLIS
+                        FRAGMENT, SCRIPT, START, RUN, AWAIT, STOP, ACTIVITY, SCENARIO, WAIT_MILLIS
                 )
         );
     }};
 
-    public static void parse(
+    public static Optional<List<Cmd>> parse(
             LinkedList<String> arglist,
-            LinkedList<Cmd> cmdList,
             String... includes
     ) {
+        List<Cmd> cmdList = new LinkedList<>();
         PathCanonicalizer canonicalizer = new PathCanonicalizer(includes);
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
-            Cmd cmd = null;
+            Cmd cmd;
             switch (word) {
                 case FRAGMENT:
                 case SCRIPT:
@@ -80,11 +84,12 @@ public class NBCLICommandParser {
                     } else if (NBCLIScenarioParser.isFoundWorkload(word, includes)) {
                         NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, includes);
                     } else {
-                        throw new InvalidParameterException("unrecognized option:" + word);
+                        return Optional.empty();
                     }
                     break;
             }
         }
+        return Optional.of(cmdList);
 
     }
 }

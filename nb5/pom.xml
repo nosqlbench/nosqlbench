@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.21-SNAPSHOT</version>
+        <version>4.17.26-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <!-- Everything below this line is in common between nb and nb5 -->
@@ -49,37 +49,43 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-tcp</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-mongodb</artifactId>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-dynamodb</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
-            <version>4.17.21-SNAPSHOT</version>
+            <version>4.17.26-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
@@ -154,7 +160,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>adapter-mongodb</artifactId>
-                    <version>4.17.21-SNAPSHOT</version>
+                    <version>4.17.26-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
