@@ -16,14 +16,46 @@
 
 package io.nosqlbench.adapter.mongodb.dispensers;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.adapter.mongodb.core.MongoSpace;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapter.mongodb.core.MongodbDriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class MongoDbUpdateOpDispenser implements OpDispenser<? extends Op> {
-    public MongoDbUpdateOpDispenser(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+/**
+ * https://www.mongodb.com/docs/manual/reference/command/update/#mongodb-dbcommand-dbcmd.update
+ * https://www.mongodb.com/docs/drivers/java/sync/current/usage-examples/updateOne/
+ */
+public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
+    private final LongFunction<MongoSpace> spaceF;
+    private final LongFunction<Op> opF;
+    private LongFunction<String> collectionF;
+
+    public MongoDbUpdateOpDispenser(MongodbDriverAdapter adapter, ParsedOp pop, LongFunction<String> collectionF) {
+        super(adapter, pop);
+        this.collectionF = collectionF;
+        this.spaceF = adapter.getSpaceFunc(pop);
+        this.opF = createOpF(pop);
     }
+
+    private LongFunction<Op> createOpF(ParsedOp pop) {
+        LongFunction<MongoClient> clientF = cycle -> spaceF.apply(cycle).getClient();
+
+        LongFunction<MongoDatabase> docF = l -> clientF.apply(l).getDatabase(collectionF.apply(l));
+//        docF.apply(1).getCollection()
+//        LongFunctionclientF.apply(l).getDatabase()
+
+        return l -> new Op() {};
+    }
+
+    @Override
+    public Op apply(long value) {
+        Op op = opF.apply(value);
+        return op;
+    }
+
 }

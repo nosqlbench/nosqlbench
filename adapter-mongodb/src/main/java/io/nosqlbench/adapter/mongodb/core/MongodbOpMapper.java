@@ -16,29 +16,50 @@
 
 package io.nosqlbench.adapter.mongodb.core;
 
+import io.nosqlbench.adapter.mongodb.dispensers.MongoDbUpdateOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MongodbOpMapper implements OpMapper<Op> {
+    private final static Logger logger = LogManager.getLogger(MongodbOpMapper.class);
 
-    private final DriverSpaceCache<? extends MongoSpace> ctxcache;
-    private final DriverAdapter adapter;
+    private final MongodbDriverAdapter adapter;
 
-    public MongodbOpMapper(DriverAdapter adapter, DriverSpaceCache<? extends MongoSpace> ctxcache) {
-        this.ctxcache = ctxcache;
+    public MongodbOpMapper(MongodbDriverAdapter adapter) {
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp op) {
-        LongFunction<String> ctxNamer = op.getAsFunctionOr("space","default");
-        LongFunction<MongoSpace> ctxFunc = l -> ctxcache.get(ctxNamer.apply(l));
-        return new MongoOpDispenser(adapter,ctxFunc, op);
+        LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
+        LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache().get(ctxNamer.apply(l));
+
+        TypeAndTarget<MongoDBOpTypes, String> opTypeAndTarget =
+            op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class)
+                .orElseThrow(() -> new RuntimeException("unable to determine MongoDB op type from '" + op.toString()));
+        Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
+        if (oDatabaseF.isEmpty()) {
+            logger.warn(() -> "");
+        }
+
+
+        return switch (opTypeAndTarget.enumId) {
+            case command -> null;
+            case update -> new MongoDbUpdateOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+//            case insert -> new MongoDbInsertOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+//            case delete -> new MongoDbDeleteOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+//            case find -> new mongoDbFindOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+//            case findAndModify -> new MongoDbFindAndModifyOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+//            case getMore -> new MongoDbGetMoreOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+        };
+
     }
 }

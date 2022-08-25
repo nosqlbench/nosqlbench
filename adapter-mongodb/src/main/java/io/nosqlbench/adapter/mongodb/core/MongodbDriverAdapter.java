@@ -16,15 +16,18 @@
 
 package io.nosqlbench.adapter.mongodb.core;
 
+import io.nosqlbench.api.config.standard.NBConfigModel;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * Special thanks to Justin Chu who authored the original NoSQLBench MongoDB ActivityType.
@@ -34,7 +37,7 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        return new MongodbOpMapper(this, getSpaceCache());
+        return new MongodbOpMapper(this);
     }
 
     @Override
@@ -46,4 +49,5 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(MongoSpace.getConfigModel());
     }
+
 }

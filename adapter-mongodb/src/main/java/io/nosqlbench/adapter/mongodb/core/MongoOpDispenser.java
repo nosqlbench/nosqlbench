@@ -28,7 +28,7 @@ import org.bson.conversions.Bson;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MongoOpDispenser extends BaseOpDispenser<Op> {
+public class MongoOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
     private final LongFunction<MongoOp> opFunc;
     private final LongFunction<MongoOp> mongoOpF;
 
