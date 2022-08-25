@@ -65,7 +65,7 @@ Configure from multiple sources:
 * **password** OR **passfile** - (optional, only one may be used) - Fi you need to specify a
   password but want to put it ina  file instead, simply use the `passfile=mypassfile` option. It
   is not uncommon to say `passfile=passfile`.
-* **showstmt** - enable per-statement diagnostics whic show as much of the statement as possible
+* **showstmt** - enable per-statement diagnostics which show as much of the statement as possible
   for the given statement type. *WARNING* - Do not use this for performance testing, only for
   diagnostics.
 * **maxpages** - configure the maximum number of pages allowed in a CQL result set. This is
