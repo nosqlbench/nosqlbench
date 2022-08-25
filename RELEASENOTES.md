@@ -1,4 +1,7 @@
-- 953cae9e1 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #707 from nosqlbench/dockerfile-nb5-compat
-- 5b6d76412 (origin/dockerfile-nb5-compat, dockerfile-nb5-compat) some soft links
-- d7c2e72ff javadoc deployment testing
-- 6930742e6 javadoc deployment testing
+- 43917c84f (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- cb826eb62 parameterize driver space in mappers
+- 691e8ae40 add default binding for cqlgen
+- d80a33f49 typo fix
+- 9c66d616f start tracking feature news in a file
+- c2a264fed partial mongodb updates
+- 86112bb3d cqlgen updates
