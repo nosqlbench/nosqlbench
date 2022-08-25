@@ -42,9 +42,11 @@ This puts NB on a footing to be "Modular Jar" compatible, which is a step toward
 ## Removed Drivers
 
 ## New command line options
+```
 --docker-prom-retention-days=183d
 --list-scripts
 --list-apps
+```
 
 ## New help topics
 ## New scripting plugins
