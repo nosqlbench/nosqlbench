@@ -18,15 +18,14 @@ package io.nosqlbench.adapter.tcp;
 
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 public class TcpOpMapper implements OpMapper<Op> {
 
-    private final DriverAdapter<Op, TcpAdapterSpace> adapter;
+    private final TcpDriverAdapter adapter;
 
-    public TcpOpMapper(DriverAdapter<Op,TcpAdapterSpace> adapter) {
+    public TcpOpMapper(TcpDriverAdapter adapter) {
         this.adapter = adapter;
     }
 

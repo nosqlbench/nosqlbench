@@ -35,10 +35,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of operation
  */
-public abstract class BaseOpDispenser<T extends Op> implements OpDispenser<T> {
+public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T> {
 
     private final String name;
-    private final DriverAdapter adapter;
+    protected final DriverAdapter<T, S> adapter;
     private boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
@@ -46,7 +46,7 @@ public abstract class BaseOpDispenser<T extends Op> implements OpDispenser<T> {
     private String[] timerStarts = new String[0];
     private String[] timerStops = new String[0];
 
-    public BaseOpDispenser(DriverAdapter adapter,ParsedOp op) {
+    public BaseOpDispenser(DriverAdapter<T,S> adapter,ParsedOp op) {
         this.name = op.getName();
         this.adapter = adapter;
         timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
@@ -65,7 +65,7 @@ public abstract class BaseOpDispenser<T extends Op> implements OpDispenser<T> {
         configureInstrumentation(op);
     }
 
-    public DriverAdapter getAdapter() {
+    public DriverAdapter<T,S> getAdapter() {
         return adapter;
     }
 

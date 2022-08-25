@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.regex.Pattern;
 
-public class HttpOpDispenser extends BaseOpDispenser<HttpOp> {
+public class HttpOpDispenser extends BaseOpDispenser<HttpOp,HttpSpace> {
 
     private final LongFunction<HttpOp> opFunc;
     public static final String DEFAULT_OK_BODY = ".+?";

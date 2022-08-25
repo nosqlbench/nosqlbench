@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.LongFunction;
 
-public class DiagOpDispenser extends BaseOpDispenser<DiagOp> implements NBReconfigurable {
+public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implements NBReconfigurable {
     private final static Logger logger = LogManager.getLogger(DiagOpDispenser.class);
     private OpFunc opFunc;
 

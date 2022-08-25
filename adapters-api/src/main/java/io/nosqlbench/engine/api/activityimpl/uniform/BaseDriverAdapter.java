@@ -19,18 +19,21 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
 public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable, NBReconfigurable {
 
     private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
+    private LongFunction<S> spaceF;
 
     /**
      * BaseDriverAdapter will take any provided functions from {@link #getOpStmtRemappers()}
@@ -172,4 +175,10 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .asReadOnly();
     }
 
+    @Override
+    public LongFunction<S> getSpaceFunc(ParsedOp pop) {
+        LongFunction<String> spaceNameF = pop.getAsFunctionOr("space", "default");
+        DriverSpaceCache<? extends S> cache = getSpaceCache();
+        return l -> getSpaceCache().get(spaceNameF.apply(l));
+    }
 }

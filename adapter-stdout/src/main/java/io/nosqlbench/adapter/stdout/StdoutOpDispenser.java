@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp> {
+public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp,StdoutSpace> {
 
     private final LongFunction<StdoutSpace> ctxfunc;
     private final LongFunction<String> outFunction;

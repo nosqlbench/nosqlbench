@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.dynamodb.opdispensers;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBPutItemOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -28,7 +29,7 @@ import io.nosqlbench.api.errors.OpConfigError;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp> {
+public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpace> {
 
     private final DynamoDB ddb;
     private final LongFunction<String> tableNameFunc;

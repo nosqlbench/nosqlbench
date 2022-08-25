@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.dynamodb.opdispensers;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapter.dynamodb.optypes.RawDynamodOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -25,7 +26,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp> {
+public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpace> {
 
     private final LongFunction<? extends String> jsonFunction;
     private final DynamoDB ddb;

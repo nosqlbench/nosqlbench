@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.dynamodb.opdispensers;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.*;
+import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBCreateTableOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -105,7 +106,7 @@ import java.util.function.LongFunction;
  * }
  * }</pre>
  */
-public class DDBCreateTableOpDispenser extends BaseOpDispenser<DynamoDBOp> {
+public class DDBCreateTableOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpace> {
 
     private final DynamoDB ddb;
     private final LongFunction<String> tableNameFunc;

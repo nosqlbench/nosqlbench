@@ -17,13 +17,12 @@
 package io.nosqlbench.adapter.tcp;
 
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
-public class TcpOpDispenser extends BaseOpDispenser<Op> {
+public class TcpOpDispenser extends BaseOpDispenser<Op,TcpAdapterSpace> {
 
-    public TcpOpDispenser(DriverAdapter<? extends Op,TcpAdapterSpace> adapter, ParsedOp op) {
+    public TcpOpDispenser(TcpDriverAdapter adapter, ParsedOp op) {
         super(adapter, op);
     }
 

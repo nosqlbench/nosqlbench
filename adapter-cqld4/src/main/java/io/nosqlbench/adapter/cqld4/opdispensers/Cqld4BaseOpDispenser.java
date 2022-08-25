@@ -24,6 +24,7 @@ import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.api.core.metadata.token.Token;
 import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -36,7 +37,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp> {
+public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, Cqld4Space> {
 
     private final static Logger logger = LogManager.getLogger("CQLD4");
 

@@ -20,6 +20,7 @@ import com.datastax.dse.driver.api.core.graph.FluentGraphStatement;
 import com.datastax.dse.driver.api.core.graph.FluentGraphStatementBuilder;
 import com.datastax.oss.driver.api.core.CqlSession;
 import groovy.lang.Script;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op> {
+public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op, Cqld4Space> {
 
     private final LongFunction<? extends String> graphnameFunc;
     private final LongFunction<CqlSession> sessionFunc;

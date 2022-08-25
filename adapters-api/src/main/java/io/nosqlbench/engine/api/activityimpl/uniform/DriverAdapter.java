@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * <P>The DriverAdapter interface is expected to be the replacement
@@ -188,4 +189,6 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
     default Maturity getAdapterMaturity() {
         return this.getClass().getAnnotation(Service.class).maturity();
     }
+
+    LongFunction<SPACETYPE> getSpaceFunc(ParsedOp pop);
 }

@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBGetItemOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp> {
+public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpace> {
     private final DynamoDB ddb;
     private final LongFunction<Table> targetTableFunction;
     private final LongFunction<GetItemSpec> getItemSpecFunc;

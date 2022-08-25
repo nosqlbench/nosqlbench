@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.dynamodb.opdispensers;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
+import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DDBDeleteTableOp;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -34,7 +35,7 @@ import java.util.function.LongFunction;
  * }
  * }</pre>
  */
-public class DDBDeleteTableOpDispenser extends BaseOpDispenser<DynamoDBOp> {
+public class DDBDeleteTableOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpace> {
 
     private final DynamoDB ddb;
     private final LongFunction<String> tableNameFunc;
