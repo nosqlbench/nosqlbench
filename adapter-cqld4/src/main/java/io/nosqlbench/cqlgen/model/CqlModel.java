@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 import io.nosqlbench.cqlgen.core.CGSchemaStats;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +47,7 @@ import java.util.function.Supplier;
  * </p>
  */
 public class CqlModel {
-    private final static Logger logger = LogManager.getLogger(CqlModel.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/model");
 
     private final Supplier<List<String>> errors;
     private final List<CqlKeyspaceDef> keyspaceDefs = new ArrayList();

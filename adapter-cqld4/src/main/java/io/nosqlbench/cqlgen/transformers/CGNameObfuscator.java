@@ -24,6 +24,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.*;
 import io.nosqlbench.cqlgen.transformers.namecache.*;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
@@ -35,7 +36,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class CGNameObfuscator implements CGModelTransformer, NBConfigurable {
-    private final static Logger logger = LogManager.getLogger(CGNameObfuscator.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/name-obfuscator");
 
     NameCache cache = new NameCache();
     private final CGCachingNameRemapper remapper = new CGCachingNameRemapper();

@@ -17,6 +17,7 @@
 package io.nosqlbench.cqlgen.model;
 
 
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.generated.CqlParser;
 import io.nosqlbench.cqlgen.generated.CqlParserBaseListener;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class CqlModelBuilder extends CqlParserBaseListener {
-    private final static Logger logger = LogManager.getLogger(CqlModelBuilder.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/buidler");
 
     private final CGErrorListener errorListener;
     private final CqlModel model;

@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Supplier<List<CGTextTransformer>> {
-    private final static Logger logger = LogManager.getLogger(CGTextTransformers.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/text-transformers");
     private final List<CGTextTransformer> transformers = new ArrayList<>();
 
     @Override

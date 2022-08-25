@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityimpl;
+package io.nosqlbench.adapter.mongodb.dispensers;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapter.mongodb.core.MongoSpace;
+import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class StandardOpDispenser<T extends Op> extends BaseOpDispenser<T>{
-
-    private final LongFunction<T> opfunc;
-
-    public StandardOpDispenser(DriverAdapter adapter, ParsedOp op, LongFunction<T> opfunc) {
-        super(adapter, op);
-        this.opfunc = opfunc;
-    }
-
-    @Override
-    public T apply(long value) {
-        return opfunc.apply(value);
+public class MongoDbUpdateOpDispenser implements OpDispenser<? extends Op> {
+    public MongoDbUpdateOpDispenser(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
     }
 }

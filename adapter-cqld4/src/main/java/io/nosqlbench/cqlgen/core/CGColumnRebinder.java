@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class CGColumnRebinder {
 
-    private final static Logger logger = LogManager.getLogger(CGColumnRebinder.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/rebinder");
     private final BindingsAccumulator accumulator;
     private final double partitionMultiplier;
     private final int quantizerDigits;

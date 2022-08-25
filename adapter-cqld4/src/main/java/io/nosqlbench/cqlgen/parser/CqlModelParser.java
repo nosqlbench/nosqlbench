@@ -16,6 +16,7 @@
 
 package io.nosqlbench.cqlgen.parser;
 
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.generated.CqlLexer;
 import io.nosqlbench.cqlgen.generated.CqlParser;
 import io.nosqlbench.cqlgen.model.CGErrorListener;
@@ -35,7 +36,7 @@ import java.util.List;
 
 
 public class CqlModelParser {
-    private final static Logger logger  = LogManager.getLogger(CqlModelParser.class);
+    private final static Logger logger  = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/parser");
 
 
     public static CqlModel parse(Path path) {

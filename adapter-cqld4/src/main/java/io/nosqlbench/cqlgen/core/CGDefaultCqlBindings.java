@@ -32,23 +32,23 @@ import java.util.Optional;
 public class CGDefaultCqlBindings implements BindingsLibrary {
 
     private final Map<String, String> bindings;
-    private final static String exporterCfgDir = "cqlgen";
-    private final static String bindingsFileName = "bindings-cqlgen.yaml";
+    public final static String DEFAULT_CFG_DIR = "cqlgen";
+    public final static String DEFAULT_BINDINGS_FILE = "bindings-cqlgen.yaml";
 
     public CGDefaultCqlBindings() {
         String yamlContent = NBIO.all()
-            .name(bindingsFileName)
+            .name(DEFAULT_BINDINGS_FILE)
             .first()
             .map(Content::asString)
-            .or(() -> loadLocal(bindingsFileName))
-            .orElseThrow(() -> new RuntimeException("Unable to load " + bindingsFileName + ", from local dir or internally as cqlgen/" + bindingsFileName));
+            .or(() -> loadLocal(DEFAULT_BINDINGS_FILE))
+            .orElseThrow(() -> new RuntimeException("Unable to load " + DEFAULT_BINDINGS_FILE + ", from local dir or internally as cqlgen/" + DEFAULT_BINDINGS_FILE));
         StmtsDocList stmtsDocs = StatementsLoader.loadString(yamlContent, Map.of());
         this.bindings = stmtsDocs.getDocBindings();
     }
 
     private Optional<String> loadLocal(String path) {
         try {
-            String resourceName = exporterCfgDir + File.separator + path;
+            String resourceName = DEFAULT_CFG_DIR + File.separator + path;
             InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceName);
             byte[] bytes = stream.readAllBytes();
             return Optional.of(new String(bytes));

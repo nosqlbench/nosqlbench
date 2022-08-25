@@ -56,7 +56,9 @@ import java.util.stream.Collectors;
  */
 @Service(value = BundledApp.class, selector = "cqlgen")
 public class CGWorkloadExporter implements BundledApp {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.class);
+    public static final String APPNAME = "cqlgen";
+    private final static Logger logger = LogManager.getLogger(APPNAME);
+
     private CGColumnRebinder binder;
     private NamingFolio namer;
     private CqlModel model;
@@ -83,15 +85,12 @@ public class CGWorkloadExporter implements BundledApp {
         "update", 10.0
     ));
 
-    private CGExporterConfig config;
-
     public static void main(String[] args) {
         new CGWorkloadExporter().applyAsInt(args);
     }
 
     @Override
     public int applyAsInt(String[] args) {
-        this.config = new CGExporterConfig(args);
 
         logger.info("running CQL workload exporter with args:" + Arrays.toString(args));
 
@@ -182,8 +181,12 @@ public class CGWorkloadExporter implements BundledApp {
                 workload,
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
             );
+            logger.info("Wrote workload template as '" + target + "'. Bear in mind that this is simply one version " +
+                "of a workload using this schema, and may not be representative of actual production usage patterns.");
         } catch (IOException e) {
-            e.printStackTrace();
+            String errmsg = "There was an error writing '" + target + "'.";
+            logger.error(errmsg);
+            throw new RuntimeException(errmsg);
         }
 
         return 0;

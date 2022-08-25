@@ -20,6 +20,7 @@ import io.nosqlbench.api.config.standard.NBConfigurable;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +39,8 @@ public class CGModelTransformers implements
     Consumer<List<Map<String, ?>>>,
     Supplier<List<CGModelTransformer>>,
     Function<CqlModel,CqlModel> {
-    private final static Logger logger = LogManager.getLogger(CGModelTransformers.class);
+
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/transformers");
     private final List<CGModelTransformer> transformers = new ArrayList<>();
 
     public CGModelTransformers() {

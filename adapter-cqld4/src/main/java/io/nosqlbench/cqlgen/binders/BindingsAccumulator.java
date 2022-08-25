@@ -17,14 +17,17 @@
 package io.nosqlbench.cqlgen.binders;
 
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
+import io.nosqlbench.cqlgen.core.CGDefaultCqlBindings;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.*;
 
 public class BindingsAccumulator {
-    private final static Logger logger = LogManager.getLogger("CQL-GENERATOR");
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/bindings-cache");
 
     private final NamingFolio namer;
     private final List<BindingsLibrary> libraries;
@@ -78,7 +81,9 @@ public class BindingsAccumulator {
             Optional<Binding> binding = library.resolveBindingsFor(def);
             if (binding.isPresent()) {
                 if (binding.get().getRecipe()==null) {
-                    throw new RuntimeException("Binding returned from library " + library + "' was null, for def '" + def + "'");
+                    throw new RuntimeException("Binding returned from library " + library + "' was null, for def '" + def + "'. " +
+                        "This probably means you need to add a default binding for '" + def.getTrimmedTypedef() + "' to " +
+                    CGDefaultCqlBindings.DEFAULT_CFG_DIR+ File.separator+CGDefaultCqlBindings.DEFAULT_BINDINGS_FILE+" (see cqlgen help for details)");
                 }
                 return binding;
             }

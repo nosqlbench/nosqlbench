@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlKeyspaceDef;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfigurable {
 
-    private final static Logger logger = LogManager.getLogger(CGKeyspaceFilter.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/keyspace-filter");
     private List<TriStateFilter> patterns;
     private String name;
 

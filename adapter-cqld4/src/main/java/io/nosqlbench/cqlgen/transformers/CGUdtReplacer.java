@@ -17,25 +17,45 @@
 package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
+import io.nosqlbench.cqlgen.model.CqlType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CGUdtReplacer implements CGModelTransformer {
-
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/udt-replacer");
     private String name;
 
     @Override
     public CqlModel apply(CqlModel model) {
-        List<String> toReplace = model.getTypeDefs().stream().map(t -> t.getKeyspace().getName() + "." + t.getName()).toList();
+        List<String> toReplace = new ArrayList<>();
+
+        model.getTypeDefs().stream()
+            .map(t -> t.getKeyspace().getName() + "." + t.getName())
+            .forEach(toReplace::add);
+
+        model.getTypeDefs().stream()
+            .map(CqlType::getName)
+            .forEach(toReplace::add);
+
         for (CqlTable table : model.getTableDefs()) {
             for (CqlColumnBase coldef : table.getColumnDefs()) {
                 String typedef = coldef.getTrimmedTypedef();
                 for (String searchFor : toReplace) {
-                    if (typedef.contains(searchFor)) {
-                        coldef.setTypeDef("blob");
+                    String[] words = typedef.split("\\W+");
+                    for (String word : words) {
+                        if (word.toLowerCase(Locale.ROOT).equals(searchFor.toLowerCase(Locale.ROOT))) {
+                            logger.info("replacing '" + typedef + "' with blob");
+                            coldef.setTypeDef("blob");
+                            break;
+                        }
                     }
                 }
             }

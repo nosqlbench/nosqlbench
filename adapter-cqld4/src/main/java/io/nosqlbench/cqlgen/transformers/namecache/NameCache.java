@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers.namecache;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlKeyspaceDef;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class NameCache {
-    private final static Logger logger = LogManager.getLogger(NameCache.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/namecache");
 
     private String path;
     private final Map<String, NamedKeyspace> keyspaces = new LinkedHashMap();

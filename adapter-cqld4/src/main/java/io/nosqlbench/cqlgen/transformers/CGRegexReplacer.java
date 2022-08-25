@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
 import io.nosqlbench.cqlgen.api.CGTextTransformer;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CGRegexReplacer implements CGTextTransformer, CGTransformerConfigurable {
-    private final static Logger logger = LogManager.getLogger(CGRegexReplacer.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/replacer");
     private List<Replacer> replacers;
     private String prefix = "";
     private String suffix = "";

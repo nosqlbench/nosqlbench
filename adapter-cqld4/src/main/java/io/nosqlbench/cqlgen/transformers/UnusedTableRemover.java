@@ -18,6 +18,7 @@ package io.nosqlbench.cqlgen.transformers;
 
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
+import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UnusedTableRemover implements CGModelTransformer, CGTransformerConfigurable {
-    private final static Logger logger = LogManager.getLogger(UnusedTableRemover.class);
+    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/unused-table-remover");
     private double minimumThreshold = 0.0001;
     private String name;
 
