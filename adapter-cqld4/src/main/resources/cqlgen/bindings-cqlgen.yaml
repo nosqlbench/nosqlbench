@@ -10,7 +10,8 @@ bindings:
  decimal: ToBigDecimal();
  double: ToDouble()
  duration: ToCqlDurationNanos();
- float: ToFloat()
+ float: ToFloat();
+ map<text,timestamp>: MapSized(3,Combinations('A-Z;0-9', ToJavaInstant()));
  frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
  list<text>: ListStepped(ToString(),ToString())
  map<text,text>: MapSized(3, Combinations('A-Z;0-9'), ToString(), ToString());
