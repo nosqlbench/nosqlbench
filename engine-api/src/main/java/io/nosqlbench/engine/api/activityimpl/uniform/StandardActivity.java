@@ -17,11 +17,12 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -29,7 +30,6 @@ import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTempl
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.ServiceSelector;
-import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
