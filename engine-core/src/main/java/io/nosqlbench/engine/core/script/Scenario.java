@@ -83,7 +83,6 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScenarioController scenarioController;
     private ActivityProgressIndicator activityProgressIndicator;
     private String progressInterval = "console:1m";
-    private boolean wantsGraaljsCompatMode;
     private ScenarioContext scriptEnv;
     private final String scenarioName;
     private ScriptParams scenarioScriptParams;
@@ -103,7 +102,6 @@ public class Scenario implements Callable<ScenarioResult> {
         String scriptfile,
         Engine engine,
         String progressInterval,
-        boolean wantsGraaljsCompatMode,
         boolean wantsStackTraces,
         boolean wantsCompiledScript,
         String reportSummaryTo,
@@ -115,7 +113,6 @@ public class Scenario implements Callable<ScenarioResult> {
         this.scriptfile = scriptfile;
         this.engine = engine;
         this.progressInterval = progressInterval;
-        this.wantsGraaljsCompatMode = wantsGraaljsCompatMode;
         this.wantsStackTraces = wantsStackTraces;
         this.wantsCompiledScript = wantsCompiledScript;
         this.reportSummaryTo = reportSummaryTo;
@@ -204,15 +201,13 @@ public class Scenario implements Callable<ScenarioResult> {
 
         scriptEngine.put("params", scenarioScriptParams);
 
-        if (wantsGraaljsCompatMode) {
-            scriptEngine.put("scenario", scenarioController);
-            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
-        } else {
+//            scriptEngine.put("scenario", scenarioController);
+//            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+//            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+
             scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
             scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
             scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
-        }
 
         for (ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {

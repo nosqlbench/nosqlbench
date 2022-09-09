@@ -121,8 +121,6 @@ public class NBCLIOptions {
     private static final String DOCKER_PROM_RETENTION_DAYS = "--docker-prom-retention-days";
 
     private static final String GRAALJS_ENGINE = "--graaljs";
-    private static final String NASHORN_ENGINE = "--nashorn";
-    private static final String GRAALJS_COMPAT = "--graaljs-compat";
 
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
@@ -168,7 +166,6 @@ public class NBCLIOptions {
     private boolean wantsWorkloadsList = false;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Scenario.Engine engine = Scenario.Engine.Graalvm;
-    private boolean graaljs_compat = false;
     private int hdr_digits = 3;
     private String docker_grafana_tag = "7.3.4";
     private String docker_prom_tag = "latest";
@@ -509,17 +506,10 @@ public class NBCLIOptions {
             String word = arglist.peekFirst();
 
             switch (word) {
-                case GRAALJS_COMPAT:
-                    graaljs_compat = true;
-                    arglist.removeFirst();
-                    break;
                 case GRAALJS_ENGINE:
                     engine = Scenario.Engine.Graalvm;
                     arglist.removeFirst();
                     break;
-                case NASHORN_ENGINE:
-                    throw new RuntimeException("The nashorn engine has been deprecated in this major version of " +
-                            "NoSQLBench");
                 case COMPILE_SCRIPT:
                     arglist.removeFirst();
                     compileScript = true;
@@ -684,10 +674,6 @@ public class NBCLIOptions {
 
     public Scenario.Engine getScriptingEngine() {
         return engine;
-    }
-
-    public boolean wantsGraaljsCompatMode() {
-        return graaljs_compat;
     }
 
     public List<LoggerConfigData> getHistoLoggerConfigs() {

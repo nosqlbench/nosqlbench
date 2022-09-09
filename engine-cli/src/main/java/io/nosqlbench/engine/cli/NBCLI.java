@@ -425,7 +425,6 @@ public class NBCLI implements Function<String[], Integer> {
             options.getScriptFile(),
             options.getScriptingEngine(),
             options.getProgressSpec(),
-            options.wantsGraaljsCompatMode(),
             options.wantsStackTraces(),
             options.wantsCompileScript(),
             options.getReportSummaryTo(),
