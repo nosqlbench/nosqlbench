@@ -57,13 +57,6 @@ public class S4JConnInfo {
                 this.s4jConfMap.putAll(s4jMiscConfMap);
             }
 
-            if (!validTransactSetting(sessionMode, s4jMiscConfMap)) {
-                String errMsg =
-                    "S4J config parameter \"enableTransaction\" needs to be set to \"true\" " +
-                        "in order to support JMS transaction - sessionModeStr:\"" + sessionModeStr + "\"(" + sessionMode + ")";
-                throw new S4JDriverParamException(errMsg);
-            }
-
             Map<String, Object> clientCfgMap = this.inputS4JConf.getClientConfMap();
             if (!clientCfgMap.isEmpty()) {
                 this.s4jConfMap.putAll(clientCfgMap);
@@ -82,6 +75,13 @@ public class S4JConnInfo {
             Map<String, Object> jmsCfgMap = this.inputS4JConf.getJmsConfMap();
             if (!jmsCfgMap.isEmpty()) {
                 this.s4jConfMap.putAll(jmsCfgMap);
+            }
+
+            if (!validTransactSetting(sessionMode, s4jConfMap)) {
+                String errMsg =
+                    "S4J config parameter \"enableTransaction\" or \"jms.emulateTransactions\" needs to be set to \"true\" (BUT not both) " +
+                        "in order to support JMS transaction - sessionModeStr:\"" + sessionModeStr + "\"(" + sessionMode + ")";
+                throw new S4JDriverParamException(errMsg);
             }
         }
     }
@@ -132,14 +132,14 @@ public class S4JConnInfo {
         return sessionMode;
     }
 
-    private boolean validTransactSetting(int jmsSessionMode, Map<String, Object> s4jClntCfgMap) {
+    private boolean validTransactSetting(int jmsSessionMode, Map<String, Object> s4jConfMap) {
         boolean validSetting = true;
 
         if (jmsSessionMode == JMSContext.SESSION_TRANSACTED) {
-            validSetting = s4jClntCfgMap.containsKey("enableTransaction");
-            if (validSetting) {
-                validSetting = BooleanUtils.toBoolean(s4jClntCfgMap.get("enableTransaction").toString());
-            }
+            boolean enableTraction = BooleanUtils.toBoolean(s4jConfMap.get("enableTransaction").toString());
+            boolean jmsTransactionEmulation = BooleanUtils.toBoolean(s4jConfMap.get("jms.emulateTransactions").toString());
+
+            validSetting = (enableTraction != jmsTransactionEmulation);
         }
 
         return validSetting;
