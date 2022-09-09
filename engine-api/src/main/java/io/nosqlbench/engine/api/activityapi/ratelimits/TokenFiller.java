@@ -19,8 +19,8 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -32,7 +32,7 @@ public class TokenFiller implements Runnable {
     public final static double MAX_PER_SECOND = 1000D;
 //    private final SysPerfData PERFDATA = SysPerf.get().getPerfData
 //    (false);
-    private final long interval = (long) 1E6;
+    private final long interval = (long) 1E5;
 
     private final ThreadDrivenTokenPool tokenPool;
     private volatile boolean running = true;
@@ -75,8 +75,9 @@ public class TokenFiller implements Runnable {
             while (thisRefillTime < nextRefillTime) {
 //            while (thisRefillTime < lastRefillAt + interval) {
                 long parkfor = Math.max(nextRefillTime - thisRefillTime, 0L);
-                //System.out.println(ANSI_Blue + "parking for " + parkfor + "ns" + ANSI_Reset);
+//                System.out.println(ANSI_Blue + "  parking for " + parkfor + "ns" + ANSI_Reset); System.out.flush();
                 LockSupport.parkNanos(parkfor);
+//                System.out.println(ANSI_Blue + "unparking for " + parkfor + "ns" + ANSI_Reset); System.out.flush();
                 thisRefillTime = System.nanoTime();
             }
 
@@ -85,7 +86,7 @@ public class TokenFiller implements Runnable {
 //            this.amounts[iteration]=delta;
             lastRefillAt = thisRefillTime;
 
-            //System.out.println(this);
+//            System.out.println(ANSI_Blue + this + ANSI_Reset); System.out.flush();
             tokenPool.refill(delta);
             timer.update(delta, TimeUnit.NANOSECONDS);
 //            iteration++;
