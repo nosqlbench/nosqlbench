@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity, ProgressCapable {
+public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
