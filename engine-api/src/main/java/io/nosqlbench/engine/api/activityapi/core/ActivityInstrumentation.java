@@ -69,21 +69,6 @@ public interface ActivityInstrumentation {
     Timer getCyclesResponseTimerOrNull();
 
     /**
-     * The phases service timer measures how long it takes to complete a phase of work.
-     * @return a new or existing {@link Timer}
-     */
-    Timer getOrCreatePhasesServiceTimer();
-
-    /**
-     * The phases response timer measures the total response time from the scheduled
-     * time a phase should start to when it is completed. Phase scheduling is only defined
-     * when it is implied by a phase rate limiter, so this method should return null if
-     * there is no phases rate limiter.
-     * @return a new or existing {@link Timer} if appropriate, else null
-     */
-    Timer getPhasesResponseTimerOrNull();
-
-    /**
      * The pending ops counter keeps track of how many ops are submitted or in-flight, but
      * which haven't been completed yet.
      * @return a new or existing {@link Counter}

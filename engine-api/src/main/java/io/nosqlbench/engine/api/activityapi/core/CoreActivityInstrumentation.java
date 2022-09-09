@@ -81,19 +81,6 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
         return ActivityMetrics.timer(def, metricName, activity.getHdrDigits());
     }
 
-
-    @Override
-    public synchronized Timer getOrCreatePhasesServiceTimer() {
-        return ActivityMetrics.timer(def, "phases" + SERVICE_TIME, activity.getHdrDigits());
-    }
-    @Override
-    public synchronized Timer getPhasesResponseTimerOrNull() {
-        if (activity.getPhaseLimiter()==null) {
-            return null;
-        }
-        return ActivityMetrics.timer(def,"phases" + RESPONSE_TIME,  activity.getHdrDigits());
-    }
-
     @Override
     public synchronized Counter getOrCreatePendingOpCounter() {
         String metricName = "pending_ops";

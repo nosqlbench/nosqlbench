@@ -65,9 +65,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private Timer cyclesTimer;
     private Timer cycleResponseTimer;
 
-    private RateLimiter phaseRateLimiter;
-    private Timer phasesTimer;
-
     private Input input;
     private Action action;
     private final Activity activity;
@@ -196,7 +193,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
             strideRateLimiter = activity.getStrideLimiter();
             cycleRateLimiter = activity.getCycleLimiter();
-            phaseRateLimiter = activity.getPhaseLimiter();
 
 
             if (slotState.get() == Finished) {
@@ -204,11 +200,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             }
 
             slotStateTracker.enterState(Running);
-
-            MultiPhaseAction multiPhaseAction = null;
-            if (action instanceof MultiPhaseAction) {
-                multiPhaseAction = ((MultiPhaseAction) action);
-            }
 
             long cyclenum;
             action.init();
@@ -398,25 +389,8 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                                 // runCycle
                                 long phaseStart = System.nanoTime();
-                                if (phaseRateLimiter != null) {
-                                    phaseDelay = phaseRateLimiter.maybeWaitForOp();
-                                }
                                 result = sync.runCycle(cyclenum);
                                 long phaseEnd = System.nanoTime();
-                                phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
-
-                                // ... runPhase ...
-                                if (multiPhaseAction != null) {
-                                    while (multiPhaseAction.incomplete()) {
-                                        phaseStart = System.nanoTime();
-                                        if (phaseRateLimiter != null) {
-                                            phaseDelay = phaseRateLimiter.maybeWaitForOp();
-                                        }
-                                        result = multiPhaseAction.runPhase(cyclenum);
-                                        phaseEnd = System.nanoTime();
-                                        phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
-                                    }
-                                }
 
                             } finally {
                                 long cycleEnd = System.nanoTime();
@@ -474,7 +448,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
         strideRateLimiter = activity.getStrideLimiter();
         cycleRateLimiter = activity.getCycleLimiter();
-        phaseRateLimiter = activity.getPhaseLimiter();
 
     }
 
