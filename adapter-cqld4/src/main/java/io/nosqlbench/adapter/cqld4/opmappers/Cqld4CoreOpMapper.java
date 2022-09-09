@@ -75,7 +75,7 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
             case gremlin -> new Cqld4GremlinOpMapper(adapter, sessionFunc, target.targetFunction).apply(op);
             case fluent -> new Cqld4FluentGraphOpMapper(adapter, sessionFunc, target).apply(op);
             case rainbow -> new CqlD4RainbowTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
-            case sst -> new CqlD4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
+//            case sst -> new Cqld4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
         };
     }
 

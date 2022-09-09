@@ -16,22 +16,35 @@
 
 package io.nosqlbench.adapter.cqld4.optypes;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import io.nosqlbench.adapter.cqld4.RSProcessors;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+
+import java.util.Map;
 
 // Need to create RainbowTableStatement
 public class Cqld4RainbowTableOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
-    private final CqlSession session;
-    private final RainbowTableStatement stmt;
+//    private final CqlSession session;
+//    private final RainbowTableStatement stmt;
 
     // Rename ResultSet to something more appropriate
     public final ResultSet apply(long cycle) {
+        throw new RuntimeException("implement me");
         // TODO: actually write to sstables
         // sstable passed to shared memory object
     }
-    
-    public Cqld4RainbowTableOp(CqlSession session, RainbowTableStatement stmt, int maxpages, boolean retryreplace) {
-        // 
+
+    @Override
+    public Op getNextOp() {
+        throw new RuntimeException("implement me");
     }
+
+    @Override
+    public Map<String, ?> capture() {
+        throw new RuntimeException("implement me");
+   }
+//
+//    public Cqld4RainbowTableOp(CqlSession session, RainbowTableStatement stmt, int maxpages, boolean retryreplace) {
+//        //
+//    }
 
 }

@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.cqld4.opmappers;
+package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SsTableDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4SsTableMapper implements OpMapper<Cqld4SsTableOp> {
-    private final LongFunction<CqlSession> sessionFunc;
-    private final LongFunction<String> targetFunction;
-    private final DriverAdapter adapter;
+public class CqlD4RainbowTableDispenser extends Cqld4BaseOpDispenser {
 
-    public CqlD4SsTableMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction) {
-        this.sessionFunc = sessionFunc;
-        this.targetFunction = targetFunction;
-        this.adapter = adapter;
+//    private final LongFunction<Statement> stmtFunc;
+    private final LongFunction<String> targetFunction;
+
+    public CqlD4RainbowTableDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter, sessionFunc,cmd);
+        this.targetFunction=targetFunction;
+//        this.tableFunc =createTableFunc(cmd);
     }
 
     @Override
-    public OpDispenser<? extends Cqld4CqlOp> apply(ParsedOp op) {
-        return new CqlD4SsTableDispenser(adapter, sessionFunc,targetFunction, op);
+    public Cqld4CqlOp apply(long cycle) {
+        throw new RuntimeException("implement me");
+//        return new Cqld4RainbowTableOp(
+//            getSessionFunc().apply(value),
+//            (RainbowTable) stmtFunc.apply(value),
+//            getMaxPages(),
+//            isRetryReplace()
+//        );
     }
+
 }

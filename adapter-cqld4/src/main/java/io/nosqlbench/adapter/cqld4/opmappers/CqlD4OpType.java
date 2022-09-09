@@ -63,5 +63,14 @@ public enum CqlD4OpType {
      *
      * <p>This is the mode that is recommended for all graph usage.</p>
      */
-    fluent
+    fluent,
+
+    /**
+     * reserved for future use
+     */
+    rainbow,
+//    /**
+//     * reserved for future use
+//     */
+//    sst
 }

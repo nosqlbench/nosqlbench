@@ -29,6 +29,8 @@ blocks:
       prepared: false
     ops:
       create-keyspace: |
+
+        db.createCollection(
         db.createCollection("students", {
            validator: {
               $jsonSchema: {

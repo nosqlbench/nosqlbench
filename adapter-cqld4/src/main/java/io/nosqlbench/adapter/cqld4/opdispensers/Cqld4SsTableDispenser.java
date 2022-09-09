@@ -18,34 +18,36 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.Statement;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4SsTableOp;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4SsTableDispenser extends BaseOpDispenser<Cqld4SsTableOp> {
-    
-    private final LongFunction<Statement> stmtFunc;
-    private final LongFunction<String> targetFunction;
+public class Cqld4SsTableDispenser extends Cqld4BaseOpDispenser {
 
-    public CqlD4SsTableDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter, sessionFunc,cmd);
-        this.targetFunction=targetFunction;
-        this.tableFunc =createTableFunc(cmd);
+//    private final LongFunction<Statement> stmtFunc;
+//    private final LongFunction<String> targetFunction;
+
+    public Cqld4SsTableDispenser(Cqld4DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter,sessionFunc,cmd);
+//        this.targetFunction=targetFunction;
+//        this.tableFunc =createTableFunc(cmd);
     }
 
     protected LongFunction<Statement> createTableFunc(ParsedOp op) {
-    
+        return null;
     }
 
     @Override
-    public Cqld4SsTableOp apply(long value) {
-        return new CqlD4SsTable(
-            getSessionFunc().apply(value),
-            (SsTable) stmtFunc.apply(value),
-            getMaxPages(),
-            isRetryReplace()
-        );
+    public Cqld4CqlOp apply(long cycle) {
+//        return new CqlD4SsTable(
+//            getSessionFunc().apply(value),
+//            (SsTable) stmtFunc.apply(value),
+//            getMaxPages(),
+//            isRetryReplace()
+//        );
+        return null;
     }
+
 }
