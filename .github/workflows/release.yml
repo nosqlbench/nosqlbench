@@ -206,6 +206,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linx/arm64
           file: Dockerfile
           pull: true
           push: true
