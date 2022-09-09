@@ -208,7 +208,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
             if (raw instanceof Map || raw instanceof Set || raw instanceof List) {
                 value = gson.toJson(raw);
             } else {
-                value = raw.toString();
+                value = String.valueOf(raw);
             }
             super.put(entry.getKey(), value);
         }
