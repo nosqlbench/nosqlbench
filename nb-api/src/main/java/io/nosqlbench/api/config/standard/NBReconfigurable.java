@@ -75,6 +75,14 @@ public interface NBReconfigurable extends NBCanReconfigure, NBReconfigModelProvi
         }
     }
 
+    /**
+     * Create a composite configuration model from all the provided elements
+     * of the collection which implement {@link NBReconfigurable}
+     *
+     * @param of The nominal type of the composite configuration model
+     * @param configurables zero or more elements which may implement {@link NBReconfigurable}
+     * @return the combined model
+     */
     static NBConfigModel collectModels(Class<?> of, Collection<?> configurables) {
         ConfigModel model = ConfigModel.of(of);
         for (Object configurable : configurables) {
