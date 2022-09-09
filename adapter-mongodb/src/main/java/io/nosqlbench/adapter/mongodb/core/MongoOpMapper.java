@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.adapter.mongodb.dispensers.MongoDbUpdateOpDispenser;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
@@ -28,12 +29,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class MongodbOpMapper implements OpMapper<Op> {
-    private final static Logger logger = LogManager.getLogger(MongodbOpMapper.class);
+public class MongoOpMapper implements OpMapper<Op> {
+    private final static Logger logger = LogManager.getLogger(MongoOpMapper.class);
 
     private final MongodbDriverAdapter adapter;
 
-    public MongodbOpMapper(MongodbDriverAdapter adapter) {
+    public MongoOpMapper(MongodbDriverAdapter adapter) {
         this.adapter = adapter;
     }
 
@@ -41,25 +42,34 @@ public class MongodbOpMapper implements OpMapper<Op> {
     public OpDispenser<? extends Op> apply(ParsedOp op) {
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
         LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache().get(ctxNamer.apply(l));
-
-        TypeAndTarget<MongoDBOpTypes, String> opTypeAndTarget =
-            op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class)
-                .orElseThrow(() -> new RuntimeException("unable to determine MongoDB op type from '" + op.toString()));
         Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
         if (oDatabaseF.isEmpty()) {
-            logger.warn(() -> "");
+            logger.warn(() -> "op field 'database' was not defined");
         }
 
-
-        return switch (opTypeAndTarget.enumId) {
-            case command -> null;
-            case update -> new MongoDbUpdateOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
+        Optional<TypeAndTarget<MongoDBOpTypes, String>> target = op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class);
+        // For any of the named operations which are called out directly AND supported via the fluent API,
+        // use specialized dispensers
+        if (target.isPresent()) {
+            TypeAndTarget<MongoDBOpTypes, String> targetdata = target.get();
+            return switch (targetdata.enumId) {
+                case update -> new MongoDbUpdateOpDispenser(adapter, op, targetdata.targetFunction);
 //            case insert -> new MongoDbInsertOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case delete -> new MongoDbDeleteOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case find -> new mongoDbFindOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case findAndModify -> new MongoDbFindAndModifyOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case getMore -> new MongoDbGetMoreOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-        };
+                case command -> throw new OpConfigError("invalid state, logic error in op mapper");
+            };
+        }
+        // For everything else use the command API
+        else {
+            return new MongoCommandOpDispenser(adapter, spaceF, op);
+        }
+
+
+
+
 
     }
 }

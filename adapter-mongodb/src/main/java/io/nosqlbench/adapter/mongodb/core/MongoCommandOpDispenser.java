@@ -28,11 +28,11 @@ import org.bson.conversions.Bson;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MongoOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
+public class MongoCommandOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
     private final LongFunction<MongoOp> opFunc;
     private final LongFunction<MongoOp> mongoOpF;
 
-    public MongoOpDispenser(DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+    public MongoCommandOpDispenser(DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
         super(adapter,op);
         opFunc = createOpFunc(ctxFunc, op);
         this.mongoOpF = createOpFunc(ctxFunc,op);
