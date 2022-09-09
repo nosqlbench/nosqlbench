@@ -58,11 +58,11 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private Timer inputTimer;
 
     private RateLimiter strideRateLimiter;
-    private Timer stridesServiceTimer;
+    private Timer strideServiceTimer;
     private Timer stridesResponseTimer;
 
     private RateLimiter cycleRateLimiter;
-    private Timer cyclesTimer;
+    private Timer cycleServiceTimer;
     private Timer cycleResponseTimer;
 
     private Input input;
@@ -187,7 +187,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
         try {
             inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
-            stridesServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
+            strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
             stridesResponseTimer = activity.getInstrumentation().getStridesResponseTimerOrNull();
             optrackerBlockCounter = activity.getInstrumentation().getOrCreateOpTrackerBlockedCounter();
 
@@ -255,7 +255,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     }
 
                     StrideTracker<D> strideTracker = new StrideTracker<>(
-                            stridesServiceTimer,
+                        strideServiceTimer,
                             stridesResponseTimer,
                             strideDelay,
                             cycleSegment.peekNextCycle(),
@@ -328,9 +328,8 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
             } else if (action instanceof SyncAction) {
 
-                cyclesTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
-                stridesServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
-                phasesTimer = activity.getInstrumentation().getOrCreatePhasesServiceTimer();
+                cycleServiceTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
+                strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
 
                 if (activity.getActivityDef().getParams().containsKey("async")) {
                     throw new RuntimeException("The async parameter was given for this activity, but it does not seem to know how to do async.");
@@ -394,14 +393,14 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                             } finally {
                                 long cycleEnd = System.nanoTime();
-                                cyclesTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
+                                cycleServiceTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
                             }
                             segBuffer.append(cyclenum, result);
                         }
 
                     } finally {
                         long strideEnd = System.nanoTime();
-                        stridesServiceTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
+                        strideServiceTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
                     }
 
                     if (output != null) {

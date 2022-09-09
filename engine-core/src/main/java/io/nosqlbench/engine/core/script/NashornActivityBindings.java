@@ -99,8 +99,8 @@ public class NashornActivityBindings implements Bindings, ProxyObject {
 
     @Override
     public Bindings get(Object key) {
-        Bindings activityDef = scenario.getActivityDef(String.valueOf(key)).getParams();
-        return activityDef;
+        Bindings activityParams = scenario.getActivityDef(String.valueOf(key)).getParams();
+        return activityParams;
     }
 
     @Override
