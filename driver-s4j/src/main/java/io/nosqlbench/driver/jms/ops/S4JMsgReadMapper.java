@@ -19,10 +19,12 @@ package io.nosqlbench.driver.jms.ops;
 
 import io.nosqlbench.driver.jms.S4JActivity;
 import io.nosqlbench.driver.jms.S4JSpace;
+import io.nosqlbench.driver.jms.conn.S4JConnInfoUtil;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import io.nosqlbench.driver.jms.util.S4JJMSContextWrapper;
 
 import javax.jms.*;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class S4JMsgReadMapper extends S4JOpMapper {
@@ -35,6 +37,8 @@ public class S4JMsgReadMapper extends S4JOpMapper {
     private final boolean noLocalBool;
     private final LongFunction<Long> readTimeoutFunc;
     private final boolean recvNoWaitBool;
+    private final Map<String,String> extraConsumerConfigRaw;
+    private final Map<String,Object> combinedConsumerConfigObjMap;
 
     public S4JMsgReadMapper(S4JSpace s4JSpace,
                             S4JActivity s4JActivity,
@@ -51,7 +55,8 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                             LongFunction<String> msgSelectorStrFunc,
                             boolean noLocalBool,
                             LongFunction<Long> readTimeoutFunc,
-                            boolean recvNoWaitBool) {
+                            boolean recvNoWaitBool,
+                            Map<String,String> extraConsumerConfigRaw) {
         super(s4JSpace,
             s4JActivity,
             S4JActivityUtil.getMsgReadOpType(durable,shared),
@@ -70,6 +75,9 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         this.noLocalBool = noLocalBool;
         this.readTimeoutFunc = readTimeoutFunc;
         this.recvNoWaitBool = recvNoWaitBool;
+        this.extraConsumerConfigRaw = extraConsumerConfigRaw;
+        this.combinedConsumerConfigObjMap = S4JConnInfoUtil.mergeExtraConsumerConfig(
+            s4JActivity.getS4JConnInfo(), this.extraConsumerConfigRaw);
     }
 
     @Override
@@ -80,7 +88,8 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         String msgSelector = msgSelectorStrFunc.apply(value);
         long readTimeout = readTimeoutFunc.apply(value);
 
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
+        S4JJMSContextWrapper s4JJMSContextWrapper =
+            s4JSpace.getOrCreateS4jJmsContextWrapper(value, this.combinedConsumerConfigObjMap);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 

@@ -55,7 +55,7 @@ public class S4JMessageListener implements MessageListener {
     public void onMessage(Message message) {
         try {
             if (message != null) {
-                s4JActivity.processMsgAck(jmsContext.getSessionMode(), message, msgAckRatio);
+                s4JActivity.processMsgAck(jmsContext, message, msgAckRatio);
 
                 int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
                 Counter bytesCounter = this.s4JActivity.getBytesCounter();

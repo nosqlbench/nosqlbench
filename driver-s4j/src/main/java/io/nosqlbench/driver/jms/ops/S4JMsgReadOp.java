@@ -35,7 +35,6 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
     private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
     private final JMSContext jmsContext;
-    private final int jmsSessionMode;
     private final boolean asyncApi;
     private final boolean blockingMsgRecv;
     private final JMSConsumer jmsConsumer;
@@ -63,7 +62,6 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
         this.jmsContext = jmsContext;
-        this.jmsSessionMode = jmsContext.getSessionMode();
         this.asyncApi = asyncApi;
         this.blockingMsgRecv = blockingMsgRecv;
         this.jmsConsumer = consumer;
@@ -102,10 +100,12 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                     if (this.commitTransact) jmsContext.commit();
 
                     if (recvdMsg != null) {
-                        s4JActivity.processMsgAck(jmsSessionMode, recvdMsg, msgAckRatio);
+                        s4JActivity.processMsgAck(jmsContext, recvdMsg, msgAckRatio);
 
                         byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
                         int messageSize = recvdMsgBody.length;
+
+
                         bytesCounter.inc(messageSize);
                         messageSizeHistogram.update(messageSize);
 

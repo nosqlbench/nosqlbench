@@ -17,8 +17,9 @@ package io.nosqlbench.driver.jms.excption;
  * under the License.
  */
 
-public class S4JDriverParamException extends RuntimeException {
-    public S4JDriverParamException(String message) {
+
+public class S4JConfigParamException extends RuntimeException {
+    public S4JConfigParamException(String message) {
         super(message);
     }
 }

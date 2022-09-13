@@ -20,7 +20,9 @@ package io.nosqlbench.driver.jms;
 
 
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
+import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
+import io.nosqlbench.driver.jms.conn.S4JConnInfoUtil;
 import io.nosqlbench.driver.jms.excption.S4JDriverParamException;
 import io.nosqlbench.driver.jms.excption.S4JDriverUnexpectedException;
 import io.nosqlbench.driver.jms.util.S4JActivityUtil;
@@ -53,6 +55,9 @@ public class S4JSpace {
 
     private CommandTemplate cmdTpl;
 
+    private final S4JActivity s4JActivity;
+    private final ActivityDef activityDef;
+
     // Total number of acknowledgement received
     // - this can apply to both message production and consumption
     // - for message consumption, this only applies to non-null messages received (which is for async API)
@@ -64,10 +69,18 @@ public class S4JSpace {
     // Represents the JMS connection
     private PulsarConnectionFactory s4jConnFactory;
 
+    public S4JActivity getS4JActivity() { return this.s4JActivity; }
+
+    public CommandTemplate getCmdTpl() { return this.cmdTpl; }
+    public void setCmdTpl(CommandTemplate cmdTpl) { this.cmdTpl = cmdTpl; }
+
+
     // - Each S4J space currently represents a number of JMS connections (\"num_conn\" NB CLI parameter);
     // - JMS connection can have a number of JMS sessions (\"num_session\" NB CLI parameter).
     // - Each JMS session has its own sets of JMS destinations, producers, consumers, etc.
-    private final ConcurrentHashMap<String, S4JJMSContextWrapper> jmsContexts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, JMSContext> connLvlJmsContexts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, S4JJMSContextWrapper> sessionLvlJmsContexts = new ConcurrentHashMap<>();
+
     private final ConcurrentHashMap<String, Destination> jmsDestinations = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, JMSProducer> jmsProducers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, JMSConsumer> jmsConsumers = new ConcurrentHashMap<>();
@@ -76,8 +89,21 @@ public class S4JSpace {
     // Keep track the transaction count per thread
     private final ThreadLocal<Integer> txnBatchTrackingCnt = ThreadLocal.withInitial(() -> 0);
 
-    private final S4JActivity s4JActivity;
-    private final ActivityDef activityDef;
+    public int getTxnBatchTrackingCnt() { return txnBatchTrackingCnt.get(); }
+    public void incTxnBatchTrackingCnt() {
+        int curVal = getTxnBatchTrackingCnt();
+        txnBatchTrackingCnt.set(curVal + 1);
+    }
+
+    public long getTotalOpResponseCnt() { return totalOpResponseCnt.get();}
+    public long incTotalOpResponseCnt() { return totalOpResponseCnt.incrementAndGet();}
+    public void resetTotalOpResponseCnt() { totalOpResponseCnt.set(0); }
+
+    public long getTotalNullMsgRecvdCnt() { return nullMsgRecvCnt.get();}
+    public void resetTotalNullMsgRecvdCnt() { nullMsgRecvCnt.set(0); }
+
+    public long incTotalNullMsgRecvdCnt() { return nullMsgRecvCnt.incrementAndGet(); }
+
 
     public S4JSpace(String name, S4JActivity s4JActivity) {
         this.spaceName = name;
@@ -85,13 +111,118 @@ public class S4JSpace {
         this.activityDef = s4JActivity.getActivityDef();
     }
 
-    public S4JActivity getS4JActivity() { return this.s4JActivity; }
+    public void initializeS4JConnectionFactory(S4JConnInfo s4JConnInfo) {
+        if (s4jConnFactory == null) {
+            Map<String, Object> cfgMap;
+            try {
+                cfgMap = s4JConnInfo.getS4jConfObjMap();
+                s4jConnFactory = new PulsarConnectionFactory(cfgMap);
+                int sessionMode = s4JConnInfo.getSessionMode();
 
-    public CommandTemplate getCmdTpl() { return this.cmdTpl; }
-    public void setCmdTpl(CommandTemplate cmdTpl) { this.cmdTpl = cmdTpl; }
+                for (int i=0; i< s4JActivity.getMaxNumConn(); i++) {
+                    // Establish a JMS connection
+                    String connLvlJmsConnContextIdStr = getConnLvlJmsContextIdentifier(i);
+                    String clientIdStr = Base64.getEncoder().encodeToString(connLvlJmsConnContextIdStr.getBytes());
+
+                    JMSContext jmsConnContext = getOrCreateConnLvlJMSContext(s4jConnFactory, s4JConnInfo, sessionMode);
+                    jmsConnContext.setClientID(clientIdStr);
+                    jmsConnContext.setExceptionListener(e -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.error("onException::Unexpected JMS error happened:" + e);
+                        }
+                    });
+
+                    connLvlJmsContexts.put(connLvlJmsConnContextIdStr, jmsConnContext);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[Connection level JMSContext] {} -- {}",
+                            Thread.currentThread().getName(),
+                            jmsConnContext );
+                    }
+                }
+            } catch (JMSRuntimeException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JConnInfo.toString());
+                }
+                throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
+            }
+        }
+    }
+
+    // Properly shut down all Pulsar objects (producers, consumers, etc.) that are associated with this space
+    public void shutdownSpace() {
+        long shutdownStartTimeMills = System.currentTimeMillis();
+
+        try {
+            // for message send and receive operations, async processing is possible
+            String stmtOpType = this.cmdTpl.getStatic("optype");
+            if ( S4JActivityUtil.isMsgSendOpType(stmtOpType) ||
+                S4JActivityUtil.isMsgReadOpType(stmtOpType) ) {
+                waitUntilAllOpFinished(shutdownStartTimeMills, stmtOpType);
+            }
+
+            this.txnBatchTrackingCnt.remove();
+
+            for (S4JJMSContextWrapper s4JJMSContextWrapper : sessionLvlJmsContexts.values()) {
+                if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
+            }
+
+            for (JMSContext jmsContext : connLvlJmsContexts.values()) {
+                if (jmsContext != null) jmsContext.close();
+            }
+
+            s4jConnFactory.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new S4JDriverUnexpectedException("Unexpected error when shutting down S4JSpace!");
+        }
+    }
+
+    // When completing NB execution, don't shut down right away because otherwise, async operation processing may fail.
+    // Instead, shut down when either one of the following condition is satisfied
+    // 1) the total number of the received operation response is the same as the total number of operations being executed;
+    // 2) time has passed for 10 seconds
+    private void waitUntilAllOpFinished(long shutdownStartTimeMills, String stmtOpType) {
+        long totalCycleNum = this.activityDef.getEndCycle();
+        long totalResponseCnt = 0;
+        long totalNullMsgCnt = 0;
+        long timeElapsedMills;
+
+        boolean trackingMsgCnt = this.s4JActivity.isTrackingMsgRecvCnt();
+        boolean continueChk;
+
+        do {
+            // Sleep for 2 second
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new S4JDriverUnexpectedException(e);
+            }
+
+            long curTimeMills = System.currentTimeMillis();
+            timeElapsedMills = curTimeMills - shutdownStartTimeMills;
+            continueChk = (timeElapsedMills <= 10000);
+
+            if (trackingMsgCnt) {
+                totalResponseCnt = this.getTotalOpResponseCnt();
+                totalNullMsgCnt = this.getTotalNullMsgRecvdCnt();
+                continueChk = continueChk && (totalResponseCnt < totalCycleNum);
+            }
+
+            if (logger.isTraceEnabled()) {
+                logger.trace(
+                    buildExecSummaryString(
+                        stmtOpType, trackingMsgCnt, timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
+            }
+        } while (continueChk);
+
+        logger.info(
+            buildExecSummaryString(
+                stmtOpType, trackingMsgCnt, timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
+    }
 
     private String buildExecSummaryString(
-        long totalCycleNum,
         String stmtOpType,
         boolean trackingMsgCnt,
         long timeElapsedMills,
@@ -101,7 +232,6 @@ public class S4JSpace {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
             .append("shutdownSpace::waitUntilAllOpFinished -- ")
-            .append("cycle number: ").append(totalCycleNum).append("; ")
             .append("operation type: ").append(stmtOpType).append("; ")
             .append("shutdown time elapsed: ").append(timeElapsedMills).append("ms; ");
 
@@ -115,115 +245,13 @@ public class S4JSpace {
         return stringBuilder.toString();
     }
 
-    // When completing NB execution, don't shut down right away because otherwise, async operation processing may fail.
-    // Instead, shut down when either one of the following condition is satisfied
-    // 1) the total number of the received operation response is the same as the total number of operations being executed;
-    // 2) time has passed for 30 seconds
-    private void waitUntilAllOpFinished(long shutdownStartTimeMills, String stmtOpType) {
-        long totalCycleNum = this.activityDef.getEndCycle();
-        long totalResponseCnt = 0;
-        long totalNullMsgCnt = 0;
-        long timeElapsedMills = 0;
-
-        boolean trackingMsgCnt = this.s4JActivity.isTrackingMsgRecvCnt();
-        boolean continueChk;
-
-        do {
-            // Sleep for 2 second
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new S4JDriverUnexpectedException(e);
-            }
-
-            long curTimeMills = System.currentTimeMillis();
-            timeElapsedMills = curTimeMills - shutdownStartTimeMills;
-            continueChk = (timeElapsedMills <= 30000);
-
-            if (trackingMsgCnt) {
-                totalResponseCnt = this.getTotalOpResponseCnt();
-                totalNullMsgCnt = this.getTotalNullMsgRecvdCnt();
-                continueChk = continueChk && (totalResponseCnt < totalCycleNum);
-            }
-
-            if (logger.isTraceEnabled()) {
-                logger.trace(
-                    buildExecSummaryString(
-                        totalCycleNum, stmtOpType, trackingMsgCnt,
-                        timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
-            }
-        } while (continueChk);
-
-        logger.info(
-            buildExecSummaryString(
-                totalCycleNum, stmtOpType, trackingMsgCnt,
-                timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
+    private String getConnLvlJmsContextIdentifier(int jmsConnSeqNum) {
+        return S4JActivityUtil.buildCacheKey(
+            this.spaceName,
+            StringUtils.join("conn-", jmsConnSeqNum));
     }
 
-    // Properly shut down all Pulsar objects (producers, consumers, etc.) that are associated with this space
-    public void shutdownSpace() {
-        long shutdownStartTimeMills = System.currentTimeMillis();
-
-        try {
-            // for message send and receive operations, async processing is possible
-            String stmtOpType = this.cmdTpl.getStatic("optype");
-            if ( S4JActivityUtil.isMsgSendOpType(stmtOpType) ||
-                 S4JActivityUtil.isMsgReadOpType(stmtOpType) ) {
-                waitUntilAllOpFinished(shutdownStartTimeMills, stmtOpType);
-            }
-
-            this.txnBatchTrackingCnt.remove();
-
-            String jmsConnContextIdStr;
-            S4JJMSContextWrapper s4JJMSContextWrapper;
-            for (int i=0; i< s4JActivity.getMaxNumConn(); i++) {
-                for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
-                    jmsConnContextIdStr = getJmsContextIdentifier(i,j);
-                    s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
-                    if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
-                }
-
-                jmsConnContextIdStr = getJmsContextIdentifier(i,0);
-                s4JJMSContextWrapper = jmsContexts.get(jmsConnContextIdStr);
-                if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
-            }
-
-            s4jConnFactory.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw new S4JDriverUnexpectedException("Unexpected error when shutting down S4JSpace!");
-        }
-    }
-
-    public int getTxnBatchTrackingCnt() {
-        return txnBatchTrackingCnt.get();
-    }
-
-    public void incTxnBatchTrackingCnt() {
-        int curVal = getTxnBatchTrackingCnt();
-        txnBatchTrackingCnt.set(curVal + 1);
-    }
-
-    public long getTotalOpResponseCnt() {
-        return totalOpResponseCnt.get();
-    }
-    public long incTotalOpResponseCnt() {
-        return totalOpResponseCnt.incrementAndGet();
-    }
-    public void resetTotalOpResponseCnt() {
-        totalOpResponseCnt.set(0);
-    }
-
-    public long getTotalNullMsgRecvdCnt() {
-        return nullMsgRecvCnt.get();
-    }
-    public long incTotalNullMsgRecvdCnt() {
-        return nullMsgRecvCnt.incrementAndGet();
-    }
-    public void resetTotalNullMsgRecvdCnt() { nullMsgRecvCnt.set(0); }
-
-    private String getJmsContextIdentifier(int jmsConnSeqNum, int jmsSessionSeqNum) {
+    private String getSessionLvlJmsContextIdentifier(int jmsConnSeqNum, int jmsSessionSeqNum) {
         return S4JActivityUtil.buildCacheKey(
             this.spaceName,
             StringUtils.join("conn-", jmsConnSeqNum),
@@ -231,19 +259,19 @@ public class S4JSpace {
     }
 
     // Create JMSContext that represents a new JMS connection
-    private JMSContext createConnLvlJMSContext(
+    private JMSContext getOrCreateConnLvlJMSContext(
         PulsarConnectionFactory s4jConnFactory,
         S4JConnInfo s4JConnInfo,
         int sessionMode)
     {
-        boolean useCredentialsEnable = s4JConnInfo.isUseCredentialsEnabled();
+        boolean useCredentialsEnable = S4JConnInfoUtil.isUseCredentialsEnabled(s4JConnInfo);
         JMSContext jmsConnContext;
 
         if (!useCredentialsEnable)
             jmsConnContext = s4jConnFactory.createContext(sessionMode);
         else {
-            String userName = s4JConnInfo.getCredentialUserName();
-            String passWord = s4JConnInfo.getCredentialPassword();
+            String userName = S4JConnInfoUtil.getCredentialUserName(s4JConnInfo);
+            String passWord = S4JConnInfoUtil.getCredentialPassword(s4JConnInfo);
 
             // Password must be in "token:<token vale>" format
             if (! StringUtils.startsWith(passWord, "token:")) {
@@ -258,67 +286,7 @@ public class S4JSpace {
         return jmsConnContext;
     }
 
-    public void initializeS4JConnectionFactory(S4JConnInfo s4JConnInfo) {
-        if (s4jConnFactory == null) {
-            Map<String, Object> cfgMap;
-            try {
-                cfgMap = s4JConnInfo.getS4jConfMap();
-                s4jConnFactory = new PulsarConnectionFactory(cfgMap);
-
-                String curThreadName = Thread.currentThread().getName();
-                int sessionMode = s4JConnInfo.getSessionMode();
-
-                for (int i=0; i< s4JActivity.getMaxNumConn(); i++) {
-                    // Establish a JMS connection
-                    String jmsConnContextIdStr = getJmsContextIdentifier(i,0);
-                    String clientIdStr = Base64.getEncoder().encodeToString(jmsConnContextIdStr.getBytes());
-
-                    JMSContext jmsConnContext = createConnLvlJMSContext(s4jConnFactory, s4JConnInfo, sessionMode);
-                    jmsConnContext.setClientID(clientIdStr);
-                    jmsConnContext.setExceptionListener(e -> {
-                        if (logger.isDebugEnabled()) {
-                            logger.error("onException::Unexpected JMS error happened:" + e);
-                        }
-                    });
-
-                    S4JJMSContextWrapper jmsContextWrapper = new S4JJMSContextWrapper(jmsConnContextIdStr, jmsConnContext);
-                    jmsContexts.put(jmsConnContextIdStr, jmsContextWrapper);
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("{} -- {}",
-                            curThreadName,
-                            jmsContextWrapper );
-                    }
-
-                    // The rest of the JMSContexts share the same JMS connection, but using separate JMS sessions
-                    for (int j = 1; j < s4JActivity.getMaxNumSessionPerConn(); j++) {
-                        String jmsSessionContextIdStr = getJmsContextIdentifier(i, j);
-                        JMSContext jmsSessionContext = jmsConnContext.createContext(jmsConnContext.getSessionMode());
-
-                        jmsContextWrapper = new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsSessionContext);
-                        jmsContexts.put(jmsSessionContextIdStr, jmsContextWrapper);
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("{} -- {}",
-                                curThreadName,
-                                jmsContextWrapper);
-                        }
-                    }
-                }
-            } catch (JMSRuntimeException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JConnInfo.toString());
-                }
-                throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
-            }
-        }
-    }
-
     public PulsarConnectionFactory getS4jConnFactory() { return s4jConnFactory; }
-
-    public S4JJMSContextWrapper getS4jJmsContextWrapper(String identifier) {
-        return jmsContexts.get(identifier);
-    }
 
     // Get the next JMSContext Wrapper in the following approach
     // - The JMSContext wrapper pool has the following sequence (assuming 3 [c]onnections and 2 [s]essions per connection):
@@ -336,15 +304,49 @@ public class S4JSpace {
     //        next:  c2s0   (8)
     //        next:  c0s1   (9)
     //        ... ...
-    public S4JJMSContextWrapper getNextS4jJmsContextWrapper(long curCycle) {
+    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(
+        long curCycle,
+        Map<String, Object> overrideS4jConfMap)
+    {
         int totalConnNum = s4JActivity.getMaxNumConn();
         int totalSessionPerConnNum = s4JActivity.getMaxNumSessionPerConn();
 
         int connSeqNum =  (int) curCycle % totalConnNum;
         int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
-        String jmsContextIdStr = getJmsContextIdentifier(connSeqNum, sessionSeqNum);
 
-        return jmsContexts.get(jmsContextIdStr);
+        String jmsConnContextIdStr = getConnLvlJmsContextIdentifier(connSeqNum);
+        JMSContext connLvlJmsContext = connLvlJmsContexts.get(jmsConnContextIdStr);
+        // Connection level JMSContext objects should be already created during the initialization phase
+        assert (connLvlJmsContext != null);
+
+        String jmsSessionContextIdStr = getSessionLvlJmsContextIdentifier(connSeqNum, sessionSeqNum);
+        S4JJMSContextWrapper jmsContextWrapper = sessionLvlJmsContexts.get(jmsSessionContextIdStr);
+
+        if (jmsContextWrapper == null) {
+            JMSContext jmsContext = null;
+
+            if (overrideS4jConfMap == null) {
+                jmsContext = connLvlJmsContext.createContext(connLvlJmsContext.getSessionMode());
+            } else {
+                jmsContext = ((PulsarJMSContext) connLvlJmsContext).createContext(
+                    connLvlJmsContext.getSessionMode(), overrideS4jConfMap);
+            }
+
+            jmsContextWrapper = new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsContext);
+            sessionLvlJmsContexts.put(jmsSessionContextIdStr, jmsContextWrapper);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Session level JMSContext] {} -- {}",
+                    Thread.currentThread().getName(),
+                    jmsContextWrapper);
+            }
+
+        }
+        return jmsContextWrapper;
+    }
+
+    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(long curCycle) {
+        return getOrCreateS4jJmsContextWrapper(curCycle, null);
     }
 
     /**

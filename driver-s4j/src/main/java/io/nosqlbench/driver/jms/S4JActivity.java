@@ -23,7 +23,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
 import io.nosqlbench.driver.jms.ops.ReadyS4JOp;
 import io.nosqlbench.driver.jms.ops.S4JOp;
-import io.nosqlbench.driver.jms.util.S4JConf;
+import io.nosqlbench.driver.jms.util.S4JConfFromFile;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -100,7 +100,8 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String curThreadName = Thread.currentThread().getName();
 
         String s4jConfFile =
-            activityDef.getParams().getOptionalString("config").orElse("config.properties");S4JConf s4JConf = new S4JConf(s4jConfFile);
+            activityDef.getParams().getOptionalString("config").orElse("config.properties");
+        S4JConfFromFile s4JConfFromFile = new S4JConfFromFile(s4jConfFile);
 
         String webSvcUrl =
             activityDef.getParams().getOptionalString("web_url").orElse("http://localhost:8080");
@@ -127,7 +128,8 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String sessionModeStr =
             activityDef.getParams().getOptionalString("session_mode").orElse("");
 
-        s4JConnInfo = new S4JConnInfo(webSvcUrl, pulsarSvcUrl, sessionModeStr, s4JConf);
+        // Global level connection info that is read from the config.properties file
+        s4JConnInfo = new S4JConnInfo(webSvcUrl, pulsarSvcUrl, sessionModeStr, s4JConfFromFile);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
@@ -175,7 +177,9 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
     public int getMaxNumSessionPerConn() { return this.maxNumSessionPerConn; }
     public int getMaxNumConn() { return this.maxNumConn; }
 
-    public void processMsgAck(int jmsSessionMode, Message message, float msgAckRatio) {
+    public void processMsgAck(JMSContext jmsContext, Message message, float msgAckRatio) {
+        int jmsSessionMode = jmsContext.getSessionMode();
+
         if ((jmsSessionMode != Session.AUTO_ACKNOWLEDGE) &&
             (jmsSessionMode != Session.SESSION_TRANSACTED)) {
             float rndVal = RandomUtils.nextFloat(0, 1);

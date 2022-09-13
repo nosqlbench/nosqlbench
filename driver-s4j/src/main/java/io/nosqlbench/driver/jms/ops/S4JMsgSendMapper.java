@@ -293,7 +293,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
             throw new S4JDriverParamException("Message payload must be specified and can't be empty!");
         }
 
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getOrCreateS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), value);
 

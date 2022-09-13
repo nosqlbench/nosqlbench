@@ -58,7 +58,7 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
         String destName = destNameStrFunc.apply(value);
         String msgSelector = msgSelectorStrFunc.apply(value);
 
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getNextS4jJmsContextWrapper(value);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4JSpace.getOrCreateS4jJmsContextWrapper(value);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
         if (tempDestBool) {

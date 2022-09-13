@@ -19,7 +19,8 @@ package io.nosqlbench.driver.jms;
 
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
-import io.nosqlbench.driver.jms.util.S4JConf;
+import io.nosqlbench.driver.jms.conn.S4JConnInfoUtil;
+import io.nosqlbench.driver.jms.util.S4JConfFromFile;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -47,13 +48,13 @@ public class InputParameterTest {
             File inputCfgPropFile = new File(fileUrl.getPath());
 
             if (inputCfgPropFile.exists()) {
-                S4JConf s4JConf = new S4JConf(fileName);
-                String webSvcUrl = s4JConf.getClientConfMap().get("webServiceUrl").toString();
-                String brkrSvcUrl = s4JConf.getClientConfMap().get("brokerServiceUrl").toString();
-                S4JConnInfo s4JConnInfo = new S4JConnInfo(webSvcUrl, brkrSvcUrl, "", s4JConf);
-                Map<String, Object> connInfoS4jConfMap = s4JConnInfo.getS4jConfMap();
-                String userName = "dummy";
-                String passWord = s4JConnInfo.getCredentialPassword();
+                S4JConfFromFile s4JConfFromFile = new S4JConfFromFile(fileName);
+                String webSvcUrl = s4JConfFromFile.getClientConfMapRaw().get("webServiceUrl");
+                String brkrSvcUrl = s4JConfFromFile.getClientConfMapRaw().get("brokerServiceUrl");
+                S4JConnInfo s4JConnInfo = new S4JConnInfo(webSvcUrl, brkrSvcUrl, "", s4JConfFromFile);
+                Map<String, Object> connInfoS4jConfMap = s4JConnInfo.getS4jConfObjMap();
+                String userName = S4JConnInfoUtil.getCredentialUserName(s4JConnInfo);
+                String passWord = S4JConnInfoUtil.getCredentialPassword(s4JConnInfo);
 
                 // Only applies when authParams starts with "token:"
                 if (StringUtils.startsWith(passWord, "token:")) {
