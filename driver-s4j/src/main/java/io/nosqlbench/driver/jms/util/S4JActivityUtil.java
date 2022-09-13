@@ -17,6 +17,7 @@ package io.nosqlbench.driver.jms.util;
  * under the License.
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -269,9 +270,9 @@ public class S4JActivityUtil {
 
     ///////
     // Convert JSON string to a key/value map
-    public static Map convertJsonToMap(String jsonStr) throws Exception {
+    public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonStr, Map.class);
+        return mapper.readValue(jsonStr, new TypeReference<Map<String, String>>(){});
     }
 
     ///////
