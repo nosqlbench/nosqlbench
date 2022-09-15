@@ -84,12 +84,12 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
                 this.bytesCounter.inc(msgSize);
                 this.messageSizeHistogram.update(msgSize);
 
-                // Please see S4JActivity::getOrCreateJmsProducer() for async processing
+                // Please see s4JSpace::getOrCreateJmsProducer() for async processing
                 if (!asyncApi) {
                     if (logger.isDebugEnabled()) {
                         // for testing purpose
                         String myMsgSeq = message.getStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP);
-                        logger.debug("Sync message send successful - message ID {} ({}) "
+                        logger.debug("Sync message sending is successful - message ID {} ({}) "
                             , message.getJMSMessageID(), myMsgSeq);
                     }
 
@@ -97,9 +97,11 @@ public class S4JMsgSendOp extends S4JTimeTrackOp {
                         s4JSpace.incTotalOpResponseCnt();
                     }
                 }
-            } catch (JMSException e) {
-                e.printStackTrace();
-                throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
+            } catch (JMSException | JMSRuntimeException e) {
+                S4JActivityUtil.processMsgErrorHandling(
+                    e,
+                    s4JActivity.isStrictMsgErrorHandling(),
+                    "Unexpected errors when sync sending a JMS message.");
             }
         }
         else {

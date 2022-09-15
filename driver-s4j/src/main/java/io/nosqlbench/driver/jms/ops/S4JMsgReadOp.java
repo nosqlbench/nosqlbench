@@ -41,6 +41,7 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
     private final float msgAckRatio;
     private final long msgReadTimeout;
     private final boolean recvNoWait;
+    private final int slowInSec;
     private final boolean commitTransact;
 
     private final Counter bytesCounter;
@@ -56,6 +57,7 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                         float msgAckRatio,
                         long readTimeout,
                         boolean recvNoWait,
+                        int slowInSec,
                         boolean commitTransact) {
         super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
 
@@ -68,6 +70,7 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
         this.msgAckRatio = msgAckRatio;
         this.msgReadTimeout = readTimeout;
         this.recvNoWait = recvNoWait;
+        this.slowInSec = slowInSec;
         this.commitTransact = commitTransact;
 
         this.bytesCounter = s4JActivity.getBytesCounter();
@@ -100,7 +103,7 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                     if (this.commitTransact) jmsContext.commit();
 
                     if (recvdMsg != null) {
-                        s4JActivity.processMsgAck(jmsContext, recvdMsg, msgAckRatio);
+                        s4JActivity.processMsgAck(jmsContext, recvdMsg, msgAckRatio, slowInSec);
 
                         byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
                         int messageSize = recvdMsgBody.length;
@@ -124,9 +127,11 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                             s4JSpace.incTotalNullMsgRecvdCnt();
                         }
                     }
-                } catch (JMSException e) {
-                    e.printStackTrace();
-                    throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
+                } catch (JMSException | JMSRuntimeException e) {
+                    S4JActivityUtil.processMsgErrorHandling(
+                        e,
+                        s4JActivity.isStrictMsgErrorHandling(),
+                        "Unexpected errors when sync receiving a JMS message.");
                 }
             }
         }

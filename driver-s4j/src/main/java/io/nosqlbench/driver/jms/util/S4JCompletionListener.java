@@ -57,8 +57,11 @@ public class S4JCompletionListener implements CompletionListener {
                 }
             }
         }
-        catch (JMSException jmsException) {
-            logger.warn("onCompletion::Error retrieving message property - {}", jmsException.getMessage());
+        catch (JMSException e) {
+            S4JActivityUtil.processMsgErrorHandling(
+                e,
+                s4JActivity.isStrictMsgErrorHandling(),
+                "Unexpected errors when async sending a JMS message.");
         }
     }
 

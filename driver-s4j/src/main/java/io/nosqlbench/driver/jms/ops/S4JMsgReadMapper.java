@@ -37,6 +37,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
     private final boolean noLocalBool;
     private final LongFunction<Long> readTimeoutFunc;
     private final boolean recvNoWaitBool;
+    private final int slowAckInSec;
     private final Map<String,String> extraConsumerConfigRaw;
     private final Map<String,Object> combinedConsumerConfigObjMap;
 
@@ -56,6 +57,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                             boolean noLocalBool,
                             LongFunction<Long> readTimeoutFunc,
                             boolean recvNoWaitBool,
+                            int slowAckInSec,
                             Map<String,String> extraConsumerConfigRaw) {
         super(s4JSpace,
             s4JActivity,
@@ -75,6 +77,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
         this.noLocalBool = noLocalBool;
         this.readTimeoutFunc = readTimeoutFunc;
         this.recvNoWaitBool = recvNoWaitBool;
+        this.slowAckInSec = slowAckInSec;
         this.extraConsumerConfigRaw = extraConsumerConfigRaw;
         this.combinedConsumerConfigObjMap = S4JConnInfoUtil.mergeExtraConsumerConfig(
             s4JActivity.getS4JConnInfo(), this.extraConsumerConfigRaw);
@@ -113,7 +116,8 @@ public class S4JMsgReadMapper extends S4JOpMapper {
                 noLocalBool,
                 durable,
                 shared,
-                asyncAPIBool);
+                asyncAPIBool,
+                slowAckInSec);
         }
         catch (JMSException jmsException) {
             throw new RuntimeException("Unable to create the JMS consumer!");
@@ -133,6 +137,7 @@ public class S4JMsgReadMapper extends S4JOpMapper {
             msgAckRatio,
             readTimeout,
             recvNoWaitBool,
+            slowAckInSec,
             commitTransaction);
     }
 }

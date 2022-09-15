@@ -296,6 +296,10 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         String recvNoWaitBoolStr = lookupStaticParameter("no_wait");
         boolean recvNoWaitBool = BooleanUtils.toBoolean(recvNoWaitBoolStr);
 
+        // simulate slow acknowledgement
+        String slowAckInSecStr = lookupStaticParameter("slow_ack_in_sec");
+        int slowAckInSec = NumberUtils.toInt(slowAckInSecStr, 0);
+
         ////////
         // statement level consumer settings
         Map<String, String> stmtLvlConsumerConfRawMap = new HashMap<>();
@@ -341,6 +345,7 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             noLocalBool,
             readTimeoutFunc,
             recvNoWaitBool,
+            slowAckInSec,
             stmtLvlConsumerConfRawMap);
     }
 

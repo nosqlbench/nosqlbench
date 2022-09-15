@@ -37,11 +37,12 @@ public class S4JMessageListener implements MessageListener {
     private final static Logger logger = LogManager.getLogger(S4JSpace.class);
 
     private final float msgAckRatio;
+    private final int slowAckInSec;
     private final JMSContext jmsContext;
     private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
 
-    public S4JMessageListener(JMSContext jmsContext, S4JSpace s4JSpace, float msgAckRatio) {
+    public S4JMessageListener(JMSContext jmsContext, S4JSpace s4JSpace, float msgAckRatio, int slowAckInSec) {
         assert (jmsContext != null);
         assert (s4JSpace != null);
 
@@ -49,13 +50,14 @@ public class S4JMessageListener implements MessageListener {
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JSpace.getS4JActivity();
         this.msgAckRatio = msgAckRatio;
+        this.slowAckInSec = slowAckInSec;
     }
 
     @Override
     public void onMessage(Message message) {
         try {
             if (message != null) {
-                s4JActivity.processMsgAck(jmsContext, message, msgAckRatio);
+                s4JActivity.processMsgAck(jmsContext, message, msgAckRatio, slowAckInSec);
 
                 int msgSize = message.getIntProperty(S4JActivityUtil.NB_MSG_SIZE_PROP);
                 Counter bytesCounter = this.s4JActivity.getBytesCounter();
@@ -80,8 +82,11 @@ public class S4JMessageListener implements MessageListener {
                 }
             }
         }
-        catch (JMSException jmsException) {
-            logger.warn("onMessage::Unexpected error:" + jmsException.getMessage());
+        catch (JMSException e) {
+            S4JActivityUtil.processMsgErrorHandling(
+                e,
+                s4JActivity.isStrictMsgErrorHandling(),
+                "Unexpected errors when async receiving a JMS message.");
         }
     }
 }

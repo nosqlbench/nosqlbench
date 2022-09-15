@@ -92,7 +92,6 @@ public class S4JMsgBrowseMapper extends S4JOpMapper {
             value,
             s4JActivity,
             jmsContext,
-            queue,
             browser);
     }
 }

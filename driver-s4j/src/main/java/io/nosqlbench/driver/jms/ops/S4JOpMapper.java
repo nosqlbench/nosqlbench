@@ -65,11 +65,11 @@ public abstract class S4JOpMapper implements LongFunction<S4JOp> {
         // Whether to commit the transaction which happens when:
         // - session mode is equal to "SESSION_TRANSACTED"
         // - "txn_batch_num" has been reached since last reset
-        boolean commitTransaction = (Session.SESSION_TRANSACTED == jmsSessionMode);
+        boolean commitTransaction = ( (Session.SESSION_TRANSACTED == jmsSessionMode) && (txnBatchNum > 0) );
         if (commitTransaction) {
             int txnBatchTackingCnt = s4JSpace.getTxnBatchTrackingCnt();
 
-            if ( ( (txnBatchTackingCnt >=  txnBatchNum) && ((txnBatchTackingCnt % txnBatchNum) == 0) ) ||
+            if ( ( (txnBatchTackingCnt > 0) && ((txnBatchTackingCnt % txnBatchNum) == 0) ) ||
                  (curCycleNum == (s4JActivity.getActivityDef().getCycleCount() - 1)) ) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Commit transaction ({}, {}, {})",

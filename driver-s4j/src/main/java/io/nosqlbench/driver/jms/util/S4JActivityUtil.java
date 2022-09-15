@@ -316,5 +316,31 @@ public class S4JActivityUtil {
     public static String buildCacheKey(String... keyParts) {
         return String.join("::", keyParts);
     }
+
+    ///////
+    // Pause the execution of the current thread
+    public static void pauseCurThreadExec(int pauseInSec) {
+        if (pauseInSec > 0) {
+            try {
+                Thread.sleep(pauseInSec * 1000);
+            }
+            catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+    }
+
+    ///////
+    // Error handling for message processing
+    public static void processMsgErrorHandling(Exception exception, boolean strictErrorHandling, String errorMsg) {
+        exception.printStackTrace();
+
+        if (strictErrorHandling) {
+            throw new RuntimeException(errorMsg + " [ " + exception.getMessage() + " ]");
+        }
+        else {
+            S4JActivityUtil.pauseCurThreadExec(1);
+        }
+    }
 }
 

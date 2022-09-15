@@ -74,7 +74,7 @@ blocks:
       - name: "s1"
         optype: "msg_read"
 
-        ## (Optional) Message selector
+        ## (Optional) client side message selector
         msg_selector: ""
 
         ## (Optional) No Local
@@ -88,6 +88,12 @@ blocks:
 
         ## (Optional) Message acknowledgement ratio
         msg_ack_ratio: "0.5"
+
+        ## (Optional) Simulate slow consumer acknowledgement
+        # must be non-negative numbers. negative numbers will be treated as 0
+        # 0 - means no simulation
+        # positive value - the number of seconds to pause before acknowledgement
+        slow_ack_in_sec: "1"
 
         #####
         ## (Optional) Statement level settings for Consumer

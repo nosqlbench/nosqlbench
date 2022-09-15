@@ -140,11 +140,15 @@ public class S4JSpace {
                             jmsConnContext );
                     }
                 }
-            } catch (JMSRuntimeException e) {
+            }
+            catch (JMSRuntimeException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JConnInfo.toString());
                 }
                 throw new S4JDriverUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -164,7 +168,12 @@ public class S4JSpace {
             this.txnBatchTrackingCnt.remove();
 
             for (S4JJMSContextWrapper s4JJMSContextWrapper : sessionLvlJmsContexts.values()) {
-                if (s4JJMSContextWrapper != null) s4JJMSContextWrapper.close();
+                if (s4JJMSContextWrapper != null) {
+                    if (s4JJMSContextWrapper.isTransactedMode()) {
+                        s4JJMSContextWrapper.getJmsContext().rollback();
+                    }
+                    s4JJMSContextWrapper.close();
+                }
             }
 
             for (JMSContext jmsContext : connLvlJmsContexts.values()) {
@@ -175,7 +184,7 @@ public class S4JSpace {
         }
         catch (Exception e) {
             e.printStackTrace();
-            throw new S4JDriverUnexpectedException("Unexpected error when shutting down S4JSpace!");
+            throw new S4JDriverUnexpectedException("Unexpected error when shutting down NB S4J space.");
         }
     }
 
@@ -193,12 +202,7 @@ public class S4JSpace {
         boolean continueChk;
 
         do {
-            // Sleep for 2 second
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new S4JDriverUnexpectedException(e);
-            }
+            S4JActivityUtil.pauseCurThreadExec(1);
 
             long curTimeMills = System.currentTimeMillis();
             timeElapsedMills = curTimeMills - shutdownStartTimeMills;
@@ -442,7 +446,8 @@ public class S4JSpace {
         boolean nonLocal,
         boolean durable,
         boolean shared,
-        boolean asyncApi) throws JMSException
+        boolean asyncApi,
+        int slowAckInSec) throws JMSException
     {
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean isTopic = StringUtils.equalsIgnoreCase(destType, S4JActivityUtil.JMS_DEST_TYPES.TOPIC.label);
@@ -473,7 +478,7 @@ public class S4JSpace {
 
             if (asyncApi) {
                 jmsConsumer.setMessageListener(
-                    new S4JMessageListener(jmsContext, this, msgAckRatio));
+                    new S4JMessageListener(jmsContext, this, msgAckRatio, slowAckInSec));
             }
 
             if (logger.isDebugEnabled()) {
