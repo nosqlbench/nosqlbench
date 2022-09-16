@@ -311,7 +311,8 @@ public class RawS4JConfConverter {
         Map.entry("jms.useExclusiveSubscriptionsForSimpleConsumers","long"),
         Map.entry("jms.usePulsarAdmin","boolean"),
         Map.entry("jms.useServerSideFiltering","boolean"),
-        Map.entry("jms.waitForServerStartupTimeout","int")
+        Map.entry("jms.waitForServerStartupTimeout","int"),
+        Map.entry("jms.transactionsStickyPartitions", "boolean")
     );
     public static Map<String, Object> convertRawJmsConf(Map<String, String> s4jJmsConfMapRaw) {
         Map<String, Object> s4jJmsConfObjMap = new HashMap<>();
