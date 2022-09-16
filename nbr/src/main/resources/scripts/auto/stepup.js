@@ -1,8 +1,27 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// params:
 // sample_seconds
 // alias
-// From Chelsea: SLAPlotter, SLACharter, SLAMapper
-// SLATracer SLABaser SLAWork, SLAFinder, SLA
-// *SLA ?
+//
+// Naming Ideas:
+// SLAPlotter, SLACharter, SLAMapper
+// SLATracer SLABaser SLAWork, SLAFinder
+// Thanks Chelsea and crew
 
 function printf(args) {
     var spec = arguments[0];
@@ -38,15 +57,15 @@ printf("driver=%s\n",driver);
 
 
 print("starting activity for stepup analysis");
-var activitydef = {
+var activitydef = params.withDefaults({
     'alias': 'stepup',
     'driver': driver,
-    'tags':'any(block:main,phase:main)',
+    'tags':'any(block:main.*,phase:main)',
     'workload' : 'TEMPLATE(workload)',
     'cycles': '1t',
     'stride': '1000',
     'striderate': '1:1.05:restart'
-};
+});
 
 var csvlogger = csvoutput.open('stepup_metrics/stepup_rates.csv', 'time', 'workload', 'rate', 'ops')
 var csvhistologger=csvmetrics.log("stepup_metrics");

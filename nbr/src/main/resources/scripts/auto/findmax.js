@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2022 nosqlbench
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// TODO: add idle period between end of one run and beginning of next to avoid
+// metrics carry-over
+
 function printf(args) {
     var spec = arguments[0];
     var values = [];
@@ -12,6 +31,8 @@ if ("TEMPLATE(showhelp,false)" === "true") {
     printf(helpdata);
     exit();
 }
+
+var colors = Java.type('io.nosqlbench.engine.api.util.Colors')
 
 if (params.cycles) {
     printf("cycles should not be set for this scenario script. " +
@@ -137,7 +158,7 @@ activitydef = params.withDefaults({
     driver: driver,
     yaml: yaml_file,
     threads: "auto",
-    striderate: "10:1.1"
+    cyclerate: "1.0:1.1"
 });
 
 activitydef.alias = "findmax";
@@ -174,11 +195,7 @@ function as_pctile(val) {
 }
 
 scenario.start(activitydef);
-raise_to_min_stride(activities.findmax, min_stride);
-let idlestride = 100.0 / activities.findmax.stride;
-printf("setting to idle speed %f\n", idlestride)
-activities.findmax.striderate = idlestride;
-
+// raise_to_min_stride(activities.findmax, min_stride);
 
 // printf("\nwarming up client JIT for 10 seconds... \n");
 // activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
@@ -186,12 +203,12 @@ activities.findmax.striderate = idlestride;
 // activities.findmax.striderate = "" + (100.0 / activities.findmax.stride) + ":1.1:restart";
 // printf("commencing test\n");
 
-function raise_to_min_stride(params, min_stride) {
-    var multipler = (min_stride / params.stride);
-    var newstride = (multipler * params.stride);
-    printf("increasing stride to %d ( %d x initial)\n", newstride, multipler);
-    params.stride = newstride.toFixed(0);
-}
+// function raise_to_min_stride(params, min_stride) {
+//     var multipler = (min_stride / params.stride);
+//     var newstride = (multipler * params.stride);
+//     printf("increasing minimum stride to %d ( %d x initial)\n", newstride, multipler);
+//     params.stride = newstride.toFixed(0);
+// }
 
 
 function testCycleFun(params) {
@@ -208,8 +225,11 @@ function testCycleFun(params) {
     reporter_params_baserate.update(params.base)
     reporter_params_targetrate.update(params.target_rate)
 
-    // printf(" target rate is " + params.target_rate + " ops_s");
-    activities.findmax.striderate = "" + (params.target_rate / activities.findmax.stride) + ":1.1:restart";
+    printf(" target rate is " + params.target_rate + " ops_s\n");
+
+    var cycle_rate_specifier = "" + (params.target_rate) + ":1.1:restart";
+    // printf(" setting activities.findmax.cyclerate = %s\n",cycle_rate_specifier);
+    activities.findmax.cyclerate = cycle_rate_specifier;
 
     // if (params.iteration == 1) {
     //     printf("\n settling load at base for %ds before active sampling.\n", sample_time);
@@ -217,21 +237,22 @@ function testCycleFun(params) {
     // }
 
     precount = metrics.findmax.cycles.servicetime.count;
-    printf("precount: %d\n", precount);
+    // printf("precount: %d\n", precount);
 
     var snapshot_reader = metrics.findmax.result.deltaReader;
     var old_data = snapshot_reader.getDeltaSnapshot(); // reset
 
-    // printf(" sampling performance for " + params.sample_seconds + " seconds...");
+    // printf(">>>--- sampling performance for " + params.sample_seconds + " seconds...\n");
     scenario.waitMillis(params.sample_seconds * 1000);
+    // printf("---<<< sampled performance for " + params.sample_seconds + " seconds...\n");
 
     postcount = metrics.findmax.cycles.servicetime.count;
-    printf("postcount: %d\n", postcount);
+    // printf("postcount: %d\n", postcount);
 
     var count = postcount - precount;
     var ops_per_second = count / params.sample_seconds;
 
-    printf(" calculated rate from count=%f sample_seconds=%f\n", count, params.sample_seconds);
+    printf(" calculated rate from count=%d sample_seconds=%d (pre=%d post=%d)\n", count, params.sample_seconds, precount, postcount);
 
     reporter_sampling_baserate.update(params.base);
     reporter_sampling_targetrate.update(params.target_rate)
@@ -239,14 +260,24 @@ function testCycleFun(params) {
 
     var latency_snapshot = snapshot_reader.getDeltaSnapshot(10000);
 
-    return {
+    // printf("DEBUG count:%d sample_seconds:%d target_rate:%d\n",count, params.sample_seconds, params.target_rate);
+
+    var achieved_ratio = 0.0+ ((count/params.sample_seconds) / params.target_rate);
+
+    var result= {
         target_rate: params.target_rate,
         count: postcount - precount,
         ops_per_second: ops_per_second,
         latency_snapshot: latency_snapshot,
-        achieved_ratio: (count / params.sample_seconds) / params.target_rate,
+        achieved_ratio: achieved_ratio,
         latency_ms: latency_snapshot.getValue(latency_pctile) / 1000000.0
     };
+
+    // printf("DEBUG count:%d sample_seconds:%d target_rate:%d achieved_ratio: %s\n",count, params.sample_seconds, params.target_rate, ""+achieved_ratio);
+    // print("result");
+    // print(JSON.stringify(result));
+
+    return result;
 
 }
 
@@ -309,11 +340,11 @@ function find_max() {
         var latency_summary = result.latency_ms.toFixed(2) + "ms " + as_pctile(latency_pctile);
         if (result.latency_ms > latency_cutoff) {
             failed_checks++;
-            printf(" FAIL(TOO HIGH) [ %s >", latency_summary)
+            printf(colors.ANSI_BrightRed + " FAIL (TOO HIGH) [ %s >", latency_summary)
         } else {
-            printf(" PASS(OK)       [ %s <", latency_summary)
+            printf(colors.ANSI_BrightGreen+" PASS            [ %s <", latency_summary)
         }
-        printf(" max %dms ]\n", latency_cutoff);
+        printf(" max %dms ]\n"+colors.ANSI_Reset, latency_cutoff);
 
         // throughput achieved of target goal
         printf(" OPRATE/TARGET  ");
@@ -321,12 +352,12 @@ function find_max() {
 
         if (result.achieved_ratio < testrate_cutoff) {
             failed_checks++;
-            printf(" FAIL(TOO LOW)  [ %s <", throughput_summary);
+            printf(colors.ANSI_BrightRed+" FAIL (TOO LOW)  [ %s <", throughput_summary);
         } else {
-            printf(" PASS(OK)       [ %s >", throughput_summary)
+            printf(colors.ANSI_BrightGreen+" PASS            [ %s >", throughput_summary)
         }
         printf(" min %s ]", as_pct(testrate_cutoff));
-        printf(" ( %s/%s )\n", result.ops_per_second.toFixed(0), params.target_rate.toFixed(0));
+        printf(" ( %s/%s )"+"\n"+colors.ANSI_Reset, result.ops_per_second.toFixed(0), params.target_rate.toFixed(0));
         // printf(" (" + result.ops_per_second.toFixed(0) + "/" + params.target_rate.toFixed(0) + ")");
 
         // throughput achieved of best known throughput
@@ -340,22 +371,22 @@ function find_max() {
         var rel_rate_pct = (rel_rate * 100.0).toFixed(2) + "%";
         if (rel_rate < bestrate_cutoff) {
             failed_checks++;
-            printf(" FAIL(SLOWER)   [ %s <", rel_rate_summary)
+            printf(colors.ANSI_BrightRed+" FAIL (SLOWER)   [ %s <", rel_rate_summary)
         } else {
-            printf(" PASS(OK)       [ %s >", rel_rate_summary)
+            printf(colors.ANSI_BrightGreen+" PASS            [ %s >", rel_rate_summary)
         }
 
-        printf(" min %s ] ( %s/%s ) \n",
+        printf(" min %s ] ( %s/%s )"+"\n"+colors.ANSI_Reset,
             as_pct(bestrate_cutoff),
             result.ops_per_second.toFixed(0),
             highest_rate_known.toFixed(0)
-            );
+        );
 
         if (failed_checks == 0) {
             accepted_count++;
             highest_acceptable_iteration = highest_acceptable_of(results, highest_acceptable_iteration, iteration);
             reporter_sampling_minbound.update(results[highest_acceptable_iteration].target_rate)
-            printf(" ---> accepting iteration %d (highest is now %d)\n", iteration, highest_acceptable_iteration);
+            printf(" --> accepting iteration %d (highest is now %d)\n", iteration, highest_acceptable_iteration);
         } else {
             rejected_count++;
             printf(" !!!  rejecting iteration %d\n", iteration);
@@ -367,7 +398,7 @@ function find_max() {
             // keep the lower maximum target rate, if both this iteration and another one failed
             if (result.target_rate < results[lowest_unacceptable_iteration].target_rate) {
                 lowest_unacceptable_iteration = iteration;
-                printf("setting lowest_unacceptable_iteration to %d\n", iteration)
+                printf("\n !!! setting lowest_unacceptable_iteration to %d\n", iteration)
             }
 
             highest_acceptable_iteration = highest_acceptable_iteration == 0 ? iteration : highest_acceptable_iteration;
@@ -400,7 +431,7 @@ function find_max() {
 
                 printf("\n new search range is %s\n", search_summary);
                 printf(" continuing search at base: %d step: %d", base, step);
-                activities.findmax.striderate = "" + (base / activities.findmax.stride) + ":1.1:restart";
+                activities.findmax.cyclerate = "" + base + ":1.1:restart";
 
                 printf("\n settling load at base for %ds before active sampling.\n", sample_time);
                 scenario.waitMillis(sample_time * 1000);
@@ -418,6 +449,7 @@ function find_max() {
                 break;
             }
         }
+        printf(colors.ANSI_Reset);
     }
     var endAt = new Date().getTime();
     var total_seconds = (endAt - startAt) / 1000.0;
@@ -438,6 +470,7 @@ for (var testrun = 0; testrun < averageof; testrun++) {
     overallresults[testrun].testrun = testrun;
 }
 
+printf("stopping activity\n");
 scenario.stop(activitydef);
 
 var total_ops_s = 0.0;
