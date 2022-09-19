@@ -329,7 +329,7 @@ public class S4JSpace {
         if (jmsContextWrapper == null) {
             JMSContext jmsContext = null;
 
-            if (overrideS4jConfMap == null) {
+            if (overrideS4jConfMap == null || overrideS4jConfMap.isEmpty()) {
                 jmsContext = connLvlJmsContext.createContext(connLvlJmsContext.getSessionMode());
             } else {
                 jmsContext = ((PulsarJMSContext) connLvlJmsContext).createContext(

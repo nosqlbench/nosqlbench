@@ -43,9 +43,14 @@ public class S4JConnInfoUtil {
         else {
             Map<String, Object> origClientConfigObjMap = s4JConnInfo.getS4jConfMapObj_client();
             Map<String, Object> extraClientConfigObjMap =
-                RawS4JConfConverter.convertRawProducerConf(extraClientConfigRaw);
+                RawS4JConfConverter.convertRawClientConf(extraClientConfigRaw);
+            Map<String, Object> mergedClientConfigObjMap =
+                mergeConfigObjMaps(origClientConfigObjMap, extraClientConfigObjMap);
 
-            return mergeConfigObjMaps(origClientConfigObjMap, extraClientConfigObjMap);
+            Map<String, Object> mergedS4JConfObjMap = s4JConnInfo.getS4jConfObjMap();
+            mergedS4JConfObjMap.putAll(mergedClientConfigObjMap);
+
+            return mergedS4JConfObjMap;
         }
     }
 
@@ -61,8 +66,13 @@ public class S4JConnInfoUtil {
             Map<String, Object> origProducerConfigObjMap = s4JConnInfo.getS4jConfMapObj_producer();
             Map<String, Object> extraProducerConfigObjMap =
                 RawS4JConfConverter.convertRawProducerConf(extraProducerConfigRaw);
+            Map<String, Object> mergedProducerConfigObjMap =
+                mergeConfigObjMaps(origProducerConfigObjMap, extraProducerConfigObjMap);
 
-            return mergeConfigObjMaps(origProducerConfigObjMap, extraProducerConfigObjMap);
+            Map<String, Object> mergedS4JConfObjMap = s4JConnInfo.getS4jConfObjMap();
+            mergedS4JConfObjMap.put("producerConfig", mergedProducerConfigObjMap);
+
+            return mergedS4JConfObjMap;
         }
     }
 
@@ -76,10 +86,15 @@ public class S4JConnInfoUtil {
             }
             else {
                 Map<String, Object> origConsumerConfigObjMap = s4JConnInfo.getS4jConfMapObj_consumer();
-                Map<String, Object> extraProducerConfigObjMap =
+                Map<String, Object> extraConsumerConfigObjMap =
                     RawS4JConfConverter.convertRawConsumerConf(extraConsumerConfigRaw);
+                Map<String, Object> mergedConsumerConfigObjMap =
+                    mergeConfigObjMaps(origConsumerConfigObjMap, extraConsumerConfigObjMap);
 
-                return mergeConfigObjMaps(origConsumerConfigObjMap, extraProducerConfigObjMap);
+                Map<String, Object> mergedS4JConfObjMap = s4JConnInfo.getS4jConfObjMap();
+                mergedS4JConfObjMap.put("consumerConfig", mergedConsumerConfigObjMap);
+
+                return mergedS4JConfObjMap;
             }
     }
 
@@ -94,9 +109,14 @@ public class S4JConnInfoUtil {
         else {
             Map<String, Object> origS4jJmsConfigObjMap = s4JConnInfo.getS4jConfMapObj_jms();
             Map<String, Object> extraS4jJmsConfigObjMap =
-                RawS4JConfConverter.convertRawProducerConf(extraS4jJmsConfigRaw);
+                RawS4JConfConverter.convertRawJmsConf(extraS4jJmsConfigRaw);
+            Map<String, Object> mergedJmsConfigObjMap =
+                mergeConfigObjMaps(origS4jJmsConfigObjMap, extraS4jJmsConfigObjMap);
 
-            return mergeConfigObjMaps(origS4jJmsConfigObjMap, extraS4jJmsConfigObjMap);
+            Map<String, Object> mergedS4JConfObjMap = s4JConnInfo.getS4jConfObjMap();
+            mergedS4JConfObjMap.putAll(mergedJmsConfigObjMap);
+
+            return mergedS4JConfObjMap;
         }
     }
 
@@ -111,9 +131,14 @@ public class S4JConnInfoUtil {
         else {
             Map<String, Object> origS4jMiscConfigObjMap = s4JConnInfo.getS4jConfMapObj_misc();
             Map<String, Object> extraS4jMiscConfigObjMap =
-                RawS4JConfConverter.convertRawProducerConf(extraS4jMiscConfigRaw);
+                RawS4JConfConverter.convertRawMiscConf(extraS4jMiscConfigRaw);
+            Map<String, Object> mergedMiscConfigObjMap =
+                mergeConfigObjMaps(origS4jMiscConfigObjMap, extraS4jMiscConfigObjMap);
 
-            return mergeConfigObjMaps(origS4jMiscConfigObjMap, extraS4jMiscConfigObjMap);
+            Map<String, Object> mergedS4JConfObjMap = s4JConnInfo.getS4jConfObjMap();
+            mergedS4JConfObjMap.putAll(mergedMiscConfigObjMap);
+
+            return mergedS4JConfObjMap;
         }
     }
 
