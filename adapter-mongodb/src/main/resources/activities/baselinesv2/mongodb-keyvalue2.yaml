@@ -28,97 +28,32 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
-
-        db.createCollection(
-        db.createCollection("students", {
-           validator: {
-              $jsonSchema: {
-                 bsonType: "object",
-                 required: [ "name", "year", "major", "address" ],
-                 properties: {
-                    name: {
-                       bsonType: "string",
-                       description: "must be a string and is required"
-                    },
-                    year: {
-                       bsonType: "int",
-                       minimum: 2017,
-                       maximum: 3017,
-                       description: "must be an integer in [ 2017, 3017 ] and is required"
-                    },
-                    major: {
-                       enum: [ "Math", "English", "Computer Science", "History", null ],
-                       description: "can only be one of the enum values and is required"
-                    },
-                    gpa: {
-                       bsonType: [ "double" ],
-                       description: "must be a double if the field exists"
-                    },
-                    address: {
-                       bsonType: "object",
-                       required: [ "city" ],
-                       properties: {
-                          street: {
-                             bsonType: "string",
-                             description: "must be a string if the field exists"
-                          },
-                          city: {
-                             bsonType: "string",
-                             description: "must be a string and is required"
-                          }
-                       }
-                    }
-                 }
-              }
-           }
-        })
+      create-collection: |
+        {
+         ...
+        }
 #        create keyspace if not exists TEMPLATE(keyspace,baselines)
 #        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
 #        AND durable_writes = true;
-      create-table: |
-        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
-        key text,
-         value text,
-         PRIMARY KEY (key)
-        );
-    schema-astra:
-      params:
-        prepared: false
-      statements:
-        create-table: |
-          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
-          key text,
-           value text,
-           PRIMARY KEY (key)
-          );
   rampup:
-    params:
-      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
       rampup-insert: |
-        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
-        (key, value)
-        values ({seq_key},{seq_value});
-  verify:
-    params:
-      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
-    ops:
-      verify-select: |
-        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={seq_key};
-      verify-fields: key->seq_key, value->seq_value
+        {
+        ...
+        }
   main-read:
     params:
       ratio: 5
-      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     statements:
       main-select: |
-        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={rw_key};
+        {
+        ...
+        }
   main-write:
     params:
       ratio: 5
-      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     statements:
       main-insert: |
-        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
-        (key, value) values ({rw_key}, {rw_value});
+        {
+        ...
+        }
