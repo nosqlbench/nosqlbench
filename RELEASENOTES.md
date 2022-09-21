@@ -1,7 +1,28 @@
-- 43917c84f (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- cb826eb62 parameterize driver space in mappers
-- 691e8ae40 add default binding for cqlgen
-- d80a33f49 typo fix
-- 9c66d616f start tracking feature news in a file
-- c2a264fed partial mongodb updates
-- 86112bb3d cqlgen updates
+- 0068467a6 (HEAD -> main) robustify tests which share state
+- 1894716bd minor naming updates
+- 019348118 stub mongodb-keyvalue
+- 3304b1d8d improve findmax, stepup analysis methods
+- 8d94cc7dd (origin/main) partial fix for stubbed sstablegen functionality
+- cd4435324 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 22a144187 Merge pull request #706 from derrickCos/compaction-test
+- 20c4d3b98 Merge pull request #710 from nosqlbench/snyk-fix-40c2b869130ffedc8106dfda369832f4
+- a1e3e2da7 Merge pull request #709 from nosqlbench/snyk-fix-4a778abad3350a18b2012b95e4154ac6
+- 4331febf7 Merge pull request #705 from nosqlbench/snyk-upgrade-d1413d56ae34c358fd13ecf9e86193c3
+- c274ebca3 Merge pull request #704 from nosqlbench/snyk-upgrade-fc24542c5ed484ecfad64ede334dbeac
+- afa08b18f Merge pull request #703 from nosqlbench/snyk-upgrade-2c9700e824a1bffa66b8b6ea5fc78705
+- ce0e48a85 Merge pull request #702 from nosqlbench/snyk-upgrade-66b43759609d17e873a37bd33c4d2d97
+- 3eb88ea82 Merge pull request #700 from weideng1/patch-2
+- dc10d9f50 MongoDB adapter improvements
+- 5b830cfa2 more accurate var names
+- fa1ae8c26 package cleanup
+- 30214f857 reorder ANSI codes for clarity, fix reset
+- 69255d5e7 remove graaljs compat flag
+- 7a83f2779 remove phases
+- bbf08ab48 make token filler thread more aggressive
+- ba4c98f5b fix case fallthrough bug reducing extraneous threads
+- 042f1f8d2 add javadocs
+- 769426600 reduce wait duration for potential long blocking
+- 6d389da5a tag implemented interface
+- bb27e5036 npe fix for value conversion
+- bc3eddbb5 (origin/snyk-fix-40c2b869130ffedc8106dfda369832f4) fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- 568703b92 (origin/snyk-fix-4a778abad3350a18b2012b95e4154ac6) fix: mvn-defaults/pom.xml to reduce vulnerabilities
