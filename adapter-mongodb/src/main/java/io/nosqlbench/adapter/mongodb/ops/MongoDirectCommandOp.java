@@ -21,7 +21,7 @@ import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-public class MongoOp implements CycleOp<Document> {
+public class MongoDirectCommandOp implements CycleOp<Document> {
 
     private final MongoClient client;
     private final Bson rqBson;
@@ -29,7 +29,7 @@ public class MongoOp implements CycleOp<Document> {
     private int resultSize;
 
     // https://docs.mongodb.com/manual/reference/method/db.runCommand/#command-response
-    public MongoOp(MongoClient client, String database, Bson rqBson) {
+    public MongoDirectCommandOp(MongoClient client, String database, Bson rqBson) {
         this.client = client;
         this.database = database;
         this.rqBson = rqBson;

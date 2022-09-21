@@ -16,8 +16,6 @@
 
 package io.nosqlbench.adapter.mongodb.core;
 
-import io.nosqlbench.adapter.mongodb.dispensers.MongoDbUpdateOpDispenser;
-import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
@@ -53,13 +51,13 @@ public class MongoOpMapper implements OpMapper<Op> {
         if (target.isPresent()) {
             TypeAndTarget<MongoDBOpTypes, String> targetdata = target.get();
             return switch (targetdata.enumId) {
-                case update -> new MongoDbUpdateOpDispenser(adapter, op, targetdata.targetFunction);
+                case command -> new MongoCommandOpDispenser(adapter, spaceF, op);
+//                case update -> new MongoDbUpdateOpDispenser(adapter, op, targetdata.targetFunction);
 //            case insert -> new MongoDbInsertOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case delete -> new MongoDbDeleteOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case find -> new mongoDbFindOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case findAndModify -> new MongoDbFindAndModifyOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
 //            case getMore -> new MongoDbGetMoreOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-                case command -> throw new OpConfigError("invalid state, logic error in op mapper");
             };
         }
         // For everything else use the command API

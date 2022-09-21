@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.mongodb.core;
 
 import com.mongodb.ReadPreference;
-import io.nosqlbench.adapter.mongodb.ops.MongoOp;
+import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MongoCommandOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
-    private final LongFunction<MongoOp> opFunc;
-    private final LongFunction<MongoOp> mongoOpF;
+    private final LongFunction<MongoDirectCommandOp> opFunc;
+    private final LongFunction<MongoDirectCommandOp> mongoOpF;
 
     public MongoCommandOpDispenser(DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
         super(adapter,op);
@@ -38,7 +38,7 @@ public class MongoCommandOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
         this.mongoOpF = createOpFunc(ctxFunc,op);
     }
 
-    private LongFunction<MongoOp> createOpFunc(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+    private LongFunction<MongoDirectCommandOp> createOpFunc(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
 
         LongFunction<String> rpstring = op.getAsOptionalFunction("readPreference")
             .orElseGet(() -> op.getAsOptionalFunction("read-preference")
@@ -59,7 +59,7 @@ public class MongoCommandOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
 
         LongFunction<String> databaseNamerF = op.getAsRequiredFunction("database", String.class);
 
-        return l-> new MongoOp(
+        return l-> new MongoDirectCommandOp(
             ctxFunc.apply(l).getClient(),
             databaseNamerF.apply(l),
             bsonFunc.apply(l)

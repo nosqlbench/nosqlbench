@@ -23,10 +23,10 @@ public enum MongoDBOpTypes {
      */
     command,
 
-    /**
-     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/update/#mongodb-dbcommand-dbcmd.update">update</a>
-     */
-    update,
+//    /**
+//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/update/#mongodb-dbcommand-dbcmd.update">update</a>
+//     */
+//    update,
 
 //    /**
 //     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/insert/">insert</a>
