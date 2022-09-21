@@ -42,7 +42,7 @@ public class ActivityExecutorTest {
     private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 
     @Test
-    public void testRestart() {
+    public synchronized void testRestart() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;op=initdelay:initdelay=5000;");
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Activity a = new DelayedInitActivity(ad);
@@ -66,7 +66,7 @@ public class ActivityExecutorTest {
     }
 
     @Test
-    public void testDelayedStartSanity() {
+    public synchronized void testDelayedStartSanity() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Activity a = new DelayedInitActivity(ad);
@@ -88,7 +88,7 @@ public class ActivityExecutorTest {
     }
 
     @Test
-    public void testNewActivityExecutor() {
+    public synchronized void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Input longSupplier = new AtomicInput(ad);

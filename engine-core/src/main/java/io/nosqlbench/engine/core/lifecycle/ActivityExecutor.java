@@ -125,7 +125,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         adjustToActivityDef(activity.getActivityDef());
         activity.setRunState(RunState.Running);
         activitylogger.debug("START/after alias=(" + activity.getAlias() + ")");
-
     }
 
     /**
@@ -153,8 +152,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 .detail("params", getActivityDef().toString())
                 .build()
         );
-
-
     }
 
     public synchronized RuntimeException forceStopScenario(int initialMillisToWait) {
