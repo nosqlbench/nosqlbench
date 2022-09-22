@@ -20,6 +20,17 @@
         as the potential JMS Destination
     </description>
 
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.0</version>
+            </extension>
+        </extensions>
+    </build>
+
     <!--    <repositories>-->
     <!--        &lt;!&ndash; Tempoarily needed for Pulsar JMS Java library &ndash;&gt;-->
     <!--        <repository>-->
@@ -74,8 +85,17 @@
         <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>pulsar-jms-all</artifactId>
-            <version>2.4.6</version>
+            <version>2.4.11</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.conscrypt/conscrypt-openjdk -->
+        <dependency>
+            <groupId>org.conscrypt</groupId>
+            <artifactId>conscrypt-openjdk</artifactId>
+            <version>2.5.2</version>
+            <classifier>${os.detected.classifier}</classifier>
+        </dependency>
+
 
     </dependencies>
 

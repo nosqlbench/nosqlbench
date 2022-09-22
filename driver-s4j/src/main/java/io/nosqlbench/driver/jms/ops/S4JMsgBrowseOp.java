@@ -18,6 +18,7 @@ package io.nosqlbench.driver.jms.ops;
  */
 
 import io.nosqlbench.driver.jms.S4JActivity;
+import io.nosqlbench.driver.jms.util.S4JActivityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,13 +32,14 @@ public class S4JMsgBrowseOp extends S4JTimeTrackOp {
     private final static Logger logger = LogManager.getLogger(S4JMsgBrowseOp.class);
     private final QueueBrowser jmsQueueBrowser;
 
+    private final S4JActivity s4JActivity;
+
     public S4JMsgBrowseOp(long curNBCycleNum,
                           S4JActivity s4JActivity,
                           JMSContext jmsContext,
-                          Queue queue,
                           QueueBrowser browser) {
         super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
-
+        this.s4JActivity = s4JActivity;
         this.jmsQueueBrowser = browser;
     }
 
@@ -63,9 +65,11 @@ public class S4JMsgBrowseOp extends S4JTimeTrackOp {
                         }
                     }
                 }
-            } catch (JMSException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Failed to acknowledge the received JMS message.");
+            } catch (JMSException | JMSRuntimeException e) {
+                S4JActivityUtil.processMsgErrorHandling(
+                    e,
+                    s4JActivity.isStrictMsgErrorHandling(),
+                    "Unexpected errors when browsing JMS messages.");
             }
         }
         else {

@@ -31,6 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class ReadyS4JOp implements OpDispenser<S4JOp> {
@@ -43,7 +45,6 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
     private final S4JActivity s4JActivity;
 
     private final LongFunction<S4JOp> opFunc;
-
 
     public ReadyS4JOp(OpTemplate optpl, S4JSpaceCache s4JSpaceCache, S4JActivity s4JActivity) {
         this.optpl = optpl;
@@ -59,6 +60,7 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         this.s4JActivity.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
         this.s4JSpace.resetTotalOpResponseCnt();
+        this.s4JSpace.resetTotalNullMsgRecvdCnt();
 
         this.opFunc = resolveS4JOp();
     }
@@ -294,6 +296,38 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
         String recvNoWaitBoolStr = lookupStaticParameter("no_wait");
         boolean recvNoWaitBool = BooleanUtils.toBoolean(recvNoWaitBoolStr);
 
+        // simulate slow acknowledgement
+        String slowAckInSecStr = lookupStaticParameter("slow_ack_in_sec");
+        int slowAckInSec = NumberUtils.toInt(slowAckInSecStr, 0);
+
+        ////////
+        // statement level consumer settings
+        Map<String, String> stmtLvlConsumerConfRawMap = new HashMap<>();
+
+        // consumer.ackTimeoutMillis
+        String keyName = "consumer.ackTimeoutMillis";
+        String ackTimeoutMillisStr = lookupStaticParameter(keyName);
+        stmtLvlConsumerConfRawMap.put(
+            StringUtils.substringAfter(keyName, "consumer."), ackTimeoutMillisStr);
+
+        // consumer.deadLetterPolicy
+        keyName = "consumer.deadLetterPolicy";
+        String deadLetterPolicyStr = lookupStaticParameter(keyName);
+        stmtLvlConsumerConfRawMap.put(
+            StringUtils.substringAfter(keyName, "consumer."), deadLetterPolicyStr);
+
+        // consumer.negativeAckRedeliveryBackoff
+        keyName = "consumer.negativeAckRedeliveryBackoff";
+        String negativeAckRedeliveryBackoffStr = lookupStaticParameter(keyName);
+        stmtLvlConsumerConfRawMap.put(
+            StringUtils.substringAfter(keyName, "consumer."), negativeAckRedeliveryBackoffStr);
+
+        // consumer.ackTimeoutRedeliveryBackoff
+        keyName = "consumer.ackTimeoutRedeliveryBackoff";
+        String ackTimeoutRedeliveryBackoffStr = lookupStaticParameter(keyName);
+        stmtLvlConsumerConfRawMap.put(
+            StringUtils.substringAfter(keyName, "consumer."), ackTimeoutRedeliveryBackoffStr);
+
         return new S4JMsgReadMapper(
             s4JSpace,
             s4JActivity,
@@ -310,7 +344,9 @@ public class ReadyS4JOp implements OpDispenser<S4JOp> {
             msgSelectorStrFunc,
             noLocalBool,
             readTimeoutFunc,
-            recvNoWaitBool);
+            recvNoWaitBool,
+            slowAckInSec,
+            stmtLvlConsumerConfRawMap);
     }
 
     private LongFunction<S4JOp> resolveMsgBrowse(

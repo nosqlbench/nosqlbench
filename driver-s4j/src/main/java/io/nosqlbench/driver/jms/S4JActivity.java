@@ -23,7 +23,8 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.driver.jms.conn.S4JConnInfo;
 import io.nosqlbench.driver.jms.ops.ReadyS4JOp;
 import io.nosqlbench.driver.jms.ops.S4JOp;
-import io.nosqlbench.driver.jms.util.S4JConf;
+import io.nosqlbench.driver.jms.util.S4JActivityUtil;
+import io.nosqlbench.driver.jms.util.S4JConfFromFile;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -44,6 +45,11 @@ import javax.jms.*;
 public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
 
     private final static Logger logger = LogManager.getLogger(S4JActivity.class);
+
+    // Whether to do strict error handling while sending/receiving messages
+    // - Yes: any error returned from the Pulsar server while doing message receiving/sending will trigger NB execution stop
+    // - No: pause the current thread that received the error message for 1 second and then continue processing
+    private boolean strictMsgErrorHandling;
 
     // Maximum time length to execute S4J operations (e.g. message send or consume)
     // - when NB execution passes this threshold, it is simply NoOp
@@ -100,7 +106,8 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String curThreadName = Thread.currentThread().getName();
 
         String s4jConfFile =
-            activityDef.getParams().getOptionalString("config").orElse("config.properties");S4JConf s4JConf = new S4JConf(s4jConfFile);
+            activityDef.getParams().getOptionalString("config").orElse("config.properties");
+        S4JConfFromFile s4JConfFromFile = new S4JConfFromFile(s4jConfFile);
 
         String webSvcUrl =
             activityDef.getParams().getOptionalString("web_url").orElse("http://localhost:8080");
@@ -127,7 +134,12 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
         String sessionModeStr =
             activityDef.getParams().getOptionalString("session_mode").orElse("");
 
-        s4JConnInfo = new S4JConnInfo(webSvcUrl, pulsarSvcUrl, sessionModeStr, s4JConf);
+        String strictMsgErrorHandlingStr =
+            activityDef.getParams().getOptionalString("strict_msg_error_handling").orElse("false");
+        strictMsgErrorHandling = BooleanUtils.toBoolean(strictMsgErrorHandlingStr);
+
+        // Global level connection info that is read from the config.properties file
+        s4JConnInfo = new S4JConnInfo(webSvcUrl, pulsarSvcUrl, sessionModeStr, s4JConfFromFile);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
@@ -175,17 +187,26 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
     public int getMaxNumSessionPerConn() { return this.maxNumSessionPerConn; }
     public int getMaxNumConn() { return this.maxNumConn; }
 
-    public void processMsgAck(int jmsSessionMode, Message message, float msgAckRatio) {
+    public boolean isStrictMsgErrorHandling() { return  this.strictMsgErrorHandling; }
+
+    public void processMsgAck(JMSContext jmsContext, Message message, float msgAckRatio, int slowAckInSec) throws JMSException {
+        int jmsSessionMode = jmsContext.getSessionMode();
+
         if ((jmsSessionMode != Session.AUTO_ACKNOWLEDGE) &&
             (jmsSessionMode != Session.SESSION_TRANSACTED)) {
             float rndVal = RandomUtils.nextFloat(0, 1);
             if (rndVal < msgAckRatio) {
-                try {
-                    message.acknowledge();
+                S4JActivityUtil.pauseCurThreadExec(slowAckInSec);
+                if (slowAckInSec > 0) {
+                    try {
+                        Thread.sleep(slowAckInSec * 1000);
+                    }
+                    catch (InterruptedException ioe) {
+                        ioe.printStackTrace();
+                    }
                 }
-                catch (JMSException jmsException) {
-                    logger.debug("Unexpected error when processing message acknowledgement!");
-                }
+
+                message.acknowledge();
             }
         }
     }

@@ -35,13 +35,13 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
     private final S4JSpace s4JSpace;
     private final S4JActivity s4JActivity;
     private final JMSContext jmsContext;
-    private final int jmsSessionMode;
     private final boolean asyncApi;
     private final boolean blockingMsgRecv;
     private final JMSConsumer jmsConsumer;
     private final float msgAckRatio;
     private final long msgReadTimeout;
     private final boolean recvNoWait;
+    private final int slowInSec;
     private final boolean commitTransact;
 
     private final Counter bytesCounter;
@@ -57,19 +57,20 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                         float msgAckRatio,
                         long readTimeout,
                         boolean recvNoWait,
+                        int slowInSec,
                         boolean commitTransact) {
         super(curNBCycleNum, s4JActivity.getS4JActivityStartTimeMills(), s4JActivity.getMaxS4JOpTimeInSec());
 
         this.s4JSpace = s4JSpace;
         this.s4JActivity = s4JActivity;
         this.jmsContext = jmsContext;
-        this.jmsSessionMode = jmsContext.getSessionMode();
         this.asyncApi = asyncApi;
         this.blockingMsgRecv = blockingMsgRecv;
         this.jmsConsumer = consumer;
         this.msgAckRatio = msgAckRatio;
         this.msgReadTimeout = readTimeout;
         this.recvNoWait = recvNoWait;
+        this.slowInSec = slowInSec;
         this.commitTransact = commitTransact;
 
         this.bytesCounter = s4JActivity.getBytesCounter();
@@ -102,10 +103,12 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                     if (this.commitTransact) jmsContext.commit();
 
                     if (recvdMsg != null) {
-                        s4JActivity.processMsgAck(jmsSessionMode, recvdMsg, msgAckRatio);
+                        s4JActivity.processMsgAck(jmsContext, recvdMsg, msgAckRatio, slowInSec);
 
                         byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
                         int messageSize = recvdMsgBody.length;
+
+
                         bytesCounter.inc(messageSize);
                         messageSizeHistogram.update(messageSize);
 
@@ -124,9 +127,11 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                             s4JSpace.incTotalNullMsgRecvdCnt();
                         }
                     }
-                } catch (JMSException e) {
-                    e.printStackTrace();
-                    throw new S4JDriverUnexpectedException("Unexpected errors when sync receiving a JMS message.");
+                } catch (JMSException | JMSRuntimeException e) {
+                    S4JActivityUtil.processMsgErrorHandling(
+                        e,
+                        s4JActivity.isStrictMsgErrorHandling(),
+                        "Unexpected errors when sync receiving a JMS message.");
                 }
             }
         }

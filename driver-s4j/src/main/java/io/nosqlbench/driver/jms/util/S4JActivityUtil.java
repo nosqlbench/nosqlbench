@@ -17,6 +17,7 @@ package io.nosqlbench.driver.jms.util;
  * under the License.
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -269,9 +270,9 @@ public class S4JActivityUtil {
 
     ///////
     // Convert JSON string to a key/value map
-    public static Map convertJsonToMap(String jsonStr) throws Exception {
+    public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonStr, Map.class);
+        return mapper.readValue(jsonStr, new TypeReference<Map<String, String>>(){});
     }
 
     ///////
@@ -314,6 +315,32 @@ public class S4JActivityUtil {
     // Calculate a unique cache key from a series of input parameters
     public static String buildCacheKey(String... keyParts) {
         return String.join("::", keyParts);
+    }
+
+    ///////
+    // Pause the execution of the current thread
+    public static void pauseCurThreadExec(int pauseInSec) {
+        if (pauseInSec > 0) {
+            try {
+                Thread.sleep(pauseInSec * 1000);
+            }
+            catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+    }
+
+    ///////
+    // Error handling for message processing
+    public static void processMsgErrorHandling(Exception exception, boolean strictErrorHandling, String errorMsg) {
+        exception.printStackTrace();
+
+        if (strictErrorHandling) {
+            throw new RuntimeException(errorMsg + " [ " + exception.getMessage() + " ]");
+        }
+        else {
+            S4JActivityUtil.pauseCurThreadExec(1);
+        }
     }
 }
 

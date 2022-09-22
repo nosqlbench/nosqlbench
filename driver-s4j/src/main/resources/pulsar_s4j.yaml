@@ -9,7 +9,7 @@ bindings:
 # document level parameters that apply to all Pulsar client types:
 params:
   temporary_dest: "false"
-  dest_type: "topic"
+  dest_type: "queue"
   dest_name: "mys4jtest_t"
   # default: true
   async_api: "false"
@@ -17,7 +17,7 @@ params:
   # - only applies when "async_api" is false (synchronous API)
   # - only applies to message receiving
   # - default: false
-  blocking_msg_recv: "false"
+  blocking_msg_recv: "true"
 
 blocks:
   ###################
@@ -74,7 +74,7 @@ blocks:
       - name: "s1"
         optype: "msg_read"
 
-        ## (Optional) Message selector
+        ## (Optional) client side message selector
         msg_selector: ""
 
         ## (Optional) No Local
@@ -85,6 +85,37 @@ blocks:
 
         ## (Optional) Receive message without wait
         no_wait: "true"
+
+        ## (Optional) Message acknowledgement ratio
+        msg_ack_ratio: "0.5"
+
+        ## (Optional) Simulate slow consumer acknowledgement
+        # must be non-negative numbers. negative numbers will be treated as 0
+        # 0 - means no simulation
+        # positive value - the number of seconds to pause before acknowledgement
+        slow_ack_in_sec: "1"
+
+        #####
+        ## (Optional) Statement level settings for Consumer
+        #
+        ## AckTimeout value (at least 1 second)
+        consumer.ackTimeoutMillis: 1000
+
+        ## DLQ policy
+        consumer.deadLetterPolicy: '{ "maxRedeliverCount": "2" }'
+
+        ## NegativeAck Redelivery policy
+        consumer.negativeAckRedeliveryBackoff: |
+          {
+          }
+
+        ## AckTimeout Redelivery policy
+        consumer.ackTimeoutRedeliveryBackoff: |
+          {
+            "minDelayMs":"10",
+            "maxDelayMs":"20",
+            "multiplier":"1.2"
+          }
 
   ###################
   # Durable message receiver/consumer/subscriber
