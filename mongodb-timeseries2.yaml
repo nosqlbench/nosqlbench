@@ -1,0 +1,171 @@
+# Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
+# nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags='block:main.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+min_version: "4.17.24"
+
+description: |
+  This workload is analogous to the cql-timeseries2 workload, just implemented for MongoDB.
+
+scenarios:
+  default:
+    schema: run driver=mongodb tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=mongodb tags==block:"main-.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF
+
+params:
+  instrument: true
+
+bindings:
+  machine_id: Mod(TEMPLATE(sources,10000)); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mod(TEMPLATE(maxtimes,1000000000000L)); Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToDate()
+  cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200)
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+    # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+    # https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+    # https://www.mongodb.com/docs/manual/core/timeseries-collections/
+    # `clusteredIndex` only support creation of an index on `_id` field (as shown below) so its optional
+      create-collection: |
+        {
+          create: "TEMPLATE(collection,timeseries)",
+          timeseries: {
+              timeField: "time",
+              granularity: "seconds"
+          },
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Timeseries collection schema validation",
+              required: [ "machine_id", "sensor_name", "time" ],
+              properties: {
+                machine_id: {
+                  bsonType: "binData",
+                  description: "'machine_id' must be UUID, unique and is required"
+                },
+                sensor_name: {
+                  bsonType: "string",
+                  description: "'sensor_name' must be a string, unique and is required"
+                },
+                time: {
+                  bsonType: "timestamp",
+                  description: "'time' must be a timestamp, and required"
+                },
+                sensor_value: {
+                  bsonType: "double",
+                  description: "'sensor_value' must be a double"
+                },
+                station_id: {
+                  bsonType: "binData",
+                  description: "'station_id' must be a UUID"
+                },
+                data: {
+                  bsonType: "string",
+                  description: "'data' must be a string"
+                }
+              }
+            }
+          },
+          validationLevel: "strict",
+          validationAction: "error",
+          comment: "timeseries-like collection creation with strict types and required '(machine_id, sensor_name), time' field."
+        }
+      create-part-clust-index: |
+        {
+          createIndexes: "TEMPLATE(collection,timeseries)",
+          indexes: [
+            {
+              key: {
+                machine_id: 1,
+                sensor_name: 1
+              },
+              name: "ts_machine_id_sensor_name_idx",
+              unique: true
+            },
+            {
+              key: {
+                time: -1,
+              },
+              name: "tab_time_desc_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'(machine_id, sensor_name), time' index creation for timeseries collection. Values should be unique. 'time' field is sorted in DESC order.",
+          commitQuorum: "majority"
+        }
+  # UUID https://www.mongodb.com/docs/manual/reference/bson-types/#binary-data
+  # Example: https://www.tutorialspoint.com/query-bindata-by-type-in-mongodb
+  rampup:
+    ops:
+      rampup-insert: |
+        {
+          insert: "TEMPLATE(collection,timeseries)",
+          documents: [
+            {
+              machine_id: "{machine_id}",
+              sensor_name: "{sensor_name}",
+              time: BinData(4, "{time}"),
+              sensor_value: "{sensor_value}",
+              station_id: "{station_id}",
+              data: "{data}"
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "Insert documents into timeseries collection."
+        }
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,1)
+    ops:
+      select-read:
+        statement: |
+          {
+            find: "TEMPLATE(collection,timeseries)",
+            filter: { machine_id: { $eq: "{machine_id}" }, sensor_name: { $eq: "{sensor_name}" } },
+            limit: TEMPLATE(limit,10),
+            readConcern: { level: "majority" },
+            comment: "Find the value for the given 'machine_id' and 'sensor_name'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,9)
+    ops:
+      main-insert: 
+        statement: |
+          {
+            insert: "TEMPLATE(collection,timeseries)",
+            documents: [
+              {
+                machine_id: "{machine_id}",
+                sensor_name: "{sensor_name}",
+                time: BinData(4, "{time}"),
+                sensor_value: "{sensor_value}",
+                station_id: "{station_id}",
+                data: "{data}"
+              }
+            ],
+            writeConcern: { w: "majority" },
+            comment: "Insert documents into timeseries collection."
+          }
+        ratio: TEMPLATE(write_ratio,9)
+  
+  # The below drop-collection blocks expects the collection to exist or else this will fail
+  drop-collection:
+    ops:
+      drop-collection: |
+        {
+          drop: "TEMPLATE(collection,timeseries)",
+          comment: "Drop timeseries collection to start afresh."
+        }
