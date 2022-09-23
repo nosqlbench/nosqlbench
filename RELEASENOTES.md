@@ -1,16 +1,11 @@
-- 03d392fdf (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #684 from yabinmeng/nb4-maintenance
-- c8f0bdd2d ReadMe update for max_s4jop_time" and "track_msg_cnt" CLI options
-- 9196cabeb Add "max_s4jop_time" and "track_msg_cnt" CLI options - when the NB execution time exceeds "max_s4jop_time" threshold, the NB S4J becomes no-op (no message production or consumption any more) - when "track_msg_cnt" is false, don't keep track of S4J operation response count
-- 22e875e70 Merge pull request #675 from yabinmeng/nb4-maintenance
-- b6969ab9c Add "forceStop" option in NB CLI scripting. This allows shutdown the activity directly without trying to wait for the activity changes its state to stopped/finished.
-- 3e6ee8136 Merge pull request #664 from yabinmeng/nb4-maintenance
-- fb2339202 - Upgrade S4J version to 2.4.3 to pick up the latest feature addition; - Add count for received null message (consumer) - Add option for the default message receiving behavior (blocking or not) - Code cleanup
-- 9efd252bd Merge pull request #635 from yabinmeng/nb4-maintenance
-- 87086871f NB S4J: set message ack mode to be auto_ack if the NB S4J CLI "session_mode" parameter is not provided (or empty string)
-- 1be4f475a NB S4J: add support for message property value type
-- de0dd357e Add support for using a sizing function as a parameter to AlphaNumericString()
-- 77665a6cb Add document for NB S4J driver
-- a2559652f Merge pull request #627 from yabinmeng/nb4-maintenance
-- 9a944cdf3 optype typo fix and add NPE prevention during shutdown
-- b0887c3a1 Revert "optype typo fix and add NPE prevention during shutdown"
-- 5c039f8c0 optype typo fix and add NPE prevention during shutdown
+- 46b28481b (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #716 from yabinmeng/nb4-maintenance
+- 9401cd32f Update S4J version to 2.4.11
+- 5b001c9bc Fix an issue of merging consumer side DLQ policies Add Conscrypt library dependency (which will remove a big chunk of warning message when running NB S4J)
+- 6d2e05ca0 Update S4J JMS config list for sticky partitions in transaction
+- e630a80e3 Add error handling when encountering connection error during message receive and send.
+- 54e02e000 - Upgrade S4J version to 2.4.10 - Add support for DLQ policy (at both global level and testing scenario level)
+- dd32991e9 - Upgrade S4J version to 2.4.10 - Add support for DLQ policy (at both global level and testing scenario level)
+- dc0bd3317 Merge pull request #708 from yabinmeng/nb4-maintenance
+- 4c4df1b22 Upgrade S4J version to 2.4.6 Add check for JMS transaction emulation (new feature) and transaction enablement
+- 0dbbf8d3c Merge pull request #699 from yabinmeng/nb4-maintenance
+- 2632dbce9 Update CLI scripting README to add "forceStop" option

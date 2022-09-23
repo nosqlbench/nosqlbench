@@ -3,7 +3,7 @@
     <parent>
         <artifactId>nosqlbench</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.15.103-SNAPSHOT</version>
+        <version>4.15.104-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>4.15.103-SNAPSHOT</version>
+            <version>4.15.104-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
