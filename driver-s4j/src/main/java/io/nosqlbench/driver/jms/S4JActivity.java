@@ -197,15 +197,6 @@ public class S4JActivity extends SimpleActivity implements ActivityDefObserver {
             float rndVal = RandomUtils.nextFloat(0, 1);
             if (rndVal < msgAckRatio) {
                 S4JActivityUtil.pauseCurThreadExec(slowAckInSec);
-                if (slowAckInSec > 0) {
-                    try {
-                        Thread.sleep(slowAckInSec * 1000);
-                    }
-                    catch (InterruptedException ioe) {
-                        ioe.printStackTrace();
-                    }
-                }
-
                 message.acknowledge();
             }
         }
