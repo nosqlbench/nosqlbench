@@ -114,10 +114,10 @@ blocks:
           indexes: [
             {
               key: {
-                key: 1,
+                part: 1,
               },
               name: "tab_part_idx",
-              unique: true
+              unique: false
             },
             {
               key: {
