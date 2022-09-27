@@ -1,3 +1,7 @@
+# Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
+# nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 min_version: "4.17.24"
 
 description: |
@@ -7,12 +11,11 @@ scenarios:
   default:
     schema: run driver=mongodb tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=mongodb tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
-  astra:
-    schema: run driver=mongodb tags==block:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=mongodb tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=mongodb tags==block:"main-.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF
 
+params:
+  instrument: true
 bindings:
   seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString();
   seq_value: >-
@@ -28,32 +31,95 @@ blocks:
     params:
       prepared: false
     ops:
+    # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+    # https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+    # `clusteredIndex` only support creation of an index on `_id` field (as shown below) so its optional
       create-collection: |
         {
-         ...
+          create: "TEMPLATE(collection,keyvalue)",
+          clusteredIndex: {
+            key: { "_id": 1 },
+            unique: true,
+            name: "_id_idx"
+          },
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Key/Value collection schema validation",
+              required: [ "key" ],
+              properties: {
+                key: {
+                  bsonType: "string",
+                  description: "'key' must be a string and is required"
+                }
+              }
+            }
+          },
+          validationLevel: "strict",
+          validationAction: "error",
+          comment: "keyvalue collection creation with strict types and required 'key' field."
         }
-#        create keyspace if not exists TEMPLATE(keyspace,baselines)
-#        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
-#        AND durable_writes = true;
+      create-key-index: |
+        {
+          createIndexes: "TEMPLATE(collection,keyvalue)",
+          indexes: [
+            {
+              key: {
+                key: 1,
+              },
+              name: "kv_key_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'key' index creation for keyvalue collection. Values should be unique.",
+          commitQuorum: "majority"
+        }
   rampup:
     ops:
       rampup-insert: |
         {
-        ...
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{rw_key}",
+              value: "{rw_value}"
+            }
+          ],
+          comment: "Insert documents into keyvalue collection."
         }
   main-read:
     params:
       ratio: 5
-    statements:
+    ops:
       main-select: |
         {
-        ...
+          find: "TEMPLATE(collection,keyvalue)",
+          filter: { key: { $eq: "{rw_key}" } },
+          readConcern: { level: "majority" },
+          comment: "Find the value for the given 'key'."
         }
   main-write:
     params:
       ratio: 5
-    statements:
+    ops:
       main-insert: |
         {
-        ...
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{rw_key}",
+              value: "{rw_value}"
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "Insert documents into keyvalue collection."
+        }
+  drop-collection:
+    ops:
+      drop-collection: |
+        {
+          drop: "TEMPLATE(collection,keyvalue)",
+          comment: "Drop keyvalue collection to start afresh."
         }

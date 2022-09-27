@@ -1,0 +1,280 @@
+# Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
+# nb5 run driver=mongodb workload=/path/to/mongodb-tabular2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-tabular2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-tabular2.yaml tags='block:main.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+min_version: "4.17.24"
+
+description: |
+  This workload is analogous to the cql-tabular2 workload, just implemented for MongoDB.
+
+scenarios:
+  default:
+    schema: run driver=mongodb tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=mongodb tags==block:"main-.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF
+
+params:
+  instrument: true
+bindings:
+
+  # for ramp-up and verify phases
+  #
+  part_layout: Div(TEMPLATE(partsize,1000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000)); ToString() -> String
+  # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
+  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9,11)
+  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18,22)
+  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27,33)
+  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45,55)
+  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72,88)
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107,143)
+  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189,231)
+  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306,374)
+
+  # for main phase
+  # for write
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
+
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+    # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+    # https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+    # `clusteredIndex` only support creation of an index on `_id` field (as shown below) so its optional
+      create-collection: |
+        {
+          create: "TEMPLATE(collection,tabular)",
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Tabular collection schema validation",
+              required: [ "part", "clust" ],
+              properties: {
+                part: {
+                  bsonType: "string",
+                  description: "'part' must be a string, unique and is required"
+                },
+                clust: {
+                  bsonType: "string",
+                  description: "'clust' must be a string, unique and is required"
+                },
+                data0: {
+                  bsonType: "string",
+                  description: "'data0' must be a string"
+                },
+                data1: {
+                  bsonType: "string",
+                  description: "'data1' must be a string"
+                },
+                data2: {
+                  bsonType: "string",
+                  description: "'data2' must be a string"
+                },
+                data3: {
+                  bsonType: "string",
+                  description: "'data3' must be a string"
+                },
+                data4: {
+                  bsonType: "string",
+                  description: "'data4' must be a string"
+                },
+                data5: {
+                  bsonType: "string",
+                  description: "'data5' must be a string"
+                },
+                data6: {
+                  bsonType: "string",
+                  description: "'data6' must be a string"
+                },
+                data7: {
+                  bsonType: "string",
+                  description: "'data7' must be a string"
+                }
+              }
+            }
+          },
+          validationLevel: "strict",
+          validationAction: "error",
+          comment: "tabular-like collection creation with strict types and required 'part' field."
+        }
+      create-part-clust-index: |
+        {
+          createIndexes: "TEMPLATE(collection,tabular)",
+          indexes: [
+            {
+              key: {
+                part: 1,
+              },
+              name: "tab_part_idx",
+              unique: false
+            },
+            {
+              key: {
+                clust: 1,
+              },
+              name: "tab_clust_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'part' & 'clust' index creation for tabular collection. Values should be unique.",
+          commitQuorum: "majority"
+        }
+  rampup:
+    ops:
+      rampup-insert: |
+        {
+          insert: "TEMPLATE(collection,tabular)",
+          documents: [
+            {
+              part: "{part_write}",
+              clust: "{clust_write}",
+              data0: "{data0}",
+              data1: "{data1}",
+              data2: "{data2}",
+              data3: "{data3}",
+              data4: "{data4}",
+              data5: "{data5}",
+              data6: "{data6}",
+              data7: "{data7}"
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "Insert documents into tabular collection."
+        }
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,1)
+    ops:
+      main-select-all:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-01:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data0: 1, data1: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data01 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-0246:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data0: 1, data2: 1, data4: 1, data6: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data0246 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-1357:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data1: 1, data3: 1, data5: 1, data7: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data1357 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-0123:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data0: 1, data1: 1, data2: 1, data3: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data0123 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-4567:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data4: 1, data5: 1, data6: 1, data7: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data4567 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select-67:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data6: 1, data7: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data67 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+      main-select:
+        statement: |
+          {
+            find: "TEMPLATE(collection,tabular)",
+            filter: { part: { $eq: "{part_read}" } },
+            projection: { data0: 1, data1: 1, data2: 1, data3: 1, data4: 1, data5: 1, data6: 1, data7: 1 },
+            limit: {limit},
+            readConcern: { level: "majority" },
+            comment: "Find the data01234567 value for the given 'part'."
+          }
+        ratio: TEMPLATE(read_ratio,1)
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,8)
+    ops:
+      main-insert: 
+        statement: |
+          {
+            insert: "TEMPLATE(collection,tabular)",
+            documents: [
+              {
+                part: "{part_write}",
+                clust: "{clust_write}",
+                data0: "{data0}",
+                data1: "{data1}",
+                data2: "{data2}",
+                data3: "{data3}",
+                data4: "{data4}",
+                data5: "{data5}",
+                data6: "{data6}",
+                data7: "{data7}"
+              }
+            ],
+            comment: "Insert documents into tabular collection."
+          }
+        ratio: TEMPLATE(write_ratio,8)
+  
+  # The below drop-collection blocks expects the collection to exist or else this will fail
+  drop-collection:
+    ops:
+      drop-collection: |
+        {
+          drop: "TEMPLATE(collection,tabular)",
+          comment: "Drop tabular collection to start afresh."
+        }
