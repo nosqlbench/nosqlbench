@@ -1,5 +1,7 @@
-- c765fa5c8 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- bc4d58bf4 (origin/main) Merge pull request #723 from nosqlbench/snyk-upgrade-24ef0d0508fb6db9a68afe4aa0ab0fb5
+- 0f6bce0b0 (HEAD -> main) fix typo in docker push logic
+- 4c73273cb (origin/main) new function, security updates
+- c765fa5c8 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- bc4d58bf4 Merge pull request #723 from nosqlbench/snyk-upgrade-24ef0d0508fb6db9a68afe4aa0ab0fb5
 - c48682d6f Merge pull request #720 from nosqlbench/snyk-upgrade-70927e42e313c8b987deaf49b716c0ff
 - e4c66c914 Merge pull request #721 from nosqlbench/snyk-upgrade-5cdbbf77836d44e45f80484268740a32
 - 2f3c6cf21 Merge pull request #722 from nosqlbench/snyk-upgrade-bf57068aaf6d334aba2b2b81c0e184fa
