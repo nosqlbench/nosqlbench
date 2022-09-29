@@ -16,7 +16,11 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid.ToUUID;
+import io.nosqlbench.virtdata.library.basics.shared.from_uuid.ToBase64String;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +28,7 @@ public class ToBase64StringTest {
 
     @Test
     public void testApply() {
-        ToBase64String f = new ToBase64String();
+        io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.ToBase64String f = new io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.ToBase64String();
         String apply = f.apply(32144123454345L);
         assertThat(apply).isEqualTo("AAAdPCMPY4k=");
     }
@@ -35,7 +39,15 @@ public class ToBase64StringTest {
                 new io.nosqlbench.virtdata.library.basics.shared.unary_string.ToBase64String();
         String r = f.apply("four score and seven years ago");
         assertThat(r).isEqualTo("Zm91ciBzY29yZSBhbmQgc2V2ZW4geWVhcnMgYWdv");
+    }
 
+    @Test
+    public void testUuidToBase64() {
+        ToUUID toUUID = new ToUUID();
+        UUID uuid1 = toUUID.apply(1);
+        ToBase64String toBase64 = new ToBase64String();
+        String string = toBase64.apply(uuid1);
+        assertThat(string).isEqualTo("ASNFZ4mrTe+AAAAAAAAAAQ==");
     }
 
 }
