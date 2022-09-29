@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.mongodb.core;
+package io.nosqlbench.adapter.mongodb.dispensers;
 
 import com.mongodb.ReadPreference;
+import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -28,7 +29,7 @@ import org.bson.conversions.Bson;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MongoCommandOpDispenser extends BaseOpDispenser<Op,MongoSpace> {
+public class MongoCommandOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
     private final LongFunction<MongoDirectCommandOp> opFunc;
     private final LongFunction<MongoDirectCommandOp> mongoOpF;
 

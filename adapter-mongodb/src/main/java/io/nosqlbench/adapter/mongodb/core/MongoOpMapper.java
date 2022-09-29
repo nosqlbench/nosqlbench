@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.mongodb.core;
 
+import io.nosqlbench.adapter.mongodb.dispensers.MongoCommandOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
