@@ -108,7 +108,6 @@ public class S4JMsgReadOp extends S4JTimeTrackOp {
                         byte[] recvdMsgBody = recvdMsg.getBody(byte[].class);
                         int messageSize = recvdMsgBody.length;
 
-
                         bytesCounter.inc(messageSize);
                         messageSizeHistogram.update(messageSize);
 

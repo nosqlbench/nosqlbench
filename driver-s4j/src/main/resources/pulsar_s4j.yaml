@@ -93,7 +93,7 @@ blocks:
         # must be non-negative numbers. negative numbers will be treated as 0
         # 0 - means no simulation
         # positive value - the number of seconds to pause before acknowledgement
-        slow_ack_in_sec: "1"
+        slow_ack_in_sec: "0"
 
         #####
         ## (Optional) Statement level settings for Consumer

@@ -353,7 +353,7 @@ public class S4JMsgSendMapper extends S4JOpMapper {
         try {
             message = updateMessageProperties(message, jmsMsgPropertyRawJsonStr);
             // for testing purpose
-            message.setStringProperty(S4JActivityUtil.NB_MSG_SEQ_PROP, String.valueOf(value));
+            message.setLongProperty(S4JActivityUtil.NB_MSG_SEQ_PROP, value);
         }
         catch (JMSException jmsException) {
             throw new S4JDriverUnexpectedException("Failed to set JMS message properties!");
