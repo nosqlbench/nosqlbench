@@ -1,28 +1,26 @@
-- 0068467a6 (HEAD -> main) robustify tests which share state
-- 1894716bd minor naming updates
-- 019348118 stub mongodb-keyvalue
-- 3304b1d8d improve findmax, stepup analysis methods
-- 8d94cc7dd (origin/main) partial fix for stubbed sstablegen functionality
-- cd4435324 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 22a144187 Merge pull request #706 from derrickCos/compaction-test
-- 20c4d3b98 Merge pull request #710 from nosqlbench/snyk-fix-40c2b869130ffedc8106dfda369832f4
-- a1e3e2da7 Merge pull request #709 from nosqlbench/snyk-fix-4a778abad3350a18b2012b95e4154ac6
-- 4331febf7 Merge pull request #705 from nosqlbench/snyk-upgrade-d1413d56ae34c358fd13ecf9e86193c3
-- c274ebca3 Merge pull request #704 from nosqlbench/snyk-upgrade-fc24542c5ed484ecfad64ede334dbeac
-- afa08b18f Merge pull request #703 from nosqlbench/snyk-upgrade-2c9700e824a1bffa66b8b6ea5fc78705
-- ce0e48a85 Merge pull request #702 from nosqlbench/snyk-upgrade-66b43759609d17e873a37bd33c4d2d97
-- 3eb88ea82 Merge pull request #700 from weideng1/patch-2
-- dc10d9f50 MongoDB adapter improvements
-- 5b830cfa2 more accurate var names
-- fa1ae8c26 package cleanup
-- 30214f857 reorder ANSI codes for clarity, fix reset
-- 69255d5e7 remove graaljs compat flag
-- 7a83f2779 remove phases
-- bbf08ab48 make token filler thread more aggressive
-- ba4c98f5b fix case fallthrough bug reducing extraneous threads
-- 042f1f8d2 add javadocs
-- 769426600 reduce wait duration for potential long blocking
-- 6d389da5a tag implemented interface
-- bb27e5036 npe fix for value conversion
-- bc3eddbb5 (origin/snyk-fix-40c2b869130ffedc8106dfda369832f4) fix: mvn-defaults/pom.xml to reduce vulnerabilities
-- 568703b92 (origin/snyk-fix-4a778abad3350a18b2012b95e4154ac6) fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- c765fa5c8 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- bc4d58bf4 (origin/main) Merge pull request #723 from nosqlbench/snyk-upgrade-24ef0d0508fb6db9a68afe4aa0ab0fb5
+- c48682d6f Merge pull request #720 from nosqlbench/snyk-upgrade-70927e42e313c8b987deaf49b716c0ff
+- e4c66c914 Merge pull request #721 from nosqlbench/snyk-upgrade-5cdbbf77836d44e45f80484268740a32
+- 2f3c6cf21 Merge pull request #722 from nosqlbench/snyk-upgrade-bf57068aaf6d334aba2b2b81c0e184fa
+- 394f202ba Merge pull request #724 from nosqlbench/snyk-upgrade-6e1404b6aa6bc329c7bcea408f043744
+- 17500b921 add UUID -> ToBase64String() -> String
+- 339e507c5 move mapper to correct package
+- d5710c9c0 Merge pull request #725 from nosqlbench/feature/mongodb_baselines2_workloads
+- 463ee5845 remove stale mention of netlify
+- 3125ffc3a Revert "Initial Draft" These files are in the wrong location. We need to move them to the src/main/resources/activities/baselinesv2 directory of the mongodb driver
+- 4b3270405 (origin/feature/mongodb_baselines2_workloads) Initial Draft. Added a fully working tabular example for MongoDB
+- 9b7c1f457 (origin/snyk-upgrade-6e1404b6aa6bc329c7bcea408f043744) fix: upgrade org.glassfish.jersey.core:jersey-common from 3.0.7 to 3.0.8
+- 68e7426c9 (origin/snyk-upgrade-24ef0d0508fb6db9a68afe4aa0ab0fb5) fix: upgrade org.glassfish.jersey.media:jersey-media-json-jackson from 3.0.5 to 3.0.8
+- b1e492723 (origin/snyk-upgrade-bf57068aaf6d334aba2b2b81c0e184fa) fix: upgrade org.snakeyaml:snakeyaml-engine from 2.3 to 2.4
+- 80f01f226 (origin/snyk-upgrade-5cdbbf77836d44e45f80484268740a32) fix: upgrade io.netty:netty-handler from 4.1.79.Final to 4.1.80.Final
+- 43a6664aa (origin/snyk-upgrade-70927e42e313c8b987deaf49b716c0ff) fix: upgrade joda-time:joda-time from 2.11.0 to 2.11.1
+- adb218e57 Merge pull request #719 from nosqlbench/feature/mongodb_baselines2_workloads
+- 763766752 Merge pull request #711 from nosqlbench/snyk-upgrade-832d042525b896d8c5bdea4cfa038503
+- 88f1c11e9 Merge pull request #712 from nosqlbench/snyk-upgrade-cd54a5f5384f6434eb6cdb3734499b01
+- 98819bebb Merge pull request #713 from nosqlbench/snyk-upgrade-d59c5288e96e4610c35d0097c53e8c21
+- f4430dd04 Merge pull request #714 from nosqlbench/snyk-upgrade-4be4c799389574d9439fc17c3c3ae1ea
+- 5d1db68dd Merge pull request #715 from nosqlbench/snyk-upgrade-b9671a988288eddc74578efe5efaaded
+- 98e8ee2bb Merge pull request #717 from nosqlbench/snyk-fix-ab6fb7c3d316f2bce461a6aa09ef6ba7
+- 30dedfb7d Merge pull request #718 from nosqlbench/snyk-fix-da2e6c00d64d760e034fcdc7b31e9d53
+- 74a0519e0 Initial Draft
