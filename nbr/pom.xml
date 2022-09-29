@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.29-SNAPSHOT</version>
+        <version>4.17.29</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -40,37 +40,37 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-rest</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-cli</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docs</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-extensions</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
-            <version>4.17.29-SNAPSHOT</version>
+            <version>4.17.29</version>
         </dependency>
     </dependencies>
 
