@@ -45,13 +45,29 @@ public class ScenarioErrorHandler {
     private final static Logger logger = LogManager.getLogger("ERRORHANDLER");
 
     public static String handle(Throwable t, boolean wantsStackTraces) {
+        if (wantsStackTraces) {
+            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+
+            for (int i = 0; i < 10; i++) {
+                if (st.length>i) {
+                    String className = st[i].getClassName();
+                    String fileName = st[i].getFileName();
+                    int lineNumber = st[i].getLineNumber();
+                    logger.trace("st["+i+"]:" + className +","+fileName+":"+lineNumber);
+                }
+            }
+        }
         if (t instanceof ScriptException) {
+            logger.trace("Handling script exception: " + t);
             return handleScriptException((ScriptException) t, wantsStackTraces);
         } else if (t instanceof BasicError) {
+            logger.trace("Handling basic error: " + t);
             return handleBasicError((BasicError) t, wantsStackTraces);
         } else if (t instanceof Exception){
+            logger.trace("Handling general exception: " + t);
             return handleInternalError((Exception) t, wantsStackTraces);
         } else {
+          logger.error("Unknown type for error handler: " + t);
           throw new RuntimeException("Error in exception handler", t);
         }
     }

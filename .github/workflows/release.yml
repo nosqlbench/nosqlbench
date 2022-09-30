@@ -256,6 +256,14 @@ jobs:
           asset_name: nb5
           asset_content_type: application/octet-stream
 
+      - name: Archive Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            [a-zA-Z]**/logs/*
+
   javadocs:
     needs: release
     runs-on: ubuntu-20.04
@@ -278,6 +286,7 @@ jobs:
           repository: nosqlbench/nosqlbench-javadoc
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
+
 
 #  docs:
 #    needs: release
