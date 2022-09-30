@@ -2,7 +2,11 @@
 # nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-timeseries2.yaml tags='block:main.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
-min_version: "4.17.24"
+
+# https://www.mongodb.com/community/forums/t/how-to-store-a-uuid-with-binary-subtype-0x04-using-the-mongodb-java-driver/13184
+# https://www.mongodb.com/community/forums/t/problem-inserting-uuid-field-with-binary-subtype-via-atlas-web-ui/1071/4
+# https://www.mongodb.com/community/forums/t/timeseries-last-x-documents/186574/5
+min_version: "4.17.29"
 
 description: |
   This workload is analogous to the cql-timeseries2 workload, just implemented for MongoDB.
@@ -18,16 +22,86 @@ params:
   instrument: true
 
 bindings:
-  machine_id: Mod(TEMPLATE(sources,10000)); ToHashedUUID() -> java.util.UUID
+  machine_id: Mod(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000); ToUUID(); ToBase64String()
   sensor_name: HashedLineToString('data/variable_words.txt')
-  time: Mod(TEMPLATE(maxtimes,1000000000000L)); Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToDate()
+  time: Mul(TEMPLATE(timespace,600000)L); StartingEpochMillis('1985-10-29 00:00:00')
   cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
   sensor_value: Normal(0.0,5.0); Add(100.0) -> double
-  station_id: Div(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000); ToHashedUUID() -> java.util.UUID
+  station_id: Mod(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000); ToUUID(); ToBase64String()
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200)
 
 blocks:
   schema:
+    params:
+      prepared: false
+    ops:
+    # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+      create-collection: |
+        {
+          create: "TEMPLATE(collection,timeseries)",
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Timeseries collection schema validation",
+              required: [ "machine_id", "sensor_name", "time" ],
+              properties: {
+                machine_id: {
+                  bsonType: "binData",
+                  description: "'machine_id' must be UUID, unique and is required"
+                },
+                sensor_name: {
+                  bsonType: "string",
+                  description: "'sensor_name' must be a string, unique and is required"
+                },
+                time: {
+                  bsonType: "timestamp",
+                  description: "'time' must be a timestamp, and required"
+                },
+                sensor_value: {
+                  bsonType: "double",
+                  description: "'sensor_value' must be a double"
+                },
+                station_id: {
+                  bsonType: "binData",
+                  description: "'station_id' must be a UUID"
+                },
+                data: {
+                  bsonType: "string",
+                  description: "'data' must be a string"
+                }
+              }
+            }
+          },
+          validationLevel: "strict",
+          validationAction: "error",
+          comment: "timeseries-like collection creation with strict types and required '(machine_id, sensor_name), time' field."
+        }
+      create-primary-key-index: |
+        {
+          createIndexes: "TEMPLATE(collection,timeseries)",
+          indexes: [
+            {
+              key: {
+                machine_id: 1,
+                sensor_name: 1
+              },
+              name: "ts_machine_id_sensor_name_idx",
+              unique: false
+            },
+            {
+              key: {
+                time: -1,
+              },
+              name: "tab_time_desc_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'(machine_id, sensor_name), time' index creation for timeseries collection. Values should be unique. 'time' field is sorted in DESC order.",
+          commitQuorum: "majority"
+        }
+  schema-with-validation-and-index:
     params:
       prepared: false
     ops:
@@ -106,23 +180,33 @@ blocks:
         }
   # UUID https://www.mongodb.com/docs/manual/reference/bson-types/#binary-data
   # Example: https://www.tutorialspoint.com/query-bindata-by-type-in-mongodb
+  # https://groups.google.com/g/mongodb-user/c/LLKWJ37Yb2M?pli=1
   rampup:
     ops:
+      # time: BinData(4, "{time}"),
       rampup-insert: |
         {
           insert: "TEMPLATE(collection,timeseries)",
           documents: [
             {
-              machine_id: "{machine_id}",
+              machine_id: { "$binary": {
+                  "base64": "{machine_id}",
+                  "subType": "4"
+                }
+              },
               sensor_name: "{sensor_name}",
-              time: BinData(4, "{time}"),
-              sensor_value: "{sensor_value}",
-              station_id: "{station_id}",
+              time: {"$timestamp": {"t": {time}, "i": 0}},
+              sensor_value: {"$numberDouble":"{sensor_value}"},
+              station_id: { "$binary": {
+                  "base64": "{station_id}",
+                  "subType": "4"
+                }
+              },
               data: "{data}"
             }
           ],
           writeConcern: { w: "majority" },
-          comment: "Insert documents into timeseries collection."
+          comment: "Insert documents into a timeseries collection."
         }
   main-read:
     params:
@@ -148,16 +232,24 @@ blocks:
             insert: "TEMPLATE(collection,timeseries)",
             documents: [
               {
-                machine_id: "{machine_id}",
+                machine_id: { "$binary": {
+                    "base64": "{machine_id}",
+                    "subType": "4"
+                  }
+                },
                 sensor_name: "{sensor_name}",
-                time: BinData(4, "{time}"),
-                sensor_value: "{sensor_value}",
-                station_id: "{station_id}",
+                time: {"$timestamp": {"t": {time}, "i": 0}},
+                sensor_value: {"$numberDouble":"{sensor_value}"},
+                station_id: { "$binary": {
+                    "base64": "{station_id}",
+                    "subType": "4"
+                  }
+                },
                 data: "{data}"
               }
             ],
             writeConcern: { w: "majority" },
-            comment: "Insert documents into timeseries collection."
+            comment: "Insert documents into a timeseries collection."
           }
         ratio: TEMPLATE(write_ratio,9)
   
