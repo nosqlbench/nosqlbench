@@ -1,3 +1,12 @@
-- ec8e6ee71 (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 114aea71b (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 0fd85c09b (origin/main) Merge pull request #728 from nosqlbench/feature/mongodb_baselines2_workloads
+- 99f0226fc Merge pull request #729 from nosqlbench/snyk-upgrade-2d988862477c7e76f15ff8b65bcdc3a4
+- d22413259 Merge pull request #727 from nosqlbench/snyk-upgrade-b28610be666fa7e80936b0c2f87df569
+- d49a5087d improved build diagnostics
+- e594aab92 (origin/snyk-upgrade-2d988862477c7e76f15ff8b65bcdc3a4) fix: upgrade com.datastax.oss:pulsar-jms from 2.4.4 to 2.4.9
+- 64990c412 (origin/feature/mongodb_baselines2_workloads) Initial working draft of MongoDB timeseries
+- 7ebb16a06 (origin/snyk-upgrade-b28610be666fa7e80936b0c2f87df569) fix: upgrade org.postgresql:postgresql from 42.4.2 to 42.5.0
+- 68cdd075b new function, security updates, actions fix
+- ec8e6ee71 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - a63fa951c actions fix release
 - 0f6bce0b0 fix typo in docker push logic
