@@ -2,7 +2,7 @@
 # nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
-min_version: "4.17.29"
+min_version: "4.17.30"
 
 description: |
   This workload is analogous to the cql-keyvalue2 workload, just implemented for MongoDB.
