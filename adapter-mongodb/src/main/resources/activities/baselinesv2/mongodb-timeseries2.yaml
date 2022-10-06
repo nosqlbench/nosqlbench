@@ -6,7 +6,7 @@
 # https://www.mongodb.com/community/forums/t/how-to-store-a-uuid-with-binary-subtype-0x04-using-the-mongodb-java-driver/13184
 # https://www.mongodb.com/community/forums/t/problem-inserting-uuid-field-with-binary-subtype-via-atlas-web-ui/1071/4
 # https://www.mongodb.com/community/forums/t/timeseries-last-x-documents/186574/5
-min_version: "4.17.29"
+min_version: "4.17.30"
 
 description: |
   This workload is analogous to the cql-timeseries2 workload, just implemented for MongoDB.
