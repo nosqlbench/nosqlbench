@@ -80,7 +80,7 @@ handler list which has the default wildcard error matcher.
 A handler definition is thus comprised of the error matching patterns and
 the error handling verbs which should be applied when an error matches the
 patterns. If the error matching patterns are not provided, then the
-default wildcard pattern and delimtiter `.*:`is automatically prepended.
+default wildcard pattern and delimiter `.*:`is automatically prepended.
 
 ### Error Pattern Formats
 
@@ -98,15 +98,15 @@ commas. Alternately, handler verbs may be blocks of JSON or other standard
 NoSQLBench encoding formats, as long as they are protected by quotes:
 
     # basic verb -only form
-    count,warn
+    counter,warn
 
     # using JSON
-    "{\"handler\"=\"count\"},{\"handler\"=\"warn\"}"
+    "{\"handler\"=\"counter\"},{\"handler\"=\"warn\"}"
 
     # using simplified params form
-    "handler=count,handler=warn,handler=code code=42"
+    "handler=counter,handler=warn,handler=code code=42"
 
-This shows that handler verbs are really just short-hand for more
+This shows that handler verbs are really just shorthand for more
 canonical object definitions which have their own properties. The handler
 property is the one that select which handler implementation to use. Each
 handler implementation may have its own options. Those will be documented

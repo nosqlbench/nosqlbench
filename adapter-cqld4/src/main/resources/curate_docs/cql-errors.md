@@ -72,8 +72,8 @@ This is the error handler stack:
   these histos is how long the operation was pending before the related
   error occurred.
 - **count** - keep a count in metrics for the exception, under the name
-  errorcounts.classname, using the simple class name.
-- **counter** - same as **count**, added for compatibility with the newer
+  errorcounts.classname, using the simple class name.  Starting with v4.17 onward, use **counter**.
+- **counter** - same as **count**, starting with v4.17 onward, added for compatibility with the newer
   universal error handler. This one is the preferred name.
 - **ignore** - do nothing, do not even retry or count
 
