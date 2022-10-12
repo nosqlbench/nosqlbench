@@ -16,8 +16,12 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers;
 
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
 import io.nosqlbench.nb.annotations.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
  * This is here to allow the classic name 'count' to work although the
@@ -25,4 +29,12 @@ import io.nosqlbench.nb.annotations.Service;
  */
 @Service(value = ErrorHandler.class, selector = "count")
 public class CountErrorHandler extends CounterErrorHandler {
+
+    private static final Logger logger = LogManager.getLogger(CountErrorHandler.class);
+
+    @Override
+    public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
+        logger.warn("Starting with v4.17 onward, use 'counter'.  See cql-errors.md for usage.");
+        return super.handleError(name, t, cycle, durationInNanos, detail);
+    }
 }
