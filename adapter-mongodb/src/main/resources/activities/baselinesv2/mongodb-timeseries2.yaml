@@ -93,7 +93,7 @@ blocks:
               key: {
                 time: -1,
               },
-              name: "tab_time_desc_idx",
+              name: "ts_time_desc_idx",
               unique: true
             }
           ],
