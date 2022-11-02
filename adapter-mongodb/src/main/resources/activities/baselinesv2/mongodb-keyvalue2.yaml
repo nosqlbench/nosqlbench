@@ -52,13 +52,17 @@ blocks:
                 key: {
                   bsonType: "string",
                   description: "'key' must be a string and is required"
+                },
+                value: {
+                  bsonType: "string",
+                  description: "'value' must be a string and is optional but, recommended"
                 }
               }
             }
           },
           validationLevel: "strict",
           validationAction: "error",
-          comment: "keyvalue collection creation with strict types and required 'key' field."
+          comment: "keyvalue collection creation with strict types and a required 'key' field."
         }
       create-key-index: |
         {
