@@ -32,6 +32,7 @@ import io.nosqlbench.api.engine.util.SSLKsFactory;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +45,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Cqld4Space {
+public class Cqld4Space implements Shutdownable {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
     private final String space;
 
@@ -299,4 +300,8 @@ public class Cqld4Space {
 
     }
 
+    @Override
+    public void shutdown() {
+        this.getSession().close();
+    }
 }

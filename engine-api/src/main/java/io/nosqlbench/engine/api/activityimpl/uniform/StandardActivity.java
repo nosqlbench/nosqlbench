@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
@@ -169,4 +170,12 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         return opTemplates;
     }
 
+    @Override
+    public void shutdownActivity() {
+        adapters.forEach((name, adapter) -> {
+            if (adapter instanceof Shutdownable shutdownable) {
+                shutdownable.shutdown();
+            }
+        });
+    }
 }

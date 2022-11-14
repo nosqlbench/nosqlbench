@@ -17,9 +17,12 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +32,8 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable, NBReconfigurable {
+public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable, NBReconfigurable, Shutdownable {
+    private final static Logger logger = LogManager.getLogger("ADAPTER");
 
     private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
@@ -180,5 +184,15 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
         LongFunction<String> spaceNameF = pop.getAsFunctionOr("space", "default");
         DriverSpaceCache<? extends S> cache = getSpaceCache();
         return l -> getSpaceCache().get(spaceNameF.apply(l));
+    }
+
+    @Override
+    public void shutdown() {
+        spaceCache.getElements().forEach((spacename,space) -> {
+            if (space instanceof Shutdownable shutdownable) {
+                logger.trace("Shutting down space '" + spacename +"'");
+                shutdownable.shutdown();
+            }
+        });
     }
 }
