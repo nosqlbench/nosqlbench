@@ -29,3 +29,4 @@ print("started logging to logs/histostats.csv for all metrics at 1/2" +
 scenario.start(activitydef);
 scenario.waitMillis(4000);
 scenario.stop(activitydef);
+
