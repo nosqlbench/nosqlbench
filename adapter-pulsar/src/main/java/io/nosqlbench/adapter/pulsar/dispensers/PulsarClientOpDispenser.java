@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.pulsar.client.api.PulsarClient;
@@ -28,13 +30,28 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
     protected final PulsarClient pulsarClient;
     protected final Schema<?> pulsarSchema;
 
+    protected final LongFunction<Boolean> useTransactFunc;
+    protected final LongFunction<Integer> transactBatchNumFunc;
+    protected final LongFunction<Boolean> seqTrackingFunc;
+
     public PulsarClientOpDispenser(DriverAdapter adapter,
                                    ParsedOp op,
                                    LongFunction<String> tgtNameFunc,
-                                   PulsarClient pulsarClient,
-                                   Schema<?> pulsarSchema) {
-        super(adapter, op, tgtNameFunc);
-        this.pulsarClient = pulsarClient;
-        this.pulsarSchema = pulsarSchema;
+                                   PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
+        this.pulsarClient = pulsarSpace.getPulsarClient();
+        this.pulsarSchema = pulsarSpace.getPulsarSchema();
+
+        // Doc-level parameter: use_transaction
+        this.useTransactFunc = lookupStaticBoolConfigValueFunc(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label, false);
+
+        // Doc-level parameter: transact_batch_num
+        this.transactBatchNumFunc = lookupStaticIntOpValueFunc(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.TRANSACT_BATCH_NUM.label, 1);
+
+        // Doc-level parameter: seq_tracking
+        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
     }
 }

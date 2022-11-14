@@ -22,4 +22,8 @@ public class PulsarAdapterInvalidParamException extends RuntimeException {
     public PulsarAdapterInvalidParamException(String paramName, String errDesc) {
         super("Invalid setting for parameter (" + paramName + "): " + errDesc);
     }
+
+    public PulsarAdapterInvalidParamException(String fullErrDesc) {
+        super(fullErrDesc);
+    }
 }

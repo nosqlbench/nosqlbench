@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminNamespaceOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -28,8 +29,8 @@ public class AdminNamespaceOpDispenser extends PulsarAdminOpDispenser {
     public AdminNamespaceOpDispenser(DriverAdapter adapter,
                                      ParsedOp op,
                                      LongFunction<String> tgtNameFunc,
-                                     PulsarAdmin pulsarAdmin) {
-        super(adapter, op, tgtNameFunc, pulsarAdmin);
+                                     PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
     }
 
     @Override

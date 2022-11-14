@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.dispensers.*;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnsupportedOpException;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -36,24 +37,23 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
     private final static Logger logger = LogManager.getLogger(PulsarOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends PulsarSpace> cache;
+    private final DriverSpaceCache<? extends PulsarSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public PulsarOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends PulsarSpace> cache) {
+    public PulsarOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends PulsarSpace> spaceCache) {
         this.cfg = cfg;
-        this.cache = cache;
+        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<? extends PulsarOp> apply(ParsedOp op) {
-        String space = op.getStaticConfigOr("space", "default");
+        String spaceName = op.getStaticConfigOr("space", "default");
+        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
 
-        PulsarClient pulsarClient = cache.get(space).getPulsarClient();
-        PulsarAdmin pulsarAdmin = cache.get(space).getPulsarAdmin();
-        Schema<?> pulsarSchema = cache.get(space).getPulsarSchema();
-
-
+        PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
+        PulsarAdmin pulsarAdmin = pulsarSpace.getPulsarAdmin();
+        Schema<?> pulsarSchema = pulsarSpace.getPulsarSchema();
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -66,19 +66,25 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
         else {
             TypeAndTarget<PulsarOpType, String> opType = op.getTypeAndTarget(PulsarOpType.class, String.class);
 
+            if (PulsarOpType.isValidPulsarOpType(opType.enumId.label)) {
+                throw new PulsarAdapterUnsupportedOpException(
+                    "Unrecognized Pulsar Adapter Op Type -- must be one of the following values: \"" +
+                        PulsarOpType.getValidPulsarOpTypeList() + "\"!");
+            }
+
             return switch (opType.enumId) {
                 case AdminTenant ->
-                    new AdminTenantOpDispenser(adapter, op, opType.targetFunction, pulsarAdmin);
+                    new AdminTenantOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case AdminNamespace ->
-                    new AdminNamespaceOpDispenser(adapter, op, opType.targetFunction, pulsarAdmin);
+                    new AdminNamespaceOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case AdminTopic ->
-                    new AdminTopicOpDispenser(adapter, op, opType.targetFunction, pulsarAdmin);
+                    new AdminTopicOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case MessageProduce ->
-                    new MessageProducerOpDispenser(adapter, op, opType.targetFunction, pulsarClient, pulsarSchema);
+                    new MessageProducerOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case MessageConsume ->
-                    new MessageConsumerOpDispenser(adapter, op, opType.targetFunction, pulsarClient, pulsarSchema);
+                    new MessageConsumerOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case MessageRead ->
-                    new MessageReaderOpDispenser(adapter, op, opType.targetFunction, pulsarClient, pulsarSchema);
+                    new MessageReaderOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
             };
         }
     }

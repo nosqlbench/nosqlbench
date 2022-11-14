@@ -83,6 +83,15 @@ public class ActivityMetrics {
         return metric;
     }
 
+    private static Metric register(String fullMetricName, MetricProvider metricProvider) {
+        Metric metric = get().getMetrics().get(fullMetricName);
+        if (metric == null) {
+            metric = metricProvider.getMetric();
+            return get().register(fullMetricName, metric);
+        }
+        return metric;
+    }
+
     private static Metric register(ScriptContext context, String name, MetricProvider metricProvider) {
         Metric metric = get().getMetrics().get(name);
         if (metric == null) {
@@ -185,6 +194,11 @@ public class ActivityMetrics {
         return (Counter) register(named, name, Counter::new);
     }
 
+    public static Counter counter(String fullName) {
+        Counter counter = get().register(fullName, new Counter());
+        return counter;
+    }
+
     /**
      * <p>Create a meter associated with an activity.</p>
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
@@ -213,6 +227,10 @@ public class ActivityMetrics {
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBNamedElement named, String name, Gauge<T> gauge) {
         return (Gauge<T>) register(named, name, () -> gauge);
+    }
+
+    public static <T> Gauge<T> gauge(String fullMetricsName, Gauge<T> gauge) {
+        return (Gauge<T>) register(fullMetricsName, () -> gauge);
     }
 
     @SuppressWarnings("unchecked")

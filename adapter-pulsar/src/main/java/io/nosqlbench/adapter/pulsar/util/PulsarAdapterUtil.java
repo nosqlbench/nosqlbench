@@ -36,34 +36,6 @@ public class PulsarAdapterUtil {
 
     private final static Logger logger = LogManager.getLogger(PulsarAdapterUtil.class);
 
-    // Supported message operation types
-    // TODO: websocket-producer and managed-ledger
-    public enum OP_TYPES {
-        ADMIN_TENANT("admin-tenant"),
-        ADMIN_NAMESPACE("admin-namespace"),
-        ADMIN_TOPIC("admin-topic"),
-        E2E_MSG_PROC_SEND("e22-msg-proc-send"),
-        E2E_MSG_PROC_CONSUME("e22-msg-proc-consume"),
-//        BATCH_MSG_SEND_START("batch-msg-send-start"),
-//        BATCH_MSG_SEND("batch-msg-send"),
-//        BATCH_MSG_SEND_END("batch-msg-send-end"),
-        MSG_SEND("msg-send"),
-        MSG_CONSUME("msg-consume"),
-        MSG_READ("msg-read"),
-        MSG_MULTI_CONSUME("msg-mt-consume");
-
-        public final String label;
-
-        OP_TYPES(String label) {
-            this.label = label;
-        }
-    }
-
-
-    public static boolean isValidClientType(String type) {
-        return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-
     public static final String MSG_SEQUENCE_NUMBER = "sequence_number";
 
     ///////
@@ -72,8 +44,10 @@ public class PulsarAdapterUtil {
         TOPIC_URI("topic_uri"),
         ASYNC_API("async_api"),
         USE_TRANSACTION("use_transaction"),
+        TRANSACT_BATCH_NUM("transact_batch_num"),
         ADMIN_DELOP("admin_delop"),
         SEQ_TRACKING("seq_tracking"),
+        RTT_TRACKING_FIELD("payload_traking_field"),
         MSG_DEDUP_BROKER("msg_dedup_broker"),
         E2E_STARTING_TIME_SOURCE("e2e_starting_time_source");
 

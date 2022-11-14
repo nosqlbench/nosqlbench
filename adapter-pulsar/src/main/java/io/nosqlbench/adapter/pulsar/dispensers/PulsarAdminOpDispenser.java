@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.pulsar.client.admin.PulsarAdmin;
@@ -30,11 +32,12 @@ public abstract class PulsarAdminOpDispenser extends PulsarBaseOpDispenser {
     public PulsarAdminOpDispenser(DriverAdapter adapter,
                                   ParsedOp op,
                                   LongFunction<String> tgtNameFunc,
-                                  PulsarAdmin pulsarAdmin) {
-        super(adapter, op, tgtNameFunc);
-        this.pulsarAdmin = pulsarAdmin;
+                                  PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
+        this.pulsarAdmin = pulsarSpace.getPulsarAdmin();
 
-        // Creating admin objects (tenant, namespace, topic) is the default
-        this.adminDelOpFunc = lookupStaticBoolConfigValueFunc("admin_delop", false);
+        // Doc-level parameter: admin_delop
+        this.adminDelOpFunc = lookupStaticBoolConfigValueFunc(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.ADMIN_DELOP.label, false);
     }
 }

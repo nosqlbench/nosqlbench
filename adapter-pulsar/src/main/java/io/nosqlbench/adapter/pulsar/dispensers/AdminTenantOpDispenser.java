@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminTenantOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -31,8 +32,8 @@ public class AdminTenantOpDispenser extends PulsarAdminOpDispenser {
     public AdminTenantOpDispenser(DriverAdapter adapter,
                                   ParsedOp op,
                                   LongFunction<String> tgtNameFunc,
-                                  PulsarAdmin pulsarAdmin) {
-        super(adapter, op, tgtNameFunc, pulsarAdmin);
+                                  PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
 
         adminRolesFunc = lookupStaticStrSetOpValueFunc("admin_roles");
         allowedClustersFunc = lookupStaticStrSetOpValueFunc("allowed_clusters");

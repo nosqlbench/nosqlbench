@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.MessageProducerOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -29,9 +30,8 @@ public class MessageProducerOpDispenser extends PulsarClientOpDispenser {
     public MessageProducerOpDispenser(DriverAdapter adapter,
                                       ParsedOp op,
                                       LongFunction<String> tgtNameFunc,
-                                      PulsarClient pulsarClient,
-                                      Schema<?> pulsarSchema) {
-        super(adapter, op, tgtNameFunc, pulsarClient, pulsarSchema);
+                                      PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
     }
 
     @Override

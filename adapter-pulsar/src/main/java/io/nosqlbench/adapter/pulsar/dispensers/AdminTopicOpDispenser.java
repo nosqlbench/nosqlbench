@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminTopicOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -31,8 +32,8 @@ public class AdminTopicOpDispenser extends PulsarAdminOpDispenser {
     public AdminTopicOpDispenser(DriverAdapter adapter,
                                  ParsedOp op,
                                  LongFunction<String> tgtNameFunc,
-                                 PulsarAdmin pulsarAdmin) {
-        super(adapter, op, tgtNameFunc, pulsarAdmin);
+                                 PulsarSpace pulsarSpace) {
+        super(adapter, op, tgtNameFunc, pulsarSpace);
 
         // Non-partitioned topic is default
         enablePartFunc = lookupStaticBoolConfigValueFunc("enable_partition", false);

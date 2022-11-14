@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
 
-@Service(value = DriverAdapter.class, selector = "pulsar-nb5", maturity = Maturity.Experimental)
+@Service(value = DriverAdapter.class, selector = "pulsar")
 public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace> {
 
     private final static Logger logger = LogManager.getLogger(PulsarDriverAdapter.class);

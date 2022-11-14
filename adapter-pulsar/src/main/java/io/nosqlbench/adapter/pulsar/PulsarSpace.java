@@ -16,25 +16,28 @@
 
 package io.nosqlbench.adapter.pulsar;
 
+import com.codahale.metrics.Gauge;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.adapter.pulsar.util.PulsarNBClientConf;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminBuilder;
-import org.apache.pulsar.client.api.ClientBuilder;
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.PulsarClientException;
-import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class PulsarSpace {
 
@@ -57,7 +60,6 @@ public class PulsarSpace {
 
         this.pulsarSvcUrl = cfg.get("service_url");
         this.webSvcUrl = cfg.get("web_url");
-
         this.pulsarNBClientConf = new PulsarNBClientConf(cfg.get("config"));
 
         initPulsarAdminAndClientObj();
@@ -178,7 +180,7 @@ public class PulsarSpace {
         // this is to allow KEY_VALUE schema
         if (pulsarNBClientConf.hasSchemaConfKey("schema.key.type")) {
             Schema<?> pulsarKeySchema = buildSchemaFromDefinition("schema.key.type", "schema.key.definition");
-            Object encodingType =  pulsarNBClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
+            Object encodingType = pulsarNBClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
             KeyValueEncodingType keyValueEncodingType = KeyValueEncodingType.SEPARATED;
             if (encodingType != null) {
                 keyValueEncodingType = KeyValueEncodingType.valueOf(encodingType.toString());
