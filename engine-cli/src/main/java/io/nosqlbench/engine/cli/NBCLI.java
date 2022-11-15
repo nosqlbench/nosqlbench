@@ -91,7 +91,7 @@ public class NBCLI implements Function<String[], Integer> {
             int statusCode = cli.apply(args);
             System.exit(statusCode);
         } catch (Exception e) {
-
+            System.out.println("Not expected issue in main: " + e.getMessage());
         }
     }
     /**
@@ -99,7 +99,7 @@ public class NBCLI implements Function<String[], Integer> {
      *     }
      *
      *     public static void main(String[] args) {
-     * @param strings
+     * @param args
      * @return
      */
     @Override
@@ -117,7 +117,7 @@ public class NBCLI implements Function<String[], Integer> {
                 }
             }
 
-            String error = ScenarioErrorHandler.handle(e, showStackTraces);
+            String error = NBCLIErrorHandler.handle(e, showStackTraces);
             // Commented for now, as the above handler should do everything needed.
             if (error != null) {
                 System.err.println("Scenario stopped due to error. See logs for details.");
@@ -150,7 +150,7 @@ public class NBCLI implements Function<String[], Integer> {
             .setConsolePattern(globalOptions.getConsoleLoggingPattern())
             .setLogfileLevel(globalOptions.getScenarioLogLevel())
             .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-            .getLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
@@ -476,15 +476,15 @@ public class NBCLI implements Function<String[], Integer> {
         ScenariosResults scenariosResults = executor.awaitAllResults();
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
-        //scenariosResults.reportToLog();
+        scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
-//        logger.info(scenariosResults.getExecutionSummary());
+        logger.info(scenariosResults.getExecutionSummary());
 
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();
-//            logger.warn(scenariosResults.getExecutionSummary());
-            ScenarioErrorHandler.handle(exception, options.wantsStackTraces());
+            logger.warn(scenariosResults.getExecutionSummary());
+            NBCLIErrorHandler.handle(exception, options.wantsStackTraces());
             System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             return EXIT_ERROR;
         } else {

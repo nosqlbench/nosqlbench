@@ -16,12 +16,19 @@
 
 package io.nosqlbench.engine.core.lifecycle;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    private static final Logger logger = LogManager.getLogger(ActivityExceptionHandler.class);
 
     private final ActivityExecutor executor;
 
     public ActivityExceptionHandler(ActivityExecutor executor) {
         this.executor = executor;
+        logger.debug(() -> "Activity exception handler is in the house.");
+
     }
 
     @Override
