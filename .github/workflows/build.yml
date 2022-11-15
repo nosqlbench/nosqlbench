@@ -10,6 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       name: checkout nosqlbench
+
     - uses: actions/setup-java@v3
       name: setup java
       with:
@@ -31,10 +32,12 @@ jobs:
     - name: mvn verify
       run: mvn verify
 
+    - name: Capture
+      run: tar -cvf jbanks_files.tar [a-zA-Z]**/logs/*
+
     - name: Archive Test Results
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: |
-         [a-zA-Z]**/logs/*
+        path: jbanks_files.tar

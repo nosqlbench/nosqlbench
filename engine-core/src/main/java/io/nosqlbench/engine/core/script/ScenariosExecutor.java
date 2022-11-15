@@ -16,10 +16,7 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
-import io.nosqlbench.engine.core.lifecycle.ScenarioController;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
-import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.*;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -256,6 +253,7 @@ public class ScenariosExecutor {
     }
 
     public synchronized void notifyException(Thread t, Throwable e) {
+        logger.debug(() -> "Scenario executor uncaught exception: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in scenario thread " + t.getName(), e);
     }
 

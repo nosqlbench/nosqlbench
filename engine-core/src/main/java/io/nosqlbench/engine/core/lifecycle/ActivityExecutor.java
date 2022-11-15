@@ -15,14 +15,14 @@
  */
 package io.nosqlbench.engine.core.lifecycle;
 
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -155,8 +155,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public synchronized RuntimeException forceStopScenario(int initialMillisToWait) {
-        activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
 
+        activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
         activity.setRunState(RunState.Stopped);
 
         executorService.shutdown();
@@ -214,23 +214,29 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public boolean finishAndShutdownExecutor(int secondsToWait) {
-        activitylogger.debug("REQUEST STOP/before alias=(" + activity.getAlias() + ")");
 
+        activitylogger.debug("REQUEST STOP/before alias=(" + activity.getAlias() + ")");
         logger.debug("Stopping executor for " + activity.getAlias() + " when work completes.");
 
-        executorService.shutdown();
         boolean wasStopped = false;
         try {
+            executorService.shutdown();
             logger.trace(() -> "awaiting termination with timeout of " + secondsToWait + " seconds");
             wasStopped = executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
             logger.trace("interrupted while awaiting termination");
             wasStopped = false;
-            logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
+            logger.warn("while waiting termination of shutdown " + activity.getAlias() + ", " + ie.getMessage());
             activitylogger.debug("REQUEST STOP/exception alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
+        } catch (RuntimeException e) {
+            logger.debug("Received exception while awaiting termination: " + e.getMessage());
+            wasStopped = true;
+            stoppingException = e;
         } finally {
+
             logger.trace(() -> "finally shutting down activity " + this.getActivity().getAlias());
             activity.shutdownActivity();
+
             logger.trace("closing auto-closeables");
             activity.closeAutoCloseables();
             activity.setRunState(RunState.Stopped);
@@ -241,6 +247,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.trace(() -> "an exception caused the activity to stop:" + stoppingException.getMessage());
             throw stoppingException;
         }
+
         activitylogger.debug("REQUEST STOP/after alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
 
         return wasStopped;
@@ -278,11 +285,13 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * This is the canonical way to wait for an activity to finish. It ties together
      * any way that an activity can finish under one blocking call.
      * This should be awaited asynchronously from the control layer in separate threads.
-     *
+     * <p>
      * TODO: move activity finisher threaad to this class and remove separate implementation
      */
     public boolean awaitCompletion(int waitTime) {
+
         boolean finished = finishAndShutdownExecutor(waitTime);
+
         Annotators.recordAnnotation(Annotation.newBuilder()
                 .session(sessionId)
                 .interval(startedAt, this.stoppedAt)
@@ -412,7 +421,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * Await a thread (aka motor/slot) entering a specific SlotState
      *
      * @param m                motor instance
-     * @param waitTime         milliseconds to wait, total
+     * @param waitTime         milliseco`nds to wait, total
      * @param pollTime         polling interval between state checks
      * @param desiredRunStates any desired SlotState
      * @return true, if the desired SlotState was detected
@@ -521,7 +530,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public synchronized void notifyException(Thread t, Throwable e) {
-        //logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
+        logger.debug(() -> "Uncaught exception in activity thread forwarded to activity executor: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in activity thread " + t.getName(), e);
         forceStopScenario(10000);
     }
