@@ -83,7 +83,11 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
                     new MessageProducerOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
                 case MessageConsume ->
                     new MessageConsumerOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
-                case MessageRead ->
+                //////////////////////////
+                // NOTE: not sure how useful to have Pulsar message reader API in the NB performance testing
+                //       currently, the reader API in NB Pulsar driver is no-op (see TDOD in MessageReaderOp)
+                //////////////////////////
+                 case MessageRead ->
                     new MessageReaderOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
             };
         }

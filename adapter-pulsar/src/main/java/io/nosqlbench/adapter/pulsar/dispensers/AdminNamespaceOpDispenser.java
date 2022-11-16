@@ -20,11 +20,15 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminNamespaceOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 
 import java.util.function.LongFunction;
 
 public class AdminNamespaceOpDispenser extends PulsarAdminOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("AdminNamespaceOpDispenser");
 
     public AdminNamespaceOpDispenser(DriverAdapter adapter,
                                      ParsedOp op,
@@ -36,6 +40,7 @@ public class AdminNamespaceOpDispenser extends PulsarAdminOpDispenser {
     @Override
     public AdminNamespaceOp apply(long cycle) {
         return new AdminNamespaceOp(
+            pulsarAdapterMetrics,
             pulsarAdmin,
             asyncApiFunc.apply(cycle),
             adminDelOpFunc.apply(cycle),

@@ -20,12 +20,16 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminTenantOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 
 import java.util.*;
 import java.util.function.LongFunction;
 
 public class AdminTenantOpDispenser extends PulsarAdminOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("AdminTenantOpDispenser");
 
     private final LongFunction<Set<String>> adminRolesFunc;
     private final LongFunction<Set<String>> allowedClustersFunc;
@@ -42,6 +46,7 @@ public class AdminTenantOpDispenser extends PulsarAdminOpDispenser {
     @Override
     public AdminTenantOp apply(long cycle) {
         return new AdminTenantOp(
+            pulsarAdapterMetrics,
             pulsarAdmin,
             asyncApiFunc.apply(cycle),
             adminDelOpFunc.apply(cycle),

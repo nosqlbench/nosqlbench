@@ -16,16 +16,74 @@
 
 package io.nosqlbench.adapter.pulsar.ops;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Timer;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
+import io.nosqlbench.adapter.pulsar.util.PulsarAvroSchemaUtil;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.api.schema.KeyValueSchema;
+import org.apache.pulsar.common.schema.SchemaType;
 
 public abstract class PulsarClientOp extends PulsarOp {
-    protected PulsarClient pulsarClient;
-    protected Schema<?> pulsarScheam;
+    protected final PulsarClient pulsarClient;
+    protected  final Schema<?> pulsarSchema;
 
-    public PulsarClientOp(PulsarClient pulsarClient, Schema<?> pulsarScheam) {
+    // Pulsar KeyValue schema
+    private org.apache.avro.Schema avroSchema;
+    private org.apache.avro.Schema avroKeySchema;
+
+    protected final Histogram messageSizeHistogram;
+    protected final Histogram payloadRttHistogram;
+    protected final Histogram e2eMsgProcLatencyHistogram;
+
+    protected final Timer transactionCommitTimer;
+
+    public PulsarClientOp(PulsarAdapterMetrics pulsarAdapterMetrics,
+                          PulsarClient pulsarClient,
+                          Schema<?> pulsarScheam,
+                          boolean asyncApi) {
+        super (pulsarAdapterMetrics, asyncApi);
+
         this.pulsarClient = pulsarClient;
-        this.pulsarScheam = pulsarScheam;
+        this.pulsarSchema = pulsarScheam;
+
+        this.messageSizeHistogram = pulsarAdapterMetrics.getMessageSizeHistogram();
+        this.payloadRttHistogram = pulsarAdapterMetrics.getPayloadRttHistogram();
+        this.e2eMsgProcLatencyHistogram = pulsarAdapterMetrics.getE2eMsgProcLatencyHistogram();
+        this.transactionCommitTimer = pulsarAdapterMetrics.getCommitTransactionTimer();
+    }
+
+    protected org.apache.avro.Schema getAvroSchemaFromConfiguration() {
+        // no need for synchronization, this is only a cache
+        // in case of the race we will parse the string twice, not a big
+        if (avroSchema == null) {
+            if (pulsarSchema.getSchemaInfo().getType() == SchemaType.KEY_VALUE) {
+                KeyValueSchema kvSchema = (KeyValueSchema) pulsarSchema;
+                Schema valueSchema = kvSchema.getValueSchema();
+                String avroDefStr = valueSchema.getSchemaInfo().getSchemaDefinition();
+                avroSchema = PulsarAvroSchemaUtil.GetSchema_ApacheAvro(avroDefStr);
+            } else {
+                String avroDefStr = pulsarSchema.getSchemaInfo().getSchemaDefinition();
+                avroSchema = PulsarAvroSchemaUtil.GetSchema_ApacheAvro(avroDefStr);
+            }
+        }
+        return avroSchema;
+    }
+
+    protected org.apache.avro.Schema getKeyAvroSchemaFromConfiguration() {
+        // no need for synchronization, this is only a cache
+        // in case of the race we will parse the string twice, not a big
+        if (avroKeySchema == null) {
+            if (pulsarSchema.getSchemaInfo().getType() == SchemaType.KEY_VALUE) {
+                KeyValueSchema kvSchema = (KeyValueSchema) pulsarSchema;
+                Schema keySchema = kvSchema.getKeySchema();
+                String avroDefStr = keySchema.getSchemaInfo().getSchemaDefinition();
+                avroKeySchema = PulsarAvroSchemaUtil.GetSchema_ApacheAvro(avroDefStr);
+            } else {
+                throw new RuntimeException("We are not using KEY_VALUE schema, so no Schema for the Key!");
+            }
+        }
+        return avroKeySchema;
     }
 }

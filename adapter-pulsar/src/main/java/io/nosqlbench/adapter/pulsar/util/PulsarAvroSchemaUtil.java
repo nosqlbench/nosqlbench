@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 
-public class AvroUtil {
+public class PulsarAvroSchemaUtil {
     ////////////////////////
     // Get an OSS Apache Avro schema from a string definition
     public static org.apache.avro.Schema GetSchema_ApacheAvro(String avroSchemDef) {

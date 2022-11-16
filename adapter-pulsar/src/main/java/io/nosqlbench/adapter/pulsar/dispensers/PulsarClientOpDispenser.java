@@ -16,29 +16,47 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
+import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.api.transaction.Transaction;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.LongFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("PulsarClientOpDispenser");
 
     protected final PulsarClient pulsarClient;
     protected final Schema<?> pulsarSchema;
 
     protected final LongFunction<Boolean> useTransactFunc;
-    protected final LongFunction<Integer> transactBatchNumFunc;
+    // TODO: add support for "operation number per transaction"
+    // protected final LongFunction<Integer> transactBatchNumFunc;
     protected final LongFunction<Boolean> seqTrackingFunc;
+    protected final LongFunction<String> payloadRttFieldFunc;
+    protected final LongFunction<Supplier<Transaction>> transactSupplierFunc;
+    protected final LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> errSimuTypeSetFunc;
 
     public PulsarClientOpDispenser(DriverAdapter adapter,
                                    ParsedOp op,
                                    LongFunction<String> tgtNameFunc,
                                    PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
+
         this.pulsarClient = pulsarSpace.getPulsarClient();
         this.pulsarSchema = pulsarSpace.getPulsarSchema();
 
@@ -46,12 +64,61 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
         this.useTransactFunc = lookupStaticBoolConfigValueFunc(
             PulsarAdapterUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label, false);
 
+        // TODO: add support for "operation number per transaction"
         // Doc-level parameter: transact_batch_num
-        this.transactBatchNumFunc = lookupStaticIntOpValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.TRANSACT_BATCH_NUM.label, 1);
+        // this.transactBatchNumFunc = lookupStaticIntOpValueFunc(
+        //    PulsarAdapterUtil.DOC_LEVEL_PARAMS.TRANSACT_BATCH_NUM.label, 1);
 
         // Doc-level parameter: seq_tracking
         this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
             PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
+
+        // Doc-level parameter: payload-tracking-field
+        this.payloadRttFieldFunc = (l) -> parsedOp.getStaticConfigOr(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.RTT_TRACKING_FIELD.label, "");
+
+        this.transactSupplierFunc = (l) -> getTransactionSupplier();
+
+        this.errSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
+    }
+
+    protected Supplier<Transaction> getTransactionSupplier() {
+        return () -> {
+            try (Timer.Context time = pulsarAdapterMetrics.getCommitTransactionTimer().time() ){
+                return pulsarClient
+                    .newTransaction()
+                    .build()
+                    .get();
+            } catch (ExecutionException | InterruptedException err) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Error while starting a new transaction", err);
+                }
+                throw new RuntimeException(err);
+            } catch (PulsarClientException err) {
+                throw new RuntimeException("Transactions are not enabled on Pulsar Client, " +
+                    "please set client.enableTransaction=true in your Pulsar Client configuration");
+            }
+        };
+    }
+
+    protected LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
+        LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
+        setStringLongFunction = (l) -> parsedOp.getOptionalStaticValue("seqerr_simu", String.class)
+            .filter(Predicate.not(String::isEmpty))
+            .map(value -> {
+                Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
+
+                if (StringUtils.contains(value,',')) {
+                    set = Arrays.stream(value.split(","))
+                        .map(PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE::parseSimuType)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                }
+
+                return set;
+            }).orElse(Collections.emptySet());
+        logger.info("seqerr_simu: {}", setStringLongFunction.apply(0));
+        return setStringLongFunction;
     }
 }

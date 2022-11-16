@@ -20,22 +20,56 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.MessageProducerOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.Schema;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.client.api.Producer;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MessageProducerOpDispenser extends PulsarClientOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("MessageProducerOpDispenser");
+
+    public static final String PRODUCER_NAME_OP_PARAM = "producer_name";
+    public static final String MSG_KEY_OP_PARAM = "msg_key";
+    public static final String MSG_PROP_OP_PARAM = "msg_prop";
+    public static final String MSG_VALUE_OP_PARAM = "msg_value";
+
+    private final LongFunction<String> cycleProducerNameFunc;
+    private final LongFunction<Producer<?>> producerFunc;
+    private final LongFunction<String> msgKeyFunc;
+    private final LongFunction<String> msgPropFunc;
+    private final LongFunction<String> msgValueFunc;
 
     public MessageProducerOpDispenser(DriverAdapter adapter,
                                       ParsedOp op,
                                       LongFunction<String> tgtNameFunc,
                                       PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
+
+        this.cycleProducerNameFunc = lookupOptionalStrOpValueFunc(PRODUCER_NAME_OP_PARAM);
+        this.producerFunc = (l) -> getProducer(tgtNameFunc.apply(l), cycleProducerNameFunc.apply(l));
+        this.msgKeyFunc = lookupOptionalStrOpValueFunc(MSG_KEY_OP_PARAM);
+        this.msgPropFunc = lookupOptionalStrOpValueFunc(MSG_PROP_OP_PARAM);
+        this.msgValueFunc = lookupMandtoryStrOpValueFunc(MSG_VALUE_OP_PARAM);
     }
 
     @Override
     public MessageProducerOp apply(long cycle) {
-        return new MessageProducerOp(pulsarClient, pulsarSchema);
+        return new MessageProducerOp(
+            pulsarAdapterMetrics,
+            pulsarClient,
+            pulsarSchema,
+            asyncApiFunc.apply(cycle),
+            useTransactFunc.apply(cycle),
+            seqTrackingFunc.apply(cycle),
+            transactSupplierFunc.apply(cycle),
+            errSimuTypeSetFunc.apply(cycle),
+            producerFunc.apply(cycle),
+            msgKeyFunc.apply(cycle),
+            msgPropFunc.apply(cycle),
+            msgValueFunc.apply(cycle)
+        );
     }
 }

@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.pulsar.ops;
 
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,13 +36,15 @@ public class AdminTopicOp extends PulsarAdminOp {
     private final boolean enablePart;
     private final int partNum;
 
-    public AdminTopicOp(PulsarAdmin pulsarAdmin,
+    public AdminTopicOp(PulsarAdapterMetrics pulsarAdapterMetrics,
+                        PulsarAdmin pulsarAdmin,
                         boolean asyncApi,
                         boolean adminDelOp,
                         String topicName,
                         boolean enablePart,
                         int partNum) {
-        super(pulsarAdmin, asyncApi, adminDelOp);
+        super(pulsarAdapterMetrics, pulsarAdmin, asyncApi, adminDelOp);
+
         this.topicName = topicName;
         this.enablePart = enablePart;
         this.partNum = partNum;

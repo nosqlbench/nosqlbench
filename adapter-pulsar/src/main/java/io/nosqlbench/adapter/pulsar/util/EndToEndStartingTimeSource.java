@@ -1,3 +1,5 @@
+package io.nosqlbench.adapter.pulsar.util;
+
 /*
  * Copyright (c) 2022 nosqlbench
  *
@@ -15,17 +17,10 @@
  * under the License.
  */
 
-package io.nosqlbench.adapter.pulsar.ops;
 
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
-
-public abstract class PulsarOp implements CycleOp<Object> {
-    protected final boolean asyncApi;
-    protected final PulsarAdapterMetrics pulsarAdapterMetrics;
-
-    public PulsarOp(PulsarAdapterMetrics pulsarAdapterMetrics, boolean asyncApi) {
-        this.pulsarAdapterMetrics = pulsarAdapterMetrics;
-        this.asyncApi = asyncApi;
-    }
+public enum EndToEndStartingTimeSource {
+    NONE, // no end-to-end latency calculation
+    MESSAGE_PUBLISH_TIME, // use message publish timestamp
+    MESSAGE_EVENT_TIME, // use message event timestamp
+    MESSAGE_PROPERTY_E2E_STARTING_TIME // use message property called "e2e_starting_time" as the timestamp
 }

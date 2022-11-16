@@ -18,24 +18,48 @@ package io.nosqlbench.adapter.pulsar.dispensers;
 
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.MessageReaderOp;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.Reader;
 import org.apache.pulsar.client.api.Schema;
 
 import java.util.function.LongFunction;
 
 public class MessageReaderOpDispenser extends PulsarClientOpDispenser {
 
+    private final static Logger logger = LogManager.getLogger("MessageReaderOpDispenser");
+
+    private final LongFunction<String> cycleReaderNameFunc;
+    private final LongFunction<String> msgStartPosStrFunc;
+    private final LongFunction<Reader> readerFunc;
+
     public MessageReaderOpDispenser(DriverAdapter adapter,
                                     ParsedOp op,
                                     LongFunction<String> tgtNameFunc,
                                     PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
+
+        this.cycleReaderNameFunc = lookupMandtoryStrOpValueFunc("reader_name");
+        this.msgStartPosStrFunc = lookupOptionalStrOpValueFunc(
+            "start_msg_position", PulsarAdapterUtil.READER_MSG_POSITION_TYPE.earliest.label);
+        this.readerFunc = (l) -> getReader(
+            tgtNameFunc.apply(l),
+            cycleReaderNameFunc.apply(l),
+            msgStartPosStrFunc.apply(l));
     }
 
     @Override
     public MessageReaderOp apply(long cycle) {
-        return new MessageReaderOp(pulsarClient, pulsarSchema);
+
+        return new MessageReaderOp(
+            pulsarAdapterMetrics,
+            pulsarClient,
+            pulsarSchema,
+            asyncApiFunc.apply(cycle),
+            readerFunc.apply(cycle));
     }
 }

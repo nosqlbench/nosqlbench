@@ -26,6 +26,7 @@ public enum PulsarOpType {
     AdminNamespace("admin-namespace"),
     AdminTopic("admin-topic"),
     MessageProduce("msg-send"),
+    // This also supports multi-topic message consumption
     MessageConsume("msg-consume"),
     MessageRead("msg-read");
 

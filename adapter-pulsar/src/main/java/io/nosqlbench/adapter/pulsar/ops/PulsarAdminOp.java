@@ -16,17 +16,21 @@
 
 package io.nosqlbench.adapter.pulsar.ops;
 
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 
 public abstract class PulsarAdminOp extends PulsarOp {
     protected PulsarAdmin pulsarAdmin;
-    protected boolean asyncApi;
     protected boolean adminDelOp;
 
-    public PulsarAdminOp(PulsarAdmin pulsarAdmin, boolean asyncApi, boolean adminDelOp) {
+    public PulsarAdminOp(PulsarAdapterMetrics pulsarAdapterMetrics,
+                         PulsarAdmin pulsarAdmin,
+                         boolean asyncApi,
+                         boolean adminDelOp) {
+        super(pulsarAdapterMetrics, asyncApi);
+
         this.pulsarAdmin = pulsarAdmin;
-        this.asyncApi = asyncApi;
         this.adminDelOp = adminDelOp;
     }
 }

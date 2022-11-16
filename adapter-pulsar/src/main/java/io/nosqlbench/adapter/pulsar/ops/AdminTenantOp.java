@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.pulsar.ops;
 
 import io.nosqlbench.adapter.pulsar.PulsarDriverAdapter;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -37,13 +38,15 @@ public class AdminTenantOp extends PulsarAdminOp {
     private final Set<String> allowedClusters;
     private final String tntName;
 
-    public AdminTenantOp(PulsarAdmin pulsarAdmin,
+    public AdminTenantOp(PulsarAdapterMetrics pulsarAdapterMetrics,
+                         PulsarAdmin pulsarAdmin,
                          boolean asyncApi,
                          boolean adminDelOp,
                          String tntName,
                          Set<String> adminRoles,
                          Set<String> allowedClusters) {
-        super(pulsarAdmin, asyncApi, adminDelOp);
+        super(pulsarAdapterMetrics, pulsarAdmin, asyncApi, adminDelOp);
+
         this.tntName = tntName;
         this.adminRoles = adminRoles;
         this.allowedClusters = allowedClusters;

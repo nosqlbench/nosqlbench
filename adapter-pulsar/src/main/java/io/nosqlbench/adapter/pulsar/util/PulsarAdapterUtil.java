@@ -470,7 +470,7 @@ public class PulsarAdapterUtil {
                 }
             }
 
-            schema = AvroUtil.GetSchema_PulsarAvro("NBAvro", schemaDefinitionStr);
+            schema = PulsarAvroSchemaUtil.GetSchema_PulsarAvro("NBAvro", schemaDefinitionStr);
         } else {
             throw new RuntimeException("Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
         }

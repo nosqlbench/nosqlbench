@@ -20,11 +20,16 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 
 import java.util.function.LongFunction;
 
 public abstract class PulsarAdminOpDispenser extends PulsarBaseOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("PulsarAdminOpDispenser");
+
 
     protected final PulsarAdmin pulsarAdmin;
     protected final LongFunction<Boolean> adminDelOpFunc;
@@ -34,6 +39,7 @@ public abstract class PulsarAdminOpDispenser extends PulsarBaseOpDispenser {
                                   LongFunction<String> tgtNameFunc,
                                   PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
+
         this.pulsarAdmin = pulsarSpace.getPulsarAdmin();
 
         // Doc-level parameter: admin_delop

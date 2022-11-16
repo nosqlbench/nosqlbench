@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.pulsar.ops;
 
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +34,12 @@ public class AdminNamespaceOp extends  PulsarAdminOp {
     // in format: <tenant>/<namespace>
     private final String nsName;
 
-    public AdminNamespaceOp(PulsarAdmin pulsarAdmin,
+    public AdminNamespaceOp(PulsarAdapterMetrics pulsarAdapterMetrics,
+                            PulsarAdmin pulsarAdmin,
                             boolean asyncApi,
                             boolean adminDelOp,
                             String nsName) {
-        super(pulsarAdmin, asyncApi, adminDelOp);
+        super(pulsarAdapterMetrics, pulsarAdmin, asyncApi, adminDelOp);
         this.nsName = nsName;
     }
 

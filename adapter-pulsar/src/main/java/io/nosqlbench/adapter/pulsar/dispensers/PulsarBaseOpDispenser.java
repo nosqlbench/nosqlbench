@@ -22,6 +22,10 @@ import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
+import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -36,21 +40,29 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, PulsarSpace> {
+public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, PulsarSpace> implements NBNamedElement {
 
     private final static Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
 
     protected final ParsedOp parsedOp;
-    protected final LongFunction<Boolean> asyncApiFunc;
-    protected final LongFunction<String> tgtNameFunc;
     protected final PulsarSpace pulsarSpace;
-
+    protected final PulsarAdapterMetrics pulsarAdapterMetrics;
     private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
-    protected final PulsarAdapterMetrics pulsarAdapterMetrics;
+
+    protected final LongFunction<Boolean> asyncApiFunc;
+    protected final LongFunction<String> tgtNameFunc;
+
+    protected final int totalThreadNum;
+
+    protected final long totalCycleNum;
+
+    protected RateLimiter per_thread_cyclelimiter;
 
     public PulsarBaseOpDispenser(DriverAdapter adapter,
                                  ParsedOp op,
@@ -67,11 +79,27 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         this.asyncApiFunc = lookupStaticBoolConfigValueFunc(
             PulsarAdapterUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, true);
 
-        this.pulsarAdapterMetrics = new PulsarAdapterMetrics(pulsarSpace, getDefaultMetricsPrefix(this.parsedOp));
+        String defaultMetricsPrefix = getDefaultMetricsPrefix(this.parsedOp);
+        this.pulsarAdapterMetrics = new PulsarAdapterMetrics(this, defaultMetricsPrefix);
         if (instrument) {
             pulsarAdapterMetrics.initPulsarAdapterInstrumentation();
         }
+
+        totalThreadNum = NumberUtils.toInt(parsedOp.getStaticValue("threads"));
+        totalCycleNum = NumberUtils.toLong(parsedOp.getStaticValue("cycles"));
+
+        this.parsedOp.getOptionalStaticConfig("per_thread_cyclerate", String.class)
+            .map(RateSpec::new)
+            .ifPresent(spec -> per_thread_cyclelimiter =
+                RateLimiters.createOrUpdate(this, "cycles", per_thread_cyclelimiter, spec));
     }
+
+    @Override
+    public String getName() {
+        return "PulsarBaseOpDispenser";
+    }
+
+    public PulsarSpace getPulsarSpace() { return pulsarSpace; }
 
     protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(String paramName, boolean defaultValue) {
         LongFunction<Boolean> booleanLongFunction;
@@ -81,19 +109,6 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             .orElse(defaultValue);
         logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
         return  booleanLongFunction;
-    }
-
-    protected LongFunction<Integer> lookupStaticIntOpValueFunc(String paramName, int defaultValue) {
-        LongFunction<Integer> integerLongFunction;
-        integerLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
-            .filter(Predicate.not(String::isEmpty))
-            .map(value -> NumberUtils.toInt(value))
-            .map(value -> {
-                if (value < 0) return 0;
-                else return value;
-            }).orElse(defaultValue);
-        logger.info("{}: {}", paramName, integerLongFunction.apply(0));
-        return integerLongFunction;
     }
 
     protected LongFunction<Set<String>> lookupStaticStrSetOpValueFunc(String paramName) {
@@ -114,6 +129,42 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             }).orElse(Collections.emptySet());
         logger.info("{}: {}", paramName, setStringLongFunction.apply(0));
         return setStringLongFunction;
+    }
+
+    // If the corresponding Op parameter is not provided, use the specified default value
+    protected LongFunction<Integer> lookupStaticIntOpValueFunc(String paramName, int defaultValue) {
+        LongFunction<Integer> integerLongFunction;
+        integerLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
+            .filter(Predicate.not(String::isEmpty))
+            .map(value -> NumberUtils.toInt(value))
+            .map(value -> {
+                if (value < 0) return 0;
+                else return value;
+            }).orElse(defaultValue);
+        logger.info("{}: {}", paramName, integerLongFunction.apply(0));
+        return integerLongFunction;
+    }
+
+    // If the corresponding Op parameter is not provided, use the specified default value
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName, String defaultValue) {
+        LongFunction<String> stringLongFunction;
+        stringLongFunction = parsedOp.getAsOptionalFunction(paramName, String.class)
+            .orElse((l) -> defaultValue);
+        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+
+        return stringLongFunction;
+    }
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName) {
+        return lookupOptionalStrOpValueFunc(paramName, "");
+    }
+
+    // Mandatory Op parameter. Throw an error if not specified or having empty value
+    protected LongFunction<String> lookupMandtoryStrOpValueFunc(String paramName) {
+        LongFunction<String> stringLongFunction;
+        stringLongFunction = parsedOp.getAsRequiredFunction(paramName, String.class);
+        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+
+        return stringLongFunction;
     }
 
     /**
@@ -154,6 +205,8 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 .replace("persistent://", "")
                 // persistent://tenant/namespace/topicname -> tenant_namespace_topicname
                 .replace("/", "_");
+
+            apiMetricsPrefix += "--";
         }
 
         return apiMetricsPrefix;
@@ -257,6 +310,61 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
     //////////////////////////////////////
     //
 
+    private String getEffectiveConsumerTopicNameListStr(String cycleTopicNameListStr) {
+        if (!StringUtils.isBlank(cycleTopicNameListStr)) {
+            return cycleTopicNameListStr;
+        }
+
+        String globalTopicNames = pulsarSpace.getPulsarNBClientConf().getConsumerTopicNames();
+        if (!StringUtils.isBlank(globalTopicNames)) {
+            return globalTopicNames;
+        }
+
+        return "";
+    }
+
+    private List<String> getEffectiveConsumerTopicNameList(String cycleTopicNameListStr) {
+        String effectiveTopicNamesStr = getEffectiveConsumerTopicNameListStr(cycleTopicNameListStr);
+
+        String[] names = effectiveTopicNamesStr.split("[;,]");
+        ArrayList<String> effectiveTopicNameList = new ArrayList<>();
+
+        for (String name : names) {
+            if (!StringUtils.isBlank(name))
+                effectiveTopicNameList.add(name.trim());
+        }
+
+        return effectiveTopicNameList;
+    }
+
+    private String getEffectiveConsumerTopicPatternStr(String cycleTopicPatternStr) {
+        if (!StringUtils.isBlank(cycleTopicPatternStr)) {
+            return cycleTopicPatternStr;
+        }
+
+        String globalTopicsPattern = pulsarSpace.getPulsarNBClientConf().getConsumerTopicPattern();
+        if (!StringUtils.isBlank(globalTopicsPattern)) {
+            return globalTopicsPattern;
+        }
+
+        return "";
+    }
+
+    private Pattern getEffectiveConsumerTopicPattern(String cycleTopicPatternStr) {
+        String effectiveTopicPatternStr = getEffectiveConsumerTopicPatternStr(cycleTopicPatternStr);
+        Pattern topicsPattern;
+        try {
+            if (!StringUtils.isBlank(effectiveTopicPatternStr))
+                topicsPattern = Pattern.compile(effectiveTopicPatternStr);
+            else
+                topicsPattern = null;
+        } catch (PatternSyntaxException pse) {
+            topicsPattern = null;
+        }
+        return topicsPattern;
+    }
+
+
     // Subscription name is NOT mandatory
     // - It can be set at either global level or cycle level
     // - If set at both levels, cycle level setting takes precedence
@@ -322,22 +430,47 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return "";
     }
 
-    public Consumer<?> getConsumer(String cycleTopicName,
+    public Consumer<?> getConsumer(String cycleTopicNameListStr,
+                                   String cycleTopicPatternStr,
                                    String cycleSubscriptionName,
                                    String cycleSubscriptionType,
                                    String cycleConsumerName,
                                    String cycleKeySharedSubscriptionRanges) {
+
+        List<String> topicNameList = getEffectiveConsumerTopicNameList(cycleTopicNameListStr);
+        String topicPatternStr = getEffectiveConsumerTopicPatternStr(cycleTopicPatternStr);
+        Pattern topicPattern = getEffectiveConsumerTopicPattern(cycleTopicPatternStr);
         String subscriptionName = getEffectiveSubscriptionName(cycleSubscriptionName);
         SubscriptionType subscriptionType = getEffectiveSubscriptionType(cycleSubscriptionType);
         String consumerName = getEffectiveConsumerName(cycleConsumerName);
 
-        if (StringUtils.isAnyBlank(cycleTopicName, subscriptionName)) {
+        if ( subscriptionType.equals(SubscriptionType.Exclusive) && (totalThreadNum > 1) ) {
             throw new PulsarAdapterInvalidParamException(
-                "Must specify a topic name and a subscription name when creating a consumer!");
+                MessageConsumerOpDispenser.SUBSCRIPTION_TYPE_OP_PARAM,
+                "creating multiple consumers of \"Exclusive\" subscription type under the same subscription name");
         }
 
-        String consumerCacheKey = PulsarAdapterUtil.buildCacheKey(consumerName, subscriptionName, cycleTopicName);
+        if ( (topicNameList.isEmpty() && (topicPattern == null)) ||
+             (!topicNameList.isEmpty() && (topicPattern != null)) ) {
+            throw new PulsarAdapterInvalidParamException(
+                "Invalid combination of topic name(s) and topic patterns; only specify one parameter!");
+        }
+
+        boolean multiTopicConsumer = (topicNameList.size() > 1 || (topicPattern != null));
+
+        String consumerTopicListString;
+        if (!topicNameList.isEmpty()) {
+            consumerTopicListString = String.join("|", topicNameList);
+        } else {
+            consumerTopicListString = topicPatternStr;
+        }
+
+        String consumerCacheKey = PulsarAdapterUtil.buildCacheKey(
+            consumerName,
+            subscriptionName,
+            consumerTopicListString);
         Consumer<?> consumer = consumers.get(consumerCacheKey);
+
         if (consumer == null) {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
@@ -355,12 +488,31 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY.timeout.label);
 
             try {
-                ConsumerBuilder<?> consumerBuilder = pulsarClient.
-                    newConsumer(pulsarSpace.getPulsarSchema()).
+                ConsumerBuilder<?> consumerBuilder;
+
+                if (!multiTopicConsumer) {
+                    assert (topicNameList.size() == 1);
+                    consumerBuilder = pulsarClient.newConsumer(pulsarSpace.getPulsarSchema());
+                    consumerBuilder.topic(topicNameList.get(0));
+                }
+                else {
+                    consumerBuilder = pulsarClient.newConsumer();
+                    if (!topicNameList.isEmpty()) {
+                        assert (topicNameList.size() > 1);
+                        consumerBuilder.topics(topicNameList);
+                    }
+                    else {
+                        consumerBuilder.topicsPattern(topicPattern);
+                    }
+                }
+
+                consumerBuilder.
                     loadConf(consumerConf).
-                    topic(cycleTopicName).
                     subscriptionName(subscriptionName).
                     subscriptionType(subscriptionType);
+
+                if (!StringUtils.isBlank(consumerName))
+                    consumerBuilder.consumerName(consumerName);
 
                 if (subscriptionType == SubscriptionType.Key_Shared) {
                     KeySharedPolicy keySharedPolicy = KeySharedPolicy.autoSplitHashRange();
@@ -372,10 +524,6 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                     consumerBuilder.keySharedPolicy(keySharedPolicy);
                 }
 
-                if (!StringUtils.isBlank(consumerName)) {
-                    consumerBuilder = consumerBuilder.consumerName(consumerName);
-                }
-
                 consumer = consumerBuilder.subscribe();
                 consumers.put(consumerCacheKey, consumer);
 
@@ -385,7 +533,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                         getPulsarAPIMetricsPrefix(
                             PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label,
                             consumerName,
-                            cycleTopicName));
+                            consumerTopicListString));
                 }
 
             }

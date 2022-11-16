@@ -21,6 +21,8 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
+import io.nosqlbench.adapter.pulsar.dispensers.PulsarBaseOpDispenser;
+import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -36,68 +38,103 @@ public class PulsarAdapterMetrics {
 
     private final static Logger logger = LogManager.getLogger("PulsarAdapterMetrics");
 
-    private final PulsarSpace pulsarSpace;
+    private final PulsarBaseOpDispenser pulsarBaseOpDispenser;
     private final String defaultAdapterMetricsPrefix;
 
     /**
      * Pulsar adapter specific metrics
      */
-    protected Counter bytesCounter;
     // - message out of sequence error counter
-    protected Counter msgErrOutOfSeqCounter;
+    private Counter msgErrOutOfSeqCounter;
     // - message loss counter
-    protected Counter msgErrLossCounter;
+    private Counter msgErrLossCounter;
     // - message duplicate (when dedup is enabled) error counter
-    protected Counter msgErrDuplicateCounter;
+    private Counter msgErrDuplicateCounter;
 
-    protected Histogram messageSizeHistogram;
+    private Histogram messageSizeHistogram;
     // end-to-end latency
-    protected Histogram e2eMsgProcLatencyHistogram;
+    private Histogram e2eMsgProcLatencyHistogram;
     // A histogram that tracks payload round-trip-time, based on a user-defined field in some sender
     // system which can be interpreted as millisecond epoch time in the system's local time zone.
     // This is paired with a field name of the same type to be extracted and reported in a metric
     // named 'payload-rtt'.
-    protected Histogram payloadRttHistogram;
+    private Histogram payloadRttHistogram;
 
-    protected Timer bindTimer;
-    protected Timer executeTimer;
-    protected Timer createTransactionTimer;
-    protected Timer commitTransactionTimer;
+    private Timer bindTimer;
+    private Timer executeTimer;
+    private Timer createTransactionTimer;
+    private Timer commitTransactionTimer;
 
-    public PulsarAdapterMetrics(PulsarSpace pulsarSpace, String defaultMetricsPrefix) {
-        this.pulsarSpace = pulsarSpace;
+    public PulsarAdapterMetrics(PulsarBaseOpDispenser pulsarBaseOpDispenser, String defaultMetricsPrefix) {
+        this.pulsarBaseOpDispenser = pulsarBaseOpDispenser;
         this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
     public void initPulsarAdapterInstrumentation() {
         // Counter metrics
-        this.bytesCounter =
-            ActivityMetrics.counter(this.defaultAdapterMetricsPrefix + "bytes");
         this.msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(this.defaultAdapterMetricsPrefix + "err_msg_oos");
+            ActivityMetrics.counter(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "err_msg_oos");
         this.msgErrLossCounter =
-            ActivityMetrics.counter(this.defaultAdapterMetricsPrefix + "err_msg_loss");
+            ActivityMetrics.counter(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "err_msg_loss");
         this.msgErrDuplicateCounter =
-            ActivityMetrics.counter(this.defaultAdapterMetricsPrefix + "err_msg_dup");
+            ActivityMetrics.counter(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "err_msg_dup");
 
         // Histogram metrics
         this.messageSizeHistogram =
-            ActivityMetrics.histogram(this.defaultAdapterMetricsPrefix + "message_size");
+            ActivityMetrics.histogram(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "message_size",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
         this.e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(this.defaultAdapterMetricsPrefix + "e2e_msg_latency");
+            ActivityMetrics.histogram(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "e2e_msg_latency",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
         this.payloadRttHistogram =
-            ActivityMetrics.histogram(this.defaultAdapterMetricsPrefix + "payload_rtt");
+            ActivityMetrics.histogram(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "payload_rtt",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
         this.bindTimer =
-            ActivityMetrics.timer(this.defaultAdapterMetricsPrefix + "bind");
+            ActivityMetrics.timer(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "bind",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
         this.executeTimer =
-            ActivityMetrics.timer(this.defaultAdapterMetricsPrefix + "execute");
+            ActivityMetrics.timer(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "execute",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
         this.createTransactionTimer =
-            ActivityMetrics.timer(this.defaultAdapterMetricsPrefix + "create_transaction");
+            ActivityMetrics.timer(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "create_transaction",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
         this.commitTransactionTimer =
-            ActivityMetrics.timer(this.defaultAdapterMetricsPrefix + "commit_transaction");
+            ActivityMetrics.timer(
+                pulsarBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "commit_transaction",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
     }
+
+    public Counter getMsgErrOutOfSeqCounter() { return this.msgErrOutOfSeqCounter; }
+    public Counter getMsgErrLossCounter() { return this.msgErrLossCounter; }
+    public Counter getMsgErrDuplicateCounter() { return this.msgErrDuplicateCounter; }
+    public Histogram getMessageSizeHistogram() { return this.messageSizeHistogram; }
+    public Histogram getE2eMsgProcLatencyHistogram() { return this.e2eMsgProcLatencyHistogram; }
+    public Histogram getPayloadRttHistogram() { return payloadRttHistogram; }
+    public Timer getBindTimer() { return bindTimer; }
+    public Timer getExecuteTimer() { return executeTimer; }
+    public Timer getCreateTransactionTimer() { return createTransactionTimer; }
+    public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
 
 
     //////////////////////////////////////
@@ -132,17 +169,17 @@ public class PulsarAdapterMetrics {
             metricsPrefix = pulsarApiMetricsPrefix;
         }
 
-        ActivityMetrics.gauge(metricsPrefix + "total_bytes_sent",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_bytes_sent",
             producerSafeExtractMetric(producer, (s -> s.getTotalBytesSent() + s.getNumBytesSent())));
-        ActivityMetrics.gauge(metricsPrefix + "total_msg_sent",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_msg_sent",
             producerSafeExtractMetric(producer, (s -> s.getTotalMsgsSent() + s.getNumMsgsSent())));
-        ActivityMetrics.gauge(metricsPrefix + "total_send_failed",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_send_failed",
             producerSafeExtractMetric(producer, (s -> s.getTotalSendFailed() + s.getNumSendFailed())));
-        ActivityMetrics.gauge(metricsPrefix + "total_ack_received",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_ack_received",
             producerSafeExtractMetric(producer,(s -> s.getTotalAcksReceived() + s.getNumAcksReceived())));
-        ActivityMetrics.gauge(metricsPrefix + "send_bytes_rate",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "send_bytes_rate",
             producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate));
-        ActivityMetrics.gauge(metricsPrefix + "send_msg_rate",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "send_msg_rate",
             producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate));
     }
 
@@ -180,17 +217,17 @@ public class PulsarAdapterMetrics {
             metricsPrefix = pulsarApiMetricsPrefix;
         }
 
-        ActivityMetrics.gauge(metricsPrefix + "total_bytes_recv",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_bytes_recv",
             consumerSafeExtractMetric(consumer, (s -> s.getTotalBytesReceived() + s.getNumBytesReceived())));
-        ActivityMetrics.gauge(metricsPrefix + "total_msg_recv",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_msg_recv",
             consumerSafeExtractMetric(consumer, (s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived())));
-        ActivityMetrics.gauge(metricsPrefix + "total_recv_failed",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_recv_failed",
             consumerSafeExtractMetric(consumer, (s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed())));
-        ActivityMetrics.gauge(metricsPrefix + "total_acks_sent",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_acks_sent",
             consumerSafeExtractMetric(consumer,(s -> s.getTotalAcksSent() + s.getNumAcksSent())));
-        ActivityMetrics.gauge(metricsPrefix + "recv_bytes_rate",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "recv_bytes_rate",
             consumerSafeExtractMetric(consumer, ConsumerStats::getRateBytesReceived));
-        ActivityMetrics.gauge(metricsPrefix + "recv_msg_rate",
+        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "recv_msg_rate",
             consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
     }
 }

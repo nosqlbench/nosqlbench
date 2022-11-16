@@ -20,11 +20,15 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.AdminTopicOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.PulsarAdmin;
 
 import java.util.function.LongFunction;
 
 public class AdminTopicOpDispenser extends PulsarAdminOpDispenser {
+
+    private final static Logger logger = LogManager.getLogger("AdminTopicOpDispenser");
 
     private final LongFunction<Boolean> enablePartFunc;
     private final LongFunction<Integer> partNumFunc;
@@ -44,6 +48,7 @@ public class AdminTopicOpDispenser extends PulsarAdminOpDispenser {
     public AdminTopicOp apply(long cycle) {
 
         return new AdminTopicOp(
+            pulsarAdapterMetrics,
             pulsarAdmin,
             asyncApiFunc.apply(cycle),
             adminDelOpFunc.apply(cycle),
