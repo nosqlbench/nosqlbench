@@ -46,7 +46,7 @@
         <mvel2.version>2.4.14.Final</mvel2.version>
         <number.to.words.version>1.0.0</number.to.words.version>
         <!--        <slf4j.version>1.7.29</slf4j.version>-->
-        <snakeyaml.version>1.32</snakeyaml.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
         <snappy.version>1.1.2.6</snappy.version>
 
         <!-- plugin versions -->
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.10</version>
+                <version>4.2.12</version>
             </dependency>
 
             <dependency>
@@ -189,7 +189,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.81.Final</version>
+                <version>4.1.82.Final</version>
             </dependency>
 
             <dependency>
@@ -271,7 +271,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.9.0</version>
+                <version>2.9.1</version>
             </dependency>
 
             <dependency>
@@ -301,7 +301,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.11.1</version>
+                <version>2.11.2</version>
             </dependency>
 
             <dependency>
