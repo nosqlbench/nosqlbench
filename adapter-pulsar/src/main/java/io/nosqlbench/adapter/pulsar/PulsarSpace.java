@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.pulsar;
 
-import com.codahale.metrics.Gauge;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.adapter.pulsar.util.PulsarNBClientConf;
@@ -24,7 +23,6 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,12 +33,13 @@ import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class PulsarSpace {
+public class PulsarSpace implements  AutoCloseable {
 
     private final static Logger logger = LogManager.getLogger(PulsarSpace.class);
 
-    private final String name;
+    private final String spaceName;
     private final NBConfiguration cfg;
 
     private final String pulsarSvcUrl;
@@ -51,8 +50,13 @@ public class PulsarSpace {
     private PulsarAdmin pulsarAdmin;
     private Schema<?> pulsarSchema;
 
-    public PulsarSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
+
+
+    public PulsarSpace(String spaceName, NBConfiguration cfg) {
+        this.spaceName = spaceName;
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");
@@ -82,6 +86,17 @@ public class PulsarSpace {
     public PulsarClient getPulsarClient() { return pulsarClient; }
     public PulsarAdmin getPulsarAdmin() { return pulsarAdmin; }
     public Schema<?> getPulsarSchema() { return pulsarSchema; }
+    public int getProducerSetCnt() { return producers.size(); }
+    public int getConsumerSetCnt() { return consumers.size(); }
+    public int getReaderSetCnt() { return readers.size(); }
+    public Producer<?> getProducer(String name) { return producers.get(name); }
+    public void setProducer(String name, Producer<?> producer) { producers.put(name, producer); }
+    public Consumer<?> getConsumer(String name) { return consumers.get(name); }
+    public void setConsumer(String name, Consumer<?> consumer) { consumers.put(name, consumer); }
+
+    public Reader<?> getReader(String name) { return readers.get(name); }
+    public void setReader(String name, Reader<?> reader) { readers.put(name, reader); }
+
 
     /**
      * Initialize
@@ -147,6 +162,26 @@ public class PulsarSpace {
         }
     }
 
+    public void shutdownSpace() {
+        try {
+            for (Producer<?> producer : producers.values()) {
+                if (producer != null) producer.close();
+            }
+            for (Consumer<?> consumer : consumers.values()) {
+                if (consumer != null) consumer.close();
+            }
+            for (Reader<?> reader : readers.values()) {
+                if (reader != null) reader.close();
+            }
+            if (pulsarAdmin != null) pulsarAdmin.close();
+            if (pulsarClient != null) pulsarClient.close();
+        }
+        catch (Exception e) {
+            throw new PulsarAdapterUnexpectedException(
+                "Unexpected error when shutting down the Pulsar space \"" + spaceName + "\"!");
+        }
+    }
+
     /**
      * Get Pulsar schema from the definition string
      */
@@ -184,6 +219,11 @@ public class PulsarSpace {
             }
             pulsarSchema = Schema.KeyValue(pulsarKeySchema, pulsarSchema, keyValueEncodingType);
         }
+    }
+
+    @Override
+    public void close() {
+        shutdownSpace();
     }
 }
 

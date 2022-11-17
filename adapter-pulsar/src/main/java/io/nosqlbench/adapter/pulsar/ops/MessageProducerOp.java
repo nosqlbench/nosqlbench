@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.pulsar.ops;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.MessageSequenceNumberSendingHandler;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
@@ -231,8 +232,6 @@ public class MessageProducerOp extends PulsarClientOp {
 
                 throw new PulsarAdapterUnexpectedException(errMsg);
             }
-
-            timeTracker.run();
         }
         else {
             try {
@@ -272,16 +271,13 @@ public class MessageProducerOp extends PulsarClientOp {
                                 msgValue);
                         }
                     }
-
-                    timeTracker.run();
                 }).exceptionally(ex -> {
                     logger.error("Async message sending failed: " +
                         "key - " + msgKey + "; " +
                         "properties - " + msgPropRawJsonStr + "; " +
                         "payload - " + msgValue);
 
-                    pulsarActivity.asyncOperationFailed(ex);
-                    return null;
+                    throw new PulsarAdapterAsyncOperationFailedException(ex);
                 });
             }
             catch (Exception e) {

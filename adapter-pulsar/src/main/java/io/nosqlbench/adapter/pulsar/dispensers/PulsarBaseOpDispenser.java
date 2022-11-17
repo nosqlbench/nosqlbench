@@ -23,9 +23,6 @@ import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -37,7 +34,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -51,18 +47,12 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
     protected final ParsedOp parsedOp;
     protected final PulsarSpace pulsarSpace;
     protected final PulsarAdapterMetrics pulsarAdapterMetrics;
-    private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
-
     protected final LongFunction<Boolean> asyncApiFunc;
     protected final LongFunction<String> tgtNameFunc;
 
     protected final int totalThreadNum;
 
     protected final long totalCycleNum;
-
-    protected RateLimiter per_thread_cyclelimiter;
 
     public PulsarBaseOpDispenser(DriverAdapter adapter,
                                  ParsedOp op,
@@ -81,17 +71,10 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
 
         String defaultMetricsPrefix = getDefaultMetricsPrefix(this.parsedOp);
         this.pulsarAdapterMetrics = new PulsarAdapterMetrics(this, defaultMetricsPrefix);
-        if (instrument) {
-            pulsarAdapterMetrics.initPulsarAdapterInstrumentation();
-        }
+        pulsarAdapterMetrics.initPulsarAdapterInstrumentation();
 
         totalThreadNum = NumberUtils.toInt(parsedOp.getStaticValue("threads"));
         totalCycleNum = NumberUtils.toLong(parsedOp.getStaticValue("cycles"));
-
-        this.parsedOp.getOptionalStaticConfig("per_thread_cyclerate", String.class)
-            .map(RateSpec::new)
-            .ifPresent(spec -> per_thread_cyclelimiter =
-                RateLimiters.createOrUpdate(this, "cycles", per_thread_cyclelimiter, spec));
     }
 
     @Override
@@ -187,11 +170,11 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 apiMetricsPrefix = apiType;
 
                 if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label))
-                    apiMetricsPrefix += producers.size();
+                    apiMetricsPrefix += pulsarSpace.getProducerSetCnt();
                 else if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label))
-                    apiMetricsPrefix += consumers.size();
+                    apiMetricsPrefix += pulsarSpace.getConsumerSetCnt();
                 else if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.READER.label))
-                    apiMetricsPrefix += readers.size();
+                    apiMetricsPrefix += pulsarSpace.getReaderSetCnt();
 
                 apiMetricsPrefix += "_";
             }
@@ -257,7 +240,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         String producerName = getEffectiveProducerName(cycleProducerName);
 
         String producerCacheKey = PulsarAdapterUtil.buildCacheKey(producerName, topicName);
-        Producer<?> producer = producers.get(producerCacheKey);
+        Producer<?> producer = pulsarSpace.getProducer(producerCacheKey);
 
         if (producer == null) {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
@@ -280,7 +263,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 }
 
                 producer = producerBuilder.create();
-                producers.put(producerCacheKey, producer);
+                pulsarSpace.setProducer(producerCacheKey, producer);
 
                 if (instrument) {
                     pulsarAdapterMetrics.registerProducerApiMetrics(producer,
@@ -469,7 +452,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             consumerName,
             subscriptionName,
             consumerTopicListString);
-        Consumer<?> consumer = consumers.get(consumerCacheKey);
+        Consumer<?> consumer = pulsarSpace.getConsumer(consumerCacheKey);
 
         if (consumer == null) {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
@@ -525,7 +508,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 }
 
                 consumer = consumerBuilder.subscribe();
-                consumers.put(consumerCacheKey, consumer);
+                pulsarSpace.setConsumer(consumerCacheKey, consumer);
 
                 if (instrument) {
                     pulsarAdapterMetrics.registerConsumerApiMetrics(
@@ -640,7 +623,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         }
 
         String readerCacheKey = PulsarAdapterUtil.buildCacheKey(topicName, readerName, startMsgPosStr);
-        Reader<?> reader = readers.get(readerCacheKey);
+        Reader<?> reader = pulsarSpace.getReader(readerCacheKey);
 
         if (reader == null) {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();;
@@ -676,7 +659,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 throw new RuntimeException("Unable to create a Pulsar reader!");
             }
 
-            readers.put(readerCacheKey, reader);
+            pulsarSpace.setReader(readerCacheKey, reader);
         }
 
         return reader;

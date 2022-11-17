@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.pulsar.ops;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -127,15 +128,14 @@ public class MessageConsumerOp extends PulsarClientOp {
                     try {
                         handleMessage(transaction, message);
                     } catch (PulsarClientException | TimeoutException e) {
-                        pulsarActivity.asyncOperationFailed(e);
+                        throw new PulsarAdapterAsyncOperationFailedException(e);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     } catch (ExecutionException e) {
-                        pulsarActivity.asyncOperationFailed(e.getCause());
+                        throw new PulsarAdapterAsyncOperationFailedException(e.getCause());
                     }
                 }).exceptionally(ex -> {
-                    pulsarActivity.asyncOperationFailed(ex);
-                    return null;
+                    throw new PulsarAdapterAsyncOperationFailedException(ex);
                 });
             }
             catch (Exception e) {
