@@ -1,0 +1,34 @@
+bindings:
+  # message key, property and value
+  mykey: NumberNameToString()
+  int_prop_val: ToString(); Prefix("IntProp_")
+  text_prop_val: AlphaNumericString(5); Prefix("TextProp_")
+  myvalue: AlphaNumericString(20)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  async_api: "true"
+
+blocks:
+  msg-produce-block:
+    tags:
+      phase: msg-send
+    ops:
+      op1:
+        MessageProduce: "tnt0/ns0/tp0"
+        msg_key: "{mykey}"
+        msg_prop: |
+          {
+            "prop1": "{int_prop_val}",
+            "prop2": "{text_prop_val}"
+          }
+        msg_value: "{myvalue}"
+
+  msg-consume-block:
+    tags:
+      phase: msg-recv
+    ops:
+      op1:
+        MessageConsume: "tnt0/ns0/tp0"
+        subscription_name: "mynbsub"
+#        subscription_type: "shared"

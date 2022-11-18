@@ -1,0 +1,16 @@
+bindings:
+  # 20 topics: 10 tenants, 2 namespaces/tenant
+  tenant: Mod(20); Div(2); ToString(); Prefix("tnt")
+  namespace: Mod(2); ToString(); Prefix("ns")
+
+params:
+  async_api: "false"
+  admin_delop: "false"
+
+blocks:
+  admin-namespace-block:
+    tags:
+      phase: admin-namespace
+    ops:
+      op1:
+        AdminNamespace: "{tenant}/{namespace}"

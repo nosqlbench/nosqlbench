@@ -39,7 +39,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
 
     private final String name;
     protected final DriverAdapter<T, S> adapter;
-    private boolean instrument;
+    protected boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
     private Timer errorTimer;
@@ -83,12 +83,16 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     @Override
     public abstract T apply(long cycle);
 
+    protected String getDefaultMetricsPrefix(ParsedOp pop) {
+        return pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--";
+    }
+
     private void configureInstrumentation(ParsedOp pop) {
         this.instrument = pop.takeStaticConfigOr("instrument", false);
         if (instrument) {
-            this.successTimer = ActivityMetrics.timer(pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--success");
-            this.errorTimer = ActivityMetrics.timer(pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--error");
-            this.resultSizeHistogram = ActivityMetrics.histogram(pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--resultset-size");
+            this.successTimer = ActivityMetrics.timer(getDefaultMetricsPrefix(pop) + "success");
+            this.errorTimer = ActivityMetrics.timer(getDefaultMetricsPrefix(pop) + "error");
+            this.resultSizeHistogram = ActivityMetrics.histogram(getDefaultMetricsPrefix(pop) + "resultset-size");
         }
     }
 

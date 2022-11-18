@@ -61,6 +61,7 @@
         <module>adapter-tcp</module>
         <module>adapter-dynamodb</module>
         <module>adapter-mongodb</module>
+        <module>adapter-pulsar</module>
 
         <!-- VIRTDATA MODULES -->
 
@@ -91,7 +92,7 @@
                 <module>driver-jmx</module>
                 <module>driver-jdbc</module>
                 <module>driver-cockroachdb</module>
-                <module>driver-pulsar</module>
+                <!--<module>driver-pulsar</module>-->
 
             </modules>
         </profile>
