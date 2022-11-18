@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.pulsar.ops;
 
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
@@ -84,7 +83,6 @@ public class MessageProducerOp extends PulsarClientOp {
         this.msgValue = msgValue;
 
         getMsgPropMapFromRawJsonStr();
-        getMsgPropMapFromRawJsonStr();
     }
 
     private MessageSequenceNumberSendingHandler getMessageSequenceNumberSendingHandler(String topicName) {
@@ -131,7 +129,7 @@ public class MessageProducerOp extends PulsarClientOp {
         }
 
         // set message key
-        if (!StringUtils.isBlank(msgKey)) {
+        if ( !StringUtils.isBlank(msgKey) && !(pulsarSchema instanceof KeyValueSchema) ) {
             typedMessageBuilder = typedMessageBuilder.key(msgKey);
         }
 
@@ -145,31 +143,32 @@ public class MessageProducerOp extends PulsarClientOp {
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
         if (pulsarSchema instanceof KeyValueSchema) {
 
-            // {KEY IN JSON}||{VALUE IN JSON}
-            int separator = msgValue.indexOf("}||{");
-            if (separator < 0) {
-                throw new IllegalArgumentException("KeyValue payload MUST be in form {KEY IN JSON}||{VALUE IN JSON} (with 2 pipes that separate the KEY part from the VALUE part)");
-            }
-            String keyInput = msgValue.substring(0, separator + 1);
-            String valueInput = msgValue.substring(separator + 3);
+//            // {KEY IN JSON}||{VALUE IN JSON}
+//            int separator = msgValue.indexOf("}||{");
+//            if (separator < 0) {
+//                throw new IllegalArgumentException("KeyValue payload MUST be in form {KEY IN JSON}||{VALUE IN JSON} (with 2 pipes that separate the KEY part from the VALUE part)");
+//            }
+//            String keyInput = msgValue.substring(0, separator + 1);
+//            String valueInput = msgValue.substring(separator + 3);
 
             KeyValueSchema keyValueSchema = (KeyValueSchema) pulsarSchema;
             org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
             GenericRecord payload = PulsarAvroSchemaUtil.GetGenericRecord_PulsarAvro(
                 (GenericAvroSchema) keyValueSchema.getValueSchema(),
                 avroSchema,
-                valueInput
+                msgValue
             );
 
             org.apache.avro.Schema avroSchemaForKey = getKeyAvroSchemaFromConfiguration();
             GenericRecord key = PulsarAvroSchemaUtil.GetGenericRecord_PulsarAvro(
                 (GenericAvroSchema) keyValueSchema.getKeySchema(),
                 avroSchemaForKey,
-                keyInput
+                msgKey
             );
+
             typedMessageBuilder = typedMessageBuilder.value(new KeyValue(key, payload));
             // TODO: add a way to calculate the message size for KEY_VALUE messages
-            messageSize = msgValue.length();
+            messageSize = msgKey.length() + msgValue.length();
         }
         else if (PulsarAdapterUtil.isAvroSchemaTypeStr(schemaType.name())) {
             GenericRecord payload = PulsarAvroSchemaUtil.GetGenericRecord_PulsarAvro(
@@ -209,14 +208,14 @@ public class MessageProducerOp extends PulsarClientOp {
                         logger.debug("({}) Sync message sent: msg-key={}; msg-properties={}; msg-payload={})",
                             producer.getProducerName(),
                             msgKey,
-                            msgPropRawJsonStr,
+                            msgProperties,
                             avroGenericRecord.toString());
                     }
                     else {
                         logger.debug("({}) Sync message sent; msg-key={}; msg-properties={}; msg-payload={}",
                             producer.getProducerName(),
                             msgKey,
-                            msgPropRawJsonStr,
+                            msgProperties,
                             msgValue);
                     }
                 }
@@ -225,7 +224,7 @@ public class MessageProducerOp extends PulsarClientOp {
                 String errMsg =
                     "Sync message sending failed: " +
                         "key - " + msgKey + "; " +
-                        "properties - " + msgPropRawJsonStr + "; " +
+                        "properties - " + msgProperties + "; " +
                         "payload - " + msgValue;
 
                 logger.trace(errMsg);
@@ -260,21 +259,21 @@ public class MessageProducerOp extends PulsarClientOp {
                             logger.debug("({}) Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={})",
                                 producer.getProducerName(),
                                 msgKey,
-                                msgPropRawJsonStr,
+                                msgProperties,
                                 avroGenericRecord.toString());
                         }
                         else {
                             logger.debug("({}) Aysnc message sent: msg-key={}; msg-properties={}; msg-payload={}",
                                 producer.getProducerName(),
                                 msgKey,
-                                msgPropRawJsonStr,
+                                msgProperties,
                                 msgValue);
                         }
                     }
                 }).exceptionally(ex -> {
                     logger.error("Async message sending failed: " +
                         "key - " + msgKey + "; " +
-                        "properties - " + msgPropRawJsonStr + "; " +
+                        "properties - " + msgProperties + "; " +
                         "payload - " + msgValue);
 
                     throw new PulsarAdapterAsyncOperationFailedException(ex);

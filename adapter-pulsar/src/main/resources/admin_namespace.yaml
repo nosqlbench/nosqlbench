@@ -5,7 +5,7 @@ bindings:
 
 params:
   async_api: "false"
-  admin_delop: "true"
+  admin_delop: "false"
 
 blocks:
   admin-namespace-block:

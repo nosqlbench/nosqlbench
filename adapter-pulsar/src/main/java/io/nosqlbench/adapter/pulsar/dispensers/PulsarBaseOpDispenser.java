@@ -246,7 +246,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
             // Get other possible producer settings that are set at global level
-            Map<String, Object> producerConf = pulsarSpace.getPulsarNBClientConf().getProducerConfMap();
+            Map<String, Object> producerConf = pulsarSpace.getPulsarNBClientConf().getProducerConfMapTgt();
 
             // Remove global level settings: "topicName" and "producerName"
             producerConf.remove(PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName.label);
@@ -265,13 +265,11 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 producer = producerBuilder.create();
                 pulsarSpace.setProducer(producerCacheKey, producer);
 
-                if (instrument) {
-                    pulsarAdapterMetrics.registerProducerApiMetrics(producer,
-                        getPulsarAPIMetricsPrefix(
-                            PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label,
-                            producerName,
-                            topicName));
-                }
+                pulsarAdapterMetrics.registerProducerApiMetrics(producer,
+                    getPulsarAPIMetricsPrefix(
+                        PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label,
+                        producerName,
+                        topicName));
             }
             catch (PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar producer.");
@@ -458,7 +456,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
             // Get other possible consumer settings that are set at global level
-            Map<String, Object> consumerConf = new HashMap<>(pulsarSpace.getPulsarNBClientConf().getConsumerConfMap());
+            Map<String, Object> consumerConf = new HashMap<>(pulsarSpace.getPulsarNBClientConf().getConsumerConfMapTgt());
 
             // Remove global level settings:
             // - "topicNames", "topicsPattern", "subscriptionName", "subscriptionType", "consumerName"
@@ -628,7 +626,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         if (reader == null) {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();;
 
-            Map<String, Object> readerConf = pulsarSpace.getPulsarNBClientConf().getReaderConfMap();
+            Map<String, Object> readerConf = pulsarSpace.getPulsarNBClientConf().getReaderConfMapTgt();
 
             // Remove global level settings: "topicName" and "readerName"
             readerConf.remove(PulsarAdapterUtil.READER_CONF_STD_KEY.topicName.label);

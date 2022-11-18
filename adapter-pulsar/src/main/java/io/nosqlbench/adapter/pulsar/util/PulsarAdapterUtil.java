@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.pulsar.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterInvalidParamException;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -460,19 +462,25 @@ public class PulsarAdapterUtil {
         // Check if payloadStr points to a file (e.g. "file:///path/to/a/file")
         if (isAvroSchemaTypeStr(typeStr)) {
             if (StringUtils.isBlank(schemaDefinitionStr)) {
-                throw new RuntimeException("Schema definition must be provided for \"Avro\" schema type!");
-            } else if (schemaDefinitionStr.startsWith(filePrefix)) {
+                throw new PulsarAdapterInvalidParamException(
+                    "Schema definition must be provided for \"Avro\" schema type!");
+            }
+            else if (schemaDefinitionStr.startsWith(filePrefix)) {
                 try {
                     Path filePath = Paths.get(URI.create(schemaDefinitionStr));
                     schemaDefinitionStr = Files.readString(filePath, StandardCharsets.US_ASCII);
-                } catch (IOException ioe) {
-                    throw new RuntimeException("Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
+                }
+                catch (IOException ioe) {
+                    throw new PulsarAdapterUnexpectedException(
+                        "Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
                 }
             }
 
             schema = PulsarAvroSchemaUtil.GetSchema_PulsarAvro("NBAvro", schemaDefinitionStr);
-        } else {
-            throw new RuntimeException("Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
+        }
+        else {
+            throw new PulsarAdapterInvalidParamException(
+                "Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
         }
 
         return schema;

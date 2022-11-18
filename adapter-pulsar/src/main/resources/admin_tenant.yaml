@@ -4,7 +4,7 @@ bindings:
 
 params:
   async_api: "false"
-  admin_delop: "true"
+  admin_delop: "false"
 
 blocks:
   admin-tenant-block:
@@ -12,6 +12,6 @@ blocks:
       phase: admin-tenant
     ops:
       op1:
-        AdminTenant: "{tenant}"
+        AdminTopic: "{tenant}"
         admin_roles: ""
         allowed_clusters: ""

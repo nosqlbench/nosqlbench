@@ -23,6 +23,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,9 +33,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class PulsarNBClientConf {
+public class PulsarClientConf {
 
-    private final static Logger logger = LogManager.getLogger(PulsarNBClientConf.class);
+    private final static Logger logger = LogManager.getLogger(PulsarClientConf.class);
 
     private String canonicalFilePath = "";
 
@@ -43,14 +44,44 @@ public class PulsarNBClientConf {
     public static final String PRODUCER_CONF_PREFIX = "producer";
     public static final String CONSUMER_CONF_PREFIX = "consumer";
     public static final String READER_CONF_PREFIX = "reader";
-    private final HashMap<String, Object> schemaConfMap = new HashMap<>();
-    private final HashMap<String, Object> clientConfMap = new HashMap<>();
-    private final HashMap<String, Object> producerConfMap = new HashMap<>();
-    private final HashMap<String, Object> consumerConfMap = new HashMap<>();
-    private final HashMap<String, Object> readerConfMap = new HashMap<>();
-    // TODO: add support for other operation types: websocket-producer, managed-ledger
+    private final Map<String, String> schemaConfMapRaw = new HashMap<>();
+    private final Map<String, String> clientConfMapRaw = new HashMap<>();
 
-    public PulsarNBClientConf(String fileName) {
+    // "Raw" map is what is read from the config properties file
+    // "Tgt" map is what is really needed in the Pulsar producer/consumer/reader API
+    private final Map<String, String> producerConfMapRaw = new HashMap<>();
+    private final Map<String, Object> producerConfMapTgt = new HashMap<>();
+
+    private final Map<String, String> consumerConfMapRaw = new HashMap<>();
+    private final Map<String, Object> consumerConfMapTgt = new HashMap<>();
+
+    private final Map<String, String> readerConfMapRaw = new HashMap<>();
+    private final Map<String, Object> readerConfMapTgt = new HashMap<>();
+
+    public PulsarClientConf(String fileName) {
+
+        //////////////////
+        // Read related Pulsar client configuration settings from a file
+        readRawConfFromFile(fileName);
+
+
+        //////////////////
+        // Ignores the following Pulsar client/producer/consumer configurations since
+        // they need to be specified either as the NB CLI parameters or as the NB yaml
+        // OpTemplate parameters.
+        clientConfMapRaw.remove("brokerServiceUrl");
+        clientConfMapRaw.remove("webServiceUrl");
+
+
+        //////////////////
+        //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
+        producerConfMapTgt.putAll(PulsarConfConverter.convertRawProducerConf(producerConfMapRaw));
+        consumerConfMapTgt.putAll(PulsarConfConverter.convertRawConsumerConf(consumerConfMapRaw));
+        // TODO: Reader API is not disabled at the moment. Revisit when needed
+    }
+
+
+    public void readRawConfFromFile(String fileName) {
         File file = new File(fileName);
 
         try {
@@ -65,44 +96,37 @@ public class PulsarNBClientConf {
 
             Configuration config = builder.getConfiguration();
 
-            // Get schema specific configuration settings
-            for (Iterator<String> it = config.getKeys(SCHEMA_CONF_PREFIX); it.hasNext(); ) {
+            for (Iterator<String> it = config.getKeys(); it.hasNext(); ) {
                 String confKey = it.next();
                 String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    schemaConfMap.put(confKey.substring(SCHEMA_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
 
-            // Get client connection specific configuration settings
-            for (Iterator<String> it = config.getKeys(CLIENT_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    clientConfMap.put(confKey.substring(CLIENT_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
+                if (!StringUtils.isBlank(confVal)) {
 
-            // Get producer specific configuration settings
-            for (Iterator<String> it = config.getKeys(PRODUCER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    producerConfMap.put(confKey.substring(PRODUCER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
-
-            // Get consumer specific configuration settings
-            for (Iterator<String> it = config.getKeys(CONSUMER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    consumerConfMap.put(confKey.substring(CONSUMER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
-            }
-
-            // Get reader specific configuration settings
-            for (Iterator<String> it = config.getKeys(READER_CONF_PREFIX); it.hasNext(); ) {
-                String confKey = it.next();
-                String confVal = config.getProperty(confKey).toString();
-                if (!StringUtils.isBlank(confVal))
-                    readerConfMap.put(confKey.substring(READER_CONF_PREFIX.length() + 1), config.getProperty(confKey));
+                    // Get schema specific configuration settings, removing "schema." prefix
+                    if (StringUtils.startsWith(confKey, SCHEMA_CONF_PREFIX)) {
+                        schemaConfMapRaw.put(confKey.substring(SCHEMA_CONF_PREFIX.length() + 1), confVal);
+                    }
+                    // Get client connection specific configuration settings, removing "client." prefix
+                    // <<< https://pulsar.apache.org/docs/reference-configuration/#client >>>
+                    else if (StringUtils.startsWith(confKey, CLIENT_CONF_PREFIX)) {
+                        clientConfMapRaw.put(confKey.substring(CLIENT_CONF_PREFIX.length() + 1), confVal);
+                    }
+                    // Get producer specific configuration settings, removing "producer." prefix
+                    // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-producer >>>
+                    else if (StringUtils.startsWith(confKey, PRODUCER_CONF_PREFIX)) {
+                        producerConfMapRaw.put(confKey.substring(PRODUCER_CONF_PREFIX.length() + 1), confVal);
+                    }
+                    // Get consumer specific configuration settings, removing "consumer." prefix
+                    // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-consumer >>>
+                    else if (StringUtils.startsWith(confKey, CONSUMER_CONF_PREFIX)) {
+                        consumerConfMapRaw.put(confKey.substring(CONSUMER_CONF_PREFIX.length() + 1), confVal);
+                    }
+                    // Get reader specific configuration settings, removing "reader." prefix
+                    // <<< https://pulsar.apache.org/docs/2.10.x/client-libraries-java/#configure-reader >>>
+                    else if (StringUtils.startsWith(confKey, READER_CONF_PREFIX)) {
+                        readerConfMapRaw.put(confKey.substring(READER_CONF_PREFIX.length() + 1), confVal);
+                    }
+                }
             }
         } catch (IOException ioe) {
             logger.error("Can't read the specified config properties file!");
@@ -114,78 +138,59 @@ public class PulsarNBClientConf {
     }
 
 
+    public Map<String, String> getSchemaConfMapRaw() { return  this.schemaConfMapRaw; }
+    public Map<String, String> getClientConfMapRaw() { return this.clientConfMapRaw; }
+    public Map<String, String> getProducerConfMapRaw() { return this.producerConfMapRaw; }
+    public Map<String, Object> getProducerConfMapTgt() { return this.producerConfMapTgt; }
+    public Map<String, String> getConsumerConfMapRaw() { return this.consumerConfMapRaw; }
+    public Map<String, Object> getConsumerConfMapTgt() { return this.consumerConfMapTgt; }
+    public Map<String, String> getReaderConfMapRaw() { return this.readerConfMapRaw; }
+    public Map<String, Object> getReaderConfMapTgt() { return this.readerConfMapTgt; }
+
+
+    public String toString() {
+        return new ToStringBuilder(this).
+            append("schemaConfMapRaw", schemaConfMapRaw.toString()).
+            append("clientConfMapRaw", clientConfMapRaw.toString()).
+            append("producerConfMapRaw", producerConfMapRaw.toString()).
+            append("consumerConfMapRaw", consumerConfMapRaw.toString()).
+            append("readerConfMapRaw", readerConfMapRaw.toString()).
+            toString();
+    }
+
     //////////////////
     // Get Schema related config
-    public Map<String, Object> getSchemaConfMap() {
-        return this.schemaConfMap;
-    }
     public boolean hasSchemaConfKey(String key) {
         if (key.contains(SCHEMA_CONF_PREFIX))
-            return schemaConfMap.containsKey(key.substring(SCHEMA_CONF_PREFIX.length() + 1));
+            return schemaConfMapRaw.containsKey(key.substring(SCHEMA_CONF_PREFIX.length() + 1));
         else
-            return schemaConfMap.containsKey(key);
+            return schemaConfMapRaw.containsKey(key);
     }
-    public Object getSchemaConfValue(String key) {
+    public String getSchemaConfValue(String key) {
         if (key.contains(SCHEMA_CONF_PREFIX))
-            return schemaConfMap.get(key.substring(SCHEMA_CONF_PREFIX.length()+1));
+            return schemaConfMapRaw.get(key.substring(SCHEMA_CONF_PREFIX.length()+1));
         else
-            return schemaConfMap.get(key);
-    }
-    public void setSchemaConfValue(String key, Object value) {
-        if (key.contains(SCHEMA_CONF_PREFIX))
-            schemaConfMap.put(key.substring(SCHEMA_CONF_PREFIX.length() + 1), value);
-        else
-            schemaConfMap.put(key, value);
+            return schemaConfMapRaw.get(key);
     }
 
 
     //////////////////
     // Get Pulsar client related config
-    public Map<String, Object> getClientConfMap() {
-        return this.clientConfMap;
-    }
-    public boolean hasClientConfKey(String key) {
+    public String getClientConfValue(String key) {
         if (key.contains(CLIENT_CONF_PREFIX))
-            return clientConfMap.containsKey(key.substring(CLIENT_CONF_PREFIX.length() + 1));
+            return clientConfMapRaw.get(key.substring(CLIENT_CONF_PREFIX.length()+1));
         else
-            return clientConfMap.containsKey(key);
-    }
-    public Object getClientConfValue(String key) {
-        if (key.contains(CLIENT_CONF_PREFIX))
-            return clientConfMap.get(key.substring(CLIENT_CONF_PREFIX.length()+1));
-        else
-            return clientConfMap.get(key);
-    }
-    public void setClientConfValue(String key, Object value) {
-        if (key.contains(CLIENT_CONF_PREFIX))
-            clientConfMap.put(key.substring(CLIENT_CONF_PREFIX.length() + 1), value);
-        else
-            clientConfMap.put(key, value);
+            return clientConfMapRaw.get(key);
     }
 
 
     //////////////////
     // Get Pulsar producer related config
-    public Map<String, Object> getProducerConfMap() {
-        return this.producerConfMap;
-    }
-    public boolean hasProducerConfKey(String key) {
-        if (key.contains(PRODUCER_CONF_PREFIX))
-            return producerConfMap.containsKey(key.substring(PRODUCER_CONF_PREFIX.length() + 1));
-        else
-            return producerConfMap.containsKey(key);
-    }
     public Object getProducerConfValue(String key) {
         if (key.contains(PRODUCER_CONF_PREFIX))
-            return producerConfMap.get(key.substring(PRODUCER_CONF_PREFIX.length()+1));
+            return producerConfMapTgt.get(key.substring(PRODUCER_CONF_PREFIX.length()+1));
         else
-            return producerConfMap.get(key);
-    }
-    public void setProducerConfValue(String key, Object value) {
-        if (key.contains(PRODUCER_CONF_PREFIX))
-            producerConfMap.put(key.substring(PRODUCER_CONF_PREFIX.length()+1), value);
-        else
-            producerConfMap.put(key, value);
+            return producerConfMapTgt.get(key);
     }
     // other producer helper functions ...
     public String getProducerName() {
@@ -208,30 +213,15 @@ public class PulsarNBClientConf {
 
     //////////////////
     // Get Pulsar consumer related config
-    public Map<String, Object> getConsumerConfMap() {
-        return this.consumerConfMap;
-    }
-    public boolean hasConsumerConfKey(String key) {
+    public String getConsumerConfValue(String key) {
         if (key.contains(CONSUMER_CONF_PREFIX))
-            return consumerConfMap.containsKey(key.substring(CONSUMER_CONF_PREFIX.length() + 1));
+            return consumerConfMapRaw.get(key.substring(CONSUMER_CONF_PREFIX.length() + 1));
         else
-            return consumerConfMap.containsKey(key);
-    }
-    public Object getConsumerConfValue(String key) {
-        if (key.contains(CONSUMER_CONF_PREFIX))
-            return consumerConfMap.get(key.substring(CONSUMER_CONF_PREFIX.length() + 1));
-        else
-            return consumerConfMap.get(key);
-    }
-    public void setConsumerConfValue(String key, Object value) {
-        if (key.contains(CONSUMER_CONF_PREFIX))
-            consumerConfMap.put(key.substring(CONSUMER_CONF_PREFIX.length() + 1), value);
-        else
-            consumerConfMap.put(key, value);
+            return consumerConfMapRaw.get(key);
     }
     // Other consumer helper functions ...
     public String getConsumerTopicNames() {
-        Object confValue = getConsumerConfValue(
+        String confValue = getConsumerConfValue(
             "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
         if (confValue == null)
             return "";
@@ -284,26 +274,23 @@ public class PulsarNBClientConf {
 
     //////////////////
     // Get Pulsar reader related config
-    public Map<String, Object> getReaderConfMap() {
-        return this.readerConfMap;
-    }
     public boolean hasReaderConfKey(String key) {
         if (key.contains(READER_CONF_PREFIX))
-            return readerConfMap.containsKey(key.substring(READER_CONF_PREFIX.length() + 1));
+            return readerConfMapRaw.containsKey(key.substring(READER_CONF_PREFIX.length() + 1));
         else
-            return readerConfMap.containsKey(key);
+            return readerConfMapRaw.containsKey(key);
     }
     public Object getReaderConfValue(String key) {
         if (key.contains(READER_CONF_PREFIX))
-            return readerConfMap.get(key.substring(READER_CONF_PREFIX.length() + 1));
+            return readerConfMapRaw.get(key.substring(READER_CONF_PREFIX.length() + 1));
         else
-            return readerConfMap.get(key);
+            return readerConfMapRaw.get(key);
     }
-    public void setReaderConfValue(String key, Object value) {
+    public void setReaderConfValue(String key, String value) {
         if (key.contains(READER_CONF_PREFIX))
-            readerConfMap.put(key.substring(READER_CONF_PREFIX.length() + 1), value);
+            readerConfMapRaw.put(key.substring(READER_CONF_PREFIX.length() + 1), value);
         else
-            readerConfMap.put(key, value);
+            readerConfMapRaw.put(key, value);
     }
     // Other reader helper functions ...
     public String getReaderTopicName() {

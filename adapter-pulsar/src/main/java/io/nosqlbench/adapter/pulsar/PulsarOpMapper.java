@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.dispensers.*;
-import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnsupportedOpException;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -28,9 +27,6 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pulsar.client.admin.PulsarAdmin;
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.Schema;
 
 public class PulsarOpMapper implements OpMapper<PulsarOp> {
 
@@ -51,10 +47,6 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
         String spaceName = op.getStaticConfigOr("space", "default");
         PulsarSpace pulsarSpace = spaceCache.get(spaceName);
 
-        PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
-        PulsarAdmin pulsarAdmin = pulsarSpace.getPulsarAdmin();
-        Schema<?> pulsarSchema = pulsarSpace.getPulsarSchema();
-
         /*
          * If the user provides a body element, then they want to provide the JSON or
          * a data structure that can be converted into JSON, bypassing any further
@@ -65,12 +57,6 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
         }
         else {
             TypeAndTarget<PulsarOpType, String> opType = op.getTypeAndTarget(PulsarOpType.class, String.class);
-
-            if (PulsarOpType.isValidPulsarOpType(opType.enumId.label)) {
-                throw new PulsarAdapterUnsupportedOpException(
-                    "Unrecognized Pulsar Adapter Op Type -- must be one of the following values: \"" +
-                        PulsarOpType.getValidPulsarOpTypeList() + "\"!");
-            }
 
             return switch (opType.enumId) {
                 case AdminTenant ->
@@ -87,7 +73,7 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
                 // NOTE: not sure how useful to have Pulsar message reader API in the NB performance testing
                 //       currently, the reader API in NB Pulsar driver is no-op (see TDOD in MessageReaderOp)
                 //////////////////////////
-                 case MessageRead ->
+                case MessageRead ->
                     new MessageReaderOpDispenser(adapter, op, opType.targetFunction, pulsarSpace);
             };
         }

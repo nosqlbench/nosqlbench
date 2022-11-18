@@ -16,37 +16,14 @@
 
 package io.nosqlbench.adapter.pulsar;
 
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public enum PulsarOpType {
-    AdminTenant("admin-tenant"),
-    AdminNamespace("admin-namespace"),
-    AdminTopic("admin-topic"),
-    MessageProduce("msg-send"),
+    AdminTenant,
+    AdminNamespace,
+    AdminTopic,
+    MessageProduce,
     // This also supports multi-topic message consumption
-    MessageConsume("msg-consume"),
-    MessageRead("msg-read");
-
-    public final String label;
-
-    PulsarOpType(String label) {
-        this.label = label;
-    }
-
-
-    public static boolean isValidPulsarOpType(String type) {
-        return Arrays.stream(values())
-            .anyMatch(t -> t.label.equalsIgnoreCase(type));
-    }
-
-    public static String getValidPulsarOpTypeList() {
-        return Arrays.stream(values())
-            .map(t -> t.label)
-            .collect(Collectors.joining(", "));
-    }
+    MessageConsume,
+    MessageRead;
 }
 
 

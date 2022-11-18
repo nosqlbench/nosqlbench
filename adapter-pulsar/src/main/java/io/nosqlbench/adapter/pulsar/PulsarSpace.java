@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.PulsarNBClientConf;
+import io.nosqlbench.adapter.pulsar.util.PulsarClientConf;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -45,7 +45,7 @@ public class PulsarSpace implements  AutoCloseable {
     private final String pulsarSvcUrl;
     private final String webSvcUrl;
 
-    private PulsarNBClientConf pulsarNBClientConf;
+    private PulsarClientConf pulsarClientConf;
     private PulsarClient pulsarClient;
     private PulsarAdmin pulsarAdmin;
     private Schema<?> pulsarSchema;
@@ -61,7 +61,7 @@ public class PulsarSpace implements  AutoCloseable {
 
         this.pulsarSvcUrl = cfg.get("service_url");
         this.webSvcUrl = cfg.get("web_url");
-        this.pulsarNBClientConf = new PulsarNBClientConf(cfg.get("config"));
+        this.pulsarClientConf = new PulsarClientConf(cfg.get("config"));
 
         initPulsarAdminAndClientObj();
         createPulsarSchemaFromConf();
@@ -82,7 +82,7 @@ public class PulsarSpace implements  AutoCloseable {
 
     public String getPulsarSvcUrl() { return pulsarSvcUrl; }
     public String getWebSvcUrl() { return webSvcUrl; }
-    public PulsarNBClientConf getPulsarNBClientConf() { return pulsarNBClientConf; }
+    public PulsarClientConf getPulsarNBClientConf() { return pulsarClientConf; }
     public PulsarClient getPulsarClient() { return pulsarClient; }
     public PulsarAdmin getPulsarAdmin() { return pulsarAdmin; }
     public Schema<?> getPulsarSchema() { return pulsarSchema; }
@@ -111,7 +111,7 @@ public class PulsarSpace implements  AutoCloseable {
         ClientBuilder clientBuilder = PulsarClient.builder();
 
         try {
-            Map<String, Object> clientConfMap = pulsarNBClientConf.getClientConfMap();
+            Map clientConfMap = pulsarClientConf.getClientConfMapRaw();
 
             // Override "client.serviceUrl" setting in config.properties
             clientConfMap.remove("serviceUrl");
@@ -119,9 +119,9 @@ public class PulsarSpace implements  AutoCloseable {
 
             // Pulsar Authentication
             String authPluginClassName =
-                (String) pulsarNBClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authPulginClassName.label);
+                pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authPulginClassName.label);
             String authParams =
-                (String) pulsarNBClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authParams.label);
+                pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authParams.label);
 
             if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
                 adminBuilder.authentication(authPluginClassName, authParams);
@@ -131,7 +131,7 @@ public class PulsarSpace implements  AutoCloseable {
             boolean useTls = StringUtils.contains(pulsarSvcUrl, "pulsar+ssl");
             if ( useTls ) {
                 String tlsHostnameVerificationEnableStr =
-                    (String) pulsarNBClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
+                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
                 boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
 
                 adminBuilder
@@ -140,14 +140,14 @@ public class PulsarSpace implements  AutoCloseable {
                     .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
 
                 String tlsTrustCertsFilePath =
-                    (String) pulsarNBClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
+                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
                 if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
                     adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
                     clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
                 }
 
                 String tlsAllowInsecureConnectionStr =
-                    (String) pulsarNBClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
+                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
                 boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
                 adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
                 clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
@@ -188,14 +188,12 @@ public class PulsarSpace implements  AutoCloseable {
 
     private Schema<?> buildSchemaFromDefinition(String schemaTypeConfEntry,
                                                 String schemaDefinitionConfEntry) {
-        Object value = pulsarNBClientConf.getSchemaConfValue(schemaTypeConfEntry);
-        Object schemaDefinition = pulsarNBClientConf.getSchemaConfValue(schemaDefinitionConfEntry);
-        String schemaType = (value != null) ? value.toString() : "";
+        String schemaType = pulsarClientConf.getSchemaConfValue(schemaTypeConfEntry);
+        String schemaDef = pulsarClientConf.getSchemaConfValue(schemaDefinitionConfEntry);
 
         Schema<?> result;
         if (PulsarAdapterUtil.isAvroSchemaTypeStr(schemaType)) {
-            String schemaDefStr = (schemaDefinition != null) ? schemaDefinition.toString() : "";
-            result = PulsarAdapterUtil.getAvroSchema(schemaType, schemaDefStr);
+            result = PulsarAdapterUtil.getAvroSchema(schemaType, schemaDef);
         } else if (PulsarAdapterUtil.isPrimitiveSchemaTypeStr(schemaType)) {
             result = PulsarAdapterUtil.getPrimitiveTypeSchema(schemaType);
         } else if (PulsarAdapterUtil.isAutoConsumeSchemaTypeStr(schemaType)) {
@@ -210,12 +208,12 @@ public class PulsarSpace implements  AutoCloseable {
         pulsarSchema = buildSchemaFromDefinition("schema.type", "schema.definition");
 
         // this is to allow KEY_VALUE schema
-        if (pulsarNBClientConf.hasSchemaConfKey("schema.key.type")) {
+        if (pulsarClientConf.hasSchemaConfKey("schema.key.type")) {
             Schema<?> pulsarKeySchema = buildSchemaFromDefinition("schema.key.type", "schema.key.definition");
-            Object encodingType = pulsarNBClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
+            String encodingType = pulsarClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
             KeyValueEncodingType keyValueEncodingType = KeyValueEncodingType.SEPARATED;
             if (encodingType != null) {
-                keyValueEncodingType = KeyValueEncodingType.valueOf(encodingType.toString());
+                keyValueEncodingType = KeyValueEncodingType.valueOf(encodingType);
             }
             pulsarSchema = Schema.KeyValue(pulsarKeySchema, pulsarSchema, keyValueEncodingType);
         }

@@ -6,7 +6,7 @@ bindings:
 
 params:
   async_api: "false"
-  admin_delop: "true"
+  admin_delop: "false"
 
 blocks:
   admin-topic-block:
@@ -15,5 +15,5 @@ blocks:
     ops:
       op1:
         AdminTopic: "{tenant}/{namespace}/{topic}"
-        enable_partition: "true"
+        enable_partition: "false"
         partition_num: "5"
