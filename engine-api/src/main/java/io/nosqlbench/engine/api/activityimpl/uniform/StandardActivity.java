@@ -19,7 +19,6 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.OpConfigError;
-import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
@@ -59,12 +58,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
-            Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+            Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
             StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
             yamlmodel = workload.getConfigModel();
-        }
-        else {
-            yamlmodel= ConfigModel.of(StandardActivity.class).asReadOnly();
+        } else {
+            yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
         }
 
         ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
@@ -78,7 +76,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         List<DriverAdapter> adapterlist = new ArrayList<>();
         for (OpTemplate ot : opTemplates) {
             ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of());
-            String driverName = incompleteOpDef.takeOptionalStaticValue("driver",String.class)
+            String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
                 .or(() -> activityDef.getParams().getOptionalString("driver"))
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
@@ -100,13 +98,13 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
                     combinedConfig = combinedModel.matchConfig(activityDef.getParams());
                     configurable.applyConfig(combinedConfig);
                 }
-                adapters.put(driverName,adapter);
-                mappers.put(driverName,adapter.getOpMapper());
+                adapters.put(driverName, adapter);
+                mappers.put(driverName, adapter.getOpMapper());
             }
 
             DriverAdapter adapter = adapters.get(driverName);
             adapterlist.add(adapter);
-            ParsedOp pop = new ParsedOp(ot,adapter.getConfiguration(),List.of(adapter.getPreprocessor()));
+            ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()));
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
@@ -153,13 +151,13 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             if (adapter instanceof NBReconfigurable configurable) {
                 NBConfigModel cfgModel = configurable.getReconfigModel();
                 NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
-                NBReconfigurable.applyMatching(cfg,List.of(configurable));
+                NBReconfigurable.applyMatching(cfg, List.of(configurable));
             }
         }
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> cfg) {
+    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String, Object> cfg) {
         List<OpTemplate> opTemplates = new ArrayList<>();
         for (DriverAdapter adapter : adapters.values()) {
             if (adapter instanceof SyntheticOpTemplateProvider sotp) {
@@ -170,12 +168,26 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         return opTemplates;
     }
 
+    /**
+     * This is done here since driver adapters are intended to keep all of their state within
+     * dedicated <em>state space</em> types. Any space which implements {@link io.nosqlbench.engine.api.activityapi.core.Shutdownable}
+     * will be closed when this activity shuts down.
+     */
     @Override
     public void shutdownActivity() {
-        adapters.forEach((name, adapter) -> {
-            if (adapter instanceof Shutdownable shutdownable) {
-                shutdownable.shutdown();
-            }
-        });
+        for (Map.Entry<String, DriverAdapter> entry : adapters.entrySet()) {
+            String adapterName = entry.getKey();
+            DriverAdapter<?,?> adapter = entry.getValue();
+            adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
+                if (space instanceof AutoCloseable autocloseable) {
+                    try {
+                        autocloseable.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while shutting down state space for " +
+                            "adapter=" + adapterName + ", space=" + spaceName + ": " + e, e);
+                    }
+                }
+            });
+        }
     }
 }

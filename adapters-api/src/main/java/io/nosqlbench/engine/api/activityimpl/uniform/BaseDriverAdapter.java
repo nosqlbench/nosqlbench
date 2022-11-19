@@ -17,7 +17,6 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.standard.*;
-import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.engine.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -32,7 +31,7 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter<R,S>, NBConfigurable, NBReconfigurable, Shutdownable {
+public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
     private DriverSpaceCache<? extends S> spaceCache;
@@ -47,22 +46,22 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      */
     @Override
     public final Function<Map<String, Object>, Map<String, Object>> getPreprocessor() {
-        List<Function<Map<String,Object>,Map<String,Object>>> mappers = new ArrayList<>();
-        List<Function<Map<String,Object>,Map<String,Object>>> stmtRemappers =
+        List<Function<Map<String, Object>, Map<String, Object>>> mappers = new ArrayList<>();
+        List<Function<Map<String, Object>, Map<String, Object>>> stmtRemappers =
             getOpStmtRemappers().stream()
-                .map(m -> new FieldDestructuringMapper("stmt",m))
+                .map(m -> new FieldDestructuringMapper("stmt", m))
                 .collect(Collectors.toList());
         mappers.addAll(stmtRemappers);
         mappers.addAll(getOpFieldRemappers());
 
-        if (mappers.size()==0) {
+        if (mappers.size() == 0) {
             return (i) -> i;
         }
 
-        Function<Map<String,Object>,Map<String,Object>> remapper = null;
+        Function<Map<String, Object>, Map<String, Object>> remapper = null;
         for (int i = 0; i < mappers.size(); i++) {
-            if (i==0) {
-                remapper=mappers.get(i);
+            if (i == 0) {
+                remapper = mappers.get(i);
             } else {
                 remapper = remapper.andThen(mappers.get(i));
             }
@@ -106,7 +105,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      *
      * @return A list of optionally applied remapping functions.
      */
-    public List<Function<String, Optional<Map<String,Object>>>> getOpStmtRemappers() {
+    public List<Function<String, Optional<Map<String, Object>>>> getOpStmtRemappers() {
         return List.of();
     }
 
@@ -116,14 +115,14 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
      * @return
      */
     @Override
-    public List<Function<Map<String,Object>,Map<String,Object>>> getOpFieldRemappers() {
+    public List<Function<Map<String, Object>, Map<String, Object>>> getOpFieldRemappers() {
         return List.of();
     }
 
     @Override
     public synchronized final DriverSpaceCache<? extends S> getSpaceCache() {
-        if (spaceCache==null) {
-            spaceCache=new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
+        if (spaceCache == null) {
+            spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }
@@ -153,7 +152,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(BaseDriverAdapter.class)
             .add(Param.optional("alias"))
-            .add(Param.defaultTo("strict",true,"strict op field mode, which requires that provided op fields are recognized and used"))
+            .add(Param.defaultTo("strict", true, "strict op field mode, which requires that provided op fields are recognized and used"))
             .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
             .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
             .add(Param.defaultTo("errors", "stop", "error handler configuration"))
@@ -166,7 +165,7 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
             .add(Param.optional("seq", String.class, "sequencing algorithm"))
             .add(Param.optional("instrument", Boolean.class))
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
-            .add(Param.optional("driver",String.class))
+            .add(Param.optional("driver", String.class))
             .asReadOnly();
     }
 
@@ -184,15 +183,5 @@ public abstract class BaseDriverAdapter<R extends Op,S> implements DriverAdapter
         LongFunction<String> spaceNameF = pop.getAsFunctionOr("space", "default");
         DriverSpaceCache<? extends S> cache = getSpaceCache();
         return l -> getSpaceCache().get(spaceNameF.apply(l));
-    }
-
-    @Override
-    public void shutdown() {
-        spaceCache.getElements().forEach((spacename,space) -> {
-            if (space instanceof Shutdownable shutdownable) {
-                logger.trace("Shutting down space '" + spacename +"'");
-                shutdownable.shutdown();
-            }
-        });
     }
 }
