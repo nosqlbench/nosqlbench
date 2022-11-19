@@ -28,9 +28,11 @@ public class DiagOp implements CycleOp<Integer> {
 
     private final static Logger logger = LogManager.getLogger(DiagOp.class);
     private final List<DiagTask> mutators;
+    private final DiagSpace space;
 
-    public DiagOp(List<DiagTask> mutators) {
+    public DiagOp(DiagSpace space, List<DiagTask> mutators) {
         this.mutators = mutators;
+        this.space = space;
     }
 
     @Override

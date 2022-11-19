@@ -19,7 +19,6 @@ package io.nosqlbench.cli.testing;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +37,7 @@ public class ExitStatusIntegrationTests {
             "badparam"
         );
         assertThat(result.exception).isNull();
-        String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
+        String stderr = String.join("\n", result.getStderrData());
         assertThat(stderr).contains("Scenario stopped due to error");
         assertThat(result.exitStatus).isEqualTo(2);
     }
@@ -52,7 +51,7 @@ public class ExitStatusIntegrationTests {
             "driver=diag", "op=initdelay:initdelay=notanumber"
         );
         assertThat(result.exception).isNull();
-        String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
+        String stderr = String.join("\n", result.getStdoutData());
         assertThat(stderr).contains("For input string: \"notanumber\"");
         assertThat(result.exitStatus).isEqualTo(2);
     }
@@ -77,15 +76,26 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
-                java, "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop", "run",
-            "driver=diag", "cyclerate=5", "op=erroroncycle:erroroncycle=10", "cycles=2000", "-vvv"
+                java, "-jar", JARNAME, "--logs-dir", "logs/test/op_exception", "run",
+            "driver=diag", "rate=5", "op=erroroncycle:erroroncycle=10", "cycles=2000", "-vvv"
         );
         assertThat(result.exception).isNull();
-        String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
+        String stdout = String.join("\n", result.getStdoutData());
         assertThat(stdout).contains("Diag was requested to stop on cycle 10");
         assertThat(result.exitStatus).isEqualTo(2);
     }
 
-
-
+    @Test
+    public void testCloseErrorHandlerOnSpace() {
+        ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
+        ProcessResult result = invoker.run("exitstatus_erroronclose", 30,
+            java, "-jar", JARNAME, "--logs-dir", "logs/test/error_on_close", "run",
+            "driver=diag", "rate=5", "op=noop", "cycles=10", "erroronclose=true", "-vvv"
+        );
+        String stdout = String.join("\n", result.getStdoutData());
+        String stderr = String.join("\n", result.getStderrData());
+        assertThat(result.exception).isNotNull();
+        assertThat(result.exception.getMessage()).contains("diag space was configured to throw");
+    }
 }
