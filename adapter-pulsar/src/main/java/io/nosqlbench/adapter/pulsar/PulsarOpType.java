@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-activitydef = {
-    "alias" : "testhistostatslogger",
-    "driver" : "diag",
-    "cycles" : "50000",
-    "threads" : "5",
-    "rate" : "100.0",
-    "op" : "noop"
-};
+package io.nosqlbench.adapter.pulsar;
 
-histostatslogger.logHistoStats("testing extention histostatslogger", ".*", "logs/histostats.csv", "0.5s");
-print("started logging to logs/histostats.csv for all metrics at 1/2" +
-    " second intervals.");
-scenario.start(activitydef);
-scenario.waitMillis(4000);
-scenario.stop(activitydef);
+public enum PulsarOpType {
+    AdminTenant,
+    AdminNamespace,
+    AdminTopic,
+    MessageProduce,
+    // This also supports multi-topic message consumption
+    MessageConsume,
+    MessageRead;
+}
+
 
