@@ -35,12 +35,6 @@ public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
 
     private final static Logger logger = LogManager.getLogger("MessageConsumerOpDispenser");
 
-    public static final String TOPIC_PATTERN_OP_PARAM = "topic_pattern";
-    public static final String SUBSCRIPTION_NAME_OP_PARAM = "subscription_name";
-    public static final String SUBSCRIPTION_TYPE_OP_PARAM = "subscription_type";
-    public static final String CONSUMER_NAME_OP_PARAM = "consumer_name";
-    public static final String RANGES_OP_PARAM = "ranges";
-
     private final LongFunction<String> topicPatternFunc;
     private final LongFunction<String> subscriptionNameFunc;
     private final LongFunction<String> subscriptionTypeFunc;
@@ -49,8 +43,8 @@ public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
     private final LongFunction<String> e2eStartTimeSrcParamStrFunc;
     private final LongFunction<Consumer> consumerFunction;
 
-    private final ThreadLocal<Map<String, ReceivedMessageSequenceTracker>> receivedMessageSequenceTrackersForTopicThreadLocal =
-        ThreadLocal.withInitial(HashMap::new);
+    private final ThreadLocal<Map<String, ReceivedMessageSequenceTracker>>
+        receivedMessageSequenceTrackersForTopicThreadLocal = ThreadLocal.withInitial(HashMap::new);
 
     public MessageConsumerOpDispenser(DriverAdapter adapter,
                                       ParsedOp op,
@@ -58,11 +52,16 @@ public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
                                       PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
 
-        this.topicPatternFunc = lookupOptionalStrOpValueFunc(TOPIC_PATTERN_OP_PARAM);
-        this.subscriptionNameFunc = lookupMandtoryStrOpValueFunc(SUBSCRIPTION_NAME_OP_PARAM);
-        this.subscriptionTypeFunc = lookupOptionalStrOpValueFunc(SUBSCRIPTION_TYPE_OP_PARAM);
-        this.cycleConsumerNameFunc = lookupOptionalStrOpValueFunc(CONSUMER_NAME_OP_PARAM);
-        this.rangesFunc = lookupOptionalStrOpValueFunc(RANGES_OP_PARAM);
+        this.topicPatternFunc =
+            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
+        this.subscriptionNameFunc =
+            lookupMandtoryStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
+        this.subscriptionTypeFunc =
+            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
+        this.cycleConsumerNameFunc =
+            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
+        this.rangesFunc =
+            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY.ranges.label);
         this.e2eStartTimeSrcParamStrFunc = lookupOptionalStrOpValueFunc(
             PulsarAdapterUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
         this.consumerFunction = (l) -> getConsumer(

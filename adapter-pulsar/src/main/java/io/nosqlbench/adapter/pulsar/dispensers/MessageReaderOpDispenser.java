@@ -43,7 +43,8 @@ public class MessageReaderOpDispenser extends PulsarClientOpDispenser {
                                     PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
 
-        this.cycleReaderNameFunc = lookupMandtoryStrOpValueFunc("reader_name");
+        this.cycleReaderNameFunc =
+            lookupMandtoryStrOpValueFunc(PulsarAdapterUtil.READER_CONF_STD_KEY.readerName.label);
         this.msgStartPosStrFunc = lookupOptionalStrOpValueFunc(
             "start_msg_position", PulsarAdapterUtil.READER_MSG_POSITION_TYPE.earliest.label);
         this.readerFunc = (l) -> getReader(

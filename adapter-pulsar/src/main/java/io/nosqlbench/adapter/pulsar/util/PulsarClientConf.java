@@ -24,6 +24,7 @@ import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,11 +40,6 @@ public class PulsarClientConf {
 
     private String canonicalFilePath = "";
 
-    public static final String SCHEMA_CONF_PREFIX = "schema";
-    public static final String CLIENT_CONF_PREFIX = "client";
-    public static final String PRODUCER_CONF_PREFIX = "producer";
-    public static final String CONSUMER_CONF_PREFIX = "consumer";
-    public static final String READER_CONF_PREFIX = "reader";
     private final Map<String, String> schemaConfMapRaw = new HashMap<>();
     private final Map<String, String> clientConfMapRaw = new HashMap<>();
 
@@ -75,8 +71,8 @@ public class PulsarClientConf {
 
         //////////////////
         //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
-        producerConfMapTgt.putAll(PulsarConfConverter.convertRawProducerConf(producerConfMapRaw));
-        consumerConfMapTgt.putAll(PulsarConfConverter.convertRawConsumerConf(consumerConfMapRaw));
+        producerConfMapTgt.putAll(PulsarConfConverter.convertStdRawProducerConf(producerConfMapRaw));
+        consumerConfMapTgt.putAll(PulsarConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
         // TODO: Reader API is not disabled at the moment. Revisit when needed
     }
 
@@ -103,28 +99,28 @@ public class PulsarClientConf {
                 if (!StringUtils.isBlank(confVal)) {
 
                     // Get schema specific configuration settings, removing "schema." prefix
-                    if (StringUtils.startsWith(confKey, SCHEMA_CONF_PREFIX)) {
-                        schemaConfMapRaw.put(confKey.substring(SCHEMA_CONF_PREFIX.length() + 1), confVal);
+                    if (StringUtils.startsWith(confKey, PulsarAdapterUtil.CONF_GATEGORY.Schema.label)) {
+                        schemaConfMapRaw.put(confKey.substring(PulsarAdapterUtil.CONF_GATEGORY.Schema.label.length() + 1), confVal);
                     }
                     // Get client connection specific configuration settings, removing "client." prefix
                     // <<< https://pulsar.apache.org/docs/reference-configuration/#client >>>
-                    else if (StringUtils.startsWith(confKey, CLIENT_CONF_PREFIX)) {
-                        clientConfMapRaw.put(confKey.substring(CLIENT_CONF_PREFIX.length() + 1), confVal);
+                    else if (StringUtils.startsWith(confKey, PulsarAdapterUtil.CONF_GATEGORY.Client.label)) {
+                        clientConfMapRaw.put(confKey.substring(PulsarAdapterUtil.CONF_GATEGORY.Client.label.length() + 1), confVal);
                     }
                     // Get producer specific configuration settings, removing "producer." prefix
                     // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-producer >>>
-                    else if (StringUtils.startsWith(confKey, PRODUCER_CONF_PREFIX)) {
-                        producerConfMapRaw.put(confKey.substring(PRODUCER_CONF_PREFIX.length() + 1), confVal);
+                    else if (StringUtils.startsWith(confKey, PulsarAdapterUtil.CONF_GATEGORY.Producer.label)) {
+                        producerConfMapRaw.put(confKey.substring(PulsarAdapterUtil.CONF_GATEGORY.Producer.label.length() + 1), confVal);
                     }
                     // Get consumer specific configuration settings, removing "consumer." prefix
                     // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-consumer >>>
-                    else if (StringUtils.startsWith(confKey, CONSUMER_CONF_PREFIX)) {
-                        consumerConfMapRaw.put(confKey.substring(CONSUMER_CONF_PREFIX.length() + 1), confVal);
+                    else if (StringUtils.startsWith(confKey, PulsarAdapterUtil.CONF_GATEGORY.Consumer.label)) {
+                        consumerConfMapRaw.put(confKey.substring(PulsarAdapterUtil.CONF_GATEGORY.Consumer.label.length() + 1), confVal);
                     }
                     // Get reader specific configuration settings, removing "reader." prefix
                     // <<< https://pulsar.apache.org/docs/2.10.x/client-libraries-java/#configure-reader >>>
-                    else if (StringUtils.startsWith(confKey, READER_CONF_PREFIX)) {
-                        readerConfMapRaw.put(confKey.substring(READER_CONF_PREFIX.length() + 1), confVal);
+                    else if (StringUtils.startsWith(confKey, PulsarAdapterUtil.CONF_GATEGORY.Reader.label)) {
+                        readerConfMapRaw.put(confKey.substring(PulsarAdapterUtil.CONF_GATEGORY.Reader.label.length() + 1), confVal);
                     }
                 }
             }
@@ -161,163 +157,111 @@ public class PulsarClientConf {
     //////////////////
     // Get Schema related config
     public boolean hasSchemaConfKey(String key) {
-        if (key.contains(SCHEMA_CONF_PREFIX))
-            return schemaConfMapRaw.containsKey(key.substring(SCHEMA_CONF_PREFIX.length() + 1));
+        if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Schema.label))
+            return schemaConfMapRaw.containsKey(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Schema.label.length() + 1));
         else
             return schemaConfMapRaw.containsKey(key);
     }
-    public String getSchemaConfValue(String key) {
-        if (key.contains(SCHEMA_CONF_PREFIX))
-            return schemaConfMapRaw.get(key.substring(SCHEMA_CONF_PREFIX.length()+1));
-        else
-            return schemaConfMapRaw.get(key);
+    public String getSchemaConfValueRaw(String key) {
+        if (hasSchemaConfKey(key)) {
+            if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Schema.label))
+                return schemaConfMapRaw.get(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Schema.label.length() + 1));
+            else
+                return schemaConfMapRaw.get(key);
+        }
+        else {
+            return "";
+        }
     }
 
 
     //////////////////
     // Get Pulsar client related config
-    public String getClientConfValue(String key) {
-        if (key.contains(CLIENT_CONF_PREFIX))
-            return clientConfMapRaw.get(key.substring(CLIENT_CONF_PREFIX.length()+1));
+    public boolean hasClientConfKey(String key) {
+        if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Client.label))
+            return clientConfMapRaw.containsKey(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Client.label.length() + 1));
         else
-            return clientConfMapRaw.get(key);
+            return clientConfMapRaw.containsKey(key);
+    }
+    public String getClientConfValueRaw(String key) {
+        if (hasClientConfKey(key)) {
+            if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Client.label))
+                return clientConfMapRaw.get(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Client.label.length() + 1));
+            else
+                return clientConfMapRaw.get(key);
+        }
+        else {
+            return "";
+        }
     }
 
 
     //////////////////
     // Get Pulsar producer related config
-    public Object getProducerConfValue(String key) {
-        if (key.contains(PRODUCER_CONF_PREFIX))
-            return producerConfMapTgt.get(key.substring(PRODUCER_CONF_PREFIX.length()+1));
+    public boolean hasProducerConfKey(String key) {
+        if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Producer.label))
+            return producerConfMapRaw.containsKey(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Producer.label.length() + 1));
         else
-            return producerConfMapTgt.get(key);
+            return producerConfMapRaw.containsKey(key);
     }
-    // other producer helper functions ...
-    public String getProducerName() {
-        Object confValue = getProducerConfValue(
-            "producer." + PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label);
-        if (confValue == null)
+    public String getProducerConfValueRaw(String key) {
+        if (hasProducerConfKey(key)) {
+            if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Producer.label))
+                return producerConfMapRaw.get(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Producer.label.length()+1));
+            else
+                return producerConfMapRaw.get(key);
+        }
+        else {
             return "";
-        else
-            return confValue.toString();
-    }
-    public String getProducerTopicName() {
-        Object confValue = getProducerConfValue(
-            "producer." + PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
+        }
     }
 
 
     //////////////////
     // Get Pulsar consumer related config
-    public String getConsumerConfValue(String key) {
-        if (key.contains(CONSUMER_CONF_PREFIX))
-            return consumerConfMapRaw.get(key.substring(CONSUMER_CONF_PREFIX.length() + 1));
+    public boolean hasConsumerConfKey(String key) {
+        if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Consumer.label))
+            return consumerConfMapRaw.containsKey(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Consumer.label.length() + 1));
         else
-            return consumerConfMapRaw.get(key);
+            return consumerConfMapRaw.containsKey(key);
     }
-    // Other consumer helper functions ...
-    public String getConsumerTopicNames() {
-        String confValue = getConsumerConfValue(
-            "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
-        if (confValue == null)
+    public String getConsumerConfValueRaw(String key) {
+        if (hasConsumerConfKey(key)) {
+            if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Consumer.label))
+                return consumerConfMapRaw.get(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Consumer.label.length() + 1));
+            else
+                return consumerConfMapRaw.get(key);
+        }
+        else {
             return "";
-        else
-            return confValue.toString();
-    }
-    public String getConsumerTopicPattern() {
-        Object confValue = getConsumerConfValue(
-            "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
-    }
-    public String getConsumerSubscriptionName() {
-        Object confValue = getConsumerConfValue(
-            "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
-    }
-    public String getConsumerSubscriptionType() {
-        Object confValue = getConsumerConfValue(
-            "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
-    }
-    public String getConsumerName() {
-        Object confValue = getConsumerConfValue(
-            "consumer." + PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
+        }
     }
     // NOTE: Below are not a standard Pulsar consumer configuration parameter as
     //          listed in "https://pulsar.apache.org/docs/en/client-libraries-java/#configure-consumer"
     //       They're custom-made configuration properties for NB pulsar driver consumer.
     public int getConsumerTimeoutSeconds() {
-        Object confValue = getConsumerConfValue(
+        String confValue = getConsumerConfValueRaw(
             "consumer." + PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY.timeout.label);
-        if (confValue == null)
-            return -1; // infinite
-        else
-            return Integer.parseInt(confValue.toString());
+        return NumberUtils.toInt(confValue, -1);
     }
 
     //////////////////
     // Get Pulsar reader related config
     public boolean hasReaderConfKey(String key) {
-        if (key.contains(READER_CONF_PREFIX))
-            return readerConfMapRaw.containsKey(key.substring(READER_CONF_PREFIX.length() + 1));
+        if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Reader.label))
+            return readerConfMapRaw.containsKey(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Reader.label.length() + 1));
         else
             return readerConfMapRaw.containsKey(key);
     }
-    public Object getReaderConfValue(String key) {
-        if (key.contains(READER_CONF_PREFIX))
-            return readerConfMapRaw.get(key.substring(READER_CONF_PREFIX.length() + 1));
-        else
-            return readerConfMapRaw.get(key);
-    }
-    public void setReaderConfValue(String key, String value) {
-        if (key.contains(READER_CONF_PREFIX))
-            readerConfMapRaw.put(key.substring(READER_CONF_PREFIX.length() + 1), value);
-        else
-            readerConfMapRaw.put(key, value);
-    }
-    // Other reader helper functions ...
-    public String getReaderTopicName() {
-        Object confValue = getReaderConfValue(
-            "reader." + PulsarAdapterUtil.READER_CONF_STD_KEY.topicName.label);
-        if (confValue == null)
+    public String getReaderConfValueRaw(String key) {
+        if (hasReaderConfKey(key)) {
+            if (key.contains(PulsarAdapterUtil.CONF_GATEGORY.Reader.label))
+                return readerConfMapRaw.get(key.substring(PulsarAdapterUtil.CONF_GATEGORY.Reader.label.length() + 1));
+            else
+                return readerConfMapRaw.get(key);
+        }
+        else {
             return "";
-        else
-            return confValue.toString();
-    }
-    public String getReaderName() {
-        Object confValue = getReaderConfValue(
-            "reader." + PulsarAdapterUtil.READER_CONF_STD_KEY.readerName.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
-    }
-    // NOTE: Below are not a standard Pulsar reader configuration parameter as
-    //          listed in "https://pulsar.apache.org/docs/en/client-libraries-java/#reader"
-    //       They're custom-made configuration properties for NB pulsar driver reader.
-    public String getStartMsgPosStr() {
-        Object confValue = getReaderConfValue(
-            "reader." + PulsarAdapterUtil.READER_CONF_CUSTOM_KEY.startMessagePos.label);
-        if (confValue == null)
-            return "";
-        else
-            return confValue.toString();
+        }
     }
 }

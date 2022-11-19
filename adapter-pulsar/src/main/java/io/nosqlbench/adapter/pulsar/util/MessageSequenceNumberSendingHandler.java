@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.pulsar.util;
  */
 
 
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.util.ArrayDeque;
@@ -34,16 +33,16 @@ public class MessageSequenceNumberSendingHandler {
     long number = 1;
     Queue<Long> outOfOrderNumbers;
 
-    public long getNextSequenceNumber(Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes) {
+    public long getNextSequenceNumber(Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes) {
         return getNextSequenceNumber(simulatedErrorTypes, SIMULATED_ERROR_PROBABILITY_PERCENTAGE);
     }
 
-    long getNextSequenceNumber(Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes, int errorProbabilityPercentage) {
+    long getNextSequenceNumber(Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes, int errorProbabilityPercentage) {
         simulateError(simulatedErrorTypes, errorProbabilityPercentage);
         return nextNumber();
     }
 
-    private void simulateError(Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes, int errorProbabilityPercentage) {
+    private void simulateError(Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> simulatedErrorTypes, int errorProbabilityPercentage) {
         if (!simulatedErrorTypes.isEmpty() && shouldSimulateError(errorProbabilityPercentage)) {
             int selectIndex = 0;
             int numberOfErrorTypes = simulatedErrorTypes.size();
@@ -51,7 +50,7 @@ public class MessageSequenceNumberSendingHandler {
                 // pick one of the simulated error type randomly
                 selectIndex = RandomUtils.nextInt(0, numberOfErrorTypes);
             }
-            PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE errorType = simulatedErrorTypes.stream()
+            PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE errorType = simulatedErrorTypes.stream()
                 .skip(selectIndex)
                 .findFirst()
                 .get();

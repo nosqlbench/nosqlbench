@@ -195,49 +195,49 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return apiMetricsPrefix;
     }
 
-    //////////////////////////////////////
-    // Producer Processing --> start
-    //////////////////////////////////////
-    //
 
-    // Topic name IS mandatory for a producer
-    // - It must be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveProducerTopicName(String cycleTopicName) {
-        if (!StringUtils.isBlank(cycleTopicName)) {
-            return cycleTopicName;
+    // A configuration parameter can be set either at the global level (config.properties file),
+    //   or at the cycle level (<nb_scenario>.yaml file).
+    // If set at both levels, cycle level setting takes precedence
+    private String getEffectiveConValue(String confCategory, String confParamName, String cycleConfValue) {
+        if (!StringUtils.isBlank(cycleConfValue)) {
+            return cycleConfValue;
         }
 
-        String globalTopicName = pulsarSpace.getPulsarNBClientConf().getProducerTopicName();
-        if (!StringUtils.isBlank(globalTopicName)) {
-            return globalTopicName;
-        }
+        if (PulsarAdapterUtil.isValidConfCategory(confCategory)) {
+            Map<String, String> catConfMap = new HashMap<>();
 
-        throw new PulsarAdapterInvalidParamException(
-            "Effective topic name for a producer can't NOT be  empty, " +
-                "it must be set either as a corresponding adapter Op parameter value or " +
-                "set in the global Pulsar conf file.");
-    }
+            if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Schema.label))
+                catConfMap = pulsarSpace.getPulsarNBClientConf().getSchemaConfMapRaw();
+            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Client.label))
+                catConfMap = pulsarSpace.getPulsarNBClientConf().getClientConfMapRaw();
+            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Producer.label))
+                catConfMap = pulsarSpace.getPulsarNBClientConf().getProducerConfMapRaw();
+            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Consumer.label))
+                catConfMap = pulsarSpace.getPulsarNBClientConf().getConsumerConfMapRaw();
+            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Reader.label))
+                catConfMap = pulsarSpace.getPulsarNBClientConf().getReaderConfMapRaw();
 
-    // Producer name is NOT mandatory
-    // - It can be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveProducerName(String cycleProducerName) {
-        if (!StringUtils.isBlank(cycleProducerName)) {
-            return cycleProducerName;
-        }
-
-        String globalProducerName = pulsarSpace.getPulsarNBClientConf().getProducerName();
-        if (!StringUtils.isBlank(globalProducerName)) {
-            return globalProducerName;
+            String globalConfValue = catConfMap.get(confParamName);
+            if (!StringUtils.isBlank(globalConfValue)) {
+                return globalConfValue;
+            }
         }
 
         return "";
     }
 
+
     public Producer<?> getProducer(String cycleTopicName, String cycleProducerName) {
-        String topicName = getEffectiveProducerTopicName(cycleTopicName);
-        String producerName = getEffectiveProducerName(cycleProducerName);
+        String topicName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Producer.label,
+            PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName.label,
+            cycleTopicName);
+
+        String producerName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Producer.label,
+            PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label,
+            cycleProducerName);
 
         String producerCacheKey = PulsarAdapterUtil.buildCacheKey(producerName, topicName);
         Producer<?> producer = pulsarSpace.getProducer(producerCacheKey);
@@ -248,7 +248,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             // Get other possible producer settings that are set at global level
             Map<String, Object> producerConf = pulsarSpace.getPulsarNBClientConf().getProducerConfMapTgt();
 
-            // Remove global level settings: "topicName" and "producerName"
+            // Remove global level settings
             producerConf.remove(PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName.label);
             producerConf.remove(PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label);
 
@@ -279,33 +279,11 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return producer;
     }
 
-    //
-    //////////////////////////////////////
-    // Producer Processing <-- end
-    //////////////////////////////////////
-
-
-
-    //////////////////////////////////////
-    // Consumer Processing --> start
-    //////////////////////////////////////
-    //
-
-    private String getEffectiveConsumerTopicNameListStr(String cycleTopicNameListStr) {
-        if (!StringUtils.isBlank(cycleTopicNameListStr)) {
-            return cycleTopicNameListStr;
-        }
-
-        String globalTopicNames = pulsarSpace.getPulsarNBClientConf().getConsumerTopicNames();
-        if (!StringUtils.isBlank(globalTopicNames)) {
-            return globalTopicNames;
-        }
-
-        return "";
-    }
-
     private List<String> getEffectiveConsumerTopicNameList(String cycleTopicNameListStr) {
-        String effectiveTopicNamesStr = getEffectiveConsumerTopicNameListStr(cycleTopicNameListStr);
+        String effectiveTopicNamesStr = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label,
+            cycleTopicNameListStr);
 
         String[] names = effectiveTopicNamesStr.split("[;,]");
         ArrayList<String> effectiveTopicNameList = new ArrayList<>();
@@ -318,21 +296,12 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return effectiveTopicNameList;
     }
 
-    private String getEffectiveConsumerTopicPatternStr(String cycleTopicPatternStr) {
-        if (!StringUtils.isBlank(cycleTopicPatternStr)) {
-            return cycleTopicPatternStr;
-        }
-
-        String globalTopicsPattern = pulsarSpace.getPulsarNBClientConf().getConsumerTopicPattern();
-        if (!StringUtils.isBlank(globalTopicsPattern)) {
-            return globalTopicsPattern;
-        }
-
-        return "";
-    }
-
     private Pattern getEffectiveConsumerTopicPattern(String cycleTopicPatternStr) {
-        String effectiveTopicPatternStr = getEffectiveConsumerTopicPatternStr(cycleTopicPatternStr);
+        String effectiveTopicPatternStr = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
+            cycleTopicPatternStr);
+
         Pattern topicsPattern;
         try {
             if (!StringUtils.isBlank(effectiveTopicPatternStr))
@@ -345,70 +314,25 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return topicsPattern;
     }
 
+    private SubscriptionType getEffectiveSubscriptionType(String cycleSubscriptionType) {
+        String subscriptionTypeStr = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label,
+            cycleSubscriptionType);
 
-    // Subscription name is NOT mandatory
-    // - It can be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveSubscriptionName(String cycleSubscriptionName) {
-        if (!StringUtils.isBlank(cycleSubscriptionName)) {
-            return cycleSubscriptionName;
-        }
-
-        String globalSubscriptionName = pulsarSpace.getPulsarNBClientConf().getConsumerSubscriptionName();
-        if (!StringUtils.isBlank(globalSubscriptionName)) {
-            return globalSubscriptionName;
-        }
-
-        throw new PulsarAdapterInvalidParamException(
-            "Effective subscription name for a consumer can't NOT be  empty, " +
-                "it must be set either as a corresponding adapter Op parameter value or " +
-                "set in the global Pulsar conf file.");
-    }
-
-    private String getEffectiveSubscriptionTypeStr(String cycleSubscriptionType) {
-        String subscriptionTypeStr = "";
-
-        if (!StringUtils.isBlank(cycleSubscriptionType)) {
-            subscriptionTypeStr = cycleSubscriptionType;
-        }
-        else {
-            String globalSubscriptionType = pulsarSpace.getPulsarNBClientConf().getConsumerSubscriptionType();
-            if (!StringUtils.isBlank(globalSubscriptionType)) {
-                subscriptionTypeStr = globalSubscriptionType;
+        SubscriptionType subscriptionType = SubscriptionType.Exclusive; // default subscription type
+        if (!StringUtils.isBlank(subscriptionTypeStr)) {
+            try {
+                subscriptionType = SubscriptionType.valueOf(subscriptionTypeStr);
+            }
+            catch (Exception e) {
+                throw new PulsarAdapterInvalidParamException(
+                    "Invalid effective subscription type for a consumer (\"" + subscriptionTypeStr + "\"). " +
+                        "It must be one of the following values: " +  PulsarAdapterUtil.getValidSubscriptionTypeList());
             }
         }
 
-        if (StringUtils.isNotBlank(subscriptionTypeStr) &&
-            !PulsarAdapterUtil.isValidSubscriptionType(subscriptionTypeStr)) {
-            throw new PulsarAdapterInvalidParamException(
-                "Invalid effective subscription type for a consumer (\"" + subscriptionTypeStr + "\"). " +
-                    "It must be one of the following values: " +  PulsarAdapterUtil.getValidSubscriptionTypeList());
-        }
-
-        return subscriptionTypeStr;
-    }
-    private SubscriptionType getEffectiveSubscriptionType(String cycleSubscriptionType) {
-        String effectiveSubscriptionStr = getEffectiveSubscriptionTypeStr(cycleSubscriptionType);
-        SubscriptionType subscriptionType = SubscriptionType.Exclusive; // default subscription type
-
-        if (!StringUtils.isBlank(effectiveSubscriptionStr)) {
-            subscriptionType = SubscriptionType.valueOf(effectiveSubscriptionStr);
-        }
-
         return subscriptionType;
-    }
-
-    private String getEffectiveConsumerName(String cycleConsumerName) {
-        if (!StringUtils.isBlank(cycleConsumerName)) {
-            return cycleConsumerName;
-        }
-
-        String globalConsumerName = pulsarSpace.getPulsarNBClientConf().getConsumerName();
-        if (!StringUtils.isBlank(globalConsumerName)) {
-            return globalConsumerName;
-        }
-
-        return "";
     }
 
     public Consumer<?> getConsumer(String cycleTopicNameListStr,
@@ -419,15 +343,28 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                                    String cycleKeySharedSubscriptionRanges) {
 
         List<String> topicNameList = getEffectiveConsumerTopicNameList(cycleTopicNameListStr);
-        String topicPatternStr = getEffectiveConsumerTopicPatternStr(cycleTopicPatternStr);
+
+        String topicPatternStr = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
+            cycleTopicPatternStr);
         Pattern topicPattern = getEffectiveConsumerTopicPattern(cycleTopicPatternStr);
-        String subscriptionName = getEffectiveSubscriptionName(cycleSubscriptionName);
+
+        String subscriptionName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label,
+            cycleSubscriptionName);
+
         SubscriptionType subscriptionType = getEffectiveSubscriptionType(cycleSubscriptionType);
-        String consumerName = getEffectiveConsumerName(cycleConsumerName);
+
+        String consumerName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
+            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label,
+            cycleConsumerName);
 
         if ( subscriptionType.equals(SubscriptionType.Exclusive) && (totalThreadNum > 1) ) {
             throw new PulsarAdapterInvalidParamException(
-                MessageConsumerOpDispenser.SUBSCRIPTION_TYPE_OP_PARAM,
+                PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label,
                 "creating multiple consumers of \"Exclusive\" subscription type under the same subscription name");
         }
 
@@ -456,20 +393,29 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
             // Get other possible consumer settings that are set at global level
-            Map<String, Object> consumerConf = new HashMap<>(pulsarSpace.getPulsarNBClientConf().getConsumerConfMapTgt());
-
-            // Remove global level settings:
-            // - "topicNames", "topicsPattern", "subscriptionName", "subscriptionType", "consumerName"
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
-            // Remove non-standard consumer configuration properties
-            consumerConf.remove(PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY.timeout.label);
+            Map<String, Object> consumerConf =
+                new HashMap<>(pulsarSpace.getPulsarNBClientConf().getConsumerConfMapTgt());
+            Map<String, Object> consumerConfToLoad = new HashMap<>();
+            consumerConfToLoad.putAll(consumerConf);
 
             try {
                 ConsumerBuilder<?> consumerBuilder;
+
+                // Remove settings that will be handled outside "loadConf()"
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
+
+                // TODO: It looks like loadConf() method can't handle the following settings properly.
+                //       Do these settings manually for now
+                //       - deadLetterPolicy
+                //       - negativeAckRedeliveryBackoff
+                //       - ackTimeoutRedeliveryBackoff
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label);
+                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label);
 
                 if (!multiTopicConsumer) {
                     assert (topicNameList.size() == 1);
@@ -487,10 +433,24 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                     }
                 }
 
-                consumerBuilder.
-                    loadConf(consumerConf).
-                    subscriptionName(subscriptionName).
-                    subscriptionType(subscriptionType);
+                consumerBuilder.loadConf(consumerConfToLoad);
+
+                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label)) {
+                    consumerBuilder.deadLetterPolicy((DeadLetterPolicy)
+                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label));
+                }
+                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label)) {
+                    consumerBuilder.negativeAckRedeliveryBackoff((RedeliveryBackoff)
+                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label));
+                }
+                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label)) {
+                    consumerBuilder.ackTimeoutRedeliveryBackoff((RedeliveryBackoff)
+                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label));
+                }
+
+                consumerBuilder
+                    .subscriptionName(subscriptionName)
+                    .subscriptionType(subscriptionType);
 
                 if (!StringUtils.isBlank(consumerName))
                     consumerBuilder.consumerName(consumerName);
@@ -508,15 +468,12 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 consumer = consumerBuilder.subscribe();
                 pulsarSpace.setConsumer(consumerCacheKey, consumer);
 
-                if (instrument) {
-                    pulsarAdapterMetrics.registerConsumerApiMetrics(
-                        consumer,
-                        getPulsarAPIMetricsPrefix(
-                            PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label,
-                            consumerName,
-                            consumerTopicListString));
-                }
-
+                pulsarAdapterMetrics.registerConsumerApiMetrics(
+                    consumer,
+                    getPulsarAPIMetricsPrefix(
+                        PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label,
+                        consumerName,
+                        consumerTopicListString));
             }
             catch (PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar consumer!");
@@ -549,73 +506,24 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         return result;
     }
 
-    //
-    //////////////////////////////////////
-    // Consumer Processing <-- end
-    //////////////////////////////////////
-
-
-
-    //////////////////////////////////////
-    // Reader Processing --> Start
-    //////////////////////////////////////
-    //
-
-    // Topic name IS mandatory for a reader
-    // - It must be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveReaderTopicName(String cycleReaderTopicName) {
-        if (!StringUtils.isBlank(cycleReaderTopicName)) {
-            return cycleReaderTopicName;
-        }
-
-        String globalReaderTopicName = pulsarSpace.getPulsarNBClientConf().getReaderTopicName();
-        if (!StringUtils.isBlank(globalReaderTopicName)) {
-            return globalReaderTopicName;
-        }
-
-        throw new PulsarAdapterInvalidParamException(
-            "Effective topic name for a reader can't NOT be  empty, " +
-                "it must be set either as a corresponding adapter Op parameter value or " +
-                "set in the global Pulsar conf file.");
-    }
-
-    // Reader name is NOT mandatory
-    // - It can be set at either global level or cycle level
-    // - If set at both levels, cycle level setting takes precedence
-    private String getEffectiveReaderName(String cycleReaderName) {
-        if (!StringUtils.isBlank(cycleReaderName)) {
-            return cycleReaderName;
-        }
-
-        String globalReaderName = pulsarSpace.getPulsarNBClientConf().getReaderName();
-        if (!StringUtils.isBlank(globalReaderName)) {
-            return globalReaderName;
-        }
-
-        return "";
-    }
-
-    private String getEffectiveStartMsgPosStr(String cycleStartMsgPosStr) {
-        if (!StringUtils.isBlank(cycleStartMsgPosStr)) {
-            return cycleStartMsgPosStr;
-        }
-
-        String globalStartMsgPosStr = pulsarSpace.getPulsarNBClientConf().getStartMsgPosStr();
-        if (!StringUtils.isBlank(globalStartMsgPosStr)) {
-            return globalStartMsgPosStr;
-        }
-
-        return PulsarAdapterUtil.READER_MSG_POSITION_TYPE.latest.label;
-    }
-
     public Reader<?> getReader(String cycleTopicName,
                                String cycleReaderName,
                                String cycleStartMsgPos) {
 
-        String topicName = getEffectiveReaderTopicName(cycleTopicName);
-        String readerName = getEffectiveReaderName(cycleReaderName);
-        String startMsgPosStr = getEffectiveStartMsgPosStr(cycleStartMsgPos);
+        String topicName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
+            PulsarAdapterUtil.READER_CONF_STD_KEY.topicName.label,
+            cycleTopicName);
+
+        String readerName = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
+            PulsarAdapterUtil.READER_CONF_STD_KEY.readerName.label,
+            cycleReaderName);
+
+        String startMsgPosStr = getEffectiveConValue(
+            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
+            PulsarAdapterUtil.READER_CONF_CUSTOM_KEY.startMessagePos.label,
+            cycleStartMsgPos);
         if (!PulsarAdapterUtil.isValideReaderStartPosition(startMsgPosStr)) {
             throw new RuntimeException("Reader:: Invalid value for reader start message position!");
         }
