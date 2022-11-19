@@ -33,11 +33,12 @@ jobs:
       run: mvn verify
 
     - name: Capture
-      run: tar -cvf jbanks_files.tar [a-zA-Z]**/logs/*
+      run: tar -cvf logfiles.tar [a-zA-Z]**/logs/*
+      if: success() || failure()
 
     - name: Archive Test Results
-      if: always()
+      if: success() || failure()
       uses: actions/upload-artifact@v3
       with:
         name: test-results
-        path: jbanks_files.tar
+        path: logfiles.tar
