@@ -83,15 +83,6 @@ public class ActivityMetrics {
         return metric;
     }
 
-    private static Metric register(String fullMetricName, MetricProvider metricProvider) {
-        Metric metric = get().getMetrics().get(fullMetricName);
-        if (metric == null) {
-            metric = metricProvider.getMetric();
-            return get().register(fullMetricName, metric);
-        }
-        return metric;
-    }
-
     private static Metric register(ScriptContext context, String name, MetricProvider metricProvider) {
         Metric metric = get().getMetrics().get(name);
         if (metric == null) {

@@ -119,9 +119,9 @@ public class PulsarSpace implements  AutoCloseable {
 
             // Pulsar Authentication
             String authPluginClassName =
-                pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authPulginClassName.label);
+                pulsarClientConf.getClientConfValueRaw(PulsarAdapterUtil.CLNT_CONF_KEY.authPulginClassName.label);
             String authParams =
-                pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.authParams.label);
+                pulsarClientConf.getClientConfValueRaw(PulsarAdapterUtil.CLNT_CONF_KEY.authParams.label);
 
             if ( !StringUtils.isAnyBlank(authPluginClassName, authParams) ) {
                 adminBuilder.authentication(authPluginClassName, authParams);
@@ -131,7 +131,7 @@ public class PulsarSpace implements  AutoCloseable {
             boolean useTls = StringUtils.contains(pulsarSvcUrl, "pulsar+ssl");
             if ( useTls ) {
                 String tlsHostnameVerificationEnableStr =
-                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
+                    pulsarClientConf.getClientConfValueRaw(PulsarAdapterUtil.CLNT_CONF_KEY.tlsHostnameVerificationEnable.label);
                 boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(tlsHostnameVerificationEnableStr);
 
                 adminBuilder
@@ -140,14 +140,14 @@ public class PulsarSpace implements  AutoCloseable {
                     .enableTlsHostnameVerification(tlsHostnameVerificationEnable);
 
                 String tlsTrustCertsFilePath =
-                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
+                    pulsarClientConf.getClientConfValueRaw(PulsarAdapterUtil.CLNT_CONF_KEY.tlsTrustCertsFilePath.label);
                 if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
                     adminBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
                     clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
                 }
 
                 String tlsAllowInsecureConnectionStr =
-                    pulsarClientConf.getClientConfValue(PulsarAdapterUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
+                    pulsarClientConf.getClientConfValueRaw(PulsarAdapterUtil.CLNT_CONF_KEY.tlsAllowInsecureConnection.label);
                 boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(tlsAllowInsecureConnectionStr);
                 adminBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
                 clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
@@ -188,8 +188,8 @@ public class PulsarSpace implements  AutoCloseable {
 
     private Schema<?> buildSchemaFromDefinition(String schemaTypeConfEntry,
                                                 String schemaDefinitionConfEntry) {
-        String schemaType = pulsarClientConf.getSchemaConfValue(schemaTypeConfEntry);
-        String schemaDef = pulsarClientConf.getSchemaConfValue(schemaDefinitionConfEntry);
+        String schemaType = pulsarClientConf.getSchemaConfValueRaw(schemaTypeConfEntry);
+        String schemaDef = pulsarClientConf.getSchemaConfValueRaw(schemaDefinitionConfEntry);
 
         Schema<?> result;
         if (PulsarAdapterUtil.isAvroSchemaTypeStr(schemaType)) {
@@ -210,11 +210,13 @@ public class PulsarSpace implements  AutoCloseable {
         // this is to allow KEY_VALUE schema
         if (pulsarClientConf.hasSchemaConfKey("schema.key.type")) {
             Schema<?> pulsarKeySchema = buildSchemaFromDefinition("schema.key.type", "schema.key.definition");
-            String encodingType = pulsarClientConf.getSchemaConfValue("schema.keyvalue.encodingtype");
             KeyValueEncodingType keyValueEncodingType = KeyValueEncodingType.SEPARATED;
-            if (encodingType != null) {
+
+            String encodingType = pulsarClientConf.getSchemaConfValueRaw("schema.keyvalue.encodingtype");
+            if (StringUtils.isNotBlank(encodingType)) {
                 keyValueEncodingType = KeyValueEncodingType.valueOf(encodingType);
             }
+
             pulsarSchema = Schema.KeyValue(pulsarKeySchema, pulsarSchema, keyValueEncodingType);
         }
     }

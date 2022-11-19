@@ -49,7 +49,7 @@ public class MessageProducerOp extends PulsarClientOp {
     private final boolean useTransact;
     private final boolean seqTracking;
     private final Supplier<Transaction> transactSupplier;
-    private final Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
+    private final Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
     private final Producer<?> producer;
     private final String msgKey;
     private final String msgPropRawJsonStr;
@@ -66,7 +66,7 @@ public class MessageProducerOp extends PulsarClientOp {
                              boolean useTransact,
                              boolean seqTracking,
                              Supplier<Transaction> transactSupplier,
-                             Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
+                             Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
                              Producer<?> producer,
                              String msgKey,
                              String msgProp,
@@ -142,15 +142,6 @@ public class MessageProducerOp extends PulsarClientOp {
         int messageSize;
         SchemaType schemaType = pulsarSchema.getSchemaInfo().getType();
         if (pulsarSchema instanceof KeyValueSchema) {
-
-//            // {KEY IN JSON}||{VALUE IN JSON}
-//            int separator = msgValue.indexOf("}||{");
-//            if (separator < 0) {
-//                throw new IllegalArgumentException("KeyValue payload MUST be in form {KEY IN JSON}||{VALUE IN JSON} (with 2 pipes that separate the KEY part from the VALUE part)");
-//            }
-//            String keyInput = msgValue.substring(0, separator + 1);
-//            String valueInput = msgValue.substring(separator + 3);
-
             KeyValueSchema keyValueSchema = (KeyValueSchema) pulsarSchema;
             org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
             GenericRecord payload = PulsarAvroSchemaUtil.GetGenericRecord_PulsarAvro(

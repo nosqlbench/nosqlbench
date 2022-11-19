@@ -92,7 +92,6 @@
                 <module>driver-jmx</module>
                 <module>driver-jdbc</module>
                 <module>driver-cockroachdb</module>
-                <!--<module>driver-pulsar</module>-->
 
             </modules>
         </profile>

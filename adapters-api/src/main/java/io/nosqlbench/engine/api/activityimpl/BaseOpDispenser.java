@@ -39,7 +39,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
 
     private final String name;
     protected final DriverAdapter<T, S> adapter;
-    protected boolean instrument;
+    private boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
     private Timer errorTimer;

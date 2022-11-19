@@ -49,7 +49,7 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
     protected final LongFunction<Boolean> seqTrackingFunc;
     protected final LongFunction<String> payloadRttFieldFunc;
     protected final LongFunction<Supplier<Transaction>> transactSupplierFunc;
-    protected final LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> errSimuTypeSetFunc;
+    protected final LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
 
     public PulsarClientOpDispenser(DriverAdapter adapter,
                                    ParsedOp op,
@@ -79,7 +79,7 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
 
         this.transactSupplierFunc = (l) -> getTransactionSupplier();
 
-        this.errSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
+        this.msgSeqErrSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
     }
 
     protected Supplier<Transaction> getTransactionSupplier() {
@@ -101,16 +101,16 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
         };
     }
 
-    protected LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
-        LongFunction<Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
+    protected LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
+        LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
         setStringLongFunction = (l) -> parsedOp.getOptionalStaticValue("seqerr_simu", String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> {
-                Set<PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
+                Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
 
                 if (StringUtils.contains(value,',')) {
                     set = Arrays.stream(value.split(","))
-                        .map(PulsarAdapterUtil.SEQ_ERROR_SIMU_TYPE::parseSimuType)
+                        .map(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .collect(Collectors.toCollection(LinkedHashSet::new));

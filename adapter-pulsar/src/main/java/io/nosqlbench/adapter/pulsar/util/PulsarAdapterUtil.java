@@ -83,6 +83,29 @@ public class PulsarAdapterUtil {
         return Arrays.stream(PULSAR_API_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
+
+    ///////
+    // Valid configuration categories
+    public enum CONF_GATEGORY {
+        Schema("schema"),
+        Client("client"),
+        Producer("producer"),
+        Consumer("consumer"),
+        Reader("reader");
+
+        public final String label;
+
+        CONF_GATEGORY(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidConfCategory(String item) {
+        return Arrays.stream(CONF_GATEGORY.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidConfCategoryList() {
+        return Arrays.stream(CONF_GATEGORY.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
+
     ///////
     // Valid persistence type
     public enum PERSISTENT_TYPES {
@@ -165,6 +188,27 @@ public class PulsarAdapterUtil {
         return Arrays.stream(PRODUCER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
+    // compressionType
+    public enum COMPRESSION_TYPE {
+        NONE("NONE"),
+        LZ4("LZ4"),
+        ZLIB("ZLIB"),
+        ZSTD("ZSTD"),
+        SNAPPY("SNAPPY");
+
+        public final String label;
+
+        COMPRESSION_TYPE(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidCompressionType(String item) {
+        return Arrays.stream(COMPRESSION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidCompressionTypeList() {
+        return Arrays.stream(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
+
     ///////
     // Standard consumer configuration (activity-level settings)
     // - https://pulsar.apache.org/docs/en/client-libraries-java/#consumer
@@ -189,7 +233,12 @@ public class PulsarAdapterUtil {
         regexSubscriptionMode("regexSubscriptionMode"),
         deadLetterPolicy("deadLetterPolicy"),
         autoUpdatePartitions("autoUpdatePartitions"),
-        replicateSubscriptionState("replicateSubscriptionState");
+        replicateSubscriptionState("replicateSubscriptionState"),
+        negativeAckRedeliveryBackoff("negativeAckRedeliveryBackoff"),
+        ackTimeoutRedeliveryBackoff("ackTimeoutRedeliveryBackoff"),
+        autoAckOldestChunkedMessageOnQueueFull("autoAckOldestChunkedMessageOnQueueFull"),
+        maxPendingChunkedMessage("maxPendingChunkedMessage"),
+        expireTimeOfIncompleteChunkedMessageMillis("expireTimeOfIncompleteChunkedMessageMillis");
 
         public final String label;
 
@@ -206,7 +255,8 @@ public class PulsarAdapterUtil {
     // - NOT part of https://pulsar.apache.org/docs/en/client-libraries-java/#consumer
     // - NB Pulsar driver consumer operation specific
     public enum CONSUMER_CONF_CUSTOM_KEY {
-        timeout("timeout");
+        timeout("timeout"),
+        ranges("ranges");
 
         public final String label;
 
@@ -218,8 +268,7 @@ public class PulsarAdapterUtil {
         return Arrays.stream(CONSUMER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
-    ///////
-    // Pulsar subscription type
+    // subscriptionTyp
     public enum SUBSCRIPTION_TYPE {
         Exclusive("Exclusive"),
         Failover("Failover"),
@@ -237,6 +286,43 @@ public class PulsarAdapterUtil {
     }
     public static String getValidSubscriptionTypeList() {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
+
+    // subscriptionInitialPosition
+    public enum SUBSCRIPTION_INITIAL_POSITION {
+        Earliest("Earliest"),
+        Latest("Latest");
+
+        public final String label;
+
+        SUBSCRIPTION_INITIAL_POSITION(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidSubscriptionInitialPosition(String item) {
+        return Arrays.stream(SUBSCRIPTION_INITIAL_POSITION.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidSubscriptionInitialPositionList() {
+        return Arrays.stream(SUBSCRIPTION_INITIAL_POSITION.values()).map(t -> t.label).collect(Collectors.joining(", "));
+    }
+
+    // regexSubscriptionMode
+    public enum REGEX_SUBSCRIPTION_MODE {
+        Persistent("PersistentOnly"),
+        NonPersistent("NonPersistentOnly"),
+        All("AllTopics");
+
+        public final String label;
+
+        REGEX_SUBSCRIPTION_MODE(String label) {
+            this.label = label;
+        }
+    }
+    public static boolean isValidRegexSubscriptionMode(String item) {
+        return Arrays.stream(REGEX_SUBSCRIPTION_MODE.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidRegexSubscriptionModeList() {
+        return Arrays.stream(REGEX_SUBSCRIPTION_MODE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
@@ -284,8 +370,7 @@ public class PulsarAdapterUtil {
     // Valid read positions for a Pulsar reader
     public enum READER_MSG_POSITION_TYPE {
         earliest("earliest"),
-        latest("latest"),
-        custom("custom");
+        latest("latest");
 
         public final String label;
 
@@ -298,22 +383,22 @@ public class PulsarAdapterUtil {
     }
 
     ///////
-    // Pulsar subscription type
-    public enum SEQ_ERROR_SIMU_TYPE {
+    // Message processing sequence error simulation types
+    public enum MSG_SEQ_ERROR_SIMU_TYPE {
         OutOfOrder("out_of_order"),
         MsgLoss("msg_loss"),
         MsgDup("msg_dup");
 
         public final String label;
 
-        SEQ_ERROR_SIMU_TYPE(String label) {
+        MSG_SEQ_ERROR_SIMU_TYPE(String label) {
             this.label = label;
         }
 
-        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
+        private static final Map<String, MSG_SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
 
         static {
-            for (SEQ_ERROR_SIMU_TYPE simuType : values()) {
+            for (MSG_SEQ_ERROR_SIMU_TYPE simuType : values()) {
                 MAPPING.put(simuType.label, simuType);
                 MAPPING.put(simuType.label.toLowerCase(), simuType);
                 MAPPING.put(simuType.label.toUpperCase(), simuType);
@@ -323,40 +408,15 @@ public class PulsarAdapterUtil {
             }
         }
 
-        public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
+        public static Optional<MSG_SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
             return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
         }
     }
     public static boolean isValidSeqErrSimuType(String item) {
-        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
+        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
     }
     public static String getValidSeqErrSimuTypeList() {
-        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
-    }
-
-    ///////
-    // Valid websocket-producer configuration (activity-level settings)
-    // TODO: to be added
-    public enum WEBSKT_PRODUCER_CONF_KEY {
-        ;
-
-        public final String label;
-
-        WEBSKT_PRODUCER_CONF_KEY(String label) {
-            this.label = label;
-        }
-    }
-
-    ///////
-    // Valid managed-ledger configuration (activity-level settings)
-    // TODO: to be added
-    public enum MANAGED_LEDGER_CONF_KEY {
-        ;
-
-        public final String label;
-        MANAGED_LEDGER_CONF_KEY(String label) {
-            this.label = label;
-        }
+        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
@@ -384,6 +444,10 @@ public class PulsarAdapterUtil {
     }
     public static Schema<?> getPrimitiveTypeSchema(String typeStr) {
         Schema<?> schema;
+
+        if (StringUtils.isBlank(typeStr)) {
+            typeStr = "BYTES";
+        }
 
         switch (typeStr.toUpperCase()) {
             case "BOOLEAN":
@@ -428,14 +492,12 @@ public class PulsarAdapterUtil {
             case "LOCAL_DATE_TIME":
                 schema = Schema.LOCAL_DATE_TIME;
                 break;
-            // Use BYTES as the default schema type if the type string is not specified
-            case "":
             case "BYTES":
                 schema = Schema.BYTES;
                 break;
             // Report an error if non-valid, non-empty schema type string is provided
             default:
-                throw new RuntimeException("Invalid Pulsar primitive schema type string : " + typeStr);
+                throw new PulsarAdapterInvalidParamException("Invalid Pulsar primitive schema type string : " + typeStr);
         }
 
         return schema;
@@ -444,15 +506,12 @@ public class PulsarAdapterUtil {
     ///////
     // Complex strut type: Avro or Json
     public static boolean isAvroSchemaTypeStr(String typeStr) {
-        return typeStr.equalsIgnoreCase("AVRO");
-    }
-    public static boolean isKeyValueTypeStr(String typeStr) {
-        return typeStr.equalsIgnoreCase("KEY_VALUE");
+        return (StringUtils.isNotBlank(typeStr) && typeStr.equalsIgnoreCase("AVRO"));
     }
 
     // automatic decode the type from the Registry
     public static boolean isAutoConsumeSchemaTypeStr(String typeStr) {
-        return typeStr.equalsIgnoreCase("AUTO_CONSUME");
+        return (StringUtils.isNotBlank(typeStr) && typeStr.equalsIgnoreCase("AUTO_CONSUME"));
     }
     public static Schema<?> getAvroSchema(String typeStr, String definitionStr) {
         String schemaDefinitionStr = definitionStr;
