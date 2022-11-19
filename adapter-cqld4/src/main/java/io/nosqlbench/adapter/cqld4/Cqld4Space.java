@@ -28,11 +28,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
 import io.nosqlbench.api.config.standard.*;
-import io.nosqlbench.api.engine.util.SSLKsFactory;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.engine.util.SSLKsFactory;
 import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +44,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Cqld4Space implements Shutdownable {
+public class Cqld4Space implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
     private final String space;
 
@@ -283,8 +282,8 @@ public class Cqld4Space implements Shutdownable {
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(Cqld4Space.class)
             .add(Param.optional("localdc"))
-            .add(Param.optional(List.of("secureconnectbundle","scb")))
-            .add(Param.optional(List.of("hosts","host")))
+            .add(Param.optional(List.of("secureconnectbundle", "scb")))
+            .add(Param.optional(List.of("hosts", "host")))
             .add(Param.optional("driverconfig", String.class))
             .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
             .add(Param.optional("userfile", String.class, "file to load the username from"))
@@ -301,7 +300,12 @@ public class Cqld4Space implements Shutdownable {
     }
 
     @Override
-    public void shutdown() {
-        this.getSession().close();
+    public void close() {
+        try {
+            this.getSession().close();
+        } catch (Exception e) {
+            logger.warn("auto-closeable cql session threw exception in cql space(" + this.space + "): " + e);
+            throw e;
+        }
     }
 }
