@@ -10,8 +10,6 @@ params:
 
 blocks:
   admin-topic-block:
-    tags:
-      phase: admin-topic
     ops:
       op1:
         AdminTopic: "{tenant}/{namespace}/{topic}"

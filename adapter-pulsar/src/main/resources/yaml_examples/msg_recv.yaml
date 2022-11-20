@@ -1,0 +1,11 @@
+params:
+  async_api: "true"
+
+blocks:
+  msg-consume-block:
+    ops:
+      op1:
+        MessageConsume: "tnt0/ns0/tp0"
+        consumer_name: ""
+        subscription_name: "mynbsub"
+        subscription_type: "shared"
