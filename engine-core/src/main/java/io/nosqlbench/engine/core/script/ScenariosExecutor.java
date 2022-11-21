@@ -40,9 +40,9 @@ public class ScenariosExecutor {
 
     public ScenariosExecutor(String name, int threads) {
         executor = new ThreadPoolExecutor(1, threads,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
         this.name = name;
     }
 
@@ -89,7 +89,6 @@ public class ScenariosExecutor {
             long waitedAt = System.currentTimeMillis();
             long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
             while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-
                 while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
                         long timeRemaining = updateAt - System.currentTimeMillis();
@@ -105,11 +104,17 @@ public class ScenariosExecutor {
 
         if (!isShutdown) {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
-                    + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
+                + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
         Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
-                .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElse(null)));
+            .entrySet()
+            .forEach(
+                es -> scenarioResultMap.put(
+                    es.getKey(),
+                    es.getValue().orElse(null)
+                )
+            );
         return new ScenariosResults(this, scenarioResultMap);
     }
 
@@ -118,9 +123,9 @@ public class ScenariosExecutor {
      */
     public List<String> getPendingScenarios() {
         return new ArrayList<>(
-                submitted.values().stream()
-                        .map(SubmittedScenario::getName)
-                        .collect(Collectors.toCollection(ArrayList::new)));
+            submitted.values().stream()
+                .map(SubmittedScenario::getName)
+                .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     /**
@@ -146,6 +151,7 @@ public class ScenariosExecutor {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
+                    logger.debug("creating exceptional scenario result from getAsyncResultStatus");
                     oResult = Optional.of(new ScenarioResult(e, now, now));
                 }
             }
@@ -184,6 +190,7 @@ public class ScenariosExecutor {
             try {
                 return Optional.ofNullable(resultFuture1.get());
             } catch (Exception e) {
+                logger.debug("creating exceptional scenario result from getPendingResult");
                 return Optional.of(new ScenarioResult(e, now, now));
             }
         } else if (resultFuture1.isCancelled()) {

@@ -286,10 +286,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * any way that an activity can finish under one blocking call.
      * This should be awaited asynchronously from the control layer in separate threads.
      * <p>
-     * TODO: move activity finisher threaad to this class and remove separate implementation
+     * TODO: move activity finisher thread to this class and remove separate implementation
      */
     public boolean awaitCompletion(int waitTime) {
-
+        logger.debug(()-> "awaiting completion of '" + this.getActivity().getAlias() + "'");
         boolean finished = finishAndShutdownExecutor(waitTime);
 
         Annotators.recordAnnotation(Annotation.newBuilder()

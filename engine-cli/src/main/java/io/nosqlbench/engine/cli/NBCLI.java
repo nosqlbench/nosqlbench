@@ -83,6 +83,7 @@ public class NBCLI implements Function<String[], Integer> {
      * Only call System.exit with the body of main. This is so that other scenario
      * invocations are handled functionally by {@link #apply(String[])}, which allows
      * for scenario encapsulation and concurrent testing.
+     *
      * @param args Command Line Args
      */
     public static void main(String[] args) {
@@ -94,11 +95,13 @@ public class NBCLI implements Function<String[], Integer> {
             System.out.println("Not expected issue in main: " + e.getMessage());
         }
     }
+
     /**
-     *         return null;
-     *     }
+     * return null;
+     * }
      *
-     *     public static void main(String[] args) {
+     * public static void main(String[] args) {
+     *
      * @param args
      * @return
      */
@@ -175,10 +178,10 @@ public class NBCLI implements Function<String[], Integer> {
 
         // Invoke any bundled app which matches the name of the first non-option argument, if it exists.
         // If it does not, continue with no fanfare. Let it drop through to other command resolution methods.
-        if (args.length>0 && args[0].matches("\\w[\\w\\d-_.]+")) {
+        if (args.length > 0 && args[0].matches("\\w[\\w\\d-_.]+")) {
             ServiceSelector<BundledApp> apploader = ServiceSelector.of(args[0], ServiceLoader.load(BundledApp.class));
             BundledApp app = apploader.get().orElse(null);
-            if (app!=null) {
+            if (app != null) {
                 String[] appargs = Arrays.copyOfRange(args, 1, args.length);
                 logger.info("invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
                 globalOptions.setWantsStackTraces(true);
@@ -211,10 +214,10 @@ public class NBCLI implements Function<String[], Integer> {
                 DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
                 DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
                 DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
-                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY,"10m",
-                DockerMetricsManager.GRAPHITE_CACHE_SIZE,"5000",
-                DockerMetricsManager.GRAPHITE_LOG_LEVEL,globalOptions.getGraphiteLogLevel(),
-                DockerMetricsManager.GRAPHITE_LOG_FORMAT,"logfmt"
+                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
+                DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
+                DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
+                DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
 
             );
             dmh.startMetrics(dashboardOptions);
@@ -262,7 +265,7 @@ public class NBCLI implements Function<String[], Integer> {
             for (ServiceLoader.Provider<BundledApp> provider : loader.stream().toList()) {
                 Class<? extends BundledApp> appType = provider.type();
                 String name = appType.getAnnotation(Service.class).selector();
-                System.out.println(String.format("%-40s %s",name,appType.getCanonicalName()));
+                System.out.println(String.format("%-40s %s", name, appType.getCanonicalName()));
             }
             return EXIT_OK;
         }
@@ -329,12 +332,12 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         if (options.wantsInputTypes()) {
-            InputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
+            InputType.FINDER.getAllSelectors().forEach((k, v) -> System.out.println(k + " (" + v.name() + ")"));
             return EXIT_OK;
         }
 
         if (options.wantsMarkerTypes()) {
-            OutputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
+            OutputType.FINDER.getAllSelectors().forEach((k, v) -> System.out.println(k + " (" + v.name() + ")"));
             return EXIT_OK;
         }
 
@@ -466,14 +469,14 @@ public class NBCLI implements Function<String[], Integer> {
 
         while (true) {
             Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
-            if (pendingResult.isEmpty()) {
-                LockSupport.parkNanos(100000000L);
-            } else {
+            if (pendingResult.isPresent()) {
                 break;
             }
+            LockSupport.parkNanos(100000000L);
         }
 
         ScenariosResults scenariosResults = executor.awaitAllResults();
+        logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
         scenariosResults.reportToLog();

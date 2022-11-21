@@ -58,12 +58,28 @@ public class ScenarioResult {
     private final String iolog;
 
     public ScenarioResult(String iolog, long startedAt, long endedAt) {
+        logger.debug("populating result from iolog");
+        if (logger.isDebugEnabled()) {
+            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+            for (int i = 0; i < st.length; i++) {
+                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
+                if (i>10) break;
+            }
+        }
         this.iolog = iolog;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
     }
 
     public ScenarioResult(Exception e, long startedAt, long endedAt) {
+        logger.debug("populating result from exception");
+        if (logger.isDebugEnabled()) {
+            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+            for (int i = 0; i < st.length; i++) {
+                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
+                if (i>10) break;
+            }
+        }
         this.iolog = e.getMessage();
         this.startedAt = startedAt;
         this.endedAt = endedAt;
