@@ -6,6 +6,6 @@ blocks:
     ops:
       op1:
         MessageConsume: "tnt0/ns0/tp0"
-        consumer_name: ""
-        subscription_name: "mynbsub"
-        subscription_type: "shared"
+        consumerName: ""
+        subscriptionName: "mynbsub"
+        subscriptionType: "shared"

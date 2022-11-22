@@ -13,7 +13,7 @@ blocks:
     ops:
       op1:
         MessageProduce: "tnt0/ns0/tp1"
-        producer_name: ""
+        producerName: ""
         msg_key: |
           {
               "Location": "{location}",
