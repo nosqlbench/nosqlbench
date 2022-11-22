@@ -63,10 +63,10 @@ import java.util.stream.Collectors;
 public class NBCLI implements Function<String[], Integer> {
 
     private static Logger logger;
-    private static LoggerConfig loggerConfig;
-    private static int EXIT_OK = 0;
-    private static int EXIT_WARNING = 1;
-    private static int EXIT_ERROR = 2;
+    private static final LoggerConfig loggerConfig;
+    private static final int EXIT_OK = 0;
+    private static final int EXIT_WARNING = 1;
+    private static final int EXIT_ERROR = 2;
 
     static {
         loggerConfig = new LoggerConfig();
@@ -117,6 +117,7 @@ public class NBCLI implements Function<String[], Integer> {
 
                 if (arg.toLowerCase(Locale.ROOT).startsWith("-v") || (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces"))) {
                     showStackTraces = true;
+                    break;
                 }
             }
 
@@ -265,7 +266,7 @@ public class NBCLI implements Function<String[], Integer> {
             for (ServiceLoader.Provider<BundledApp> provider : loader.stream().toList()) {
                 Class<? extends BundledApp> appType = provider.type();
                 String name = appType.getAnnotation(Service.class).selector();
-                System.out.println(String.format("%-40s %s", name, appType.getCanonicalName()));
+                System.out.printf("%-40s %s%n", name, appType.getCanonicalName());
             }
             return EXIT_OK;
         }
@@ -319,14 +320,14 @@ public class NBCLI implements Function<String[], Integer> {
 
             Path writeTo = Path.of(data.asPath().getFileName().toString());
             if (Files.exists(writeTo)) {
-                throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
+                throw new BasicError("A file named " + writeTo + " exists. Remove it first.");
             }
             try {
                 Files.writeString(writeTo, data.getCharBuffer(), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
+                throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
             }
-            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() + "'");
+            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo + "'");
             return EXIT_OK;
 
         }
@@ -467,13 +468,13 @@ public class NBCLI implements Function<String[], Integer> {
 
         executor.execute(scenario);
 
-        while (true) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
-            if (pendingResult.isPresent()) {
-                break;
-            }
-            LockSupport.parkNanos(100000000L);
-        }
+//        while (true) {
+//            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
+//            if (pendingResult.isPresent()) {
+//                break;
+//            }
+//            LockSupport.parkNanos(100000000L);
+//        }
 
         ScenariosResults scenariosResults = executor.awaitAllResults();
         logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");

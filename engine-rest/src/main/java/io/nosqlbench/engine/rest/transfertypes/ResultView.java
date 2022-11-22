@@ -27,14 +27,17 @@ public class ResultView {
     }
 
     public String getIOLog() {
-        return result.getIOLog();
-    }
-
-    public String getError() {
-        if (result.getException().isPresent()) {
-            return result.getException().get().getMessage();
+        if (result!=null) {
+            return result.getIOLog();
         } else {
             return "";
         }
+    }
+
+    public String getError() {
+        if (result!=null && result.getException().isPresent()) {
+            return result.getException().get().getMessage();
+        }
+        return "";
     }
 }

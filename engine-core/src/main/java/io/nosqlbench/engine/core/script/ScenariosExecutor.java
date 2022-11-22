@@ -152,7 +152,7 @@ public class ScenariosExecutor {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ScenarioResult(e, now, now));
+                    oResult = Optional.of(new ScenarioResult(e, "errored output", now, now));
                 }
             }
 
@@ -179,24 +179,8 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<ScenarioResult> getPendingResult(String scenarioName) {
-
-        Future<ScenarioResult> resultFuture1 = submitted.get(scenarioName).resultFuture;
-        if (resultFuture1 == null) {
-            throw new BasicError("Unknown scenario name:" + scenarioName);
-        }
-        long now = System.currentTimeMillis();
-        if (resultFuture1.isDone()) {
-            try {
-                return Optional.ofNullable(resultFuture1.get());
-            } catch (Exception e) {
-                logger.debug("creating exceptional scenario result from getPendingResult");
-                return Optional.of(new ScenarioResult(e, now, now));
-            }
-        } else if (resultFuture1.isCancelled()) {
-            return Optional.of(new ScenarioResult(new Exception("result was cancelled."), now, now));
-        }
-        return Optional.empty();
+    public Optional<Future<ScenarioResult>> getPendingResult(String scenarioName) {
+        return Optional.ofNullable(submitted.get(scenarioName)).map(s -> s.resultFuture);
     }
 
     public synchronized void stopScenario(String scenarioName) {
@@ -204,6 +188,7 @@ public class ScenariosExecutor {
     }
 
     public synchronized void stopScenario(String scenarioName, boolean rethrow) {
+        logger.debug("#stopScenario(name=" + scenarioName + ", rethrow="+ rethrow+")");
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             ScenarioController controller = pendingScenario.get().getScenarioController();

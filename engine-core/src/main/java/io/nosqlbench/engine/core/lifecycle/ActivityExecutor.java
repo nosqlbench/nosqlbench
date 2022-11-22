@@ -229,7 +229,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             logger.warn("while waiting termination of shutdown " + activity.getAlias() + ", " + ie.getMessage());
             activitylogger.debug("REQUEST STOP/exception alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
         } catch (RuntimeException e) {
-            logger.debug("Received exception while awaiting termination: " + e.getMessage());
+            logger.trace("Received exception while awaiting termination: " + e.getMessage());
             wasStopped = true;
             stoppingException = e;
         } finally {
