@@ -431,6 +431,7 @@ public class ScenarioController {
      * @return true, if all activities completed before the timer expired, false otherwise
      */
     public boolean awaitCompletion(long waitTimeMillis) {
+        logger.debug(() -> "awaiting completion");
         boolean completed = true;
         long remaining = waitTimeMillis;
 
@@ -443,7 +444,9 @@ public class ScenarioController {
 
         for (ActivityFinisher finisher : finishers) {
             try {
+                logger.debug("joining finisher " + finisher.getName());
                 finisher.join(waitTimeMillis);
+                logger.debug("joined finisher " + finisher.getName());
             } catch (InterruptedException ignored) {
             }
         }
