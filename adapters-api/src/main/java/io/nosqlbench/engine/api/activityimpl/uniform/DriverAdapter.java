@@ -148,7 +148,15 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
     DriverSpaceCache<? extends SPACETYPE> getSpaceCache();
 
     /**
-     * @return A function which can initialize a new S
+     * This method allows each driver adapter to create named state which is automatically
+     * cached and re-used by name. For each (driver,space) combination in an activity,
+     * a distinct space instance will be created. In general, adapter developers will
+     * use the space type associated with an adapter to wrap native driver instances
+     * one-to-one. As such, if the space implementation is a {@link AutoCloseable},
+     * it will be explicitly shutdown as part of the activity shutdown.
+     *
+     * @return A function which can initialize a new Space, which is a place to hold
+     * object state related to retained objects for the lifetime of a native driver.
      */
     default Function<String, ? extends SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
         return n -> null;
