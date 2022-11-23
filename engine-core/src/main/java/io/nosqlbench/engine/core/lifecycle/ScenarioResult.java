@@ -149,14 +149,14 @@ public class ScenarioResult {
         StringBuilder sb = new StringBuilder();
 
         ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
-            if (v instanceof Counting) {
-                long count = ((Counting) v).getCount();
+            if (v instanceof Counting counting) {
+                long count = counting.getCount();
                 if (count > 0) {
                     NBMetricsSummary.summarize(sb, k, v);
                 }
-            } else if (v instanceof Gauge) {
-                Object value = ((Gauge) v).getValue();
-                if (value != null && value instanceof Number n) {
+            } else if (v instanceof Gauge<?> gauge) {
+                Object value = gauge.getValue();
+                if (value instanceof Number n) {
                     if (n.doubleValue() != 0) {
                         NBMetricsSummary.summarize(sb, k, v);
                     }
