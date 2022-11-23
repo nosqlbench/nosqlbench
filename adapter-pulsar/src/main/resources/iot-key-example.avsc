@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "IotSensorKey",
+  "namespace": "TestNS",
+  "fields" : [
+    {"name": "Location", "type": "string"},
+    {"name": "WellID", "type": "string"}
+  ]
+}

@@ -41,6 +41,7 @@ import org.joda.time.format.DateTimeFormat;
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.concurrent.Future;
 
 @Service(value = WebServiceObject.class, selector = "scenario-executor")
 @Singleton
@@ -233,8 +234,9 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
 
         if (pendingScenario.isPresent()) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenarioName);
-            return new LiveScenarioView(pendingScenario.get(), pendingResult.orElse(null));
+            Optional<Future<ScenarioResult>> pendingResult = executor.getPendingResult(scenarioName);
+            Future<ScenarioResult> scenarioResultFuture = pendingResult.get();
+            return new LiveScenarioView(pendingScenario.get());
         } else {
             throw new RuntimeException("Scenario name '" + scenarioName + "' not found.");
         }

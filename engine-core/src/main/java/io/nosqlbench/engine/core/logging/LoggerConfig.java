@@ -29,15 +29,14 @@ import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.builder.api.*;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
-import java.nio.file.attribute.*;
-
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,10 +54,10 @@ import java.util.stream.Collectors;
 public class LoggerConfig extends ConfigurationFactory {
 
     public static Map<String, String> STANDARD_FORMATS = Map.of(
-        "TERSE", "%8r %-5level [%t] %-12logger{0} %msg%n%throwable",
-        "VERBOSE", "%d{DEFAULT}{GMT} [%t] %logger %-5level: %msg%n%throwable",
-        "TERSE-ANSI", "%8r %highlight{%-5level} %style{%C{1.} [%t] %-12logger{0}} %msg%n%throwable",
-        "VERBOSE-ANSI", "%d{DEFAULT}{GMT} [%t] %highlight{%logger %-5level}: %msg%n%throwable"
+            "TERSE", "%8r %-5level [%t] %-12logger{0} %msg%n%throwable",
+            "VERBOSE", "%d{DEFAULT}{GMT} [%t] %logger %-5level: %msg%n%throwable",
+            "TERSE-ANSI", "%8r %highlight{%-5level} %style{%C{1.} [%t] %-12logger{0}} %msg%n%throwable",
+            "VERBOSE-ANSI", "%d{DEFAULT}{GMT} [%t] %highlight{%logger %-5level}: %msg%n%throwable"
     );
 
     /**
@@ -66,7 +65,7 @@ public class LoggerConfig extends ConfigurationFactory {
      * we squelch them to some reasonable level so they aren't a nuisance.
      */
     public static Map<String, Level> BUILTIN_OVERRIDES = Map.of(
-        "oshi.util", Level.INFO
+            "oshi.util", Level.INFO
     );
 
     /**
@@ -151,20 +150,20 @@ public class LoggerConfig extends ConfigurationFactory {
         builder.setStatusLevel(internalLoggingStatusThreshold);
 
         builder.add(
-            builder.newFilter(
-                "ThresholdFilter",
-                Filter.Result.ACCEPT,
-                Filter.Result.NEUTRAL
-            ).addAttribute("level", builderThresholdLevel)
+                builder.newFilter(
+                        "ThresholdFilter",
+                        Filter.Result.ACCEPT,
+                        Filter.Result.NEUTRAL
+                ).addAttribute("level", builderThresholdLevel)
         );
 
         // CONSOLE appender
         AppenderComponentBuilder appenderBuilder =
-            builder.newAppender("console", "CONSOLE")
-                .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+                builder.newAppender("console", "CONSOLE")
+                        .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
 
         appenderBuilder.add(builder.newLayout("PatternLayout")
-            .addAttribute("pattern", consolePattern));
+                .addAttribute("pattern", consolePattern));
 
 //        appenderBuilder.add(
 //                builder.newFilter("MarkerFilter", Filter.Result.DENY, Filter.Result.NEUTRAL)
@@ -174,8 +173,8 @@ public class LoggerConfig extends ConfigurationFactory {
 
         // Log4J internal logging
         builder.add(builder.newLogger("org.apache.logging.log4j", Level.DEBUG)
-            .add(builder.newAppenderRef("console"))
-            .addAttribute("additivity", false));
+                .add(builder.newAppenderRef("console"))
+                .addAttribute("additivity", false));
 
         if (sessionName != null) {
 
@@ -189,55 +188,55 @@ public class LoggerConfig extends ConfigurationFactory {
 
             // LOGFILE appender
             LayoutComponentBuilder logfileLayout = builder.newLayout("PatternLayout")
-                .addAttribute("pattern", logfilePattern);
+                    .addAttribute("pattern", logfilePattern);
 
             String filebase = getSessionName().replaceAll("\\s", "_");
             String logfilePath = loggerDir.resolve(filebase + ".log").toString();
             this.logfileLocation = logfilePath;
             String archivePath = loggerDir.resolve(filebase + "-TIMESTAMP.log.gz").toString()
-                .replaceAll("TIMESTAMP", "%d{MM-dd-yy}");
+                    .replaceAll("TIMESTAMP", "%d{MM-dd-yy}");
 
             ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
-                .addComponent(builder.newComponent("CronTriggeringPolicy").addAttribute("schedule", "0 0 0 * * ?"))
-                .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "100M"));
+                    .addComponent(builder.newComponent("CronTriggeringPolicy").addAttribute("schedule", "0 0 0 * * ?"))
+                    .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "100M"));
 
             AppenderComponentBuilder logsAppenderBuilder =
-                builder.newAppender("SCENARIO_APPENDER", RollingFileAppender.PLUGIN_NAME)
-                    .addAttribute("fileName", logfilePath)
-                    .addAttribute("filePattern", archivePath)
-                    .addAttribute("append", false)
-                    .add(logfileLayout)
-                    .addComponent(triggeringPolicy);
+                    builder.newAppender("SCENARIO_APPENDER", RollingFileAppender.PLUGIN_NAME)
+                            .addAttribute("fileName", logfilePath)
+                            .addAttribute("filePattern", archivePath)
+                            .addAttribute("append", false)
+                            .add(logfileLayout)
+                            .addComponent(triggeringPolicy);
             builder.add(logsAppenderBuilder);
 
             rootBuilder.add(
-                builder.newAppenderRef("SCENARIO_APPENDER")
-                    .addAttribute("level", fileLevel)
+                    builder.newAppenderRef("SCENARIO_APPENDER")
+                            .addAttribute("level", fileLevel)
             );
         }
 
         rootBuilder.add(
-            builder.newAppenderRef("console")
-                .addAttribute("level",
-                    consoleLevel
-                )
+                builder.newAppenderRef("console")
+                        .addAttribute("level",
+                                consoleLevel
+                        )
         );
 
         builder.add(rootBuilder);
 
         BUILTIN_OVERRIDES.forEach((k, v) -> {
             builder.add(builder.newLogger(k, v)
-                .add(builder.newAppenderRef("console"))
-                .add(builder.newAppenderRef("SCENARIO_APPENDER"))
-                .addAttribute("additivity", true));
+                    .add(builder.newAppenderRef("console"))
+                    .add(builder.newAppenderRef("SCENARIO_APPENDER"))
+                    .addAttribute("additivity", true));
         });
 
         logLevelOverrides.forEach((k, v) -> {
             Level olevel = Level.valueOf(v);
             builder.add(builder.newLogger(k, olevel)
-                .add(builder.newAppenderRef("console"))
-                .add(builder.newAppenderRef("SCENARIO_APPENDER"))
-                .addAttribute("additivity", true));
+                    .add(builder.newAppenderRef("console"))
+                    .add(builder.newAppenderRef("SCENARIO_APPENDER"))
+                    .addAttribute("additivity", true));
         });
 
         BuiltConfiguration builtConfig = builder.build();
@@ -268,7 +267,7 @@ public class LoggerConfig extends ConfigurationFactory {
         if (!Files.exists(loggerDir)) {
             try {
                 FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(
-                    PosixFilePermissions.fromString("rwxrwx---")
+                        PosixFilePermissions.fromString("rwxrwx---")
                 );
                 Path directory = Files.createDirectory(loggerDir, attrs);
             } catch (Exception e) {
@@ -280,22 +279,22 @@ public class LoggerConfig extends ConfigurationFactory {
 
     public LoggerConfig setConsolePattern(String consoleLoggingPattern) {
 
-        consoleLoggingPattern= (ansiEnabled && STANDARD_FORMATS.containsKey(consoleLoggingPattern+"-ANSI"))
-            ? consoleLoggingPattern+"-ANSI" : consoleLoggingPattern;
+        consoleLoggingPattern = (ansiEnabled && STANDARD_FORMATS.containsKey(consoleLoggingPattern + "-ANSI"))
+                ? consoleLoggingPattern + "-ANSI" : consoleLoggingPattern;
 
         this.consolePattern = STANDARD_FORMATS.getOrDefault(consoleLoggingPattern, consoleLoggingPattern);
         return this;
     }
 
     public LoggerConfig setLogfilePattern(String logfileLoggingPattern) {
-        logfileLoggingPattern= (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern))
-            ? logfileLoggingPattern.substring(logfileLoggingPattern.length()-5) : logfileLoggingPattern;
+        logfileLoggingPattern = (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern))
+                ? logfileLoggingPattern.substring(logfileLoggingPattern.length() - 5) : logfileLoggingPattern;
 
         this.logfileLocation = STANDARD_FORMATS.getOrDefault(logfileLoggingPattern, logfileLoggingPattern);
         return this;
     }
 
-    public LoggerConfig getLoggerLevelOverrides(Map<String, String> logLevelOverrides) {
+    public LoggerConfig setLoggerLevelOverrides(Map<String, String> logLevelOverrides) {
         this.logLevelOverrides = logLevelOverrides;
         return this;
     }
@@ -334,9 +333,9 @@ public class LoggerConfig extends ConfigurationFactory {
         }
 
         List<File> toDelete = filesList.stream()
-            .sorted(fileTimeComparator)
-            .limit(remove)
-            .collect(Collectors.toList());
+                .sorted(fileTimeComparator)
+                .limit(remove)
+                .collect(Collectors.toList());
 
         for (File file : toDelete) {
             logger.info("removing extra logfile: " + file.getPath());
