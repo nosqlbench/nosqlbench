@@ -26,13 +26,14 @@ import io.nosqlbench.api.config.standard.Param;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DiagSpace implements ActivityDefObserver {
+public class DiagSpace implements ActivityDefObserver, AutoCloseable {
     private final Logger logger = LogManager.getLogger(DiagSpace.class);
 
     private final NBConfiguration cfg;
     private final String name;
     private RateLimiter diagRateLimiter;
     private long interval;
+    private boolean errorOnClose;
 
     public DiagSpace(String name, NBConfiguration cfg) {
         this.cfg = cfg;
@@ -42,11 +43,13 @@ public class DiagSpace implements ActivityDefObserver {
 
     public void applyConfig(NBConfiguration cfg) {
         this.interval = cfg.get("interval",long.class);
+        this.errorOnClose = cfg.get("erroronclose",boolean.class);
     }
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(DiagSpace.class)
             .add(Param.defaultTo("interval",1000))
+            .add(Param.defaultTo("erroronclose", false))
             .asReadOnly();
     }
 
@@ -60,5 +63,13 @@ public class DiagSpace implements ActivityDefObserver {
     public void onActivityDefUpdate(ActivityDef activityDef) {
         NBConfiguration cfg = getConfigModel().apply(activityDef.getParams().getStringStringMap());
         this.applyConfig(cfg);
+    }
+
+    @Override
+    public void close() throws Exception {
+        logger.debug("closing diag space '" + this.name + "'");
+        if (errorOnClose) {
+            throw new RuntimeException("diag space was configured to throw this error when it was configured.");
+        }
     }
 }
