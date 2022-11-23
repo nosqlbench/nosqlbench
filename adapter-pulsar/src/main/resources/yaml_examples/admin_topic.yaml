@@ -1,0 +1,17 @@
+bindings:
+  # 100 topics: 10 tenants, 2 namespaces/tenant, 5 topics/namespace
+  tenant: Mod(100); Div(10); ToString(); Prefix("tnt")
+  namespace: Mod(10); Div(5); ToString(); Prefix("ns")
+  topic: Mod(5); ToString(); Prefix("tp")
+
+params:
+  async_api: "false"
+  admin_delop: "false"
+
+blocks:
+  admin-topic-block:
+    ops:
+      op1:
+        AdminTopic: "{tenant}/{namespace}/{topic}"
+        enable_partition: "false"
+        partition_num: "5"
