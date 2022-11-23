@@ -16,10 +16,7 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
-import io.nosqlbench.engine.core.lifecycle.ScenarioController;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
-import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.*;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,9 +40,9 @@ public class ScenariosExecutor {
 
     public ScenariosExecutor(String name, int threads) {
         executor = new ThreadPoolExecutor(1, threads,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
         this.name = name;
     }
 
@@ -92,7 +89,6 @@ public class ScenariosExecutor {
             long waitedAt = System.currentTimeMillis();
             long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
             while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-
                 while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
                         long timeRemaining = updateAt - System.currentTimeMillis();
@@ -108,11 +104,17 @@ public class ScenariosExecutor {
 
         if (!isShutdown) {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
-                    + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
+                + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
         Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
-                .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElse(null)));
+            .entrySet()
+            .forEach(
+                es -> scenarioResultMap.put(
+                    es.getKey(),
+                    es.getValue().orElse(null)
+                )
+            );
         return new ScenariosResults(this, scenarioResultMap);
     }
 
@@ -121,9 +123,9 @@ public class ScenariosExecutor {
      */
     public List<String> getPendingScenarios() {
         return new ArrayList<>(
-                submitted.values().stream()
-                        .map(SubmittedScenario::getName)
-                        .collect(Collectors.toCollection(ArrayList::new)));
+            submitted.values().stream()
+                .map(SubmittedScenario::getName)
+                .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     /**
@@ -149,7 +151,8 @@ public class ScenariosExecutor {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
-                    oResult = Optional.of(new ScenarioResult(e, now, now));
+                    logger.debug("creating exceptional scenario result from getAsyncResultStatus");
+                    oResult = Optional.of(new ScenarioResult(e, "errored output", now, now));
                 }
             }
 
@@ -176,23 +179,8 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<ScenarioResult> getPendingResult(String scenarioName) {
-
-        Future<ScenarioResult> resultFuture1 = submitted.get(scenarioName).resultFuture;
-        if (resultFuture1 == null) {
-            throw new BasicError("Unknown scenario name:" + scenarioName);
-        }
-        long now = System.currentTimeMillis();
-        if (resultFuture1.isDone()) {
-            try {
-                return Optional.ofNullable(resultFuture1.get());
-            } catch (Exception e) {
-                return Optional.of(new ScenarioResult(e, now, now));
-            }
-        } else if (resultFuture1.isCancelled()) {
-            return Optional.of(new ScenarioResult(new Exception("result was cancelled."), now, now));
-        }
-        return Optional.empty();
+    public Optional<Future<ScenarioResult>> getPendingResult(String scenarioName) {
+        return Optional.ofNullable(submitted.get(scenarioName)).map(s -> s.resultFuture);
     }
 
     public synchronized void stopScenario(String scenarioName) {
@@ -200,6 +188,7 @@ public class ScenariosExecutor {
     }
 
     public synchronized void stopScenario(String scenarioName, boolean rethrow) {
+        logger.debug("#stopScenario(name=" + scenarioName + ", rethrow="+ rethrow+")");
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             ScenarioController controller = pendingScenario.get().getScenarioController();
@@ -256,6 +245,7 @@ public class ScenariosExecutor {
     }
 
     public synchronized void notifyException(Thread t, Throwable e) {
+        logger.debug(() -> "Scenario executor uncaught exception: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in scenario thread " + t.getName(), e);
     }
 

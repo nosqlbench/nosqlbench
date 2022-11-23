@@ -17,8 +17,13 @@ package io.nosqlbench.engine.core.script;
 
 import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.annotations.Annotation;
+import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.metadata.ScenarioMetadata;
+import io.nosqlbench.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.api.metadata.SystemId;
+import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ActivityProgressIndicator;
@@ -27,14 +32,12 @@ import io.nosqlbench.engine.core.lifecycle.ScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.metadata.ScenarioMetadata;
-import io.nosqlbench.api.metadata.ScenarioMetadataAware;
-import io.nosqlbench.api.metadata.SystemId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.EnvironmentAccess;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.PolyglotAccess;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -67,6 +70,12 @@ public class Scenario implements Callable<ScenarioResult> {
     private volatile ScenarioShutdownHook scenarioShutdownHook;
     private Exception error;
     private ScenarioMetadata scenarioMetadata;
+
+    private ScenarioResult result;
+
+    public Optional<ScenarioResult> getResultIfComplete() {
+        return Optional.ofNullable(this.result);
+    }
 
 
     public enum State {
@@ -162,10 +171,9 @@ public class Scenario implements Callable<ScenarioResult> {
         return this;
     }
 
-    private void init() {
+    private void initializeScriptingEngine() {
 
         logger.debug("Using engine " + engine.toString());
-
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
         Context.Builder contextSettings = Context.newBuilder("js")
@@ -183,7 +191,7 @@ public class Scenario implements Callable<ScenarioResult> {
             .option("js.nashorn-compat", "true");
 
         org.graalvm.polyglot.Engine.Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
-        engineBuilder.option("engine.WarnInterpreterOnly","false");
+        engineBuilder.option("engine.WarnInterpreterOnly", "false");
         org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
 
         // TODO: add in, out, err for this scenario
@@ -205,9 +213,9 @@ public class Scenario implements Callable<ScenarioResult> {
 //            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
 //            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
 
-            scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
-            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
+        scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
+        scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+        scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
 
         for (ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
@@ -241,12 +249,11 @@ public class Scenario implements Callable<ScenarioResult> {
         return scenarioMetadata;
     }
 
-    public void runScenario() {
+    private synchronized void runScenario() {
         scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(scenarioShutdownHook);
 
         state = State.Running;
-
         startedAtMillis = System.currentTimeMillis();
         Annotators.recordAnnotation(
             Annotation.newBuilder()
@@ -256,21 +263,21 @@ public class Scenario implements Callable<ScenarioResult> {
                 .detail("engine", this.engine.toString())
                 .build()
         );
-        init();
+
+        initializeScriptingEngine();
         logger.debug("Running control script for " + getScenarioName() + ".");
+
         for (String script : scripts) {
             try {
                 Object result = null;
-                if (scriptEngine instanceof Compilable && wantsCompiledScript) {
+                if (scriptEngine instanceof Compilable compilableEngine && wantsCompiledScript) {
                     logger.debug("Using direct script compilation");
-                    Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
                     logger.debug("-> invoking main scenario script (compiled)");
                     result = compiled.eval();
                     logger.debug("<- scenario script completed (compiled)");
                 } else {
                     if (scriptfile != null && !scriptfile.isEmpty()) {
-
                         String filename = scriptfile.replace("_SESSION_", scenarioName);
                         logger.debug("-> invoking main scenario script (" +
                             "interpreted from " + filename + ")");
@@ -292,16 +299,21 @@ public class Scenario implements Callable<ScenarioResult> {
                 }
 
                 if (result != null) {
-                    logger.debug("scenario result: type(" + result.getClass().getCanonicalName() + "): value:" + result.toString());
+                    logger.debug("scenario result: type(" + result.getClass().getCanonicalName() + "): value:" + result);
                 }
                 System.err.flush();
                 System.out.flush();
             } catch (Exception e) {
                 this.state = State.Errored;
-                logger.error("Error in scenario, shutting down. (" + e.toString() + ")");
-                this.scenarioController.forceStopScenario(5000, false);
-                this.error = e;
-                throw new RuntimeException(e);
+                logger.error("Error in scenario, shutting down. (" + e + ")");
+                try {
+                    this.scenarioController.forceStopScenario(5000, false);
+                } catch (Exception eInner) {
+                    logger.debug("Found inner exception while forcing stop with rethrow=false: " + eInner);
+                } finally {
+                    this.error = e;
+                    throw new RuntimeException(e);
+                }
             } finally {
                 System.out.flush();
                 System.err.flush();
@@ -355,14 +367,29 @@ public class Scenario implements Callable<ScenarioResult> {
         return endedAtMillis;
     }
 
-    public ScenarioResult call() {
-        runScenario();
-        String iolog = scriptEnv.getTimedLog();
-        ScenarioResult result = new ScenarioResult(iolog, this.startedAtMillis, this.endedAtMillis);
+    /**
+     * This should be the only way to get a ScenarioResult for a Scenario.
+     *
+     * @return
+     */
+    public synchronized ScenarioResult call() {
+        if (result == null) {
+            try {
+                runScenario();
+            } catch (Exception e) {
+                if (this.error!=null) {
+                    logger.debug("OVERLAPPING ERRORS: prior" + this.error.getMessage() + ", current:" + e.getMessage());
+                }
+                this.error = e;
+            } finally {
+                logger.debug((this.error == null ? "NORMAL" : "ERRORED") + " scenario run");
+            }
 
-        result.reportToLog();
-
-        doReportSummaries(reportSummaryTo, result);
+            String iolog = scriptEnv.getTimedLog();
+            this.result = new ScenarioResult(this.error, iolog, this.startedAtMillis, this.endedAtMillis);
+            result.reportToLog();
+            doReportSummaries(reportSummaryTo, result);
+        }
 
         return result;
     }

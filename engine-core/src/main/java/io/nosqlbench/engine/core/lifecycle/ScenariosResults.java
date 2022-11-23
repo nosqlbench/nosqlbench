@@ -27,7 +27,6 @@ import java.util.Map;
 public class ScenariosResults {
 
     private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
-
     private final String scenariosExecutorName;
     private final Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
 
@@ -76,5 +75,9 @@ public class ScenariosResults {
     public boolean hasError() {
         return this.scenarioResultMap.values().stream()
                 .anyMatch(r -> r.getException().isPresent());
+    }
+
+    public int getSize() {
+        return this.scenarioResultMap.size();
     }
 }

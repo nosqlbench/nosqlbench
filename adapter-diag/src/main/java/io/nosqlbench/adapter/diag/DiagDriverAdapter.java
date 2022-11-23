@@ -51,7 +51,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     @Override
     public synchronized OpMapper<DiagOp> getOpMapper() {
         if (this.mapper == null) {
-            this.mapper = new DiagOpMapper(this, getSpaceCache());
+            this.mapper = new DiagOpMapper(this);
         }
         return this.mapper;
     }

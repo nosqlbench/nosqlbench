@@ -19,19 +19,27 @@ package io.nosqlbench.engine.core;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.nb.annotations.Maturity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScenarioTest {
+    private final Logger logger = LogManager.getLogger(ScenarioTest.class);
 
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        Scenario env = new Scenario("testing", Scenario.Engine.Graalvm, "stdout:300", Maturity.Any);
-        env.addScriptText("print('loaded script environment...');\n");
-        env.runScenario();
-        assertThat(env.getIOLog().get().get(0)).contains("loaded script environment...");
+        Scenario scenario = new Scenario("testing", Scenario.Engine.Graalvm, "stdout:300", Maturity.Any);
+        scenario.addScriptText("print('loaded script environment...');\n");
+        try {
+            var result=scenario.call();
+        } catch (Exception e) {
+            logger.debug("Scenario run encountered an exception: " + e.getMessage());
+
+        }
+        assertThat(scenario.getIOLog().get().get(0)).contains("loaded script environment...");
     }
 
 }

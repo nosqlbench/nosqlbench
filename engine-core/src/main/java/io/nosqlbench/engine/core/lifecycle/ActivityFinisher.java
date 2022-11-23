@@ -16,7 +16,11 @@
 
 package io.nosqlbench.engine.core.lifecycle;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class ActivityFinisher extends Thread {
+    private final static Logger logger = LogManager.getLogger(ActivityFinisher.class);
 
     private final ActivityExecutor executor;
     private final int timeout;
@@ -30,10 +34,17 @@ public class ActivityFinisher extends Thread {
 
     @Override
     public void run() {
+        logger.debug(this + " awaiting async completion of " + executor.getActivity().getAlias() + " on " + executor + " for timeout " + timeout);
         result = executor.awaitCompletion(timeout);
+        logger.debug(this + " awaited async completion of " + executor.getActivity().getAlias());
     }
 
     public boolean getResult() {
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"/" + executor.getActivity().getAlias();
     }
 }
