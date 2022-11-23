@@ -63,17 +63,21 @@ The process of loading a workload definition occurs in several discrete steps du
 session:
 
 1. The workload file is loaded.
-2. Template variables are interposed.
+2. Template variables from the activity parameters are interposed into the raw contents of the
+   file.
 3. The file is deserialized from its native form into a raw data structure.
 4. The raw data structure is transformed into a normalized data structure according to the Op
    Template normalization rules.
-5. The data is provided to the ParsedOp API for use by the developer.
-6. The DriverAdapter is loaded which understands the op fields provided in the op template.
-7. The DriverAdapter uses its documented rules to determine which types of native driver operations
+5. Each op template is then denormalized as a self-contained data
+   structure, containing all the provided bindings, params, and tags from the upper layers of the
+   doc structure.
+6. The data is provided to the ParsedOp API for use by the developer.
+7. The DriverAdapter is loaded which understands the op fields provided in the op template.
+8. The DriverAdapter uses its documented rules to determine which types of native driver operations
    each op template is intended to represent. This is called **Op Mapping**.
-8. The DriverAdapter uses the identified types to create dispensers of native driver operations.
-   This is called **Op Dispensing**.
-9. The op dispensers are arranged into an indexed bank of op sources according to the specified
+9. The DriverAdapter (via the selected Op Mapper) uses the identified types to create dispensers of
+   native driver operations. This is called **Op Dispensing**.
+10. The op dispensers are arranged into an indexed bank of op sources according to the specified
    ratios and or sequencing strategy. From this point on, NoSQLBench has the ability to
    construct an operation for any given cycle at high speed.
 

@@ -19,7 +19,6 @@ package io.nosqlbench.engine.rest.transfertypes;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.script.Scenario;
 
 import java.util.ArrayList;
@@ -29,21 +28,16 @@ import java.util.List;
 public class LiveScenarioView {
 
     private final Scenario scenario;
-    private final ScenarioResult result;
 
-    public LiveScenarioView(Scenario scenario, ScenarioResult result) {
+    public LiveScenarioView(Scenario scenario) {
         this.scenario = scenario;
-        this.result = result;
     }
 
     @JsonProperty
     @JsonPropertyDescription("Optionally populated result, "+
         " present only if there was an error or the scenario is complete")
     public ResultView getResult() {
-        if (result==null) {
-            return null;
-        }
-        return new ResultView(result);
+        return new ResultView(scenario.getResultIfComplete().orElse(null));
     }
 
     @JsonProperty("scenario_name")
