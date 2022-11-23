@@ -63,10 +63,10 @@ import java.util.stream.Collectors;
 public class NBCLI implements Function<String[], Integer> {
 
     private static Logger logger;
-    private static LoggerConfig loggerConfig;
-    private static int EXIT_OK = 0;
-    private static int EXIT_WARNING = 1;
-    private static int EXIT_ERROR = 2;
+    private static final LoggerConfig loggerConfig;
+    private static final int EXIT_OK = 0;
+    private static final int EXIT_WARNING = 1;
+    private static final int EXIT_ERROR = 2;
 
     static {
         loggerConfig = new LoggerConfig();
@@ -83,6 +83,7 @@ public class NBCLI implements Function<String[], Integer> {
      * Only call System.exit with the body of main. This is so that other scenario
      * invocations are handled functionally by {@link #apply(String[])}, which allows
      * for scenario encapsulation and concurrent testing.
+     *
      * @param args Command Line Args
      */
     public static void main(String[] args) {
@@ -91,15 +92,17 @@ public class NBCLI implements Function<String[], Integer> {
             int statusCode = cli.apply(args);
             System.exit(statusCode);
         } catch (Exception e) {
-
+            System.out.println("Not expected issue in main: " + e.getMessage());
         }
     }
+
     /**
-     *         return null;
-     *     }
+     * return null;
+     * }
      *
-     *     public static void main(String[] args) {
-     * @param strings
+     * public static void main(String[] args) {
+     *
+     * @param args
      * @return
      */
     @Override
@@ -114,10 +117,11 @@ public class NBCLI implements Function<String[], Integer> {
 
                 if (arg.toLowerCase(Locale.ROOT).startsWith("-v") || (arg.toLowerCase(Locale.ROOT).equals("--show-stacktraces"))) {
                     showStackTraces = true;
+                    break;
                 }
             }
 
-            String error = ScenarioErrorHandler.handle(e, showStackTraces);
+            String error = NBCLIErrorHandler.handle(e, showStackTraces);
             // Commented for now, as the above handler should do everything needed.
             if (error != null) {
                 System.err.println("Scenario stopped due to error. See logs for details.");
@@ -150,7 +154,7 @@ public class NBCLI implements Function<String[], Integer> {
             .setConsolePattern(globalOptions.getConsoleLoggingPattern())
             .setLogfileLevel(globalOptions.getScenarioLogLevel())
             .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-            .getLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
@@ -175,10 +179,10 @@ public class NBCLI implements Function<String[], Integer> {
 
         // Invoke any bundled app which matches the name of the first non-option argument, if it exists.
         // If it does not, continue with no fanfare. Let it drop through to other command resolution methods.
-        if (args.length>0 && args[0].matches("\\w[\\w\\d-_.]+")) {
+        if (args.length > 0 && args[0].matches("\\w[\\w\\d-_.]+")) {
             ServiceSelector<BundledApp> apploader = ServiceSelector.of(args[0], ServiceLoader.load(BundledApp.class));
             BundledApp app = apploader.get().orElse(null);
-            if (app!=null) {
+            if (app != null) {
                 String[] appargs = Arrays.copyOfRange(args, 1, args.length);
                 logger.info("invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
                 globalOptions.setWantsStackTraces(true);
@@ -211,10 +215,10 @@ public class NBCLI implements Function<String[], Integer> {
                 DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
                 DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
                 DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
-                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY,"10m",
-                DockerMetricsManager.GRAPHITE_CACHE_SIZE,"5000",
-                DockerMetricsManager.GRAPHITE_LOG_LEVEL,globalOptions.getGraphiteLogLevel(),
-                DockerMetricsManager.GRAPHITE_LOG_FORMAT,"logfmt"
+                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
+                DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
+                DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
+                DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
 
             );
             dmh.startMetrics(dashboardOptions);
@@ -262,7 +266,7 @@ public class NBCLI implements Function<String[], Integer> {
             for (ServiceLoader.Provider<BundledApp> provider : loader.stream().toList()) {
                 Class<? extends BundledApp> appType = provider.type();
                 String name = appType.getAnnotation(Service.class).selector();
-                System.out.println(String.format("%-40s %s",name,appType.getCanonicalName()));
+                System.out.printf("%-40s %s%n", name, appType.getCanonicalName());
             }
             return EXIT_OK;
         }
@@ -316,25 +320,25 @@ public class NBCLI implements Function<String[], Integer> {
 
             Path writeTo = Path.of(data.asPath().getFileName().toString());
             if (Files.exists(writeTo)) {
-                throw new BasicError("A file named " + writeTo.toString() + " exists. Remove it first.");
+                throw new BasicError("A file named " + writeTo + " exists. Remove it first.");
             }
             try {
                 Files.writeString(writeTo, data.getCharBuffer(), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                throw new BasicError("Unable to write to " + writeTo.toString() + ": " + e.getMessage());
+                throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
             }
-            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo.toString() + "'");
+            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo + "'");
             return EXIT_OK;
 
         }
 
         if (options.wantsInputTypes()) {
-            InputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
+            InputType.FINDER.getAllSelectors().forEach((k, v) -> System.out.println(k + " (" + v.name() + ")"));
             return EXIT_OK;
         }
 
         if (options.wantsMarkerTypes()) {
-            OutputType.FINDER.getAllSelectors().forEach((k,v) -> System.out.println(k + " (" + v.name() + ")"));
+            OutputType.FINDER.getAllSelectors().forEach((k, v) -> System.out.println(k + " (" + v.name() + ")"));
             return EXIT_OK;
         }
 
@@ -464,27 +468,27 @@ public class NBCLI implements Function<String[], Integer> {
 
         executor.execute(scenario);
 
-        while (true) {
-            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
-            if (pendingResult.isEmpty()) {
-                LockSupport.parkNanos(100000000L);
-            } else {
-                break;
-            }
-        }
+//        while (true) {
+//            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
+//            if (pendingResult.isPresent()) {
+//                break;
+//            }
+//            LockSupport.parkNanos(100000000L);
+//        }
 
         ScenariosResults scenariosResults = executor.awaitAllResults();
+        logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
-        //scenariosResults.reportToLog();
+        scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 
-//        logger.info(scenariosResults.getExecutionSummary());
+        logger.info(scenariosResults.getExecutionSummary());
 
         if (scenariosResults.hasError()) {
             Exception exception = scenariosResults.getOne().getException().get();
-//            logger.warn(scenariosResults.getExecutionSummary());
-            ScenarioErrorHandler.handle(exception, options.wantsStackTraces());
+            logger.warn(scenariosResults.getExecutionSummary());
+            NBCLIErrorHandler.handle(exception, options.wantsStackTraces());
             System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             return EXIT_ERROR;
         } else {

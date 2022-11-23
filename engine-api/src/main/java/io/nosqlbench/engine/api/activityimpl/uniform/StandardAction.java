@@ -53,11 +53,13 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends Op>> opsequence;
+    private final int maxTries;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
         this.opsequence = activity.getOpSequence();
         this.slot = slot;
+        this.maxTries = activity.getMaxTries();
         bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
         executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();
         triesHistogram = activity.getInstrumentation().getOrCreateTriesHistogram();
@@ -84,7 +86,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         while (op != null) {
 
             int tries = 0;
-            while (tries++ <= activity.getMaxTries()) {
+            while (tries++ <= maxTries) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 
