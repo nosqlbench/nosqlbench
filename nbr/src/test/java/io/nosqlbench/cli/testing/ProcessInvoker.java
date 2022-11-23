@@ -16,10 +16,16 @@
 
 package io.nosqlbench.cli.testing;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class ProcessInvoker {
+
+    private static final Logger logger = LogManager.getLogger(ProcessInvoker.class);
+
     private File runDirectory = new File(".");
     private File logDirectory = new File(".");
 
@@ -49,13 +55,17 @@ public class ProcessInvoker {
         try {
             result.cmdDir = new File(".").getCanonicalPath();
             process = pb.start();
-
+            var handle = process.toHandle();
             boolean terminated = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
             if (!terminated) {
                 process.destroyForcibly().waitFor();
                 result.exception = new RuntimeException("timed out waiting for process, so it was shutdown forcibly.");
             }
+
         } catch (Exception e) {
+            if (process != null) {
+                logger.debug("Exception received, with exit value: " + process.exitValue());
+            }
             result.exception = e;
         } finally {
             result.startNanosTime = startNanosTime;
@@ -66,7 +76,7 @@ public class ProcessInvoker {
             if (process != null) {
                 result.exitStatus = process.exitValue();
             } else {
-                result.exitStatus=255;
+                result.exitStatus = 255;
             }
         }
         return result;

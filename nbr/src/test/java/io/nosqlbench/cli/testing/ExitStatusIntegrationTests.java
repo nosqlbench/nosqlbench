@@ -22,19 +22,20 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExitStatusIntegrationTests {
+class ExitStatusIntegrationTests {
 
     private final String java = Optional.ofNullable(System.getenv(
-        "JAVA_HOME")).map(v -> v+"/bin/java").orElse("java");
+            "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
 
     private final static String JARNAME = "target/nbr.jar";
+
     @Test
-    public void testExitStatusOnBadParam() {
+    void testExitStatusOnBadParam() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_badparam", 15,
                 java, "-jar", JARNAME, "--logs-dir", "logs/test/badparam/",
-            "badparam"
+                "badparam"
         );
         assertThat(result.exception).isNull();
         String stderr = String.join("\n", result.getStderrData());
@@ -43,12 +44,12 @@ public class ExitStatusIntegrationTests {
     }
 
     @Test
-    public void testExitStatusOnActivityInitException() {
+    void testExitStatusOnActivityInitException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_initexception", 15,
                 java, "-jar", JARNAME, "--logs-dir", "logs/test/initerror", "run",
-            "driver=diag", "op=initdelay:initdelay=notanumber"
+                "driver=diag", "op=initdelay:initdelay=notanumber"
         );
         assertThat(result.exception).isNull();
         String stderr = String.join("\n", result.getStdoutData());
@@ -56,28 +57,28 @@ public class ExitStatusIntegrationTests {
         assertThat(result.exitStatus).isEqualTo(2);
     }
 
-// Temporarily disabled for triage
-// TODO: figure out if github actions is an issue for this test.
-// It passes locally, but fails spuriously in github actions runner
-//    @Test
-//    public void testExitStatusOnActivityThreadException() {
-//        ProcessInvoker invoker = new ProcessInvoker();
-//        invoker.setLogDir("logs/test");
-//        ProcessResult result = invoker.run("exitstatus_threadexception", 30,
-//                "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "driver=diag", "throwoncycle=10", "cycles=1000", "cyclerate=10", "-vvv"
-//        );
-//        String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
-//        assertThat(stdout).contains("Diag was asked to throw an error on cycle 10");
-//        assertThat(result.exitStatus).isEqualTo(2);
-//    }
+    @Test
+    void testExitStatusOnActivityBasicCommandException() {
+        ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
+
+        // Forcing a thread exception via basic command issue.
+        ProcessResult result = invoker.run("exitstatus_threadexception", 30,
+                "java", "-jar", JARNAME, "--logs-dir", "logs/test/threadexcep", "--logs-level", "debug", "run",
+                "driver=diag", "cyclerate=10", "not_a_thing", "cycles=100", "-vvv"
+        );
+        String stdout = String.join("\n", result.getStdoutData());
+        assertThat(stdout).contains("Could not recognize command");
+        assertThat(result.exitStatus).isEqualTo(2);
+    }
 
     @Test
-    public void testExitStatusOnActivityOpException() {
+    void testExitStatusOnActivityOpException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
-                java, "-jar", JARNAME, "--logs-dir", "logs/test/op_exception", "run",
-            "driver=diag", "rate=5", "op=erroroncycle:erroroncycle=10", "cycles=2000", "-vvv"
+                "java", "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop", "--logs-level", "debug", "run",
+                "driver=diag", "threads=2", "cyclerate=10", "op=erroroncycle:erroroncycle=10", "cycles=500", "-vvv"
         );
         assertThat(result.exception).isNull();
         String stdout = String.join("\n", result.getStdoutData());
