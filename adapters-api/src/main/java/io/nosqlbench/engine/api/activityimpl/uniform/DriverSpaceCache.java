@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -62,6 +64,10 @@ public class DriverSpaceCache<S> {
 
     public S get(String name) {
         return cache.computeIfAbsent(name, newSpaceFunction);
+    }
+
+    public Map<String,S> getElements() {
+        return Collections.unmodifiableMap(cache);
     }
 
 }

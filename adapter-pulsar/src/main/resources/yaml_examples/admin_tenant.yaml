@@ -8,8 +8,6 @@ params:
 
 blocks:
   admin-tenant-block:
-    tags:
-      phase: admin-tenant
     ops:
       op1:
         AdminTopic: "{tenant}"

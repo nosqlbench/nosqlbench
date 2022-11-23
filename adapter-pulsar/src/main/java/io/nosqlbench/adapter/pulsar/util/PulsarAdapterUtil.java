@@ -49,6 +49,7 @@ public class PulsarAdapterUtil {
         TRANSACT_BATCH_NUM("transact_batch_num"),
         ADMIN_DELOP("admin_delop"),
         SEQ_TRACKING("seq_tracking"),
+        SEQERR_SIMU("seqerr_simu"),
         RTT_TRACKING_FIELD("payload_traking_field"),
         MSG_DEDUP_BROKER("msg_dedup_broker"),
         E2E_STARTING_TIME_SOURCE("e2e_starting_time_source");
@@ -61,6 +62,43 @@ public class PulsarAdapterUtil {
     }
     public static boolean isValidDocLevelParam(String param) {
         return Arrays.stream(DOC_LEVEL_PARAMS.values()).anyMatch(t -> t.label.equals(param));
+    }
+
+    ///////
+    // Message processing sequence error simulation types
+    public enum MSG_SEQ_ERROR_SIMU_TYPE {
+        OutOfOrder("out_of_order"),
+        MsgLoss("msg_loss"),
+        MsgDup("msg_dup");
+
+        public final String label;
+
+        MSG_SEQ_ERROR_SIMU_TYPE(String label) {
+            this.label = label;
+        }
+
+        private static final Map<String, MSG_SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
+
+        static {
+            for (MSG_SEQ_ERROR_SIMU_TYPE simuType : values()) {
+                MAPPING.put(simuType.label, simuType);
+                MAPPING.put(simuType.label.toLowerCase(), simuType);
+                MAPPING.put(simuType.label.toUpperCase(), simuType);
+                MAPPING.put(simuType.name(), simuType);
+                MAPPING.put(simuType.name().toLowerCase(), simuType);
+                MAPPING.put(simuType.name().toUpperCase(), simuType);
+            }
+        }
+
+        public static Optional<MSG_SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
+            return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
+        }
+    }
+    public static boolean isValidSeqErrSimuType(String item) {
+        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
+    }
+    public static String getValidSeqErrSimuTypeList() {
+        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
@@ -380,43 +418,6 @@ public class PulsarAdapterUtil {
     }
     public static boolean isValideReaderStartPosition(String item) {
         return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch(t -> t.label.equals(item));
-    }
-
-    ///////
-    // Message processing sequence error simulation types
-    public enum MSG_SEQ_ERROR_SIMU_TYPE {
-        OutOfOrder("out_of_order"),
-        MsgLoss("msg_loss"),
-        MsgDup("msg_dup");
-
-        public final String label;
-
-        MSG_SEQ_ERROR_SIMU_TYPE(String label) {
-            this.label = label;
-        }
-
-        private static final Map<String, MSG_SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
-
-        static {
-            for (MSG_SEQ_ERROR_SIMU_TYPE simuType : values()) {
-                MAPPING.put(simuType.label, simuType);
-                MAPPING.put(simuType.label.toLowerCase(), simuType);
-                MAPPING.put(simuType.label.toUpperCase(), simuType);
-                MAPPING.put(simuType.name(), simuType);
-                MAPPING.put(simuType.name().toLowerCase(), simuType);
-                MAPPING.put(simuType.name().toUpperCase(), simuType);
-            }
-        }
-
-        public static Optional<MSG_SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
-            return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
-        }
-    }
-    public static boolean isValidSeqErrSimuType(String item) {
-        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
-    }
-    public static String getValidSeqErrSimuTypeList() {
-        return Arrays.stream(MSG_SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     ///////
