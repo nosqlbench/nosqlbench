@@ -139,7 +139,7 @@ public class Cqld4Space implements AutoCloseable {
             try {
                 username = Files.readAllLines(path).get(0);
             } catch (IOException e) {
-                String error = "Error while reading username from file:" + usernameOpt.get();
+                String error = "Error while reading username from file:" + path;
                 logger.error(error, e);
                 throw new RuntimeException(e);
             }
@@ -155,7 +155,7 @@ public class Cqld4Space implements AutoCloseable {
                 try {
                     password = Files.readAllLines(path).get(0);
                 } catch (IOException e) {
-                    String error = "Error while reading password from file:" + passfileOpt.get();
+                    String error = "Error while reading password from file:" + path;
                     logger.error(error, e);
                     throw new RuntimeException(e);
                 }
