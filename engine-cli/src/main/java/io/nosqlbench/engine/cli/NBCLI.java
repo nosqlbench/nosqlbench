@@ -418,7 +418,7 @@ public class NBCLI implements Function<String[], Integer> {
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.getConsoleLogLevel());
 
-        ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
+        ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
         if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
             options.setWantsStackTraces(true);
             logger.debug("enabling stack traces since log level is " + options.getConsoleLogLevel());
@@ -466,7 +466,7 @@ public class NBCLI implements Function<String[], Integer> {
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
 
-        executor.execute(scenario);
+        scenariosExecutor.execute(scenario);
 
 //        while (true) {
 //            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
@@ -476,7 +476,7 @@ public class NBCLI implements Function<String[], Integer> {
 //            LockSupport.parkNanos(100000000L);
 //        }
 
-        ScenariosResults scenariosResults = executor.awaitAllResults();
+        ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
         logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());

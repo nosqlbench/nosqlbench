@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nbr.examples;
 
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ExecMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 public class ScriptExampleTests {
 
-    public static ScenarioResult runScenario(String scriptname, String... params) {
+    public static ExecMetricsResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
             throw new RuntimeException("params must be pairwise key, value, ...");
         }
@@ -74,7 +74,7 @@ public class ScriptExampleTests {
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
         executor.execute(s);
         ScenariosResults scenariosResults = executor.awaitAllResults();
-        ScenarioResult scenarioResult = scenariosResults.getOne();
+        ExecMetricsResult scenarioResult = scenariosResults.getOne();
         executor.shutdownNow();
         return scenarioResult;
     }
@@ -86,7 +86,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testLinkedInput() {
-        ScenarioResult scenarioResult = runScenario("linkedinput");
+        ExecMetricsResult scenarioResult = runScenario("linkedinput");
         Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
             Pattern.DOTALL);
         assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
@@ -94,14 +94,14 @@ public class ScriptExampleTests {
 
     @Test
     public void testExceptionPropagationFromMotorThread() {
-        ScenarioResult scenarioResult = runScenario("activityerror");
+        ExecMetricsResult scenarioResult = runScenario("activityerror");
         assertThat(scenarioResult.getException()).isPresent();
         assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
     }
 
     @Test
     public void testCycleRate() {
-        ScenarioResult scenarioResult = runScenario("cycle_rate");
+        ExecMetricsResult scenarioResult = runScenario("cycle_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
         Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);
@@ -116,13 +116,13 @@ public class ScriptExampleTests {
 
     @Test
     public void testExtensionPoint() {
-        ScenarioResult scenarioResult = runScenario("extensions");
+        ExecMetricsResult scenarioResult = runScenario("extensions");
         assertThat(scenarioResult.getIOLog()).contains("sum is 46");
     }
 
     @Test
     public void testOptimo() {
-        ScenarioResult scenarioResult = runScenario("optimo");
+        ExecMetricsResult scenarioResult = runScenario("optimo");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
         assertThat(iolog).contains("map of result was");
@@ -130,14 +130,14 @@ public class ScriptExampleTests {
 
     @Test
     public void testExtensionCsvLogger() {
-        ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
+        ExecMetricsResult scenarioResult = runScenario("extension_csvmetrics");
         assertThat(scenarioResult.getIOLog()).contains("started new " +
             "csvlogger: logs/csvmetricstestdir");
     }
 
     @Test
     public void testScriptParamsVariable() {
-        ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
+        ExecMetricsResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
         assertThat(scenarioResult.getIOLog()).contains("params[\"one\"]='two'");
         assertThat(scenarioResult.getIOLog()).contains("params[\"three\"]='four'");
         assertThat(scenarioResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
@@ -146,7 +146,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testScriptParamsUndefVariableWithOverride() {
-        ScenarioResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
+        ExecMetricsResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
         assertThat(scenarioResult.getIOLog()).contains("before: params[\"three\"]:four");
         assertThat(scenarioResult.getIOLog()).contains("before: params.three:four");
         assertThat(scenarioResult.getIOLog()).contains("after: params[\"three\"]:undefined");
@@ -155,7 +155,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testExtensionHistoStatsLogger() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
+        ExecMetricsResult scenarioResult = runScenario("extension_histostatslogger");
         assertThat(scenarioResult.getIOLog()).contains("stdout started " +
             "logging to logs/histostats.csv");
         List<String> strings = Files.readAllLines(Paths.get(
@@ -167,7 +167,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testExtensionCsvOutput() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_csvoutput");
+        ExecMetricsResult scenarioResult = runScenario("extension_csvoutput");
         List<String> strings = Files.readAllLines(Paths.get(
             "logs/csvoutputtestfile.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
@@ -177,7 +177,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testExtensionHistogramLogger() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_histologger");
+        ExecMetricsResult scenarioResult = runScenario("extension_histologger");
         assertThat(scenarioResult.getIOLog()).contains("stdout started logging to hdrhistodata.log");
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
@@ -187,7 +187,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testBlockingRun() {
-        ScenarioResult scenarioResult = runScenario("blockingrun");
+        ExecMetricsResult scenarioResult = runScenario("blockingrun");
         int a1end = scenarioResult.getIOLog().indexOf("blockingactivity1 finished");
         int a2start = scenarioResult.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
@@ -195,12 +195,12 @@ public class ScriptExampleTests {
 
     @Test
     public void testAwaitFinished() {
-        ScenarioResult scenarioResult = runScenario("awaitfinished");
+        ExecMetricsResult scenarioResult = runScenario("awaitfinished");
     }
 
     @Test
     public void testStartStop() {
-        ScenarioResult scenarioResult = runScenario("startstopdiag");
+        ExecMetricsResult scenarioResult = runScenario("startstopdiag");
         int startedAt = scenarioResult.getIOLog().indexOf("starting activity teststartstopdiag");
         int stoppedAt = scenarioResult.getIOLog().indexOf("stopped activity teststartstopdiag");
         assertThat(startedAt).isGreaterThan(0);
@@ -210,7 +210,7 @@ public class ScriptExampleTests {
     // TODO: find out why this causes a long delay after stop is called.
     @Test
     public void testThreadChange() {
-        ScenarioResult scenarioResult = runScenario("threadchange");
+        ExecMetricsResult scenarioResult = runScenario("threadchange");
         int changedTo1At = scenarioResult.getIOLog().indexOf("threads now 1");
         int changedTo5At = scenarioResult.getIOLog().indexOf("threads now 5");
         System.out.println("IOLOG:\n"+scenarioResult.getIOLog());
@@ -220,13 +220,13 @@ public class ScriptExampleTests {
 
     @Test
     public void testReadMetric() {
-        ScenarioResult scenarioResult = runScenario("readmetrics");
+        ExecMetricsResult scenarioResult = runScenario("readmetrics");
         assertThat(scenarioResult.getIOLog()).contains("count: ");
     }
 
     @Test
     public void testShutdownHook() {
-        ScenarioResult scenarioResult = runScenario("extension_shutdown_hook");
+        ExecMetricsResult scenarioResult = runScenario("extension_shutdown_hook");
         assertThat(scenarioResult.getIOLog()).doesNotContain("shutdown hook running").describedAs(
             "shutdown hooks should not run in the same IO context as the main scenario"
         );
@@ -234,7 +234,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testExceptionPropagationFromActivityInit() {
-        ScenarioResult scenarioResult = runScenario("activityiniterror");
+        ExecMetricsResult scenarioResult = runScenario("activityiniterror");
         assertThat(scenarioResult.getException()).isPresent();
         assertThat(scenarioResult.getException().get().getMessage()).contains("Unable to convert end cycle from invalid");
         assertThat(scenarioResult.getException()).isNotNull();
@@ -242,7 +242,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testReportedCoDelayBursty() {
-        ScenarioResult scenarioResult = runScenario("cocycledelay_bursty");
+        ExecMetricsResult scenarioResult = runScenario("cocycledelay_bursty");
         assertThat(scenarioResult.getIOLog()).contains("step1 metrics.waittime=");
         assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
         String iolog = scenarioResult.getIOLog();
@@ -252,7 +252,7 @@ public class ScriptExampleTests {
 
     @Test
     public void testReportedCoDelayStrict() {
-        ScenarioResult scenarioResult = runScenario("cocycledelay_strict");
+        ExecMetricsResult scenarioResult = runScenario("cocycledelay_strict");
         assertThat(scenarioResult.getIOLog()).contains("step1 cycles.waittime=");
         assertThat(scenarioResult.getIOLog()).contains("step2 cycles.waittime=");
         String iolog = scenarioResult.getIOLog();
@@ -263,14 +263,14 @@ public class ScriptExampleTests {
 
     @Test
     public void testCycleRateChangeNewMetrics() {
-        ScenarioResult scenarioResult = runScenario("cycle_rate_change");
+        ExecMetricsResult scenarioResult = runScenario("cycle_rate_change");
         String ioLog = scenarioResult.getIOLog();
         assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
     }
 
     @Test
     public void testExitLogic() {
-        ScenarioResult scenarioResult = runScenario(
+        ExecMetricsResult scenarioResult = runScenario(
             "basicdiag",
             "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );

@@ -14,30 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.rest.transfertypes;
+package io.nosqlbench.engine.core.lifecycle;
 
-import io.nosqlbench.engine.core.lifecycle.ExecMetricsResult;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 
-public class ResultView {
+public class StartedActivityInfo {
+    private final Activity activity;
 
-    private final ExecMetricsResult result;
-
-    public ResultView(ExecMetricsResult result) {
-        this.result = result;
+    StartedActivityInfo(Activity activity) {
+        this.activity = activity;
     }
 
-    public String getIOLog() {
-        if (result!=null) {
-            return result.getIOLog();
-        } else {
-            return "";
-        }
-    }
 
-    public String getError() {
-        if (result!=null && result.getException().isPresent()) {
-            return result.getException().get().getMessage();
-        }
-        return "";
-    }
 }

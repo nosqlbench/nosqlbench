@@ -22,11 +22,11 @@ import org.apache.logging.log4j.Logger;
 public class ActivityFinisher extends Thread {
     private final static Logger logger = LogManager.getLogger(ActivityFinisher.class);
 
-    private final ActivityExecutor executor;
+    private final ActivityThreadsManager executor;
     private final int timeout;
     private boolean result;
 
-    public ActivityFinisher(ActivityExecutor executor, int timeout) {
+    public ActivityFinisher(ActivityThreadsManager executor, int timeout) {
         super(executor.getActivityDef().getAlias() + "_finisher");
         this.executor = executor;
         this.timeout = timeout;

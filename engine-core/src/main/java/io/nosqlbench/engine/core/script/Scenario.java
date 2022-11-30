@@ -27,9 +27,9 @@ import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ActivityProgressIndicator;
+import io.nosqlbench.engine.core.lifecycle.ExecMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.PolyglotScenarioController;
 import io.nosqlbench.engine.core.lifecycle.ScenarioController;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
 import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +58,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-public class Scenario implements Callable<ScenarioResult> {
+public class Scenario implements Callable<ExecMetricsResult> {
 
     private final String commandLine;
     private final String reportSummaryTo;
@@ -71,9 +71,9 @@ public class Scenario implements Callable<ScenarioResult> {
     private Exception error;
     private ScenarioMetadata scenarioMetadata;
 
-    private ScenarioResult result;
+    private ExecMetricsResult result;
 
-    public Optional<ScenarioResult> getResultIfComplete() {
+    public Optional<ExecMetricsResult> getResultIfComplete() {
         return Optional.ofNullable(this.result);
     }
 
@@ -171,7 +171,7 @@ public class Scenario implements Callable<ScenarioResult> {
         return this;
     }
 
-    private void initializeScriptingEngine() {
+    private void initializeScriptingEngine(ScenarioController scenarioController) {
 
         logger.debug("Using engine " + engine.toString());
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
@@ -198,11 +198,9 @@ public class Scenario implements Callable<ScenarioResult> {
         this.scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
 
 
-        scenarioController = new ScenarioController(this.scenarioName, minMaturity);
         if (!progressInterval.equals("disabled")) {
             activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
         }
-
 
         scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
@@ -264,9 +262,22 @@ public class Scenario implements Callable<ScenarioResult> {
                 .build()
         );
 
-        initializeScriptingEngine();
         logger.debug("Running control script for " + getScenarioName() + ".");
+        scenarioController = new ScenarioController(this.scenarioName, minMaturity);
+        initializeScriptingEngine(scenarioController);
+        executeScenarioScripts();
 
+        long awaitCompletionTime = 86400 * 365 * 1000L;
+        logger.debug("Awaiting completion of scenario and activities for " + awaitCompletionTime + " millis.");
+
+        scenarioController.awaitCompletion(awaitCompletionTime);
+        //TODO: Ensure control flow covers controller shutdown in event of internal error.
+
+        Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
+        scenarioShutdownHook.run();
+    }
+
+    private void executeScenarioScripts() {
         for (String script : scripts) {
             try {
                 Object result = null;
@@ -304,6 +315,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 System.err.flush();
                 System.out.flush();
             } catch (Exception e) {
+                this.error=e;
                 this.state = State.Errored;
                 logger.error("Error in scenario, shutting down. (" + e + ")");
                 try {
@@ -311,7 +323,6 @@ public class Scenario implements Callable<ScenarioResult> {
                 } catch (Exception eInner) {
                     logger.debug("Found inner exception while forcing stop with rethrow=false: " + eInner);
                 } finally {
-                    this.error = e;
                     throw new RuntimeException(e);
                 }
             } finally {
@@ -320,14 +331,6 @@ public class Scenario implements Callable<ScenarioResult> {
                 endedAtMillis = System.currentTimeMillis();
             }
         }
-        long awaitCompletionTime = 86400 * 365 * 1000L;
-        logger.debug("Awaiting completion of scenario and activities for " + awaitCompletionTime + " millis.");
-        scenarioController.awaitCompletion(awaitCompletionTime);
-        //TODO: Ensure control flow covers controller shutdown in event of internal error.
-
-        Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
-        scenarioShutdownHook = null;
-        finish();
     }
 
     public void finish() {
@@ -370,9 +373,23 @@ public class Scenario implements Callable<ScenarioResult> {
     /**
      * This should be the only way to get a ScenarioResult for a Scenario.
      *
+     * The lifecycle of a scenario includes the lifecycles of all of the following:
+     * <OL>
+     *     <LI>The scenario control script, executing within a graaljs context.</LI>
+     *     <LI>The lifecycle of every activity which is started within the scenario.</LI>
+     * </OL>
+     *
+     * All of these run asynchronously within the scenario, however the same thread that calls
+     * the scenario is the one which executes the control script. A scenario ends when all
+     * of the following conditions are met:
+     * <UL>
+     *     <LI>The scenario control script has run to completion, or experienced an exception.</LI>
+     *     <LI>Each activity has run to completion, experienced an exception, or all</LI>
+     * </UL>
+     *
      * @return
      */
-    public synchronized ScenarioResult call() {
+    public synchronized ExecMetricsResult call() {
         if (result == null) {
             try {
                 runScenario();
@@ -386,15 +403,15 @@ public class Scenario implements Callable<ScenarioResult> {
             }
 
             String iolog = scriptEnv.getTimedLog();
-            this.result = new ScenarioResult(this.error, iolog, this.startedAtMillis, this.endedAtMillis);
-            result.reportToLog();
+            this.result = new ExecMetricsResult(this.error, iolog, this.startedAtMillis, this.endedAtMillis);
+            result.reportMetricsSummaryToLog();
             doReportSummaries(reportSummaryTo, result);
         }
 
         return result;
     }
 
-    private void doReportSummaries(String reportSummaryTo, ScenarioResult result) {
+    private void doReportSummaries(String reportSummaryTo, ExecMetricsResult result) {
         List<PrintStream> fullChannels = new ArrayList<>();
         List<PrintStream> briefChannels = new ArrayList<>();
 
@@ -437,7 +454,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 }
             }
         }
-        fullChannels.forEach(result::reportTo);
+        fullChannels.forEach(result::reportMetricsSummaryTo);
 //        briefChannels.forEach(result::reportCountsTo);
     }
 

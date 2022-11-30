@@ -20,20 +20,16 @@ import com.codahale.metrics.*;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class ScenarioResult {
+public class ExecMetricsResult extends ExecResult {
 
-    private final static Logger logger = LogManager.getLogger(ScenarioResult.class);
     public static final Set<MetricAttribute> INTERVAL_ONLY_METRICS = Set.of(
         MetricAttribute.MIN,
         MetricAttribute.MAX,
@@ -51,32 +47,12 @@ public class ScenarioResult {
         MetricAttribute.M5_RATE,
         MetricAttribute.M15_RATE
     );
-    private final long startedAt;
-    private final long endedAt;
 
-    private final Exception exception;
-    private final String iolog;
-
-    public ScenarioResult(Exception e, String iolog, long startedAt, long endedAt) {
-        logger.debug("populating "+(e==null? "NORMAL" : "ERROR")+" scenario result");
-        if (logger.isDebugEnabled()) {
-            StackTraceElement[] st = Thread.currentThread().getStackTrace();
-            for (int i = 0; i < st.length; i++) {
-                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
-                if (i>10) break;
-            }
-        }
-        this.iolog = ((iolog!=null) ? iolog + "\n\n" : "") + (e!=null? e.getMessage() : "");
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
-        this.exception = e;
+    public ExecMetricsResult(long startedAt, long endedAt, String iolog, Exception e) {
+        super(startedAt, endedAt, iolog, e);
     }
 
-    public void reportElapsedMillis() {
-        logger.info("-- SCENARIO TOOK " + getElapsedMillis() + "ms --");
-    }
-
-    public String getSummaryReport() {
+    public String getMetricsSummary() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(os);
         ConsoleReporter.Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
@@ -91,45 +67,23 @@ public class ScenarioResult {
         builder.disabledMetricAttributes(disabled);
         ConsoleReporter consoleReporter = builder.build();
         consoleReporter.report();
-
         ps.flush();
+        consoleReporter.close();
         String result = os.toString(StandardCharsets.UTF_8);
         return result;
     }
 
     public void reportToConsole() {
-        String summaryReport = getSummaryReport();
+        String summaryReport = getMetricsSummary();
         System.out.println(summaryReport);
     }
 
 
-    public Optional<Exception> getException() {
-        return Optional.ofNullable(exception);
+    public void reportMetricsSummaryTo(PrintStream out) {
+        out.println(getMetricsSummary());
     }
 
-    public void rethrowIfError() {
-        if (exception != null) {
-            if (exception instanceof RuntimeException) {
-                throw ((RuntimeException) exception);
-            } else {
-                throw new RuntimeException(exception);
-            }
-        }
-    }
-
-    public String getIOLog() {
-        return this.iolog;
-    }
-
-    public long getElapsedMillis() {
-        return endedAt - startedAt;
-    }
-
-    public void reportTo(PrintStream out) {
-        out.println(getSummaryReport());
-    }
-
-    public void reportToLog() {
+    public void reportMetricsSummaryToLog() {
         logger.debug("-- WARNING: Metrics which are taken per-interval (like histograms) will not have --");
         logger.debug("-- active data on this last report. (The workload has already stopped.) Record   --");
         logger.debug("-- metrics to an external format to see values for each reporting interval.      --");
@@ -142,10 +96,11 @@ public class ScenarioResult {
             .outputTo(logger)
             .build();
         reporter.report();
+        reporter.close();
         logger.debug("-- END METRICS DETAIL --");
     }
 
-    public void reportCountsTo(PrintStream printStream) {
+    public void reportMetricsCountsTo(PrintStream printStream) {
         StringBuilder sb = new StringBuilder();
 
         ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {

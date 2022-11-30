@@ -50,7 +50,7 @@ public class ScenariosExecutor {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
-        Future<ScenarioResult> future = executor.submit(scenario);
+        Future<ExecMetricsResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
     }
@@ -106,7 +106,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                 + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
+        Map<Scenario, ExecMetricsResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
             .entrySet()
             .forEach(
@@ -133,26 +133,26 @@ public class ScenariosExecutor {
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
      *
-     * <p>Results may be exceptional. If {@link ScenarioResult#getException()} is present,
+     * <p>Results may be exceptional. If {@link ExecMetricsResult#getException()} is present,
      * then the result did not complete normally.</p>
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<Scenario, Optional<ScenarioResult>> getAsyncResultStatus() {
+    public Map<Scenario, Optional<ExecMetricsResult>> getAsyncResultStatus() {
 
-        Map<Scenario, Optional<ScenarioResult>> optResults = new LinkedHashMap<>();
+        Map<Scenario, Optional<ExecMetricsResult>> optResults = new LinkedHashMap<>();
 
         for (SubmittedScenario submittedScenario : submitted.values()) {
-            Future<ScenarioResult> resultFuture = submittedScenario.getResultFuture();
+            Future<ExecMetricsResult> resultFuture = submittedScenario.getResultFuture();
 
-            Optional<ScenarioResult> oResult = Optional.empty();
+            Optional<ExecMetricsResult> oResult = Optional.empty();
             if (resultFuture.isDone()) {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ScenarioResult(e, "errored output", now, now));
+                    oResult = Optional.of(new ExecMetricsResult(now, now, "errored output", e));
                 }
             }
 
@@ -179,7 +179,7 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<Future<ScenarioResult>> getPendingResult(String scenarioName) {
+    public Optional<Future<ExecMetricsResult>> getPendingResult(String scenarioName) {
         return Optional.ofNullable(submitted.get(scenarioName)).map(s -> s.resultFuture);
     }
 
@@ -224,9 +224,9 @@ public class ScenariosExecutor {
 
     private static class SubmittedScenario {
         private final Scenario scenario;
-        private final Future<ScenarioResult> resultFuture;
+        private final Future<ExecMetricsResult> resultFuture;
 
-        SubmittedScenario(Scenario scenario, Future<ScenarioResult> resultFuture) {
+        SubmittedScenario(Scenario scenario, Future<ExecMetricsResult> resultFuture) {
             this.scenario = scenario;
             this.resultFuture = resultFuture;
         }
@@ -235,7 +235,7 @@ public class ScenariosExecutor {
             return scenario;
         }
 
-        Future<ScenarioResult> getResultFuture() {
+        Future<ExecMetricsResult> getResultFuture() {
             return resultFuture;
         }
 

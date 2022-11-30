@@ -28,7 +28,7 @@ import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.engine.core.lifecycle.ActivityExecutor;
+import io.nosqlbench.engine.core.lifecycle.ActivityThreadsManager;
 import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -38,8 +38,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ActivityExecutorTest {
-    private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
+public class ActivityThreadsManagerTest {
+    private static final Logger logger = LogManager.getLogger(ActivityThreadsManagerTest.class);
 
     @Test
     public synchronized void testRestart() {
@@ -55,7 +55,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
+        ActivityThreadsManager ae = new ActivityThreadsManager(a, "test-restart");
         ad.setThreads(1);
         ae.startActivity();
         ae.stopActivity();
@@ -79,7 +79,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a, "test-delayed-start");
+        ActivityThreadsManager ae = new ActivityThreadsManager(a, "test-delayed-start");
         ad.setThreads(1);
         ae.startActivity();
         ae.awaitCompletion(15000);
@@ -104,7 +104,7 @@ public class ActivityExecutorTest {
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
-        ActivityExecutor ae = new ActivityExecutor(a, "test-new-executor");
+        ActivityThreadsManager ae = new ActivityThreadsManager(a, "test-new-executor");
         ad.setThreads(5);
         ae.startActivity();
 

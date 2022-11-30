@@ -26,11 +26,10 @@ import io.nosqlbench.engine.core.annotation.Annotators;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,9 +48,9 @@ import java.util.stream.Collectors;
  * </ul>
  */
 
-public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressCapable {
+public class ActivityThreadsManager implements ActivityController, ParameterMap.Listener, ProgressCapable, Callable<ExecResult> {
 
-    private static final Logger logger = LogManager.getLogger(ActivityExecutor.class);
+    private static final Logger logger = LogManager.getLogger(ActivityThreadsManager.class);
     private static final Logger activitylogger = LogManager.getLogger("ACTIVITY");
 
     private final List<Motor<?>> motors = new ArrayList<>();
@@ -68,24 +67,19 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
 //    private RunState intendedState = RunState.Uninitialized;
 
-    public ActivityExecutor(Activity activity, String sessionId) {
+    public ActivityThreadsManager(Activity activity, String sessionId) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         executorService = new ThreadPoolExecutor(
-                0, Integer.MAX_VALUE,
-                0L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
+            0, Integer.MAX_VALUE,
+            0L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
         );
         activity.getActivityDef().getParams().addListener(this);
         activity.setActivityController(this);
         this.sessionId = sessionId;
     }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
 
     // TODO: Doc how uninitialized activities do not propagate parameter map changes and how
     // TODO: this is different from preventing modification to uninitialized activities
@@ -101,14 +95,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .now()
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
 
         activitylogger.debug("START/before alias=(" + activity.getAlias() + ")");
@@ -130,7 +124,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     /**
      * Simply stop the motors
      */
-    public synchronized void stopActivity() {
+    private synchronized void stopActivity() {
         activitylogger.debug("STOP/before alias=(" + activity.getAlias() + ")");
 
         activity.setRunState(RunState.Stopping);
@@ -142,19 +136,20 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         activity.setRunState(RunState.Stopped);
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
         activitylogger.debug("STOP/after alias=(" + activity.getAlias() + ")");
+
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .interval(this.startedAt, this.stoppedAt)
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .interval(this.startedAt, this.stoppedAt)
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
     }
 
-    public synchronized RuntimeException forceStopScenario(int initialMillisToWait) {
+    public RuntimeException forceStopActivity(int initialMillisToWait) {
 
         activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
         activity.setRunState(RunState.Stopped);
@@ -206,14 +201,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing
      *                            everything to stop
      */
-    public synchronized void forceStopScenarioAndThrow(int initialMillisToWait, boolean rethrow) {
-        RuntimeException exception = forceStopScenario(initialMillisToWait);
+    private synchronized void forceStopScenarioAndThrow(int initialMillisToWait, boolean rethrow) {
+        RuntimeException exception = forceStopActivity(initialMillisToWait);
         if (exception != null && rethrow) {
             throw exception;
         }
     }
 
-    public boolean finishAndShutdownExecutor(int secondsToWait) {
+    private boolean finishAndShutdownExecutor(int secondsToWait) {
 
         activitylogger.debug("REQUEST STOP/before alias=(" + activity.getAlias() + ")");
         logger.debug("Stopping executor for " + activity.getAlias() + " when work completes.");
@@ -245,6 +240,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
         if (stoppingException != null) {
             logger.trace(() -> "an exception caused the activity to stop:" + stoppingException.getMessage());
+            logger.trace("Setting ERROR on activity executor: " + stoppingException.getMessage());
             throw stoppingException;
         }
 
@@ -270,10 +266,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 adjustToActivityDef(activity.getActivityDef());
             }
             motors.stream()
-                    .filter(m -> (m instanceof ActivityDefObserver))
+                .filter(m -> (m instanceof ActivityDefObserver))
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
-                    .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
+                .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
         }
     }
 
@@ -288,25 +284,25 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * <p>
      * TODO: move activity finisher thread to this class and remove separate implementation
      */
-    public boolean awaitCompletion(int waitTime) {
-        logger.debug(()-> "awaiting completion of '" + this.getActivity().getAlias() + "'");
+    private boolean awaitCompletion(int waitTime) {
+        logger.debug(() -> "awaiting completion of '" + this.getActivity().getAlias() + "'");
         boolean finished = finishAndShutdownExecutor(waitTime);
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .interval(startedAt, this.stoppedAt)
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .interval(startedAt, this.stoppedAt)
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
 
         return finished;
     }
 
-    public boolean awaitFinish(int timeout) {
+    public boolean awaitFinishedOrStopped(int timeout) {
         activitylogger.debug("AWAIT-FINISH/before alias=(" + activity.getAlias() + ")");
 
         boolean awaited = awaitAllRequiredMotorState(timeout, 50, RunState.Finished, RunState.Stopped);
@@ -327,8 +323,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     private String getSlotStatus() {
         return motors.stream()
-                .map(m -> m.getSlotStateTracker().getSlotState().getCode())
-                .collect(Collectors.joining(",", "[", "]"));
+            .map(m -> m.getSlotStateTracker().getSlotState().getCode())
+            .collect(Collectors.joining(",", "[", "]"));
     }
 
     /**
@@ -371,18 +367,18 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             case Running:
             case Starting:
                 motors.stream()
-                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Running)
-                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Finished)
-                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
-                        .forEach(m -> {
-                            m.getSlotStateTracker().enterState(RunState.Starting);
-                            executorService.execute(m);
-                        });
+                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Running)
+                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Finished)
+                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
+                    .forEach(m -> {
+                        m.getSlotStateTracker().enterState(RunState.Starting);
+                        executorService.execute(m);
+                    });
                 break;
             case Stopped:
                 motors.stream()
-                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Stopped)
-                        .forEach(Motor::requestStop);
+                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Stopped)
+                    .forEach(Motor::requestStop);
                 break;
             case Finished:
             case Stopping:
@@ -421,30 +417,22 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * Await a thread (aka motor/slot) entering a specific SlotState
      *
      * @param m                motor instance
-     * @param waitTime         milliseco`nds to wait, total
+     * @param waitTime         milliseconds to wait, total
      * @param pollTime         polling interval between state checks
      * @param desiredRunStates any desired SlotState
      * @return true, if the desired SlotState was detected
      */
-    private boolean awaitMotorState(Motor m, int waitTime, int pollTime, RunState... desiredRunStates) {
+    private boolean awaitMotorState(Motor<?> m, int waitTime, int pollTime, RunState... desiredRunStates) {
         long startedAt = System.currentTimeMillis();
         while (System.currentTimeMillis() < (startedAt + waitTime)) {
-            Map<RunState, Integer> actualStates = new HashMap<>();
-            for (RunState state : desiredRunStates) {
-                actualStates.compute(state, (k, v) -> (v == null ? 0 : v) + 1);
-            }
             for (RunState desiredRunState : desiredRunStates) {
-                actualStates.remove(desiredRunState);
-            }
-            logger.trace(() -> "state of remaining slots:" + actualStates);
-            if (actualStates.size() == 0) {
-                return true;
-            } else {
-                System.out.println("motor states:" + actualStates);
-                try {
-                    Thread.sleep(pollTime);
-                } catch (InterruptedException ignored) {
+                if (desiredRunState == m.getSlotStateTracker().getSlotState()) {
+                    return true;
                 }
+            }
+            try {
+                Thread.sleep(pollTime);
+            } catch (InterruptedException ignored) {
             }
         }
         logger.trace(() -> activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotStateTracker().getSlotState());
@@ -461,35 +449,13 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 awaited = awaitMotorState(motor, waitTime, pollTime, awaitingState);
                 if (!awaited) {
                     logger.trace(() -> "failed awaiting motor " + motor.getSlotId() + " for state in " +
-                            Arrays.asList(awaitingState));
+                        Arrays.asList(awaitingState));
                     break;
                 }
             }
         }
         return awaited;
     }
-
-
-    private boolean awaitAnyRequiredMotorState(int waitTime, int pollTime, RunState... awaitingState) {
-        long startedAt = System.currentTimeMillis();
-        while (System.currentTimeMillis() < (startedAt + waitTime)) {
-            for (Motor motor : motors) {
-                for (RunState state : awaitingState) {
-                    if (motor.getSlotStateTracker().getSlotState() == state) {
-                        logger.trace(() -> "at least one 'any' of " + activityDef.getAlias() + "/Motor[" + motor.getSlotId() + "] is now in state " + motor.getSlotStateTracker().getSlotState());
-                        return true;
-                    }
-                }
-            }
-            try {
-                Thread.sleep(pollTime);
-            } catch (InterruptedException ignored) {
-            }
-        }
-        logger.trace(() -> "none of " + activityDef.getAlias() + "/Motor [" + motors.size() + "] is in states in " + Arrays.asList(awaitingState));
-        return false;
-    }
-
 
     /**
      * Await a required thread (aka motor/slot) entering a specific SlotState
@@ -505,8 +471,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         boolean awaitedRequiredState = awaitMotorState(m, waitTime, pollTime, awaitingState);
         if (!awaitedRequiredState) {
             String error = "Unable to await " + activityDef.getAlias() +
-                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState()
-                    + " after waiting for " + waitTime + "ms";
+                "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState()
+                + " after waiting for " + waitTime + "ms";
             RuntimeException e = new RuntimeException(error);
             logger.error(error);
             throw e;
@@ -532,7 +498,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public synchronized void notifyException(Thread t, Throwable e) {
         logger.debug(() -> "Uncaught exception in activity thread forwarded to activity executor: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in activity thread " + t.getName(), e);
-        forceStopScenario(10000);
+        forceStopActivity(10000);
     }
 
     @Override
@@ -564,4 +530,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
 
+    @Override
+    public synchronized ExecResult call() throws Exception {
+        boolean stopped = awaitCompletion(Integer.MAX_VALUE);
+        ExecResult result = new ExecResult(startedAt, stoppedAt, "", this.stoppingException);
+        return result;
+    }
 }

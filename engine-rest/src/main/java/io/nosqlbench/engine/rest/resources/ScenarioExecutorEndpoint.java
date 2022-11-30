@@ -21,7 +21,7 @@ import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.NBCLICommandParser;
 import io.nosqlbench.engine.cli.ScriptBuffer;
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ExecMetricsResult;
 import io.nosqlbench.engine.core.script.Scenario;
 import io.nosqlbench.engine.core.script.ScenariosExecutor;
 import io.nosqlbench.engine.rest.services.WorkSpace;
@@ -234,8 +234,8 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
 
         if (pendingScenario.isPresent()) {
-            Optional<Future<ScenarioResult>> pendingResult = executor.getPendingResult(scenarioName);
-            Future<ScenarioResult> scenarioResultFuture = pendingResult.get();
+            Optional<Future<ExecMetricsResult>> pendingResult = executor.getPendingResult(scenarioName);
+            Future<ExecMetricsResult> scenarioResultFuture = pendingResult.get();
             return new LiveScenarioView(pendingScenario.get());
         } else {
             throw new RuntimeException("Scenario name '" + scenarioName + "' not found.");

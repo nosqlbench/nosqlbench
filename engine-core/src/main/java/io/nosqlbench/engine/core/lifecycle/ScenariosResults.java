@@ -28,27 +28,26 @@ public class ScenariosResults {
 
     private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
     private final String scenariosExecutorName;
-    private final Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
+    private final Map<Scenario, ExecMetricsResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
         this.scenariosExecutorName = scenariosExecutor.getName();
     }
 
-    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ScenarioResult> map) {
+    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ExecMetricsResult> map) {
         this.scenariosExecutorName = scenariosExecutor.getName();
         scenarioResultMap.putAll(map);
     }
 
     public String getExecutionSummary() {
-        StringBuilder sb = new StringBuilder("executions: ");
-        sb.append(scenarioResultMap.size()).append(" scenarios, ");
-        sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isEmpty()).count()).append(" normal, ");
-        sb.append(scenarioResultMap.values().stream().filter(r -> r.getException().isPresent()).count()).append(" errored");
-        return sb.toString();
+        String sb = "executions: " + scenarioResultMap.size() + " scenarios, " +
+            scenarioResultMap.values().stream().filter(r -> r.getException().isEmpty()).count() + " normal, " +
+            scenarioResultMap.values().stream().filter(r -> r.getException().isPresent()).count() + " errored";
+        return sb;
     }
 
-    public ScenarioResult getOne() {
+    public ExecMetricsResult getOne() {
         if (this.scenarioResultMap.size() != 1) {
             throw new RuntimeException("getOne found " + this.scenarioResultMap.size() + " results instead of 1.");
         }
@@ -57,14 +56,14 @@ public class ScenariosResults {
     }
 
     public void reportToLog() {
-        for (Map.Entry<Scenario, ScenarioResult> entry : this.scenarioResultMap.entrySet()) {
+        for (Map.Entry<Scenario, ExecMetricsResult> entry : this.scenarioResultMap.entrySet()) {
             Scenario scenario = entry.getKey();
-            ScenarioResult oresult = entry.getValue();
+            ExecMetricsResult oresult = entry.getValue();
 
             logger.info("results for scenario: " + scenario);
 
             if (oresult != null) {
-                oresult.reportElapsedMillis();
+                oresult.reportElapsedMillisToLog();
             } else {
                 logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
             }

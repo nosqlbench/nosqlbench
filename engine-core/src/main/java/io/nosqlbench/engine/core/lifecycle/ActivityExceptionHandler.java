@@ -23,9 +23,9 @@ public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler
 
     private static final Logger logger = LogManager.getLogger(ActivityExceptionHandler.class);
 
-    private final ActivityExecutor executor;
+    private final ActivityThreadsManager executor;
 
-    public ActivityExceptionHandler(ActivityExecutor executor) {
+    public ActivityExceptionHandler(ActivityThreadsManager executor) {
         this.executor = executor;
         logger.debug(() -> "Activity exception handler starting up for executor '" + executor + "'");
     }
