@@ -17,21 +17,20 @@
 package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
 
 /**
- * This is the root type of any operation which is used in a NoSQLBench
+ * <p>This is the root type of any operation which is used in a NoSQLBench
  * DriverAdapter. It is a tagging interface for incremental type validation
- * in the NB runtime. You probably don't want to use it directly.
+ * in the NB runtime. You probably don't want to use it directly.</p>
  *
- * Instead, use these:
+ * <p>Instead, use <em>one</em> of these:
  * <ul>
  *  <li>{@link CycleOp}</li> - An interface that will called if there is nothing to consume
  *  the result type from your operation. In some cases preparing a result body to
- *  hand down the chain is more costly, so implementing this interface allows ...
+ *  hand down the chain is more costly, so implementing this interface allows the runtime
+ *  to be more optimized.</li>
+ *  <li>{@link ChainingOp}</li>
  * </ul>
- *
- * either {@link CycleOp} or {@link ChainingOp} (but not both!)
- *
- * In the standard flow of an activity, either of the above interfaces is called
- * so long as an Op implements one of them.
+ * </p>
  */
+// TODO: optimize the runtime around the specific op type
 public interface Op extends OpResultSize {
 }
