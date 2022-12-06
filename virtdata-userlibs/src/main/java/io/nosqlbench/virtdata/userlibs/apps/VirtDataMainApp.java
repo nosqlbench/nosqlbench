@@ -32,11 +32,13 @@ public class VirtDataMainApp implements BundledApp {
 
     private final static String APP_TESTMAPPER = "testmapper";
     private final static String APP_GENDOCS = "gendocs";
+
+    private final static String APP_BUILDDOCS = "builddocs";
     private final static String APP_DIAGNOSE = "diagnose";
-    private final static String[] names = new String[]{APP_GENDOCS, APP_TESTMAPPER, APP_DIAGNOSE};
+    private final static String[] names = new String[]{APP_GENDOCS,APP_BUILDDOCS, APP_TESTMAPPER, APP_DIAGNOSE};
 
     public static boolean hasNamedApp(String appname) {
-        return (appname.equals(APP_TESTMAPPER) || appname.equals(APP_GENDOCS) || appname.equals(APP_DIAGNOSE));
+        return (appname.equals(APP_TESTMAPPER) || appname.equals(APP_BUILDDOCS) || appname.equals(APP_GENDOCS) || appname.equals(APP_DIAGNOSE));
     }
 
     public static void main(String[] args) {
@@ -46,7 +48,7 @@ public class VirtDataMainApp implements BundledApp {
     @Override
     public int applyAsInt(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_GENDOCS + "|" + APP_DIAGNOSE +")");
+            System.out.println("Usage: app (" + APP_TESTMAPPER + "|" + APP_BUILDDOCS + "|" + APP_GENDOCS +"|"+ APP_DIAGNOSE +")");
             return 1;
         }
 
@@ -58,7 +60,8 @@ public class VirtDataMainApp implements BundledApp {
 
         if (appSelection.equalsIgnoreCase(APP_TESTMAPPER)) {
             VirtDataCheckPerfApp.main(appArgs);
-        } else if (appSelection.equalsIgnoreCase(APP_GENDOCS)) {
+        }
+        else if (appSelection.equalsIgnoreCase(APP_GENDOCS)) {
             VirtDataGenDocsApp.main(appArgs);
         } else if (appSelection.equalsIgnoreCase(APP_DIAGNOSE)) {
             VirtDataDiagnoseApp.main(appArgs);

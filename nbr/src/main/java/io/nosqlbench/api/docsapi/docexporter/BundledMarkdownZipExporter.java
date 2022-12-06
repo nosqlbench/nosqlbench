@@ -20,6 +20,7 @@ import io.nosqlbench.api.docsapi.BundledMarkdownLoader;
 import io.nosqlbench.api.docsapi.DocsBinder;
 import io.nosqlbench.api.docsapi.DocsNameSpace;
 import io.nosqlbench.api.markdown.aggregator.MutableMarkdown;
+import io.nosqlbench.virtdata.userlibs.apps.docsapp.VirtDataGenDocsApp;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,12 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -51,11 +57,28 @@ public class BundledMarkdownZipExporter {
             zipstream.setMethod(ZipOutputStream.DEFLATED);
             zipstream.setLevel(9);
 
-            DocsBinder docsNameSpaces = BundledMarkdownLoader.loadBundledMarkdown();
+            DocsBinder docsNameSpaces = BundledMarkdownLoader.loadBundledMarkdown(); //Loads the drivers under @Service Annotation
+
             for (DocsNameSpace docs_ns : docsNameSpaces) {
                 for (Path p : docs_ns) {
-                    addEntry(p, p.getParent(), zipstream);
+                    addEntry(p, p.getParent(), zipstream, docs_ns.getName() + "/");
                 }
+            }
+
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            Future<Map<String, StringBuilder>> future = executorService.submit(new VirtDataGenDocsApp(null));
+            Map<String, StringBuilder> builderMap = future.get();
+            executorService.shutdown();
+            String bindingsPrefix ="bindings/";
+            for(Map.Entry<String, StringBuilder> entry : builderMap.entrySet())
+            {
+                String filename = entry.getKey();
+                StringBuilder fileStringBuilder = entry.getValue();
+                ZipEntry zipEntry = new ZipEntry(bindingsPrefix +filename);
+                zipEntry.setTime(new Date().getTime());
+                zipstream.putNextEntry(zipEntry);
+                zipstream.write(fileStringBuilder.toString().getBytes());
+                zipstream.closeEntry();
             }
             zipstream.finish();
             stream.close();
@@ -64,18 +87,17 @@ public class BundledMarkdownZipExporter {
         }
     }
 
-    private void addEntry(Path p, Path r, ZipOutputStream zos) throws IOException {
+    private void addEntry(Path p, Path r, ZipOutputStream zos, String prefix) throws IOException {
 
         String name = r.relativize(p).toString();
         name = Files.isDirectory(p) ? (name.endsWith(File.separator) ? name : name + File.separator) : name;
-
-        ZipEntry entry = new ZipEntry(name);
+        ZipEntry entry = new ZipEntry(prefix + name);
 
         if (Files.isDirectory(p)) {
             zos.putNextEntry(entry);
             DirectoryStream<Path> stream = Files.newDirectoryStream(p);
             for (Path path : stream) {
-                addEntry(path,r,zos);
+                addEntry(path,r,zos, prefix);
             }
         } else {
             entry.setTime(Files.getLastModifiedTime(p).toMillis());

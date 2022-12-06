@@ -28,11 +28,15 @@ import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.stream.Stream;
 
 /**
  * <P>The DriverAdapter interface is expected to be the replacement
@@ -169,7 +173,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
      * @return A {@link DocsBinder} which describes docs to include for a given adapter.
      */
     default DocsBinder getBundledDocs() {
-        Docs docs = new Docs().namespace("adapter-"+this.getAdapterName());
+        Docs docs = new Docs().namespace("drivers");
 
         String dev_docspath = "adapter-" + this.getAdapterName() + "/src/main/resources/docs/" + this.getAdapterName();
         String cp_docspath = "docs/" + this.getAdapterName();
@@ -177,6 +181,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
         bundled_docs.map(Content::asPath).ifPresent(docs::addContentsOf);
 
         Optional<Content<?>> maindoc = NBIO.local().name("/src/main/resources/" + this.getAdapterName() + ".md", this.getAdapterName() + ".md").first();
+
         maindoc.map(Content::asPath).ifPresent(docs::addPath);
 
         return docs.asDocsBinder();
