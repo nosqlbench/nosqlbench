@@ -52,7 +52,7 @@ public class TriangularStepFunction implements LongUnaryOperator {
     TriangularStepFunction(long average, long variance) {
         if (average<=0 || variance < 0 || variance > average) {
             throw new RuntimeException(
-                "The average must be non-negative, and the variance must be less than the average. " +
+                "The average must be positive, variance non-negative and the variance must be less than the average. " +
                     "You provided average=" + average + ", variance=" + variance + "."
             );
         }
