@@ -32,7 +32,7 @@ public class ExceededRetryReplaceException extends CqlGenericCycleException {
     private final int retries;
 
     public ExceededRetryReplaceException(ResultSet resultSet, String queryString, int retries) {
-        super("After " + retries + " retires using the retryreplace option, Operation was not applied:" + queryString);
+        super("After " + retries + " retries using the retryreplace option, Operation was not applied:" + queryString);
         this.retries = retries;
         this.resultSet = resultSet;
         this.queryString = queryString;
