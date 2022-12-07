@@ -1,0 +1,114 @@
+# nb -v run driver=http yaml=http-docsapi-keyvalue tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+
+description: |
+  This workload emulates a timeseries data model and access patterns.
+  This should be identical to the cql variant except for:
+  - Schema creation with the Docs API, we don't use cql because the Docs API is opinionated about schema.
+  - There is no instrumentation with the http driver.
+  - There is no async mode with the http driver.
+  Note that stargate_port should reflect the port where the Docs API is exposed (defaults to 8082). 
+
+scenarios:
+  default:
+    schema: run driver=http tags==phase:schema threads==1 cycles==UNDEF
+    rampup: run driver=http tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: stargate_host=host1
+  #   multiple hosts: stargate_host=host1,host2,host3
+  #   multiple weighted hosts: stargate_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  # http request id
+  request_id: ToHashedUUID(); ToString();
+
+  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); StringDateWrapper("yyyy-MM-dd'T'hh:mm:ss'Z");
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); URLEncode();
+
+blocks:
+  - tags:
+      phase: schema
+    statements:
+      - delete-docs-collection : DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_timeseries>>/collections/<<table:docs_collection>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        tags:
+          name: delete-table
+        ok-status: "[2-4][0-9][0-9]"
+      - create-docs-collection : POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_timeseries>>/collections
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<table:docs_collection>>"
+          }
+        tags:
+          name: create-table
+
+  - name: rampup
+    tags:
+      phase: rampup
+    statements:
+      - rampup-insert: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_timeseries>>/collections/<<table:docs_collection>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+            "machine_id": "{machine_id}",
+            "sensor_name": "{sensor_name}",
+            "time": "{time}",
+            "sensor_value": "{sensor_value}",
+            "station_id": "{station_id}",
+            "data": "{data}"
+            }
+        tags:
+          name: rampup-insert
+
+  - name: main-read
+    tags:
+      phase: main
+      type: read
+    params:
+      ratio: <<read_ratio:1>>
+    statements:
+      - main-select: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_timeseries>>/collections/<<table:docs_collection>>?where=E[[{"machine_id":{"$eq":"1"},"sensor_name":{"$eq":"one"}}]]&page-size=10'
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        tags:
+          name: main-select
+        ok-status: "[2-4][0-9][0-9]"
+
+  - name: main-write
+    tags:
+      phase: main
+      type: write
+    params:
+      ratio: <<write_ratio:9>>
+    statements:
+      - main-write: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_timeseries>>/collections/<<table:docs_collection>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+            {
+            "machine_id": "{machine_id}",
+            "sensor_name": "{sensor_name}",
+            "time": "{time}",
+            "sensor_value": "{sensor_value}",
+            "station_id": "{station_id}",
+            "data": "{data}"
+            }
+        tags:
+          name: main-write
