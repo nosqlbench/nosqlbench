@@ -24,8 +24,8 @@ public class Cqld4CqlPreparedStatement extends Cqld4CqlOp {
 
     private final BoundStatement stmt;
 
-    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxpages, boolean retryreplace, RSProcessors processors) {
-        super(session,maxpages,retryreplace,processors);
+    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxpages, boolean retryreplace, int maxLwtRetries, RSProcessors processors) {
+        super(session,maxpages,retryreplace,maxLwtRetries,processors);
         this.stmt = stmt;
     }
 

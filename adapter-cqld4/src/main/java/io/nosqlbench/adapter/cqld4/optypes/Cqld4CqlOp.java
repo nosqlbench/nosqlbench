@@ -23,6 +23,7 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.*;
 import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
+import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
@@ -46,15 +47,27 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private final CqlSession session;
     private final int maxpages;
     private final boolean retryreplace;
+    private final int maxLwtRetries;
+    private int retryReplaceCount =0;
 
     private ResultSet rs;
     private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
 
-    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, RSProcessors processors) {
+    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, int maxLwtRetries, RSProcessors processors) {
         this.session = session;
         this.maxpages = maxpages;
         this.retryreplace = retryreplace;
+        this.maxLwtRetries =maxLwtRetries;
+        this.processors = processors;
+    }
+
+    protected Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
+        this.session = session;
+        this.maxpages = maxpages;
+        this.retryreplace = retryreplace;
+        this.maxLwtRetries =maxLwtRetries;
+        this.retryReplaceCount=retryRplaceCount;
         this.processors = processors;
     }
 
@@ -69,6 +82,10 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
             if (!retryreplace) {
                 throw new ChangeUnappliedCycleException(rs, getQueryString());
             } else {
+                retryReplaceCount++;
+                if (retryReplaceCount >maxLwtRetries) {
+                    throw new ExceededRetryReplaceException(rs,getQueryString(), retryReplaceCount);
+                }
                 Row one = rs.one();
                 processors.buffer(one);
                 totalRows++;
@@ -119,7 +136,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
     private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
-        return new Cqld4CqlReboundStatement(session, maxpages, retryreplace, rebound, processors);
+        return new Cqld4CqlReboundStatement(session, maxpages, retryreplace, maxLwtRetries, retryReplaceCount, rebound, processors);
     }
 
 }
