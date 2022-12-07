@@ -45,8 +45,8 @@ import java.util.Map;
 public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
 
     private final CqlSession session;
-    private final int maxpages;
-    private final boolean retryreplace;
+    private final int maxPages;
+    private final boolean retryReplace;
     private final int maxLwtRetries;
     private int retryReplaceCount =0;
 
@@ -54,18 +54,18 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
 
-    public Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, int maxLwtRetries, RSProcessors processors) {
+    public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
         this.session = session;
-        this.maxpages = maxpages;
-        this.retryreplace = retryreplace;
+        this.maxPages = maxPages;
+        this.retryReplace = retryReplace;
         this.maxLwtRetries =maxLwtRetries;
         this.processors = processors;
     }
 
-    protected Cqld4CqlOp(CqlSession session, int maxpages, boolean retryreplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
+    protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
         this.session = session;
-        this.maxpages = maxpages;
-        this.retryreplace = retryreplace;
+        this.maxPages = maxPages;
+        this.retryReplace = retryReplace;
         this.maxLwtRetries =maxLwtRetries;
         this.retryReplaceCount=retryRplaceCount;
         this.processors = processors;
@@ -79,7 +79,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
         int totalRows = 0;
 
         if (!rs.wasApplied()) {
-            if (!retryreplace) {
+            if (!retryReplace) {
                 throw new ChangeUnappliedCycleException(rs, getQueryString());
             } else {
                 retryReplaceCount++;
@@ -103,8 +103,8 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
                 Row row = reader.next();
                 processors.buffer(row);
             }
-            if (pages++ > maxpages) {
-                throw new UnexpectedPagingException(rs, getQueryString(), pages, maxpages, stmt.getPageSize());
+            if (pages++ > maxPages) {
+                throw new UnexpectedPagingException(rs, getQueryString(), pages, maxPages, stmt.getPageSize());
             }
             if (rs.isFullyFetched()) {
                 break;
@@ -136,7 +136,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
     private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
-        return new Cqld4CqlReboundStatement(session, maxpages, retryreplace, maxLwtRetries, retryReplaceCount, rebound, processors);
+        return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors);
     }
 
 }
