@@ -41,22 +41,22 @@ import java.util.function.LongUnaryOperator;
 public class TriangularStepFunction implements LongUnaryOperator {
 
     private final Hash hasher = new Hash();
-    private final long median;
+    private final long average;
     private final LongUnaryOperator sizer;
 
     private final long variance;
 
 
-    @Example({"TriangularStepFunction(100,20)","Create a sequence of values where the average and median is 100, but the range of values is between 80 and 120."})
-    @Example({"TriangularStepFunction(80,10)","Create a sequence of values where the average and median is 80, but the range of values is between 70 and 90."})
+    @Example({"TriangularStepFunction(100,20)","Create a sequence of values where the average is 100, but the range of values is between 80 and 120."})
+    @Example({"TriangularStepFunction(80,10)","Create a sequence of values where the average is 80, but the range of values is between 70 and 90."})
     TriangularStepFunction(long average, long variance) {
-        if (variance < 0 || variance > average) {
+        if (average<=0 || variance < 0 || variance > average) {
             throw new RuntimeException(
-                "The median must be non-negative, and the variance must be less than the median. " +
-                    "You provided median=" + average + ", variance=" + variance + "."
+                "The average must be non-negative, and the variance must be less than the average. " +
+                    "You provided average=" + average + ", variance=" + variance + "."
             );
         }
-        this.median = average;
+        this.average = average;
         this.variance = variance;
         this.sizer = new HashRange(average-variance,average+variance);
     }
@@ -68,9 +68,9 @@ public class TriangularStepFunction implements LongUnaryOperator {
     @Override
     public long applyAsLong(long operand) {
         // window number
-        long count = operand / median;
+        long count = operand / average;
         // offset within window
-        long offset = operand % median;
+        long offset = operand % average;
         // base of window
         long base = operand - offset;
         // variate up to window size
@@ -84,6 +84,6 @@ public class TriangularStepFunction implements LongUnaryOperator {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+"{median="+median+",variance="+variance+"}";
+        return this.getClass().getSimpleName()+"{average="+ average +",variance="+variance+"}";
     }
 }
