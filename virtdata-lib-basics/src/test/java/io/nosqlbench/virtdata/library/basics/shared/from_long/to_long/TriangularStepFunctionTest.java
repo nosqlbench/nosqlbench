@@ -49,30 +49,6 @@ public class TriangularStepFunctionTest {
     }
 
     @Test
-    public void testStepSlice() {
-        int avgsize=10;
-        TriangularStepFunction f = new TriangularStepFunction(avgsize);
-        int[] ary = new int[avgsize*2];
-        long current=0L;
-        int count=0;
-        for (int i = 0; i < 10000; i++) {
-            long result = f.applyAsLong(i);
-            if (result==current) {
-                count++;
-            } else {
-                ary[count]++;
-                current=result;
-                count=0;
-            }
-        }
-
-        for (int i = 0; i < ary.length; i++) {
-            System.out.println("bucket " + i + ", count " + ary[i]);
-        }
-    }
-
-
-    @Test
     public void testIncrementalVariance() {
         TriangularStepFunction f = new TriangularStepFunction(100, 0);
         assertThat(f.applyAsLong(0L)).isEqualTo(0L);
@@ -141,6 +117,5 @@ public class TriangularStepFunctionTest {
             stats.accept(count);
         }
         return stats;
-
     }
 }

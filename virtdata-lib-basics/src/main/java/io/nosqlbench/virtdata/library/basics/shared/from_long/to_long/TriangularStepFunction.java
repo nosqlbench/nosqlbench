@@ -47,7 +47,7 @@ public class TriangularStepFunction implements LongUnaryOperator {
     private final long variance;
 
 
-    @Example({"TriangularStepFunction(100,20)","Create a sequence of values where the average and median is 100, but the range of values is between 90 and 120."})
+    @Example({"TriangularStepFunction(100,20)","Create a sequence of values where the average and median is 100, but the range of values is between 80 and 120."})
     @Example({"TriangularStepFunction(80,10)","Create a sequence of values where the average and median is 80, but the range of values is between 70 and 90."})
     TriangularStepFunction(long average, long variance) {
         if (variance < 0 || variance > average) {
@@ -63,9 +63,6 @@ public class TriangularStepFunction implements LongUnaryOperator {
 
     TriangularStepFunction(long average) {
         this(average, average/2);
-//        if (maxOffset>=avgsize) {
-//            throw new RuntimeException("max offset " + maxOffset + " has to be less than avg size " + avgsize);
-//        }
     }
 
     @Override
@@ -83,10 +80,6 @@ public class TriangularStepFunction implements LongUnaryOperator {
         // select current or next window
         long result = ((slice)>operand) ? count : count + 1;
         return result;
-    }
-
-    public long inlined(long operand) {
-        return (operand < operand - operand % median + sizer.applyAsLong(operand - operand % median)) ? operand / median : operand / median + 1;
     }
 
     @Override
