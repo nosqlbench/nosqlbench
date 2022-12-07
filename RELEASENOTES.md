@@ -1,12 +1,203 @@
-- 114aea71b (HEAD -> main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 0fd85c09b (origin/main) Merge pull request #728 from nosqlbench/feature/mongodb_baselines2_workloads
-- 99f0226fc Merge pull request #729 from nosqlbench/snyk-upgrade-2d988862477c7e76f15ff8b65bcdc3a4
-- d22413259 Merge pull request #727 from nosqlbench/snyk-upgrade-b28610be666fa7e80936b0c2f87df569
-- d49a5087d improved build diagnostics
-- e594aab92 (origin/snyk-upgrade-2d988862477c7e76f15ff8b65bcdc3a4) fix: upgrade com.datastax.oss:pulsar-jms from 2.4.4 to 2.4.9
-- 64990c412 (origin/feature/mongodb_baselines2_workloads) Initial working draft of MongoDB timeseries
-- 7ebb16a06 (origin/snyk-upgrade-b28610be666fa7e80936b0c2f87df569) fix: upgrade org.postgresql:postgresql from 42.4.2 to 42.5.0
-- 68cdd075b new function, security updates, actions fix
-- ec8e6ee71 Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- a63fa951c actions fix release
-- 0f6bce0b0 fix typo in docker push logic
+- d0f25f5c6 (HEAD -> main, origin/main) Merge pull request #831 from nosqlbench/nosqlbench-830
+- 03a3afd86 Merge pull request #828 from nosqlbench/nosqlbench-824
+- 2b63b8e64 (origin/nosqlbench-830, nosqlbench-830) fix camel case across all affected method signatures
+- 6fbbfb5d0 (origin/nosqlbench-824, nosqlbench-824) diagram updates
+- a1fbb6dcc use average instead of median, add safety check for average==0
+- 15f15ebc9 nosqlbench-828 nosqlbench-824
+- 7737ffc0f nosqlbench-828 nosqlbench-824
+- d90731ec7 typo fix
+- b33e93eae Merge pull request #827 from nosqlbench/snyk-upgrade-5c7e9a58ec726ce1a5540b1007997a68
+- 3677a60ec nosqlbench-830 limit spin-looping with cqld4 retryreplace option.
+- 97cf9a32c add ad-hoc doc to show publishing flow
+- dc7428395 nosqlbench-824 Add function to provide clustered values with monotonic stepping
+- eaa8c5671 Merge pull request #826 from nosqlbench/snyk-upgrade-62cc0785172d699541ae5c0e9e487268
+- a1e7eb198 Merge pull request #825 from nosqlbench/snyk-upgrade-32a05328633bd6d7b922681265c560ee
+- 14df638f7 Merge pull request #823 from nosqlbench/snyk-upgrade-d560c5ed862bae1f5c8558515d8e4571
+- cde915914 Merge pull request #818 from nosqlbench/snyk-upgrade-e5f0f6d488b383219dd2ca00632f1dde
+- b13c899e8 Merge pull request #815 from nosqlbench/javadoc_improvements
+- f8623f3b7 (origin/snyk-upgrade-5c7e9a58ec726ce1a5540b1007997a68) fix: upgrade io.swagger.core.v3:swagger-models from 2.2.4 to 2.2.6
+- 76f5507e4 (origin/snyk-upgrade-62cc0785172d699541ae5c0e9e487268) fix: upgrade org.apache.commons:commons-compress from 1.21 to 1.22
+- 150793cda (origin/snyk-upgrade-32a05328633bd6d7b922681265c560ee) fix: upgrade org.glassfish.jersey.media:jersey-media-json-jackson from 3.0.8 to 3.1.0
+- 82bfa4485 (origin/snyk-upgrade-d560c5ed862bae1f5c8558515d8e4571) fix: upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.340 to 1.12.341
+- 2ca4320c2 Merge pull request #819 from nosqlbench/snyk-upgrade-cab2f09370a21c3a871a0379d2ad3792
+- 569d35f2b Merge pull request #820 from nosqlbench/snyk-upgrade-a30d7c35198a17d29ecdca13feba6579
+- 5595f5083 Merge pull request #821 from nosqlbench/snyk-upgrade-f3ed4565eab47a4f529c1dfe1685b618
+- 8eb934c56 Merge pull request #822 from nosqlbench/snyk-upgrade-292f7f0db6ee968fd7ce222173de764c
+- 141bfe088 fix: upgrade org.graalvm.js:js-scriptengine from 21.3.3.1 to 21.3.4
+- fd4673f15 fix: upgrade io.dropwizard.metrics:metrics-graphite from 4.2.10 to 4.2.12
+- 3030e58df fix: upgrade org.graalvm.tools:profiler from 20.3.6.1 to 20.3.8
+- 1e6367ecb fix: upgrade org.graalvm.js:js from 21.3.3.1 to 21.3.4
+- 52ef69373 (origin/snyk-upgrade-e5f0f6d488b383219dd2ca00632f1dde) fix: upgrade io.netty:netty-handler from 4.1.84.Final to 4.1.85.Final
+- 726028059 (origin/javadoc_improvements, javadoc_improvements) update docs for op types
+- b4b09048f update docs for op types
+- 98493cfcb Merge pull request #812 from nosqlbench/snyk-upgrade-1754fe16038ae415d7733b7b3fdfb0ad
+- 842427e4f Merge pull request #813 from nosqlbench/snyk-upgrade-ca34705c36a67d06ea66413eae078875
+- b06996319 Merge pull request #814 from nosqlbench/snyk-upgrade-a37d7e3729b4fe18258665c47ebd0cf4
+- b3e20c16e Merge pull request #809 from nosqlbench/nosqlbench-808
+- 6ad405d9f fix: upgrade org.glassfish.jersey.core:jersey-server from 3.0.8 to 3.1.0
+- db6594d41 Merge pull request #811 from nosqlbench/snyk-upgrade-8275b1467b7f05117180335fa4d5f944
+- b6cc8fcf0 Merge pull request #810 from nosqlbench/snyk-upgrade-342e4814a0e11c6d2f22b112ba735c12
+- d88359a6a fix: upgrade org.snakeyaml:snakeyaml-engine from 2.4 to 2.5
+- f413a5af7 fix: upgrade org.codehaus.groovy:groovy from 3.0.12 to 3.0.13
+- 34b51b198 fix: upgrade com.datastax.oss:java-driver-query-builder from 4.14.1 to 4.15.0
+- c89339839 fix: upgrade joda-time:joda-time from 2.11.2 to 2.12.1
+- 9bca349e4 (origin/nosqlbench-808, nosqlbench-808) use correct value in exception handlers
+- bf518c375 Merge pull request #804 from nosqlbench/snyk-upgrade-4a7ee2762e595acb421d164dc872273b
+- b16de9edb Merge pull request #806 from nosqlbench/snyk-fix-d203bc55bd9076b01b05bf8a45a65046
+- 7c8727e15 Merge pull request #805 from nosqlbench/snyk-upgrade-18902492bf09462887646247db53d19b
+- 017fcf8ff Merge pull request #803 from nosqlbench/snyk-upgrade-12d61683e1022753a4e624d6d62d5a19
+- 1f96e625d Merge pull request #802 from nosqlbench/snyk-upgrade-cf1da0c80b868193683f0a03748b3835
+- ce353d899 Merge pull request #801 from nosqlbench/snyk-upgrade-399641fb454b01fc3feead152acf52d5
+- 74ae911e5 Merge pull request #800 from nosqlbench/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.5.1
+- 82c253acb (origin/snyk-fix-d203bc55bd9076b01b05bf8a45a65046) fix: driver-cockroachdb/pom.xml to reduce vulnerabilities
+- fec156a25 (origin/snyk-upgrade-18902492bf09462887646247db53d19b) fix: upgrade io.netty:netty-handler from 4.1.82.Final to 4.1.84.Final
+- d622670f7 (origin/snyk-upgrade-4a7ee2762e595acb421d164dc872273b) fix: upgrade org.graalvm.sdk:graal-sdk from 21.3.3.1 to 21.3.4
+- ec858f69d (origin/snyk-upgrade-12d61683e1022753a4e624d6d62d5a19) fix: upgrade info.picocli:picocli from 4.6.3 to 4.7.0
+- 96be7811a (origin/snyk-upgrade-cf1da0c80b868193683f0a03748b3835) fix: upgrade com.google.code.gson:gson from 2.9.1 to 2.10
+- 64f11bed1 (origin/snyk-upgrade-399641fb454b01fc3feead152acf52d5) fix: upgrade com.github.oshi:oshi-core-java11 from 6.2.2 to 6.3.1
+- 702692058 (origin/dependabot/maven/driver-cockroachdb/org.postgresql-postgresql-42.5.1) build(deps): bump postgresql in /driver-cockroachdb
+- f39ba9331 fix: upgrade io.swagger.core.v3:swagger-models from 2.2.3 to 2.2.4 (#799)
+- 9afe376b4 fix: upgrade io.swagger.parser.v3:swagger-parser from 2.1.4 to 2.1.7 (#798)
+- 79a2d0977 fix: upgrade org.apache.pulsar:pulsar-client from 2.10.1 to 2.10.2 (#796)
+- 523f500cc Merge pull request #773 from nosqlbench/snyk-fix-8aa6ab863bb5432def89d1b31da171c7
+- 26ee71883 Merge pull request #772 from nosqlbench/snyk-fix-ab49d52aab0b82f5b5b84c1e7389d4b1
+- 8b87b10ca Merge branch 'main' into snyk-fix-ab49d52aab0b82f5b5b84c1e7389d4b1
+- 00e0596fd Merge pull request #771 from nosqlbench/snyk-fix-ac633ddba1da2c7ec65dff2ae08fa725
+- 1e0ac38b4 Merge branch 'main' into snyk-fix-ac633ddba1da2c7ec65dff2ae08fa725
+- f9adeff1d Merge pull request #774 from nosqlbench/snyk-fix-b2c236df12318590f34b590edea9705e
+- 5ffda7d1e Merge branch 'main' into snyk-fix-b2c236df12318590f34b590edea9705e
+- e5f03b91a Merge pull request #775 from nosqlbench/snyk-fix-8c31cd4a0b1166676ed0fe1e7cf9a216
+- c7e5e7291 Merge branch 'main' into snyk-fix-8c31cd4a0b1166676ed0fe1e7cf9a216
+- 3ceddb631 Merge pull request #776 from nosqlbench/snyk-fix-6ba0467ba1a5842fab939a7c4f8b6a14
+- e39954ccc Merge branch 'main' into snyk-fix-6ba0467ba1a5842fab939a7c4f8b6a14
+- 56470956b Merge pull request #778 from nosqlbench/snyk-fix-62d2529ba6efa1321216d8e295c48e5d
+- 59b430b12 Merge branch 'main' into snyk-fix-62d2529ba6efa1321216d8e295c48e5d
+- 4c764250d Merge pull request #794 from nosqlbench/snyk-fix-2ac9869bf1d47aa3f30a82f3655c5432
+- 7491370ba Merge branch 'main' into snyk-fix-2ac9869bf1d47aa3f30a82f3655c5432
+- 47db96c06 Merge pull request #795 from nosqlbench/snyk-fix-3f81768022b768b87ace72058200f7ac
+- fa528eebe Merge pull request #779 from nosqlbench/shutdown_hooks
+- 875e2d8f9 (origin/shutdown_hooks, shutdown_hooks) temporarily disable test for close exception handler
+- 901034875 fix for second noisy shutdown test
+- 2db6c6cf6 Update codeql-analysis.yml
+- 18ba2fdaf Merge branch 'main' into shutdown_hooks
+- 8602d5b53 Merge pull request #793 from yabinmeng/main
+- 3b616d7d2 (origin/snyk-fix-3f81768022b768b87ace72058200f7ac) fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- eaefd9a1b Merge pull request #781 from nosqlbench/780-sporadic-buildtest-failures-gh-actions
+- 69617042b (origin/780-sporadic-buildtest-failures-gh-actions, 780-sporadic-buildtest-failures-gh-actions) minor fixes on PR
+- 28f561aed direct work-around for flaky test, simple improvements to logging, some improvements to consistent view of status, misc cleanups
+- 0193ed355 (origin/snyk-fix-2ac9869bf1d47aa3f30a82f3655c5432) fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- c077218e8 Fix example yaml file producer and consumer parameter names
+- 16417f37b additional diagnostics for spurious test
+- f7c9e50f3 Add README file and adjust sample yaml files
+- eb0013f16 logging updates for build sanity checking
+- bc4773269 build workflow should upload logfiles for success() or failure() of previous jobs, but not when canceled
+- 40c968234 Merge branch '780-sporadic-buildtest-failures-gh-actions' of github.com:nosqlbench/nosqlbench into 780-sporadic-buildtest-failures-gh-actions
+- dcf7baf86 Dead code utest resurrection and timing w/ gh actions Cyclerate=10 to test github actions part2 Debug and exception handling Detailed error handler logging System out diagnostics Capture step included Try-catch diagnostics. sysout cleanup; general cleanup
+- 20ed4950d removing broken actions plugin on main
+- 2831d8c3f Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 3e8153dd8 Merge pull request #792 from yabinmeng/main
+- b8684107b memoize retries in hot code path
+- ebb6f2c58 include space usage in diag for testing
+- 48192cbde close native driver connections on on activity+space shutdown
+- 4471d90cc implement closeable spaces via decorator interface
+- bd8aff908 Added support for 1) subscription initial position and 2) regex subscription mode
+- 35eec4d81 Dead code utest resurrection and timing w/ gh actions Cyclerate=10 to test github actions part2 Debug and exception handling Detailed error handler logging System out diagnostics Capture step included Try-catch diagnostics. sysout cleanup; general cleanup
+- e80e9926c Merge pull request #791 from yabinmeng/main
+- 0de710288 Add support for 1) producer message compression 2) consumer DLT/negAck/ackTimeout policy
+- 12f8697e0 Complete the first draft of NB5 Pulsar adapter code, except the per-thread rate limiter.
+- e128d2867 Merge branch 'nosqlbench:main' into main
+- 0c71696b1 Completed NB4 Pulsar driver code migration to NB5. But there are still a few lingering issues due to the difference of how NB4 vs NB5 driver/adapter interacts with the NB engine.
+- 33e330dc3 [Snyk] Security upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.325 to 1.12.330 (#768)
+- 2158dfa33 fix: upgrade io.netty:netty-handler from 4.1.81.Final to 4.1.82.Final (#767)
+- 5fc22bbaa fix: upgrade com.google.code.gson:gson from 2.9.0 to 2.9.1 (#766)
+- 6999a675f [Snyk] Upgrade io.dropwizard.metrics:metrics-core from 4.2.10 to 4.2.12 (#765)
+- ca6f2b052 Add PulsarAdapter specific metrics
+- 8b76d1fcf add shutdown hooks for adapters and spaces
+- 8c3d744a0 Merge pull request #764 from nosqlbench/snyk-upgrade-6693c12bca4fafc634662d8962afcb9a
+- eb1de8f1d Timing changes for github actions to properly perform build/test step.
+- a05c511de fix: upgrade org.eclipse.jetty:jetty-server from 11.0.11 to 11.0.12 (#763)
+- c309d200a - Delete unsed code "driver-jms" - NB5 Pulsar driver Admin functionality in place - create/delete tenant, namespace, and topic
+- 2b9452fde Buildfixes, trying to unblock current builds (#777)
+- fe268d7f8 (origin/snyk-fix-62d2529ba6efa1321216d8e295c48e5d) fix: nb-api/pom.xml to reduce vulnerabilities
+- d47462929 (origin/buildfixes, buildfixes) remove blocking issues github actions plugin, since it is broken
+- 4dc830aa1 improve wording around op template resolution
+- b2f74d329 make example/test script more robust for meager github actions environment
+- cbb01fb7f (origin/snyk-fix-6ba0467ba1a5842fab939a7c4f8b6a14) fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- e50098800 (origin/snyk-fix-8c31cd4a0b1166676ed0fe1e7cf9a216) fix: nb-api/pom.xml to reduce vulnerabilities
+- 422849209 (origin/snyk-fix-b2c236df12318590f34b590edea9705e) fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- c5b632518 (origin/snyk-fix-8aa6ab863bb5432def89d1b31da171c7) fix: docsys/pom.xml to reduce vulnerabilities
+- f8af301fb (origin/snyk-fix-ab49d52aab0b82f5b5b84c1e7389d4b1) fix: nb-api/pom.xml to reduce vulnerabilities
+- a5974919a (origin/snyk-fix-ac633ddba1da2c7ec65dff2ae08fa725) fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- 7c1fb1963 Merge pull request #770 from nosqlbench/ms-mongodb-keyvalue-schema-fix
+- 98c7b1a97 Merge pull request #769 from nosqlbench/base64
+- 45ee75fef bump min_version
+- 8f32c9496 Updated MongoDB key-value collection to have a 'value' field
+- 9a92129a8 (origin/base64) base64
+- bb27a6f7f (origin/snyk-upgrade-6693c12bca4fafc634662d8962afcb9a) fix: upgrade io.swagger.core.v3:swagger-models from 2.2.2 to 2.2.3
+- 0e3893190 (origin/jeffb/nb736) Merge pull request #757 from nosqlbench/snyk-upgrade-de963ecc07996edad35bfd93b9db28c2
+- 92e41e7f7 Merge pull request #758 from nosqlbench/snyk-upgrade-38e72059fc3a8a2099fed05a4e8be9b0
+- 64093b2ab Merge pull request #759 from nosqlbench/snyk-upgrade-5f4f139c9c2fc23d4a2117f5bda8f31e
+- 6d25c03ff Merge pull request #760 from nosqlbench/snyk-upgrade-c29375a9a40341a121dfc342ee787201
+- a92897b1d Merge pull request #761 from nosqlbench/snyk-upgrade-c51251ba7d6c428fd60b9aa362f5d4b4
+- 927f4e2c6 fix: upgrade org.eclipse.jetty:jetty-servlets from 11.0.11 to 11.0.12
+- f64a25280 fix: upgrade org.eclipse.jetty:jetty-servlet from 11.0.11 to 11.0.12
+- 74db1d97e fix: upgrade org.eclipse.jetty:jetty-rewrite from 11.0.11 to 11.0.12
+- 02257d41b fix: upgrade org.yaml:snakeyaml from 1.32 to 1.33
+- ed1365773 fix: upgrade joda-time:joda-time from 2.11.1 to 2.11.2
+- dae02bb60 Merge pull request #746 from nosqlbench/snyk-fix-c33fb16683078e999e1d6cab62020656
+- 90bf9dd47 Merge pull request #748 from nosqlbench/snyk-fix-4981c736a854543f414acc756aa6773d
+- 2cbb844db Merge pull request #756 from nosqlbench/dependabot/maven/mvn-defaults/org.apache.commons-commons-text-1.10.0
+- 702187794 Merge pull request #744 from nosqlbench/snyk-fix-26f3021e2a4eb5d42b86ca025e907044
+- def46982f Merge branch 'main' into snyk-fix-26f3021e2a4eb5d42b86ca025e907044
+- 2292c6a21 Merge branch 'main' into snyk-fix-4981c736a854543f414acc756aa6773d
+- 0021e1cf5 Merge pull request #740 from nosqlbench/snyk-upgrade-e3eae2348ed5c3a9c5a4df3da5434294
+- 2874bdd6a Merge branch 'main' into snyk-fix-c33fb16683078e999e1d6cab62020656
+- 5fb062c1a Merge pull request #749 from nosqlbench/snyk-fix-01ab345df3b2b9725654404c28451b69
+- f684760ee Merge branch 'main' into snyk-fix-01ab345df3b2b9725654404c28451b69
+- 25fe0a541 Merge pull request #739 from nosqlbench/snyk-upgrade-61e7fcecc7f6c453bf8ee04e1799fe04
+- 0cb654259 Merge pull request #738 from nosqlbench/snyk-upgrade-de204ed7275df7f0d05e2783982c6ac7
+- 6bcc1cfd2 build(deps): bump commons-text from 1.9 to 1.10.0 in /mvn-defaults
+- 974b29f11 Merge pull request #742 from nosqlbench/snyk-upgrade-dc69205a67c70990049a72696a0c367b
+- 88987fb04 Merge pull request #743 from nosqlbench/snyk-upgrade-ac680967c12a71fb0828a5fb85bd8259
+- 879a8778f Merge pull request #745 from nosqlbench/snyk-fix-6accd862435675058d9b3c98aefe4f4a
+- af6380f70 Merge pull request #747 from nosqlbench/snyk-fix-fc4ff10e48c0a29879ed09f2c567dd08
+- 47489b075 Merge pull request #750 from nosqlbench/snyk-fix-30fed3e9e7bf54aa1715f6cb0cd3bd93
+- bc1039a11 Merge pull request #751 from nosqlbench/snyk-fix-eeda5403343ff40d314d648afcfdf408
+- 256d7b721 Merge pull request #752 from nosqlbench/snyk-fix-b9ee34aa87226cd6400a08d1f6f78f84
+- eb3e57041 Merge pull request #754 from nosqlbench/snyk-fix-5ff726edd68fbb5f2553166c8f1878d6
+- b478a3766 Merge pull request #755 from nosqlbench/snyk-fix-fec660b2a5471e3538d424b7a8a66438
+- f875f2c7f fix: nb-api/pom.xml to reduce vulnerabilities
+- e90580de2 Merge pull request #753 from nosqlbench/ms-trivial-mongodb-workload-fix
+- c35ec732e fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- 60bd26104 Minor update to timeseries clustering index name
+- 3496f965c fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- e3187bc1e fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- 75aa1e45c fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- ad369143d fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- 9b279895e fix: nb-api/pom.xml to reduce vulnerabilities
+- 49309872c fix: engine-rest/pom.xml to reduce vulnerabilities
+- 35d57fca5 fix: nb-api/pom.xml & mvn-defaults/pom.xml to reduce vulnerabilities
+- 5cb5bd5b0 fix: mvn-defaults/pom.xml to reduce vulnerabilities
+- 8a3720792 fix: adapter-dynamodb/pom.xml to reduce vulnerabilities
+- 7e5bd8f7f fix: upgrade com.datastax.oss:java-driver-core from 4.14.1 to 4.15.0
+- cb3191a1a fix: upgrade com.datastax.oss:pulsar-jms from 2.4.9 to 2.4.11
+- 706880c01 fix: upgrade org.apache.logging.log4j:log4j-core from 2.18.0 to 2.19.0
+- dc4c92eca fix: upgrade org.apache.logging.log4j:log4j-api from 2.18.0 to 2.19.0
+- e7a92d68d fix: upgrade org.apache.logging.log4j:log4j-jcl from 2.18.0 to 2.19.0
+- 87c3904f9 Merge pull request #730 from nosqlbench/snyk-upgrade-497803c521a3e4b5bf1f8320886e4693
+- c769c59af Merge pull request #731 from nosqlbench/snyk-upgrade-4de9e27b335c4ba704d719c6b8208fc9
+- ee4243af7 Merge pull request #732 from nosqlbench/snyk-upgrade-b07f4c6dc36ef0b84aac016e42bc0ac0
+- 59a0b3fbf Merge pull request #733 from nosqlbench/snyk-upgrade-9d3ff80bbe2914cac41eefa7bf016fc4
+- a67e9604b Merge pull request #734 from nosqlbench/snyk-upgrade-6f292d686b89f8516e45eb37ec3e77bb
+- 1929bc87c Merge pull request #735 from nosqlbench/snyk-fix-d6c9e33a2e55402294f57e1ce7c62a6e
+- ab7487e98 Merge pull request #737 from jeffbanks/jeffb/count-warn-nb561
+- 9bc3a2fd1 Notify user when using error=count vs. counter.
+- b1d5411af Updated min_version to be 4.17.30
+- 5abef6db3 Updated min_version to be 4.17.30
+- 84b3b5e25 Updated min_version to be 4.17.30
+- a60c41256 (origin/snyk-fix-d6c9e33a2e55402294f57e1ce7c62a6e) fix: docsys/pom.xml to reduce vulnerabilities
+- 35d5c0cee (origin/snyk-upgrade-6f292d686b89f8516e45eb37ec3e77bb) fix: upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.269 to 1.12.300
+- 9d3310413 (origin/snyk-upgrade-9d3ff80bbe2914cac41eefa7bf016fc4) fix: upgrade org.antlr:antlr4-runtime from 4.10.1 to 4.11.1
+- c41b5990d (origin/snyk-upgrade-b07f4c6dc36ef0b84aac016e42bc0ac0) fix: upgrade com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider from 2.13.3 to 2.13.4
+- e0fb11da4 (origin/snyk-upgrade-4de9e27b335c4ba704d719c6b8208fc9) fix: upgrade io.netty:netty-handler from 4.1.80.Final to 4.1.81.Final
+- c6b327161 (origin/snyk-upgrade-497803c521a3e4b5bf1f8320886e4693) fix: upgrade com.amazonaws:aws-java-sdk-dynamodb from 1.12.262 to 1.12.299
