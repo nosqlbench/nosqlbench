@@ -23,8 +23,8 @@ import io.nosqlbench.adapter.cqld4.RSProcessors;
 public class Cqld4CqlSimpleStatement extends Cqld4CqlOp {
     private final SimpleStatement stmt;
 
-    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxpages, boolean retryreplace) {
-        super(session, maxpages,retryreplace, new RSProcessors());
+    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries) {
+        super(session, maxPages,retryReplace, maxLwtRetries, new RSProcessors());
         this.stmt = stmt;
     }
 
