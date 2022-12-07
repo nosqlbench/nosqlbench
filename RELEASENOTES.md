@@ -1,11 +1,9 @@
-- 46b28481b (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #716 from yabinmeng/nb4-maintenance
-- 9401cd32f Update S4J version to 2.4.11
-- 5b001c9bc Fix an issue of merging consumer side DLQ policies Add Conscrypt library dependency (which will remove a big chunk of warning message when running NB S4J)
-- 6d2e05ca0 Update S4J JMS config list for sticky partitions in transaction
-- e630a80e3 Add error handling when encountering connection error during message receive and send.
-- 54e02e000 - Upgrade S4J version to 2.4.10 - Add support for DLQ policy (at both global level and testing scenario level)
-- dd32991e9 - Upgrade S4J version to 2.4.10 - Add support for DLQ policy (at both global level and testing scenario level)
-- dc0bd3317 Merge pull request #708 from yabinmeng/nb4-maintenance
-- 4c4df1b22 Upgrade S4J version to 2.4.6 Add check for JMS transaction emulation (new feature) and transaction enablement
-- 0dbbf8d3c Merge pull request #699 from yabinmeng/nb4-maintenance
-- 2632dbce9 Update CLI scripting README to add "forceStop" option
+- 471f8ab46 (HEAD -> nb4-maintenance, origin/nb4-maintenance) Merge pull request #829 from kijanowski/patch-1
+- b4dc1e089 Add timeseries test for Docs API
+- 0be7cdf0f Merge pull request #762 from yabinmeng/nb4-maintenance
+- 375010119 Update S4J version from 3.0.0 to 3.1.0
+- b88967531 Merge pull request #726 from yabinmeng/nb4-maintenance
+- f34d829a7 Update S4J version from 2.4.11 to 3.0.0
+- 6318ccdcb Remove unnecessary consumer sleep statements
+- 8546b0779 Merge remote-tracking branch 'origin/nb4-maintenance' into nb4-maintenance
+- a6aee1496 Update 'NBMsgSeqProp' property from String to Long
