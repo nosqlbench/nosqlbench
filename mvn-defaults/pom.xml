@@ -19,7 +19,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.17.31-SNAPSHOT</version>
+    <version>4.17.32-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -189,7 +189,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.84.Final</version>
+                <version>4.1.85.Final</version>
             </dependency>
 
             <dependency>

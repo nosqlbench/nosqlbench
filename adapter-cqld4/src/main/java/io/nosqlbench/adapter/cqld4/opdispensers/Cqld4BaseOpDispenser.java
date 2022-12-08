@@ -45,12 +45,14 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
     private final Cqld4OpMetrics metrics = new Cqld4OpMetrics();
     private final LongFunction<CqlSession> sessionFunc;
     private final boolean isRetryReplace;
+    private final int maxLwtRetries;
 
     public Cqld4BaseOpDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op) {
         super(adapter, op);
         this.sessionFunc = sessionFunc;
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);
+        this.maxLwtRetries = op.getStaticConfigOr("maxlwtretries", 1);
     }
 
     public int getMaxPages() {
@@ -60,6 +62,11 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
     public boolean isRetryReplace() {
         return isRetryReplace;
     }
+
+    public int getMaxLwtRetries() {
+        return maxLwtRetries;
+    }
+
 
     public LongFunction<CqlSession> getSessionFunc() {
         return sessionFunc;
