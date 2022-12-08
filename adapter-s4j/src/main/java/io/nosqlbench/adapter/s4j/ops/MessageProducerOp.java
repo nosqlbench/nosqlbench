@@ -69,7 +69,7 @@ public class MessageProducerOp extends S4JOp {
                 int msgSize = message.getIntProperty(S4JAdapterUtil.NB_MSG_SIZE_PROP);
                 messageSizeHistogram.update(msgSize);
 
-                // Please see s4JSpace::getOrCreateJmsProducer() for async processing
+                // Please see S4JBaseOpDispenser::getOrCreateJmsProducer() for async processing
                 if (!asyncApi) {
                     if (logger.isDebugEnabled()) {
                         // for testing purpose

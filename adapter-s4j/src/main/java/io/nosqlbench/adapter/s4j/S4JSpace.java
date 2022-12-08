@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.s4j;
 
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
+import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterInvalidParamException;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
 import io.nosqlbench.adapter.s4j.util.*;
@@ -24,8 +25,10 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -98,13 +101,19 @@ public class S4JSpace implements  AutoCloseable {
 
         this.pulsarSvcUrl = cfg.get("service_url");
         this.webSvcUrl = cfg.get("web_url");
-        this.maxNumConn= cfg.getOrDefault("num_conn", Integer.valueOf(1));
-        this.maxNumSessionPerConn = cfg.getOrDefault("num_session", Integer.valueOf(1));
-        this.maxS4JOpTimeInSec= cfg.getOrDefault("max_s4jop_time", Long.valueOf(0));
-        this.trackingMsgRecvCnt=cfg.getOrDefault("track_msg_cnt", Boolean.FALSE);
-        this.strictMsgErrorHandling = cfg.getOrDefault("strict_msg_error_handling", Boolean.FALSE);
+        this.maxNumConn=
+            NumberUtils.toInt(cfg.getOptional("num_conn").orElse("1"));
+        this.maxNumSessionPerConn =
+            NumberUtils.toInt(cfg.getOptional("num_session").orElse("1"));
+        this.maxS4JOpTimeInSec =
+            NumberUtils.toLong(cfg.getOptional("max_s4jop_time").orElse("0L"));
+        this.trackingMsgRecvCnt =
+            BooleanUtils.toBoolean(cfg.getOptional("track_msg_cnt").orElse("false"));
+        this.strictMsgErrorHandling =
+            BooleanUtils.toBoolean(cfg.getOptional("strict_msg_error_handling").orElse("false"));
         this.s4jClientConfFileName = cfg.get("config");
-        this.sessionMode = S4JAdapterUtil.getSessionModeFromStr(cfg.get("session_mode"));
+        this.sessionMode = S4JAdapterUtil.getSessionModeFromStr(
+            cfg.getOptional("session_mode").orElse(""));
         this.s4JClientConf = new S4JClientConf(pulsarSvcUrl, webSvcUrl, s4jClientConfFileName);
 
         this.initializeSpace(s4JClientConf);
@@ -340,7 +349,17 @@ public class S4JSpace implements  AutoCloseable {
         S4JClientConf s4JClientConf,
         int sessionMode)
     {
-        boolean useCredentialsEnable = S4JAdapterUtil.isUseCredentialsEnabled(s4JClientConf);
+        if ( !S4JAdapterUtil.isAuthNRequired(s4JClientConf) &&
+              S4JAdapterUtil.isUseCredentialsEnabled(s4JClientConf) ) {
+            throw new S4JAdapterInvalidParamException(
+                "'jms.useCredentialsFromCreateConnection' can't set be true " +
+                    "when Pulsar client authN parameters are not set. "
+            );
+        }
+
+        boolean useCredentialsEnable =
+            S4JAdapterUtil.isAuthNRequired(s4JClientConf) &&
+            S4JAdapterUtil.isUseCredentialsEnabled(s4JClientConf);
         JMSContext jmsConnContext;
 
         if (!useCredentialsEnable)
@@ -360,5 +379,66 @@ public class S4JSpace implements  AutoCloseable {
         }
 
         return jmsConnContext;
+    }
+
+    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(long curCycle) {
+        return getOrCreateS4jJmsContextWrapper(curCycle, null);
+    }
+
+    // Get the next JMSContext Wrapper in the following approach
+    // - The JMSContext wrapper pool has the following sequence (assuming 3 [c]onnections and 2 [s]essions per connection):
+    //   c0s0, c0s1, c1s0, c1s1, c2s0, c2s1
+    // - When getting the next JMSContext wrapper, always get from the next connection, starting from the first session
+    //   When reaching the end of connection, move back to the first connection, but get the next session.
+    //   e.g. first: c0s0   (0)
+    //        next:  c1s0   (1)
+    //        next:  c2s0   (2)
+    //        next:  c0s1   (3)
+    //        next:  c1s1   (4)
+    //        next:  c2s1   (5)
+    //        next:  c0s0   (6)  <-- repeat the pattern
+    //        next:  c1s0   (7)
+    //        next:  c2s0   (8)
+    //        next:  c0s1   (9)
+    //        ... ...
+    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(
+        long curCycle,
+        Map<String, Object> overrideS4jConfMap)
+    {
+        int totalConnNum = getMaxNumConn();
+        int totalSessionPerConnNum = getMaxNumSessionPerConn();
+
+        int connSeqNum =  (int) curCycle % totalConnNum;
+        int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
+
+        String jmsConnContextIdStr = getConnLvlJmsContextIdentifier(connSeqNum);
+        JMSContext connLvlJmsContext = connLvlJmsContexts.get(jmsConnContextIdStr);
+        // Connection level JMSContext objects should be already created during the initialization phase
+        assert (connLvlJmsContext != null);
+
+        String jmsSessionContextIdStr = getSessionLvlJmsContextIdentifier(connSeqNum, sessionSeqNum);
+        S4JJMSContextWrapper jmsContextWrapper = sessionLvlJmsContexts.get(jmsSessionContextIdStr);
+
+        if (jmsContextWrapper == null) {
+            JMSContext jmsContext = null;
+
+            if (overrideS4jConfMap == null || overrideS4jConfMap.isEmpty()) {
+                jmsContext = connLvlJmsContext.createContext(connLvlJmsContext.getSessionMode());
+            } else {
+                jmsContext = ((PulsarJMSContext) connLvlJmsContext).createContext(
+                    connLvlJmsContext.getSessionMode(), overrideS4jConfMap);
+            }
+
+            jmsContextWrapper = new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsContext);
+            sessionLvlJmsContexts.put(jmsSessionContextIdStr, jmsContextWrapper);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Session level JMSContext] {} -- {}",
+                    Thread.currentThread().getName(),
+                    jmsContextWrapper);
+            }
+
+        }
+        return jmsContextWrapper;
     }
 }

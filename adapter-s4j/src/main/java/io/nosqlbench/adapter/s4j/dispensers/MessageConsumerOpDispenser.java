@@ -63,7 +63,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
     //   which can be applied to many testing scenarios.
     // Setting them here will allow scenario-specific customer configurations. At the moment, only the
     //   DLT related settings are supported
-    private final Map<String, Object> combinedConsumerConfigObjMap = new HashMap<>();
+    private final Map<String, Object> combinedS4jConfigObjMap = new HashMap<>();
 
 
     public MessageConsumerOpDispenser(DriverAdapter adapter,
@@ -88,10 +88,21 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
             parsedOp.getStaticConfigOr("msg_ack_ratio", Float.valueOf(1.0f));
         this.slowAckInSec =
             parsedOp.getStaticConfigOr("slow_ack_in_sec", Integer.valueOf(0));
-        this.subNameStrFunc =
-            lookupMandtoryStrOpValueFunc("subscription_name");
         this.localMsgSelectorFunc =
             lookupOptionalStrOpValueFunc("msg_selector");
+
+        // Subscription name is OPTIONAL for queue and non-shared, non-durable topic;
+        // but mandatory for shared or shared topic
+        if ( StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.QUEUE.label) ||
+             ( StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.TOPIC.label) &&
+               !durableTopic && !sharedTopic) ) {
+            this.subNameStrFunc =
+                lookupOptionalStrOpValueFunc("subscription_name");
+        }
+        else {
+            this.subNameStrFunc =
+                lookupMandtoryStrOpValueFunc("subscription_name");
+        }
 
         String[] stmtLvlConsumerConfKeyNameList = {
             "consumer.ackTimeoutMillis",
@@ -106,14 +117,14 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
                 confVal);
         }
 
-        this.combinedConsumerConfigObjMap.putAll(
+        this.combinedS4jConfigObjMap.putAll(
             s4jSpace.getS4JClientConf().mergeExtraConsumerConfig(stmtLvlConsumerConfRawMap));
     }
 
     @Override
     public MessageConsumerOp apply(long cycle) {
         S4JJMSContextWrapper s4JJMSContextWrapper =
-            getOrCreateS4jJmsContextWrapper(cycle, this.combinedConsumerConfigObjMap);
+            s4jSpace.getOrCreateS4jJmsContextWrapper(cycle, this.combinedS4jConfigObjMap);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransact = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
 

@@ -167,67 +167,6 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         return stringLongFunction;
     }
 
-    // Get the next JMSContext Wrapper in the following approach
-    // - The JMSContext wrapper pool has the following sequence (assuming 3 [c]onnections and 2 [s]essions per connection):
-    //   c0s0, c0s1, c1s0, c1s1, c2s0, c2s1
-    // - When getting the next JMSContext wrapper, always get from the next connection, starting from the first session
-    //   When reaching the end of connection, move back to the first connection, but get the next session.
-    //   e.g. first: c0s0   (0)
-    //        next:  c1s0   (1)
-    //        next:  c2s0   (2)
-    //        next:  c0s1   (3)
-    //        next:  c1s1   (4)
-    //        next:  c2s1   (5)
-    //        next:  c0s0   (6)  <-- repeat the pattern
-    //        next:  c1s0   (7)
-    //        next:  c2s0   (8)
-    //        next:  c0s1   (9)
-    //        ... ...
-    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(
-        long curCycle,
-        Map<String, Object> overrideS4jConfMap)
-    {
-        int totalConnNum = s4jSpace.getMaxNumConn();
-        int totalSessionPerConnNum = s4jSpace.getMaxNumSessionPerConn();
-
-        int connSeqNum =  (int) curCycle % totalConnNum;
-        int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
-
-        String jmsConnContextIdStr = s4jSpace.getConnLvlJmsContextIdentifier(connSeqNum);
-        JMSContext connLvlJmsContext = connLvlJmsContexts.get(jmsConnContextIdStr);
-        // Connection level JMSContext objects should be already created during the initialization phase
-        assert (connLvlJmsContext != null);
-
-        String jmsSessionContextIdStr = s4jSpace.getSessionLvlJmsContextIdentifier(connSeqNum, sessionSeqNum);
-        S4JJMSContextWrapper jmsContextWrapper = sessionLvlJmsContexts.get(jmsSessionContextIdStr);
-
-        if (jmsContextWrapper == null) {
-            JMSContext jmsContext = null;
-
-            if (overrideS4jConfMap == null || overrideS4jConfMap.isEmpty()) {
-                jmsContext = connLvlJmsContext.createContext(connLvlJmsContext.getSessionMode());
-            } else {
-                jmsContext = ((PulsarJMSContext) connLvlJmsContext).createContext(
-                    connLvlJmsContext.getSessionMode(), overrideS4jConfMap);
-            }
-
-            jmsContextWrapper = new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsContext);
-            sessionLvlJmsContexts.put(jmsSessionContextIdStr, jmsContextWrapper);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("[Session level JMSContext] {} -- {}",
-                    Thread.currentThread().getName(),
-                    jmsContextWrapper);
-            }
-
-        }
-        return jmsContextWrapper;
-    }
-
-    public S4JJMSContextWrapper getOrCreateS4jJmsContextWrapper(long curCycle) {
-        return getOrCreateS4jJmsContextWrapper(curCycle, null);
-    }
-
     /**
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
      */
@@ -340,7 +279,8 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                     }
 
                     if (durable && !shared)
-                        jmsConsumer = jmsContext.createDurableConsumer((Topic) destination, subName, msgSelector, nonLocal);
+                        jmsConsumer = jmsContext.createDurableConsumer(
+                            (Topic) destination, subName, msgSelector, nonLocal);
                     else if (!durable)
                         jmsConsumer = jmsContext.createSharedConsumer((Topic) destination, subName, msgSelector);
                     else

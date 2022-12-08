@@ -97,7 +97,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-s4j</artifactId>
-            <version>4.17.31-SNAPSHOT</version>
+            <version>4.17.32-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

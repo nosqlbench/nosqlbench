@@ -75,7 +75,7 @@ public class MessageConsumerOp extends S4JOp {
         // just no-op.
         if ( (maxS4jOpDurationInSec == 0) || (timeElapsedMills <= (maxS4jOpDurationInSec*1000)) ) {
 
-            // Please see S4JSpace::getOrCreateJmsConsumer() for async processing
+            // Please see S4JBaseOpDispenser::getOrCreateJmsConsumer() for async processing
             if (!asyncApi) {
                 Message recvdMsg;
 

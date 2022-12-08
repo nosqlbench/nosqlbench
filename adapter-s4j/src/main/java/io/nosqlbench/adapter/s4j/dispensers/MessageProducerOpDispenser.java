@@ -279,7 +279,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             throw new S4JAdapterInvalidParamException("Message payload must be specified and can't be empty!");
         }
 
-        S4JJMSContextWrapper s4JJMSContextWrapper = getOrCreateS4jJmsContextWrapper(cycle);
+        S4JJMSContextWrapper s4JJMSContextWrapper = s4jSpace.getOrCreateS4jJmsContextWrapper(cycle);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
 

@@ -48,9 +48,6 @@ public class S4JAdapterUtil {
         // String value
         // - valid values: see JMS_DEST_TYPES
         DEST_TYPE("dest_type"),
-        // JMS destination name
-        // String value
-        DEST_NAME("dest_name"),
         // Asynchronous message processing
         ASYNC_API("async_api"),
         // Transaction batch size
@@ -266,11 +263,30 @@ public class S4JAdapterUtil {
         return sessionMode;
     }
 
-    public static boolean isUseCredentialsEnabled(S4JClientConf s4JClientConf) {
-        assert (s4JClientConf != null);
+    public static boolean isAuthNRequired(S4JClientConf s4jClientConf) {
+        assert (s4jClientConf != null);
+
+        boolean required = false;
+        Map<String, Object> s4jClientConfObjMap = s4jClientConf.getS4jConfMapObj_client();
+
+        if (s4jClientConfObjMap.containsKey("authPlugin") && s4jClientConfObjMap.containsKey("authParams")) {
+            Object authPluginObj = s4jClientConfObjMap.get("authPlugin");
+            Object authParamsObj = s4jClientConfObjMap.get("authParams");
+
+            if ( (authPluginObj != null) && StringUtils.isNotBlank(authPluginObj.toString()) &&
+                 (authParamsObj != null) && StringUtils.isNotBlank(authParamsObj.toString()) ) {
+                required = true;
+            }
+        }
+        return required;
+    }
+
+
+    public static boolean isUseCredentialsEnabled(S4JClientConf s4jClientConf) {
+        assert (s4jClientConf != null);
 
         boolean enabled = false;
-        Map<String, Object> s4jConfMap = s4JClientConf.getS4jConfObjMap();
+        Map<String, Object> s4jConfMap = s4jClientConf.getS4jConfObjMap();
 
         if (s4jConfMap.containsKey("jms.useCredentialsFromCreateConnection")) {
             enabled = BooleanUtils.toBoolean(s4jConfMap.get("jms.useCredentialsFromCreateConnection").toString());
@@ -278,12 +294,12 @@ public class S4JAdapterUtil {
         return enabled;
     }
 
-    public static String getCredentialUserName(S4JClientConf s4JClientConf) {
+    public static String getCredentialUserName(S4JClientConf s4jClientConf) {
         return "dummy";
     }
 
-    public static String getCredentialPassword(S4JClientConf s4JClientConf) {
-        Map<String, Object> s4jConfMap = s4JClientConf.getS4jConfObjMap();
+    public static String getCredentialPassword(S4JClientConf s4jClientConf) {
+        Map<String, Object> s4jConfMap = s4jClientConf.getS4jConfObjMap();
         if (s4jConfMap.containsKey("authParams"))
             return s4jConfMap.get("authParams").toString();
         else
