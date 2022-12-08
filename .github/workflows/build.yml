@@ -37,16 +37,16 @@ jobs:
           name: exported-docs
           path: exported_docs.zip
 
-      - name: mvn verify
-        run: mvn verify
+#      - name: mvn verify
+#        run: mvn verify
 
-      - name: Archive Test Results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: |
-            [a-zA-Z]**/logs/*
+#      - name: Archive Test Results
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-results
+#          path: |
+#            [a-zA-Z]**/logs/*
 
 
   docs:
