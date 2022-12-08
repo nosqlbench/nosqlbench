@@ -107,3 +107,4 @@ jobs:
             git commit -m"docs update for $GITHUB_REF"
             git push
           fi
+          echo "push completed"
