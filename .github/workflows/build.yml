@@ -95,11 +95,9 @@ jobs:
         run: |
           rsync -av --delete drivers/ nosqlbench-build-docs/site/content/docs/drivers
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
-          git add drivers
-          git add -u
           rsync -av --delete bindings/ nosqlbench-build-docs/site/content/docs/bindings
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
-          git add bindings
+          git add .
           git add -u
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
           echo "found $CHANGES to push for doc updates"
