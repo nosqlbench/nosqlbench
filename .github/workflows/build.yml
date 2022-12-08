@@ -97,6 +97,7 @@ jobs:
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
           rsync -av --delete bindings/ nosqlbench-build-docs/site/content/docs/bindings
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
+          cd nosqlbench-build-docs
           git add .
           git add -u
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
