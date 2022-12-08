@@ -93,11 +93,14 @@ jobs:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
-          rsync -av --delete nosqlbench-build-docs/site/docs/drivers
+          pwd
+          ls
+          find . -type d
+          rsync -av --delete drivers/ nosqlbench-build-docs/site/docs/drivers
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/docs/drivers/CNAME
           git add drivers
           git add -u
-          rsync -av --delete nosqlbench-build-docs/site/docs/bindings
+          rsync -av --delete bindings/ nosqlbench-build-docs/site/docs/bindings
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/docs/bindings/CNAME
           git add bindings
           git add -u
