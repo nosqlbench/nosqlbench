@@ -25,14 +25,14 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TriangularStepFunctionTest {
+public class TriangularStepTest {
 
     private static final int LABEL=0;
     private static final int FREQUENCY=1;
 
     @Test
-    public void testExample1() {
-        TriangularStepFunction e1 = new TriangularStepFunction(100, 20);
+    public void testStepExample1() {
+        TriangularStep e1 = new TriangularStep(100, 20);
         int[] runLengths = this.rleStatsFor(e1, 0, 10000);
         System.out.println(Arrays.toString(runLengths));
         assertThat(IntStream.of(runLengths).min().orElseThrow()).isEqualTo(80L);
@@ -40,8 +40,8 @@ public class TriangularStepFunctionTest {
     }
 
     @Test
-    public void testExample2() {
-        TriangularStepFunction e1 = new TriangularStepFunction(80, 10);
+    public void testStepExample2() {
+        TriangularStep e1 = new TriangularStep(80, 10);
         int[] runLengths = this.rleStatsFor(e1, 0, 10000);
         System.out.println(Arrays.toString(runLengths));
         assertThat(IntStream.of(runLengths).min().orElseThrow()).isEqualTo(70L);
@@ -50,7 +50,7 @@ public class TriangularStepFunctionTest {
 
     @Test
     public void testIncrementalVariance() {
-        TriangularStepFunction f = new TriangularStepFunction(100, 0);
+        TriangularStep f = new TriangularStep(100, 0);
         assertThat(f.applyAsLong(0L)).isEqualTo(0L);
         assertThat(f.applyAsLong(1L)).isEqualTo(0L);
         assertThat(f.applyAsLong(99L)).isEqualTo(0L);
@@ -60,7 +60,7 @@ public class TriangularStepFunctionTest {
     @Test
     public void testVariance() {
         long first=0;
-        TriangularStepFunction f = new TriangularStepFunction(100,1);
+        TriangularStep f = new TriangularStep(100,1);
         var rlestats = rleStatsFor(f, 0, 100000);
         LongSummaryStatistics stats99to101 = statsForRle((int) f.applyAsLong(first),rlestats);
         assertThat(stats99to101.getMin()).isEqualTo(99L);
@@ -74,7 +74,7 @@ public class TriangularStepFunctionTest {
         assertThat(histoStats.getAverage()).isEqualTo(100);
     }
 
-    private int[] rleStatsFor(TriangularStepFunction f, long firstTrialIncl, long lastTrialExcl) {
+    private int[] rleStatsFor(TriangularStep f, long firstTrialIncl, long lastTrialExcl) {
         long firstBucket = f.applyAsLong(firstTrialIncl);
         long lastBucket = f.applyAsLong(lastTrialExcl);
         if (firstBucket>Integer.MAX_VALUE||lastBucket>Integer.MAX_VALUE) {
