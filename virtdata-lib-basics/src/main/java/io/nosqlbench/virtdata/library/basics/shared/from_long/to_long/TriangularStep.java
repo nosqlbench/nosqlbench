@@ -38,7 +38,7 @@ import java.util.function.LongUnaryOperator;
  * join the project or let us know.</p>
  */
 @ThreadSafeMapper
-public class TriangularStepFunction implements LongUnaryOperator {
+public class TriangularStep implements LongUnaryOperator {
 
     private final Hash hasher = new Hash();
     private final long average;
@@ -47,9 +47,9 @@ public class TriangularStepFunction implements LongUnaryOperator {
     private final long variance;
 
 
-    @Example({"TriangularStepFunction(100,20)","Create a sequence of values where the average is 100, but the range of values is between 80 and 120."})
-    @Example({"TriangularStepFunction(80,10)","Create a sequence of values where the average is 80, but the range of values is between 70 and 90."})
-    TriangularStepFunction(long average, long variance) {
+    @Example({"TriangularStep(100,20)","Create a sequence of values where the average is 100, but the range of values is between 80 and 120."})
+    @Example({"TriangularStep(80,10)","Create a sequence of values where the average is 80, but the range of values is between 70 and 90."})
+    public TriangularStep(long average, long variance) {
         if (average<=0 || variance < 0 || variance > average) {
             throw new RuntimeException(
                 "The average must be positive, variance non-negative and the variance must be less than the average. " +
@@ -61,7 +61,7 @@ public class TriangularStepFunction implements LongUnaryOperator {
         this.sizer = new HashRange(average-variance,average+variance);
     }
 
-    TriangularStepFunction(long average) {
+    TriangularStep(long average) {
         this(average, average/2);
     }
 
@@ -71,9 +71,9 @@ public class TriangularStepFunction implements LongUnaryOperator {
         long count = operand / average;
         // offset within window
         long offset = operand % average;
-        // base of window
+        // base of window, same as count*average
         long base = operand - offset;
-        // variate up to window size
+        // variate + or - from average
         long variance = sizer.applyAsLong(base);
         // variate offset from start of window
         long slice = base + variance;
