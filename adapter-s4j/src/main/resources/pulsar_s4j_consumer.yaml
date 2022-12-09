@@ -1,0 +1,73 @@
+# document level parameters that apply to all Pulsar client types:
+params:
+  temporary_dest: "false"
+  dest_type: "topic"
+
+  # default: true
+  async_api: "false"
+  # whether to wait indefinitely (as the default behavior)
+  # - only applies when "async_api" is false (synchronous API)
+  # - only applies to message receiving
+  # - default: false
+  blocking_msg_recv: "true"
+
+  ## (Optional) If shared topic or not (only relevant when the destination is a topic)
+  share_topic: "true"
+
+  ## (Optional) If durable topic or not (only relevant when the destination is a topic)
+  durable_topic: "false"
+
+blocks:
+  msg-consume-block:
+    ops:
+      op1:
+        ## The value represents the destination (queue or topic) name)
+        MessageConsume: "mys4jtest_t"
+
+        ## Subscription name
+        ## - optional for queue and non-shared, non-durable topic
+        ## - mandatory for shared and/or durable topic
+        subscription_name: "nbs4j-sub"
+
+        ## (Optional) client side message selector
+        msg_selector: ""
+
+        ## (Optional) No Local
+        no_local: "true"
+
+        ## (Optional) Read Timeout
+        read_timeout: "10"
+
+        ## (Optional) Receive message without wait
+        no_wait: "true"
+
+        ## (Optional) Message acknowledgement ratio
+        msg_ack_ratio: "0.5"
+
+        ## (Optional) Simulate slow consumer acknowledgement
+        # must be non-negative numbers. negative numbers will be treated as 0
+        # 0 - means no simulation
+        # positive value - the number of seconds to pause before acknowledgement
+        slow_ack_in_sec: "0"
+
+        #####
+        ## (Optional) Statement level settings for Consumer
+        #
+        ## AckTimeout value (at least 1 second)
+        consumer.ackTimeoutMillis: 1000
+
+        ## DLQ policy
+        consumer.deadLetterPolicy: '{ "maxRedeliverCount": "2" }'
+
+        ## NegativeAck Redelivery policy
+        consumer.negativeAckRedeliveryBackoff: |
+          {
+          }
+
+        ## AckTimeout Redelivery policy
+        consumer.ackTimeoutRedeliveryBackoff: |
+          {
+            "minDelayMs":"10",
+            "maxDelayMs":"20",
+            "multiplier":"1.2"
+          }
