@@ -30,11 +30,14 @@ import org.apache.logging.log4j.Logger;
 @Service(value = ErrorHandler.class, selector = "count")
 public class CountErrorHandler extends CounterErrorHandler {
 
+    public CountErrorHandler() {
+        logger.warn("Starting with v4.17 onward, use 'counter'.  See cql-errors.md for usage.");
+    }
+
     private static final Logger logger = LogManager.getLogger(CountErrorHandler.class);
 
     @Override
     public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        logger.warn("Starting with v4.17 onward, use 'counter'.  See cql-errors.md for usage.");
         return super.handleError(name, t, cycle, durationInNanos, detail);
     }
 }
