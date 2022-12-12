@@ -92,6 +92,7 @@ jobs:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
+          cd nosqlbench-build-docs
           touch test.txt
           git add .
           git commit -m"docs update for $GITHUB_REF"
