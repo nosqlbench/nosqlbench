@@ -4,38 +4,38 @@ on:
   push:
   pull_request:
 
-jobs:
-  build:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        name: checkout nosqlbench
-      - uses: actions/setup-java@v3
-        name: setup java
-        with:
-          java-version: '17'
-          java-package: jdk
-          architecture: x64
-          distribution: 'temurin'
-
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: mvn package
-        run: mvn package
-
-      - name: export docs
-        run: nb5/target/nb5 export-docs
-
-      - name: archive docs
-        uses: actions/upload-artifact@v3
-        with:
-          name: exported-docs
-          path: exported_docs.zip
+#jobs:
+#  build:
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - uses: actions/checkout@v3
+#        name: checkout nosqlbench
+#      - uses: actions/setup-java@v3
+#        name: setup java
+#        with:
+#          java-version: '17'
+#          java-package: jdk
+#          architecture: x64
+#          distribution: 'temurin'
+#
+#      - name: Cache Maven packages
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
+#
+#      - name: mvn package
+#        run: mvn package
+#
+#      - name: export docs
+#        run: nb5/target/nb5 export-docs
+#
+#      - name: archive docs
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: exported-docs
+#          path: exported_docs.zip
 
 #      - name: mvn verify
 #        run: mvn verify
@@ -59,13 +59,13 @@ jobs:
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
-      - name: download exported-docs
-        uses: actions/download-artifact@v3
-        with:
-          name: exported-docs
-
-      - name: unzip docs
-        run: unzip exported_docs.zip
+#      - name: download exported-docs
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: exported-docs
+#
+#      - name: unzip docs
+#        run: unzip exported_docs.zip
 
       - run: ls -la
 
@@ -93,11 +93,7 @@ jobs:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
-          rsync -av --delete drivers/ nosqlbench-build-docs/site/content/docs/drivers
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
-          rsync -av --delete bindings/ nosqlbench-build-docs/site/content/docs/bindings
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
-          cd nosqlbench-build-docs
+          touch test.txt
           git add .
           git add -u
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
