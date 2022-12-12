@@ -80,6 +80,7 @@ jobs:
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
           git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
+          git remote -v
           cd nosqlbench-build-docs
           echo "files listing"
           find .
