@@ -96,13 +96,21 @@ jobs:
           path: nosqlbench-build-docs
           token: ${{secrets.NBDROID_TOKEN}}
       #      Disabling this because it will be replaced soon.
+        run: |
+          cd nosqlbench-build-docs
+          touch test.txt
+          git add .
+          git commit -m"docs update for $GITHUB_REF"
+          git push
+          echo "push completed"
+
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
           cd nosqlbench-build-docs
-          touch test.txt
+          touch test2.txt
           git add .
           git commit -m"docs update for $GITHUB_REF"
           git push
