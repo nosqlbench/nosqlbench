@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
 
-#jobs:
+jobs:
 #  build:
 #    runs-on: ubuntu-20.04
 #    steps:
@@ -95,12 +95,6 @@ on:
         run: |
           touch test.txt
           git add .
-          git add -u
-          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
-          echo "found $CHANGES to push for doc updates"
-          if (( $CHANGES > 0 ))
-          then
-            git commit -m"docs update for $GITHUB_REF"
-            git push
-          fi
+          git commit -m"docs update for $GITHUB_REF"
+          git push
           echo "push completed"
