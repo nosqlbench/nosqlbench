@@ -81,10 +81,9 @@ jobs:
         run: |
           git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
           cd nosqlbench-build-docs
-          git remote -v
           echo "files listing"
           find .
-#          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
+          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
       - name: checkout repo
