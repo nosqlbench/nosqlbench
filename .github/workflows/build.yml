@@ -86,24 +86,6 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
-      - name: checkout repo
-        env:
-          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-        uses: actions/checkout@v3
-        with:
-          repository: nosqlbench/nosqlbench-build-docs
-          path: nosqlbench-build-docs
-          token: ${{secrets.NBDROID_TOKEN}}
-      #      Disabling this because it will be replaced soon.
-        run: |
-          cd nosqlbench-build-docs
-          touch test.txt
-          git add .
-          git commit -m"docs update for $GITHUB_REF"
-          git push
-          echo "push completed"
-
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
