@@ -50,7 +50,6 @@ jobs:
 
 
   docs:
-    needs: build
     runs-on: ubuntu-20.04
     steps:
       - name: set git username
