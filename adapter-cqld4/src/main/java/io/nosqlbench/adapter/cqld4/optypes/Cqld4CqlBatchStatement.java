@@ -24,8 +24,8 @@ public class Cqld4CqlBatchStatement extends Cqld4CqlOp {
 
     private final BatchStatement stmt;
 
-    public Cqld4CqlBatchStatement(CqlSession session, BatchStatement stmt, int maxpages, boolean retryreplace) {
-        super(session,maxpages,retryreplace,new RSProcessors());
+    public Cqld4CqlBatchStatement(CqlSession session, BatchStatement stmt, int maxPage, int maxLwtRetries, boolean retryReplace) {
+        super(session,maxPage,retryReplace,maxLwtRetries,new RSProcessors());
         this.stmt = stmt;
     }
 

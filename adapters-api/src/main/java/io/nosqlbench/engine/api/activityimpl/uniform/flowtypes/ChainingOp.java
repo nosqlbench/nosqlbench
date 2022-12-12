@@ -19,16 +19,25 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
 import java.util.function.Function;
 
 /**
- * Run a function on the current cached result and replace it
- * with the result of the function. Functions are one way of invoking
+ * <H2>ChainingOp<I,O>: f(I) -> O</I,O></H2>
+ * <P>
+ * Run a function on the current cached result in the current thread and replace it
+ * with the result of the function. ChainingOps are one way of invoking
  * logic within a cycle. However, they are not intended to stand alone.
- * A CycleFunction must always have an input to work on. This input is
- * provided by a Supplier as optionally implemented by an Op
+ * A ChainingOp must always have an input to work on,
+ * provided by either a {@link CycleOp} OR <em>another</em> call to a {@link ChainingOp}</P>
  *
- * @param <I> Some input type.
+ * @param <I> Some input type, as determined by a previous {@link CycleOp} or {@link ChainingOp} on the same thread.
  * @param <O> Some output type.
  */
-public interface ChainingOp<I,O> extends Op, Function<I,O> {
+public interface ChainingOp<I, O> extends Op, Function<I, O> {
+
+    /**
+     * Transform a value from a previous action and provide the result for a subsequent action.
+     *
+     * @param lastResult object form a previous operation or action
+     * @return a new result
+     */
     @Override
-    O apply(I i);
+    O apply(I lastResult);
 }

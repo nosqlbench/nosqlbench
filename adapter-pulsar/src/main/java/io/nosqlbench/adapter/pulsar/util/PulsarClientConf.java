@@ -73,7 +73,7 @@ public class PulsarClientConf {
         //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
         producerConfMapTgt.putAll(PulsarConfConverter.convertStdRawProducerConf(producerConfMapRaw));
         consumerConfMapTgt.putAll(PulsarConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
-        // TODO: Reader API is not disabled at the moment. Revisit when needed
+        // TODO: Reader API is not enabled at the moment. Revisit when needed
     }
 
 

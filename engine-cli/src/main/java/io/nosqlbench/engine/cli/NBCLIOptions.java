@@ -179,7 +179,7 @@ public class NBCLIOptions {
     private Path statepath;
     private final List<String> statePathAccesses = new ArrayList<>();
     private final String hdrForChartFileName = DEFAULT_CHART_HDR_LOG_NAME;
-    private String dockerPromRetentionDays = "183d";
+    private String dockerPromRetentionDays = "3650d";
     private String reportSummaryTo = REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = System.getenv("TERM")!=null && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
@@ -371,7 +371,7 @@ public class NBCLIOptions {
                     break;
                 case DOCKER_PROM_RETENTION_DAYS:
                     arglist.removeFirst();
-                    dockerPromRetentionDays = readWordOrThrow(arglist, "prometheus retention (183d by default)");
+                    dockerPromRetentionDays = readWordOrThrow(arglist, "prometheus retention (3650d by default)");
                     break;
                 case DOCKER_GRAFANA_TAG:
                     arglist.removeFirst();

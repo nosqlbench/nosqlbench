@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.31-SNAPSHOT</version>
+        <version>4.17.32-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -62,6 +62,7 @@
         <module>adapter-dynamodb</module>
         <module>adapter-mongodb</module>
         <module>adapter-pulsar</module>
+        <module>adapter-s4j</module>
 
         <!-- VIRTDATA MODULES -->
 

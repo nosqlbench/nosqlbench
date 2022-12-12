@@ -22,13 +22,13 @@
     <name>docsys</name>
     <url>http://nosqlbench.io/</url>
     <properties>
-        <jersey.version>3.0.8</jersey.version>
+        <jersey.version>3.1.0</jersey.version>
     </properties>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.31-SNAPSHOT</version>
+        <version>4.17.32-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
-            <version>4.17.31-SNAPSHOT</version>
+            <version>4.17.32-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -93,13 +93,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>1.22</version>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <version>3.0.8</version>
+            <version>3.1.0</version>
         </dependency>
 
         <dependency>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>4.17.31-SNAPSHOT</version>
+            <version>4.17.32-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

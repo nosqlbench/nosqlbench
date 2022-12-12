@@ -49,7 +49,8 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser {
             getSessionFunc().apply(value),
             (SimpleStatement) stmtFunc.apply(value),
             getMaxPages(),
-            isRetryReplace()
+            isRetryReplace(),
+            getMaxLwtRetries()
         );
     }
 
