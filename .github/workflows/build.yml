@@ -87,6 +87,9 @@ jobs:
           git remote -v
 
       - name: checkout repo
+        env:
+          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         uses: actions/checkout@v3
         with:
           repository: nosqlbench/nosqlbench-build-docs
