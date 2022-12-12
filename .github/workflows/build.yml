@@ -5,51 +5,52 @@ on:
   pull_request:
 
 jobs:
-#  build:
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - uses: actions/checkout@v3
-#        name: checkout nosqlbench
-#      - uses: actions/setup-java@v3
-#        name: setup java
-#        with:
-#          java-version: '17'
-#          java-package: jdk
-#          architecture: x64
-#          distribution: 'temurin'
-#
-#      - name: Cache Maven packages
-#        uses: actions/cache@v1
-#        with:
-#          path: ~/.m2
-#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: ${{ runner.os }}-m2
-#
-#      - name: mvn package
-#        run: mvn package
-#
-#      - name: export docs
-#        run: nb5/target/nb5 export-docs
-#
-#      - name: archive docs
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: exported-docs
-#          path: exported_docs.zip
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout nosqlbench
+      - uses: actions/setup-java@v3
+        name: setup java
+        with:
+          java-version: '17'
+          java-package: jdk
+          architecture: x64
+          distribution: 'temurin'
 
-#      - name: mvn verify
-#        run: mvn verify
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-#      - name: Archive Test Results
-#        if: always()
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: test-results
-#          path: |
-#            [a-zA-Z]**/logs/*
+      - name: mvn package
+        run: mvn package
+
+      - name: export docs
+        run: nb5/target/nb5 export-docs
+
+      - name: archive docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: exported-docs
+          path: exported_docs.zip
+
+  #      - name: mvn verify
+  #        run: mvn verify
+
+  #      - name: Archive Test Results
+  #        if: always()
+  #        uses: actions/upload-artifact@v3
+  #        with:
+  #          name: test-results
+  #          path: |
+  #            [a-zA-Z]**/logs/*
 
 
   docs:
+    needs: build
     runs-on: ubuntu-20.04
     steps:
       - name: set git username
@@ -58,13 +59,13 @@ jobs:
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
-#      - name: download exported-docs
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: exported-docs
-#
-#      - name: unzip docs
-#        run: unzip exported_docs.zip
+      - name: download exported-docs
+        uses: actions/download-artifact@v3
+        with:
+          name: exported-docs
+
+      - name: unzip docs
+        run: unzip exported_docs.zip
 
       - run: ls -la
 
@@ -86,14 +87,24 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
+      #      Disabling this because it will be replaced soon.
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
+          rsync -av --delete drivers/ nosqlbench-build-docs/site/content/docs/drivers
+          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
+          rsync -av --delete bindings/ nosqlbench-build-docs/site/content/docs/bindings
+          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
           cd nosqlbench-build-docs
-          touch test2.txt
           git add .
-          git commit -m"docs update for $GITHUB_REF"
-          git push
+          git add -u
+          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+          echo "found $CHANGES to push for doc updates"
+          if (( $CHANGES > 0 ))
+          then
+            git commit -m"docs update for $GITHUB_REF"
+            git push
+          fi
           echo "push completed"
