@@ -84,9 +84,15 @@ jobs:
           git remote -v
           echo "files listing"
           find .
-          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
+#          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
+      - name: checkout repo
+        uses: actions/checkout@v3
+        with:
+          repository: nosqlbench-build-docs
+          path: nosqlbench-build-docs
+          token: ${{secrets.NBDROID_TOKEN}}
       #      Disabling this because it will be replaced soon.
       - name: push changes
         env:
