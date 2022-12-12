@@ -89,7 +89,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v3
         with:
-          repository: nosqlbench-build-docs
+          repository: nosqlbench/nosqlbench-build-docs
           path: nosqlbench-build-docs
           token: ${{secrets.NBDROID_TOKEN}}
       #      Disabling this because it will be replaced soon.
