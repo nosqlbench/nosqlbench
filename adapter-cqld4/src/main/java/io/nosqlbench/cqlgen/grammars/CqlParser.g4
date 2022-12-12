@@ -21,6 +21,8 @@
  * Project : cql-parser; an ANTLR4 grammar for Apache Cassandra CQL  https://github.com/kdcro101cql-parser
  */
 
+// TODO: Add support for
+// CREATE CUSTOM INDEX idxname ON ksname.tbname (fieldname) USING 'StorageAttachedIndex';
 parser grammar CqlParser;
 
 options

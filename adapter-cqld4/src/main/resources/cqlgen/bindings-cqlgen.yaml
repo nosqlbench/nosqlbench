@@ -13,11 +13,14 @@ bindings:
  float: ToFloat();
  map<text,timestamp>: MapSized(3,Combinations('A-Z;0-9', ToJavaInstant()));
  frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
- list<text>: ListStepped(ToString(),ToString())
+ list<text>: ListStepped(ToString(),ToString());
+ list<ascii>: ListStepped(ToString(),ToString())
  map<text,text>: MapSized(3, Combinations('A-Z;0-9'), ToString(), ToString());
+ map<ascii,text>: MapSized(3, Combinations('A-Z;0-9'), ToString(), ToString());
  map<int,int>: MapSized(3, ToInt(), ToInt());
  counter: HashRange(1,3);
  set<text>: SetSized(HashRange(3,4),ToString()));
+ set<ascii>: SetSized(HashRange(3,4),ToString()));
  smallint: ToShort();
  time: StartingEpochMillis('2022-01-01 00:00:00'); ToLocalTime();
  timestamp: ToJavaInstant();
