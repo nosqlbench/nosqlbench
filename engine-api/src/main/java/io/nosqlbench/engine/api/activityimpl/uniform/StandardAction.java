@@ -32,11 +32,11 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the generified version of an Action. All activity types should endeavor to use
- * this, as the API surface is being consolidated so that the internal machinery of NB
- * works in a very consistent and uniform way.
- * There will be changes to multiple drivers to support this consolidation, but the bulk
- * of this work will be undertaken by the project maintainers.
+ * This is the generified version of an Action. All driver adapters us this, as opposed
+ * to previous NB versions where it was implemented for each driver.
+ *
+ * This allows the API to be consolidated so that the internal machinery of NB
+ * works in a very consistent and uniform way for all users and drivers.
  *
  * @param <A> The type of activity
  * @param <R> The type of operation
@@ -53,11 +53,13 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends Op>> opsequence;
+    private final int maxTries;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
         this.opsequence = activity.getOpSequence();
         this.slot = slot;
+        this.maxTries = activity.getMaxTries();
         bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
         executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();
         triesHistogram = activity.getInstrumentation().getOrCreateTriesHistogram();
@@ -84,7 +86,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         while (op != null) {
 
             int tries = 0;
-            while (tries++ <= activity.getMaxTries()) {
+            while (tries++ <= maxTries) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 

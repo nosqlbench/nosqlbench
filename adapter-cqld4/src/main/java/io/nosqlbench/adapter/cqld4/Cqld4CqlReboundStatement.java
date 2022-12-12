@@ -24,8 +24,8 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 public class Cqld4CqlReboundStatement extends Cqld4CqlOp {
     private final BoundStatement stmt;
 
-    public Cqld4CqlReboundStatement(CqlSession session, int maxpages, boolean retryreplace, BoundStatement rebound, RSProcessors processors) {
-        super(session,maxpages,retryreplace,processors);
+    public Cqld4CqlReboundStatement(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int lwtRetryCount, BoundStatement rebound, RSProcessors processors) {
+        super(session,maxPages,retryReplace,maxLwtRetries,lwtRetryCount, processors);
         this.stmt = rebound;
     }
 

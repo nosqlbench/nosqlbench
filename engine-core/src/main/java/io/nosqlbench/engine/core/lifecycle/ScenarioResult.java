@@ -54,17 +54,19 @@ public class ScenarioResult {
     private final long startedAt;
     private final long endedAt;
 
-    private Exception exception;
+    private final Exception exception;
     private final String iolog;
 
-    public ScenarioResult(String iolog, long startedAt, long endedAt) {
-        this.iolog = iolog;
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
-    }
-
-    public ScenarioResult(Exception e, long startedAt, long endedAt) {
-        this.iolog = e.getMessage();
+    public ScenarioResult(Exception e, String iolog, long startedAt, long endedAt) {
+        logger.debug("populating "+(e==null? "NORMAL" : "ERROR")+" scenario result");
+        if (logger.isDebugEnabled()) {
+            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+            for (int i = 0; i < st.length; i++) {
+                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
+                if (i>10) break;
+            }
+        }
+        this.iolog = ((iolog!=null) ? iolog + "\n\n" : "") + (e!=null? e.getMessage() : "");
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.exception = e;
@@ -147,15 +149,14 @@ public class ScenarioResult {
         StringBuilder sb = new StringBuilder();
 
         ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
-            if (v instanceof Counting) {
-                long count = ((Counting) v).getCount();
+            if (v instanceof Counting counting) {
+                long count = counting.getCount();
                 if (count > 0) {
                     NBMetricsSummary.summarize(sb, k, v);
                 }
-            } else if (v instanceof Gauge) {
-                Object value = ((Gauge) v).getValue();
-                if (value != null && value instanceof Number) {
-                    Number n = (Number) value;
+            } else if (v instanceof Gauge<?> gauge) {
+                Object value = gauge.getValue();
+                if (value instanceof Number n) {
                     if (n.doubleValue() != 0) {
                         NBMetricsSummary.summarize(sb, k, v);
                     }

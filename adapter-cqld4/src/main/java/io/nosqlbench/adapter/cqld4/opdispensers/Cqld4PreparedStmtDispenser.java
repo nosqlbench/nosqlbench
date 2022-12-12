@@ -89,6 +89,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
                 boundStatement,
                 getMaxPages(),
                 isRetryReplace(),
+                getMaxLwtRetries(),
                 processors
             );
         } catch (Exception exception) {
