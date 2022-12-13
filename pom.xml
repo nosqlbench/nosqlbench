@@ -63,6 +63,7 @@
         <module>adapter-mongodb</module>
         <module>adapter-pulsar</module>
         <module>adapter-s4j</module>
+        <module>adapter-kafka</module>
 
         <!-- VIRTDATA MODULES -->
 
@@ -77,7 +78,6 @@
 
         <!-- Documentation -->
         <module>docsys</module>
-
     </modules>
 
     <profiles>
@@ -89,7 +89,6 @@
             <modules>
                 <module>nb</module>
                 <module>driver-tcp</module>
-                <module>driver-kafka</module>
                 <module>driver-jmx</module>
                 <module>driver-jdbc</module>
                 <module>driver-cockroachdb</module>
