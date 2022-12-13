@@ -1,0 +1,39 @@
+bindings:
+  mykey: Mod(5); ToString(); Prefix("key-")
+  mytext_val: AlphaNumericString(30)
+  random_text_val1: AlphaNumericString(10)
+  random_text_val2: AlphaNumericString(20)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  # whether to confirm message send ack. asynchronously
+  # - default: true
+  async_api: "true"
+
+  # The number of messages to put in one transaction
+  # - default: 0
+  # - value 0 or 1 means no transaction
+  # - it also requires "transactional.id" parameter is set
+  txn_batch_num: 5
+
+blocks:
+  msg-produce-block:
+    ops:
+      op1:
+        ## The value represents a topic name
+        MessageProduce: "nbktest1"
+
+        ## (Optional) Kafka message headers (in JSON format).
+        msg_header: |
+          {
+            "header-1": "{random_text_val1}",
+            "header-2": "{random_text_val2}"
+          }
+
+        ## (Optional) Kafka message key.
+        #  - message key and value can't be both empty at the same time
+        msg_key: "{mykey}"
+
+        ## (Optional) Kafka message value.
+        #  - message key and value can't be both empty at the same time
+        msg_body: "{mytext_val}"

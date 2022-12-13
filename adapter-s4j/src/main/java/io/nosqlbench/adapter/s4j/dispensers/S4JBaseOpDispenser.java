@@ -17,8 +17,6 @@ package io.nosqlbench.adapter.s4j.dispensers;
  */
 
 
-import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
 import io.nosqlbench.adapter.s4j.util.*;
@@ -93,8 +91,8 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         this.txnBatchNum =
             parsedOp.getStaticConfigOr(S4JAdapterUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, Integer.valueOf(0));
 
-        this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticValue("threads"));
-        this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticValue("cycles"));
+        this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticConfig("threads", String.class));
+        this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticConfig("cycles", String.class));
         s4jSpace.setTotalCycleNum(totalCycleNum);
     }
 

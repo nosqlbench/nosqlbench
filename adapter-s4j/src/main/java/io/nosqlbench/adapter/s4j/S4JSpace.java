@@ -54,7 +54,7 @@ public class S4JSpace implements  AutoCloseable {
     private final String pulsarSvcUrl;
     private final String webSvcUrl;
     private final String s4jClientConfFileName;
-    private S4JClientConf s4JClientConf;
+    private final S4JClientConf s4JClientConf;
     private final int sessionMode;
 
     // Whether to do strict error handling while sending/receiving messages
@@ -115,6 +115,8 @@ public class S4JSpace implements  AutoCloseable {
         this.sessionMode = S4JAdapterUtil.getSessionModeFromStr(
             cfg.getOptional("session_mode").orElse(""));
         this.s4JClientConf = new S4JClientConf(pulsarSvcUrl, webSvcUrl, s4jClientConfFileName);
+
+        this.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
         this.initializeSpace(s4JClientConf);
     }
