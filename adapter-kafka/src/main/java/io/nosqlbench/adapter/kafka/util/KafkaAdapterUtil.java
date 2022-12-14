@@ -34,14 +34,14 @@ public class KafkaAdapterUtil {
 
     private final static Logger logger = LogManager.getLogger(KafkaAdapterUtil.class);
 
+    public static String DFT_CONSUMER_GROUP_NAME_PREFIX = "nbKafkaGrp";
+    public static String DFT_TOPIC_NAME_PREFIX = "nbKafkaTopic";
+
     ///////
     // Valid document level parameters for JMS NB yaml file
     public enum DOC_LEVEL_PARAMS {
         // Blocking message producing or consuming
-        ASYNC_API("async_api"),
-        // Transaction batch size
-        TXN_BATCH_NUM("txn_batch_num");
-
+        ASYNC_API("async_api");
         public final String label;
 
         DOC_LEVEL_PARAMS(String label) {
@@ -80,7 +80,9 @@ public class KafkaAdapterUtil {
     }
 
     public static String buildCacheKey(String... keyParts) {
-        String combinedStr = String.join("::", keyParts);
+        String combinedStr = Arrays.stream(keyParts)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.joining("::"));
         return Base64.encodeAsString(combinedStr.getBytes());
     }
 

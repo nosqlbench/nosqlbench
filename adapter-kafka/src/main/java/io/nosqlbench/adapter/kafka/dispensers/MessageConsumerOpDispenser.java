@@ -31,11 +31,9 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.LongFunction;
+import java.util.stream.Collectors;
 
 public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
 
@@ -82,7 +80,7 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
 
     private String getEffectiveGroupId(long cycle) {
         int grpIdx = (int) (cycle % consumerGrpCnt);
-        String defaultGrpNamePrefix = "nb-grp";
+        String defaultGrpNamePrefix = KafkaAdapterUtil.DFT_CONSUMER_GROUP_NAME_PREFIX;
         if (consumerClientConfMap.containsKey("group.id")) {
             defaultGrpNamePrefix = consumerClientConfMap.get("group.id");
         }
@@ -91,10 +89,16 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
     }
 
     private OpTimeTrackKafkaClient getOrCreateOpTimeTrackKafkaConsumer(
-        String cacheKey,
-        String groupId,
-        String topicName)
+        long cycle,
+        List<String> topicNameList,
+        String groupId)
     {
+        String topicNameListStr = topicNameList.stream()
+            .collect(Collectors.joining("::"));
+
+        String cacheKey = KafkaAdapterUtil.buildCacheKey(
+            "consumer-" + String.valueOf(cycle % kafkaClntCnt), topicNameListStr, groupId );
+
         OpTimeTrackKafkaClient opTimeTrackKafkaClient = kafkaSpace.getOpTimeTrackKafkaClient(cacheKey);
         if (opTimeTrackKafkaClient == null) {
             Properties consumerConfProps = new Properties();
@@ -103,10 +107,15 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
 
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfProps);
             synchronized (this) {
-                consumer.subscribe(Arrays.asList(topicName));
+                consumer.subscribe(topicNameList);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Kafka consumer created: {} -- {}", cacheKey, consumer);
+                logger.debug("Kafka consumer created: {}/{} -- {}, {}, {}",
+                    cacheKey,
+                    consumer,
+                    topicNameList,
+                    autoCommitEnabled,
+                    maxMsgCntPerCommit);
             }
 
             opTimeTrackKafkaClient = new OpTimeTrackKafkaConsumer(
@@ -117,19 +126,27 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
         return opTimeTrackKafkaClient;
     }
 
+
+    protected List<String> getEffectiveTopicNameList(long cycle) {
+        String explicitTopicListStr = topicNameStrFunc.apply(cycle);
+        assert (StringUtils.isNotBlank(explicitTopicListStr));
+
+        return Arrays.stream(StringUtils.split(explicitTopicListStr, ','))
+            .filter(s -> StringUtils.isNotBlank(s))
+            .toList();
+    }
+
     @Override
     public KafkaOp apply(long cycle) {
-        String topicName = topicNameStrFunc.apply(cycle);
+        List<String> topicNameList = getEffectiveTopicNameList(cycle);
         String groupId = getEffectiveGroupId(cycle);
-        String cacheKey = KafkaAdapterUtil.buildCacheKey(
-            "consumer", topicName, groupId, String.valueOf(cycle % kafkaClntCnt));
-
-        if (StringUtils.isBlank(groupId)) {
-            throw new KafkaAdapterInvalidParamException("An effective \"group.id\" is needed for a consumer!");
+        if (topicNameList.size() ==0 || StringUtils.isBlank(groupId)) {
+            throw new KafkaAdapterInvalidParamException(
+                "Effective consumer group name and/or topic names  are needed for creating a consumer!");
         }
 
         OpTimeTrackKafkaClient opTimeTrackKafkaConsumer =
-            getOrCreateOpTimeTrackKafkaConsumer(cacheKey, groupId, topicName);
+            getOrCreateOpTimeTrackKafkaConsumer(cycle, topicNameList, groupId);
 
         return new KafkaOp(
             kafkaAdapterMetrics,

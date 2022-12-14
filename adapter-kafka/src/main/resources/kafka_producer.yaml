@@ -10,18 +10,19 @@ params:
   # - default: true
   async_api: "true"
 
-  # The number of messages to put in one transaction
-  # - default: 0
-  # - value 0 or 1 means no transaction
-  # - it also requires "transactional.id" parameter is set
-  txn_batch_num: 5
-
 blocks:
   msg-produce-block:
     ops:
       op1:
         ## The value represents a topic name
-        MessageProduce: "nbktest1"
+        #  - for producer, only ONE topic is supported
+        MessageProduce: "nbktest"
+
+        # The number of messages to put in one transaction
+        # - default: 0
+        # - value 0 or 1 means no transaction
+        # - it also requires "transactional.id" parameter is set
+        txn_batch_num: 8
 
         ## (Optional) Kafka message headers (in JSON format).
         msg_header: |
