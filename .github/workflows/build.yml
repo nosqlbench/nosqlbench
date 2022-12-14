@@ -100,6 +100,7 @@ jobs:
           cd nosqlbench-build-docs
           git add .
           git add -u
+          git status
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
           echo "found $CHANGES to push for doc updates"
           if (( $CHANGES > 0 ))
