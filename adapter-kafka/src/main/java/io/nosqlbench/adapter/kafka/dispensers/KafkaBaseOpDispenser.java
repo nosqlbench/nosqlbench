@@ -34,7 +34,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, KafkaSpace> {
 
@@ -82,7 +81,7 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
         this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticConfig("cycles", String.class));
         kafkaSpace.setTotalCycleNum(totalCycleNum);
 
-        this.kafkaClntCnt = kafkaSpace.getClntNum();
+        this.kafkaClntCnt = kafkaSpace.getKafkaClntNum();
         this.consumerGrpCnt = kafkaSpace.getConsumerGrpNum();
         this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticConfig("threads", String.class));
 
@@ -91,11 +90,11 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
 
         boolean validThreadNum =
             ( ((this instanceof MessageProducerOpDispenser) && (totalThreadNum == kafkaClntCnt)) ||
-              ((this instanceof MessageConsumerOpDispenser) && (totalThreadNum == kafkaClntCnt*consumerGrpCnt)) );
+                ((this instanceof MessageConsumerOpDispenser) && (totalThreadNum == kafkaClntCnt*consumerGrpCnt)) );
         if (!validThreadNum) {
             throw new KafkaAdapterInvalidParamException(
                 "Incorrect settings of 'threads', 'num_clnt', or 'num_cons_grp' -- "  +
-                totalThreadNum + ", " + kafkaClntCnt + ", " + consumerGrpCnt);
+                    totalThreadNum + ", " + kafkaClntCnt + ", " + consumerGrpCnt);
         }
     }
 
@@ -110,40 +109,6 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
             .orElse(defaultValue);
         logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
         return  booleanLongFunction;
-    }
-
-    protected LongFunction<Set<String>> lookupStaticStrSetOpValueFunc(String paramName) {
-        LongFunction<Set<String>> setStringLongFunction;
-        setStringLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
-            .filter(Predicate.not(String::isEmpty))
-            .map(value -> {
-                Set<String > set = new HashSet<>();
-
-                if (StringUtils.contains(value,',')) {
-                    set = Arrays.stream(value.split(","))
-                        .map(String::trim)
-                        .filter(Predicate.not(String::isEmpty))
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-                }
-
-                return set;
-            }).orElse(Collections.emptySet());
-        logger.info("{}: {}", paramName, setStringLongFunction.apply(0));
-        return setStringLongFunction;
-    }
-
-    // If the corresponding Op parameter is not provided, use the specified default value
-    protected LongFunction<Integer> lookupStaticIntOpValueFunc(String paramName, int defaultValue) {
-        LongFunction<Integer> integerLongFunction;
-        integerLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
-            .filter(Predicate.not(String::isEmpty))
-            .map(value -> NumberUtils.toInt(value))
-            .map(value -> {
-                if (value < 0) return 0;
-                else return value;
-            }).orElse(defaultValue);
-        logger.info("{}: {}", paramName, integerLongFunction.apply(0));
-        return integerLongFunction;
     }
 
     // If the corresponding Op parameter is not provided, use the specified default value

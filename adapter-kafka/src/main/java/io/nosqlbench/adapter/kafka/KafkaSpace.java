@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KafkaSpace implements  AutoCloseable {
 
@@ -61,23 +62,25 @@ public class KafkaSpace implements  AutoCloseable {
     // - For Producer workload, this represents how many total producers to publish messages
     //   it must be the same value as the NB "threads" parameter
     // - For Consumer workload, this represents how many total consumers per consumer group to subscribe messages
-    //
-    private final int clntNum;
+    private final int kafkaClntNum;
 
     // Maximum number of Kafka consumer groups
-    // - This is only relevant for Consumer workload
-    // - (clntNum * consumerGrpNum) is the total consumer thread number and must be the same
+    // - Only relevant for Consumer workload
+    // - (topicPartNum * consumerGrpNum) is the total consumer thread number and must be the same
     //   as the NB "threads" parameter
+    // - For multi-topic testing, this means one consumer thread may read from multiple topics.
     private final int consumerGrpNum;
 
     private long totalCycleNum;
+
+    private AtomicBoolean beingShutdown = new AtomicBoolean(false);
 
     public KafkaSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
         this.cfg = cfg;
 
         this.bootstrapSvr = cfg.get("bootstrap_server");
-        this.clntNum =
+        this.kafkaClntNum =
             NumberUtils.toInt(cfg.getOptional("num_clnt").orElse("1"));
         this.consumerGrpNum =
             NumberUtils.toInt(cfg.getOptional("num_cons_grp").orElse("1"));
@@ -124,7 +127,7 @@ public class KafkaSpace implements  AutoCloseable {
     public String getBootstrapSvr() { return this.bootstrapSvr; }
     public KafkaClientConf getKafkaClientConf() { return kafkaClientConf; }
 
-    public int getClntNum() { return this.clntNum; }
+    public int getKafkaClntNum() { return this.kafkaClntNum; }
     public int getConsumerGrpNum() { return this.consumerGrpNum; }
 
     public boolean isStrictMsgErrorHandling() { return  this.strictMsgErrorHandling; }
@@ -132,14 +135,19 @@ public class KafkaSpace implements  AutoCloseable {
     public long getTotalCycleNum() { return totalCycleNum; }
     public void setTotalCycleNum(long cycleNum) { totalCycleNum = cycleNum; }
 
+    public boolean isShuttigDown() {
+        return beingShutdown.get();
+    }
     public void shutdownSpace() {
         try {
-            // Pause 5 seconds before closing producers/consumers
-            KafkaAdapterUtil.pauseCurThreadExec(5);
+            beingShutdown.set(true);
 
             for (OpTimeTrackKafkaClient client : opTimeTrackKafkaClients.values()) {
                 client.close();
             }
+
+            // Pause 5 seconds before closing producers/consumers
+            KafkaAdapterUtil.pauseCurThreadExec(5);
         }
         catch (Exception e) {
             e.printStackTrace();

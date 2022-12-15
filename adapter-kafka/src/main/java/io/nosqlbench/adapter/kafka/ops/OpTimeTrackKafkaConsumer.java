@@ -106,6 +106,10 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
 
     @Override
     void cycleMsgProcess(long cycle, Object cycleObj) {
+        if (kafkaSpace.isShuttigDown()) {
+            return;
+        }
+
         synchronized (this) {
             ConsumerRecords<String, String> records = consumer.poll(msgPoolIntervalInMs);
             for (ConsumerRecord<String, String> record : records) {

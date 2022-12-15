@@ -59,8 +59,7 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
         this.producerClientConfMap.putAll(kafkaSpace.getKafkaClientConf().getProducerConfMap());
         producerClientConfMap.put("bootstrap.servers", kafkaSpace.getBootstrapSvr());
 
-        this.txnBatchNum =
-            parsedOp.getStaticConfigOr(KafkaAdapterUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, Integer.valueOf(0));
+        this.txnBatchNum = parsedOp.getStaticConfigOr("txn_batch_num", Integer.valueOf(0));
 
         this.msgHeaderJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
         this.msgKeyStrFunc = lookupOptionalStrOpValueFunc(MSG_KEY_OP_PARAM);
@@ -79,38 +78,53 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
         }
     }
 
-    private OpTimeTrackKafkaClient getOrCreateOpTimeTrackKafkaProducer(
-        String cacheKey, String clientId)
+    private OpTimeTrackKafkaClient getOrCreateOpTimeTrackKafkaProducer(long cycle,
+                                                                       String topicName,
+                                                                       String clientId)
     {
+        String cacheKey = KafkaAdapterUtil.buildCacheKey(
+            "producer-" + String.valueOf(cycle % kafkaClntCnt), topicName);
+
         OpTimeTrackKafkaClient opTimeTrackKafkaClient = kafkaSpace.getOpTimeTrackKafkaClient(cacheKey);
         if (opTimeTrackKafkaClient == null) {
             Properties producerConfProps = new Properties();
             producerConfProps.putAll(producerClientConfMap);
-            producerConfProps.put("client.id", clientId);
+
+            if (StringUtils.isNotBlank(clientId))
+                producerConfProps.put("client.id", clientId);
+            else
+                producerConfProps.remove("client.id");
 
             // When transaction batch number is less than 2, it is treated effectively as no-transaction
             if (txnBatchNum < 2)
                 producerConfProps.remove("transactional.id");
 
             String baseTransactId = "";
+            boolean transactionEnabled = false;
             if (producerConfProps.containsKey("transactional.id")) {
                 baseTransactId = producerConfProps.get("transactional.id").toString();
                 producerConfProps.put("transactional.id", baseTransactId + "-" + cacheKey);
+                transactionEnabled = StringUtils.isNotBlank(producerConfProps.get("transactional.id").toString());
             }
 
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerConfProps);
-            if (producerConfProps.containsKey("transactional.id")) {
+            if (transactionEnabled) {
                 producer.initTransactions();
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Producer created: {} -- {}", cacheKey, producer);
+                logger.debug("Producer created: {}/{} -- ({}, {}, {})",
+                    cacheKey,
+                    producer,
+                    topicName,
+                    transactionEnabled,
+                    clientId);
             }
 
             opTimeTrackKafkaClient = new OpTimeTrackKafkaProducer(
                 kafkaSpace,
                 asyncAPI,
-                StringUtils.isNotBlank(producerClientConfMap.get("transactional.id")),
+                transactionEnabled,
                 txnBatchNum,
                 producer);
             kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
@@ -176,11 +190,9 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
     public KafkaOp apply(long cycle) {
         String topicName = topicNameStrFunc.apply(cycle);
         String clientId = getEffectiveClientId(cycle);
-        String cacheKey = KafkaAdapterUtil.buildCacheKey(
-            "producer", topicName, String.valueOf(cycle % kafkaClntCnt));
 
         OpTimeTrackKafkaClient opTimeTrackKafkaProducer =
-            getOrCreateOpTimeTrackKafkaProducer(cacheKey, clientId);
+            getOrCreateOpTimeTrackKafkaProducer(cycle, topicName, clientId);
 
         ProducerRecord<String, String> message = createKafkaMessage(
             cycle,
