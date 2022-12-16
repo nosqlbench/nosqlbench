@@ -94,13 +94,11 @@ jobs:
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
           rsync -av --delete -I --exclude '_index.md' drivers/ nosqlbench-build-docs/site/content/docs/drivers
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
           rsync -av --delete -I --exclude '_index.md' bindings/ nosqlbench-build-docs/site/content/docs/bindings
+          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
           echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
           cd nosqlbench-build-docs
-          git add .
-          git add -u
-          git status
+          git add -A
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
           echo "found $CHANGES to push for doc updates"
           if (( $CHANGES > 0 ))
