@@ -95,8 +95,7 @@ jobs:
         run: |
           rsync -av --delete -I --exclude '_index.md' drivers/ nosqlbench-build-docs/site/content/docs/drivers
           rsync -av --delete -I --exclude '_index.md' bindings/ nosqlbench-build-docs/site/content/docs/bindings
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/drivers/CNAME
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/content/docs/bindings/CNAME
+          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/staticCNAME
           cd nosqlbench-build-docs
           git add -A
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
