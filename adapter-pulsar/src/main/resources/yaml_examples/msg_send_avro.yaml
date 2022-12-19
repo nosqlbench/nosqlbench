@@ -1,28 +1,25 @@
 bindings:
-  # message key and value
-  mykey: NumberNameToString()
   location: Cities();
   well_id: ToUUID();ToString();
   sensor_id: ToUUID();ToString();
   reading_time: ToDateTime();
   reading_value: ToFloat(100);
 
-# document level parameters that apply to all Pulsar client types:
 params:
   async_api: "true"
 
 blocks:
   msg-produce-block:
-    tags:
-      phase: msg-send
     ops:
       op1:
         MessageProduce: "tnt0/ns0/tp1"
+        producerName: ""
         msg_key: |
           {
               "Location": "{location}",
               "WellID": "{well_id}"
           }
+        msg_properties: ""
         msg_value: |
           {
               "SensorID": "{sensor_id}",
@@ -30,12 +27,3 @@ blocks:
               "ReadingTime": "{reading_time}",
               "ReadingValue": {reading_value}
           }
-
-  msg-consume-block:
-    tags:
-      phase: msg-recv
-    ops:
-      op1:
-        MessageConsume: "tnt0/ns0/tp0"
-        subscription_name: "mynbsub"
-#        subscription_type: "shared"

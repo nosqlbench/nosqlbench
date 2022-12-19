@@ -17,14 +17,13 @@
 package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapter.diag.optasks.DiagTask;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
-import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
+import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,12 +38,12 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
     private LongFunction<DiagSpace> spaceF;
     private OpFunc opFuncs;
 
-    public DiagOpDispenser(DriverAdapter adapter, ParsedOp op) {
+    public DiagOpDispenser(DiagDriverAdapter adapter, LongFunction<DiagSpace> spaceF, ParsedOp op) {
         super(adapter,op);
-        this.opFunc = resolveOpFunc(op);
+        this.opFunc = resolveOpFunc(spaceF, op);
     }
 
-    private OpFunc resolveOpFunc(ParsedOp op) {
+    private OpFunc resolveOpFunc(LongFunction<DiagSpace> spaceF, ParsedOp op) {
         List<DiagTask> tasks = new ArrayList<>();
         Set<String> tasknames = op.getDefinedNames();
 
@@ -82,7 +81,7 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
             // Store the task into the diag op's list of things to do when it runs
             tasks.add(task);
         }
-        this.opFunc = new OpFunc(tasks);
+        this.opFunc = new OpFunc(spaceF,tasks);
         return opFunc;
     }
 
@@ -98,13 +97,17 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
 
     private final static class OpFunc implements LongFunction<DiagOp>, NBReconfigurable {
         private final List<DiagTask> tasks;
-        public OpFunc(List<DiagTask> tasks) {
+        private final LongFunction<DiagSpace> spaceF;
+
+        public OpFunc(LongFunction<DiagSpace> spaceF, List<DiagTask> tasks) {
             this.tasks = tasks;
+            this.spaceF = spaceF;
         }
 
         @Override
         public DiagOp apply(long value) {
-            return new DiagOp(tasks);
+            DiagSpace space = spaceF.apply(value);
+            return new DiagOp(space, tasks);
         }
 
         @Override

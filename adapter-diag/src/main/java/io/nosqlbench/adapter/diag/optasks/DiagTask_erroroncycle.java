@@ -28,7 +28,7 @@ import java.util.Map;
  * Cause a blocking call to delay the initialization
  * of this owning operation for a number of milliseconds.
  */
-@Service(value= DiagTask.class,selector = "erroroncycle")
+@Service(value = DiagTask.class, selector = "erroroncycle")
 public class DiagTask_erroroncycle implements DiagTask {
 
     private String name;
@@ -36,21 +36,21 @@ public class DiagTask_erroroncycle implements DiagTask {
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name",String.class);
-        error_on_cycle = cfg.get("erroroncycle",long.class);
+        this.name = cfg.get("name", String.class);
+        error_on_cycle = cfg.get("erroroncycle", long.class);
     }
 
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(DiagTask_erroroncycle.class)
-            .add(Param.required("name",String.class))
-            .add(Param.defaultTo("erroroncycle",1L))
-            .asReadOnly();
+                .add(Param.required("name", String.class))
+                .add(Param.defaultTo("erroroncycle", 1L))
+                .asReadOnly();
     }
 
     @Override
     public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-        if (error_on_cycle==aLong) {
+        if (error_on_cycle == aLong) {
             throw new RuntimeException("Diag was requested to stop on cycle " + error_on_cycle);
         }
         return Map.of();

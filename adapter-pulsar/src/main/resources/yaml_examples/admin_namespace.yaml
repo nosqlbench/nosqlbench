@@ -9,8 +9,6 @@ params:
 
 blocks:
   admin-namespace-block:
-    tags:
-      phase: admin-namespace
     ops:
       op1:
         AdminNamespace: "{tenant}/{namespace}"

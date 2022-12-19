@@ -103,7 +103,8 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
 
     protected LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
         LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
-        setStringLongFunction = (l) -> parsedOp.getOptionalStaticValue("seqerr_simu", String.class)
+        setStringLongFunction = (l) ->
+            parsedOp.getOptionalStaticValue(PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> {
                 Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
@@ -118,7 +119,9 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
 
                 return set;
             }).orElse(Collections.emptySet());
-        logger.info("seqerr_simu: {}", setStringLongFunction.apply(0));
+        logger.info(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label + ": {}",
+            setStringLongFunction.apply(0));
         return setStringLongFunction;
     }
 }

@@ -11,8 +11,6 @@ params:
 
 blocks:
   msg-produce-block:
-    tags:
-      phase: msg-send
     ops:
       op1:
         MessageProduce: "tnt0/ns0/tp0"
@@ -23,12 +21,3 @@ blocks:
             "prop2": "{text_prop_val}"
           }
         msg_value: "{myvalue}"
-
-  msg-consume-block:
-    tags:
-      phase: msg-recv
-    ops:
-      op1:
-        MessageConsume: "tnt0/ns0/tp0"
-        subscriptionName: "mynbsub"
-        subscriptionType: "Shared"

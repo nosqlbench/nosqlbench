@@ -27,13 +27,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: mvn package
+      - name: mvn-package
         run: mvn package
 
       - name: export docs
         run: nb5/target/nb5 export-docs
 
-      - name: archive docs
+      - name: upload docs artifact
         uses: actions/upload-artifact@v3
         with:
           name: exported-docs
@@ -42,13 +42,16 @@ jobs:
       - name: mvn verify
         run: mvn verify
 
+      - name: Capture
+        if: success() || failure()
+        run: tar -cvf logfiles.tar [a-zA-Z]**/logs/*
+
       - name: Archive Test Results
-        if: always()
+        if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: |
-            [a-zA-Z]**/logs/*
+          path: logfiles.tar
 
 
   docs:
