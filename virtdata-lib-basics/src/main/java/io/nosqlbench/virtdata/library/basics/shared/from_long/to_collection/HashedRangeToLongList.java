@@ -36,7 +36,7 @@ public class HashedRangeToLongList implements LongFunction<List<Long>> {
     private final HashRange sizeRange;
 
     public HashedRangeToLongList(int minVal, int maxVal, int minSize, int maxSize) {
-        if (minSize>=maxSize || minSize>=maxSize) {
+        if (minSize>maxSize || minVal>maxVal) {
             throw new RuntimeException("HashedRangeToLongList must have minval, maxval, minsize, maxsize, where min<max.");
         }
         this.valueRange = new HashRange(minVal,maxVal);

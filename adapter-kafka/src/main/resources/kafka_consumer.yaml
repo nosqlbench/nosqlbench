@@ -1,0 +1,24 @@
+# document level parameters that apply to all Pulsar client types:
+params:
+  # Whether to commit message asynchronously
+  # - default: true
+  # - only relevant for manual commit
+  async_api: "true"
+
+blocks:
+  msg-consume-block:
+    ops:
+      op1:
+        ## The value represents the topic names
+        #  - for consumer, a list of topics (separated by comma) are supported
+        MessageConsume: "nbktest1,nbktest2"
+
+        # The timeout value to poll messages (unit: milli-seconds)
+        # - default: 0
+        msg_poll_interval: "10"
+
+        # The number of messages to receive before doing a manual commit
+        # - default: 0
+        # - If 0, it could mean doing auto commit or not, which is determined
+        #   by "enable.auto.commit" consumer config value
+        manual_commit_batch_num: "0"

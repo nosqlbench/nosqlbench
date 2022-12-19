@@ -1,0 +1,54 @@
+bindings:
+  cur_cycle: ToString()
+  mykey: Mod(5); ToString(); Prefix("key-")
+  mytext_val: AlphaNumericString(30)
+  mymap_val1: AlphaNumericString(10)
+  mymap_val2: AlphaNumericString(20)
+  mystream_val1: AlphaNumericString(50)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  temporary_dest: "false"
+  dest_type: "queue"
+  async_api: "true"
+
+blocks:
+  msg-produce-block:
+    ops:
+      op1:
+        ## The value represents the destination (queue or topic) name)
+        MessageProduce: "mys4jtest_t"
+
+        ## (Optional) JMS headers (in JSON format).
+        msg_header: |
+          {
+            "JMSPriority": "9"
+          }
+
+        ## (Optional) JMS properties, predefined or customized (in JSON format).
+        msg_property: |
+          {
+            "JMSXGroupID": "{mykey}"
+          }
+
+        ## (Optional) JMS message types, default to be BYTES.
+        msg_type: "text"
+
+        ## (Mandatory) JMS message body. Value depends on msg_type.
+        msg_body: "{mytext_val}"
+
+#        # example of having "map" as the message type
+#        msg_type: "map"
+#        msg_body: |
+#          {
+#            "prop-key-1": "{mymap_val1}",
+#            "prop-key-2": "{mymap_val2}"
+#          }
+#        # example of having "stream" as the message type
+#        msg_type: "stream"
+#        msg_body: |
+#          [
+#            "100",
+#            "{mystream_val1}",
+#            "abcdef"
+#          ]

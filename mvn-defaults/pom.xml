@@ -19,7 +19,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>4.17.31-SNAPSHOT</version>
+    <version>4.17.32-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.12</version>
+                <version>4.2.13</version>
             </dependency>
 
             <dependency>
@@ -153,12 +153,12 @@
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-core</artifactId>
-                <version>1.35</version>
+                <version>1.36</version>
             </dependency>
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
-                <version>1.35</version>
+                <version>1.36</version>
             </dependency>
 
             <dependency>
@@ -189,7 +189,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.84.Final</version>
+                <version>4.1.86.Final</version>
             </dependency>
 
             <dependency>
@@ -209,7 +209,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-haproxy</artifactId>
-                <version>4.1.54.Final</version>
+                <version>4.1.86.Final</version>
             </dependency>
 
             <dependency>
@@ -265,7 +265,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.3.1</version>
+                <version>6.3.2</version>
             </dependency>
 
             <dependency>

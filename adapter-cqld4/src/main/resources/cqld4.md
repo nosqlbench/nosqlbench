@@ -198,6 +198,11 @@ params:
   # match the preconditions) in order to test LWT performance.
   retryreplace: true
 
+  # Set the number of retries allowed by the retryreplace option. This is set
+  # to 1 conservatively, as with the maxpages setting. This means that you will
+  # see an error if the first LWT retry after an unapplied change was not successful.
+  maxlwtretries: 1
+
   ## The following options are meant for advanced testing scenarios only,
   ## and are not generally meant to be used in typical application-level,
   ## data mode, performance or scale testing. These expose properties

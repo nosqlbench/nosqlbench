@@ -16,5 +16,19 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
 
+/**
+ * <H2>RunnableOp</H2>
+ * <P>This is the simplest form of an executable operation in NoSQLBench.
+ * It is simply an operation is run for side-effect only.</P>
+ */
 public interface RunnableOp extends Op, Runnable {
+
+    /**
+     * Invoke the operation. If you need to see the value of the current
+     * cycle, then you can use {@link CycleOp} instead. If you need to
+     * use a cached result of a previous operation, then you may need to
+     * use {@link ChainingOp}.
+     */
+    @Override
+    void run();
 }

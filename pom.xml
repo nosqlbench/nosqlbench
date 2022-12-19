@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.31-SNAPSHOT</version>
+        <version>4.17.32-SNAPSHOT</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -62,6 +62,8 @@
         <module>adapter-dynamodb</module>
         <module>adapter-mongodb</module>
         <module>adapter-pulsar</module>
+        <module>adapter-s4j</module>
+        <module>adapter-kafka</module>
 
         <!-- VIRTDATA MODULES -->
 
@@ -76,7 +78,6 @@
 
         <!-- Documentation -->
         <module>docsys</module>
-
     </modules>
 
     <profiles>
@@ -88,7 +89,6 @@
             <modules>
                 <module>nb</module>
                 <module>driver-tcp</module>
-                <module>driver-kafka</module>
                 <module>driver-jmx</module>
                 <module>driver-jdbc</module>
                 <module>driver-cockroachdb</module>

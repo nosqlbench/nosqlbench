@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.31-SNAPSHOT</version>
+        <version>4.17.32-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-annotations</artifactId>
-            <version>4.17.31-SNAPSHOT</version>
+            <version>4.17.32-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.340</version>
+            <version>1.12.364</version>
         </dependency>
 
         <dependency>
