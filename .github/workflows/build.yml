@@ -74,12 +74,6 @@ jobs:
 
       - run: ls -la
 
-      #      - name: download docs
-      #        uses: actions/download-artifact@v1
-      #        with:
-      #          name: guidebook
-      #          path: guidebook
-
       - name: clone nosqlbench-build-docs
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
@@ -92,7 +86,6 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
-      #      Disabling this because it will be replaced soon.
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
