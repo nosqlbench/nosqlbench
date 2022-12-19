@@ -39,8 +39,6 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.commonmark.parser.Parser;
-import org.commonmark.node.Node;
 
 public class BundledMarkdownZipExporter {
 
