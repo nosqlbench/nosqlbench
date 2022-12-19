@@ -39,7 +39,7 @@ public class BundledFrontmatterInjector implements BundledMarkdownProcessor {
             if (name.length()>i) {
                 int ord = name.charAt(i) - 'a';
                 double addend = Math.pow(pow, i) * ord;
-                sum += addend;
+                sum += (int)addend;
             } else {
                 break;
             }
