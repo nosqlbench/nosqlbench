@@ -3,7 +3,6 @@ name: build
 on:
   push:
     branches:
-      - main
     paths:
       - !RELEASENOTES.**
   pull_request:
