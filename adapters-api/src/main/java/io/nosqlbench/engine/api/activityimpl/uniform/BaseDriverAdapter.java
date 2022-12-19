@@ -166,6 +166,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapte
             .add(Param.optional("instrument", Boolean.class))
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
             .add(Param.optional("driver", String.class))
+            .add(Param.defaultTo("dryrun",false))
             .asReadOnly();
     }
 

@@ -17,7 +17,11 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
@@ -37,14 +41,11 @@ import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DryRunOpDispenserWrapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -472,7 +473,6 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             List<Long> ratios = new ArrayList<>(pops.size());
 
             for (int i = 0; i < pops.size(); i++) {
-
                 ParsedOp pop = pops.get(i);
                 long ratio = pop.takeStaticConfigOr("ratio", 1);
                 ratios.add(ratio);
@@ -484,21 +484,34 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
+            int dryrunCount=0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
-                if (ratio==0) {
+                if (ratio == 0) {
                     logger.info("skipped mapping op '" + pop.getName() + "'");
                     continue;
                 }
+                boolean dryrun = pop.takeStaticConfigOr("dryrun", false);
+
                 DriverAdapter adapter = adapters.get(i);
                 OpMapper opMapper = adapter.getOpMapper();
                 OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
+
+                if (dryrun) {
+                    dispenser = new DryRunOpDispenserWrapper(adapter, pop, dispenser);
+                    dryrunCount++;
+                }
+
 //                if (strict) {
 //                    optemplate.assertConsumed();
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
+            if (dryrunCount>0) {
+                logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
+            }
+
 
             return planner.resolve();
 
