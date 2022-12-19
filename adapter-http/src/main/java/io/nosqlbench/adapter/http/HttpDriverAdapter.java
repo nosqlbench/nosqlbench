@@ -20,6 +20,8 @@ import io.nosqlbench.adapter.http.core.HttpFormatParser;
 import io.nosqlbench.adapter.http.core.HttpOp;
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.api.config.standard.ConfigModel;
+import io.nosqlbench.api.config.standard.Param;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -68,6 +70,11 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
     @Override
     public NBConfigModel getConfigModel() {
-        return super.getConfigModel().add(HttpSpace.getConfigModel());
+        NBConfigModel thisCfgModel = ConfigModel.of(HttpDriverAdapter.class)
+            .add(Param.defaultTo("enable_urlencode", false)
+                .setDescription("Override auto-detection of URLENCODE[[ requirements in the uri field."))
+            .asReadOnly();
+
+        return super.getConfigModel().add(HttpSpace.getConfigModel()).add(thisCfgModel);
     }
 }

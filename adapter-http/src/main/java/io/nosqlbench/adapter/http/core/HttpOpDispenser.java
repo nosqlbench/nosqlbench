@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.regex.Pattern;
 
-public class HttpOpDispenser extends BaseOpDispenser<HttpOp,HttpSpace> {
+public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
 
     private final LongFunction<HttpOp> opFunc;
     public static final String DEFAULT_OK_BODY = ".+?";
@@ -63,9 +63,27 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp,HttpSpace> {
             )
         );
 
-        initBuilderF = op.enhanceFuncOptionally(initBuilderF, "uri", String.class, (b, v) -> b.uri(URI.create(v)));
+        Optional<LongFunction<String>> optionalUriFunc = op.getAsOptionalFunction("uri", String.class);
+        LongFunction<String> urifunc;
+        // Add support for URLENCODE on the uri field if either it statically or dynamically contains the E or URLENCODE pattern,
+        // OR the enable_urlencode op field is set to true.
+        if (optionalUriFunc.isPresent()) {
+            String testUriValue = optionalUriFunc.get().apply(0L);
+            if (HttpFormatParser.URLENCODER_PATTERN.matcher(testUriValue).find()
+                || op.getStaticConfigOr("enable_urlencode", true)) {
+                initBuilderF =
+                    op.enhanceFuncOptionally(
+                        initBuilderF,
+                        "uri",
+                        String.class,
+                        (b, v) -> b.uri(URI.create(HttpFormatParser.rewriteExplicitSections(v)))
+                    );
+            }
+        } else {
+            initBuilderF = op.enhanceFuncOptionally(initBuilderF, "uri", String.class, (b, v) -> b.uri(URI.create(v)));
+        }
 
-        op.getOptionalStaticValue("follow_redirects",boolean.class);
+        op.getOptionalStaticValue("follow_redirects", boolean.class);
 
         /**
          * Add header adders for any key provided in the op template which is capitalized
@@ -74,19 +92,19 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp,HttpSpace> {
             .filter(n -> n.charAt(0) >= 'A')
             .filter(n -> n.charAt(0) <= 'Z')
             .toList();
-        if (headerNames.size()>0) {
+        if (headerNames.size() > 0) {
             for (String headerName : headerNames) {
-                initBuilderF = op.enhanceFunc(initBuilderF,headerName,String.class, (b,h) -> b.header(headerName,h));
+                initBuilderF = op.enhanceFunc(initBuilderF, headerName, String.class, (b, h) -> b.header(headerName, h));
             }
         }
 
-        initBuilderF = op.enhanceFuncOptionally(initBuilderF,"timeout",long.class,(b,v) -> b.timeout(Duration.ofMillis(v)));
+        initBuilderF = op.enhanceFuncOptionally(initBuilderF, "timeout", long.class, (b, v) -> b.timeout(Duration.ofMillis(v)));
 
         LongFunction<HttpRequest.Builder> finalInitBuilderF = initBuilderF;
         LongFunction<HttpRequest> reqF = l -> finalInitBuilderF.apply(l).build();
 
 
-        Pattern ok_status = op.getOptionalStaticValue("ok-status",String.class)
+        Pattern ok_status = op.getOptionalStaticValue("ok-status", String.class)
             .map(Pattern::compile)
             .orElse(Pattern.compile(DEFAULT_OK_STATUS));
 
@@ -99,7 +117,7 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp,HttpSpace> {
             reqF.apply(cycle),
             ok_status,
             ok_body,
-            ctxF.apply(cycle),cycle
+            ctxF.apply(cycle), cycle
         );
         return opFunc;
     }
