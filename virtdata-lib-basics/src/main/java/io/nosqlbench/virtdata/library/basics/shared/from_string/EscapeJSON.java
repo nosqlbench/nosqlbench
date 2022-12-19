@@ -18,6 +18,8 @@ package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -38,6 +40,7 @@ import java.util.function.Function;
  * }</pre>
  */
 @ThreadSafeMapper
+@Categories({Category.conversion, Category.general})
 public class EscapeJSON implements Function<String,String> {
     Gson gson = new GsonBuilder().create();
 

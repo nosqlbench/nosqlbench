@@ -53,6 +53,7 @@ public class BundledMarkdownExporter implements BundledApp {
         String zipfile = options.valueOf(zipfileSpec);
 
         new BundledMarkdownZipExporter(new BundledFrontmatterInjector()).exportDocs(Path.of(zipfile));
+
         return 0;
     }
 }

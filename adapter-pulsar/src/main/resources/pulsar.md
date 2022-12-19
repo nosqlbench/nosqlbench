@@ -1,3 +1,4 @@
+# Table of contents
 - [1. Overview](#1-overview)
     - [1.1. Issues Tracker](#11-issues-tracker)
 - [2. Execute the NB Pulsar Driver Workload](#2-execute-the-nb-pulsar-driver-workload)

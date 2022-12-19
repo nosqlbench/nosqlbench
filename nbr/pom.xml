@@ -72,6 +72,7 @@
             <artifactId>adapter-diag</artifactId>
             <version>4.17.32-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
 
     <build>
