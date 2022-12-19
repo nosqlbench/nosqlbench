@@ -39,6 +39,8 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.commonmark.parser.Parser;
+import org.commonmark.node.Node;
 
 public class BundledMarkdownZipExporter {
 
@@ -74,10 +76,14 @@ public class BundledMarkdownZipExporter {
             {
                 String filename = entry.getKey();
                 StringBuilder fileStringBuilder = entry.getValue();
-                ZipEntry zipEntry = new ZipEntry(bindingsPrefix +filename);
+                MutableMarkdown parsed = new MutableMarkdown(fileStringBuilder.toString());
+                for (BundledMarkdownProcessor filter : this.filters) {
+                    parsed = filter.apply(parsed);
+                }
+                ZipEntry zipEntry = new ZipEntry(bindingsPrefix + filename);
                 zipEntry.setTime(new Date().getTime());
                 zipstream.putNextEntry(zipEntry);
-                zipstream.write(fileStringBuilder.toString().getBytes());
+                zipstream.write(parsed.getComposedMarkdown().getBytes(StandardCharsets.UTF_8));
                 zipstream.closeEntry();
             }
             zipstream.finish();
