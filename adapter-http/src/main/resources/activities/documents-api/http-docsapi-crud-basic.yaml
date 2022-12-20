@@ -1,27 +1,27 @@
 min_version: "4.17.15"
 
-# nb -v run driver=http yaml=http-docsapi-crud-basic tags=phase:schema stargate_host=my_stargate_host auth_token=$AUTH_TOKEN
+# nb -v run driver=http yaml=http-docsapi-crud-basic tags=phase:schema docsapi_host=my_docsapi_host auth_token=$AUTH_TOKEN
 
 description: |
   This workload emulates CRUD operations for the Stargate Documents API.
   It generates a simple JSON document to be used for writes and updates.
-  Note that stargate_port should reflect the port where the Docs API is exposed (defaults to 8082).
+  Note that docsapi_port should reflect the port where the Docs API is exposed (defaults to 8180).
 
 scenarios:
   default:
     schema:   run driver=http tags==block:schema threads==1 cycles==UNDEF
-    write:    run driver=http tags==name:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read:     run driver=http tags==name:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update:   run driver=http tags==name:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete:   run driver=http tags==name:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    write:    run driver=http tags==block:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=http tags==block:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=http tags==block:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=http tags==block:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
-  #   single host: stargate_host=host1
-  #   multiple hosts: stargate_host=host1,host2,host3
-  #   multiple weighted hosts: stargate_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  #   single host: docsapi_host=host1
+  #   multiple hosts: docsapi_host=host1,host2,host3
+  #   multiple weighted hosts: docsapi_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
 
@@ -42,40 +42,45 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+      create-namespace:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<keyspace:docs_crud_basic>>",
+              "name": "<<namespace:docs_crud_basic>>",
               "replicas": <<rf:1>>
           }
+        ok-status: ".*"
 
       delete-docs-collection:
-        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections/<<collection:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
 
       create-docs-collection:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections
+        method: POST
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<table:docs_collection>>"
+              "name": "<<collection:docs_collection>>"
           }
 
-  main:
+  write:
     ops:
       write-document:
-        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
+        method: PUT
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -105,15 +110,21 @@ blocks:
             "debt":         null
           }
 
+  read:
+    ops:
       read-document:
-        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
+        method: GET
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections/<<collection:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
 
+  update:
+    ops:
       update-document:
-        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{random_key}
+        method: PUT
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections/<<collection:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -143,8 +154,11 @@ blocks:
             "debt":         null
           }
 
+  delete:
+    ops:
       delete-document:
-        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_crud_basic>>/collections/<<table:docs_collection>>/{seq_key}
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_basic>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"

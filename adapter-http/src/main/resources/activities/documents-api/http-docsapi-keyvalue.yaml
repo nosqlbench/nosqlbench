@@ -6,7 +6,7 @@ description: |
   - Schema creation with the Docs API, we don't use cql because the Docs API is opinionated about schema.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
-  Note that stargate_port should reflect the port where the Docs API is exposed (defaults to 8082).
+  Note that docsapi_port should reflect the port where the Docs API is exposed (defaults to 8180).
 
 scenarios:
   default:
@@ -17,10 +17,10 @@ scenarios:
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
-  #   single host: stargate_host=host1
-  #   multiple hosts: stargate_host=host1,host2,host3
-  #   multiple weighted hosts: stargate_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  #   single host: docsapi_host=host1
+  #   multiple hosts: docsapi_host=host1,host2,host3
+  #   multiple weighted hosts: docsapi_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
 
@@ -32,40 +32,45 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+      create-namespace:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<keyspace:docs_keyvalue>>",
+              "name": "<<namespace:docs_keyvalue>>",
               "replicas": <<rf:1>>
           }
+        ok-status: ".*"
 
       delete-docs-collection:
-        op: DELETE <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
 
       create-docs-collection:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<table:docs_collection>>"
+              "name": "<<collection:docs_collection>>"
           }
 
   rampup:
     ops:
       rampup-insert:
-        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>/{seq_key}
+        method: PUT
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -80,14 +85,16 @@ blocks:
       ratio: <<read_ratio:5>>
     ops:
       main-select:
-        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>/{rw_key}
+        method: GET
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         ok-status: "[2-4][0-9][0-9]"
 
       main-write:
-        op: PUT <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/namespaces/<<keyspace:docs_keyvalue>>/collections/<<table:docs_collection>>/{rw_key}
+        method: PUT
+        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
