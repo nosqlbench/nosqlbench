@@ -17,26 +17,31 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * Holds the state of a slot, allows only valid transitions, and shares the
  * slot state as
  */
-public class SlotStateTracker {
-    private final AtomicReference<RunState> slotState = new AtomicReference<>(RunState.Uninitialized);
-    private final static Logger logger = LogManager.getLogger(SlotStateTracker.class);
+public class MotorState implements Supplier<RunState> {
+    private final static Logger logger = LogManager.getLogger("MOTORS");
+    private final AtomicReference<RunState> atomicState = new AtomicReference<>(RunState.Uninitialized);
     private final long slotId;
+    private final RunStateTally tally;
 
-    public SlotStateTracker(long slotId) {
+    public MotorState(long slotId, RunStateTally tally) {
         this.slotId = slotId;
+        this.tally = tally;
+        tally.add(atomicState.get());
     }
 
-    public RunState getSlotState() {
-        return slotState.get();
+    public RunState get() {
+        return atomicState.get();
     }
 
     /**
@@ -46,7 +51,7 @@ public class SlotStateTracker {
      * @return an atomic reference for SlotState
      */
     public AtomicReference<RunState> getAtomicSlotState() {
-        return slotState;
+        return atomicState;
     }
 
     /**
@@ -56,16 +61,19 @@ public class SlotStateTracker {
      * @param to The next SlotState for this thread/slot/motor
      */
     public synchronized void enterState(RunState to) {
-        RunState from = slotState.get();
+        RunState from = atomicState.get();
         if (!from.canTransitionTo(to)) {
             throw new RuntimeException("Invalid transition from " + from + " to " + to);
         }
-        while (!slotState.compareAndSet(from, to)) {
+        while (!atomicState.compareAndSet(from, to)) {
             logger.trace("retrying transition from:" + from + " to:" + to);
         }
+        tally.change(from,to);
         logger.trace("TRANSITION[" + slotId + "]: " + from + " ==> " + to);
-
     }
 
-
+    public void removeState() {
+        logger.trace(() -> "Removing motor state " + atomicState.get());
+        tally.remove(atomicState.get());
+    }
 }
