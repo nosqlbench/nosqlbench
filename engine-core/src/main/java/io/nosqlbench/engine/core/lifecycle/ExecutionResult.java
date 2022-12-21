@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public class ExecutionResult {
-    protected final static Logger logger = LogManager.getLogger(ExecutionMetricsResult.class);
+    protected final static Logger logger = LogManager.getLogger(ExecutionResult.class);
     protected final long startedAt;
     protected final long endedAt;
     protected final Exception exception;

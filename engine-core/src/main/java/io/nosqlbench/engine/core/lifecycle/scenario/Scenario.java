@@ -26,14 +26,14 @@ import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivityProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.ActivityBindings;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.SandboxExtensionFinder;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.ActivityBindings;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotMetricRegistryBindings;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +45,6 @@ import org.graalvm.polyglot.PolyglotAccess;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -88,8 +87,6 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         Interrupted,
         Finished
     }
-
-    private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
@@ -266,7 +263,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         );
 
         logger.debug("Running control script for " + getScenarioName() + ".");
-        scenarioController = new ScenarioController(this,minMaturity);
+        scenarioController = new ScenarioController(this);
         try {
             initializeScriptingEngine(scenarioController);
             executeScenarioScripts();
