@@ -18,12 +18,15 @@ package io.nosqlbench.engine.api.activityimpl.tracking;
 
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTracker;
 import io.nosqlbench.engine.api.activityimpl.marker.longheap.LongTreeTrackerAtomic;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LongTreeTrackerTest2 {
+    private final static Logger logger = LogManager.getLogger(LongTreeTrackerTest2.class);
 
 //    @Test
 //    public void testCoMask() {
@@ -96,21 +99,21 @@ public class LongTreeTrackerTest2 {
     public void testApply() {
         LongTreeTracker t = new LongTreeTracker(0L);
         t.setCompleted(0);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(1);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(2);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(5);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(6);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(3);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(4);
-        System.out.println(t);
+        logger.debug(t);
         t.setCompleted(7);
-        System.out.println(t);
+        logger.debug(t);
     }
 
     @Test
@@ -119,7 +122,7 @@ public class LongTreeTrackerTest2 {
         for (int i = 0; i < 32 ; i++) {
             t.setCompleted(i);
         }
-        System.out.println(t);
+        logger.debug(t);
         assertThat(t.getImage()).isEqualTo(-2L);
     }
 
@@ -141,7 +144,7 @@ public class LongTreeTrackerTest2 {
     @Test
     public void testBitString() {
         LongTreeTracker t = new LongTreeTracker(2L);
-        System.out.println(t);
+        logger.debug(t);
     }
 
     /**

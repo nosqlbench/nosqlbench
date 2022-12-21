@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
 import java.util.function.Function;
 
 /**
- * <H2>ChainingOp<I,O>: f(I) -> O</I,O></H2>
+ * <H2>ChainingOp&lt;I,O&gt;: f(I) -> O&lt;I,O&gt;</H2>
  * <P>
  * Run a function on the current cached result in the current thread and replace it
  * with the result of the function. ChainingOps are one way of invoking

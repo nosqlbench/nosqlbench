@@ -19,6 +19,8 @@ package io.nosqlbench.virtdata.library.curves4.discrete;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.statistics.distribution.BinomialDistribution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +35,7 @@ import java.util.concurrent.Future;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegerDistributionsConcurrencyTest {
+    private final static Logger logger = LogManager.getLogger(IntegerDistributionsConcurrencyTest.class);
 
     @Test
     public void testBinomialICDR() {
@@ -109,7 +112,6 @@ public class IntegerDistributionsConcurrencyTest {
             try {
                 results[i] = futures.get(i).get();
                 System.out.println(description + ": got results for thread " + i);
-                System.out.flush();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -125,15 +127,14 @@ public class IntegerDistributionsConcurrencyTest {
                     for (int ithread = 0; ithread < threads; ithread++) {
                         System.out.print(results[ithread][i] + ",");
                     }
-                    System.out.println();
                 }
             }
             boolean equal = Arrays.equals(results[vthread],values);
             if (!equal) {
-                System.out.println("not equal!");
+                logger.debug("not equal!");
             }
             assertThat(results[vthread]).isEqualTo(values);
-            System.out.println(description + ": verified values for thread " + vthread);
+            logger.debug(description + ": verified values for thread " + vthread);
         }
 
 
@@ -157,8 +158,7 @@ public class IntegerDistributionsConcurrencyTest {
         public long[] call() throws Exception {
             long[] output = new long[size];
             DataMapper<Long> mapper = VirtData.getMapper(mapperSpec, long.class);
-//            System.out.println("resolved:" + mapper);
-//            System.out.flush();
+//            logger.debug("resolved:" + mapper);
 
             synchronized (signal) {
                 signal.wait(10000);
@@ -167,7 +167,7 @@ public class IntegerDistributionsConcurrencyTest {
             for (int i = 0; i < output.length; i++) {
                 output[i] = mapper.get(i);
 //                if ((i % 100) == 0) {
-//                    System.out.println("wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
+//                    logger.debug("wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
 //                }
             }
             return output;

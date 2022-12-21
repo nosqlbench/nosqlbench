@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -38,6 +40,7 @@ import java.util.function.LongUnaryOperator;
  * join the project or let us know.</p>
  */
 @ThreadSafeMapper
+@Categories({Category.experimental})
 public class TriangularStep implements LongUnaryOperator {
 
     private final Hash hasher = new Hash();

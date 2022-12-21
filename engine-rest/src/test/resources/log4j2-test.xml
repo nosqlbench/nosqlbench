@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<Configuration status="debug" strict="true" name="XMLConfigTest"
+<Configuration status="${project.test_logstatuslevel}" strict="true" name="XMLConfigTest"
                packages="org.apache.logging.log4j.test">
 
   <Filter type="ThresholdFilter" level="info"/>
@@ -48,7 +48,7 @@
       <AppenderRef ref="APPSLOG"/>
     </Logger>
 
-    <Root level="trace">
+    <Root level="${project.testlevel}">
       <AppenderRef ref="STDOUT"/>
     </Root>
 

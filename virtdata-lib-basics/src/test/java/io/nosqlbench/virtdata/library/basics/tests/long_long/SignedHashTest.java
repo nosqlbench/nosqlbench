@@ -17,11 +17,14 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_long;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.SignedHash;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SignedHashTest {
+    private final static Logger logger = LogManager.getLogger(SignedHashTest.class);
 
     @Test
     public void testFunctionalResult() {
@@ -44,12 +47,13 @@ public class SignedHashTest {
         SignedHash hash = new SignedHash();
         for (int i = 0; i < 10; i++) {
             long l = hash.applyAsLong(i) % 50L;
-            System.out.println("i=" + i + " result=" + l);
+            logger.debug("i=" + i + " result=" + l);
+
         }
 
         for (int i = 0; i < 10; i++) {
             long l = hash.applyAsLong(i+1000000L) % 50L;
-            System.out.println("i=" + i + " result=" + l);
+            logger.debug("i=" + i + " result=" + l);
         }
 
     }

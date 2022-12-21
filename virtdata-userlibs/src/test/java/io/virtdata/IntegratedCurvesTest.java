@@ -19,6 +19,8 @@ package io.virtdata;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -27,15 +29,14 @@ import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
-
 public class IntegratedCurvesTest {
+    private final static Logger logger = LogManager.getLogger(IntegratedComposerLogicTest.class);
 
     @Test
     public void testZipf() {
         DataMapper<Long> mapper = VirtData.getMapper("Zipf(1000,2) -> long", long.class);
         RunData runData = iterateMapperLong(mapper, 10000);
-        System.out.println(runData);
+        logger.debug(runData);
 
         assertThat(runData.getStats().getPercentile(0.1d)).isCloseTo(1.0, Offset.offset(0.01d));
         assertThat(runData.getStats().getPercentile(1.0d)).isCloseTo(1.0, Offset.offset(0.01d));
