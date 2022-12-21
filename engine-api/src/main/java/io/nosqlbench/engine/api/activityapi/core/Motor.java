@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import io.nosqlbench.engine.api.activityapi.input.Input;
-import io.nosqlbench.engine.api.activityimpl.SlotStateTracker;
+import io.nosqlbench.engine.api.activityimpl.MotorState;
 
 /**
  * The core threading harness within an activity.
@@ -54,6 +54,7 @@ public interface Motor<T> extends Runnable, Stoppable {
      * Get a description of the current slot run status.
      * @return - a value from the {@link RunState} enum
      */
-    SlotStateTracker getSlotStateTracker();
+    MotorState getState();
 
+    void removeState();
 }

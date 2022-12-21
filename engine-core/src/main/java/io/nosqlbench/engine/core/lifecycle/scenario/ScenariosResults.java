@@ -41,8 +41,8 @@ public class ScenariosResults {
 
     public String getExecutionSummary() {
         String sb = "executions: " + scenarioResultMap.size() + " scenarios, " +
-            scenarioResultMap.values().stream().filter(r -> r.getException().isEmpty()).count() + " normal, " +
-            scenarioResultMap.values().stream().filter(r -> r.getException().isPresent()).count() + " errored";
+            scenarioResultMap.values().stream().filter(r -> r.getException()==null).count() + " normal, " +
+            scenarioResultMap.values().stream().filter(r -> r.getException()!=null).count() + " errored";
         return sb;
     }
 
@@ -72,7 +72,7 @@ public class ScenariosResults {
 
     public boolean hasError() {
         return this.scenarioResultMap.values().stream()
-                .anyMatch(r -> r.getException().isPresent());
+                .anyMatch(r -> r.getException()!=null);
     }
 
     public int getSize() {

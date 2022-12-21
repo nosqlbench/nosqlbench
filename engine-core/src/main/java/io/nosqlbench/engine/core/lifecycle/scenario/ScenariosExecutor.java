@@ -79,6 +79,7 @@ public class ScenariosExecutor {
      * @return the final scenario-result map
      */
     public ScenariosResults awaitAllResults(long timeout, long updateInterval) {
+        long waitFrom = System.currentTimeMillis();
         if (updateInterval > timeout) {
             throw new BasicError("timeout must be equal to or greater than updateInterval");
         }
@@ -98,6 +99,7 @@ public class ScenariosExecutor {
                     } catch (InterruptedException ignored) {
                     }
                 }
+                logger.trace("waited " + (System.currentTimeMillis()-waitFrom) + " millis for scenarios");
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
@@ -193,10 +195,7 @@ public class ScenariosExecutor {
         logger.debug("#stopScenario(name=" + scenarioName + ", rethrow="+ rethrow+")");
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
-            ScenarioController controller = pendingScenario.get().getScenarioController();
-            if (controller != null) {
-                controller.forceStopScenario(0, rethrow);
-            }
+            pendingScenario.get().getScenarioController().forceStopScenario(10000, true);
         } else {
             throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
         }

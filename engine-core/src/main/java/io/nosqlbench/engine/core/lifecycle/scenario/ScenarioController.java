@@ -70,7 +70,7 @@ public class ScenarioController {
      */
     public synchronized void start(ActivityDef activityDef) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+            .session(scenario.getScenarioName())
             .now()
             .layer(Layer.Activity)
             .label("alias", activityDef.getAlias())
@@ -129,7 +129,7 @@ public class ScenarioController {
      */
     public synchronized void run(ActivityDef activityDef, long timeoutMs) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+            .session(this.scenario.getScenarioName())
             .now()
             .layer(Layer.Activity)
             .label("alias", activityDef.getAlias())
@@ -165,9 +165,8 @@ public class ScenarioController {
     }
 
     public boolean isRunningActivity(ActivityDef activityDef) {
-
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(activityDef, false);
-        return activityThreadsManager != null && activityThreadsManager.isRunning();
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+        return (runtimeInfo != null && runtimeInfo.isRunning());
     }
 
     public boolean isRunningActivity(Map<String, String> activityDefMap) {
@@ -184,7 +183,7 @@ public class ScenarioController {
      */
     public synchronized void stop(ActivityDef activityDef) {
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+            .session(this.scenario.getScenarioName())
             .now()
             .layer(Layer.Activity)
             .label("alias", activityDef.getAlias())
@@ -192,18 +191,14 @@ public class ScenarioController {
             .detail("params", activityDef.toString())
             .build());
 
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(activityDef, false);
-        if (activityThreadsManager == null) {
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+        if (runtimeInfo == null) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
-        }
-        RunState runstate = activityThreadsManager.getActivity().getRunState();
-        if (runstate != RunState.Running) {
-            logger.warn("NOT stopping activity '" + activityThreadsManager.getActivity().getAlias() + "' because it is in state '" + runstate + "'");
-            return;
         }
 
         scenariologger.debug("STOP " + activityDef.getAlias());
-        activityThreadsManager.stopActivity();
+
+        runtimeInfo.stopActivity();
     }
 
     /**
@@ -240,76 +235,6 @@ public class ScenarioController {
         }
     }
 
-    /**
-     * Modify one of the parameters in a defined activity. Any observing activity components will be notified of the
-     * changes made to activity parameters.
-     *
-     * @param alias The name of an activity that is already known to the scenario.
-     * @param param The parameter name
-     * @param value a new parameter value
-     */
-    public synchronized void modify(String alias, String param, String value) {
-        if (param.equals("alias")) {
-            throw new InvalidParameterException("It is not allowed to change the name of an existing activity.");
-        }
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(alias);
-        ParameterMap params = activityThreadsManager.getActivityDef().getParams();
-        scenariologger.debug("SET (" + alias + "/" + param + ")=(" + value + ")");
-        params.set(param, value);
-    }
-
-    /**
-     * Apply any parameter changes to a defined activity, or start a new one.
-     * This method is syntactical sugar for scripting. Each of the parameters in the map
-     * is checked against existing values, and per-field modifications
-     * are applied one at a time, only if the values have changed.
-     *
-     * @param appliedParams Map of new values.
-     */
-    public synchronized void apply(Map<String, String> appliedParams) {
-        String alias = appliedParams.get("alias");
-
-        if (alias == null) {
-            throw new BasicError("alias must be provided");
-        }
-
-        ActivityThreadsManager executor = activityExecutors.get(alias);
-
-        if (executor == null) {
-            logger.info("started scenario from apply:" + alias);
-            start(appliedParams);
-            return;
-        }
-
-        ParameterMap previousMap = executor.getActivityDef().getParams();
-
-        for (String paramName : appliedParams.keySet()) {
-            String appliedVal = appliedParams.get(paramName);
-            Optional<String> prevVal = previousMap.getOptionalString(paramName);
-
-            if (!prevVal.isPresent() || !prevVal.get().equals(appliedVal)) {
-                logger.info("applying new value to activity '" + alias + "': '" + prevVal.get() + "' -> '" + appliedVal + "'");
-                previousMap.set(paramName, appliedVal);
-            }
-        }
-    }
-
-    /**
-     * Get the activity executor associated with the given alias. This should be used to find activitytypes
-     * which are presumed to be already defined.
-     *
-     * @param activityAlias The activity alias for the extant activity.
-     * @return the associated ActivityExecutor
-     * @throws RuntimeException a runtime exception if the named activity is not found
-     */
-    private ActivityThreadsManager getActivityExecutor(String activityAlias) {
-        Optional<ActivityThreadsManager> executor =
-            Optional.ofNullable(activityExecutors.get(activityAlias));
-        return executor.orElseThrow(
-            () -> new RuntimeException("ActivityExecutor for alias " + activityAlias + " not found.")
-        );
-
-    }
 
     private List<String> getMatchingAliases(String pattern) {
         Pattern matcher;
@@ -320,50 +245,11 @@ public class ScenarioController {
             matcher = Pattern.compile(pattern);
         }
 
-        List<String> matching = activityExecutors.keySet().stream()
+        List<String> matching = activityInfoMap.keySet().stream()
             .filter(a -> Pattern.matches(pattern, a))
             .peek(p -> logger.debug("MATCH " + pattern + " -> " + p))
             .collect(Collectors.toList());
         return matching;
-    }
-
-    private ActivityThreadsManager getActivityExecutor(ActivityDef activityDef, boolean createIfMissing) {
-        synchronized (activityExecutors) {
-            ActivityThreadsManager executor = activityExecutors.get(activityDef.getAlias());
-
-            if (executor == null && createIfMissing) {
-                if (activityDef.getParams().containsKey("driver")) {
-                    ActivityType<?> activityType = new ActivityTypeLoader()
-                        .setMaturity(this.minMaturity)
-                        .load(activityDef)
-                        .orElseThrow(
-                            () -> new RuntimeException("Driver for '" + activityDef + "' was not found." +
-                                "\nYou can use --list-drivers to see what drivers are supported in this runtime." +
-                                ConfigSuggestions.suggestAlternates(
-                                        new ActivityTypeLoader().getAllSelectors(), activityDef.getActivityType(), 4)
-                                    .orElse("")
-                            )
-                        );
-
-                    executor = new ActivityThreadsManager(
-                        activityType.getAssembledActivity(
-                            activityDef,
-                            getActivityMap()
-                        ),
-                        this.sessionId
-                    );
-                    activityExecutors.put(activityDef.getAlias(), executor);
-                } else {
-                    executor = new ActivityThreadsManager(
-                        new StandardActivityType(activityDef).getAssembledActivity(
-                            activityDef, getActivityMap()
-                        ), this.sessionId
-                    );
-                }
-
-            }
-            return executor;
-        }
     }
 
     /**
@@ -394,29 +280,7 @@ public class ScenarioController {
      * @return set of activity names
      */
     public Set<String> getAliases() {
-        return activityExecutors.keySet();
-    }
-
-    /**
-     * Return all the activity definitions that are known to this scenario.
-     *
-     * @return list of activity defs
-     */
-    public List<ActivityDef> getActivityDefs() {
-        return activityExecutors.values().stream()
-            .map(ActivityThreadsManager::getActivityDef)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get the named activity def, if it is known to this scenario.
-     *
-     * @param alias The name by which the activity is known to this scenario.
-     * @return an ActivityDef instance
-     * @throws RuntimeException if the alias is not known to the scenario
-     */
-    public ActivityDef getActivityDef(String alias) {
-        return getActivityExecutor(alias).getActivityDef();
+        return activityInfoMap.keySet();
     }
 
     /**
@@ -427,8 +291,9 @@ public class ScenarioController {
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
     public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
+        logger.debug("force stopping scenario " + this.scenario.getScenarioName());
+        activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(10000));
         logger.debug("Scenario force stopped.");
-        activityExecutors.values().forEach(a -> a.forceStopScenarioAndThrow(waitTimeMillis, rethrow));
     }
 
 //    public synchronized void stopAll() {
@@ -446,31 +311,21 @@ public class ScenarioController {
     public boolean awaitCompletion(long waitTimeMillis) {
         logger.debug(() -> "awaiting completion");
         boolean completed = true;
-        long remaining = waitTimeMillis;
-
-        List<ActivityFinisher> finishers = new ArrayList<>();
-        for (ActivityThreadsManager ae : activityExecutors.values()) {
-            ActivityFinisher finisher = new ActivityFinisher(ae, (int) remaining);
-            finishers.add(finisher);
-            finisher.start();
-        }
-
-        for (ActivityFinisher finisher : finishers) {
-            try {
-                logger.debug("joining finisher " + finisher.getName());
-                finisher.join(waitTimeMillis);
-                logger.debug("joined finisher " + finisher.getName());
-            } catch (InterruptedException ignored) {
-            }
-        }
-
-        for (ActivityFinisher finisher : finishers) {
-            if (!finisher.getResult()) {
-                logger.debug("finisher for " + finisher.getName() + " did not signal TRUE");
+        for (ActivityRuntimeInfo activityRuntimeInfo : this.activityInfoMap.values()) {
+            ExecutionResult activityResult = activityRuntimeInfo.awaitResult(waitTimeMillis);
+            if (activityResult == null) {
+                logger.error("Unable to retrieve activity result for " + activityRuntimeInfo.getActivity().getAlias());
                 completed = false;
+            } else {
+                if (activityResult.getException()!=null) {
+                    if (activityResult.getException() instanceof RuntimeException e) {
+                        throw e;
+                    } else {
+                        throw new RuntimeException(activityResult.getException());
+                    }
+                }
             }
         }
-
         return completed;
     }
 
@@ -482,66 +337,98 @@ public class ScenarioController {
         }
     }
 
-    public boolean await(Map<String, String> activityDefMap) {
-        return this.awaitActivity(activityDefMap);
+    public void await(Map<String, String> activityDefMap) {
+        this.awaitActivity(activityDefMap);
     }
 
     public boolean awaitActivity(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        return awaitActivity(ad);
+        return awaitActivity(ad, Long.MAX_VALUE);
     }
 
     public boolean await(String alias) {
-        return this.awaitActivity(alias);
+        return this.awaitActivity(alias, Long.MAX_VALUE);
     }
 
-    public boolean awaitActivity(String alias) {
+    public boolean awaitActivity(String alias, long timeoutMs) {
         ActivityDef toAwait = aliasToDef(alias);
-        return awaitActivity(toAwait);
+        return awaitActivity(toAwait, Long.MAX_VALUE);
     }
 
-    public boolean await(ActivityDef activityDef) {
-        return this.awaitActivity(activityDef);
+    public void await(ActivityDef activityDef, long timeoutMs) {
+        this.awaitActivity(activityDef, timeoutMs);
     }
 
-    public boolean awaitActivity(ActivityDef activityDef) {
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(activityDef, false);
-        if (activityThreadsManager == null) {
-            throw new RuntimeException("Could not await missing activity: " + activityDef);
+    public boolean awaitActivity(ActivityDef activityDef, long timeoutMs) {
+        ActivityRuntimeInfo ari = this.activityInfoMap.get(activityDef.getAlias());
+        if (ari == null) {
+            throw new RuntimeException("Could not await missing activity: " + activityDef.getAlias());
         }
         scenariologger.debug("AWAIT/before alias=" + activityDef.getAlias());
-        boolean finished = activityThreadsManager.awaitFinishedOrStopped(Integer.MAX_VALUE);
-        scenariologger.debug("AWAIT/after  completed=" + finished);
-        return finished;
-
+        ExecutionResult result = null;
+        Future<ExecutionResult> future=null;
+        try {
+            future = ari.getFuture();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            result = future.get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+        return (result != null);
     }
 
     /**
      * @return an unmodifyable String to executor map of all activities known to this scenario
      */
-    public Map<String, ActivityThreadsManager> getActivityExecutorMap() {
-        return Collections.unmodifiableMap(activityExecutors);
+    public Map<String, ActivityRuntimeInfo> getActivityExecutorMap() {
+        return Collections.unmodifiableMap(activityInfoMap);
+    }
+
+    public List<ActivityDef> getActivityDefs() {
+        return activityInfoMap.values().stream().map(ari -> ari.getActivity().getActivityDef()).toList();
     }
 
     public void reportMetrics() {
         ActivityMetrics.reportTo(System.out);
     }
 
-    private Map<String, Activity> getActivityMap() {
-        Map<String, Activity> activityMap = new HashMap<String, Activity>();
-        for (Map.Entry<String, ActivityThreadsManager> entry : activityExecutors.entrySet()) {
-            activityMap.put(entry.getKey(), entry.getValue().getActivity());
-        }
-        return activityMap;
-    }
-
     public List<ProgressMeterDisplay> getProgressMeters() {
         List<ProgressMeterDisplay> indicators = new ArrayList<>();
-        for (ActivityThreadsManager ae : activityExecutors.values()) {
+        for (ActivityRuntimeInfo ae : activityInfoMap.values()) {
             indicators.add(ae.getProgressMeter());
         }
         indicators.sort(Comparator.comparing(ProgressMeterDisplay::getStartTime));
         return indicators;
     }
 
+    public void notifyException(Thread t, Throwable e) {
+        logger.error("Uncaught exception in activity lifecycle thread:" + e, e);
+        scenario.notifyException(t,e);
+        throw new RuntimeException(e);
+    }
+
+    public ActivityDef getActivityDef(String alias) {
+        return activityInfoMap.get(alias).getActivity().getActivityDef();
+    }
+
+    public void shutdown() {
+        this.activitiesExecutor.shutdown();
+        try {
+            if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                this.activitiesExecutor.shutdownNow();
+                if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    throw new RuntimeException("Unable to shutdown activities executor");
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
 }

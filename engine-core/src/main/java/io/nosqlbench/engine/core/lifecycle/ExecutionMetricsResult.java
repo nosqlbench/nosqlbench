@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class ExecMetricsResult extends ExecResult {
+public class ExecutionMetricsResult extends ExecutionResult {
 
     public static final Set<MetricAttribute> INTERVAL_ONLY_METRICS = Set.of(
         MetricAttribute.MIN,
@@ -48,8 +48,8 @@ public class ExecMetricsResult extends ExecResult {
         MetricAttribute.M15_RATE
     );
 
-    public ExecMetricsResult(long startedAt, long endedAt, String iolog, Exception e) {
-        super(startedAt, endedAt, iolog, e);
+    public ExecutionMetricsResult(long startedAt, long endedAt, String iolog, Exception error) {
+        super(startedAt, endedAt, iolog, error);
     }
 
     public String getMetricsSummary() {

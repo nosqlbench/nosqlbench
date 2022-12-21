@@ -19,28 +19,26 @@ package io.nosqlbench.engine.core.lifecycle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
-
 /**
  * Provide a result type back to a caller, including the start and end times,
  * any exception that occurred, and any content written to stdout or stderr equivalent
  * IO streams. This is an <EM>execution result</EM>.
  *
  */
-public class ExecResult {
-    protected final static Logger logger = LogManager.getLogger(ExecMetricsResult.class);
+public class ExecutionResult {
+    protected final static Logger logger = LogManager.getLogger(ExecutionMetricsResult.class);
     protected final long startedAt;
     protected final long endedAt;
     protected final Exception exception;
     protected final String iolog;
 
-    public ExecResult(long startedAt, long endedAt, String iolog, Exception e) {
+    public ExecutionResult(long startedAt, long endedAt, String iolog, Exception error) {
         this.startedAt = startedAt;
         this.endedAt = endedAt;
-        this.exception = e;
-        this.iolog = ((iolog != null) ? iolog + "\n\n" : "") + (e != null ? e.getMessage() : "");
-        logger.debug("populating "+(e==null? "NORMAL" : "ERROR")+" scenario result");
-        if (logger.isDebugEnabled()) {
+        this.exception = error;
+        this.iolog = ((iolog != null) ? iolog + "\n\n" : "") + exception;
+        logger.debug("populating "+(error==null ? "NORMAL" : "ERROR")+" scenario result");
+        if (logger.isTraceEnabled()) {
             StackTraceElement[] st = Thread.currentThread().getStackTrace();
             for (int i = 0; i < st.length; i++) {
                 logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
@@ -51,7 +49,7 @@ public class ExecResult {
     }
 
     public void reportElapsedMillisToLog() {
-        logger.info("-- SCENARIO TOOK " + getElapsedMillis() + "ms --");
+        logger.info(() -> String.format("-- SCENARIO TOOK %.3fS --",(getElapsedMillis()/1000.0f)));
     }
 
     public String getIOLog() {
@@ -62,7 +60,7 @@ public class ExecResult {
         return endedAt - startedAt;
     }
 
-    public Optional<Exception> getException() {
-        return Optional.ofNullable(exception);
+    public Exception getException() {
+        return exception;
     }
 }
