@@ -47,11 +47,13 @@ public class ScenarioController {
     private static final Logger logger = LogManager.getLogger(ScenarioController.class);
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
-    private final Map<String, ActivityThreadsManager> activityExecutors = new ConcurrentHashMap<>();
-    private final String sessionId;
+    private final ActivityLoader activityLoader;
+
+    private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
+    private final Scenario scenario;
     private final Maturity minMaturity;
 
-    private ExecutorService activitiesExecutor;
+    private final ExecutorService activitiesExecutor;
 
     public ScenarioController(Scenario scenario, Maturity minMaturity) {
         this.scenario = scenario;

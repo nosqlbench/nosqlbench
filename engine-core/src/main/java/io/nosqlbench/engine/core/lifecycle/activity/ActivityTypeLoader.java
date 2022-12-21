@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.activity;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
@@ -150,18 +150,6 @@ public class ActivityTypeLoader {
         if (oda.isPresent()) {
             DriverAdapter<?, ?> driverAdapter = oda.get();
 
-//            activityDef.getParams().remove("driver");
-//            if (driverAdapter instanceof NBConfigurable) {
-//                NBConfigModel cfgModel = ((NBConfigurable) driverAdapter).getConfigModel();
-//                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-//                if (op_yaml_loc.isPresent()) {
-//                    Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-//                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
-//                    cfgModel=cfgModel.add(workload.getConfigModel());
-//                }
-//                NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
-//                ((NBConfigurable) driverAdapter).applyConfig(cfg);
-//            }
             ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef);
             return Optional.of(activityType);
         } else {
