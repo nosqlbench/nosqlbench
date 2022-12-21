@@ -19,7 +19,7 @@ activitydef1 = {
     "driver" : "diag",
     "cycles" : "0..1500000",
     "threads" : "1",
-    "targetrate" : "500",
+    "targetrate" : "10",
     "op" : {
         "log": "type=log modulo=1"
     }

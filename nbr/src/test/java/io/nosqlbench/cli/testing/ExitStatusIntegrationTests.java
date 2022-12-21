@@ -96,8 +96,8 @@ class ExitStatusIntegrationTests {
         );
         String stdout = String.join("\n", result.getStdoutData());
         String stderr = String.join("\n", result.getStderrData());
-        assertThat(result.exception).isNotNull();
-        assertThat(result.exception.getMessage()).contains("diag space was configured to throw");
+        assertThat(result.exitStatus).isEqualTo(2);
+        assertThat(stderr).contains("diag space was configured to throw");
     }
 
 }
