@@ -27,14 +27,14 @@ public class ScenariosResults {
 
     private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
     private final String scenariosExecutorName;
-    private final Map<Scenario, ExecMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+    private final Map<Scenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
         this.scenariosExecutorName = scenariosExecutor.getName();
     }
 
-    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ExecMetricsResult> map) {
+    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ExecutionMetricsResult> map) {
         this.scenariosExecutorName = scenariosExecutor.getName();
         scenarioResultMap.putAll(map);
     }
@@ -46,7 +46,7 @@ public class ScenariosResults {
         return sb;
     }
 
-    public ExecMetricsResult getOne() {
+    public ExecutionMetricsResult getOne() {
         if (this.scenarioResultMap.size() != 1) {
             throw new RuntimeException("getOne found " + this.scenarioResultMap.size() + " results instead of 1.");
         }
@@ -55,9 +55,9 @@ public class ScenariosResults {
     }
 
     public void reportToLog() {
-        for (Map.Entry<Scenario, ExecMetricsResult> entry : this.scenarioResultMap.entrySet()) {
+        for (Map.Entry<Scenario, ExecutionMetricsResult> entry : this.scenarioResultMap.entrySet()) {
             Scenario scenario = entry.getKey();
-            ExecMetricsResult oresult = entry.getValue();
+            ExecutionMetricsResult oresult = entry.getValue();
 
             logger.info("results for scenario: " + scenario);
 

@@ -52,7 +52,7 @@ public class ScenariosExecutor {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
-        Future<ExecMetricsResult> future = executor.submit(scenario);
+        Future<ExecutionMetricsResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
     }
@@ -108,7 +108,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                 + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, ExecMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+        Map<Scenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
             .entrySet()
             .forEach(
@@ -135,26 +135,26 @@ public class ScenariosExecutor {
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
      *
-     * <p>Results may be exceptional. If {@link ExecMetricsResult#getException()} is present,
+     * <p>Results may be exceptional. If {@link ExecutionMetricsResult#getException()} is present,
      * then the result did not complete normally.</p>
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<Scenario, Optional<ExecMetricsResult>> getAsyncResultStatus() {
+    public Map<Scenario, Optional<ExecutionMetricsResult>> getAsyncResultStatus() {
 
-        Map<Scenario, Optional<ExecMetricsResult>> optResults = new LinkedHashMap<>();
+        Map<Scenario, Optional<ExecutionMetricsResult>> optResults = new LinkedHashMap<>();
 
         for (SubmittedScenario submittedScenario : submitted.values()) {
-            Future<ExecMetricsResult> resultFuture = submittedScenario.getResultFuture();
+            Future<ExecutionMetricsResult> resultFuture = submittedScenario.getResultFuture();
 
-            Optional<ExecMetricsResult> oResult = Optional.empty();
+            Optional<ExecutionMetricsResult> oResult = Optional.empty();
             if (resultFuture.isDone()) {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ExecMetricsResult(now, now, "errored output", e));
+                    oResult = Optional.of(new ExecutionMetricsResult(now, now, "errored output", e));
                 }
             }
 
@@ -181,7 +181,7 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<Future<ExecMetricsResult>> getPendingResult(String scenarioName) {
+    public Optional<Future<ExecutionMetricsResult>> getPendingResult(String scenarioName) {
         return Optional.ofNullable(submitted.get(scenarioName)).map(s -> s.resultFuture);
     }
 
@@ -226,9 +226,9 @@ public class ScenariosExecutor {
 
     private static class SubmittedScenario {
         private final Scenario scenario;
-        private final Future<ExecMetricsResult> resultFuture;
+        private final Future<ExecutionMetricsResult> resultFuture;
 
-        SubmittedScenario(Scenario scenario, Future<ExecMetricsResult> resultFuture) {
+        SubmittedScenario(Scenario scenario, Future<ExecutionMetricsResult> resultFuture) {
             this.scenario = scenario;
             this.resultFuture = resultFuture;
         }
@@ -237,7 +237,7 @@ public class ScenariosExecutor {
             return scenario;
         }
 
-        Future<ExecMetricsResult> getResultFuture() {
+        Future<ExecutionMetricsResult> getResultFuture() {
             return resultFuture;
         }
 

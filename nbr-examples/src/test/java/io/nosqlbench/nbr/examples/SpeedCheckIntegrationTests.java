@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.nbr.examples;
 
-import io.nosqlbench.engine.core.lifecycle.ExecMetricsResult;
+import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -30,14 +30,14 @@ public class SpeedCheckIntegrationTests {
     @Disabled
     // Verified as working
     public void testSpeedSanity() {
-        ExecMetricsResult scenarioResult = ScriptExampleTests.runScenario("speedcheck");
+        ExecutionMetricsResult scenarioResult = ScriptExampleTests.runScenario("speedcheck");
     }
 
     @Test
     @Disabled
     // This seems incomplete
     public void testThreadSpeeds() {
-        ExecMetricsResult scenarioResult = ScriptExampleTests.runScenario("threadspeeds");
+        ExecutionMetricsResult scenarioResult = ScriptExampleTests.runScenario("threadspeeds");
     }
 
 

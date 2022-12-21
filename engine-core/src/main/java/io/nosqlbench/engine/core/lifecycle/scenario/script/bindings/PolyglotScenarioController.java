@@ -81,7 +81,7 @@ public class PolyglotScenarioController {
     private synchronized void runValue(int timeout, Value spec) {
         logger.debug("run(Value) called with:" + spec);
         if (spec.isHostObject()) {
-            controller.run(timeout, (ActivityDef) spec.asHostObject());
+            controller.run(spec.asHostObject(),timeout);
         } else if (spec.isString()) {
             controller.run(timeout, spec.asString());
         } else if (spec.hasMembers()) {
@@ -89,7 +89,7 @@ public class PolyglotScenarioController {
         } else if (spec.isHostObject()) {
             Object o = spec.asHostObject();
             if (o instanceof ActivityDef) {
-                controller.run(timeout, (ActivityDef) o);
+                controller.run((ActivityDef) o, timeout);
             } else {
                 throw new RuntimeException("unrecognized polyglot host object type for run: " + spec);
             }
@@ -165,7 +165,7 @@ public class PolyglotScenarioController {
 
     private synchronized void awaitValue(Value spec) {
         if (spec.isHostObject()) {
-            controller.await((ActivityDef) spec.asHostObject());
+            controller.await(spec.asHostObject(), Long.MAX_VALUE);
         } else if (spec.hasMembers()) {
             controller.await(spec.as(Map.class));
         } else if (spec.isString()) {

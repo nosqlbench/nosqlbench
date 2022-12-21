@@ -234,8 +234,8 @@ public class ScenarioExecutorEndpoint implements WebServiceObject {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
 
         if (pendingScenario.isPresent()) {
-            Optional<Future<ExecMetricsResult>> pendingResult = executor.getPendingResult(scenarioName);
-            Future<ExecMetricsResult> scenarioResultFuture = pendingResult.get();
+            Optional<Future<ExecutionMetricsResult>> pendingResult = executor.getPendingResult(scenarioName);
+            Future<ExecutionMetricsResult> scenarioResultFuture = pendingResult.get();
             return new LiveScenarioView(pendingScenario.get());
         } else {
             throw new RuntimeException("Scenario name '" + scenarioName + "' not found.");

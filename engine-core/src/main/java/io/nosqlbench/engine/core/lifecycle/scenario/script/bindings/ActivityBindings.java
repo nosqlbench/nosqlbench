@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.core.lifecycle.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 /**
  * Provide a bindings wrapper around a ScenarioController,
  */
-public class NashornActivityBindings implements Bindings, ProxyObject {
+public class ActivityBindings implements Bindings, ProxyObject {
 
     private final ScenarioController scenario;
     private final Map<String, Bindings> elementMap = new HashMap<String, Bindings>();
 
-    public NashornActivityBindings(ScenarioController scenarioController) {
+    public ActivityBindings(ScenarioController scenarioController) {
         this.scenario = scenarioController;
     }
 

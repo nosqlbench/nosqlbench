@@ -18,7 +18,7 @@ package io.nosqlbench.engine.core.metadata;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
@@ -28,20 +28,20 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
-public class MarkdownDocInfo {
-    private final static Logger logger = LogManager.getLogger(MarkdownDocInfo.class);
+public class MarkdownFinder {
+    private final static Logger logger = LogManager.getLogger(MarkdownFinder.class);
 
     public static Optional<String> forHelpTopic(String topic) {
         String help = null;
         try {
-            help = new MarkdownDocInfo().forActivityInstance(topic);
+            help = new MarkdownFinder().forActivityInstance(topic);
             return Optional.ofNullable(help);
         } catch (Exception e) {
             logger.debug("Did not find help topic for activity instance: " + topic);
         }
 
         try {
-            help = new MarkdownDocInfo().forResourceMarkdown(topic, "docs/");
+            help = new MarkdownFinder().forResourceMarkdown(topic, "docs/");
             return Optional.ofNullable(help);
         } catch (Exception e) {
             logger.debug("Did not find help topic for generic markdown file: " + topic + "(.md)");

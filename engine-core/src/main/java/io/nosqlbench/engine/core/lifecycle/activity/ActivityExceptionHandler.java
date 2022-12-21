@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.activity;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +23,9 @@ public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler
 
     private static final Logger logger = LogManager.getLogger(ActivityExceptionHandler.class);
 
-    private final ActivityThreadsManager executor;
+    private final ActivityExecutor executor;
 
-    public ActivityExceptionHandler(ActivityThreadsManager executor) {
+    public ActivityExceptionHandler(ActivityExecutor executor) {
         this.executor = executor;
         logger.debug(() -> "Activity exception handler starting up for executor '" + executor + "'");
     }
@@ -33,7 +33,7 @@ public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logger.error("Uncaught exception in thread '" + t.getName() + ", state[" + t.getState() + "], notifying executor '" + executor + "'");
+        logger.error("Uncaught exception in thread '" + t.getName() + ", state[" + t.getState() + "], notifying executor '" + executor + "': " + e);
         executor.notifyException(t, e);
     }
 }

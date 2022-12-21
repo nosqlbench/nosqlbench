@@ -124,10 +124,10 @@ public class ScenarioController {
     /**
      * Synchronously run the defined activity with a timeout in seconds.
      *
-     * @param timeout     seconds to await completion of the activity.
+     * @param timeoutMs   seconds to await completion of the activity.
      * @param activityDef A definition for an activity to run
      */
-    public synchronized void run(int timeout, ActivityDef activityDef) {
+    public synchronized void run(ActivityDef activityDef, long timeoutMs) {
         Annotators.recordAnnotation(Annotation.newBuilder()
             .session(sessionId)
             .now()
@@ -143,7 +143,7 @@ public class ScenarioController {
 
     public synchronized void run(int timeout, String activityDefString) {
         ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
-        run(timeout, activityDef);
+        run(activityDef, timeout);
     }
 
     public synchronized void run(Map<String, String> activityDefMap) {
@@ -156,7 +156,7 @@ public class ScenarioController {
 
 
     public synchronized void run(ActivityDef activityDef) {
-        run(Integer.MAX_VALUE, activityDef);
+        run(activityDef, Long.MAX_VALUE);
     }
 
 
