@@ -111,7 +111,7 @@ public class IntegerDistributionsConcurrencyTest {
         for (int i = 0; i < futures.size(); i++) {
             try {
                 results[i] = futures.get(i).get();
-                System.out.println(description + ": got results for thread " + i);
+                logger.debug(description + ": got results for thread " + i);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -122,7 +122,7 @@ public class IntegerDistributionsConcurrencyTest {
             long[] threadResults = results[vthread];
             for (int i = 0; i <values.length ; i++) {
                 if (threadResults[i] != values[i]) {
-                    System.out.println("not equal in thread="+ vthread + ", i=" + i
+                    logger.debug("not equal in thread="+ vthread + ", i=" + i
                             +", " + threadResults[i] + "!=" + values[i]);
                     for (int ithread = 0; ithread < threads; ithread++) {
                         System.out.print(results[ithread][i] + ",");

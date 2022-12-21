@@ -22,6 +22,8 @@ import io.nosqlbench.virtdata.lang.generated.VirtDataParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -37,6 +39,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class VirtdataBuilderTest {
+    private final static Logger logger = LogManager.getLogger(VirtdataBuilderTest.class);
 
     private static char[] readFile(String filename) {
         BufferedReader sr = new BufferedReader(
@@ -62,7 +65,7 @@ public class VirtdataBuilderTest {
         char[] chars = readFile("test-syntax.virtdata");
         CodePointCharStream ais = CharStreams.fromString(new String(chars));
         String inputString = new String(chars);
-        System.out.println("Parsing:\n" + inputString);
+        logger.debug("Parsing:\n" + inputString);
         VirtDataLexer lexer = new VirtDataLexer(ais);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         VirtDataParser parser = new VirtDataParser(tokens);
@@ -70,10 +73,10 @@ public class VirtdataBuilderTest {
         parser.addParseListener(astListener);
 
         VirtDataParser.VirtdataRecipeContext virtdataRecipeContext = parser.virtdataRecipe();
-        System.out.println(virtdataRecipeContext.toStringTree(parser));
+        logger.debug(virtdataRecipeContext.toStringTree(parser));
 
         if (astListener.hasErrors()) {
-            System.out.println(astListener.getErrorNodes());
+            logger.debug(astListener.getErrorNodes());
         }
 
         VirtDataAST ast = astListener.getModel();

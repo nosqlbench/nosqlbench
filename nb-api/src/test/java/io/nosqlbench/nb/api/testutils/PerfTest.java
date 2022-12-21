@@ -18,11 +18,14 @@ package io.nosqlbench.nb.api.testutils;
 
 import io.nosqlbench.api.testutils.Perf;
 import io.nosqlbench.api.testutils.Result;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PerfTest {
+    private final static Logger logger = LogManager.getLogger(PerfTest.class);
 
     @Test
     public void testBasics() {
@@ -35,7 +38,7 @@ public class PerfTest {
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isFalse();
         p.add("3",0,100,1431);
         double[] deltas = p.getDeltas(Result::getOpsPerSec);
-        System.out.println("Sanity Check for Perf methods:\n"+p.toStringDelta(Result::getOpsPerSec, "D_ops_s"));
+        logger.debug("Sanity Check for Perf methods:\n"+p.toStringDelta(Result::getOpsPerSec, "D_ops_s"));
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isFalse();
         p.add("4",0,100,1441);
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isTrue();

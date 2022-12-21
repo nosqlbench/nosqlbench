@@ -17,7 +17,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.function.LongToIntFunction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ListSizedHashedTest {
+    private final static Logger logger = LogManager.getLogger(ListSizedHashedTest.class);
 
     @Test
     public void testTwoPartExample() {
@@ -38,7 +40,7 @@ public class ListSizedHashedTest {
         assertThat(for37).hasSize(37);
         assertThat(for37.get(0)).isNotEqualTo(for37.get(36));
         for (Object o : for37) {
-            System.out.println(o);
+            logger.debug(o);
         }
 
     }

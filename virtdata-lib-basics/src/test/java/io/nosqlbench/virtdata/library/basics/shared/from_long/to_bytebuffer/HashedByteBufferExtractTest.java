@@ -19,6 +19,8 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_charbuffer.CharBufferExtract;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.HashedLoremExtractToString;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -26,13 +28,14 @@ import java.nio.CharBuffer;
 import java.util.function.LongToIntFunction;
 
 public class HashedByteBufferExtractTest {
+    private final static Logger logger = LogManager.getLogger(HashedByteBufferExtractTest.class);
 
     @Test
     public void read1MBBytesDefault() {
         HashedByteBufferExtract bbe = new HashedByteBufferExtract(1024*1024,(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             ByteBuffer a0 = bbe.apply(i);
-            System.out.println(Hex.encodeHex(a0));
+            logger.debug(Hex.encodeHex(a0));
         }
     }
 
@@ -41,7 +44,7 @@ public class HashedByteBufferExtractTest {
         HashedByteBufferExtract bbe = new HashedByteBufferExtract(new ByteBufferSizedHashed(1024*1024),(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             ByteBuffer a0 = bbe.apply(i);
-            System.out.println(Hex.encodeHex(a0));
+            logger.debug(Hex.encodeHex(a0));
         }
     }
 
@@ -50,7 +53,7 @@ public class HashedByteBufferExtractTest {
         CharBufferExtract bbe = new CharBufferExtract(1024*1024,(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             CharBuffer a0 = bbe.apply(i);
-            System.out.println(a0.toString());
+            logger.debug(a0.toString());
         }
     }
 
@@ -59,7 +62,7 @@ public class HashedByteBufferExtractTest {
         CharBufferExtract bbe = new CharBufferExtract(new HashedLoremExtractToString(1000,1000),(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             CharBuffer a0 = bbe.apply(i);
-            System.out.println(a0.toString());
+            logger.debug(a0.toString());
         }
     }
 

@@ -16,12 +16,15 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.basicsmappers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExprTest {
+    private final static Logger logger = LogManager.getLogger(ExprTest.class);
 
     @Test
     public void testLongUnaryExpr() {
@@ -66,15 +69,13 @@ public class ExprTest {
         int max=1000000;
         for (int i = min; i < max; i++) {
             long l = mod5.applyAsLong(i);
-            //System.out.format("input=%d output=%d\n", i, l);
-            //assertThat(l).isEqualTo((i%5));
 
         }
         long end = System.nanoTime();
         long duration = end-start;
         double nsperop = (double) duration / (double) (max-min);
 
-        System.out.format("(ops/time)=(%d/%dns) rate=%.3f\n", (max-min), duration, ((double) max-min)*1000000000.0/duration);
+        logger.debug(String.format("(ops/time)=(%d/%dns) rate=%.3f\n", (max-min), duration, ((double) max-min)*1000000000.0/duration));
     }
 
 }

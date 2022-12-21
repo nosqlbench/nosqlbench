@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-co_cycle_delay = {
-    "alias": "co_cycle_delay",
+co_cycle_delay_bursty = {
+    "alias": "co_cycle_delay_bursty",
     "driver": "diag",
     "cycles": "0..1000000",
     "threads": "10",
@@ -23,41 +23,41 @@ co_cycle_delay = {
     "op" : '{"log":{"level":"info","modulo":1000},"diagrate":{"diagrate":"500"}}'
 };
 
-print('starting activity co_cycle_delay');
-scenario.start(co_cycle_delay);
+print('starting activity co_cycle_delay_bursty');
+scenario.start(co_cycle_delay_bursty);
 for (i = 0; i < 5; i++) {
     scenario.waitMillis(1000);
-    if (!scenario.isRunningActivity('co_cycle_delay')) {
+    if (!scenario.isRunningActivity('co_cycle_delay_bursty')) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("backlogging, cycles=" + metrics.co_cycle_delay.cycles.servicetime.count +
-        " waittime=" + metrics.co_cycle_delay.cycles.waittime.value +
-        " diagrate=" + activities.co_cycle_delay.diagrate +
-        " cyclerate=" + activities.co_cycle_delay.cyclerate
+    print("backlogging, cycles=" + metrics.co_cycle_delay_bursty.cycles.servicetime.count +
+        " waittime=" + metrics.co_cycle_delay_bursty.cycles.waittime.value +
+        " diagrate=" + activities.co_cycle_delay_bursty.diagrate +
+        " cyclerate=" + activities.co_cycle_delay_bursty.cyclerate
     );
 }
-print('step1 metrics.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
-activities.co_cycle_delay.diagrate = "10000";
+print('step1 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles.waittime.value);
+activities.co_cycle_delay_bursty.diagrate = "10000";
 
 for (i = 0; i < 10; i++) {
-    if (!scenario.isRunningActivity('co_cycle_delay')) {
+    if (!scenario.isRunningActivity('co_cycle_delay_bursty')) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("recovering, cycles=" + metrics.co_cycle_delay.cycles.servicetime.count +
-        " waittime=" + metrics.co_cycle_delay.cycles.waittime.value +
-        " diagrate=" + activities.co_cycle_delay.diagrate +
-        " cyclerate=" + activities.co_cycle_delay.cyclerate
+    print("recovering, cycles=" + metrics.co_cycle_delay_bursty.cycles.servicetime.count +
+        " waittime=" + metrics.co_cycle_delay_bursty.cycles.waittime.value +
+        " diagrate=" + activities.co_cycle_delay_bursty.diagrate +
+        " cyclerate=" + activities.co_cycle_delay_bursty.cyclerate
     );
 
     scenario.waitMillis(1000);
-    if (metrics.co_cycle_delay.cycles.waittime.value < 50000000) {
+    if (metrics.co_cycle_delay_bursty.cycles.waittime.value < 50000000) {
         print("waittime trended back down as expected, exiting on iteration " + i);
         break;
     }
 }
 //scenario.awaitActivity("co_cycle_delay");
-print('step2 metrics.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
-scenario.stop(co_cycle_delay);
-print("stopped activity co_cycle_delay");
+print('step2 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles.waittime.value);
+scenario.stop(co_cycle_delay_bursty);
+print("stopped activity co_cycle_delay_bursty");

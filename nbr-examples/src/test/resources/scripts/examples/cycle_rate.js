@@ -18,9 +18,9 @@
 activitydef = {
     "alias" : "cycle_rate",
     "driver" : "diag",
-    "cycles" : "5K",
+    "cycles" : "2500",
     "threads" : "10",
-    "cyclerate" : "1K",
+    "cyclerate" : "500",
     "op" : "noop"
 };
 

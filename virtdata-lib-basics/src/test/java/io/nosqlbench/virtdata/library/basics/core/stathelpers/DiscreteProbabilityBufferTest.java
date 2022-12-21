@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 public class DiscreteProbabilityBufferTest {
 
+    private final static Logger logger = LogManager.getLogger(DiscreteProbabilityBufferTest.class);
     @Test
     public void testReplay() {
         DiscreteProbabilityBuffer dp = new DiscreteProbabilityBuffer(10);
@@ -36,9 +39,9 @@ public class DiscreteProbabilityBufferTest {
         dp.normalize();
 
         for (DiscreteProbabilityBuffer.Entry entry : dp) {
-            System.out.println("entry: " + entry.getEventId() + ":" + entry.getProbability());
+            logger.debug("entry: " + entry.getEventId() + ":" + entry.getProbability());
         }
-        System.out.println("cumuProb:" + dp.getCumulativeProbability());
+        logger.debug("cumuProb:" + dp.getCumulativeProbability());
     }
 
 }

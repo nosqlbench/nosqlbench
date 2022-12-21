@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +26,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ShuffleTest {
+    private final static Logger logger = LogManager.getLogger(ShuffleTest.class);
 
     /**
      * Worst Case:
@@ -169,14 +172,14 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-        System.out.println(Arrays.toString(r));
+        logger.debug(Arrays.toString(r));
         Arrays.sort(r);
 
-        System.out.println(Arrays.toString(r));
+        logger.debug(Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        System.out.println("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
     }
 
     @Test
@@ -188,13 +191,13 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-//        System.out.println(Arrays.toString(r));
+//        logger.debug(Arrays.toString(r));
         Arrays.sort(r);
-//        System.out.println(Arrays.toString(r));
+//        logger.debug(Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        System.out.println("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
 
     }
 
@@ -208,13 +211,13 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-//        System.out.println(Arrays.toString(r));
+//        logger.debug(Arrays.toString(r));
         Arrays.sort(r);
-//        System.out.println(Arrays.toString(r));
+//        logger.debug(Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        System.out.println("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
     }
 
 

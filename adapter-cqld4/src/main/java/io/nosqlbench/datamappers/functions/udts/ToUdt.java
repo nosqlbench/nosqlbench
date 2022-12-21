@@ -28,7 +28,7 @@ import io.nosqlbench.cqlgen.parser.CqlModelParser;
 import java.util.function.LongFunction;
 
 /**
- * map<A,B>
+ * map&lt;A,B&gt;
  * where:
  * A := (f1 text, f2 text, f3 int)
  * AND

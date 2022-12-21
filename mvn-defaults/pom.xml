@@ -334,7 +334,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.10.1</version>
+                <version>4.11.1</version>
             </dependency>
 
             <dependency>
@@ -496,6 +496,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M6</version>
                 <configuration>
+                    <parallel>methods</parallel>
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -703,7 +704,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.10.1</version>
+                    <version>4.11.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

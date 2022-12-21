@@ -17,8 +17,10 @@
 package io.nosqlbench.virtdata.core.composers;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
-import io.nosqlbench.virtdata.core.bindings.FunctionType;
 import io.nosqlbench.virtdata.core.bindings.DataMapperFunctionMapper;
+import io.nosqlbench.virtdata.core.bindings.FunctionType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.function.*;
 
 public class FunctionAssemblerMatrixTest {
+    private final static Logger logger = LogManager.getLogger(FunctionAssemblerMatrixTest.class);
 
     @Test
     public void testFullPrimitiveMatrix() {
@@ -59,7 +62,7 @@ public class FunctionAssemblerMatrixTest {
                 double pctDone = 100.0 * ((double) iteration / totalIterations);
 
                 String testingSignature = "testing: f1:" + f1 + ", f2:" + f2;
-                System.out.format("%3d/%3d %s",iteration,totalIterations, testingSignature);
+                logger.debug(String.format("%3d/%3d %s",iteration,totalIterations, testingSignature));
                 FunctionComposer assy = new FunctionAssembly();
 
                 assy = assy.andThen(f1);
@@ -67,7 +70,7 @@ public class FunctionAssemblerMatrixTest {
 
                 DataMapper g = DataMapperFunctionMapper.map(assy.getResolvedFunction().getFunctionObject());
                 Object o = g.get(1L);
-                System.out.println(" out:" + o);
+                logger.debug(" out:" + o);
 
             }
         }
