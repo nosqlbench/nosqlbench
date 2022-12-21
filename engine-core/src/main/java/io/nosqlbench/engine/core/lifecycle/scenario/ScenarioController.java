@@ -78,10 +78,21 @@ public class ScenarioController {
             .detail("params", activityDef.toString())
             .build());
 
+        doStartActivity(activityDef);
+    }
 
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(activityDef, true);
-        scenariologger.debug("START " + activityDef.getAlias());
-        activityThreadsManager.startActivity();
+
+    private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
+        if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
+            Activity activity = this.activityLoader.loadActivity(activityDef);
+            ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
+            Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
+            ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
+            this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
+            executor.startActivity();
+            scenariologger.debug("STARTED " + activityDef.getAlias());
+        }
+        return this.activityInfoMap.get(activityDef.getAlias());
     }
 
     /**
@@ -107,7 +118,7 @@ public class ScenarioController {
 
     public synchronized void run(int timeout, Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        run(timeout, ad);
+        run(ad, timeout);
     }
 
     /**
@@ -126,13 +137,8 @@ public class ScenarioController {
             .detail("params", activityDef.toString())
             .build());
 
-        ActivityThreadsManager activityThreadsManager = getActivityExecutor(activityDef, true);
-        scenariologger.debug("RUN alias=" + activityDef.getAlias());
-        scenariologger.debug(" (RUN/START) alias=" + activityDef.getAlias());
-        activityThreadsManager.startActivity();
-        scenariologger.debug(" (RUN/AWAIT before) alias=" + activityDef.getAlias());
-        boolean completed = activityThreadsManager.awaitCompletion(timeout);
-        scenariologger.debug(" (RUN/AWAIT after) completed=" + activityDef.getAlias());
+        doStartActivity(activityDef);
+        awaitActivity(activityDef, timeoutMs);
     }
 
     public synchronized void run(int timeout, String activityDefString) {
