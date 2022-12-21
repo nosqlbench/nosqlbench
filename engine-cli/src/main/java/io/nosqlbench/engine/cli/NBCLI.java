@@ -32,14 +32,17 @@ import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.lifecycle.*;
+import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
+import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
-import io.nosqlbench.engine.core.metadata.MarkdownDocInfo;
+import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
-import io.nosqlbench.engine.core.script.MetricsMapper;
-import io.nosqlbench.engine.core.script.Scenario;
-import io.nosqlbench.engine.core.script.ScenariosExecutor;
-import io.nosqlbench.engine.core.script.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
 import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
@@ -56,7 +59,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -353,7 +355,7 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         if (options.wantsTopicalHelp()) {
-            Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
+            Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
                 () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
@@ -418,7 +420,7 @@ public class NBCLI implements Function<String[], Integer> {
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.getConsoleLogLevel());
 
-        ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
+        ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
         if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
             options.setWantsStackTraces(true);
             logger.debug("enabling stack traces since log level is " + options.getConsoleLogLevel());
@@ -466,7 +468,7 @@ public class NBCLI implements Function<String[], Integer> {
         scriptParams.putAll(buffer.getCombinedParams());
         scenario.addScenarioScriptParams(scriptParams);
 
-        executor.execute(scenario);
+        scenariosExecutor.execute(scenario);
 
 //        while (true) {
 //            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
@@ -476,7 +478,7 @@ public class NBCLI implements Function<String[], Integer> {
 //            LockSupport.parkNanos(100000000L);
 //        }
 
-        ScenariosResults scenariosResults = executor.awaitAllResults();
+        ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
         logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
@@ -486,7 +488,7 @@ public class NBCLI implements Function<String[], Integer> {
         logger.info(scenariosResults.getExecutionSummary());
 
         if (scenariosResults.hasError()) {
-            Exception exception = scenariosResults.getOne().getException().get();
+            Exception exception = scenariosResults.getOne().getException();
             logger.warn(scenariosResults.getExecutionSummary());
             NBCLIErrorHandler.handle(exception, options.wantsStackTraces());
             System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing

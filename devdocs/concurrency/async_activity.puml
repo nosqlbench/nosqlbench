@@ -1,0 +1,105 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title: Lifecycle of an activity
+
+control caller as caller
+control ActivityExecutor as ae
+control "Activity\nException\nHandler" as aeh
+control "Activity\nThread\nFactory" as atf
+control ExecutorService as aes
+control Annotator as ann
+control Activity as activity
+
+== startup sequence ==
+caller -> ae**: create
+  ae -> aeh**: create
+  ae -> atf**: create(\w Exception Handler)
+  aeh -> atf: <injected\nvia ctor>
+ ae -> aes**: create(\w Thread Factory)
+  atf -> aes: <injected\nvia ctor>
+
+caller -> ae: startActivity()
+activate ae
+ ae -> ann: Annotate Activity Start
+
+ ae -> activity: initActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ note over ae,aes: align threadcount as explained below
+
+caller <- ae
+deactivate ae
+
+== dynamic threadcount update ==
+note over ae, aes: threads can be changed dynamically
+
+caller -> ae: apply params
+activate ae
+ ae->ae: align motor count
+ ae->aes: stop extra motors
+ ae->aes: <start missing motors>
+ group for each new thread/motor
+  ae -> aes: execute(<motor>)
+ activate aes
+  aes -> atf: get()
+  atf -> thread**: create
+  activate atf
+  aes <- atf: <thread>
+  deactivate atf
+  aes --> thread: run()
+  note over ann, thread: At this point, the\nmotor thread starts running\nthe defined activity's action\nover cycles
+  ae->ae: await thread state update
+
+ ae<-aes:
+ deactivate aes
+ end group
+caller <- ae
+deactivate ae
+
+== shutdown sequence [after startup] ==
+
+caller -> ae: stopActivity()
+activate ae
+
+ ae -> ae: request stop motors
+ ae -> ae: await all stop
+
+ ae -> activity: shutdownActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ ae -> ann: Annotate Activity Finish
+
+caller <- ae
+deactivate ae
+
+== on exception in motor thread ==
+thread -> aeh: catch(<thrown exception>)
+aeh -> ae: notifyException\n(<thread>,<throwable>)
+activate ae
+ ae -> ae: save exception
+ ae -> ae: forceStopActivity()
+ ae -> aes: shutdown();
+ activate aes
+ ae <- aes:
+ deactivate aes
+
+ group if needed [after timeout]]
+  ae -> aes: shutdownNow();
+  activate aes
+  ae <- aes
+  deactivate aes
+ end group
+
+ ae -> activity: shutdownActivity();
+ ae -> activity: closeAutoCloseables();
+
+ note over thread: action\nthread\nterminates
+ destroy thread
+deactivate ae
+
+
+@enduml

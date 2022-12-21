@@ -38,6 +38,7 @@ public class DiagSpace implements ActivityDefObserver, AutoCloseable {
     public DiagSpace(String name, NBConfiguration cfg) {
         this.cfg = cfg;
         this.name = name;
+        applyConfig(cfg);
         logger.trace("diag space initialized as '" + name + "'");
     }
 

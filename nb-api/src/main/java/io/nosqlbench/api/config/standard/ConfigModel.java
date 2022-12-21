@@ -131,9 +131,19 @@ public class ConfigModel implements NBConfigModel {
                     return (T) Double.valueOf(string);
                 } else if (type == BigDecimal.class) {
                     return (T) BigDecimal.valueOf(Double.parseDouble(string));
+                } else if (type == boolean.class || type == Boolean.class) {
+                    return (T) Boolean.valueOf(Boolean.parseBoolean(string));
                 } else {
                     throw new RuntimeException("CharSequence type " + type.getSimpleName() + " could " +
                         " not be converted from " + value.getClass().getSimpleName());
+                }
+            } else if (value instanceof Boolean bool) {
+                if (type == boolean.class) {
+                    return (T) bool;
+                } else {
+                    throw new RuntimeException("Boolean type " + type.getSimpleName() + " could " +
+                        " not be converted from " + value.getClass().getSimpleName());
+
                 }
             }
 
@@ -318,11 +328,10 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[").append(
-                params.stream().map(p -> p.getNames().get(0)).collect(Collectors.joining(",")))
-            .append("]");
+        String sb = "[" +
+            params.stream().map(p -> p.getNames().get(0)).collect(Collectors.joining(",")) +
+            "]";
 
-        return sb.toString();
+        return sb;
     }
 }

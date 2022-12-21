@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+  - Copyright (c) 2022 nosqlbench
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="1888.6px" preserveAspectRatio="none" style="width:1168px;height:1888px;background:#FFFFFF;" version="1.1" viewBox="0 0 1168 1888" width="1169px" zoomAndPan="magnify"><defs/><g><rect fill="none" height="40.6951" id="_title" style="stroke:none;stroke-width:1.3999999999999997;" width="340.2" x="409.15" y="14"/><text fill="#000000" font-family="sans-serif" font-size="19.6" font-weight="bold" lengthAdjust="spacing" textLength="326.2" x="416.15" y="41.9523">Lifecycle of a single scenario.call()</text><rect fill="#FFFFFF" height="1317.3407" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="160.3" y="293.9688"/><rect fill="#FFFFFF" height="156.5786" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="354.9" y="1023.0351"/><rect fill="#FFFFFF" height="130.7768" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="354.9" y="1278.1905"/><rect fill="#FFFFFF" height="470.0976" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="525.7" y="763.7045"/><rect fill="#FFFFFF" height="19.6" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="631.4" y="1359.9674"/><rect fill="none" height="406.1091" style="stroke:#000000;stroke-width:2.0999999999999996;" width="400.4" x="296.8" y="784.7045"/><rect fill="none" height="91.5768" style="stroke:#000000;stroke-width:2.0999999999999996;" width="400.4" x="296.8" y="1299.1905"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="36.4" x2="36.4" y1="161.2853" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="167.3" x2="167.3" y1="232.0328" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="361.2" x2="361.2" y1="576.2309" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="532" x2="532" y1="688.421" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="638.4" x2="638.4" y1="1104.3302" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="740.6" x2="740.6" y1="161.2853" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="851.2" x2="851.2" y1="375.2638" y2="1789.2747"/><line style="stroke:#181818;stroke-width:0.6999999999999998;stroke-dasharray:5.0,5.0;" x1="1091.3" x2="1091.3" y1="161.2853" y2="1789.2747"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="51.8" x="7" y="155.5425">caller</text><ellipse cx="37.1" cy="112.1902" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="31.5,95.3902,39.9,88.3902,37.1,95.3902,39.9,102.3902,31.5,95.3902" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="51.8" x="7" y="1808.827">caller</text><ellipse cx="37.1" cy="1836.9698" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="31.5,1820.1698,39.9,1813.1698,37.1,1820.1698,39.9,1827.1698,31.5,1820.1698" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="122.5" y="1808.827">Scenario</text><ellipse cx="167.3" cy="1836.9698" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="161.7,1820.1698,170.1,1813.1698,167.3,1820.1698,170.1,1827.1698,161.7,1820.1698" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="317.1" y="1808.827">Scenario</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="93.8" x="310.8" y="1835.5221">Controller</text><ellipse cx="361.9" cy="1863.6649" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="356.3,1846.8649,364.7,1839.8649,361.9,1846.8649,364.7,1853.8649,356.3,1846.8649" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="85.4" x="485.8" y="1808.827">Scripting</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="65.8" x="495.6" y="1835.5221">Engine</text><ellipse cx="532.7" cy="1863.6649" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="527.1,1846.8649,535.5,1839.8649,532.7,1846.8649,535.5,1853.8649,527.1,1846.8649" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="67.2" x="600.6" y="1808.827">Activity</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="593.6" y="1835.5221">Executor</text><ellipse cx="638.4" cy="1863.6649" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="632.8,1846.8649,641.2,1839.8649,638.4,1846.8649,641.2,1853.8649,632.8,1846.8649" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="37.8" x="718.2" y="128.8474">Java</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="79.8" x="697.2" y="155.5425">Runtime</text><ellipse cx="741.3" cy="85.4951" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="735.7,68.6951,744.1,61.6951,741.3,68.6951,744.1,75.6951,735.7,68.6951" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="37.8" x="718.2" y="1808.827">Java</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="79.8" x="697.2" y="1835.5221">Runtime</text><ellipse cx="741.3" cy="1863.6649" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="735.7,1846.8649,744.1,1839.8649,741.3,1846.8649,744.1,1853.8649,735.7,1846.8649" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="95.2" x="799.4" y="1808.827">Shutdown</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="46.2" x="823.9" y="1835.5221">Hook</text><ellipse cx="851.2" cy="1863.6649" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="845.6,1846.8649,854,1839.8649,851.2,1846.8649,854,1853.8649,845.6,1846.8649" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="113.4" x="1031.1" y="155.5425">Annotations</text><ellipse cx="1092" cy="112.1902" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="1086.4,95.3902,1094.8,88.3902,1092,95.3902,1094.8,102.3902,1086.4,95.3902" style="stroke:#181818;stroke-width:1.3999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="113.4" x="1031.1" y="1808.827">Annotations</text><ellipse cx="1092" cy="1836.9698" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="1086.4,1820.1698,1094.8,1813.1698,1092,1820.1698,1094.8,1827.1698,1086.4,1820.1698" style="stroke:#181818;stroke-width:1.3999999999999997;"/><rect fill="#FFFFFF" height="1317.3407" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="160.3" y="293.9688"/><rect fill="#FFFFFF" height="156.5786" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="354.9" y="1023.0351"/><rect fill="#FFFFFF" height="130.7768" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="354.9" y="1278.1905"/><rect fill="#FFFFFF" height="470.0976" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="525.7" y="763.7045"/><rect fill="#FFFFFF" height="19.6" style="stroke:#181818;stroke-width:1.3999999999999997;" width="14" x="631.4" y="1359.9674"/><polygon fill="#181818" points="105.7,202.8737,119.7,208.4737,105.7,214.0737,111.3,208.4737" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="37.1" x2="114.1" y1="208.4737" y2="208.4737"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="46.9" y="200.3411">create</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="122.5" y="241.0376">Scenario</text><ellipse cx="167.3" cy="197.6853" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="143.5,288.3688,157.5,293.9688,143.5,299.5688,149.1,293.9688" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="37.1" x2="151.9" y1="293.9688" y2="293.9688"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="37.8" x="46.9" y="285.8362">call()</text><polygon fill="#181818" points="782.6,332.7572,796.6,338.3572,782.6,343.9572,788.2,338.3572" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="791" y1="338.3572" y2="338.3572"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="184.1" y="330.2246">create</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="95.2" x="799.4" y="370.9211">Shutdown</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="46.2" x="823.9" y="397.6161">Hook</text><ellipse cx="851.2" cy="327.5688" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="845.6,310.7688,854,303.7688,851.2,310.7688,854,317.7688,845.6,310.7688" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="724.5,444.9473,738.5,450.5473,724.5,456.1473,730.1,450.5473" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="732.9" y1="450.5473" y2="450.5473"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="208.6" x="184.1" y="442.4147">register(ShutdownHook)</text><polygon fill="#181818" points="1075.2,489.3358,1089.2,494.9358,1075.2,500.5358,1080.8,494.9358" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="1083.6" y1="494.9358" y2="494.9358"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="198.8" x="184.1" y="486.8032">Annotate Scenario Start</text><polygon fill="#181818" points="294,533.7242,308,539.3242,294,544.9242,299.6,539.3242" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="302.4" y1="539.3242" y2="539.3242"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="184.1" y="531.1916">create</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="317.1" y="571.8881">Scenario</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="93.8" x="310.8" y="598.5832">Controller</text><ellipse cx="361.9" cy="528.5358" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="356.3,511.7358,364.7,504.7358,361.9,511.7358,364.7,518.7358,356.3,511.7358" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="469,645.9144,483,651.5144,469,657.1144,474.6,651.5144" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="477.4" y1="651.5144" y2="651.5144"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="184.1" y="643.3818">create</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="85.4" x="485.8" y="684.0782">Scripting</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="65.8" x="495.6" y="710.7733">Engine</text><ellipse cx="532.7" cy="640.7259" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="527.1,623.9259,535.5,616.9259,532.7,623.9259,535.5,630.9259,527.1,623.9259" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="508.9,758.1045,522.9,763.7045,508.9,769.3045,514.5,763.7045" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="517.3" y1="763.7045" y2="763.7045"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="86.8" x="184.1" y="755.5719">run(script)</text><path d="M296.8,784.7045 L460.6,784.7045 L460.6,798.293 L446.6,812.293 L296.8,812.293 L296.8,784.7045 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.0999999999999996;"/><rect fill="none" height="406.1091" style="stroke:#000000;stroke-width:2.0999999999999996;" width="400.4" x="296.8" y="784.7045"/><text fill="#000000" font-family="sans-serif" font-size="18.2" font-weight="bold" lengthAdjust="spacing" textLength="96.6" x="317.8" y="805.5603">async calls</text><text fill="#000000" font-family="sans-serif" font-size="15.4" font-weight="bold" lengthAdjust="spacing" textLength="121.8" x="481.6" y="803.967">[javacript+Java]</text><polygon fill="#181818" points="377.3,839.8814,363.3,845.4814,377.3,851.0814,371.7,845.4814" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="508.9,839.8814,522.9,845.4814,508.9,851.0814,514.5,845.4814" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;stroke-dasharray:2.0,2.0;" x1="368.9" x2="517.3" y1="845.4814" y2="845.4814"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="95.2" x="385.7" y="837.3488">scenario.(*)</text><polygon fill="#181818" points="377.3,884.2698,363.3,889.8698,377.3,895.4698,371.7,889.8698" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="508.9,884.2698,522.9,889.8698,508.9,895.4698,514.5,889.8698" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;stroke-dasharray:2.0,2.0;" x1="368.9" x2="517.3" y1="889.8698" y2="889.8698"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="98" x="385.7" y="881.7372">activities.(*)</text><polygon fill="#181818" points="377.3,928.6582,363.3,934.2582,377.3,939.8582,371.7,934.2582" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="508.9,928.6582,522.9,934.2582,508.9,939.8582,514.5,934.2582" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;stroke-dasharray:2.0,2.0;" x1="368.9" x2="517.3" y1="934.2582" y2="934.2582"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="86.8" x="385.7" y="926.1256">metrics.(*)</text><polygon fill="#181818" points="377.3,973.0466,363.3,978.6466,377.3,984.2466,371.7,978.6466" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="508.9,973.0466,522.9,978.6466,508.9,984.2466,514.5,978.6466" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;stroke-dasharray:2.0,2.0;" x1="368.9" x2="517.3" y1="978.6466" y2="978.6466"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="88.2" x="385.7" y="970.514">params.(*)</text><polygon fill="#181818" points="384.3,1017.4351,370.3,1023.0351,384.3,1028.6351,378.7,1023.0351" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="375.9" x2="524.3" y1="1023.0351" y2="1023.0351"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="130.2" x="392.7" y="1014.9025">start(&lt;activity&gt;)</text><polygon fill="#181818" points="576.8,1061.8235,590.8,1067.4235,576.8,1073.0235,582.4,1067.4235" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="368.9" x2="585.2" y1="1067.4235" y2="1067.4235"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="378.7" y="1059.2909">create</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="67.2" x="600.6" y="1099.9874">Activity</text><text fill="#000000" font-family="sans-serif" font-size="19.6" lengthAdjust="spacing" textLength="81.2" x="593.6" y="1126.6825">Executor</text><ellipse cx="638.4" cy="1056.6351" fill="#E2E2F0" rx="16.8" ry="16.8" style="stroke:#181818;stroke-width:0.6999999999999998;"/><polygon fill="#181818" points="632.8,1039.8351,641.2,1032.8351,638.4,1039.8351,641.2,1046.8351,632.8,1039.8351" style="stroke:#181818;stroke-width:1.3999999999999997;"/><polygon fill="#181818" points="621.6,1174.0137,635.6,1179.6137,621.6,1185.2137,627.2,1179.6137" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="361.9" x2="630" y1="1179.6137" y2="1179.6137"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="112" x="371.7" y="1171.4811">startActivity()</text><polygon fill="#181818" points="189.7,1228.2021,175.7,1233.8021,189.7,1239.4021,184.1,1233.8021" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="181.3" x2="531.3" y1="1233.8021" y2="1233.8021"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="47.6" x="198.1" y="1225.6695">result</text><polygon fill="#181818" points="338.1,1272.5905,352.1,1278.1905,338.1,1283.7905,343.7,1278.1905" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="346.5" y1="1278.1905" y2="1278.1905"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="154" x="184.1" y="1270.0579">awaitCompletion()</text><path d="M296.8,1299.1905 L508.2,1299.1905 L508.2,1312.7789 L494.2,1326.7789 L296.8,1326.7789 L296.8,1299.1905 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.0999999999999996;"/><rect fill="none" height="91.5768" style="stroke:#000000;stroke-width:2.0999999999999996;" width="400.4" x="296.8" y="1299.1905"/><text fill="#000000" font-family="sans-serif" font-size="18.2" font-weight="bold" lengthAdjust="spacing" textLength="148.4" x="317.8" y="1320.0463">for each activity</text><polygon fill="#181818" points="614.6,1354.3674,628.6,1359.9674,614.6,1365.5674,620.2,1359.9674" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="368.9" x2="623" y1="1359.9674" y2="1359.9674"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="154" x="378.7" y="1351.8347">awaitCompletion()</text><polygon fill="#181818" points="384.3,1373.9674,370.3,1379.5674,384.3,1385.1674,378.7,1379.5674" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="375.9" x2="637" y1="1379.5674" y2="1379.5674"/><polygon fill="#181818" points="189.7,1403.3674,175.7,1408.9674,189.7,1414.5674,184.1,1408.9674" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="181.3" x2="360.5" y1="1408.9674" y2="1408.9674"/><polygon fill="#181818" points="724.5,1447.7558,738.5,1453.3558,724.5,1458.9558,730.1,1453.3558" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="732.9" y1="1453.3558" y2="1453.3558"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="231" x="184.1" y="1445.2232">unregister(ShutdownHook)</text><polygon fill="#181818" points="834.4,1492.1442,848.4,1497.7442,834.4,1503.3442,840,1497.7442" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="174.3" x2="842.8" y1="1497.7442" y2="1497.7442"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="40.6" x="184.1" y="1489.6116">run()</text><polygon fill="#181818" points="1075.2,1536.5326,1089.2,1542.1326,1075.2,1547.7326,1080.8,1542.1326" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="851.2" x2="1083.6" y1="1542.1326" y2="1542.1326"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="207.2" x="861" y="1534">Annotate Scenario Finish</text><polygon fill="#181818" points="52.5,1605.7095,38.5,1611.3095,52.5,1616.9095,46.9,1611.3095" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="44.1" x2="165.9" y1="1611.3095" y2="1611.3095"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="71.4" x="60.9" y="1578.3884">Scenario</text><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="51.8" x="60.9" y="1603.1769">Result</text><rect fill="#EEEEEE" height="4.2" style="stroke:#EEEEEE;stroke-width:1.3999999999999997;" width="1159.9" x="0" y="1653.1037"/><line style="stroke:#000000;stroke-width:1.3999999999999997;" x1="0" x2="1159.9" y1="1653.1037" y2="1653.1037"/><line style="stroke:#000000;stroke-width:1.3999999999999997;" x1="0" x2="1159.9" y1="1657.3037" y2="1657.3037"/><rect fill="#EEEEEE" height="35.9884" style="stroke:#000000;stroke-width:2.7999999999999994;" width="257.6" x="451.15" y="1636.5095"/><text fill="#000000" font-family="sans-serif" font-size="18.2" font-weight="bold" lengthAdjust="spacing" textLength="233.8" x="459.55" y="1661.5653">on exception during call()</text><polygon fill="#181818" points="834.4,1714.0863,848.4,1719.6863,834.4,1725.2863,840,1719.6863" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="741.3" x2="842.8" y1="1719.6863" y2="1719.6863"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="40.6" x="751.1" y="1711.5537">run()</text><polygon fill="#181818" points="1075.2,1758.4747,1089.2,1764.0747,1075.2,1769.6747,1080.8,1764.0747" style="stroke:#181818;stroke-width:1.3999999999999997;"/><line style="stroke:#181818;stroke-width:1.3999999999999997;" x1="851.2" x2="1083.6" y1="1764.0747" y2="1764.0747"/><text fill="#000000" font-family="sans-serif" font-size="18.2" lengthAdjust="spacing" textLength="207.2" x="861" y="1755.9421">Annotate Scenario Finish</text><!--MD5=[64ddfbb09e50ccc271f59fe61717f90b]
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Lifecycle of a single scenario.call()
+control "caller" as c
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scripting\nEngine" as engine
+control "Activity\nExecutor" as ae
+control "Java\nRuntime" as jrt
+control "Shutdown\nHook" as sh
+control "Annotations" as ann
+
+c -> s**: create
+
+c -> s: call()
+activate s
+
+ s -> sh**: create
+ s -> jrt: register(ShutdownHook)
+ s -> ann: Annotate Scenario Start
+
+ s -> sc**: create
+ s -> engine**: create
+
+ s -> engine: run(script)
+ activate engine
+ group async calls [javacript+Java]
+ engine <- -> sc: scenario.(*)
+ engine <- -> sc: activities.(*)
+ engine <- -> sc: metrics.(*)
+ engine <- -> sc: params.(*)
+ engine -> sc: start(<activity>)
+ activate sc
+ sc -> ae**: create
+ sc -> ae: startActivity()
+
+ deactivate sc
+ end group
+ s <- engine: result
+ deactivate engine
+
+ s -> sc: awaitCompletion()
+ activate sc
+  group for each activity
+   sc -> ae: awaitCompletion()
+   activate ae
+   sc <- ae
+   deactivate ae
+  end group
+
+ s <- sc
+ deactivate sc
+
+ s -> jrt: unregister(ShutdownHook)
+ s -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+c <- s: Scenario\nResult
+deactivate s
+
+== on exception during call() ==
+ jrt -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+
+@enduml
+
+@startuml
+
+title Lifecycle of a single scenario.call()
+control "caller" as c
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scripting\nEngine" as engine
+control "Activity\nExecutor" as ae
+control "Java\nRuntime" as jrt
+control "Shutdown\nHook" as sh
+control "Annotations" as ann
+
+c -> s**: create
+
+c -> s: call()
+activate s
+
+ s -> sh**: create
+ s -> jrt: register(ShutdownHook)
+ s -> ann: Annotate Scenario Start
+
+ s -> sc**: create
+ s -> engine**: create
+
+ s -> engine: run(script)
+ activate engine
+ group async calls [javacript+Java]
+ engine <- -> sc: scenario.(*)
+ engine <- -> sc: activities.(*)
+ engine <- -> sc: metrics.(*)
+ engine <- -> sc: params.(*)
+ engine -> sc: start(<activity>)
+ activate sc
+ sc -> ae**: create
+ sc -> ae: startActivity()
+
+ deactivate sc
+ end group
+ s <- engine: result
+ deactivate engine
+
+ s -> sc: awaitCompletion()
+ activate sc
+  group for each activity
+   sc -> ae: awaitCompletion()
+   activate ae
+   sc <- ae
+   deactivate ae
+  end group
+
+ s <- sc
+ deactivate sc
+
+ s -> jrt: unregister(ShutdownHook)
+ s -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+c <- s: Scenario\nResult
+deactivate s
+
+== on exception during call() ==
+ jrt -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+
+@enduml
+
+PlantUML version 1.2022.12(Sun Oct 23 13:12:26 CDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
