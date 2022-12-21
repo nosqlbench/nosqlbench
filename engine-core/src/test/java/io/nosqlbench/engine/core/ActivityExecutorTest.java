@@ -63,20 +63,12 @@ public class ActivityExecutorTest {
         ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
         Future<ExecutionResult> future = executor.submit(ae);
         try {
-            System.out.println("ad.setThreads(1)");
             ad.setThreads(1);
-            System.out.println("ae.startActivity()");
             ae.startActivity();
-            System.out.println("ae.stopActivity()");
             ae.stopActivity();
-            System.out.println("ae.startActivity()");
             ae.startActivity();
-            System.out.println("ae.startActivity()");
             ae.startActivity();
-            System.out.println("ExecutionResult executionResult = future.get();");
             ExecutionResult executionResult = future.get();
-            System.out.println("System.out.print(executionResult);");
-            System.out.print(executionResult);
             Thread.sleep(500L);
         } catch (Exception e) {
             throw new RuntimeException(e);
