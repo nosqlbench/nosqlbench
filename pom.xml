@@ -64,6 +64,7 @@
         <module>adapter-pulsar</module>
         <module>adapter-s4j</module>
         <module>adapter-kafka</module>
+        <module>adapter-cockroachdb</module>
 
         <!-- VIRTDATA MODULES -->
 
