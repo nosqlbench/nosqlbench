@@ -27,6 +27,8 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
  * .md#securityRequirementObject">OpenApi Spec 3.1.0</A>
  */
 public class OpenApiLoader {
+    private final static Logger logger = LogManager.getLogger(OpenApiLoader.class);
 
     private static final OpenAPIParser parser = new OpenAPIParser();
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -91,7 +94,7 @@ public class OpenApiLoader {
         yaml.setBeanAccess(BeanAccess.DEFAULT);
 
         for (PathOp activeOp : activeOps) {
-            System.out.println("yaml for op:" + yaml.dump(activeOp));
+            logger.debug("yaml for op:" + yaml.dump(activeOp));
             pathops.put(activeOp.getCall(), activeOp);
         }
 

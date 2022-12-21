@@ -19,6 +19,8 @@ package io.nosqlbench.virtdata.library.curves4.discrete;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import io.nosqlbench.virtdata.library.curves4.discrete.long_long.Zipf;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,13 +33,14 @@ import java.util.function.LongUnaryOperator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegerDistributionsValuesTest {
+    private final static Logger logger = LogManager.getLogger(IntegerDistributionsValuesTest.class);
 
 
     @Disabled
     @Test
     public void testComputedZipf() {
         RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
-        System.out.println(runData);
+        logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.7D))
@@ -51,7 +54,7 @@ public class IntegerDistributionsValuesTest {
     @Test
     public void testInterpolatedZipf() {
         RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
-        System.out.println(runData);
+        logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.7D))
@@ -72,7 +75,7 @@ public class IntegerDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData);
+        logger.debug(runData);
     }
 
     @Test
@@ -84,7 +87,7 @@ public class IntegerDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData);
+        logger.debug(runData);
     }
 
     @Test
@@ -127,7 +130,7 @@ public class IntegerDistributionsValuesTest {
         int readout = iterations/10;
         for (int i = 0; i < iterations; i++) {
             if ((i%readout)==0) {
-                System.out.println("i="+i+"/"+iterations);
+                logger.debug("i="+i+"/"+iterations);
             }
             samples[i] = mapper.applyAsDouble(i);
         }

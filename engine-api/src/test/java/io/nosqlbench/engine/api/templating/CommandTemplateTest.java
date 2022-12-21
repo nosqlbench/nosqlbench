@@ -21,6 +21,8 @@ import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -28,6 +30,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommandTemplateTest {
+    private final static Logger logger = LogManager.getLogger(CommandTemplateTest.class);
 
     @Test
     public void testCommandTemplate() {
@@ -53,7 +56,7 @@ public class CommandTemplateTest {
         OpTemplate optpl = stmtsDocs.getStmts().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);
         String format = gson.toJson(ct);
-        System.out.println(format);
+        logger.debug(format);
 
     }
 

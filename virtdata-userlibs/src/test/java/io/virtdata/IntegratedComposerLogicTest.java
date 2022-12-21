@@ -22,6 +22,8 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Identity;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNameToString;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -33,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class IntegratedComposerLogicTest {
+    private final static Logger logger = LogManager.getLogger(IntegratedComposerLogicTest.class);
 
     @Test
     public void testPreferredReturnType() {

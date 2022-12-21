@@ -18,6 +18,8 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.concurrent.Future;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RealDistributionsConcurrencyTests {
+    private final static Logger logger = LogManager.getLogger(RealDistributionsConcurrencyTests.class);
 
     @Test
     public void testConcurrentBinomialHashValues() {
@@ -73,8 +76,7 @@ public class RealDistributionsConcurrencyTests {
         for (int i = 0; i < futures.size(); i++) {
             try {
                 results.add(futures.get(i).get());
-//                System.out.println(description + ": got results for thread " + i);
-//                System.out.flush();
+                logger.trace(description + ": got results for thread " + i);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -83,7 +85,7 @@ public class RealDistributionsConcurrencyTests {
 
         for (int vthread = 0; vthread < threads; vthread++) {
             assertThat(results.get(vthread)).isEqualTo(values);
-            System.out.println(description + ": verified values for thread " + vthread);
+            logger.debug(description + ": verified values for thread " + vthread);
         }
 
 
@@ -107,8 +109,7 @@ public class RealDistributionsConcurrencyTests {
         public double[] call() throws Exception {
             double[] output = new double[size];
             DataMapper<Double> mapper = VirtData.getMapper(mapperSpec, double.class);
-//            System.out.println("resolved:" + mapper);
-//            System.out.flush();
+            logger.trace("resolved:" + mapper);
 
             synchronized (signal) {
                 signal.wait(10000);
@@ -116,9 +117,9 @@ public class RealDistributionsConcurrencyTests {
 
             for (int i = 0; i < output.length; i++) {
                 output[i] = mapper.get(i);
-//                if ((i % 100) == 0) {
-//                    System.out.println("wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
-//                }
+                if ((i % 100) == 0) {
+                    logger.trace("wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
+                }
             }
             return output;
         }

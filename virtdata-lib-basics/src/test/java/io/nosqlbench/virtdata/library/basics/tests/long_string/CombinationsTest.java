@@ -17,12 +17,15 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class CombinationsTest {
+    private final static Logger logger = LogManager.getLogger(CombinationsTest.class);
 
     @Test
     public void testSimplePrimes() {
@@ -38,7 +41,7 @@ public class CombinationsTest {
         Combinations binaryByte = new Combinations("0-1;0-1;0-1;0-1;0-1;0-1;0-1;0-1;");
         assertThat(binaryByte.apply(37)).isEqualTo("00100101");
         for (int i = 0; i < 512; i++) {
-            System.out.println("i:" + i + " = b:" + binaryByte.apply(i));
+            logger.debug("i:" + i + " = b:" + binaryByte.apply(i));
         }
     }
 
