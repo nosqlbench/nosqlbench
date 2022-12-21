@@ -38,7 +38,6 @@ public class CoreMotorTest {
         Motor cm = new CoreMotor(activity, 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
-        cm.getSlotStateTracker().enterState(RunState.Starting);
         Thread t = new Thread(cm);
         t.setName("TestMotor");
         t.start();
@@ -58,7 +57,6 @@ public class CoreMotorTest {
         AtomicLongArray ary = new AtomicLongArray(10);
         Action a1 = getTestArrayConsumer(ary);
         cm1.setAction(a1);
-        cm1.getSlotStateTracker().enterState(RunState.Starting);
 
         Thread t1 = new Thread(cm1);
         t1.setName("cm1");

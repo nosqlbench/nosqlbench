@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+  - Copyright (c) 2022 nosqlbench
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="4174.3px" preserveAspectRatio="none" style="width:1504px;height:4174px;background:#FFFFFF;" version="1.1" viewBox="0 0 1504 4174" width="1504.8px" zoomAndPan="magnify"><defs/><g><rect fill="none" height="55.229" id="_title" style="stroke:none;stroke-width:1.8999999999999997;" width="309.7" x="589.95" y="19"/><text fill="#000000" font-family="sans-serif" font-size="26.6" font-weight="bold" lengthAdjust="spacing" textLength="290.7" x="599.45" y="56.9353">Lifecycle of an activity</text><rect fill="#FFFFFF" height="245.3243" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="1202.7971"/><rect fill="#FFFFFF" height="904.8677" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="1666.8457"/><rect fill="#FFFFFF" height="343.5657" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="2718.7962"/><rect fill="#FFFFFF" height="528.09" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="3303.3276"/><rect fill="#FFFFFF" height="64.729" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="749.55" y="2122.7357"/><rect fill="#FFFFFF" height="548.5605" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="1983.2528"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="3533.4519"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="3671.0348"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1260.65" y="1323.28"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1260.65" y="2948.9205"/><rect fill="none" height="646.2434" style="stroke:#000000;stroke-width:2.8499999999999996;" width="1325.25" x="147.25" y="1900.77"/><rect fill="none" height="124.2829" style="stroke:#000000;stroke-width:2.8499999999999996;" width="913.9" x="147.25" y="3588.5519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="49.4" x2="49.4" y1="255.1162" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="272.65" x2="272.65" y1="437.9721" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="609.9" x2="609.9" y1="590.2302" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="759.05" x2="759.05" y1="778.7173" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="935.75" x2="935.75" y1="1024.8583" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1129.55" x2="1129.55" y1="255.1162" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1270.15" x2="1270.15" y1="255.1162" y2="4004.542"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1395.55" x2="1395.55" y1="2119.5588" y2="4004.542"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="70.3" x="9.5" y="247.3224">caller</text><ellipse cx="50.35" cy="188.4871" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="42.75,165.6871,54.15,156.1871,50.35,165.6871,54.15,175.1871,42.75,165.6871" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="70.3" x="9.5" y="4031.0772">caller</text><ellipse cx="50.35" cy="4069.271" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="42.75,4046.471,54.15,4036.971,50.35,4046.471,54.15,4055.971,42.75,4046.471" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="201.4" x="166.25" y="4031.0772">ActivityExecutor</text><ellipse cx="272.65" cy="4069.271" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="265.05,4046.471,276.45,4036.971,272.65,4046.471,276.45,4055.971,265.05,4046.471" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="559.55" y="4031.0772">Activity</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="543.4" y="4067.3063">Exception</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="102.6" x="553.85" y="4103.5353">Handler</text><ellipse cx="610.85" cy="4141.7291" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="603.25,4118.9291,614.65,4109.4291,610.85,4118.9291,614.65,4128.4291,603.25,4118.9291" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="4031.0772">Activity</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="4067.3063">Thread</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="4103.5353">Factory</text><ellipse cx="759.05" cy="4141.7291" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="751.45,4118.9291,762.85,4109.4291,759.05,4118.9291,762.85,4128.4291,751.45,4118.9291" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="201.4" x="829.35" y="4031.0772">ExecutorService</text><ellipse cx="935.75" cy="4069.271" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="928.15,4046.471,939.55,4036.971,935.75,4046.471,939.55,4055.971,928.15,4046.471" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="127.3" x="1061.15" y="247.3224">Annotator</text><ellipse cx="1130.5" cy="188.4871" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1122.9,165.6871,1134.3,156.1871,1130.5,165.6871,1134.3,175.1871,1122.9,165.6871" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="127.3" x="1061.15" y="4031.0772">Annotator</text><ellipse cx="1130.5" cy="4069.271" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1122.9,4046.471,1134.3,4036.971,1130.5,4046.471,1134.3,4055.971,1122.9,4046.471" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="1218.85" y="247.3224">Activity</text><ellipse cx="1270.15" cy="188.4871" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1262.55,165.6871,1273.95,156.1871,1270.15,165.6871,1273.95,175.1871,1262.55,165.6871" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="1218.85" y="4031.0772">Activity</text><ellipse cx="1270.15" cy="4069.271" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1262.55,4046.471,1273.95,4036.971,1270.15,4046.471,1273.95,4055.971,1262.55,4046.471" style="stroke:#181818;stroke-width:1.8999999999999997;"/><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="112.1" x="1340.45" y="4002.642"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="85.5" x="1353.75" y="4044.3772">thread</text><rect fill="#FFFFFF" height="245.3243" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="1202.7971"/><rect fill="#FFFFFF" height="904.8677" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="1666.8457"/><rect fill="#FFFFFF" height="343.5657" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="2718.7962"/><rect fill="#FFFFFF" height="528.09" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="263.15" y="3303.3276"/><rect fill="#FFFFFF" height="64.729" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="749.55" y="2122.7357"/><rect fill="#FFFFFF" height="548.5605" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="1983.2528"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="3533.4519"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="926.25" y="3671.0348"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1260.65" y="1323.28"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1260.65" y="2948.9205"/><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1491.5" x="0" y="315.6369"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="315.6369" y2="315.6369"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="321.3369" y2="321.3369"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="250.8" x="620.35" y="293.1162"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="218.5" x="631.75" y="327.1205">startup sequence</text><polygon fill="#181818" points="143.45,398.399,162.45,405.999,143.45,413.599,151.05,405.999" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="50.35" x2="154.85" y1="405.999" y2="405.999"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="63.65" y="394.9619">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="201.4" x="166.25" y="450.1929">ActivityExecutor</text><ellipse cx="272.65" cy="391.3576" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="265.05,368.5576,276.45,359.0576,272.65,368.5576,276.45,378.0576,265.05,368.5576" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="520.6,514.4281,539.6,522.0281,520.6,529.6281,528.2,522.0281" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="272.65" x2="532" y1="522.0281" y2="522.0281"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="285.95" y="510.991">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="559.55" y="566.2219">Activity</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="543.4" y="602.451">Exception</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="102.6" x="553.85" y="638.68">Handler</text><ellipse cx="610.85" cy="507.3866" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="603.25,484.5866,614.65,475.0866,610.85,484.5866,614.65,494.0866,603.25,484.5866" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="684.95,702.9152,703.95,710.5152,684.95,718.1152,692.55,710.5152" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="272.65" x2="696.35" y1="710.5152" y2="710.5152"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="328.7" x="285.95" y="699.4781">create(\w Exception Handler)</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="754.709">Activity</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="790.9381">Thread</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="707.75" y="827.1671">Factory</text><ellipse cx="759.05" cy="695.8738" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="751.45,673.0738,762.85,663.5738,759.05,673.0738,762.85,682.5738,751.45,673.0738" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="736.25,925.0438,755.25,932.6438,736.25,940.2438,743.85,932.6438" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="610.85" x2="747.65" y1="932.6438" y2="932.6438"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="102.6" x="624.15" y="887.9652">&lt;injected</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="96.9" x="624.15" y="921.6067">via ctor&gt;</text><polygon fill="#181818" points="806.55,985.2852,825.55,992.8852,806.55,1000.4852,814.15,992.8852" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="272.65" x2="817.95" y1="992.8852" y2="992.8852"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="290.7" x="285.95" y="981.8481">create(\w Thread Factory)</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="201.4" x="829.35" y="1037.079">ExecutorService</text><ellipse cx="935.75" cy="978.2438" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="928.15,955.4438,939.55,945.9438,935.75,955.4438,939.55,964.9438,928.15,955.4438" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="912.95,1134.9557,931.95,1142.5557,912.95,1150.1557,920.55,1142.5557" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="759.05" x2="924.35" y1="1142.5557" y2="1142.5557"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="102.6" x="772.35" y="1097.8771">&lt;injected</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="96.9" x="772.35" y="1131.5186">via ctor&gt;</text><polygon fill="#181818" points="240.35,1195.1971,259.35,1202.7971,240.35,1210.3971,247.95,1202.7971" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="50.35" x2="251.75" y1="1202.7971" y2="1202.7971"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="152" x="63.65" y="1191.76">startActivity()</text><polygon fill="#181818" points="1107.7,1255.4385,1126.7,1263.0385,1107.7,1270.6385,1115.3,1263.0385" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="1119.1" y1="1263.0385" y2="1263.0385"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="256.5" x="295.45" y="1252.0014">Annotate Activity Start</text><polygon fill="#181818" points="1237.85,1315.68,1256.85,1323.28,1237.85,1330.88,1245.45,1323.28" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="1249.25" y1="1323.28" y2="1323.28"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="134.9" x="295.45" y="1312.2428">initActivity()</text><polygon fill="#181818" points="303.05,1342.28,284.05,1349.88,303.05,1357.48,295.45,1349.88" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="1268.25" y1="1349.88" y2="1349.88"/><path d="M171,1374.58 L171,1425.88 L1037.4,1425.88 L1037.4,1393.58 L1018.4,1374.58 L171,1374.58 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><path d="M1018.4,1374.58 L1018.4,1393.58 L1037.4,1393.58 L1018.4,1374.58 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="423.7" x="383.8" y="1410.4843">align threadcount as explained below</text><polygon fill="#181818" points="71.25,1440.5214,52.25,1448.1214,71.25,1455.7214,63.65,1448.1214" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="59.85" x2="270.75" y1="1448.1214" y2="1448.1214"/><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1491.5" x="0" y="1504.8421"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="1504.8421" y2="1504.8421"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="1510.5421" y2="1510.5421"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="399" x="546.25" y="1482.3214"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="366.7" x="557.65" y="1516.3257">dynamic threadcount update</text><path d="M171,1559.6628 L171,1610.9628 L1037.4,1610.9628 L1037.4,1578.6628 L1018.4,1559.6628 L171,1559.6628 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><path d="M1018.4,1559.6628 L1018.4,1578.6628 L1037.4,1578.6628 L1018.4,1559.6628 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="412.3" x="389.5" y="1595.5671">threads can be changed dynamically</text><polygon fill="#181818" points="240.35,1659.2457,259.35,1666.8457,240.35,1674.4457,247.95,1666.8457" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="50.35" x2="251.75" y1="1666.8457" y2="1666.8457"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="153.9" x="63.65" y="1655.8086">apply params</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="1727.0871" y2="1727.0871"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="1727.0871" y2="1751.7871"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="1751.7871" y2="1751.7871"/><polygon fill="#181818" points="303.05,1744.1871,284.05,1751.7871,303.05,1759.3871,295.45,1751.7871" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="205.2" x="295.45" y="1716.05">align motor count</text><polygon fill="#181818" points="912.95,1804.4285,931.95,1812.0285,912.95,1819.6285,920.55,1812.0285" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="924.35" y1="1812.0285" y2="1812.0285"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="205.2" x="295.45" y="1800.9914">stop extra motors</text><polygon fill="#181818" points="912.95,1864.67,931.95,1872.27,912.95,1879.87,920.55,1872.27" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="924.35" y1="1872.27" y2="1872.27"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="262.2" x="295.45" y="1861.2329">&lt;start missing motors&gt;</text><path d="M147.25,1900.77 L572.85,1900.77 L572.85,1919.2114 L553.85,1938.2114 L147.25,1938.2114 L147.25,1900.77 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.8499999999999996;"/><rect fill="none" height="646.2434" style="stroke:#000000;stroke-width:2.8499999999999996;" width="1325.25" x="147.25" y="1900.77"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="340.1" x="175.75" y="1929.0743">for each new thread/motor</text><polygon fill="#181818" points="903.45,1975.6528,922.45,1983.2528,903.45,1990.8528,911.05,1983.2528" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="914.85" y1="1983.2528" y2="1983.2528"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="203.3" x="295.45" y="1972.2157">execute(&lt;motor&gt;)</text><polygon fill="#181818" points="779.95,2035.8943,760.95,2043.4943,779.95,2051.0943,772.35,2043.4943" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="768.55" x2="924.35" y1="2043.4943" y2="2043.4943"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="53.2" x="791.35" y="2032.4572">get()</text><polygon fill="#181818" points="1317.65,2096.1357,1336.65,2103.7357,1317.65,2111.3357,1325.25,2103.7357" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="759.05" x2="1329.05" y1="2103.7357" y2="2103.7357"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="772.35" y="2092.6986">create</text><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="112.1" x="1340.45" y="2058.6943"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="85.5" x="1353.75" y="2100.4295">thread</text><polygon fill="#181818" points="903.45,2179.8647,922.45,2187.4647,903.45,2195.0647,911.05,2187.4647" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="759.05" x2="914.85" y1="2187.4647" y2="2187.4647"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="102.6" x="772.35" y="2176.4276">&lt;thread&gt;</text><polygon fill="#181818" points="1373.7,2240.1062,1392.7,2247.7062,1373.7,2255.3062,1381.3,2247.7062" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;stroke-dasharray:2.0,2.0;" x1="945.25" x2="1385.1" y1="2247.7062" y2="2247.7062"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="55.1" x="958.55" y="2236.6691">run()</text><path d="M1071.6,2272.4062 L1071.6,2424.4062 L1453.5,2424.4062 L1453.5,2291.4062 L1434.5,2272.4062 L1071.6,2272.4062 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><path d="M1434.5,2272.4062 L1434.5,2291.4062 L1453.5,2291.4062 L1434.5,2272.4062 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="188.1" x="1093.45" y="2308.3105">At this point, the</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="321.1" x="1093.45" y="2341.9519">motor thread starts running</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="309.7" x="1093.45" y="2375.5934">the defined activity's action</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="123.5" x="1093.45" y="2409.2348">over cycles</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="2480.5133" y2="2480.5133"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="2480.5133" y2="2505.2133"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="2505.2133" y2="2505.2133"/><polygon fill="#181818" points="303.05,2497.6133,284.05,2505.2133,303.05,2512.8133,295.45,2505.2133" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="292.6" x="295.45" y="2469.4762">await thread state update</text><polygon fill="#181818" points="303.05,2524.2133,284.05,2531.8133,303.05,2539.4133,295.45,2531.8133" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="933.85" y1="2531.8133" y2="2531.8133"/><polygon fill="#181818" points="71.25,2564.1133,52.25,2571.7133,71.25,2579.3133,63.65,2571.7133" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="59.85" x2="270.75" y1="2571.7133" y2="2571.7133"/><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1491.5" x="0" y="2628.434"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="2628.434" y2="2628.434"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="2634.134" y2="2634.134"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="465.5" x="513" y="2605.9133"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="433.2" x="524.4" y="2639.9177">shutdown sequence [after startup]</text><polygon fill="#181818" points="240.35,2711.1962,259.35,2718.7962,240.35,2726.3962,247.95,2718.7962" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="50.35" x2="251.75" y1="2718.7962" y2="2718.7962"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="150.1" x="63.65" y="2707.7591">stopActivity()</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="2779.0376" y2="2779.0376"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="2779.0376" y2="2803.7376"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="2803.7376" y2="2803.7376"/><polygon fill="#181818" points="303.05,2796.1376,284.05,2803.7376,303.05,2811.3376,295.45,2803.7376" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="233.7" x="295.45" y="2768.0005">request stop motors</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="2863.9791" y2="2863.9791"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="2863.9791" y2="2888.6791"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="2888.6791" y2="2888.6791"/><polygon fill="#181818" points="303.05,2881.0791,284.05,2888.6791,303.05,2896.2791,295.45,2888.6791" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="148.2" x="295.45" y="2852.942">await all stop</text><polygon fill="#181818" points="1237.85,2941.3205,1256.85,2948.9205,1237.85,2956.5205,1245.45,2948.9205" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="1249.25" y1="2948.9205" y2="2948.9205"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="214.7" x="295.45" y="2937.8834">shutdownActivity()</text><polygon fill="#181818" points="303.05,2967.9205,284.05,2975.5205,303.05,2983.1205,295.45,2975.5205" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="1268.25" y1="2975.5205" y2="2975.5205"/><polygon fill="#181818" points="1107.7,3028.1619,1126.7,3035.7619,1107.7,3043.3619,1115.3,3035.7619" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="1119.1" y1="3035.7619" y2="3035.7619"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="267.9" x="295.45" y="3024.7248">Annotate Activity Finish</text><polygon fill="#181818" points="71.25,3054.7619,52.25,3062.3619,71.25,3069.9619,63.65,3062.3619" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="59.85" x2="270.75" y1="3062.3619" y2="3062.3619"/><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1491.5" x="0" y="3119.0826"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="3119.0826" y2="3119.0826"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1491.5" y1="3124.7826" y2="3124.7826"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="400.9" x="545.3" y="3096.5619"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="368.6" x="556.7" y="3130.5662">on exception in motor thread</text><polygon fill="#181818" points="631.75,3201.8448,612.75,3209.4448,631.75,3217.0448,624.15,3209.4448" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="620.35" x2="1394.6" y1="3209.4448" y2="3209.4448"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="304" x="643.15" y="3198.4077">catch(&lt;thrown exception&gt;)</text><polygon fill="#181818" points="303.05,3295.7276,284.05,3303.3276,303.05,3310.9276,295.45,3303.3276" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="608.95" y1="3303.3276" y2="3303.3276"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="178.6" x="314.45" y="3258.6491">notifyException</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="266" x="314.45" y="3292.2905">(&lt;thread&gt;,&lt;throwable&gt;)</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="3363.5691" y2="3363.5691"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="3363.5691" y2="3388.2691"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="3388.2691" y2="3388.2691"/><polygon fill="#181818" points="303.05,3380.6691,284.05,3388.2691,303.05,3395.8691,295.45,3388.2691" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="169.1" x="295.45" y="3352.532">save exception</text><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="361.95" y1="3448.5105" y2="3448.5105"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="361.95" x2="361.95" y1="3448.5105" y2="3473.2105"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="284.05" x2="361.95" y1="3473.2105" y2="3473.2105"/><polygon fill="#181818" points="303.05,3465.6105,284.05,3473.2105,303.05,3480.8105,295.45,3473.2105" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="209" x="295.45" y="3437.4734">forceStopActivity()</text><polygon fill="#181818" points="903.45,3525.8519,922.45,3533.4519,903.45,3541.0519,911.05,3533.4519" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="914.85" y1="3533.4519" y2="3533.4519"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="136.8" x="295.45" y="3522.4148">shutdown();</text><polygon fill="#181818" points="303.05,3552.4519,284.05,3560.0519,303.05,3567.6519,295.45,3560.0519" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="933.85" y1="3560.0519" y2="3560.0519"/><path d="M147.25,3588.5519 L354.35,3588.5519 L354.35,3606.9934 L335.35,3625.9934 L147.25,3625.9934 L147.25,3588.5519 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.8499999999999996;"/><rect fill="none" height="124.2829" style="stroke:#000000;stroke-width:2.8499999999999996;" width="913.9" x="147.25" y="3588.5519"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="115.9" x="175.75" y="3616.8563">if needed</text><text fill="#000000" font-family="sans-serif" font-size="20.9" font-weight="bold" lengthAdjust="spacing" textLength="167.2" x="382.85" y="3614.6939">[after timeout]]</text><polygon fill="#181818" points="903.45,3663.4348,922.45,3671.0348,903.45,3678.6348,911.05,3671.0348" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="914.85" y1="3671.0348" y2="3671.0348"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="190" x="295.45" y="3659.9977">shutdownNow();</text><polygon fill="#181818" points="303.05,3690.0348,284.05,3697.6348,303.05,3705.2348,295.45,3697.6348" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="291.65" x2="933.85" y1="3697.6348" y2="3697.6348"/><polygon fill="#181818" points="1247.35,3763.5762,1266.35,3771.1762,1247.35,3778.7762,1254.95,3771.1762" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="282.15" x2="1258.75" y1="3771.1762" y2="3771.1762"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="220.4" x="295.45" y="3760.1391">shutdownActivity();</text><polygon fill="#181818" points="1247.35,3823.8177,1266.35,3831.4177,1247.35,3839.0177,1254.95,3831.4177" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="272.65" x2="1258.75" y1="3831.4177" y2="3831.4177"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="252.7" x="285.95" y="3820.3806">closeAutoCloseables();</text><path d="M1314.8,3856.1177 L1314.8,3975.8177 L1478.2,3975.8177 L1478.2,3875.1177 L1459.2,3856.1177 L1314.8,3856.1177 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><path d="M1459.2,3856.1177 L1459.2,3875.1177 L1478.2,3875.1177 L1459.2,3856.1177 " fill="#FEFFDD" style="stroke:#181818;stroke-width:0.9499999999999998;"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="1326.2" y="3892.022">action</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="76" x="1326.2" y="3925.6634">thread</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="123.5" x="1326.2" y="3959.3049">terminates</text><line style="stroke:#A80036;stroke-width:3.7999999999999994;" x1="1379.4" x2="1413.6" y1="3814.3177" y2="3848.5177"/><line style="stroke:#A80036;stroke-width:3.7999999999999994;" x1="1379.4" x2="1413.6" y1="3848.5177" y2="3814.3177"/><!--MD5=[64295dfc7c134f03997ebf991733183c]
+@startuml
+'https://plantuml.com/sequence-diagram
+title: Lifecycle of an activity
+
+control caller as caller
+control ActivityExecutor as ae
+control "Activity\nException\nHandler" as aeh
+control "Activity\nThread\nFactory" as atf
+control ExecutorService as aes
+control Annotator as ann
+control Activity as activity
+
+== startup sequence ==
+caller -> ae**: create
+  ae -> aeh**: create
+  ae -> atf**: create(\w Exception Handler)
+  aeh -> atf: <injected\nvia ctor>
+ ae -> aes**: create(\w Thread Factory)
+  atf -> aes: <injected\nvia ctor>
+
+caller -> ae: startActivity()
+activate ae
+ ae -> ann: Annotate Activity Start
+
+ ae -> activity: initActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ note over ae,aes: align threadcount as explained below
+
+caller <- ae
+deactivate ae
+
+== dynamic threadcount update ==
+note over ae, aes: threads can be changed dynamically
+
+caller -> ae: apply params
+activate ae
+ ae->ae: align motor count
+ ae->aes: stop extra motors
+ ae->aes: <start missing motors>
+ group for each new thread/motor
+  ae -> aes: execute(<motor>)
+ activate aes
+  aes -> atf: get()
+  atf -> thread**: create
+  activate atf
+  aes <- atf: <thread>
+  deactivate atf
+  aes - -> thread: run()
+  note over ann, thread: At this point, the\nmotor thread starts running\nthe defined activity's action\nover cycles
+  ae->ae: await thread state update
+
+ ae<-aes:
+ deactivate aes
+ end group
+caller <- ae
+deactivate ae
+
+== shutdown sequence [after startup] ==
+
+caller -> ae: stopActivity()
+activate ae
+
+ ae -> ae: request stop motors
+ ae -> ae: await all stop
+
+ ae -> activity: shutdownActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ ae -> ann: Annotate Activity Finish
+
+caller <- ae
+deactivate ae
+
+== on exception in motor thread ==
+thread -> aeh: catch(<thrown exception>)
+aeh -> ae: notifyException\n(<thread>,<throwable>)
+activate ae
+ ae -> ae: save exception
+ ae -> ae: forceStopActivity()
+ ae -> aes: shutdown();
+ activate aes
+ ae <- aes:
+ deactivate aes
+
+ group if needed [after timeout]]
+  ae -> aes: shutdownNow();
+  activate aes
+  ae <- aes
+  deactivate aes
+ end group
+
+ ae -> activity: shutdownActivity();
+ ae -> activity: closeAutoCloseables();
+
+ note over thread: action\nthread\nterminates
+ destroy thread
+deactivate ae
+
+
+@enduml
+
+@startuml
+title: Lifecycle of an activity
+
+control caller as caller
+control ActivityExecutor as ae
+control "Activity\nException\nHandler" as aeh
+control "Activity\nThread\nFactory" as atf
+control ExecutorService as aes
+control Annotator as ann
+control Activity as activity
+
+== startup sequence ==
+caller -> ae**: create
+  ae -> aeh**: create
+  ae -> atf**: create(\w Exception Handler)
+  aeh -> atf: <injected\nvia ctor>
+ ae -> aes**: create(\w Thread Factory)
+  atf -> aes: <injected\nvia ctor>
+
+caller -> ae: startActivity()
+activate ae
+ ae -> ann: Annotate Activity Start
+
+ ae -> activity: initActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ note over ae,aes: align threadcount as explained below
+
+caller <- ae
+deactivate ae
+
+== dynamic threadcount update ==
+note over ae, aes: threads can be changed dynamically
+
+caller -> ae: apply params
+activate ae
+ ae->ae: align motor count
+ ae->aes: stop extra motors
+ ae->aes: <start missing motors>
+ group for each new thread/motor
+  ae -> aes: execute(<motor>)
+ activate aes
+  aes -> atf: get()
+  atf -> thread**: create
+  activate atf
+  aes <- atf: <thread>
+  deactivate atf
+  aes - -> thread: run()
+  note over ann, thread: At this point, the\nmotor thread starts running\nthe defined activity's action\nover cycles
+  ae->ae: await thread state update
+
+ ae<-aes:
+ deactivate aes
+ end group
+caller <- ae
+deactivate ae
+
+== shutdown sequence [after startup] ==
+
+caller -> ae: stopActivity()
+activate ae
+
+ ae -> ae: request stop motors
+ ae -> ae: await all stop
+
+ ae -> activity: shutdownActivity()
+ activate activity
+ ae <- activity
+ deactivate activity
+
+ ae -> ann: Annotate Activity Finish
+
+caller <- ae
+deactivate ae
+
+== on exception in motor thread ==
+thread -> aeh: catch(<thrown exception>)
+aeh -> ae: notifyException\n(<thread>,<throwable>)
+activate ae
+ ae -> ae: save exception
+ ae -> ae: forceStopActivity()
+ ae -> aes: shutdown();
+ activate aes
+ ae <- aes:
+ deactivate aes
+
+ group if needed [after timeout]]
+  ae -> aes: shutdownNow();
+  activate aes
+  ae <- aes
+  deactivate aes
+ end group
+
+ ae -> activity: shutdownActivity();
+ ae -> activity: closeAutoCloseables();
+
+ note over thread: action\nthread\nterminates
+ destroy thread
+deactivate ae
+
+
+@enduml
+
+PlantUML version 1.2022.12(Sun Oct 23 13:12:26 CDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

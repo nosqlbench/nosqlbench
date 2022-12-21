@@ -16,18 +16,18 @@
 
 package io.nosqlbench.engine.rest.transfertypes;
 
-import io.nosqlbench.engine.core.lifecycle.ScenarioResult;
+import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 
 public class ResultView {
 
-    private final ScenarioResult result;
+    private final ExecutionMetricsResult result;
 
-    public ResultView(ScenarioResult result) {
+    public ResultView(ExecutionMetricsResult result) {
         this.result = result;
     }
 
     public String getIOLog() {
-        if (result!=null) {
+        if (result != null) {
             return result.getIOLog();
         } else {
             return "";
@@ -35,8 +35,8 @@ public class ResultView {
     }
 
     public String getError() {
-        if (result!=null && result.getException().isPresent()) {
-            return result.getException().get().getMessage();
+        if (result != null && result.getException()!=null) {
+            return result.getException().getMessage();
         }
         return "";
     }

@@ -21,7 +21,7 @@ import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.lifecycle.ShutdownManager;
+import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
 import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +54,7 @@ public class MetricReporters implements Shutdownable {
     }
 
     public MetricReporters addGraphite(String dest, String prefix) {
-        logger.debug("Adding graphite reporter to " + dest + " with prefix " + prefix);
+        logger.debug(() -> "Adding graphite reporter to " + dest + " with prefix " + prefix);
         if (dest.indexOf(":")>=0) {
             String[] split = dest.split(":");
             addGraphite(split[0],Integer.valueOf(split[1]),prefix);
@@ -65,7 +65,7 @@ public class MetricReporters implements Shutdownable {
     }
 
     public void addCSVReporter(String directoryName, String prefix) {
-        logger.debug("Adding CSV reporter to " + directoryName + " with prefix " + prefix);
+        logger.debug(() -> "Adding CSV reporter to " + directoryName + " with prefix " + prefix);
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");

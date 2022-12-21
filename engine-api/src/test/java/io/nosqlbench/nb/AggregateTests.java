@@ -18,6 +18,8 @@ package io.nosqlbench.nb;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.HdrHistogram.DoubleRecorder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.DoubleSummaryStatistics;
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * a proof, so we can get on with testing!
  */
 public class AggregateTests {
+    private final static Logger logger = LogManager.getLogger(AggregateTests.class);
     double[][] data = new double[][]{
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 91},
         {15, 15, 15, 15, 15, 5, 5, 5, 5, 5},
@@ -62,8 +65,8 @@ public class AggregateTests {
             aggstats.accept(series.getAverage());
         }
 
-        System.out.println("aggstats avg:" + aggstats.getAverage());
-        System.out.println("allstats avg:" + allstats.getAverage());
+        logger.debug("aggstats avg:" + aggstats.getAverage());
+        logger.debug("allstats avg:" + allstats.getAverage());
 
         assertThat(aggstats.getAverage()).isNotEqualTo(allstats.getAverage());
     }
@@ -92,21 +95,21 @@ public class AggregateTests {
                 all.recordValue(v);
             }
             snapshots[i]=recorder.getIntervalHistogram();
-            System.out.println(snapshot(snapshots[i],"ary[" + i + "]"));
+            logger.debug(snapshot(snapshots[i],"ary[" + i + "]"));
         }
 
         DoubleHistogram histoall = all.getIntervalHistogram();
-        System.out.println(snapshot(histoall, "all"));
+        logger.debug(snapshot(histoall, "all"));
 
         for (double pctile : new double[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 99.9, 99.99}) {
             DoubleSummaryStatistics avgOfInputs = new DoubleSummaryStatistics();
             for (DoubleHistogram snapshot : snapshots) {
                 avgOfInputs.accept(snapshot.getValueAtPercentile(pctile));
             }
-            System.out.println("avg of " + pctile + " => " + String.format("%.3f",avgOfInputs.getAverage()) + " (min,max)=("+String.format("%.3f",avgOfInputs.getMin()) + "," +
+            logger.debug("avg of " + pctile + " => " + String.format("%.3f",avgOfInputs.getAverage()) + " (min,max)=("+String.format("%.3f",avgOfInputs.getMin()) + "," +
                 String.format("%.3f",avgOfInputs.getMax())+ ")");
-            System.out.println("direct " + pctile + " => " + String.format("%.3f",histoall.getValueAtPercentile(pctile)));
-            System.out.println();
+            logger.debug("direct " + pctile + " => " + String.format("%.3f",histoall.getValueAtPercentile(pctile)));
+
 
         }
 
@@ -128,11 +131,10 @@ public class AggregateTests {
                 prototype[j]=r.nextDouble()*100;
             }
 
-            System.out.print("proto[" + i + "] = ");
+            logger.debug("proto[" + i + "] = ");
             for (double v : prototype) {
-                System.out.print(String.format("% 3.0f ",v));
+                logger.trace(String.format("% 3.0f ",v));
             }
-            System.out.println();
             series[i]=resampleCurve(prototype,100);
         }
 

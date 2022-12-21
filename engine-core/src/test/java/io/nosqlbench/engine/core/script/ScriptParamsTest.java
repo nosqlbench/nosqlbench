@@ -17,12 +17,12 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ScriptParamsTest {

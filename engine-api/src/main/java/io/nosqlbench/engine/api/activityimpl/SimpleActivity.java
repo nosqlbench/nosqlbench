@@ -40,6 +40,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DryRunOpDispenserWrapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
@@ -83,6 +84,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
+    private final RunStateTally tally = new RunStateTally();
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -96,7 +98,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             } else {
                 activityDef.getParams().set("alias",
                     activityDef.getActivityType().toUpperCase(Locale.ROOT)
-                        + String.valueOf(nameEnumerator++));
+                        + nameEnumerator++);
             }
         }
     }
@@ -191,7 +193,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public String toString() {
-        return getAlias();
+        return getAlias()+":"+getRunState()+":"+getRunStateTally().toString();
     }
 
     @Override
@@ -218,7 +220,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
-            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable.toString());
+            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -393,7 +395,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         if (threadSpec.isPresent()) {
             String spec = threadSpec.get();
             int processors = Runtime.getRuntime().availableProcessors();
-            if (spec.toLowerCase().equals("auto")) {
+            if (spec.equalsIgnoreCase("auto")) {
                 int threads = processors * 10;
                 if (threads > activityDef.getCycleCount()) {
                     threads = (int) activityDef.getCycleCount();
@@ -665,7 +667,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             return stmtsDocList;
 
         } catch (Exception e) {
-            throw new OpConfigError("Error loading op templates: " + e.toString(), workloadSource, e);
+            throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
         }
 
     }
@@ -688,6 +690,11 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     @Override
     public int getMaxTries() {
         return getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
+    }
+
+    @Override
+    public RunStateTally getRunStateTally() {
+        return tally;
     }
 
 

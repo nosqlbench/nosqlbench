@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+  - Copyright (c) 2022 nosqlbench
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="2667.6px" preserveAspectRatio="none" style="width:1455px;height:2667px;background:#FFFFFF;" version="1.1" viewBox="0 0 1455 2667" width="1455.4px" zoomAndPan="magnify"><defs/><g><rect fill="none" height="55.229" id="_title" style="stroke:none;stroke-width:1.8999999999999997;" width="298.3" x="570.95" y="19"/><text fill="#000000" font-family="sans-serif" font-size="26.6" font-weight="bold" lengthAdjust="spacing" textLength="279.3" x="580.45" y="56.9353">Lifecycle of Scenarios</text><rect fill="#FFFFFF" height="60.2414" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="221.35" y="1775.9961"/><rect fill="#FFFFFF" height="455.89" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="562.4" y="2043.5618"/><rect fill="#FFFFFF" height="143.9705" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1060.2" y="1220.4895"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1060.2" y="2214.7861"/><rect fill="#FFFFFF" height="60.2414" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1238.8" y="2365.669"/><rect fill="#FFFFFF" height="180.7243" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1367.05" y="1715.7547"/><rect fill="none" height="124.2829" style="stroke:#000000;stroke-width:2.8499999999999996;" width="664.05" x="485.45" y="2132.3033"/><rect fill="none" height="157.9243" style="stroke:#000000;stroke-width:2.8499999999999996;" width="835.05" x="485.45" y="2283.1861"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="53.2" x2="53.2" y1="218.8871" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="230.85" x2="230.85" y1="923.934" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="415.15" x2="415.15" y1="1058.0775" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="570.95" x2="570.95" y1="333.0162" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="754.3" x2="754.3" y1="485.2743" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="921.5" x2="921.5" y1="637.5323" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1069.7" x2="1069.7" y1="789.7904" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1248.3" x2="1248.3" y1="1296.554" y2="2533.6519"/><line style="stroke:#181818;stroke-width:0.9499999999999998;stroke-dasharray:5.0,5.0;" x1="1375.6" x2="1375.6" y1="1587.6073" y2="2533.6519"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="77.9" x="9.5" y="211.0934">NBCLI</text><ellipse cx="54.15" cy="152.2581" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="46.55,129.4581,57.95,119.9581,54.15,129.4581,57.95,138.9581,46.55,129.4581" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="77.9" x="9.5" y="2560.1871">NBCLI</text><ellipse cx="54.15" cy="2598.3809" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="46.55,2575.5809,57.95,2566.0809,54.15,2575.5809,57.95,2585.0809,46.55,2575.5809" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="170.05" y="2560.1871">Scenario</text><ellipse cx="230.85" cy="2598.3809" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="223.25,2575.5809,234.65,2566.0809,230.85,2575.5809,234.65,2585.0809,223.25,2575.5809" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="355.3" y="2560.1871">Scenario</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="127.3" x="346.75" y="2596.4162">Controller</text><ellipse cx="416.1" cy="2634.61" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="408.5,2611.81,419.9,2602.31,416.1,2611.81,419.9,2621.31,408.5,2611.81" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="504.45" y="2560.1871">Scenarios</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="511.1" y="2596.4162">Executor</text><ellipse cx="571.9" cy="2634.61" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="564.3,2611.81,575.7,2602.31,571.9,2611.81,575.7,2621.31,564.3,2611.81" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="687.8" y="2560.1871">Exception</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="102.6" x="698.25" y="2596.4162">Handler</text><ellipse cx="755.25" cy="2634.61" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="747.65,2611.81,759.05,2602.31,755.25,2611.81,759.05,2621.31,747.65,2611.81" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="870.2" y="2560.1871">Thread</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="870.2" y="2596.4162">Factory</text><ellipse cx="921.5" cy="2634.61" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="913.9,2611.81,925.3,2602.31,921.5,2611.81,925.3,2621.31,913.9,2611.81" style="stroke:#181818;stroke-width:1.8999999999999997;"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="1008.9" y="2560.1871">Executor</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="1018.4" y="2596.4162">Service</text><ellipse cx="1069.7" cy="2634.61" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1062.1,2611.81,1073.5,2602.31,1069.7,2611.81,1073.5,2621.31,1062.1,2611.81" style="stroke:#181818;stroke-width:1.8999999999999997;"/><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="106.4" x="1195.1" y="2531.7519"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="79.8" x="1208.4" y="2573.4871">future</text><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="112.1" x="1320.5" y="2531.7519"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="85.5" x="1333.8" y="2573.4871">thread</text><rect fill="#FFFFFF" height="60.2414" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="221.35" y="1775.9961"/><rect fill="#FFFFFF" height="455.89" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="562.4" y="2043.5618"/><rect fill="#FFFFFF" height="143.9705" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1060.2" y="1220.4895"/><rect fill="#FFFFFF" height="26.6" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1060.2" y="2214.7861"/><rect fill="#FFFFFF" height="60.2414" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1238.8" y="2365.669"/><rect fill="#FFFFFF" height="180.7243" style="stroke:#181818;stroke-width:1.8999999999999997;" width="19" x="1367.05" y="1715.7547"/><polygon fill="#181818" points="481.65,275.3286,500.65,282.9286,481.65,290.5286,489.25,282.9286" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="54.15" x2="493.05" y1="282.9286" y2="282.9286"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="67.45" y="271.8915">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="504.45" y="327.1224">Scenarios</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="511.1" y="363.3514">Executor</text><ellipse cx="571.9" cy="268.2871" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="665,427.5866,684,435.1866,665,442.7866,672.6,435.1866" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="571.9" x2="676.4" y1="435.1866" y2="435.1866"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="585.2" y="424.1495">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="123.5" x="687.8" y="479.3805">Exception</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="102.6" x="698.25" y="515.6095">Handler</text><ellipse cx="755.25" cy="420.5452" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="747.65,397.7452,759.05,388.2452,755.25,397.7452,759.05,407.2452,747.65,397.7452" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="847.4,613.4862,866.4,621.0862,847.4,628.6862,855,621.0862" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="571.9" x2="858.8" y1="621.0862" y2="621.0862"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="241.3" x="585.2" y="576.4076">create ThreadFactory</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="252.7" x="585.2" y="610.0491">(w/ ExceptionHandler)</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="870.2" y="631.6386">Thread</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="870.2" y="667.8676">Factory</text><ellipse cx="921.5" cy="572.8033" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="913.9,550.0033,925.3,540.5033,921.5,550.0033,925.3,559.5033,913.9,550.0033" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="986.1,765.7442,1005.1,773.3442,986.1,780.9442,993.7,773.3442" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="571.9" x2="997.5" y1="773.3442" y2="773.3442"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="256.5" x="585.2" y="728.6657">create ExecutorService</text><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="214.7" x="585.2" y="762.3071">(w/ ThreadFactory)</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="1008.9" y="783.8967">Executor</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="91.2" x="1018.4" y="820.1257">Service</text><ellipse cx="1069.7" cy="725.0614" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="1062.1,702.2614,1073.5,692.7614,1069.7,702.2614,1073.5,711.7614,1062.1,702.2614" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="147.25,884.3609,166.25,891.9609,147.25,899.5609,154.85,891.9609" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="54.15" x2="158.65" y1="891.9609" y2="891.9609"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="67.45" y="880.9238">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="170.05" y="936.1547">Scenario</text><ellipse cx="230.85" cy="877.3195" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="223.25,854.5195,234.65,845.0195,230.85,854.5195,234.65,864.0195,223.25,854.5195" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="323.95,1000.3899,342.95,1007.9899,323.95,1015.5899,331.55,1007.9899" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="230.85" x2="335.35" y1="1007.9899" y2="1007.9899"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="244.15" y="996.9528">create</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="110.2" x="355.3" y="1052.1838">Scenario</text><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="127.3" x="346.75" y="1088.4128">Controller</text><ellipse cx="416.1" cy="993.3485" fill="#E2E2F0" rx="22.8" ry="22.8" style="stroke:#181818;stroke-width:0.9499999999999998;"/><polygon fill="#181818" points="408.5,970.5485,419.9,961.0485,416.1,970.5485,419.9,980.0485,408.5,970.5485" style="stroke:#181818;stroke-width:1.8999999999999997;"/><polygon fill="#181818" points="549.1,1152.648,568.1,1160.248,549.1,1167.848,556.7,1160.248" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;stroke-dasharray:2.0,2.0;" x1="54.15" x2="560.5" y1="1160.248" y2="1160.248"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="201.4" x="67.45" y="1149.2109">execute(Scenario)</text><polygon fill="#181818" points="1037.4,1212.8895,1056.4,1220.4895,1037.4,1228.0895,1045,1220.4895" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;stroke-dasharray:2.0,2.0;" x1="571.9" x2="1048.8" y1="1220.4895" y2="1220.4895"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="311.6" x="585.2" y="1209.4523">submit(&lt;Callable&gt; Scenario)</text><polygon fill="#181818" points="1172.3,1273.1309,1191.3,1280.7309,1172.3,1288.3309,1179.9,1280.7309" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="1079.2" x2="1183.7" y1="1280.7309" y2="1280.7309"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="1092.5" y="1269.6938">create</text><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="106.4" x="1195.1" y="1235.6895"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="79.8" x="1208.4" y="1277.4247">future</text><polygon fill="#181818" points="592.8,1356.8599,573.8,1364.4599,592.8,1372.0599,585.2,1364.4599" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;stroke-dasharray:2.0,2.0;" x1="581.4" x2="1067.8" y1="1364.4599" y2="1364.4599"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="296.4" x="604.2" y="1353.4228">&lt;Future&lt;ScenarioResult&gt;&gt;</text><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1442.1" x="0" y="1421.1806"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1442.1" y1="1421.1806" y2="1421.1806"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1442.1" y1="1426.8806" y2="1426.8806"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="499.7" x="471.2" y="1398.6599"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="467.4" x="482.6" y="1432.6643">[async] on thread from thread factory</text><polygon fill="#181818" points="942.4,1503.9428,923.4,1511.5428,942.4,1519.1428,934.8,1511.5428" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="931" x2="1067.8" y1="1511.5428" y2="1511.5428"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="53.2" x="953.8" y="1500.5057">get()</text><polygon fill="#181818" points="1297.7,1564.1842,1316.7,1571.7842,1297.7,1579.3842,1305.3,1571.7842" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="921.5" x2="1309.1" y1="1571.7842" y2="1571.7842"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="70.3" x="934.8" y="1560.7471">create</text><rect fill="#E2E2F0" height="62.829" rx="4.75" ry="4.75" style="stroke:#181818;stroke-width:0.9499999999999998;" width="112.1" x="1320.5" y="1526.7428"/><text fill="#000000" font-family="sans-serif" font-size="26.6" lengthAdjust="spacing" textLength="85.5" x="1333.8" y="1568.4781">thread</text><polygon fill="#181818" points="1046.9,1647.9133,1065.9,1655.5133,1046.9,1663.1133,1054.5,1655.5133" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="921.5" x2="1058.3" y1="1655.5133" y2="1655.5133"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="102.6" x="934.8" y="1644.4762">&lt;thread&gt;</text><polygon fill="#181818" points="1344.25,1708.1547,1363.25,1715.7547,1344.25,1723.3547,1351.85,1715.7547" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="1069.7" x2="1355.65" y1="1715.7547" y2="1715.7547"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="93.1" x="1083" y="1704.7176">run task</text><polygon fill="#181818" points="261.25,1768.3961,242.25,1775.9961,261.25,1783.5961,253.65,1775.9961" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="249.85" x2="1365.15" y1="1775.9961" y2="1775.9961"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="51.3" x="272.65" y="1764.959">call()</text><polygon fill="#181818" points="1344.25,1828.6376,1363.25,1836.2376,1344.25,1843.8376,1351.85,1836.2376" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="230.85" x2="1355.65" y1="1836.2376" y2="1836.2376"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="167.2" x="244.15" y="1825.2004">ScenarioResult</text><polygon fill="#181818" points="1269.2,1888.879,1250.2,1896.479,1269.2,1904.079,1261.6,1896.479" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="1257.8" x2="1374.65" y1="1896.479" y2="1896.479"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="64.6" x="1280.6" y="1885.4419">result</text><rect fill="#EEEEEE" height="5.7" style="stroke:#EEEEEE;stroke-width:1.8999999999999997;" width="1442.1" x="0" y="1953.1997"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1442.1" y1="1953.1997" y2="1953.1997"/><line style="stroke:#000000;stroke-width:1.8999999999999997;" x1="0" x2="1442.1" y1="1958.8997" y2="1958.8997"/><rect fill="#EEEEEE" height="48.8414" style="stroke:#000000;stroke-width:3.7999999999999994;" width="328.7" x="556.7" y="1930.679"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="296.4" x="568.1" y="1964.6833">[async] on NBCLI thread</text><polygon fill="#181818" points="539.6,2035.9618,558.6,2043.5618,539.6,2051.1618,547.2,2043.5618" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="54.15" x2="551" y1="2043.5618" y2="2043.5618"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="190" x="67.45" y="2032.5247">awaitAllResults();</text><polygon fill="#181818" points="1046.9,2096.2033,1065.9,2103.8033,1046.9,2111.4033,1054.5,2103.8033" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="581.4" x2="1058.3" y1="2103.8033" y2="2103.8033"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="115.9" x="594.7" y="2092.7662">shutdown</text><path d="M485.45,2132.3033 L624.15,2132.3033 L624.15,2150.7447 L605.15,2169.7447 L485.45,2169.7447 L485.45,2132.3033 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.8499999999999996;"/><rect fill="none" height="124.2829" style="stroke:#000000;stroke-width:2.8499999999999996;" width="664.05" x="485.45" y="2132.3033"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="53.2" x="513.95" y="2160.6076">loop</text><text fill="#000000" font-family="sans-serif" font-size="20.9" font-weight="bold" lengthAdjust="spacing" textLength="100.7" x="652.65" y="2158.4452">[timeout]</text><polygon fill="#181818" points="1037.4,2207.1861,1056.4,2214.7861,1037.4,2222.3861,1045,2214.7861" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="581.4" x2="1048.8" y1="2214.7861" y2="2214.7861"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="305.9" x="594.7" y="2203.749">awaitTermination(timeout)</text><polygon fill="#181818" points="602.3,2233.7861,583.3,2241.3861,602.3,2248.9861,594.7,2241.3861" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="590.9" x2="1067.8" y1="2241.3861" y2="2241.3861"/><path d="M485.45,2283.1861 L624.15,2283.1861 L624.15,2301.6276 L605.15,2320.6276 L485.45,2320.6276 L485.45,2283.1861 " fill="#EEEEEE" style="stroke:#000000;stroke-width:2.8499999999999996;"/><rect fill="none" height="157.9243" style="stroke:#000000;stroke-width:2.8499999999999996;" width="835.05" x="485.45" y="2283.1861"/><text fill="#000000" font-family="sans-serif" font-size="24.7" font-weight="bold" lengthAdjust="spacing" textLength="53.2" x="513.95" y="2311.4905">loop</text><text fill="#000000" font-family="sans-serif" font-size="20.9" font-weight="bold" lengthAdjust="spacing" textLength="138.7" x="652.65" y="2309.3281">[each future]</text><polygon fill="#181818" points="1216,2358.069,1235,2365.669,1216,2373.269,1223.6,2365.669" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="581.4" x2="1227.4" y1="2365.669" y2="2365.669"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="53.2" x="594.7" y="2354.6319">get()</text><polygon fill="#181818" points="602.3,2418.3104,583.3,2425.9104,602.3,2433.5104,594.7,2425.9104" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="590.9" x2="1246.4" y1="2425.9104" y2="2425.9104"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="167.2" x="613.7" y="2414.8733">ScenarioResult</text><polygon fill="#181818" points="75.05,2491.8519,56.05,2499.4519,75.05,2507.0519,67.45,2499.4519" style="stroke:#181818;stroke-width:1.8999999999999997;"/><line style="stroke:#181818;stroke-width:1.8999999999999997;" x1="63.65" x2="570" y1="2499.4519" y2="2499.4519"/><text fill="#000000" font-family="sans-serif" font-size="24.7" lengthAdjust="spacing" textLength="216.6" x="86.45" y="2488.4148">&lt;ScenariosResults&gt;</text><!--MD5=[f7dbc3966eeeca638e2d774db8fe0781]
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Lifecycle of Scenarios
+
+control "NBCLI" as nbcli
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scenarios\nExecutor" as se
+control "Exception\nHandler" as seh
+control "Thread\nFactory" as stf
+control "Executor\nService" as ses
+
+nbcli -> se** : create
+ se -> seh** : create
+ se -> stf** : create ThreadFactory\n(w/ ExceptionHandler)
+ se -> ses** : create ExecutorService\n(w/ ThreadFactory)
+
+nbcli -> s** : create
+ s -> sc** : create
+nbcli - -> se : execute(Scenario)
+se - -> ses: submit(<Callable> Scenario)
+activate ses
+ ses -> future**: create
+se <- - ses: <Future<ScenarioResult>>
+deactivate ses
+
+== [async] on thread from thread factory ==
+ses -> stf: get()
+ stf -> thread**: create
+ses <- stf: <thread>
+ses -> thread: run task
+activate thread
+thread -> s: call()
+activate s
+thread <- s: ScenarioResult
+deactivate s
+thread -> future: result
+deactivate thread
+
+== [async] on NBCLI thread ==
+
+nbcli -> se: awaitAllResults();
+activate se
+ se -> ses: shutdown
+ loop timeout
+ se -> ses: awaitTermination(timeout)
+ activate ses
+ se <- ses
+ deactivate ses
+ end loop
+ loop each future
+ se -> future: get()
+ activate future
+ se <- future: ScenarioResult
+ deactivate future
+ end loop
+
+nbcli <- se: <ScenariosResults>
+deactivate se
+
+@enduml
+
+@startuml
+
+title Lifecycle of Scenarios
+
+control "NBCLI" as nbcli
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scenarios\nExecutor" as se
+control "Exception\nHandler" as seh
+control "Thread\nFactory" as stf
+control "Executor\nService" as ses
+
+nbcli -> se** : create
+ se -> seh** : create
+ se -> stf** : create ThreadFactory\n(w/ ExceptionHandler)
+ se -> ses** : create ExecutorService\n(w/ ThreadFactory)
+
+nbcli -> s** : create
+ s -> sc** : create
+nbcli - -> se : execute(Scenario)
+se - -> ses: submit(<Callable> Scenario)
+activate ses
+ ses -> future**: create
+se <- - ses: <Future<ScenarioResult>>
+deactivate ses
+
+== [async] on thread from thread factory ==
+ses -> stf: get()
+ stf -> thread**: create
+ses <- stf: <thread>
+ses -> thread: run task
+activate thread
+thread -> s: call()
+activate s
+thread <- s: ScenarioResult
+deactivate s
+thread -> future: result
+deactivate thread
+
+== [async] on NBCLI thread ==
+
+nbcli -> se: awaitAllResults();
+activate se
+ se -> ses: shutdown
+ loop timeout
+ se -> ses: awaitTermination(timeout)
+ activate ses
+ se <- ses
+ deactivate ses
+ end loop
+ loop each future
+ se -> future: get()
+ activate future
+ se <- future: ScenarioResult
+ deactivate future
+ end loop
+
+nbcli <- se: <ScenariosResults>
+deactivate se
+
+@enduml
+
+PlantUML version 1.2022.12(Sun Oct 23 13:12:26 CDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

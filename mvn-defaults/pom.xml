@@ -23,6 +23,11 @@
     <packaging>pom</packaging>
 
     <properties>
+        <!-- Set this level to override the logging level for tests during build -->
+        <project.testlevel>INFO</project.testlevel>
+        <!-- Set this level to override the logging level for tests logging configuration during build -->
+        <project.test_logstatuslevel>INFO</project.test_logstatuslevel>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench</javadoc.name>
@@ -463,6 +468,12 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -596,7 +607,7 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <version>0.13</version>
+                <version>0.15</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
