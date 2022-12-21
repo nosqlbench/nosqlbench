@@ -146,20 +146,6 @@ public class PolyglotScenarioController {
         }
     }
 
-    public synchronized void apply(Object o) {
-        if (o instanceof Value) {
-            applyValue((Value) o);
-        } else if (o instanceof Map) {
-            controller.apply((Map<String, String>) o);
-        } else {
-            throw new RuntimeException("unknown type: " + o.getClass().getCanonicalName());
-        }
-    }
-
-    private synchronized void applyValue(Value spec) {
-        Map<String, String> map = spec.as(Map.class);
-        controller.apply(map);
-    }
 
     public synchronized void awaitActivity(Object o) {
         this.await(o);
