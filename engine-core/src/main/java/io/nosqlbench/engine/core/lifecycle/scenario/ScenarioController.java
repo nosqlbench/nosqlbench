@@ -51,9 +51,16 @@ public class ScenarioController {
     private final String sessionId;
     private final Maturity minMaturity;
 
-    public ScenarioController(String sessionId, Maturity minMaturity) {
-        this.sessionId = sessionId;
+    private ExecutorService activitiesExecutor;
+
+    public ScenarioController(Scenario scenario, Maturity minMaturity) {
+        this.scenario = scenario;
         this.minMaturity = minMaturity;
+        this.activityLoader = new ActivityLoader(scenario);
+
+        ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
+        IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
+        this.activitiesExecutor = Executors.newCachedThreadPool(indexedThreadFactory);
     }
 
     /**
