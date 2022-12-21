@@ -17,12 +17,15 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.IntUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashInterval implements IntUnaryOperator {
 
     private final int minValue;

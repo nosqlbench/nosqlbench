@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.discrete.long_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.ZipfDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class Zipf extends LongToIntDiscreteCurve {
     public Zipf(int numberOfElements, double exponent, String... modslist) {
         super(new ZipfDistribution(numberOfElements, exponent), modslist);

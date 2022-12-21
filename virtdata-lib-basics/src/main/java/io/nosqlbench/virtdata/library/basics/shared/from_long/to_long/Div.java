@@ -15,6 +15,8 @@
  */
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -24,6 +26,7 @@ import java.util.function.LongUnaryOperator;
  * Divide the operand by a fixed value and return the result.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Div implements LongUnaryOperator {
     private final long divisor;
 

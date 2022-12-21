@@ -17,12 +17,15 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Interpolate implements LongUnaryOperator {
 
     private final io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate basefunc;

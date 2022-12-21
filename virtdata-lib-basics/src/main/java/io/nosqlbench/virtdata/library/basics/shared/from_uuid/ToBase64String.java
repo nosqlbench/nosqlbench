@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_uuid;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -26,8 +28,9 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @ThreadSafeMapper
+@Categories(Category.conversion)
 public class ToBase64String implements Function<UUID,String> {
-    private ThreadLocal<Base64.Encoder> tl_encoder = ThreadLocal.withInitial(Base64::getEncoder);
+    private final ThreadLocal<Base64.Encoder> tl_encoder = ThreadLocal.withInitial(Base64::getEncoder);
 
     @Example({"ToBase64String()","Encode the bits of a UUID into a Base64 String"})
     public ToBase64String() {
