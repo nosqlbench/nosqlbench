@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.codahale.metrics.*;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
-import io.nosqlbench.engine.core.metrics.PolyglotMetricRegistryBindings;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotMetricRegistryBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

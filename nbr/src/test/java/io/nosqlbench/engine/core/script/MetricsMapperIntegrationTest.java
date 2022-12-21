@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.script;
 
+import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

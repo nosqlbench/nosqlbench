@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario;
 
-import io.nosqlbench.engine.core.lifecycle.*;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
+import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioExceptionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

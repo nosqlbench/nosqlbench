@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.core.lifecycle.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 
 public class ScenarioContext extends ScriptEnvBuffer {

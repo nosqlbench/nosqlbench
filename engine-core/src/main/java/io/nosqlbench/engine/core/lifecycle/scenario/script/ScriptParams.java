@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,8 +43,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
         Map<String, String> map;
         if (overrides instanceof Map) {
             map = (Map) overrides;
-        } else if (overrides instanceof Value) {
-            Value v = (Value) overrides;
+        } else if (overrides instanceof Value v) {
             map = v.as(Map.class);
         } else {
             throw new RuntimeException("Unrecognized overrides type: " + overrides.getClass().getCanonicalName());

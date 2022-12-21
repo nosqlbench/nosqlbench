@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.process;
 
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 

@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-public class ReadOnlyBindingsException extends RuntimeException {
-    private final Object parent;
-    private final String name;
-    private final String operation;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 
-    public ReadOnlyBindingsException(Object parent, String operation) {
-        this.parent = parent;
-        this.name = "unspecified";
-        this.operation = operation;
+public class ScenarioExceptionHandler implements Thread.UncaughtExceptionHandler {
+    private final ScenariosExecutor scenariosExecutor;
+
+    public ScenarioExceptionHandler(ScenariosExecutor scenariosExecutor) {
+        this.scenariosExecutor = scenariosExecutor;
     }
 
     @Override
-    public String getMessage() {
-        return "Object " + parent + " is read-only, unable to " + operation + " on it. ";
+    public void uncaughtException(Thread t, Throwable e) {
+        scenariosExecutor.notifyException(t, e);
     }
 }

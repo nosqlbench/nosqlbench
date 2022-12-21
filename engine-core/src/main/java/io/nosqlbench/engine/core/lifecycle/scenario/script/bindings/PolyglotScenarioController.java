@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;

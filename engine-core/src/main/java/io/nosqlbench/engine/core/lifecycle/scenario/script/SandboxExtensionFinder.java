@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 

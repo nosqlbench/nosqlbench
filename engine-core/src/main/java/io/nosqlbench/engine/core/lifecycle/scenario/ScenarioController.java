@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.scenario;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityapi.core.RunState;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.config.standard.ConfigSuggestions;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
+import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
+import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.activity.*;
+import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 

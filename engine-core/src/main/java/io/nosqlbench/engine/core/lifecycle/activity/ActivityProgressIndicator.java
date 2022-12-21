@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.activity;
 
 import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -22,6 +22,7 @@ import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.api.engine.metrics.PeriodicRunnable;
 import io.nosqlbench.api.engine.util.Unit;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

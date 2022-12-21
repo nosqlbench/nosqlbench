@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-package io.nosqlbench.engine.core.script;
+public class ScriptExecutionError extends RuntimeException {
 
-public class ScenarioExceptionHandler implements Thread.UncaughtExceptionHandler {
-    private final ScenariosExecutor scenariosExecutor;
-
-    public ScenarioExceptionHandler(ScenariosExecutor scenariosExecutor) {
-        this.scenariosExecutor = scenariosExecutor;
+    public ScriptExecutionError(Throwable cause) {
+        super(cause);
     }
 
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        scenariosExecutor.notifyException(t, e);
+    public String getMessage() {
+        return "There was an error while executing script:" + super.getMessage();
     }
 }

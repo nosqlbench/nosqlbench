@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.process;
 
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;

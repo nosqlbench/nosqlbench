@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle;
+package io.nosqlbench.engine.core.lifecycle.scenario;
 
-public class ActivityStatus {
+import org.apache.logging.log4j.Logger;
+
+public class ScenarioShutdownHook extends Thread {
+
+    private final Scenario scenario;
+    private final Logger logger;
+
+    public ScenarioShutdownHook(Scenario scenario) {
+        this.scenario = scenario;
+        logger = scenario.getLogger();
+    }
+
+    @Override
+    public void run() {
+        scenario.finish();
+    }
+
 }

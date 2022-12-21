@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.script;
 
-public class ScriptExecutionError extends RuntimeException {
+package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
-    public ScriptExecutionError(Throwable cause) {
-        super(cause);
+public class ReadOnlyBindingsException extends RuntimeException {
+    private final Object parent;
+    private final String name;
+    private final String operation;
+
+    public ReadOnlyBindingsException(Object parent, String operation) {
+        this.parent = parent;
+        this.name = "unspecified";
+        this.operation = operation;
     }
 
     @Override
     public String getMessage() {
-        return "There was an error while executing script:" + super.getMessage();
+        return "Object " + parent + " is read-only, unable to " + operation + " on it. ";
     }
 }

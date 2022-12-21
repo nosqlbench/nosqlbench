@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.metrics;
+package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.engine.core.metrics.MetricMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
