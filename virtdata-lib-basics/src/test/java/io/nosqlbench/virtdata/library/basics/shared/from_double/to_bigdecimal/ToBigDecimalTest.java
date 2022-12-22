@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_double.to_bigdecimal;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +27,12 @@ import java.math.MathContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ToBigDecimalTest {
+    private final static Logger logger = LogManager.getLogger(ToBigDecimalTest.class);
 
     @Test
     public void demonstrateDoubleToBigDecimal() {
         double big = 1234567890.098765d;
-        System.out.println(big);
+        logger.debug(big);
 
         ToBigDecimal unlimited = new ToBigDecimal();
         BigDecimal bignum = unlimited.apply(big);
@@ -39,7 +42,7 @@ public class ToBigDecimalTest {
         ToBigDecimal p5rounded = new ToBigDecimal("precision=5 roundingMode=UP");
         BigDecimal rounded = p5rounded.apply(big);
         assertThat(rounded.doubleValue()).isCloseTo(1234600000.0D,Offset.offset(0.0000001d));
-        System.out.println(rounded);
+        logger.debug(rounded);
 
     }
 

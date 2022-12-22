@@ -18,6 +18,8 @@ package io.nosqlbench.virtdata.library.basics.core.stathelpers.aliasmethod;
 
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AliasSamplerDoubleIntTest {
 
+    private final static Logger logger = LogManager.getLogger(AliasSamplerDoubleIntTest.class);
     @Test
     public void testAliasSamplerBinaryFractions() {
         List<EvProbD> events = new ArrayList<>();
@@ -48,7 +51,7 @@ public class AliasSamplerDoubleIntTest {
             int idx = as.applyAsInt(v);
             stats[idx]++;
         }
-        System.out.println(Arrays.toString(stats));
+        logger.debug(Arrays.toString(stats));
         assertThat(stats).containsExactly(0,79,79,157,313,626,1250,2499,4997);
 
     }
@@ -68,7 +71,7 @@ public class AliasSamplerDoubleIntTest {
             int idx = as.applyAsInt(v);
             stats[idx]++;
         }
-        System.out.println(Arrays.toString(stats));
+        logger.debug(Arrays.toString(stats));
         assertThat(stats).containsExactly(0,1667,3334,4999);
     }
 

@@ -62,7 +62,7 @@ public class MetricsMapper {
         List<String> metricsDetails = new ArrayList<>();
 
         ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
-        logger.info("introspecting metric names for " + activitySpec);
+        logger.info(() -> "introspecting metric names for " + activitySpec);
 
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(activityDef);
 

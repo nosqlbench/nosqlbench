@@ -37,9 +37,9 @@ public class CoreAction implements SyncAction {
     @Override
     public int runCycle(long cycle) {
         if ((cycle % interval) == 0) {
-            logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
+            logger.info(() -> activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
         } else {
-            logger.trace(activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
+            logger.trace(() -> activityDef.getAlias() + "[" + slot + "]: cycle=" + cycle);
         }
         return 0;
     }

@@ -70,10 +70,10 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
             .stream()
             .filter(n -> {
                 if (bindingsFilter.matcher(n).matches()) {
-                    logger.trace("bindings filter kept binding '" + n + "'");
+                    logger.trace(() -> "bindings filter kept binding '" + n + "'");
                     return true;
                 } else {
-                    logger.trace("bindings filter removed binding '" + n + "'");
+                    logger.trace(() -> "bindings filter removed binding '" + n + "'");
                     return false;
                 }
             })

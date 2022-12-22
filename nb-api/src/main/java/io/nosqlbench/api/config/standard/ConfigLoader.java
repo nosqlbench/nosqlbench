@@ -105,7 +105,7 @@ public class ConfigLoader {
 
             data = NBIO.all().name(filename).first()
                     .map(c -> {
-                        logger.debug("found 'data' at " + c.getURI());
+                        logger.debug(() -> "found 'data' at " + c.getURI());
                         return c.asString();
                     }).orElseThrow();
         }

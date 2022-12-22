@@ -60,7 +60,7 @@ public class MetricMap implements ProxyObject {
                 Object element = current.map.get(edgeName);
                 if (element instanceof MetricMap) {
                     current = (MetricMap) element;
-                    logger.trace("traversing edge:" + edgeName);
+                    logger.trace(() -> "traversing edge:" + edgeName);
                 } else {
                     String error = "edge exists at level:" + i;
                     logger.error(error);
@@ -70,7 +70,7 @@ public class MetricMap implements ProxyObject {
                 MetricMap newMap = new MetricMap(edgeName,this.name);
                 current.map.put(edgeName, newMap);
                 current = newMap;
-                logger.trace("adding edge:" + edgeName);
+                logger.trace(() -> "adding edge:" + edgeName);
             }
         }
         return current;

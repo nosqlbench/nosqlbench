@@ -208,12 +208,12 @@ public class NBCLIScenarioParser {
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
 
-                logger.debug("rebuilt command: " + String.join(" ", buildingCmd.values()));
+                logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
             }
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
-        logger.debug("composed command line args to fulfill named scenario: " + arglist);
+        logger.debug(() -> "composed command line args to fulfill named scenario: " + arglist);
 
     }
 

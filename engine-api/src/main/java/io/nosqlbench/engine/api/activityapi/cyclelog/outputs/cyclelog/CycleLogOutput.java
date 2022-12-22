@@ -121,12 +121,12 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
                 + (nextFileExtent.remaining() / CycleResultsRLEBufferTarget.BYTES)
                 + ") tuples");
         int targetCapacity = (mbb == null ? 0 : mbb.capacity()) + nextFileExtent.remaining();
-        logger.trace("ensuring capacity for " + targetCapacity);
+        logger.trace(() -> "ensuring capacity for " + targetCapacity);
         this.ensureCapacity(targetCapacity);
         mbb.put(nextFileExtent);
         mbb.force();
         logger.trace("extent appended");
-        logger.trace("mbb position now at " + mbb.position());
+        logger.trace(() -> "mbb position now at " + mbb.position());
 
     }
 
@@ -148,7 +148,7 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
 
     private synchronized void ensureCapacity(long newCapacity) {
         try {
-            logger.info("resizing marking file from " + (mbb == null ? 0 : mbb.capacity()) + " to " + newCapacity);
+            logger.info(() -> "resizing marking file from " + (mbb == null ? 0 : mbb.capacity()) + " to " + newCapacity);
             if (file == null) {
                 file = new RandomAccessFile(outputFile, "rw");
                 file.seek(0);
@@ -160,7 +160,7 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
                 mbb = file.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, newCapacity);
                 mbb.position(pos);
             }
-            logger.trace("mbb position now at " + mbb.position());
+            logger.trace(() -> "mbb position now at " + mbb.position());
 
         } catch (Exception e) {
             throw new RuntimeException(e);

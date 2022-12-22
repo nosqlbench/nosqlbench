@@ -18,6 +18,8 @@ package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.api.config.standard.NBTypeConverter;
 import org.apache.commons.lang3.ClassUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBTypeConverterTest {
+    public final static Logger logger = LogManager.getLogger(NBTypeConverterTest.class);
 
     @Test
     public void testBasicConversion() {
@@ -37,17 +40,16 @@ public class NBTypeConverterTest {
         for (Class<?> inc : NBTypeConverter.CORE_TYPES) {
             for (Class<?> outc : NBTypeConverter.CORE_TYPES) {
                 Object in = genElement(inc);
-                System.out.print("inc:" + inc.getSimpleName() + ", outc:" + outc.getSimpleName() +", in:" + in + " --> ");
+                logger.debug(() -> "inc:" + inc.getSimpleName() + ", outc:" + outc.getSimpleName() +", in:" + in + " --> ");
                 assertThat(NBTypeConverter.canConvert(in,outc)).as("Should be able to convert core types from " + inc.getSimpleName() + " to " + outc);
 
                 Object out = NBTypeConverter.convert(in, outc);
-                System.out.println("out:" + out +", type:" + out.getClass().getSimpleName());
+                logger.debug(() -> "out:" + out +", type:" + out.getClass().getSimpleName());
                 assertThat(ClassUtils.isAssignable(out.getClass(),outc,true))
                     .as(outc.getSimpleName() + " should be assignable from "+ out.getClass().getSimpleName())
                     .isTrue();
             }
         }
-        System.out.println();
     }
 
     @Test

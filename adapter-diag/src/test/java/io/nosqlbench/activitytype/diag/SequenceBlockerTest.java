@@ -16,21 +16,22 @@
 
 package io.nosqlbench.activitytype.diag;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.io.PrintStream;
-
 public class SequenceBlockerTest {
+    private final static Logger logger = LogManager.getLogger(SequenceBlockerTest.class);
 
     @Test
     public void await() throws Exception {
 
         SequenceBlocker sb = new SequenceBlocker(234L, true);
-        new Thread(() -> sb.awaitAndRun(249L,253L, new Printer(System.out, "249-253"))).start();
+        new Thread(() -> sb.awaitAndRun(249L,253L, new Printer(logger, "249-253"))).start();
         Thread.sleep(100);
-        new Thread(() -> sb.awaitAndRun(247L,249L, new Printer(System.out, "247-249"))).start();
+        new Thread(() -> sb.awaitAndRun(247L,249L, new Printer(logger, "247-249"))).start();
         Thread.sleep(100);
-        new Thread(() -> sb.awaitAndRun(234L,247L, new Printer(System.out, "234-247"))).start();
+        new Thread(() -> sb.awaitAndRun(234L,247L, new Printer(logger, "234-247"))).start();
 
         sb.awaitCompletion();
         System.out.flush();
@@ -38,17 +39,17 @@ public class SequenceBlockerTest {
 
     private final static class Printer implements Runnable {
 
-        private final PrintStream printStream;
+        private final Logger logger;
         private final String out;
 
-        public Printer(PrintStream printStream, String out) {
-            this.printStream = printStream;
+        public Printer(Logger logger, String out) {
+            this.logger = logger;
             this.out = out;
         }
 
         @Override
         public void run() {
-            printStream.println(out);
+            logger.debug(out);
         }
     }
 

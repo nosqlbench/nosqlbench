@@ -49,7 +49,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         if ((counted++ & 0b11111111111111) == 0b10000000000000) {
-            logger.trace("parsed " + counted + " elements...");
+            logger.trace(() -> "parsed " + counted + " elements...");
         }
     }
 
@@ -59,7 +59,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
         ParseTree parent = node.getParent();
         String errorNodeType = parent.getClass().getSimpleName();
 
-        logger.info("PARSE ERROR: " + errorNodeType + "\n" + node.getSourceInterval());
+        logger.info(() -> "PARSE ERROR: " + errorNodeType + "\n" + node.getSourceInterval());
 
         super.visitErrorNode(node);
     }

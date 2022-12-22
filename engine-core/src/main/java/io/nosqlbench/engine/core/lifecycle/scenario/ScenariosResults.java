@@ -59,7 +59,7 @@ public class ScenariosResults {
             Scenario scenario = entry.getKey();
             ExecutionMetricsResult oresult = entry.getValue();
 
-            logger.info("results for scenario: " + scenario);
+            logger.info(() -> "results for scenario: " + scenario);
 
             if (oresult != null) {
                 oresult.reportElapsedMillisToLog();

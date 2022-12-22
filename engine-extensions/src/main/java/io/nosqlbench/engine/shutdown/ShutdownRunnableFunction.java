@@ -34,13 +34,13 @@ public class ShutdownRunnableFunction extends Thread {
 
     @Override
     public void run() {
-        logger.info("Running shutdown hook '" + name + "'...");
+        logger.info(() -> "Running shutdown hook '" + name + "'...");
         try {
             Object result = function.apply(new Object[0]);
             if (result instanceof CharSequence) {
-                logger.info("shutdown hook returned output:\n" + result);
+                logger.info(() -> "shutdown hook returned output:\n" + result);
             }
-            logger.info("Completed shutdown hook '" + name + "'...");
+            logger.info(() -> "Completed shutdown hook '" + name + "'...");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

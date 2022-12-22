@@ -153,10 +153,10 @@ public class VirtData {
         return getOptionalMapper(flowSpec,clazz,Collections.emptyMap());
     }
     public static <T> Optional<DataMapper<T>> getOptionalMapper(
-            String flowSpec,
+            final String originalflowSpec,
             Class<?> clazz,
             Map<String,Object> config) {
-        flowSpec = CompatibilityFixups.fixup(flowSpec);
+        String flowSpec = CompatibilityFixups.fixup(originalflowSpec);
         VirtDataDSL.ParseResult parseResult = VirtDataDSL.parse(flowSpec);
         if (parseResult.throwable != null) {
             throw new RuntimeException(parseResult.throwable);
@@ -173,7 +173,7 @@ public class VirtData {
                         " reliably be cast to type '" + clazz.getCanonicalName() +"'");
             }
         } else {
-            logger.debug("Auto-assigning output type qualifier '->" + clazz.getCanonicalName() + "' to specifier '" + flowSpec + "'");
+            logger.debug(() -> "Auto-assigning output type qualifier '->" + clazz.getCanonicalName() + "' to specifier '" + flowSpec + "'");
             flow.getLastExpression().getCall().setOutputType(clazz.getCanonicalName());
         }
 

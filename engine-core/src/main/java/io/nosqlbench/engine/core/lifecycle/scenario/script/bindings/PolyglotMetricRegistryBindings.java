@@ -43,7 +43,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public Object getMember(String key) {
-        logger.trace("get member: " + key);
+        logger.trace(() -> "get member: " + key);
         Object o = metrics.get(key);
         return o;
     }

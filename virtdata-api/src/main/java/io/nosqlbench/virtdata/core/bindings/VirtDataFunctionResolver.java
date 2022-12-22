@@ -157,11 +157,11 @@ public class VirtDataFunctionResolver {
 
         if (targetCtor.isVarArgs()) {
             if (sourceParameters.length < (targetTypes.length - 1)) {
-                logger.trace(targetCtor + " (varargs) does not match, not enough source parameters: " + Arrays.toString(sourceParameters));
+                logger.trace(() -> targetCtor + " (varargs) does not match, not enough source parameters: " + Arrays.toString(sourceParameters));
                 return false;
             }
         } else if (sourceParameters.length != targetTypes.length) {
-            logger.trace(targetCtor + " (varargs) does not match source parameters (size): " + Arrays.toString(sourceParameters));
+            logger.trace(() -> targetCtor + " (varargs) does not match source parameters (size): " + Arrays.toString(sourceParameters));
             return false;
         }
 

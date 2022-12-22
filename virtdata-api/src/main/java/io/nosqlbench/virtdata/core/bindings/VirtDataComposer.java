@@ -259,7 +259,7 @@ public class VirtDataComposer {
         List<ResolvedFunction> toRemove = new LinkedList<>();
         for (ResolvedFunction func : funcs) {
             if (!func.getInputClass().isAssignableFrom(long.class)) {
-                logger.trace("input type " + func.getInputClass().getCanonicalName() + " is not assignable from long");
+                logger.trace(() -> "input type " + func.getInputClass().getCanonicalName() + " is not assignable from long");
                 toRemove.add(func);
             }
         }
@@ -286,9 +286,7 @@ public class VirtDataComposer {
             l -> l.stream().map(String::valueOf).collect(Collectors.joining("|\n"))
         ).collect(Collectors.joining("\n\n"));
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("---\\\\\n").append(funcsdata).append("\n---////\n");
-        return sb.toString();
+        return "---\\\\\n" + funcsdata + "\n---////\n";
     }
 
     /**
@@ -375,7 +373,7 @@ public class VirtDataComposer {
             progressed += funcs.size() - 1;
             funcs.sort(ResolvedFunction.PREFERRED_TYPE_COMPARATOR);
             while (funcs.size() > 1) {
-                logger.trace("BY-SINGLE-PREFERRED-TYPE removing func " + funcs.get(funcs.size() - 1)
+                logger.trace(() -> "BY-SINGLE-PREFERRED-TYPE removing func " + funcs.get(funcs.size() - 1)
                     + " because " + funcs.get(0) + " has more preferred types.");
                 funcs.remove(funcs.size() - 1);
             }

@@ -52,7 +52,7 @@ public class CGUdtReplacer implements CGModelTransformer {
                     String[] words = typedef.split("\\W+");
                     for (String word : words) {
                         if (word.toLowerCase(Locale.ROOT).equals(searchFor.toLowerCase(Locale.ROOT))) {
-                            logger.info("replacing '" + typedef + "' with blob");
+                            logger.info(() -> "replacing '" + typedef + "' with blob");
                             coldef.setTypeDef("blob");
                             break;
                         }

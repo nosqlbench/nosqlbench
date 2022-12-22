@@ -78,16 +78,16 @@ public class ValuesCheckerRunnable implements Runnable {
             String rangeInfo = "t:" + threadNum + " [" + rangeStart + ".." + (rangeStart+bufsize) + ")";
 
             synchronizeFor("generation start " + rangeInfo);
-//            logger.debug("generating for " + "range: " + rangeStart + ".." + (rangeStart + bufsize));
+//            logger.debug(() -> "generating for " + "range: " + rangeStart + ".." + (rangeStart + bufsize));
             for (int i = 0; i < output.length; i++) {
                 output[i] = mapper.get(i + rangeStart);
 //                if (i==0) {
-//                    logger.debug("gen i:" + i + ", cycle: " + (i + rangeStart) + ": " + output[i]);
+//                    logger.debug(() -> "gen i:" + i + ", cycle: " + (i + rangeStart) + ": " + output[i]);
 //                }
 
             }
             if (this.threadNum==0) {
-                logger.trace("Thread " + threadNum + " putting values into comparable array before acking");
+                logger.trace(() -> "Thread " + threadNum + " putting values into comparable array before acking");
                 expected.clear();
                 expected.addAll(Arrays.asList(output));
                 if (System.getProperties().containsKey("PRINTVALUES")) {
@@ -99,7 +99,7 @@ public class ValuesCheckerRunnable implements Runnable {
             synchronizeFor("generation complete " + rangeInfo);
 
             synchronizeFor("verification " + rangeInfo);
-//            logger.debug("checker " + this.threadNum + " verifying range [" + start + ".." + (start + end) + ")");
+//            logger.debug(() -> "checker " + this.threadNum + " verifying range [" + start + ".." + (start + end) + ")");
             for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
                 if (!expected.get(bufidx).equals(output[bufidx])) {
                     String errmsg = "Value differs: " +
@@ -115,7 +115,7 @@ public class ValuesCheckerRunnable implements Runnable {
             }
             synchronizeFor("verification complete" + rangeInfo);
 
-//            logger.info("verified values for thread " + Thread.currentThread().getLibname() + " in range " +
+//            logger.info(() -> "verified values for thread " + Thread.currentThread().getLibname() + " in range " +
 //                    rangeStart + ".." + (rangeStart + bufsize)
 //            );
         }
@@ -126,7 +126,7 @@ public class ValuesCheckerRunnable implements Runnable {
         try {
             lock.lock();
             readyQueue.add(threadNum);
-            logger.trace("awaiting signal for " + forWhat);
+            logger.trace(() -> "awaiting signal for " + forWhat);
             goTime.await();
         } catch (Throwable e) {
             System.out.println("error while synchronizing: " + e.getMessage());

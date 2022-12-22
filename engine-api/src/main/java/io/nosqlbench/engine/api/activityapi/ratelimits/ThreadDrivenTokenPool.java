@@ -72,7 +72,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
      */
     public ThreadDrivenTokenPool(RateSpec rateSpec, NBNamedElement named) {
         apply(named,rateSpec);
-        logger.debug("initialized token pool: " + this + " for rate:" + rateSpec);
+        logger.debug(() -> "initialized token pool: " + this + " for rate:" + rateSpec);
 //        filler.start();
     }
 

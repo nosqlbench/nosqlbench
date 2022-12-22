@@ -39,7 +39,7 @@ public class SysPerfBaseliner {
             Collection<RunResult> jmhResults = sysPerfBaseliner.runBenchmarks();
 //            logger.info("Results of JMH benchmarks:\n" + result.toString());
 //            result.forEach(System.out::println);
-            logger.info("SysPerfData (selected details for EB):\n" + new SysPerfData(jmhResults, SysPerfData.currentVersion));
+            logger.info(() -> "SysPerfData (selected details for EB):\n" + new SysPerfData(jmhResults, SysPerfData.currentVersion));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -59,7 +59,7 @@ public class SysPerfBaseliner {
             try {
                 String logfile = Files.createTempFile("jmh_" + n, ".log").toString();
                 Options options = new OptionsBuilder().forks(1).include(c.getSimpleName()).output(logfile).build();
-                logger.info("running microbench for " + n + ", for about 20 seconds; details in " + logfile);
+                logger.info(() -> "running microbench for " + n + ", for about 20 seconds; details in " + logfile);
                 RunResult runResult = new Runner(options).runSingle();
                 results.add(runResult);
             } catch (Exception e) {
@@ -74,7 +74,7 @@ public class SysPerfBaseliner {
         logger.info("Running system calibration tests for about a minute. This is used to calibrate delay loops, and is done only once.");
         Collection<RunResult> runResult = runBenchmarks();
         SysPerfData sysPerfData = new SysPerfData(runResult, SysPerfData.currentVersion);
-        logger.info("System timing test complete: " + sysPerfData);
+        logger.info(() -> "System timing test complete: " + sysPerfData);
         return sysPerfData;
     }
 

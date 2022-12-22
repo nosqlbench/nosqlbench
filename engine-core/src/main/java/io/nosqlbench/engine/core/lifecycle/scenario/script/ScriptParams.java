@@ -63,7 +63,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
             String oVal = overrideEntry.getValue();
             if (oVal.toUpperCase().endsWith("UNDEF") || oVal.toUpperCase(Locale.ROOT).endsWith("UNSET")) {
                 String removed = result.remove(oKey);
-                logger.trace("Removed key '" + oKey + "': '" + removed + "' from script params because it was " + oVal + " in overrides");
+                logger.trace(() -> "Removed key '" + oKey + "': '" + removed + "' from script params because it was " + oVal + " in overrides");
             } else {
                 String was = result.get(oKey);
                 was = (was == null ? "NULL" : was);
@@ -114,7 +114,7 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
     }
 
     private static void printMapToLog(String name, Map<String, String> map) {
-        logger.info("contents of map '" + name + "':");
+        logger.info(() -> "contents of map '" + name + "':");
         String mapdetail = map.entrySet()
                 .stream()
                 .map(e -> valueOf(e.getKey()) + ":" + valueOf(e.getValue()))

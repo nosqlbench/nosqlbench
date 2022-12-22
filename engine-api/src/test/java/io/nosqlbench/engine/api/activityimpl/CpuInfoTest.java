@@ -28,7 +28,7 @@ public class CpuInfoTest {
     public void testProcScanner() {
         Optional<CpuInfo.ProcDetails> procDetails = CpuInfo.getProcDetails();
         assertThat(procDetails).isPresent();
-        System.out.println(procDetails.get());
+//        System.out.println(procDetails.get());
     }
 
 }

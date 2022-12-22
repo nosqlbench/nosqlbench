@@ -91,7 +91,7 @@ public class ActivityMetrics {
                 if (metric == null) {
                     metric = metricProvider.getMetric();
                     Metric registered = get().register(name, metric);
-                    logger.info("registered scripting metric: " + name);
+                    logger.info(() -> "registered scripting metric: " + name);
                     return registered;
                 }
             }
@@ -260,7 +260,7 @@ public class ActivityMetrics {
 
         HistoIntervalLogger histoIntervalLogger =
             new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
-        logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
+        logger.debug(() -> "attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
         metricsCloseables.add(histoIntervalLogger);
     }
@@ -283,7 +283,7 @@ public class ActivityMetrics {
 
         HistoStatsLogger histoStatsLogger =
             new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
-        logger.debug("attaching " + histoStatsLogger + " to the metrics registry.");
+        logger.debug(() -> "attaching " + histoStatsLogger + " to the metrics registry.");
         get().addListener(histoStatsLogger);
         metricsCloseables.add(histoStatsLogger);
     }
@@ -304,12 +304,12 @@ public class ActivityMetrics {
 
         ClassicHistoListener classicHistoListener =
             new ClassicHistoListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
-        logger.debug("attaching histo listener " + classicHistoListener + " to the metrics registry.");
+        logger.debug(() -> "attaching histo listener " + classicHistoListener + " to the metrics registry.");
         get().addListener(classicHistoListener);
 
         ClassicTimerListener classicTimerListener =
             new ClassicTimerListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
-        logger.debug("attaching timer listener " + classicTimerListener + " to the metrics registry.");
+        logger.debug(() -> "attaching timer listener " + classicTimerListener + " to the metrics registry.");
         get().addListener(classicTimerListener);
     }
 
@@ -322,7 +322,7 @@ public class ActivityMetrics {
     public static void closeMetrics(boolean showChart) {
         logger.trace("Closing all registered metrics closable objects.");
         for (MetricsCloseable metricsCloseable : metricsCloseables) {
-            logger.trace("closing metrics closeable: " + metricsCloseable);
+            logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
             if (showChart) {
                 metricsCloseable.chart();

@@ -291,8 +291,7 @@ public class S4JSpace implements  AutoCloseable {
             }
 
             if (logger.isTraceEnabled()) {
-                logger.trace(
-                    buildExecSummaryString(trackingMsgCnt, timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
+                logger.trace(buildExecSummaryString(trackingMsgCnt, timeElapsedMills, totalResponseCnt, totalNullMsgCnt));
             }
         } while (continueChk);
 

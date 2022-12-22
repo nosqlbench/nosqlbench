@@ -17,6 +17,8 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.api.engine.util.Tagged;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TagFilterTest {
 
+    private final static Logger logger = LogManager.getLogger(TagFilterTest.class);
     @Test
     public void testTagFilterNameOnly() {
         TagFilter tf = new TagFilter("name");
@@ -123,7 +126,7 @@ public class TagFilterTest {
         TagFilter tfLeft = new TagFilter("one:'four-.*' five two seven six=again ");
         TagFilter.Result result = tfLeft.matchesTaggedResult(tagged);
         assertThat(result.matched()).isFalse();
-        System.out.println(result.getLog());
+        logger.debug(result.getLog());
         assertThat(result.getLog()).contains("(☑,☐) filter(one:'four-.*' five two seven six=again) tag(one:four-five-six): did not match '^'four-.*' five two seven six=again$'");
 
     }

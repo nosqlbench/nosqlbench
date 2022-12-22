@@ -17,14 +17,16 @@
 package io.nosqlbench.nbr.examples;
 
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +41,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+@Execution(ExecutionMode.CONCURRENT)
 public class ScriptExampleTests {
 
     public static ExecutionMetricsResult runScenario(String scriptname, String... params) {
@@ -111,7 +114,7 @@ public class ScriptExampleTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.parseDouble(digits);
-        assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
+        assertThat(rate).isCloseTo(500, Offset.offset(100.0));
     }
 
     @Test

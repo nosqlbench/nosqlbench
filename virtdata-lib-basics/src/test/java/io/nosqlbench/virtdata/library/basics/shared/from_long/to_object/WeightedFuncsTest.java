@@ -17,11 +17,14 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_object;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.FixedValues;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
 public class WeightedFuncsTest {
+    private final static Logger logger = LogManager.getLogger(WeightedFuncsTest.class);
 
     @Test
     public void testFuncSelectionDistribution() {
@@ -44,7 +47,7 @@ public class WeightedFuncsTest {
             int v = ((Long) o).intValue();
             results[v]++;
         }
-        System.out.print(Arrays.toString(results));
+        logger.debug(() -> Arrays.toString(results));
 
     }
 

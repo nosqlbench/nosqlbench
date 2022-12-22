@@ -56,7 +56,7 @@ public class ClassicTimerListener extends CapabilityHook<TimerAttachment> {
 
             this.histos.put(prefixed, new Attachment(name, prefix, capable, classicTimer));
             metricsRegistry.timer(prefixed, () -> classicTimer);
-            logger.trace("Added classic timer attachment:" + prefixed);
+            logger.trace(() -> "Added classic timer attachment:" + prefixed);
         }
 
 
@@ -65,7 +65,7 @@ public class ClassicTimerListener extends CapabilityHook<TimerAttachment> {
     @Override
     public void onCapableRemoved(String name, TimerAttachment capable) {
         Attachment removed = histos.remove(name);
-        logger.trace("Removed classic timer attachment: " + removed);
+        logger.trace(() -> "Removed classic timer attachment: " + removed);
     }
 
     @Override

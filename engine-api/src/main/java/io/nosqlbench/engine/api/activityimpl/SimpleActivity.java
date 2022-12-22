@@ -220,7 +220,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
-            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
+            logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -356,7 +356,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
-            logger.info("defaulting stride to " + stride + " (the sequence length)");
+            logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
 //            getParams().set("stride", stride);
             getParams().setSilently("stride", stride);
         }
@@ -364,7 +364,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
-            logger.info("defaulting cycles to " + cycles + " (the stride length)");
+            logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
             getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
@@ -387,7 +387,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
 
         if (stride > 0 && (cycleCount % stride) != 0) {
-            logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
+            logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
                 "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
         }
 
@@ -408,23 +408,23 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
-                logger.info("setting threads to " + threads + " (" + multiplier + "x)");
+                logger.info(() -> "setting threads to " + threads + " (" + multiplier + "x)");
 //                activityDef.setThreads(threads);
                 activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
-                logger.info("setting threads to " + spec + " (direct)");
+                logger.info(() -> "setting threads to " + spec + " (direct)");
 //                activityDef.setThreads(Integer.parseInt(spec));
                 activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
             }
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
-                logger.warn("threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+                logger.warn(() -> "threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
                     + ", you should have more cycles than threads.");
             }
 
         } else {
             if (cycleCount > 1000) {
-                logger.warn("For testing at scale, it is highly recommended that you " +
+                logger.warn(() -> "For testing at scale, it is highly recommended that you " +
                     "set threads to a value higher than the default of 1." +
                     " hint: you can use threads=auto for reasonable default, or" +
                     " consult the topic on threads with `help threads` for" +
@@ -491,7 +491,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
                 if (ratio == 0) {
-                    logger.info("skipped mapping op '" + pop.getName() + "'");
+                    logger.info(() -> "skipped mapping op '" + pop.getName() + "'");
                     continue;
                 }
                 boolean dryrun = pop.takeStaticConfigOr("dryrun", false);

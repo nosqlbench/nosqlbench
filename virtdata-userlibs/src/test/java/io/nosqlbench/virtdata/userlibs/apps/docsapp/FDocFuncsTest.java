@@ -20,10 +20,13 @@ import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc1;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.ExampleDocFunc2;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFunc;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFuncs;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 public class FDocFuncsTest {
 
+    private final static Logger logger = LogManager.getLogger(FDocFuncsTest.class);
     @Test
     public void testMarkdownFormat() {
         ExampleDocFunc1 exampleDocData1 = new ExampleDocFunc1();
@@ -34,7 +37,7 @@ public class FDocFuncsTest {
         funcs.addFunctionDoc(new FDocFunc(exampleDocData2));
 
         String out = funcs.asMarkdown();
-        System.out.print(out);
+        logger.debug(out);
     }
 
 }
