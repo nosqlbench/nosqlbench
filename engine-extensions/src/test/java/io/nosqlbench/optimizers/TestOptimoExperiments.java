@@ -21,6 +21,8 @@ import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -52,6 +54,7 @@ import java.util.Random;
  */
 public class TestOptimoExperiments {
 
+    private final static Logger logger = LogManager.getLogger(TestOptimoExperiments.class);
     @Test
     public void testNewAlgo() {
 
@@ -81,8 +84,8 @@ public class TestOptimoExperiments {
         );
         PointValuePair result = mo.optimize(od.toArray(new OptimizationData[0]));
 
-        System.out.println(
-                "point:" + Arrays.toString(result.getPoint()) +
+        logger.debug(() ->
+            "point:" + Arrays.toString(result.getPoint()) +
                         " value=" + m.value(result.getPoint())
         );
 

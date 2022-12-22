@@ -18,6 +18,8 @@ package io.nosqlbench.virtdata.library.basics.core.stathelpers.aliasmethod;
 
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasElementSampler;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.ElemProbD;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AliasElementSamplerTest {
 
+    private final static Logger logger = LogManager.getLogger(AliasElementSamplerTest.class);
     @Test
     public void testAliasSamplerBinaryFractions() {
         List<ElemProbD<Integer>> events = new ArrayList<>();
@@ -47,7 +50,7 @@ public class AliasElementSamplerTest {
             Integer idx = as.apply(v);
             stats[idx]++;
         }
-        System.out.println(Arrays.toString(stats));
+        logger.debug(Arrays.toString(stats));
         assertThat(stats).containsExactly(0,79,79,157,313,626,1250,2499,4997);
 
     }

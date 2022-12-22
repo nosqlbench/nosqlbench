@@ -29,11 +29,11 @@ public class RateLimiters {
         if (extant == null) {
             RateLimiter rateLimiter= new HybridRateLimiter(def, label, spec);
 
-            logger.info("Using rate limiter: " + rateLimiter);
+            logger.info(() -> "Using rate limiter: " + rateLimiter);
             return rateLimiter;
         } else {
             extant.applyRateSpec(spec);
-            logger.info("Updated rate limiter: " + extant);
+            logger.info(() -> "Updated rate limiter: " + extant);
             return extant;
         }
     }

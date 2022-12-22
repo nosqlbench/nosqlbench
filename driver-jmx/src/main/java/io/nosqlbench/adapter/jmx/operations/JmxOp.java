@@ -52,7 +52,7 @@ public abstract class JmxOp implements Op,Runnable {
     protected Object readObject(String attributeName) {
         try {
             Object value = getMBeanConnection().getAttribute(objectName, attributeName);
-            logger.trace("read attribute '" + value + "': " + value);
+            logger.trace(() -> "read attribute '" + value + "': " + value);
             return value;
         } catch (Exception e) {
             throw new RuntimeException(e);

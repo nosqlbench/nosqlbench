@@ -51,6 +51,11 @@ public class MutableMarkdown  {
             throw new RuntimeException(e);
         }
     }
+    public MutableMarkdown(String rawMarkdown) {
+        this.path = null;
+        this.rawMarkdown = rawMarkdown;
+        parseStructure(rawMarkdown);
+    }
 
     private void parseStructure(String rawMarkdown) {
         AbstractYamlFrontMatterVisitor v = new AbstractYamlFrontMatterVisitor();
@@ -69,13 +74,19 @@ public class MutableMarkdown  {
                 } else if (node instanceof WhiteSpace) {
                 } else if (node instanceof YamlFrontMatterBlock) {
                 } else {
-                    throw new RuntimeException("The markdown file at '" + this.path.toString() + "' must have an initial heading as a title, before any other element, but found:" + node.getClass().getSimpleName());
+                    if(this.path != null)
+                        throw new RuntimeException("The markdown file at '" + this.path.toString() + "' must have an initial heading as a title, before any other element, but found:" + node.getClass().getSimpleName());
+                    else
+                        throw new RuntimeException("The markdown string provided must have an initial heading as a title, before any other element, but found: "+ node.getClass().getSimpleName());
                 }
                 node=node.getNext();
             }
         }
         if (frontMatter.getTitle()==null || frontMatter.getTitle().isEmpty()) {
-            throw new RuntimeException("The markdown file at '" + this.path.toString() + "' has no heading to use as a title.");
+            if(this.path != null)
+                throw new RuntimeException("The markdown file at '" + this.path.toString() + "' has no heading to use as a title.");
+            else
+                throw new RuntimeException("The markdown string provided has no heading to use as a title.");
         }
     }
 
@@ -90,7 +101,10 @@ public class MutableMarkdown  {
                 if (end>=0) {
                     return rawMarkdown.substring(end+4);
                 } else {
-                    throw new RuntimeException("Unable to find matching boundaries in " + path.toString() + ": " + boundary);
+                    if(path != null)
+                        throw new RuntimeException("Unable to find matching boundaries in " + path.toString() + ": " + boundary);
+                    else
+                        throw new RuntimeException("Unable to find matching boundaries in provided markdown: " + boundary);
                 }
             }
         }

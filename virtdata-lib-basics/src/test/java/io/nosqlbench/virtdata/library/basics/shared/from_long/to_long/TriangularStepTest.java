@@ -34,7 +34,7 @@ public class TriangularStepTest {
     public void testStepExample1() {
         TriangularStep e1 = new TriangularStep(100, 20);
         int[] runLengths = this.rleStatsFor(e1, 0, 10000);
-        System.out.println(Arrays.toString(runLengths));
+//        System.out.println(Arrays.toString(runLengths));
         assertThat(IntStream.of(runLengths).min().orElseThrow()).isEqualTo(80L);
         assertThat(IntStream.of(runLengths).max().orElseThrow()).isEqualTo(120L);
     }
@@ -43,7 +43,7 @@ public class TriangularStepTest {
     public void testStepExample2() {
         TriangularStep e1 = new TriangularStep(80, 10);
         int[] runLengths = this.rleStatsFor(e1, 0, 10000);
-        System.out.println(Arrays.toString(runLengths));
+//        System.out.println(Arrays.toString(runLengths));
         assertThat(IntStream.of(runLengths).min().orElseThrow()).isEqualTo(70L);
         assertThat(IntStream.of(runLengths).max().orElseThrow()).isEqualTo(90L);
     }
@@ -101,7 +101,7 @@ public class TriangularStepTest {
         }
 
         for (int count : counts) {
-            System.out.println(count);
+//            System.out.println(count);
             histo[count-minval][FREQUENCY]++;
         }
         return histo;

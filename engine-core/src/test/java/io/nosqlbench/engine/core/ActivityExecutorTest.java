@@ -16,25 +16,30 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.*;
-import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
-import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
+import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.engine.core.lifecycle.ActivityExecutor;
-import io.nosqlbench.engine.core.lifecycle.ActivityTypeLoader;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,13 +59,22 @@ public class ActivityExecutorTest {
         a.setOutputDispenserDelegate(tdisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
-
+        ExecutorService executor = Executors.newCachedThreadPool();
         ActivityExecutor ae = new ActivityExecutor(a, "test-restart");
-        ad.setThreads(1);
-        ae.startActivity();
-        ae.stopActivity();
-        ae.startActivity();
-        ae.awaitCompletion(15000);
+        Future<ExecutionResult> future = executor.submit(ae);
+        try {
+            ad.setThreads(1);
+            ae.startActivity();
+            ae.stopActivity();
+            ae.startActivity();
+            ae.startActivity();
+            ExecutionResult executionResult = future.get();
+            Thread.sleep(500L);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        System.out.print("ad.setThreads(1)");
+        executor.shutdown();
         assertThat(idisp.getInput(10).getInputSegment(3)).isNull();
 
     }
@@ -80,9 +94,19 @@ public class ActivityExecutorTest {
         a.setMotorDispenserDelegate(mdisp);
 
         ActivityExecutor ae = new ActivityExecutor(a, "test-delayed-start");
-        ad.setThreads(1);
-        ae.startActivity();
-        ae.awaitCompletion(15000);
+        ExecutorService testExecutor = Executors.newCachedThreadPool();
+        Future<ExecutionResult> future = testExecutor.submit(ae);
+
+        try {
+            ad.setThreads(1);
+            ae.startActivity();
+            ExecutionResult result = future.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        testExecutor.shutdownNow();
         assertThat(idisp.getInput(10).getInputSegment(3)).isNull();
 
     }
@@ -93,7 +117,7 @@ public class ActivityExecutorTest {
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Input longSupplier = new AtomicInput(ad);
         MotorDispenser<?> cmf = getActivityMotorFactory(
-                ad, motorActionDelay(999), longSupplier
+            ad, motorActionDelay(999), longSupplier
         );
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
@@ -108,11 +132,11 @@ public class ActivityExecutorTest {
         ad.setThreads(5);
         ae.startActivity();
 
-        int[] speeds = new int[]{1,2000,5,2000,2,2000};
-        for(int offset=0; offset<speeds.length; offset+=2) {
-            int threadTarget=speeds[offset];
-            int threadTime = speeds[offset+1];
-            logger.info("Setting thread level to " + threadTarget + " for " +threadTime + " seconds.");
+        int[] speeds = new int[]{1, 2000, 5, 2000, 2, 2000};
+        for (int offset = 0; offset < speeds.length; offset += 2) {
+            int threadTarget = speeds[offset];
+            int threadTime = speeds[offset + 1];
+            logger.info(() -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
             ad.setThreads(threadTarget);
             try {
                 Thread.sleep(threadTime);
@@ -161,12 +185,12 @@ public class ActivityExecutorTest {
         @Override
         public void initActivity() {
             Integer initdelay = activityDef.getParams().getOptionalInteger("initdelay").orElse(0);
-            logger.info("delaying for " + initdelay);
+            logger.info(() -> "delaying for " + initdelay);
             try {
                 Thread.sleep(initdelay);
             } catch (InterruptedException ignored) {
             }
-            logger.info("delayed for " + initdelay);
+            logger.info(() -> "delayed for " + initdelay);
         }
     }
 }

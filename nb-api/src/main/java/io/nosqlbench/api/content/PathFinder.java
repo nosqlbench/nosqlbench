@@ -118,7 +118,7 @@ public class PathFinder {
             }
             return Optional.empty();
         } catch (Exception e) {
-            logger.trace("Error while looking in classpath for " + candidatePath, e);
+            logger.trace(() -> "Error while looking in classpath for " + candidatePath, e);
             return Optional.empty();
         }
     }

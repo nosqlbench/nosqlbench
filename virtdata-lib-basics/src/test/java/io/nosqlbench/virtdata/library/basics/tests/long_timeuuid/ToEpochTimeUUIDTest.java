@@ -18,6 +18,8 @@ package io.nosqlbench.virtdata.library.basics.tests.long_timeuuid;
 
 import io.nosqlbench.virtdata.library.basics.core.DateTimeFormats;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types.ToEpochTimeUUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ToEpochTimeUUIDTest {
+    private final static Logger logger = LogManager.getLogger(ToEpochTimeUUIDTest.class);
 
     @Test
     public void testFormats() {
@@ -41,7 +44,7 @@ public class ToEpochTimeUUIDTest {
         }
 
         for (String formatted : formats) {
-            System.out.println(formatted);
+            logger.debug(formatted);
         }
 
         /**

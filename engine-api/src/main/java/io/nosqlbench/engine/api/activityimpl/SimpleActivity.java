@@ -17,7 +17,11 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
@@ -36,15 +40,13 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.DryRunOpDispenserWrapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.CommandTemplate;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -82,6 +84,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
+    private final RunStateTally tally = new RunStateTally();
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -95,7 +98,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             } else {
                 activityDef.getParams().set("alias",
                     activityDef.getActivityType().toUpperCase(Locale.ROOT)
-                        + String.valueOf(nameEnumerator++));
+                        + nameEnumerator++);
             }
         }
     }
@@ -190,7 +193,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public String toString() {
-        return getAlias();
+        return getAlias()+":"+getRunState()+":"+getRunStateTally().toString();
     }
 
     @Override
@@ -217,7 +220,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
-            logger.debug("CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable.toString());
+            logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -353,7 +356,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
-            logger.info("defaulting stride to " + stride + " (the sequence length)");
+            logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
 //            getParams().set("stride", stride);
             getParams().setSilently("stride", stride);
         }
@@ -361,7 +364,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
-            logger.info("defaulting cycles to " + cycles + " (the stride length)");
+            logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
             getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
@@ -384,7 +387,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
 
         if (stride > 0 && (cycleCount % stride) != 0) {
-            logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
+            logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
                 "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
         }
 
@@ -392,7 +395,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         if (threadSpec.isPresent()) {
             String spec = threadSpec.get();
             int processors = Runtime.getRuntime().availableProcessors();
-            if (spec.toLowerCase().equals("auto")) {
+            if (spec.equalsIgnoreCase("auto")) {
                 int threads = processors * 10;
                 if (threads > activityDef.getCycleCount()) {
                     threads = (int) activityDef.getCycleCount();
@@ -405,23 +408,23 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
                 int threads = processors * Integer.parseInt(multiplier);
-                logger.info("setting threads to " + threads + " (" + multiplier + "x)");
+                logger.info(() -> "setting threads to " + threads + " (" + multiplier + "x)");
 //                activityDef.setThreads(threads);
                 activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
-                logger.info("setting threads to " + spec + " (direct)");
+                logger.info(() -> "setting threads to " + spec + " (direct)");
 //                activityDef.setThreads(Integer.parseInt(spec));
                 activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
             }
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
-                logger.warn("threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+                logger.warn(() -> "threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
                     + ", you should have more cycles than threads.");
             }
 
         } else {
             if (cycleCount > 1000) {
-                logger.warn("For testing at scale, it is highly recommended that you " +
+                logger.warn(() -> "For testing at scale, it is highly recommended that you " +
                     "set threads to a value higher than the default of 1." +
                     " hint: you can use threads=auto for reasonable default, or" +
                     " consult the topic on threads with `help threads` for" +
@@ -472,7 +475,6 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             List<Long> ratios = new ArrayList<>(pops.size());
 
             for (int i = 0; i < pops.size(); i++) {
-
                 ParsedOp pop = pops.get(i);
                 long ratio = pop.takeStaticConfigOr("ratio", 1);
                 ratios.add(ratio);
@@ -484,21 +486,34 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
+            int dryrunCount=0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
-                if (ratio==0) {
-                    logger.info("skipped mapping op '" + pop.getName() + "'");
+                if (ratio == 0) {
+                    logger.info(() -> "skipped mapping op '" + pop.getName() + "'");
                     continue;
                 }
+                boolean dryrun = pop.takeStaticConfigOr("dryrun", false);
+
                 DriverAdapter adapter = adapters.get(i);
                 OpMapper opMapper = adapter.getOpMapper();
                 OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
+
+                if (dryrun) {
+                    dispenser = new DryRunOpDispenserWrapper(adapter, pop, dispenser);
+                    dryrunCount++;
+                }
+
 //                if (strict) {
 //                    optemplate.assertConsumed();
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
+            if (dryrunCount>0) {
+                logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
+            }
+
 
             return planner.resolve();
 
@@ -652,7 +667,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             return stmtsDocList;
 
         } catch (Exception e) {
-            throw new OpConfigError("Error loading op templates: " + e.toString(), workloadSource, e);
+            throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
         }
 
     }
@@ -675,6 +690,11 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     @Override
     public int getMaxTries() {
         return getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
+    }
+
+    @Override
+    public RunStateTally getRunStateTally() {
+        return tally;
     }
 
 

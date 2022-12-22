@@ -1,0 +1,62 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Lifecycle of Scenarios
+
+control "NBCLI" as nbcli
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scenarios\nExecutor" as se
+control "Exception\nHandler" as seh
+control "Thread\nFactory" as stf
+control "Executor\nService" as ses
+
+nbcli -> se** : create
+ se -> seh** : create
+ se -> stf** : create ThreadFactory\n(w/ ExceptionHandler)
+ se -> ses** : create ExecutorService\n(w/ ThreadFactory)
+
+nbcli -> s** : create
+ s -> sc** : create
+nbcli --> se : execute(Scenario)
+se --> ses: submit(<Callable> Scenario)
+activate ses
+ ses -> future**: create
+se <-- ses: <Future<ScenarioResult>>
+deactivate ses
+
+== [async] on thread from thread factory ==
+ses -> stf: get()
+ stf -> thread**: create
+ses <- stf: <thread>
+ses -> thread: run task
+activate thread
+thread -> s: call()
+activate s
+thread <- s: ScenarioResult
+deactivate s
+thread -> future: result
+deactivate thread
+
+== [async] on NBCLI thread ==
+
+nbcli -> se: awaitAllResults();
+activate se
+ se -> ses: shutdown
+ loop timeout
+ se -> ses: awaitTermination(timeout)
+ activate ses
+ se <- ses
+ deactivate ses
+ end loop
+ loop each future
+ se -> future: get()
+ activate future
+ se <- future: ScenarioResult
+ deactivate future
+ end loop
+
+nbcli <- se: <ScenariosResults>
+deactivate se
+
+@enduml

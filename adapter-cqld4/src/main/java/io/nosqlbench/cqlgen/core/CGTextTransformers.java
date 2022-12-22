@@ -74,7 +74,7 @@ public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Suppl
                 Object cfgvalues = cfgmap.get("config");
                 if (cfgvalues != null) {
                     configurable.accept((cfgvalues));
-                    logger.info("configured transformer with " + cfgvalues);
+                    logger.info(() -> "configured transformer with " + cfgvalues);
                 }
             }
 

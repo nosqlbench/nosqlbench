@@ -66,6 +66,9 @@ class NBErrorHandlerTest {
         NBErrorHandler eh = new NBErrorHandler(() -> "warn", () -> errorMetrics);
         ErrorDetail detail = eh.handleError(runtimeException, 1, 2);
 
+        logger.getContext().stop(); // force any async appenders to flush
+        logger.getContext().start(); // resume processing
+
         assertThat(detail.isRetryable()).isFalse();
         assertThat(appender.getFirstEntry()).contains("error with cycle");
         appender.cleanup(logger);
@@ -104,6 +107,9 @@ class NBErrorHandlerTest {
         List<Counter> histograms = errorMetrics.getExceptionCountMetrics().getCounters();
         assertThat(histograms).hasSize(1);
 
+        logger.getContext().stop(); // force any async appenders to flush
+        logger.getContext().start(); // resume processing
+
         assertThat(appender.getFirstEntry()).isNull();
         appender.cleanup(logger);
     }
@@ -119,6 +125,9 @@ class NBErrorHandlerTest {
         assertThat(detail.isRetryable()).isFalse();
         List<Counter> histograms = errorMetrics.getExceptionCountMetrics().getCounters();
         assertThat(histograms).hasSize(1);
+
+        logger.getContext().stop(); // force any async appenders to flush
+        logger.getContext().start(); // resume processing
 
         assertThat(appender.getFirstEntry()).contains("Starting with v4.17 onward, use 'counter'");
         appender.cleanup(logger);
@@ -152,6 +161,9 @@ class NBErrorHandlerTest {
 
         logger.debug("NBErrorHandler is cool.");
         logger.debug("I second that.");
+
+        logger.getContext().stop(); // force any async appenders to flush
+        logger.getContext().start(); // resume processing
 
         List<String> entries = appender.getEntries();
         assertThat(entries).hasSize(2);

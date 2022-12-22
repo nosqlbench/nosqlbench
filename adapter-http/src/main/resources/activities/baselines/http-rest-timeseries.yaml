@@ -20,10 +20,10 @@ scenarios:
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
-  #   single host: stargate_host=host1
-  #   multiple hosts: stargate_host=host1,host2,host3
-  #   multiple weighted hosts: stargate_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  #   single host: restapi_host=host1
+  #   multiple hosts: restapi_host=host1,host2,host3
+  #   multiple weighted hosts: restapi_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
 
@@ -36,47 +36,91 @@ bindings:
 
 blocks:
   schema:
-    params:
-      prepared: false
     ops:
-      create-keyspace: |
-        create keyspace if not exists <<keyspace:baselines>>
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
-        AND durable_writes = true;
-      create-table: |
-        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
-        machine_id UUID,     // source machine
-        sensor_name text,    // sensor name
-        time timestamp,      // timestamp of collection
-        sensor_value double, //
-        station_id UUID,     // source location
-        data text,
-        PRIMARY KEY ((machine_id, sensor_name), time)
-        ) WITH CLUSTERING ORDER BY (time DESC)
-         AND compression = { 'sstable_compression' : '<<compression:LZ4Compressor>>' }
-         AND compaction = {
-         'class': 'TimeWindowCompactionStrategy',
-         'compaction_window_size': <<expiry_minutes:60>>,
-         'compaction_window_unit': 'MINUTES'
-        };
-      truncate-table: |
-        truncate table <<keyspace:baselines>>.<<table:iot>>;
-  schema-astra:
-    ops:
-      create-table-astra: |
-        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
-        machine_id UUID,     // source machine
-        sensor_name text,    // sensor name
-        time timestamp,      // timestamp of collection
-        sensor_value double, //
-        station_id UUID,     // source location
-        data text,
-        PRIMARY KEY ((machine_id, sensor_name), time)
-        ) WITH CLUSTERING ORDER BY (time DESC);
+      create-keyspace:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<keyspace:baselines>>",
+              "replicas": <<rf:1>>
+          }
+
+      drop-table:
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        ok-status: "[2-4][0-9][0-9]"
+
+      create-table:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        body: |
+          {
+              "name": "<<table:iot>>",
+              "columnDefinitions": [
+                  {
+                      "name": "machine_id",
+                      "typeDefinition": "uuid"
+                  },
+                  {
+                      "name": "sensor_name",
+                      "typeDefinition": "text"
+                  },
+                  {
+                      "name": "time",
+                      "typeDefinition": "timestamp"
+                  },
+                  {
+                      "name": "sensor_value",
+                      "typeDefinition": "double"
+                  },
+                  {
+                      "name": "station_id",
+                      "typeDefinition": "uuid"
+                  },
+                  {
+                      "name": "data",
+                      "typeDefinition": "text"
+                  }
+              ],
+              "primaryKey": {
+                  "partitionKey": [
+                      "machine_id",
+                      "sensor_name"
+                  ],
+                  "clusteringKey": [
+                      "time"
+                  ]
+              },
+              "tableOptions": {
+                  "clusteringExpression": [
+                      {
+                          "column": "time",
+                          "order": "DESC"
+                      }
+                  ]
+              },
+              "ifNotExists": true
+          }
+
+
   rampup:
     ops:
       rampup-insert:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -90,22 +134,26 @@ blocks:
             "station_id": "{station_id}",
             "data": "{data}"
           }
+
   main-read:
     params:
       ratio: <<read_ratio:1>>
     ops:
       main-select:
-        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=E[[{"machine_id":{"$eq":"{machine_id}"},"sensor_name":{"$eq":"{sensor_name}"}}]]&page-size=<<limit:10>>
+        method: GET
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=URLENCODE[[{"machine_id":{"$eq":"{machine_id}"},"sensor_name":{"$eq":"{sensor_name}"}}]]&page-size=<<limit:10>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
+
   main-write:
     params:
       ratio: <<write_ratio:9>>
     ops:
       main-write:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +36,7 @@ public class ScenarioTest {
         try {
             var result=scenario.call();
         } catch (Exception e) {
-            logger.debug("Scenario run encountered an exception: " + e.getMessage());
+            logger.debug(() -> "Scenario run encountered an exception: " + e.getMessage());
 
         }
         assertThat(scenario.getIOLog().get().get(0)).contains("loaded script environment...");

@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Lifecycle of a single scenario.call()
+control "caller" as c
+control "Scenario" as s
+control "Scenario\nController" as sc
+control "Scripting\nEngine" as engine
+control "Activity\nExecutor" as ae
+control "Java\nRuntime" as jrt
+control "Shutdown\nHook" as sh
+control "Annotations" as ann
+
+c -> s**: create
+
+c -> s: call()
+activate s
+
+ s -> sh**: create
+ s -> jrt: register(ShutdownHook)
+ s -> ann: Annotate Scenario Start
+
+ s -> sc**: create
+ s -> engine**: create
+
+ s -> engine: run(script)
+ activate engine
+ group async calls [javacript+Java]
+ engine <--> sc: scenario.(*)
+ engine <--> sc: activities.(*)
+ engine <--> sc: metrics.(*)
+ engine <--> sc: params.(*)
+ engine -> sc: start(<activity>)
+ activate sc
+ sc -> ae**: create
+ sc -> ae: startActivity()
+
+ deactivate sc
+ end group
+ s <- engine: result
+ deactivate engine
+
+ s -> sc: awaitCompletion()
+ activate sc
+  group for each activity
+   sc -> ae: awaitCompletion()
+   activate ae
+   sc <- ae
+   deactivate ae
+  end group
+
+ s <- sc
+ deactivate sc
+
+ s -> jrt: unregister(ShutdownHook)
+ s -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+c <- s: Scenario\nResult
+deactivate s
+
+== on exception during call() ==
+ jrt -> sh: run()
+ sh -> ann: Annotate Scenario Finish
+
+
+@enduml

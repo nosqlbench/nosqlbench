@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.distributions;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * } </pre>
  */
 public class CSVSamplerTest {
+    private final static Logger logger = LogManager.getLogger(CSVSamplerTest.class);
 
 
     /**
@@ -53,7 +56,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(results.get("beta")*2, Percentage.withPercentage(5.0d));
         assertThat(results.get("alpha")).isCloseTo(results.get("gamma")*2, Percentage.withPercentage(5.0d));
         assertThat(results.get("alpha")).isCloseTo(results.get("delta")*2, Percentage.withPercentage(5.0d));
@@ -73,7 +76,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(33333, Percentage.withPercentage(2.0d));
     }
 
@@ -90,7 +93,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(20000, Percentage.withPercentage(2.0d));
     }
 
@@ -107,7 +110,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(6666, Percentage.withPercentage(2.0d));
     }
 
@@ -124,7 +127,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(30000, Percentage.withPercentage(2.0d));
     }
 
@@ -141,7 +144,7 @@ public class CSVSamplerTest {
             String name = sampler.apply(i);
             results.compute(name, (k,v) -> v==null ? 1d : v + 1d);
         }
-        System.out.println(results);
+        logger.debug(results);
         assertThat(results.get("alpha")).isCloseTo(20000, Percentage.withPercentage(2.0d));
     }
 

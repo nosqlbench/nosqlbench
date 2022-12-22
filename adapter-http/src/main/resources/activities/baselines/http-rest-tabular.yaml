@@ -16,10 +16,10 @@ scenarios:
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
-  #   single host: stargate_host=host1
-  #   multiple hosts: stargate_host=host1,host2,host3
-  #   multiple weighted hosts: stargate_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  #   single host: restapi_host=host1
+  #   multiple hosts: restapi_host=host1,host2,host3
+  #   multiple weighted hosts: restapi_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
   # for ramp-up and verify
@@ -39,7 +39,8 @@ blocks:
   schema:
     ops:
       create-keyspace:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -49,8 +50,19 @@ blocks:
               "name": "<<keyspace:baselines>>",
               "replicas": <<rf:1>>
           }
+
+      drop-table:
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:tabular>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        Content-Type: "application/json"
+        ok-status: "[2-4][0-9][0-9]"
+
       create-table:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -82,45 +94,12 @@ blocks:
               },
               "ifNotExists": true
           }
-  schema-astra:
-    ops:
-      create-table-astra:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {
-              "name": "<<table:tabular>>",
-              "columnDefinitions": [
-                  {
-                      "name": "part",
-                      "typeDefinition": "text"
-                  },
-                  {
-                      "name": "clust",
-                      "typeDefinition": "text"
-                  },
-                  {
-                      "name": "data",
-                      "typeDefinition": "text"
-                  }
-              ],
-              "primaryKey": {
-                  "partitionKey": [
-                      "part"
-                  ],
-                  "clusteringKey": [
-                      "clust"
-                  ]
-              },
-              "ifNotExists": true
-          }
+
   rampup:
     ops:
       rampup-insert:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
@@ -131,22 +110,26 @@ blocks:
             "clust": "{clust_layout}",
             "data": "{data}"
           }
+
   main-read:
     params:
       ratio: 5
     ops:
       main-select:
-        op: GET <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
+        method: GET
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
+
   main-write:
     params:
       ratio: 5
     ops:
       main-write:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"

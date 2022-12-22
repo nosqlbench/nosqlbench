@@ -94,12 +94,12 @@ public class HttpFormatParser {
         return props;
     }
 
-    private final static Pattern DOENCODE = Pattern.compile("(URLENCODE|E)\\[\\[(?<data>.+?)\\]\\]");
+    public final static Pattern URLENCODER_PATTERN = Pattern.compile("(URLENCODE|E)\\[\\[(?<data>.+?)\\]\\]");
 
     public static String rewriteExplicitSections(String template) {
 
         StringBuilder sb = new StringBuilder();
-        Matcher matcher = DOENCODE.matcher(template);
+        Matcher matcher = URLENCODER_PATTERN.matcher(template);
         while (matcher.find()) {
             String rewrite = matcher.group("data");
             String encoded = rewriteStaticsOnly(rewrite);

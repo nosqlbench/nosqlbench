@@ -16,7 +16,9 @@
 
 package io.nosqlbench.engine.core.script;
 
-import io.nosqlbench.engine.core.lifecycle.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

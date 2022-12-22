@@ -100,8 +100,8 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
         logger.info("Checking [{}..{}) in chunks of {}", start, end, bufsize);
 
         if (!isolated) {
-            logger.debug(
-                    "Sharing data mapper, only expect success for " +
+            logger.debug(() ->
+                "Sharing data mapper, only expect success for " +
                             "explicitly thread-safe generators.");
         }
 
@@ -189,11 +189,11 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
     }
 
     private void coordinateFor(String forWhat) {
-        logger.trace("coordinating " + threads + " threads for " + forWhat);
+        logger.trace(() -> "coordinating " + threads + " threads for " + forWhat);
         try {
             long delay = 1;
             while (readyQueue.size() < threads) {
-//                logger.debug("threads ready for " + forWhat + ": " + readyQueue.size() + ", delaying " + delay + "ms");
+//                logger.debug(() -> "threads ready for " + forWhat + ": " + readyQueue.size() + ", delaying " + delay + "ms");
                 Thread.sleep(delay);
                 delay = Math.min(1024, delay * 2);
                 throwInjectedExceptions();

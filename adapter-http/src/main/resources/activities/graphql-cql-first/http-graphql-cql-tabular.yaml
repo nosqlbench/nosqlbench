@@ -6,7 +6,7 @@ description: |
   - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
-  Note that stargate_port should reflect the port where GraphQL API is exposed (defaults to 8080).
+  Note that graphql_port should reflect the port where GraphQL API is exposed (defaults to 8080).
 
 scenarios:
   default:
@@ -17,10 +17,10 @@ scenarios:
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
   # Examples
-  #   single host: stargate_host=host1
-  #   multiple hosts: stargate_host=host1,host2,host3
-  #   multiple weighted hosts: stargate_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  #   single host: graphql_host=host1
+  #   multiple hosts: graphql_host=host1,host2,host3
+  #   multiple weighted hosts: graphql_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
   # for ramp-up and verify
@@ -42,59 +42,58 @@ blocks:
       phase: schema
     ops:
       create-keyspace:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
+
       create-table:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
-  schema-astra:
-    ops:
-      create-table-astra:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql-schema
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
-        Content-Type: "application/json"
-        body: |
-          {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
+
   rampup:
     ops:
       rampup-insert:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {value {part, clust, data}}}"}
+
   main-read:
     params:
       ratio: 5
     ops:
       main-select:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"
         Content-Type: "application/json"
         body: |
           {"query":"{<<table:tabular>>(value: {part: \"{part_read}\"}, options: { pageSize: <<limit:10>> }) {values {part, clust, data}}}"}
+
   main-write:
     params:
       ratio: 5
     ops:
       main-write:
-        op: POST <<protocol:http>>://{weighted_hosts}:<<stargate_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:my_auth_token>>"

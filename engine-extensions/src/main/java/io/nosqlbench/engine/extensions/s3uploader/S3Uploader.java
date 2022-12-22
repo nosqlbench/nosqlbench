@@ -89,7 +89,7 @@ public class S3Uploader implements ScenarioMetadataAware {
                 combined
             )
             .orElseThrow();
-        logger.debug("S3 composite URL is '" + url + "'");
+        logger.debug(() -> "S3 composite URL is '" + url + "'");
 
         S3UrlFields fields = S3UrlFields.fromURLString(url);
         S3ClientCache s3ClientCache = new S3ClientCache();

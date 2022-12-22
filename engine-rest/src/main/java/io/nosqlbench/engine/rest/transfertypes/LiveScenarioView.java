@@ -19,7 +19,7 @@ package io.nosqlbench.engine.rest.transfertypes;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.engine.core.script.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 
 import java.util.ArrayList;
 import java.util.Collection;

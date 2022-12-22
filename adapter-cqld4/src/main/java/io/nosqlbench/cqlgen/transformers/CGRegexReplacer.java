@@ -108,7 +108,7 @@ public class CGRegexReplacer implements CGTextTransformer, CGTransformerConfigur
             while (matcher.find()) {
                 matcher.appendReplacement(sb, replacement);
 //                if (matcher.end() - matcher.start() > 10000) {
-//                    logger.info("whoops");
+//                    logger.info(()-> "whoops");
 //                }
 //                logger.info("matcher:[" + matcher.group(0) + "][" + matcher.group(1) + "][" + matcher.group(2) + "][" + matcher.group(3));
 //                logger.info(String.format("\tat %2.2f%%", (float) ((float) matcher.start() / (float) s.length())));

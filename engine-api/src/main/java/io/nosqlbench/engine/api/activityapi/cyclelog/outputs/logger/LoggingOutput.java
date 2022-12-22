@@ -48,7 +48,7 @@ public class LoggingOutput implements Output,CanFilterResultValue {
                 .append("activity=").append(def.getAlias())
                 .append(",cycle=").append(completedCycle)
                 .append(",result=").append((byte) (result & 127));
-        logger.info(sb.get().toString());
+        logger.info(() -> sb.get().toString());
         return true;
     }
 

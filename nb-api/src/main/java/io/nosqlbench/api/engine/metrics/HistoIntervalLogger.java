@@ -91,9 +91,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalLength);
-        return sb.toString();
+        return "HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalLength;
     }
 
     public long getInterval() {
@@ -130,7 +128,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
         executor.close();
         long potentialWriteTime = System.currentTimeMillis();
         if (lastRunTime +1000 < potentialWriteTime) {
-            logger.debug("Writing last partial histo log:" + this);
+            logger.debug(() -> "Writing last partial histo log:" + this);
             run();
         } else {
             logger.debug("Not writing last partial histo log <1s:" + this);

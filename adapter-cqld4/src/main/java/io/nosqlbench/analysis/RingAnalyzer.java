@@ -32,7 +32,7 @@ public class RingAnalyzer implements BundledApp {
         CommandLine cli = new CommandLine(cfg);
         CommandLine.ParseResult cl = cli.parseArgs(args);
 
-        logger.info("filename: " + cfg.filename);
+        logger.info(() -> "filename: " + cfg.filename);
         return 0;
     }
 }

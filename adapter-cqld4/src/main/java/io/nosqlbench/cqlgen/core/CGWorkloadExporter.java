@@ -92,7 +92,7 @@ public class CGWorkloadExporter implements BundledApp {
     @Override
     public int applyAsInt(String[] args) {
 
-        logger.info("running CQL workload exporter with args:" + Arrays.toString(args));
+        logger.info(() -> "running CQL workload exporter with args:" + Arrays.toString(args));
 
         if (args.length == 0) {
             throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml");
@@ -195,7 +195,7 @@ public class CGWorkloadExporter implements BundledApp {
     private String loadFile(Path path) {
         try {
             String ddl = Files.readString(path);
-            logger.info("read " + ddl.length() + " character DDL file");
+            logger.info(() -> "read " + ddl.length() + " character DDL file");
             return ddl;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -348,7 +348,7 @@ public class CGWorkloadExporter implements BundledApp {
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             if (table.getClusteringColumns().size() == 0) {
-                logger.debug("skipping table " + table.getFullName() + " for scan since there are no clustering columns");
+                logger.debug(() -> "skipping table " + table.getFullName() + " for scan since there are no clustering columns");
             }
             ops.put(
                 namer.nameFor(table, "optype", "scan", "blockname", blockname),

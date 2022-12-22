@@ -28,6 +28,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
+import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -215,4 +216,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     default int getHdrDigits() {
         return getParams().getOptionalInteger("hdr_digits").orElse(4);
     }
+
+    RunStateTally getRunStateTally();
 }

@@ -150,7 +150,7 @@ public class Cmd {
                         "command '" + cmdName + " requires a value for " + arg.name
                                 + ", but there were no remaining arguments after it.");
             } else if (arg.freeform) {
-                logger.debug("freeform parameter:" + nextarg);
+                logger.debug(() -> "freeform parameter:" + nextarg);
             } else if (nextarg.contains("=")) {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name + "" +
@@ -161,7 +161,7 @@ public class Cmd {
                                 + ", but a reserved word was found instead: " + nextarg);
             }
 
-            logger.debug("cmd name:" + cmdName + ", positional " + arg.name + ": " + nextarg);
+            logger.debug(() -> "cmd name:" + cmdName + ", positional " + arg.name + ": " + nextarg);
             params.put(arg.name, arg.converter.apply(arglist.removeFirst()).toString());
         }
 

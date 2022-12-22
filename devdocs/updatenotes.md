@@ -225,6 +225,8 @@ sstablegen
 * Mac M1 support
     - as of 08/15, all Mac M1 systems should be supported for the.jar and the docker image
 
+* Dry-run mode for all adapter types
+
 review:
 - 7578e91d773a9ea8113250899ef46b7aacf95e70
 - 392bbcc5954019ae58956850c980646cef14a1f7

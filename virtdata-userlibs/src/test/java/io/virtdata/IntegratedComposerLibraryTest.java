@@ -16,11 +16,9 @@
 
 package io.virtdata;
 
-import io.nosqlbench.virtdata.core.bindings.DataMapper;
-import io.nosqlbench.virtdata.core.bindings.Bindings;
-import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
-import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
-import io.nosqlbench.virtdata.core.bindings.VirtData;
+import io.nosqlbench.virtdata.core.bindings.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class IntegratedComposerLibraryTest {
+    private final static Logger logger = LogManager.getLogger(IntegratedComposerLibraryTest.class);
 
     // The deprecated functions are not being included in the next release, so this test's purpose has been
     // reversed.
@@ -194,10 +193,10 @@ public class IntegratedComposerLibraryTest {
     public void testTemplateBindingConversion() {
         ResolverDiagnostics diag;
         diag = VirtData.getMapperDiagnostics("Uniform(0.0,1.0)");
-        System.out.println(diag.toString());
+        logger.debug(diag.toString());
 
         diag = VirtData.getMapperDiagnostics("Template('{}', long->Uniform(0.0D,1.0D))->double");
-        System.out.println(diag.toString());
+        logger.debug(diag.toString());
     }
 
 }

@@ -36,8 +36,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Callable;
 
-public class VirtDataGenDocsApp implements Runnable {
+public class VirtDataGenDocsApp implements Callable<Map<String, StringBuilder>> {
 
     private final static Logger logger = LogManager.getLogger(VirtDataGenDocsApp.class);
 
@@ -55,6 +56,7 @@ public class VirtDataGenDocsApp implements Runnable {
 
     private final String[] args;
     private final Map<String, Writer> writers = new HashMap<>();
+    Map<String, StringBuilder> stringBuilders = new HashMap<String, StringBuilder>();
 
     private String baseFileName = BASE_FILENAME;
     private String categories = CATEGORIES_SPLIT;
@@ -64,22 +66,21 @@ public class VirtDataGenDocsApp implements Runnable {
     private String basedir = "";
 
     public static void main(String[] args) {
-        new VirtDataGenDocsApp(args).run();
+        new VirtDataGenDocsApp(args).call();
     }
 
-    public VirtDataGenDocsApp(String[] args) {
-        this.args = args;
-    }
+    public VirtDataGenDocsApp(String[] args) {this.args = args;}
 
-    public void run() {
-        LinkedList<String> largs = new LinkedList<>(Arrays.asList(args));
+    public Map<String, StringBuilder> call() {
+
+        /*LinkedList<String> largs = new LinkedList<>(Arrays.asList(args));
         if (args.length > 0 && args[0].contains("help")) {
             System.out.println(
                 "usage:\n" +
                     "[basefile <name>] [basedir <dir>] [categories combined|split] [format json|markdown] " +
                     "[blurbsdirs <dir>[:...]]\n\n"
             );
-            return;
+            return result;
         }
         while (largs.peekFirst() != null) {
             String argtype = largs.removeFirst();
@@ -112,12 +113,12 @@ public class VirtDataGenDocsApp implements Runnable {
                     break;
                 default:
             }
-        }
+        }*/
 
         Optional<FDoc> docsinfo = loadAllDocs();
 
         if (!docsinfo.isPresent()) {
-            return;
+            return stringBuilders;
         }
 
         try {
@@ -131,38 +132,43 @@ public class VirtDataGenDocsApp implements Runnable {
                     + (this.categories.equals(CATEGORIES_SPLIT) ? "_" + categoryName : "")
                     + extension;
 
-                Writer writer = getWriterFor(filename);
+//                Writer writer = getWriterFor(filename);
+                StringBuilder builder = getBuilderFor(filename);
+                String name = filename;
 
                 for (FDocFuncs docsForFuncName : docsForCatName) {
                     if (format.equals(FORMAT_JSON)) {
                         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                        writer.append(gson.toJson(docsForFuncName));
+                        builder.append(gson.toJson(docsForFuncName));
                     } else if (format.equals(FORMAT_MARKDOWN)) {
                         String markdown = docsForFuncName.asMarkdown();
-                        writer.append(markdown);
+                        builder.append(markdown);
                     }
                 }
             }
-            for (Writer writer : writers.values()) {
+            /*for (Writer writer : writers.values()) {
                 writer.flush();
                 writer.close();
-            }
+            }*/
         } catch (Exception e) {
+
             throw new RuntimeException(e);
         }
+        return stringBuilders;
     }
 
-    private Writer getWriterFor(String outputname) {
-        FileWriter fileWriter = null;
-        if (!writers.containsKey(outputname)) {
+    private StringBuilder getBuilderFor(String outputname) {
+//        FileWriter fileWriter = null;
+        StringBuilder builder = null;
+        if (!stringBuilders.containsKey(outputname)) {
             try {
                 outputname = basedir.isEmpty() ? outputname : basedir + "/" + outputname;
                 Path parent = Path.of(outputname).getParent();
                 if (parent != null) {
                     Files.createDirectories(parent);
                 }
-                fileWriter = new FileWriter(outputname, false);
-                writers.put(outputname, fileWriter);
+                builder = new StringBuilder();
+                stringBuilders.put(outputname, builder);
 
                 String[] blurbsdirs = blurbsDirs.split(":");
                 for (String blurbsdir : blurbsdirs) {
@@ -173,7 +179,7 @@ public class VirtDataGenDocsApp implements Runnable {
                             String blurb = Files.readString(blurbsFile, StandardCharsets.UTF_8);
 
                             logger.debug("writing blurb to " + outputname);
-                            fileWriter.append(blurb);
+                            builder.append(blurb);
                         }
                     }
                 }
@@ -181,7 +187,7 @@ public class VirtDataGenDocsApp implements Runnable {
                 throw new RuntimeException(e);
             }
         }
-        return writers.get(outputname);
+        return stringBuilders.get(outputname);
     }
 
     private Optional<FDoc> loadAllDocs() {

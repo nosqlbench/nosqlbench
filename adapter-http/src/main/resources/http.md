@@ -141,6 +141,9 @@ defaults:
   ensure that the values that are inserted at binding points are produced
   in a valid form for a URI. You can use the `URLEncode()`
   binding function where needed to achieve this.
+  *NOTE*, If you are using dynamic values for the uri field, and
+  a test value for cycle 0 includes neither `URLENCODE[[` nor `E[]`,
+  then it is skipped. You can override this with `enable_urlencode: true`.
 - **method** - An optional request method. If not provided, "GET" is
   assumed. Any method name will work here, even custom ones that are
   specific to a given target system. No validation is done for standard
@@ -187,11 +190,22 @@ configuration. If needed, more configurable SSL support will be added.
 
 ## Client Behavior
 
-### TCP Sessions
+### TCP Sessions & Clients
 
-The HTTP clients are allocated one to each thread. The TCP connection
-caching is entirely left to the defaults for the current HttpClient
-library that is bundled within the JVM.
+Client instances are created for each unique `space` value. NoSQLBench
+provides a way for all driver adapters to instance native clients according
+to a data from a binding. This is standardized under the op template parameter
+`space`, which is wired by default to the static value `default`. This means
+that each activity that uses the http driver shares a client instance across
+all threads by default. If you want to have a new http client per-thread,
+simply add a binding for `space: ThreadNumToInteger()` and reference it in
+an op template like `space: {space}`, OR use an inline op field in your op
+template like `space: {{ThreadNumToInteger()}}`.
+
+You can use any binding function you want for the space op field. However,
+if you were to assign it something like "space: {{Identity()}}" you would
+not have a good result, as you would be spinning up and caching a new http client
+instance for every single cycle.
 
 ### Chunked encoding and web sockets
 

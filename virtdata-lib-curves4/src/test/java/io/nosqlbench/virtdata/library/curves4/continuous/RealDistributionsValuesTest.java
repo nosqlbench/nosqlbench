@@ -19,6 +19,8 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Normal;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Uniform;
 import org.apache.commons.math4.stat.descriptive.DescriptiveStatistics;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +31,13 @@ import java.util.function.LongToDoubleFunction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RealDistributionsValuesTest {
+    private final static Logger logger = LogManager.getLogger(RealDistributionsValuesTest.class);
 
 
     @Test
     public void testComputedNormal() {
         RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"compute"), 1000000,1);
-        System.out.println(runData);
+        logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
         assertThat(runData.getFractionalPercentile(0.4D))
@@ -46,7 +49,7 @@ public class RealDistributionsValuesTest {
     @Test
     public void testInterpolatedNormal() {
         RunData runData = iterateMapperDouble(new Normal(10.0,2.0,"interpolate"), 1000000,1);
-        System.out.println(runData);
+        logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.5D))
                 .isCloseTo(10.0D, Offset.offset(0.01D));
         assertThat(runData.getFractionalPercentile(0.4D))
@@ -64,7 +67,7 @@ public class RealDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData);
+        logger.debug(runData);
     }
 
     @Test
@@ -76,7 +79,7 @@ public class RealDistributionsValuesTest {
                 .isCloseTo(50.0D, Offset.offset(1.0D));
         assertThat(runData.getFractionalPercentile(0.78D))
                 .isCloseTo(78.0D, Offset.offset(1.0D));
-        System.out.println(runData);
+        logger.debug(runData);
     }
 
     @Test
@@ -92,7 +95,7 @@ public class RealDistributionsValuesTest {
 
         assertThat(mapper.applyAsDouble(Long.MAX_VALUE)).isCloseTo(100.0D, Offset.offset(1.0D));
 
-        System.out.println(runData);
+        logger.debug(runData);
     }
 
     private RunData iterateMapperDouble(LongToDoubleFunction mapper, int iterations, long funcstep) {

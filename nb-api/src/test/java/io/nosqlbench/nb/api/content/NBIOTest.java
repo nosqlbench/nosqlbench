@@ -20,6 +20,8 @@ import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBIORelativizer;
 import io.nosqlbench.api.content.NBPathsAPI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBIOTest {
+    private final static Logger logger = LogManager.getLogger(NBIOTest.class);
 
     @Test
     public void testFullyQualifiedNameSearches() {
@@ -212,15 +215,15 @@ public class NBIOTest {
         List<Content<?>> list = null;
 
         list = NBIO.classpath().prefix("./").list();
-        System.out.println("found " + list.size() + " entries for path '.'");
+        logger.debug("found " + list.size() + " entries for path '.'");
         assertThat(list).hasSizeGreaterThan(0);
 
         list = NBIO.fs().prefix("./").list();
-        System.out.println("found " + list.size() + " entries for path '.'");
+        logger.debug("found " + list.size() + " entries for path '.'");
         assertThat(list).hasSizeGreaterThan(0);
 
         list = NBIO.remote().prefix("./").list();
-        System.out.println("found " + list.size() + " entries for path '.'");
+        logger.debug("found " + list.size() + " entries for path '.'");
         assertThat(list).hasSize(0);
     }
 

@@ -42,7 +42,7 @@ public class ShutdownHookPlugin {
         Thread runnable = new ShutdownRunnableFunction(logger, name, (Function<?,?>)f);
         runnable.setName(shutdownName);
         Runtime.getRuntime().addShutdownHook(runnable);
-        logger.info("Registered shutdown hook to run under name '" + shutdownName + "'");
+        logger.info(() -> "Registered shutdown hook to run under name '" + shutdownName + "'");
 
     }
 }

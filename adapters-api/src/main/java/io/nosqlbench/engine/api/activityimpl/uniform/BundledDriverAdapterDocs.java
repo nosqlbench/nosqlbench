@@ -19,23 +19,27 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
 import io.nosqlbench.api.docsapi.Docs;
 import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.api.docsapi.DocsNameSpace;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Service(value = BundledMarkdownManifest.class, selector = "adapter-docs")
+@Service(value = BundledMarkdownManifest.class, selector = "drivers")
 public class BundledDriverAdapterDocs implements BundledMarkdownManifest {
     @Override
     public DocsBinder getDocs() {
-        Docs docs = new Docs().namespace("adapter-docs");
+        DocsBinder docs = new Docs();
         SimpleServiceLoader<DriverAdapter> loader = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
         List<SimpleServiceLoader.Component<? extends DriverAdapter>> namedProviders = loader.getNamedProviders();
         for (SimpleServiceLoader.Component<? extends DriverAdapter> namedProvider : namedProviders) {
             DriverAdapter driverAdapter = namedProvider.provider.get();
             DocsBinder bundledDocs = driverAdapter.getBundledDocs();
-            docs.merge(bundledDocs);
+            docs = docs.merge(bundledDocs);
         }
         return docs;
     }

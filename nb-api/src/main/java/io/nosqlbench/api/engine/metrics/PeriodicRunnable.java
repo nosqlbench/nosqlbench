@@ -70,7 +70,7 @@ public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoClose
         long nextEventTime = System.currentTimeMillis() + intervalMillis;
         while (running) {
             nextEventTime = awaitTime(intervalMillis, nextEventTime);
-            logger.trace("invoking interval runnable " + action);
+            logger.trace(() -> "invoking interval runnable " + action);
             action.run();
         }
     }

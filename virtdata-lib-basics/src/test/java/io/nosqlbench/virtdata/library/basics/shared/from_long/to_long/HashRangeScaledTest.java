@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HashRangeScaledTest {
 
+    private final static Logger logger = LogManager.getLogger(HashRangeScaledTest.class);
     @Test
     public void testRanging() {
         HashRangeScaled hrs = new HashRangeScaled();
@@ -44,7 +47,7 @@ public class HashRangeScaledTest {
         for (long i = 0; i < top; i++) {
             lss.accept(hrs.applyAsLong(i));
         }
-        System.out.println(lss);
+        logger.debug(lss);
         assertThat(lss.getAverage()).isCloseTo(top / 4d, Percentage.withPercentage(1d));
     }
 
@@ -58,7 +61,7 @@ public class HashRangeScaledTest {
         for (long i = 0; i < top; i++) {
             lss.accept(hrs.applyAsLong(i));
         }
-        System.out.println(lss);
+        logger.debug(lss);
         assertThat(lss.getAverage()).isCloseTo(top / 8d, Percentage.withPercentage(1d));
     }
 
@@ -72,7 +75,7 @@ public class HashRangeScaledTest {
         for (long i = 0; i < top; i++) {
             lss.accept(hrs.applyAsLong(i));
         }
-        System.out.println(lss);
+        logger.debug(lss);
         assertThat(lss.getAverage()).isCloseTo(top / 2d, Percentage.withPercentage(1d));
     }
 

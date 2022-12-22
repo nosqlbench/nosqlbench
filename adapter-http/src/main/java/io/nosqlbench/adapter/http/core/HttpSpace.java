@@ -62,7 +62,7 @@ public class HttpSpace implements NBNamedElement {
 
     private HttpClient newClient() {
         HttpClient.Builder builder = HttpClient.newBuilder();
-        logger.debug("follow_redirects=>" + followRedirects);
+        logger.debug(() -> "follow_redirects=>" + followRedirects);
         builder = builder.followRedirects(this.followRedirects);
         builder = builder.connectTimeout(this.timeout);
         return builder.build();
@@ -120,7 +120,7 @@ public class HttpSpace implements NBNamedElement {
                 .setDescription("Print extended diagnostics. This option has numerous" +
                     " possible values. See the markdown docs for details. (nb help http)")
             )
-            .add(Param.defaultTo("timeout", Long.MAX_VALUE)
+            .add(Param.defaultTo("timeout", 1000L*60L*15L) // 15 minutes
                 .setDescription("How long to wait for requests before timeout out. Default is forever."))
             .add(Param.defaultTo("hdr_digits", 4)
                 .setDescription("number of digits of precision to keep in HDR histograms"))
