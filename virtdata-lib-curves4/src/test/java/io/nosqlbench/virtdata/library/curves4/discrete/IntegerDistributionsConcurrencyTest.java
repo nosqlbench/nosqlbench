@@ -158,7 +158,7 @@ public class IntegerDistributionsConcurrencyTest {
         public long[] call() throws Exception {
             long[] output = new long[size];
             DataMapper<Long> mapper = VirtData.getMapper(mapperSpec, long.class);
-//            logger.debug("resolved:" + mapper);
+//            logger.debug(() -> "resolved:" + mapper);
 
             synchronized (signal) {
                 signal.wait(10000);
@@ -167,7 +167,7 @@ public class IntegerDistributionsConcurrencyTest {
             for (int i = 0; i < output.length; i++) {
                 output[i] = mapper.get(i);
 //                if ((i % 100) == 0) {
-//                    logger.debug("wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
+//                    logger.debug(() -> "wrote t:" + slot + ", iter:" + i + ", val:" + output[i]);
 //                }
             }
             return output;

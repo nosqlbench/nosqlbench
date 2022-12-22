@@ -220,7 +220,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
 
         for (ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
-                logger.info("Not loading " + extensionDescriptor + ", autoloading is false");
+                logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;
             }
 
@@ -232,7 +232,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
                 scriptEnv
             );
             ScenarioMetadataAware.apply(extensionObject, getScenarioMetadata());
-            logger.trace("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+            logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                 " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
@@ -356,7 +356,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
             logger.warn("Scenario was interrupted by process exit, shutting down");
         }
 
-        logger.info("scenario state: " + this.state);
+        logger.info(() -> "scenario state: " + this.state);
 
         // We report the scenario state via annotation even for short runs
         Annotation annotation = Annotation.newBuilder()

@@ -75,7 +75,7 @@ public class ExprTest {
         long duration = end-start;
         double nsperop = (double) duration / (double) (max-min);
 
-        logger.debug(String.format("(ops/time)=(%d/%dns) rate=%.3f\n", (max-min), duration, ((double) max-min)*1000000000.0/duration));
+        logger.debug(() -> String.format("(ops/time)=(%d/%dns) rate=%.3f\n", (max-min), duration, ((double) max-min)*1000000000.0/duration));
     }
 
 }

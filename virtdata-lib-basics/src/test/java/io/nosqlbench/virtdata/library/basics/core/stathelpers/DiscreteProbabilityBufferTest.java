@@ -39,9 +39,9 @@ public class DiscreteProbabilityBufferTest {
         dp.normalize();
 
         for (DiscreteProbabilityBuffer.Entry entry : dp) {
-            logger.debug("entry: " + entry.getEventId() + ":" + entry.getProbability());
+            logger.debug(() -> "entry: " + entry.getEventId() + ":" + entry.getProbability());
         }
-        logger.debug("cumuProb:" + dp.getCumulativeProbability());
+        logger.debug(() -> "cumuProb:" + dp.getCumulativeProbability());
     }
 
 }

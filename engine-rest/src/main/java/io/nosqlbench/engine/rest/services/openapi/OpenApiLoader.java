@@ -94,7 +94,7 @@ public class OpenApiLoader {
         yaml.setBeanAccess(BeanAccess.DEFAULT);
 
         for (PathOp activeOp : activeOps) {
-            logger.debug("yaml for op:" + yaml.dump(activeOp));
+            logger.debug(() -> "yaml for op:" + yaml.dump(activeOp));
             pathops.put(activeOp.getCall(), activeOp);
         }
 

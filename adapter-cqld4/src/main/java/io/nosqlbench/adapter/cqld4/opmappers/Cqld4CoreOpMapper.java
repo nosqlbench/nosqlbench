@@ -66,7 +66,7 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
 
-        logger.info("Using " + target.enumId + " statement form for '" + op.getName());
+        logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName());
 
         return switch (target.enumId) {
             case raw -> new CqlD4RawStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);

@@ -65,7 +65,7 @@ public class VirtdataBuilderTest {
         char[] chars = readFile("test-syntax.virtdata");
         CodePointCharStream ais = CharStreams.fromString(new String(chars));
         String inputString = new String(chars);
-        logger.debug("Parsing:\n" + inputString);
+        logger.debug(() -> "Parsing:\n" + inputString);
         VirtDataLexer lexer = new VirtDataLexer(ais);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         VirtDataParser parser = new VirtDataParser(tokens);
@@ -73,10 +73,10 @@ public class VirtdataBuilderTest {
         parser.addParseListener(astListener);
 
         VirtDataParser.VirtdataRecipeContext virtdataRecipeContext = parser.virtdataRecipe();
-        logger.debug(virtdataRecipeContext.toStringTree(parser));
+        logger.debug(() -> virtdataRecipeContext.toStringTree(parser));
 
         if (astListener.hasErrors()) {
-            logger.debug(astListener.getErrorNodes());
+            logger.debug(() -> astListener.getErrorNodes());
         }
 
         VirtDataAST ast = astListener.getModel();

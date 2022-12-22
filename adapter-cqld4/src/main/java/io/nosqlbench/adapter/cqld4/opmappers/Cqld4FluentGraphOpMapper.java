@@ -103,7 +103,7 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
             try {
                 loader.loadClass(candidateName);
                 classNames.add(candidateName);
-                logger.debug("added import " + candidateName);
+                logger.debug(() -> "added import " + candidateName);
             } catch (Exception e) {
                 throw new RuntimeException("Class '" + candidateName + "' was not found for fluent imports.");
             }

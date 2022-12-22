@@ -47,7 +47,7 @@ public class WeightedFuncsTest {
             int v = ((Long) o).intValue();
             results[v]++;
         }
-        logger.debug(Arrays.toString(results));
+        logger.debug(() -> Arrays.toString(results));
 
     }
 

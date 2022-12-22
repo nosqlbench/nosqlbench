@@ -46,10 +46,11 @@ public class RawStmtsLoader {
         Collections.addAll(this.transformers, newTransformer);
     }
 
-    public RawStmtsDocList loadString(Logger logger, String data) {
+    public RawStmtsDocList loadString(Logger logger, final String originalData) {
+        String data = originalData;
 
         try {
-            if (logger != null) logger.trace("Applying string transformer to yaml data:" + data);
+            if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + originalData);
             for (Function<String, String> transformer : transformers) {
                 data = transformer.apply(data);
             }
@@ -103,7 +104,7 @@ public class RawStmtsLoader {
     protected String applyTransforms(Logger logger, String data) {
         for (Function<String, String> xform : stringTransformers) {
             try {
-                if (logger != null) logger.trace("Applying string transformer to yaml data:" + xform);
+                if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
                 RuntimeException t = new OpConfigError("Error applying string transforms to input", e);

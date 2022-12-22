@@ -61,10 +61,10 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
                 action = pattern.apply(keyspace);
                 switch (action) {
                     case add:
-                        logger.debug("including all definitions in " + keyspace + " with inclusion pattern " + pattern);
+                        logger.debug(() -> "including all definitions in " + keyspace + " with inclusion pattern " + pattern);
                         break;
                     case remove:
-                        logger.info("removing all definitions in " + keyspace + " with exclusion pattern " + pattern);
+                        logger.info(() -> "removing all definitions in " + keyspace + " with exclusion pattern " + pattern);
                         model.removeKeyspaceDef(keyspace);
                     case inderminate:
                 }

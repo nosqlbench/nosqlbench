@@ -65,7 +65,7 @@ public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAct
 
     @Override
     public void requestStop() {
-        logger.info(this + " requested to stop.");
+        logger.info(() -> this + " requested to stop.");
         this.running = false;
     }
 

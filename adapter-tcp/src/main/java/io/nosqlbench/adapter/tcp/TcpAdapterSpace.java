@@ -54,7 +54,7 @@ public class TcpAdapterSpace {
 
         try {
             Socket socket = socketFactory.createSocket(host, port);
-            logger.info("connected to " + socket.toString());
+            logger.info(() -> "connected to " + socket.toString());
             return new PrintWriter(socket.getOutputStream());
         } catch (IOException e) {
             throw new RuntimeException("Error opening socket:" + e, e);
@@ -110,7 +110,7 @@ public class TcpAdapterSpace {
 //                InetAddress hostAddr = InetAddress.getByName(host);
 //                listenerSocket = socketFactory.createServerSocket(port, 10, hostAddr);
 //                if (socketFactory instanceof SSLServerSocketFactory) {
-//                    logger.info("SSL enabled on server socket " + listenerSocket);
+//                    logger.info(() -> "SSL enabled on server socket " + listenerSocket);
 //                }
 //                TCPServerActivity.SocketAcceptor socketAcceptor = new TCPServerActivity.SocketAcceptor(queue, listenerSocket);
 //                managedShutdown.add(socketAcceptor);
@@ -124,7 +124,7 @@ public class TcpAdapterSpace {
 //        }
 //
 //        TCPServerActivity.QueueWriterAdapter queueWriterAdapter = new TCPServerActivity.QueueWriterAdapter(this.queue);
-//        logger.info("initialized queue writer:" + queueWriterAdapter);
+//        logger.info(() -> "initialized queue writer:" + queueWriterAdapter);
 //        return queueWriterAdapter;
 //
 //    }
@@ -227,7 +227,7 @@ public class TcpAdapterSpace {
 //                        writerThread.setName("SocketWriter/" + connectedSocket);
 //                        writerThread.setDaemon(true);
 //                        writerThread.start();
-//                        logger.info("Started writer thread for " + connectedSocket);
+//                        logger.info(() -> "Started writer thread for " + connectedSocket);
 //                    } catch (SocketTimeoutException ignored) {
 //                    }
 //                }

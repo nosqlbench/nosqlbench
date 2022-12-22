@@ -72,7 +72,7 @@ public class NameCache {
             if (this.path.equals(path)) {
                 logger.debug("mapfile unchanged '" + path + "'");
             } else {
-                logger.info("mapfile changed from '" + this.path + "' to '" + path + "'");
+                logger.info(() -> "mapfile changed from '" + this.path + "' to '" + path + "'");
                 this.path = path;
             }
         }

@@ -49,7 +49,7 @@ public class DataMapperLibraryFinder {
             ServiceLoader<DataMapperLibrary> sl = ServiceLoader.load(DataMapperLibrary.class);
             Map<String,Integer> dups = new HashMap<>();
             for (DataMapperLibrary dataMapperLibrary : sl) {
-                logger.debug("Found data mapper library:" +
+                logger.debug(() -> "Found data mapper library:" +
                         dataMapperLibrary.getClass().getCanonicalName() + ":" +
                         dataMapperLibrary.getLibraryName());
 
@@ -61,12 +61,12 @@ public class DataMapperLibraryFinder {
                 libraries.put(dataMapperLibrary.getLibraryName(),dataMapperLibrary);
             }
             if (dups.size() > 0) {
-                logger.trace("Java runtime provided duplicates for " +
+                logger.trace(() -> "Java runtime provided duplicates for " +
                         dups.entrySet().stream().map(e -> e.getKey()+":"+e.getValue()).collect(Collectors.joining(",")));
             }
 
         }
-        logger.info("Loaded DataMapper Libraries:" + libraries.keySet());
+        logger.info(() -> "Loaded DataMapper Libraries:" + libraries.keySet());
         return libraries;
     }
 

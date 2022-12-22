@@ -84,8 +84,8 @@ public class TestOptimoExperiments {
         );
         PointValuePair result = mo.optimize(od.toArray(new OptimizationData[0]));
 
-        logger.debug(
-                "point:" + Arrays.toString(result.getPoint()) +
+        logger.debug(() ->
+            "point:" + Arrays.toString(result.getPoint()) +
                         " value=" + m.value(result.getPoint())
         );
 

@@ -117,7 +117,7 @@ public class BindingsAccumulator {
         accumulated.forEach((k,v) -> {
             inverted.computeIfAbsent(v,def -> new HashSet<>()).add(k);
         });
-        logger.info("computed " + accumulated.size() + " raw bindings, consisting of " + inverted.size() + " unique definitions.");
+        logger.info(() -> "computed " + accumulated.size() + " raw bindings, consisting of " + inverted.size() + " unique definitions.");
         return accumulated;
     }
 }

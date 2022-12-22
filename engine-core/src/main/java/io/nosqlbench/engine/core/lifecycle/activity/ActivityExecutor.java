@@ -89,7 +89,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      * Simply stop the motors
      */
     public void stopActivity() {
-        logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
+        logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
         tally.awaitNoneOther(RunState.Stopped,RunState.Finished);
@@ -98,7 +98,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         tally.awaitNoneOther(RunState.Stopped,RunState.Finished);
         activity.setRunState(RunState.Stopped);
 
-        logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
+        logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
             .session(sessionId)
@@ -136,11 +136,11 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.debug("took " + (gracefulWaitEndedAt - gracefulWaitStartedAt) + " ms to shutdown gracefully");
 
         if (!executorService.isTerminated()) {
-            logger.info("stopping activity forcibly " + activity.getAlias());
+            logger.info(() -> "stopping activity forcibly " + activity.getAlias());
             List<Runnable> runnables = executorService.shutdownNow();
             long forcibleShutdownCompletedAt = System.currentTimeMillis();
-            logger.debug("took " + (forcibleShutdownCompletedAt - gracefulWaitEndedAt) + " ms to shutdown forcibly");
-            logger.debug(runnables.size() + " tasks never started.");
+            logger.debug(() -> "took " + (forcibleShutdownCompletedAt - gracefulWaitEndedAt) + " ms to shutdown forcibly");
+            logger.debug(() -> runnables.size() + " tasks never started.");
         }
 
         long activityShutdownStartedAt = System.currentTimeMillis();
@@ -336,7 +336,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
 
     private void requestStopMotors() {
-        logger.info("stopping activity " + activity);
+        logger.info(() -> "stopping activity " + activity);
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
     }
@@ -358,7 +358,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     @Override
     public synchronized void stopActivityWithReasonAsync(String reason) {
-        logger.info("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
+        logger.info(() -> "Stopping activity " + this.activityDef.getAlias() + ": " + reason);
         this.exception = new RuntimeException("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
         logger.error("stopping with reason: " + exception);
         requestStopMotors();
@@ -491,7 +491,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
      */
     private void startRunningActivityThreads() {
 
-        logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
+        logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         Annotators.recordAnnotation(Annotation.newBuilder()
             .session(sessionId)
             .now()

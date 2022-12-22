@@ -172,14 +172,14 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-        logger.debug(Arrays.toString(r));
+        logger.debug(() -> Arrays.toString(r));
         Arrays.sort(r);
 
-        logger.debug(Arrays.toString(r));
+        logger.debug(() -> Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug(() -> "resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
     }
 
     @Test
@@ -191,13 +191,13 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-//        logger.debug(Arrays.toString(r));
+//        logger.debug(() -> Arrays.toString(r));
         Arrays.sort(r);
-//        logger.debug(Arrays.toString(r));
+//        logger.debug(() -> Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug(() -> "resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
 
     }
 
@@ -211,13 +211,13 @@ public class ShuffleTest {
         for (int i = 1; i <= r.length; i++) {
             r[i-1]=shuffle.applyAsLong(i);
         }
-//        logger.debug(Arrays.toString(r));
+//        logger.debug(() -> Arrays.toString(r));
         Arrays.sort(r);
-//        logger.debug(Arrays.toString(r));
+//        logger.debug(() -> Arrays.toString(r));
         for (int i = 0; i < r.length; i++) {
             assertThat(r[i]).isEqualTo(i+1);
         }
-//        logger.debug("resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
+//        logger.debug(() -> "resampling stats for " + max + " values: " + Arrays.toString(shuffle.stats));
     }
 
 

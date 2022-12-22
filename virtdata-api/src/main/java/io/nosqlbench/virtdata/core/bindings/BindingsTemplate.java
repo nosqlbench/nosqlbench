@@ -139,7 +139,7 @@ public class BindingsTemplate {
     }
 
     private void logAvailableDataMappers() {
-        VirtDataDocs.getAllNames().forEach(gn -> logger.info("DATAMAPPER " + gn));
+        VirtDataDocs.getAllNames().forEach(gn -> logger.info(() -> "DATAMAPPER " + gn));
     }
 
     public List<String> getBindPointNames() {

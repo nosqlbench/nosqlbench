@@ -71,13 +71,11 @@ public class Annotators {
                 }
                 Annotator annotator = annotatorProvider.get();
 
-                if (annotator instanceof NBMapConfigurable) {
-                    NBMapConfigurable NBMapConfigurable = (NBMapConfigurable) annotator;
+                if (annotator instanceof NBMapConfigurable NBMapConfigurable) {
                     NBMapConfigurable.applyConfig(cmap);
                 }
 
-                if (annotator instanceof NBConfigurable) {
-                    NBConfigurable nbConfigurable = (NBConfigurable) annotator;
+                if (annotator instanceof NBConfigurable nbConfigurable) {
                     NBConfiguration cfg = nbConfigurable.getConfigModel().apply(cmap);
                     nbConfigurable.applyConfig(cfg);
                 }
@@ -87,7 +85,7 @@ public class Annotators {
 
         }
 
-        logger.debug("Initialized " + Annotators.annotators.size() + " annotators, since the configuration is empty.");
+        logger.debug(() -> "Initialized " + Annotators.annotators.size() + " annotators, since the configuration is empty.");
 
     }
 
@@ -124,7 +122,7 @@ public class Annotators {
     public static synchronized void recordAnnotation(Annotation annotation) {
         for (Annotator annotator : getAnnotators()) {
             try {
-                logger.trace("calling annotator " + annotator.getClass().getAnnotation(Service.class).selector());
+                logger.trace(() -> "calling annotator " + annotator.getClass().getAnnotation(Service.class).selector());
                 annotator.recordAnnotation(annotation);
             } catch (Exception e) {
                 logger.error(e);

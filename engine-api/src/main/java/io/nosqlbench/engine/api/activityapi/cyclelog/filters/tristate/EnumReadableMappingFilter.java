@@ -53,7 +53,7 @@ public class EnumReadableMappingFilter<E extends Enum<E> & ResultReadable> imple
         for (E enumValue : enumValues) {
             if (enumValue.toString().matches(p.pattern())) {
                 matched++;
-                logger.debug("Setting policy for " + enumValue + " to " + policy);
+                logger.debug(() -> "Setting policy for " + enumValue + " to " + policy);
                 int resultCode = enumValue.getResult();
                 arrayFilter.addPolicy(enumValue,policy);
             }

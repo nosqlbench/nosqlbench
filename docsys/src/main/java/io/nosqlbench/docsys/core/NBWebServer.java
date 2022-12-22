@@ -144,11 +144,11 @@ public class NBWebServer implements Runnable {
         svcLoader.getNamedProviders().stream().map(p -> p.provider)
             .forEach(p -> {
                 Class<? extends WebServiceObject> c = p.type();
-                logger.info("Adding web service object: " + c.getSimpleName());
+                logger.info(() -> "Adding web service object: " + c.getSimpleName());
                 this.addWebObject(c);
             });
 
-        logger.debug("Loaded " + this.servletClasses.size() + " root resources.");
+        logger.debug(() -> "Loaded " + this.servletClasses.size() + " root resources.");
 
     }
 
@@ -177,7 +177,7 @@ public class NBWebServer implements Runnable {
                 path.getFileSystem().provider().checkAccess(path, AccessMode.READ);
                 this.basePaths.add(path);
             } catch (Exception e) {
-                logger.error("Unable to access path " + path.toString());
+                logger.error(() -> "Unable to access path " + path.toString());
                 throw new RuntimeException(e);
             }
         }
@@ -224,7 +224,7 @@ public class NBWebServer implements Runnable {
         }
 
         for (Path basePath : basePaths) {
-            logger.info("Adding path to server: " + basePath.toString());
+            logger.info(() -> "Adding path to server: " + basePath.toString());
             ResourceHandler resourceHandler = new ResourceHandler();
             resourceHandler.setDirAllowed(true);
             resourceHandler.setAcceptRanges(true);
@@ -253,7 +253,7 @@ public class NBWebServer implements Runnable {
 //        ServletHolder statusResourceServletHolder = new ServletHolder(statusResourceContainer);
 //        getContextHandler().addServlet(statusResourceServletHolder, "/_");
 
-        logger.info("adding " + servletClasses.size() + " context handlers...");
+        logger.info(() -> "adding " + servletClasses.size() + " context handlers...");
         loadDynamicEndpoints();
 
 
@@ -311,7 +311,7 @@ public class NBWebServer implements Runnable {
         server.setHandler(handlers);
         for (Connector connector : server.getConnectors()) {
             if (connector instanceof AbstractConnector) {
-                logger.debug("Setting idle timeout for " + connector + " to 300,000ms");
+                logger.debug(() -> "Setting idle timeout for " + connector + " to 300,000ms");
                 ((AbstractConnector) connector).setIdleTimeout(300000);
             }
         }
@@ -347,7 +347,7 @@ public class NBWebServer implements Runnable {
 
             server.join();
         } catch (Exception e) {
-            throw new RuntimeException("error while starting doc server: "+e.toString(),e);
+            throw new RuntimeException("error while starting doc server: "+ e,e);
         }
 
     }
@@ -381,13 +381,11 @@ public class NBWebServer implements Runnable {
         StringBuilder sb = new StringBuilder();
         sb.append("----> handler type ").append(handler.getClass().getSimpleName()).append("\n");
 
-        if (handler instanceof ResourceHandler) {
-            ResourceHandler h = (ResourceHandler) handler;
+        if (handler instanceof ResourceHandler h) {
             sb.append(" base resource: ").append(h.getBaseResource().toString())
                 .append("\n");
             sb.append(h.dump());
-        } else if (handler instanceof ServletContextHandler) {
-            ServletContextHandler h = (ServletContextHandler) handler;
+        } else if (handler instanceof ServletContextHandler h) {
             sb.append(h.dump()).append("\n");
             h.getServletContext().getServletRegistrations().forEach(
                 (k, v) -> {
@@ -396,8 +394,7 @@ public class NBWebServer implements Runnable {
                 }
             );
             sb.append("context path:").append(h.getContextPath());
-        } else if (handler instanceof DefaultHandler) {
-            DefaultHandler h = (DefaultHandler) handler;
+        } else if (handler instanceof DefaultHandler h) {
             sb.append(h.dump());
         }
         return sb.toString();

@@ -17,6 +17,8 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.HashedFileExtractToString;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.IntSummaryStatistics;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HashedFileExtractToStringTest {
 
+    private final static Logger logger = LogManager.getLogger(HashedFileExtractToStringTest.class);
     @Test
     public void testHashedFileBasic() {
         HashedFileExtractToString extract =
@@ -38,7 +41,7 @@ public class HashedFileExtractToStringTest {
             assertThat(apply.length()).isLessThanOrEqualTo(3000);
         }
 
-        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
+        logger.debug("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
     }
 
     @Test
@@ -52,6 +55,6 @@ public class HashedFileExtractToStringTest {
             iss.accept(apply.length());
         }
 
-        System.out.println("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
+        logger.debug("Loaded examples from data/lorem_ipsum_full.txt:" + iss);
     }
 }

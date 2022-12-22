@@ -192,11 +192,11 @@ public class NBCLIArgsFile {
         LinkedHashSet<String> mergedPins = mergePins(this.argsToPin, this.argsToUnpin, extant);
         if (extant.equals(mergedPins)) {
             if (logger != null) {
-                logger.info("Pinning resulted in no changes to argsfile '" + this.argsPath.toString() + "'");
+                logger.info(() -> "Pinning resulted in no changes to argsfile '" + this.argsPath.toString() + "'");
             }
         } else {
             if (logger != null) {
-                logger.info("Writing updated argsfile '" + this.argsPath.toString() + "' with " +
+                logger.info(() -> "Writing updated argsfile '" + this.argsPath.toString() + "' with " +
                         (this.argsToPin.size() + this.argsToUnpin.size()) + " changes");
             }
             writeArgsFile(mergedPins);
@@ -232,11 +232,11 @@ public class NBCLIArgsFile {
         for (String toAdd : toPin) {
             if (merged.contains(toAdd)) {
                 if (logger != null) {
-                    logger.warn("Requested to pin argument again: '" + toAdd + "', ignoring");
+                    logger.warn(() -> "Requested to pin argument again: '" + toAdd + "', ignoring");
                 }
             } else {
                 if (logger != null) {
-                    logger.info("Pinning option '" + toAdd + "' to '" + this.argsPath.toString() + "'");
+                    logger.info(() -> "Pinning option '" + toAdd + "' to '" + this.argsPath.toString() + "'");
                 }
                 merged.add(toAdd);
             }
@@ -245,12 +245,12 @@ public class NBCLIArgsFile {
         for (String toDel : toUnpin) {
             if (merged.contains(toDel)) {
                 if (logger != null) {
-                    logger.info("Unpinning '" + toDel + "' from '" + this.argsPath.toString() + "'");
+                    logger.info(() -> "Unpinning '" + toDel + "' from '" + this.argsPath.toString() + "'");
                 }
                 merged.remove(toDel);
             } else {
                 if (logger != null) {
-                    logger.warn("Requested to unpin argument '" + toDel + "' which was not found in " + argsPath.toString());
+                    logger.warn(() -> "Requested to unpin argument '" + toDel + "' which was not found in " + argsPath.toString());
                 }
             }
         }
@@ -422,7 +422,7 @@ public class NBCLIArgsFile {
 
         this.argsPath = selected;
         if (logger != null) {
-            logger.debug("argsfile path is now '" + this.argsPath + "'");
+            logger.debug(() -> "argsfile path is now '" + this.argsPath + "'");
         }
     }
 

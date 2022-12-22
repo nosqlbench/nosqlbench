@@ -99,7 +99,7 @@ public class ScenariosExecutor {
                     } catch (InterruptedException ignored) {
                     }
                 }
-                logger.trace("waited " + (System.currentTimeMillis()-waitFrom) + " millis for scenarios");
+                logger.trace(() -> "waited " + (System.currentTimeMillis()-waitFrom) + " millis for scenarios");
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
@@ -207,7 +207,7 @@ public class ScenariosExecutor {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             submitted.remove(scenarioName);
-            logger.info("cancelled scenario " + scenarioName);
+            logger.info(() -> "cancelled scenario " + scenarioName);
         } else {
             throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
         }

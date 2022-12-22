@@ -86,7 +86,7 @@ public class StageManager implements Thread.UncaughtExceptionHandler, Runnable {
         try {
             lock.lock();
             readyQueue.add(forWhat);
-            logger.trace("awaiting signal for " + forWhat);
+            logger.trace(() -> "awaiting signal for " + forWhat);
             goTime.await();
         } catch (Throwable e) {
             System.out.println("error while synchronizing: " + e.getMessage());
@@ -97,7 +97,7 @@ public class StageManager implements Thread.UncaughtExceptionHandler, Runnable {
     }
 
     public void coordinateFor(int concurrency, String forWhat) {
-        logger.trace("coordinating " + concurrency + " threads for " + forWhat);
+        logger.trace(() -> "coordinating " + concurrency + " threads for " + forWhat);
         try {
             long delay = 1;
             long startedAt = System.currentTimeMillis();

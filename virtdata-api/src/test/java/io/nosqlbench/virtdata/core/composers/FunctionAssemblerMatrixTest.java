@@ -42,7 +42,7 @@ public class FunctionAssemblerMatrixTest {
             funcs.addAll(Arrays.asList(objects));
         }
 
-        long totalIterations = funcs.size() * funcs.size();
+        long totalIterations = (long) funcs.size() * funcs.size();
 
         for (Object f1 : funcs) {
 //            if (ft1 == FunctionType.R_T
@@ -70,7 +70,7 @@ public class FunctionAssemblerMatrixTest {
 
                 DataMapper g = DataMapperFunctionMapper.map(assy.getResolvedFunction().getFunctionObject());
                 Object o = g.get(1L);
-                logger.debug(" out:" + o);
+                logger.debug(() -> " out:" + o);
 
             }
         }

@@ -138,7 +138,7 @@ public class CommandTemplate {
             for (Function<String, Map<String, String>> parser : parserlist) {
                 Map<String, String> parsed = parser.apply(oneline);
                 if (parsed != null) {
-                    logger.debug("parsed request: " + parsed);
+                    logger.debug(() -> "parsed request: " + parsed);
                     cmd.putAll(parsed);
                     didParse = true;
                     break;

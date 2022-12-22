@@ -200,10 +200,9 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
 
             if (motorState.get() == Finished) {
-                logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
+                logger.warn(() -> "Input was already exhausted for slot " + slotId + ", remaining in finished state.");
             }
 
-            long cyclenum;
             action.init();
 
             if (input instanceof Startable) {
@@ -247,7 +246,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     }
 
                     if (cycleSegment == null) {
-                        logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        logger.trace(() -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
                         motorState.enterState(Finished);
                         continue;
                     }
@@ -270,17 +269,17 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     long strideStart = System.nanoTime();
 
                     while (!cycleSegment.isExhausted() && motorState.get() == Running) {
-                        cyclenum = cycleSegment.nextCycle();
+                        long cyclenum = cycleSegment.nextCycle();
                         if (cyclenum < 0) {
                             if (cycleSegment.isExhausted()) {
-                                logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
                                 motorState.enterState(Finished);
                                 continue;
                             }
                         }
 
                         if (motorState.get() != Running) {
-                            logger.trace("motor stopped in cycle " + cyclenum + ", stopping motor thread " + slotId);
+                            logger.trace(()->"motor stopped in cycle " + cyclenum + ", stopping motor thread " + slotId);
                             continue;
                         }
 
@@ -307,7 +306,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                             async.enqueue(op);
 
                         } catch (Exception t) {
-                            logger.error("Error while processing async cycle " + cyclenum + ", error:" + t);
+                            logger.error(()->"Error while processing async cycle " + cyclenum + ", error:" + t);
                             throw t;
                         }
                     }
@@ -318,9 +317,9 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                 if (motorState.get() == Finished) {
                     boolean finished = opTracker.awaitCompletion(60000);
                     if (finished) {
-                        logger.debug("slot " + this.slotId + " completed successfully");
+                        logger.debug(() -> "slot " + this.slotId + " completed successfully");
                     } else {
-                        logger.warn("slot " + this.slotId + " was stopped before completing successfully");
+                        logger.warn(() -> "slot " + this.slotId + " was stopped before completing successfully");
                     }
                 }
 
@@ -349,7 +348,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     }
 
                     if (cycleSegment == null) {
-                        logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        logger.trace(() -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
                         motorState.enterState(Finished);
                         continue;
                     }
@@ -364,17 +363,17 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                     try {
 
                         while (!cycleSegment.isExhausted()) {
-                            cyclenum = cycleSegment.nextCycle();
+                            long cyclenum = cycleSegment.nextCycle();
                             if (cyclenum < 0) {
                                 if (cycleSegment.isExhausted()) {
-                                    logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                    logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
                                     motorState.enterState(Finished);
                                     continue;
                                 }
                             }
 
                             if (motorState.get() != Running) {
-                                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                                logger.trace(() -> "motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
                                 continue;
                             }
                             int result = -1;
@@ -386,7 +385,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                             long cycleStart = System.nanoTime();
                             try {
-                                logger.trace("cycle " + cyclenum);
+                                logger.trace(()->"cycle " + cyclenum);
 
                                 // runCycle
                                 long phaseStart = System.nanoTime();
@@ -413,7 +412,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                         try {
                             output.onCycleResultSegment(outputBuffer);
                         } catch (Exception t) {
-                            logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
+                            logger.error(()->"Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
                             throw t;
                         }
                     }
@@ -429,11 +428,11 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             } else if (motorState.get() == Finished) {
                 logger.trace(() -> Thread.currentThread().getName() + " shutting down as " + motorState.get());
             } else {
-                logger.warn("Unexpected motor state for CoreMotor shutdown: " + motorState.get());
+                logger.warn(()->"Unexpected motor state for CoreMotor shutdown: " + motorState.get());
             }
 
         } catch (Throwable t) {
-            logger.error("Error in core motor loop:" + t, t);
+            logger.error(()->"Error in core motor loop:" + t, t);
             motorState.enterState(Errored);
             throw t;
         }
@@ -471,7 +470,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             motorState.enterState(RunState.Stopping);
         } else {
             if (motorState.get() != Stopped && motorState.get() != Stopping) {
-                logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + motorState.get());
+                logger.warn(()->"attempted to stop motor " + this.getSlotId() + ": from non Running state:" + motorState.get());
             }
         }
     }

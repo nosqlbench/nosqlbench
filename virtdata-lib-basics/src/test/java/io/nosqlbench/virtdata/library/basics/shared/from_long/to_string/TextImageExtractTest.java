@@ -31,20 +31,20 @@ public class TextImageExtractTest {
     public void testCtors() {
 
         CharBufImage f1 = new CharBufImage(10);
-        logger.debug("f1:" + f1.apply(1L));
+        logger.debug(() -> "f1:" + f1.apply(1L));
 
         CharBufImage f2 = new CharBufImage("abc123",15);
-        logger.debug("f2:" + f2.apply(1L));
+        logger.debug(() -> "f2:" + f2.apply(1L));
 
         CharBufImage f3 = new CharBufImage("abcdef",10,3L,5);
-        logger.debug("f3:" + f3.apply(1L));
+        logger.debug(() -> "f3:" + f3.apply(1L));
     }
 
     @Test
     public void testComposedFromStringFunc() {
         NumberNameToString nnts = new NumberNameToString();
         CharBufImage cbi = new CharBufImage(nnts, 100, 20);
-        logger.debug("cbi:" + cbi.apply(1L));
+        logger.debug(() -> "cbi:" + cbi.apply(1L));
     }
 
 

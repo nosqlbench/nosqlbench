@@ -165,7 +165,7 @@ public class NBCLI implements Function<String[], Integer> {
 
         logger = LogManager.getLogger("NBCLI");
         loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
-        logger.info("Configured scenario log at " + loggerConfig.getLogfileLocation());
+        logger.info(() -> "Configured scenario log at " + loggerConfig.getLogfileLocation());
         logger.debug("Scenario log started");
 
         // Global only processing
@@ -174,9 +174,9 @@ public class NBCLI implements Function<String[], Integer> {
             return EXIT_OK;
         }
 
-        logger.info("Running NoSQLBench Version " + new VersionInfo().getVersion());
-        logger.info("command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
-        logger.info("client-hardware: " + SystemId.getHostSummary());
+        logger.info(() -> "Running NoSQLBench Version " + new VersionInfo().getVersion());
+        logger.info(() -> "command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
+        logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
 
 
         // Invoke any bundled app which matches the name of the first non-option argument, if it exists.
@@ -186,7 +186,7 @@ public class NBCLI implements Function<String[], Integer> {
             BundledApp app = apploader.get().orElse(null);
             if (app != null) {
                 String[] appargs = Arrays.copyOfRange(args, 1, args.length);
-                logger.info("invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
+                logger.info(() -> "invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
                 globalOptions.setWantsStackTraces(true);
                 int result = app.applyAsInt(appargs);
                 return result;
@@ -299,7 +299,7 @@ public class NBCLI implements Function<String[], Integer> {
 
         if (options.wantsToCopyResource()) {
             String resourceToCopy = options.wantsToCopyResourceNamed();
-            logger.debug("user requests to copy out " + resourceToCopy);
+            logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
                 .prefix("activities")
@@ -329,7 +329,7 @@ public class NBCLI implements Function<String[], Integer> {
             } catch (IOException e) {
                 throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
             }
-            logger.info("Copied internal resource '" + data.asPath() + "' to '" + writeTo + "'");
+            logger.info(() -> "Copied internal resource '" + data.asPath() + "' to '" + writeTo + "'");
             return EXIT_OK;
 
         }
@@ -418,12 +418,12 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         // intentionally not shown for warn-only
-        logger.info("console logging level is " + options.getConsoleLogLevel());
+        logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
         ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
         if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
             options.setWantsStackTraces(true);
-            logger.debug("enabling stack traces since log level is " + options.getConsoleLogLevel());
+            logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
         }
 
         Scenario scenario = new Scenario(
@@ -479,7 +479,7 @@ public class NBCLI implements Function<String[], Integer> {
 //        }
 
         ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
-        logger.debug("Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
+        logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
         ActivityMetrics.closeMetrics(options.wantsEnableChart());
         scenariosResults.reportToLog();

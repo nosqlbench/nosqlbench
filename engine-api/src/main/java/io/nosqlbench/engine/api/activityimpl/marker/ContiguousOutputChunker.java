@@ -99,13 +99,13 @@ public class ContiguousOutputChunker implements Output {
             extent = extent.extend();
             logger.debug("added tracker extent " + extent.rangeSummary());
         }
-        logger.info("using max " + maxExtents + " extents with getCount: " + extentSize);
+        logger.info(() -> "using max " + maxExtents + " extents with getCount: " + extentSize);
     }
 
 
     @Override
     public synchronized void onCycleResultSegment(CycleResultsSegment segment) {
-        logger.trace("on-cycle-result-segment: (" + segment + ")");
+        logger.trace(() -> "on-cycle-result-segment: (" + segment + ")");
         for (CycleResult cr : segment) {
             onCycleResult(cr.getCycle(), cr.getResult());
         }
@@ -113,7 +113,7 @@ public class ContiguousOutputChunker implements Output {
 
     @Override
     public synchronized boolean onCycleResult(long completedCycle, int result) {
-        logger.trace("on-cycle-result: (" + completedCycle + "," + result + ")");
+        logger.trace(() -> "on-cycle-result: (" + completedCycle + "," + result + ")");
 
         try {
             while (true) {
@@ -174,7 +174,7 @@ public class ContiguousOutputChunker implements Output {
     }
 
     private void onFullyFilled(ByteTrackerExtent extent) {
-        logger.trace("MARKER>: fully filled: " + extent);
+        logger.trace(() -> "MARKER>: fully filled: " + extent);
         for (Output reader : readers) {
             CycleResultsIntervalSegment remainingSegment = extent.getRemainingSegment();
             if (remainingSegment != null) {

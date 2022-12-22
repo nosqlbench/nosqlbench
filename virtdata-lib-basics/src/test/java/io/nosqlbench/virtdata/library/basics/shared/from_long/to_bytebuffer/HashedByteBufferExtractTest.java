@@ -35,7 +35,7 @@ public class HashedByteBufferExtractTest {
         HashedByteBufferExtract bbe = new HashedByteBufferExtract(1024*1024,(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             ByteBuffer a0 = bbe.apply(i);
-            logger.debug(Hex.encodeHex(a0));
+            logger.debug(() -> Hex.encodeHex(a0));
         }
     }
 
@@ -44,7 +44,7 @@ public class HashedByteBufferExtractTest {
         HashedByteBufferExtract bbe = new HashedByteBufferExtract(new ByteBufferSizedHashed(1024*1024),(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             ByteBuffer a0 = bbe.apply(i);
-            logger.debug(Hex.encodeHex(a0));
+            logger.debug(() -> Hex.encodeHex(a0));
         }
     }
 
@@ -53,7 +53,7 @@ public class HashedByteBufferExtractTest {
         CharBufferExtract bbe = new CharBufferExtract(1024*1024,(LongToIntFunction) l -> 10);
         for (int i = 0; i < 10; i++) {
             CharBuffer a0 = bbe.apply(i);
-            logger.debug(a0.toString());
+            logger.debug(a0::toString);
         }
     }
 

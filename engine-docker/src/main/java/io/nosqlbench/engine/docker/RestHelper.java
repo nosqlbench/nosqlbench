@@ -47,7 +47,7 @@ public class RestHelper {
             content = contentSupplier.get();
         }
 
-        logger.debug("posting to " + url + ", auth: " + auth + " task:" + taskname);
+        logger.debug(() -> "posting to " + url + ", auth: " + auth + " task:" + taskname);
 
         HttpRequest.Builder builder = HttpRequest.newBuilder();
         builder = builder.uri(URI.create(url));
@@ -70,8 +70,8 @@ public class RestHelper {
 
         try {
             HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            logger.debug("http response for configuring grafana:\n" + resp);
-            logger.debug("response status code: " + resp.statusCode());
+            logger.debug(() -> "http response for configuring grafana:\n" + resp);
+            logger.debug(() -> "response status code: " + resp.statusCode());
             logger.debug("response body: " + resp.body());
             if (resp.statusCode()==412) {
                 logger.warn("Unable to configure dashboard, grafana precondition failed (status 412): " + resp.body());

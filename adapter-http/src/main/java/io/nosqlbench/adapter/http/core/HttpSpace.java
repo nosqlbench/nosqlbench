@@ -62,7 +62,7 @@ public class HttpSpace implements NBNamedElement {
 
     private HttpClient newClient() {
         HttpClient.Builder builder = HttpClient.newBuilder();
-        logger.debug("follow_redirects=>" + followRedirects);
+        logger.debug(() -> "follow_redirects=>" + followRedirects);
         builder = builder.followRedirects(this.followRedirects);
         builder = builder.connectTimeout(this.timeout);
         return builder.build();

@@ -37,7 +37,7 @@ public class ScriptingMetrics {
     public ScriptingGauge newGauge(String name, double initialValue) {
         ScriptingGauge scriptingGauge = new ScriptingGauge(name, initialValue);
         ActivityMetrics.gauge(scriptContext,name, scriptingGauge);
-        logger.info("registered scripting gauge:" + name);
+        logger.info(() -> "registered scripting gauge:" + name);
         return scriptingGauge;
     }
 

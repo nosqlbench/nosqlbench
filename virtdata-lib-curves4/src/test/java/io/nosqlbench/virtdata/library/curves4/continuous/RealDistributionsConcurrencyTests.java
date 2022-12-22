@@ -109,7 +109,7 @@ public class RealDistributionsConcurrencyTests {
         public double[] call() throws Exception {
             double[] output = new double[size];
             DataMapper<Double> mapper = VirtData.getMapper(mapperSpec, double.class);
-            logger.trace("resolved:" + mapper);
+            logger.trace(() -> "resolved:" + mapper);
 
             synchronized (signal) {
                 signal.wait(10000);

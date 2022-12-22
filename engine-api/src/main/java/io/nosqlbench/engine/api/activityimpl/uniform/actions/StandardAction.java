@@ -126,7 +126,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
             triesHistogram.update(tries);
 
             if (op instanceof OpGenerator) {
-                logger.trace("GEN OP for cycle(" + cycle + ")");
+                logger.trace(() -> "GEN OP for cycle(" + cycle + ")");
                 op = ((OpGenerator) op).getNextOp();
             } else {
                 op = null;

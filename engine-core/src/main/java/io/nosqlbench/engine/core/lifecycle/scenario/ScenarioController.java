@@ -309,7 +309,7 @@ public class ScenarioController {
      * @return true, if all activities completed before the timer expired, false otherwise
      */
     public boolean awaitCompletion(long waitTimeMillis) {
-        logger.debug(() -> "awaiting completion");
+        logger.debug("awaiting completion");
         boolean completed = true;
         for (ActivityRuntimeInfo activityRuntimeInfo : this.activityInfoMap.values()) {
             ExecutionResult activityResult = activityRuntimeInfo.awaitResult(waitTimeMillis);
