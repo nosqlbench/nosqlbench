@@ -203,7 +203,7 @@ an op template like `space: {space}`, OR use an inline op field in your op
 template like `space: {(ThreadNumToInteger())}`.
 
 You can use any binding function you want for the space op field. However,
-if you were to assign it something like "space: {{Identity()}}" you would
+if you were to assign it something like "space: {(Identity()}" you would
 not have a good result, as you would be spinning up and caching a new http client
 instance for every single cycle.
 
