@@ -61,6 +61,20 @@ public class BindPointParserTest {
     }
 
     @Test
+    public void testInline2TypeBindPoint() {
+        BindPointParser bpp = new BindPointParser();
+        assertThat(bpp.apply("test {(this is a definition)} and {{another}}", Map.of())).isEqualTo(
+            new BindPointParser.Result(
+                List.of("test ","this is a definition"," and ","another",""),
+                List.of(
+                    BindPoint.of(BindPointParser.DEFINITION,"this is a definition", BindPoint.Type.definition),
+                    BindPoint.of(BindPointParser.DEFINITION, "another",BindPoint.Type.definition)
+                )
+            )
+        );
+    }
+
+    @Test
     public void testCurlyBracesWithinPattern() {
         BindPointParser bpp = new BindPointParser();
         assertThat(bpp.apply("a{{Template(\"-{}-\",Combinations(\"a-z\"))}}b", Map.of())).isEqualTo(

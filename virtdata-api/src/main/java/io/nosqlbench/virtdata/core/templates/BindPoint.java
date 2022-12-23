@@ -51,6 +51,7 @@ public class BindPoint {
         reference,
         /**
          * a definition bindpoint is expressed as anything between double curly braces like <pre>{@code {{Identity()}}</pre>
+         * or <pre>{@code {(Identity())}}
          */
         definition
     }

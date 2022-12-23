@@ -37,7 +37,9 @@ import java.util.regex.Pattern;
  */
 public class BindPointParser implements BiFunction<String, Map<String, String>, BindPointParser.Result> {
 
-    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile("(\\{((?<anchor>\\w+[-_<>,\\d\\w.]*)})|(\\{\\{(?<extended>(?!}}).+?)}}))");
+    public final static Pattern BINDPOINT_ANCHOR = Pattern.compile(
+        "(\\{((?<reference>\\w+[-_<>,\\d\\w.]*)})|(\\{\\{(?<inline1>(?!}}).+?)}})|(\\{\\((?<inline2>(?!\\)}).+?)\\)}))"
+    );
     public final static String DEFINITION = "DEFINITION";
 
 
@@ -55,14 +57,18 @@ public class BindPointParser implements BiFunction<String, Map<String, String>, 
             spans.add(pre);
             lastMatch = m.end();
 
-            String anchor = m.group("anchor");
-            String extendedAnchor = m.group("extended");
-            if (anchor != null) {
-                bindpoints.add(BindPoint.of(anchor, bindings.getOrDefault(anchor, null), BindPoint.Type.reference));
-                spans.add(anchor);
-            } else if (extendedAnchor != null) {
-                bindpoints.add(BindPoint.of(DEFINITION, extendedAnchor, BindPoint.Type.definition));
-                spans.add(extendedAnchor);
+            String reference = m.group("reference");
+            String inline1 = m.group("inline1");
+            String inline2 = m.group("inline2");
+            if (reference != null) {
+                bindpoints.add(BindPoint.of(reference, bindings.getOrDefault(reference, null), BindPoint.Type.reference));
+                spans.add(reference);
+            } else if (inline1 != null) {
+                bindpoints.add(BindPoint.of(DEFINITION, inline1, BindPoint.Type.definition));
+                spans.add(inline1);
+            } else if (inline2 != null) {
+                bindpoints.add(BindPoint.of(DEFINITION, inline2, BindPoint.Type.definition));
+                spans.add(inline2);
             } else {
                 throw new BasicError("Unable to parse: " + template);
             }
