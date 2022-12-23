@@ -15,6 +15,8 @@
  */
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Description;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -22,6 +24,7 @@ import java.util.function.IntUnaryOperator;
 
 @Description("divides the operand by an integer and returns the whole part")
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Div implements IntUnaryOperator {
     private final int divisor;
 

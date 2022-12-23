@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -24,6 +26,7 @@ import java.util.function.LongUnaryOperator;
  * Return the result of multiplying the specified value with the input.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Mul implements LongUnaryOperator {
 
     public Mul(long multiplicand) {

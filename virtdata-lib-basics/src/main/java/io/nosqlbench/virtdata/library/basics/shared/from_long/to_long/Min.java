@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -24,6 +26,7 @@ import java.util.function.LongUnaryOperator;
  * Return the minimum of either the input value or the specified minimum.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Min implements LongUnaryOperator {
 
     private final long min;

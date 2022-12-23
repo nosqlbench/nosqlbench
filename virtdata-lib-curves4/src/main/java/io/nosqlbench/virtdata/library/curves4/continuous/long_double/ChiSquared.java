@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.continuous.long_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class ChiSquared extends LongToDoubleContinuousCurve {
     public ChiSquared(double degreesOfFreedom, String... mods) {
         super(new ChiSquaredDistribution(degreesOfFreedom), mods);

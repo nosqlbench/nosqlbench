@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -25,6 +27,7 @@ import java.util.function.LongUnaryOperator;
  * a scale factor, with a default scale factor of 1.0d
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashRangeScaled implements LongUnaryOperator {
 
     private final double scalefactor;

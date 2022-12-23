@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -32,6 +34,7 @@ import java.util.function.LongUnaryOperator;
  * as well as negative values.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class SignedHash implements LongUnaryOperator {
 
     // TODO: Bench this against the non-state based TL implementations

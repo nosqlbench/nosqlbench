@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.discrete.long_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.PoissonDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class Poisson extends LongToIntDiscreteCurve {
     public Poisson(double p, String... modslist) {
         super(new PoissonDistribution(p), modslist);

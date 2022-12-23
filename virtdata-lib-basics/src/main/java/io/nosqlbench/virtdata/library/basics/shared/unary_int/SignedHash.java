@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -23,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class SignedHash implements IntUnaryOperator {
 
     private final ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);

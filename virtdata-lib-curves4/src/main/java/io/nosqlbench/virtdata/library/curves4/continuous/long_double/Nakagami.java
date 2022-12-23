@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.continuous.long_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.NakagamiDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class Nakagami extends LongToDoubleContinuousCurve {
     public Nakagami(double mu, double omega, String... mods) {
         super(new NakagamiDistribution(mu, omega), mods);

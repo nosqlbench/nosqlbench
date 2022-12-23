@@ -28,7 +28,6 @@ import java.util.function.LongToIntFunction;
  */
 @ThreadSafeMapper
 @Categories({Category.general})
-
 public class FixedValue implements LongToIntFunction {
 
     private final int fixedValue;
