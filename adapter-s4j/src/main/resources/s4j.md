@@ -1,12 +1,16 @@
+---
+weight: 0
+title: S4J Adapter
+---
 # S4J Adapter
 - [1. Overview](#1-overview)
 - [2. Execute NB S4J Workload](#2-execute-nb-s4j-workload)
 - [3. NB S4J Driver Configuration Parameter File](#3-nb-s4j-driver-configuration-parameter-file)
 - [4. NB S4J Scenario Definition File](#4-nb-s4j-scenario-definition-file)
-    - [4.1. Document Level Parameters](#41-document-level-parameters)
-    - [4.2. NB S4J Workload Types](#42-nb-s4j-workload-types)
-        - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#421-publish-messages-to-a-jms-destination-queue-or-topic)
-        - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#422-receiving-messages-from-a-jms-destination-queue-or-topic)
+    - [4.1. Document Level Parameters](#4-1-document-level-parameters)
+    - [4.2. NB S4J Workload Types](#4-2-nb-s4j-workload-types)
+        - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#4-2-1-publish-messages-to-a-jms-destination-queue-or-topic)
+        - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#4-2-2-receiving-messages-from-a-jms-destination-queue-or-topic)
 
 
 # 1. Overview
