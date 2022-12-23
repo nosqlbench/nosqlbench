@@ -32,12 +32,9 @@ import java.util.concurrent.TimeoutException;
 public class ActivityRuntimeInfo implements ProgressCapable {
 
     private final static Logger logger = LogManager.getLogger(ActivityRuntimeInfo.class);
-
     private final Activity activity;
     private final Future<ExecutionResult> future;
     private final ActivityExecutor executor;
-
-    private ExecutionResult result;
 
     public ActivityRuntimeInfo(Activity activity, Future<ExecutionResult> result, ActivityExecutor executor) {
 
@@ -60,6 +57,7 @@ public class ActivityRuntimeInfo implements ProgressCapable {
      * Wait until the execution is complete and return the result.
      * @param timeoutMillis
      * @return null, or an ExecutionResult if the execution completed
+     * @throws RuntimeException if there was an execution exception
      */
     public ExecutionResult awaitResult(long timeoutMillis) {
         ExecutionResult result = null;
@@ -70,7 +68,6 @@ public class ActivityRuntimeInfo implements ProgressCapable {
             logger.warn("interrupted waiting for execution to complete");
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
-//            return new ExecutionResult(activity.getStartedAtMillis(),System.currentTimeMillis(),"",e);
         }
         return result;
     }

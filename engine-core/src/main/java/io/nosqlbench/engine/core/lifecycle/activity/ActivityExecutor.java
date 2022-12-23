@@ -64,14 +64,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     private final RunStateTally tally;
     private ExecutorService executorService;
     private Exception exception;
-
-    private final static int waitTime = 10000;
     private String sessionId = "";
     private long startedAt = 0L;
     private long stoppedAt = 0L;
-    private String[] annotatedCommand;
-
-//    private RunState intendedState = RunState.Uninitialized;
 
     public ActivityExecutor(Activity activity, String sessionId) {
         this.activity = activity;
@@ -197,31 +192,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     public ActivityDef getActivityDef() {
         return activityDef;
-    }
-
-    /**
-     * This is the canonical way to wait for an activity to finish. It ties together
-     * any way that an activity can finish under one blocking call.
-     * This should be awaited asynchronously from the control layer in separate threads.
-     * <p>
-     * TODO: move activity finisher thread to this class and remove separate implementation
-     */
-    private boolean awaitCompletion(int waitTime) {
-        logger.debug(() -> "awaiting completion of '" + this.getActivity().getAlias() + "'");
-        boolean finished = shutdownExecutorService(waitTime);
-
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
-            .interval(startedAt, this.stoppedAt)
-            .layer(Layer.Activity)
-            .label("alias", getActivityDef().getAlias())
-            .label("driver", getActivityDef().getActivityType())
-            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-            .detail("params", getActivityDef().toString())
-            .build()
-        );
-
-        return finished;
     }
 
     public String toString() {
@@ -438,7 +408,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             wasStopped = executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
             logger.trace("interrupted while awaiting termination");
-            wasStopped = false;
             logger.warn("while waiting termination of shutdown " + activity.getAlias() + ", " + ie.getMessage());
             activitylogger.debug("REQUEST STOP/exception alias=(" + activity.getAlias() + ") wasstopped=" + wasStopped);
         } catch (RuntimeException e) {

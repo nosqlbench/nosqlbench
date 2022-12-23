@@ -469,15 +469,6 @@ public class NBCLI implements Function<String[], Integer> {
         scenario.addScenarioScriptParams(scriptParams);
 
         scenariosExecutor.execute(scenario);
-
-//        while (true) {
-//            Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenario.getScenarioName());
-//            if (pendingResult.isPresent()) {
-//                break;
-//            }
-//            LockSupport.parkNanos(100000000L);
-//        }
-
         ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
         logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
