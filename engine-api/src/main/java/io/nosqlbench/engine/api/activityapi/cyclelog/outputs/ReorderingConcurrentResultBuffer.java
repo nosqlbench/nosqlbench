@@ -72,7 +72,7 @@ public class ReorderingConcurrentResultBuffer implements Output, CanFilterResult
         segmentCount++;
         currentCount+=segment.getCount();
         if (currentCount>=threshold) {
-            logger.trace("Reordering threshold met: " + currentCount +"/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
+            logger.trace(() -> "Reordering threshold met: " + currentCount +"/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
             Collections.sort(segments);
             while(currentCount>=threshold) {
                 CycleResultsSegment head = segments.removeFirst();
@@ -85,7 +85,7 @@ public class ReorderingConcurrentResultBuffer implements Output, CanFilterResult
 
     @Override
     public synchronized void close() throws Exception {
-        logger.trace("closing and flushing " + segments.size() + " segments");
+        logger.trace(() -> "closing and flushing " + segments.size() + " segments");
         Collections.sort(segments);
         for (CycleResultsSegment segment : segments) {
             downstream.onCycleResultSegment(segment);

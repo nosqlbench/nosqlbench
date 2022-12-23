@@ -36,7 +36,7 @@ public class ScenarioTest {
         try {
             var result=scenario.call();
         } catch (Exception e) {
-            logger.debug("Scenario run encountered an exception: " + e.getMessage());
+            logger.debug(() -> "Scenario run encountered an exception: " + e.getMessage());
 
         }
         assertThat(scenario.getIOLog().get().get(0)).contains("loaded script environment...");

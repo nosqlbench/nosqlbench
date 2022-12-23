@@ -54,14 +54,14 @@ public class NBWebServerApp implements BundledApp {
 
         StandardOpenOption[] OVERWRITE = {StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE,StandardOpenOption.WRITE};
 
-        logger.info("generating to directory " + dirpath);
+        logger.info(() -> "generating to directory " + dirpath);
 
 
         DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
         String markdownList = dds.getMarkdownList(true);
 
         Path markdownCsvPath = dirpath.resolve(Path.of("services/docs/markdown.csv"));
-        logger.info("markdown.csv located at " + markdownCsvPath);
+        logger.info(() -> "markdown.csv located at " + markdownCsvPath);
 
         Files.createDirectories(markdownCsvPath.getParent());
         Files.writeString(markdownCsvPath, markdownList, OVERWRITE);
@@ -70,7 +70,7 @@ public class NBWebServerApp implements BundledApp {
 
         for (String markdownFile : markdownFileArray) {
             Path relativePath = dirpath.resolve(Path.of("services/docs", markdownFile));
-            logger.info("Creating " + relativePath);
+            logger.info(() -> "Creating " + relativePath);
 
             Path path = dds.findPath(markdownFile);
 //            String markdown = dds.getFileByPath(markdownFile);
@@ -115,7 +115,7 @@ public class NBWebServerApp implements BundledApp {
                 server.withContextParam("workspaces_root", workspaces_root);
             } else if (arg.matches("--logdir")) {
                 String logdir_path = serverArgs[i + 1];
-                logger.info("Setting docserver logdir to " + logdir_path);
+                logger.info(() -> "Setting docserver logdir to " + logdir_path);
                 server.withContextParam("logpath", Path.of(logdir_path));
             }
         }
@@ -150,10 +150,10 @@ public class NBWebServerApp implements BundledApp {
         } else if (args.length > 0 && args[0].contains("generate")) {
             try {
                 String[] genargs = Arrays.copyOfRange(args, 1, args.length);
-                logger.info("Generating with args [" + String.join("][", args) + "]");
+                logger.info(() -> "Generating with args [" + String.join("][", args) + "]");
                 generate(genargs);
             } catch (IOException e) {
-                logger.error("could not generate files with command " + String.join(" ", args));
+                logger.error(() -> "could not generate files with command " + String.join(" ", args));
                 e.printStackTrace();
             }
         } else {

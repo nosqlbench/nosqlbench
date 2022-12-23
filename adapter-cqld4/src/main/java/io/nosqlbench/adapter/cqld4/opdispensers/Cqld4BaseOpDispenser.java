@@ -110,7 +110,7 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
 
     private Statement showstmt(Statement stmt, boolean input) {
         String query = cqlFor(stmt, new StringBuilder());
-        logger.info("CQL(SIMPLE): " + query);
+        logger.info(() -> "CQL(SIMPLE): " + query);
         return stmt;
     }
 

@@ -334,7 +334,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.10.1</version>
+                <version>4.11.1</version>
             </dependency>
 
             <dependency>
@@ -421,6 +421,13 @@
             <version>2.19.0</version>
         </dependency>
 
+        <dependency>
+            <scope>test</scope>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.4.4</version>
+        </dependency>
+
 <!--        Removed due to a possible conflict-->
 <!--        <dependency>-->
 <!--            <groupId>org.apache.logging.log4j</groupId>-->
@@ -496,6 +503,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M6</version>
                 <configuration>
+                    <systemPropertyVariables>
+                        <Log4jContextSelector>org.apache.logging.log4j.core.async.AsyncLoggerContextSelector</Log4jContextSelector>
+                    </systemPropertyVariables>
+                    <parallel>methods</parallel>
                     <excludes>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
@@ -542,7 +553,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.1</version>
                 <configuration>
                     <release>17</release>
                     <doctitle>${javadoc.name}</doctitle>
@@ -703,7 +714,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.10.1</version>
+                    <version>4.11.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

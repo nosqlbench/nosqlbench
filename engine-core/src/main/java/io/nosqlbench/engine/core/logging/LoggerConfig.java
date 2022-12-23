@@ -338,7 +338,7 @@ public class LoggerConfig extends ConfigurationFactory {
                 .collect(Collectors.toList());
 
         for (File file : toDelete) {
-            logger.info("removing extra logfile: " + file.getPath());
+            logger.info(() -> "removing extra logfile: " + file.getPath());
             if (!file.delete()) {
                 logger.warn("unable to delete: " + file);
                 try {

@@ -42,9 +42,9 @@ public class CqlModelParser {
     public static CqlModel parse(Path path) {
         try {
             String ddl = Files.readString(path);
-            logger.info("read " + ddl.length() + " character DDL file, parsing");
+            logger.info(() -> "read " + ddl.length() + " character DDL file, parsing");
             CqlModel parsed = parse(ddl, null);
-            logger.info("parsed cql model: " + parsed.getSummaryLine());
+            logger.info(() -> "parsed cql model: " + parsed.getSummaryLine());
             return parsed;
 
         } catch (IOException e) {
@@ -85,7 +85,7 @@ public class CqlModelParser {
             }
 
         } catch (Exception e) {
-            logger.warn("Error while parsing flow:" + e.getMessage());
+            logger.warn(() -> "Error while parsing flow:" + e.getMessage());
             throw e;
 //            return new ParseResult(e);
         }

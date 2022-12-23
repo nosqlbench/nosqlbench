@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.Function;
@@ -26,6 +28,7 @@ import java.util.function.Function;
  * String.valueOf() to the result.
  */
 @ThreadSafeMapper
+@Categories({Category.conversion})
 public class ToString implements Function<Object,String> {
 
     @Override

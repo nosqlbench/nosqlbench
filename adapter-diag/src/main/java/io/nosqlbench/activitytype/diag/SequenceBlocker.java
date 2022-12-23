@@ -53,7 +53,7 @@ public class SequenceBlocker {
         try {
             task.run();
         } catch (Exception e) {
-            logger.error("Runnable errored in SequenceBlocker: " + e.getMessage());
+            logger.error(() -> "Runnable errored in SequenceBlocker: " + e.getMessage());
             if (errorsAreFatal) {
                 this.fatalError = e;
             }

@@ -54,7 +54,7 @@ public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
 
             this.histos.put(prefixed, new Attachment(name, prefix, capable, classicHisto));
             metricsRegistry.histogram(prefixed, () -> classicHisto);
-            logger.trace("Added classic histogram attachment:" + prefixed);
+            logger.trace(() -> "Added classic histogram attachment:" + prefixed);
         }
 
     }
@@ -62,7 +62,7 @@ public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
     @Override
     public void onCapableRemoved(String name, HistogramAttachment capable) {
         Attachment removed = histos.remove(name);
-        logger.trace("Removed classic histogram attachment: " + removed);
+        logger.trace(() -> "Removed classic histogram attachment: " + removed);
     }
 
     @Override

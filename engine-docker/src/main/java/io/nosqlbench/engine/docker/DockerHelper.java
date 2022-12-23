@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,14 +62,14 @@ public class DockerHelper {
     }
 
     public String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload, List<String> linkNames) {
-        logger.info("Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
+        logger.info(() -> "Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
                 "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
         boolean existingContainer = removeExitedContainers(name);
 
         Container containerId = searchContainer(name, reload, tag);
         if (containerId != null) {
-            logger.debug("container is already up with the id: " + containerId.getId());
+            logger.debug(() -> "container is already up with the id: " + containerId.getId());
             return null;
         }
 
@@ -139,13 +140,13 @@ public class DockerHelper {
 
     private boolean startStoppedContainer(String name) {
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("stopped"));
-        listContainersCmd.getFilters().put("name", Arrays.asList(name));
+        listContainersCmd.getFilters().put("name", Collections.singletonList(name));
         List<Container> stoppedContainers = null;
         try {
             stoppedContainers = listContainersCmd.exec();
             for (Container stoppedContainer : stoppedContainers) {
                 String id = stoppedContainer.getId();
-                logger.info("Removing exited container: " + id);
+                logger.info(() -> "Removing exited container: " + id);
                 dockerClient.removeContainerCmd(id).exec();
             }
         } catch (Exception e) {
@@ -161,13 +162,13 @@ public class DockerHelper {
 
     private boolean removeExitedContainers(String name) {
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("exited"));
-        listContainersCmd.getFilters().put("name", Arrays.asList(name));
+        listContainersCmd.getFilters().put("name", Collections.singletonList(name));
         List<Container> stoppedContainers = null;
         try {
             stoppedContainers = listContainersCmd.exec();
             for (Container stoppedContainer : stoppedContainers) {
                 String id = stoppedContainer.getId();
-                logger.info("Removing exited container: " + id);
+                logger.info(() -> "Removing exited container: " + id);
                 dockerClient.removeContainerCmd(id).exec();
                 return true;
             }
@@ -184,7 +185,7 @@ public class DockerHelper {
     public Container searchContainer(String name, String reload, String tag) {
 
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("running"));
-        listContainersCmd.getFilters().put("name", Arrays.asList(name));
+        listContainersCmd.getFilters().put("name", Collections.singletonList(name));
         List<Container> runningContainers = null;
         try {
             runningContainers = listContainersCmd.exec();
@@ -196,9 +197,9 @@ public class DockerHelper {
 
         if (runningContainers.size() >= 1) {
             //Container test = runningContainers.get(0);
-            logger.info(String.format("The container %s is already running", name));
+            logger.info(() -> String.format("The container %s is already running", name));
 
-            logger.info(String.format("Hupping config"));
+            logger.info(() -> "Hupping config");
 
             if (reload != null) {
                 try {

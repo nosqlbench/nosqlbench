@@ -82,7 +82,7 @@ public class RawSocketInjector {
             rqbuf.flip();
 
             String requestContent = rqbuf.toString();
-            logger.trace("authorizer request:\n" + requestContent + "\n");
+            logger.trace(() -> "authorizer request:\n" + requestContent + "\n");
             toServer.write(requestContent.getBytes(StandardCharsets.UTF_8));
             toServer.flush();
 
@@ -95,7 +95,7 @@ public class RawSocketInjector {
             String response = inbuf.toString();
 
 
-            logger.trace("authorizer response:\n" + response + "\n");
+            logger.trace(() -> "authorizer response:\n" + response + "\n");
             String[] headersAndBody = response.split("\r\n\r\n", 2);
             String[] statusAndHeaders = headersAndBody[0].split("\r\n", 2);
             if (!statusAndHeaders[0].contains("200 OK")) {
@@ -113,7 +113,7 @@ public class RawSocketInjector {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             ApiToken apiToken = gson.fromJson(headersAndBody[1], ApiToken.class);
-            logger.info("Authorized local grafana client with Socket client: " + apiToken.toString());
+            logger.info(() -> "Authorized local grafana client with Socket client: " + apiToken.toString());
             return Optional.of(apiToken);
 
         } catch (Exception e) {

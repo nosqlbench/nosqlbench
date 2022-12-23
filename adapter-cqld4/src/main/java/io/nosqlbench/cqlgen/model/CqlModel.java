@@ -75,18 +75,18 @@ public class CqlModel {
 
             CqlKeyspaceDef ksdef = getKeyspace(statsKeyspacename);
             if (ksdef !=null) {
-                logger.debug("setting         keyspace stats for '" + statsKeyspacename + "'");
+                logger.debug(() -> "setting         keyspace stats for '" + statsKeyspacename + "'");
                 ksdef.setStats(keyspaceStats);
                 keyspaceStats.getKeyspaceTables().forEach((tbname, tbstats) -> {
                     CqlTable table = ksdef.getTable(tbname);
                     if (table != null) {
                         table.setStats(tbstats);
                     } else {
-                        logger.debug(" skipping table '" + statsKeyspacename + "." + tbname + ", since it was not found in the model.");
+                        logger.debug(() -> " skipping table '" + statsKeyspacename + "." + tbname + ", since it was not found in the model.");
                     }
                 });
             } else {
-                logger.debug("       skipping keyspace stats for '" + statsKeyspacename + "'");
+                logger.debug(() -> "       skipping keyspace stats for '" + statsKeyspacename + "'");
             }
 
         }

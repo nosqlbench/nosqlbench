@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.unary_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -25,6 +27,7 @@ import java.util.function.IntUnaryOperator;
  * Yields a value within a specified range, which rolls over continuously.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class CycleRange implements IntUnaryOperator {
 
     private final int minValue;

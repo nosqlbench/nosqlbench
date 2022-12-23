@@ -21,7 +21,7 @@ activitydef = {
     "driver" : "diag",
     "cycles" : "50000",
     "threads" : "20",
-    "op": '{"log":"interval=1000"}',
+    "op": '{"log":"level=debug,interval=1000"}',
     "targetrate" : "10000.0"
 };
 scenario.start(activitydef);

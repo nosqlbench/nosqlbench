@@ -17,6 +17,8 @@
 package io.nosqlbench.virtdata.library.basics.tests.long_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.WeightedStrings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class WeightedStringsTest {
 
+    private final static Logger logger = LogManager.getLogger(WeightedStringsTest.class);
     /**
      * A simple qualitative test to demonstrate expected values.
      */
@@ -44,7 +47,7 @@ public class WeightedStringsTest {
             String label = fiveAndOnes.apply(i);
             hist.put(label, hist.get(label)+1);
         }
-        System.out.println(hist);
+        logger.debug(hist);
         assertThat(hist.get("zero")).isBetween(950,1050);
         assertThat(hist.get("one")).isBetween(950,1050);
         assertThat(hist.get("two")).isBetween(950,1050);

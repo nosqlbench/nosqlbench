@@ -45,7 +45,7 @@ public class UnusedTableRemover implements CGModelTransformer, CGTransformerConf
             String weightedOpsSpec = table.getTableAttributes().getAttribute("weighted_ops");
             double weightedOps = Double.parseDouble(weightedOpsSpec);
             if (weightedOps < minimumThreshold) {
-                logger.info(String.format(
+                logger.info(() -> String.format(
                     "removing table " + table.getKeyspace().getName() + "." + table.getName() + " with minimum weighted_ops of %1.5f under %1.5f",
                     weightedOps, minimumThreshold)
                 );

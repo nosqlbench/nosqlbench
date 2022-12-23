@@ -133,7 +133,7 @@ public class AggregateTests {
 
             logger.debug("proto[" + i + "] = ");
             for (double v : prototype) {
-                logger.trace(String.format("% 3.0f ",v));
+                logger.trace(() -> String.format("% 3.0f ",v));
             }
             series[i]=resampleCurve(prototype,100);
         }

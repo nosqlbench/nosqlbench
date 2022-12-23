@@ -39,7 +39,7 @@ public class DiagSpace implements ActivityDefObserver, AutoCloseable {
         this.cfg = cfg;
         this.name = name;
         applyConfig(cfg);
-        logger.trace("diag space initialized as '" + name + "'");
+        logger.trace(() -> "diag space initialized as '" + name + "'");
     }
 
     public void applyConfig(NBConfiguration cfg) {
@@ -68,7 +68,7 @@ public class DiagSpace implements ActivityDefObserver, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        logger.debug("closing diag space '" + this.name + "'");
+        logger.debug(() -> "closing diag space '" + this.name + "'");
         if (errorOnClose) {
             throw new RuntimeException("diag space was configured to throw this error when it was configured.");
         }

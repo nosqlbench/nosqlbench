@@ -26,7 +26,6 @@ import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.engine.core.lifecycle.activity.*;
-import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,13 +47,11 @@ public class ScenarioController {
 
     private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
     private final Scenario scenario;
-    private final Maturity minMaturity;
 
     private final ExecutorService activitiesExecutor;
 
-    public ScenarioController(Scenario scenario, Maturity minMaturity) {
+    public ScenarioController(Scenario scenario) {
         this.scenario = scenario;
-        this.minMaturity = minMaturity;
         this.activityLoader = new ActivityLoader(scenario);
 
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
@@ -309,7 +306,7 @@ public class ScenarioController {
      * @return true, if all activities completed before the timer expired, false otherwise
      */
     public boolean awaitCompletion(long waitTimeMillis) {
-        logger.debug(() -> "awaiting completion");
+        logger.debug("awaiting completion");
         boolean completed = true;
         for (ActivityRuntimeInfo activityRuntimeInfo : this.activityInfoMap.values()) {
             ExecutionResult activityResult = activityRuntimeInfo.awaitResult(waitTimeMillis);
@@ -419,16 +416,19 @@ public class ScenarioController {
     }
 
     public void shutdown() {
+        logger.debug(() -> "Requesting ScenarioController shutdown.");
         this.activitiesExecutor.shutdown();
         try {
             if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                logger.info(() -> "Scenario is being forced to shutdown after waiting 5 seconds for graceful shutdown.");
                 this.activitiesExecutor.shutdownNow();
                 if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                     throw new RuntimeException("Unable to shutdown activities executor");
                 }
             }
         } catch (Exception e) {
-
+            logger.warn("There was an exception while trying to shutdown the ScenarioController:" + e,e);
+            throw new RuntimeException(e);
         }
     }
 }

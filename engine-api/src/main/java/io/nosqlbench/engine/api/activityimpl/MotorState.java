@@ -66,10 +66,10 @@ public class MotorState implements Supplier<RunState> {
             throw new RuntimeException("Invalid transition from " + from + " to " + to);
         }
         while (!atomicState.compareAndSet(from, to)) {
-            logger.trace("retrying transition from:" + from + " to:" + to);
+            logger.trace(() -> "retrying transition from:" + from + " to:" + to);
         }
         tally.change(from,to);
-        logger.trace("TRANSITION[" + slotId + "]: " + from + " ==> " + to);
+        logger.trace(() -> "TRANSITION[" + slotId + "]: " + from + " ==> " + to);
     }
 
     public void removeState() {

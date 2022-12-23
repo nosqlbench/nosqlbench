@@ -143,7 +143,7 @@ public class WorkspaceFinder {
                             "parameter that matches. This is a safety mechanism."
                     );
                 }
-                logger.debug("found " + foundFiles + " to delete.");
+                logger.debug(() -> "found " + foundFiles + " to delete.");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -158,7 +158,7 @@ public class WorkspaceFinder {
                     .map(Path::toFile)
 //                    .peek(System.out::println)
                     .forEach(f -> {
-                        logger.debug("deleting '" + f + "'");
+                        logger.debug(() -> "deleting '" + f + "'");
                         if (!f.delete()) {
                             throw new RuntimeException("Unable to delete " + f);
                         }

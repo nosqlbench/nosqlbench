@@ -43,7 +43,7 @@ public class MongoOpMapper implements OpMapper<Op> {
         LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache().get(ctxNamer.apply(l));
         Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
         if (oDatabaseF.isEmpty()) {
-            logger.warn(() -> "op field 'database' was not defined");
+            logger.warn("op field 'database' was not defined");
         }
 
         Optional<TypeAndTarget<MongoDBOpTypes, String>> target = op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class);

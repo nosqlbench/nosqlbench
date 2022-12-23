@@ -87,7 +87,7 @@ public class DirectoryLines implements LongFunction<String> {
     }
 
     private List<Path> getAllFiles() {
-        logger.debug("Loading file paths from " + basepath);
+        logger.debug(() -> "Loading file paths from " + basepath);
         Set<FileVisitOption> options = new HashSet<>();
         options.add(FileVisitOption.FOLLOW_LINKS);
         FileList fileList = new FileList(namePattern);
@@ -97,7 +97,7 @@ public class DirectoryLines implements LongFunction<String> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.debug("File reader: " + fileList + " in path: " + Paths.get(basepath).getFileName());
+        logger.debug(() -> "File reader: " + fileList + " in path: " + Paths.get(basepath).getFileName());
         fileList.paths.sort(Path::compareTo);
         return fileList.paths;
     }

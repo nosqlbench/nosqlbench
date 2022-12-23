@@ -92,7 +92,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters addGraphite(String host, int graphitePort, String globalPrefix) {
 
-        logger.debug("Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + globalPrefix);
+        logger.debug(() -> "Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + globalPrefix);
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");
@@ -137,7 +137,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters start(int consoleIntervalSeconds, int remoteIntervalSeconds) {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
-            logger.info("starting reporter: " + scheduledReporter.getClass().getSimpleName());
+            logger.info(() -> "starting reporter: " + scheduledReporter.getClass().getSimpleName());
             if (scheduledReporter instanceof ConsoleReporter) {
                 scheduledReporter.start(consoleIntervalSeconds, TimeUnit.SECONDS);
             } else {
@@ -149,7 +149,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters stop() {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
-            logger.info("stopping reporter: " + scheduledReporter);
+            logger.info(() -> "stopping reporter: " + scheduledReporter);
             scheduledReporter.stop();
         }
         return this;
@@ -158,7 +158,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters report() {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
-            logger.info("flushing reporter data: " + scheduledReporter);
+            logger.info(() -> "flushing reporter data: " + scheduledReporter);
             scheduledReporter.report();
         }
         return this;

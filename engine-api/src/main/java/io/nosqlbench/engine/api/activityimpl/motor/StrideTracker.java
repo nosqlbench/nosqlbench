@@ -94,7 +94,7 @@ public class StrideTracker<D> extends Buffer<CompletedOp<D>> implements OpEvents
      */
     public void onFull() {
         strideOp.succeed(0);
-        logger.trace("completed strideOp with first result cycle (" + strideOp.getCycle() + ")");
+        logger.trace(() -> "completed strideOp with first result cycle (" + strideOp.getCycle() + ")");
         strideServiceTimer.update(strideOp.getResponseTimeNanos(), TimeUnit.NANOSECONDS);
         if (strideResponseTimer!=null) {
             strideResponseTimer.update(strideOp.getResponseTimeNanos(),TimeUnit.NANOSECONDS);

@@ -136,7 +136,7 @@ public class ActivityExecutorTest {
         for (int offset = 0; offset < speeds.length; offset += 2) {
             int threadTarget = speeds[offset];
             int threadTime = speeds[offset + 1];
-            logger.info("Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
+            logger.info(() -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
             ad.setThreads(threadTarget);
             try {
                 Thread.sleep(threadTime);
@@ -185,12 +185,12 @@ public class ActivityExecutorTest {
         @Override
         public void initActivity() {
             Integer initdelay = activityDef.getParams().getOptionalInteger("initdelay").orElse(0);
-            logger.info("delaying for " + initdelay);
+            logger.info(() -> "delaying for " + initdelay);
             try {
                 Thread.sleep(initdelay);
             } catch (InterruptedException ignored) {
             }
-            logger.info("delayed for " + initdelay);
+            logger.info(() -> "delayed for " + initdelay);
         }
     }
 }

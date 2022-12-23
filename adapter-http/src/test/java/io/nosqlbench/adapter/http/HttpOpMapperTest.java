@@ -18,12 +18,14 @@ package io.nosqlbench.adapter.http;
 
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpOpMapperTest {
 
+    private final static Logger logger = LogManager.getLogger(HttpOpMapperTest.class);
     static NBConfiguration cfg;
     static HttpDriverAdapter adapter;
     static HttpOpMapper mapper;
@@ -132,7 +135,7 @@ public class HttpOpMapperTest {
                  body: StaticStringMapper('test')
             """);
 
-        System.out.println(pop);
+        logger.debug(pop);
         assertThat(pop.getDefinedNames()).containsAll(List.of(
             "method","uri","version","Header1","body"
         ));
