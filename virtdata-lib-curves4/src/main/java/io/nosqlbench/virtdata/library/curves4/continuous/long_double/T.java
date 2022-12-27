@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.continuous.long_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.TDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class T extends LongToDoubleContinuousCurve {
     public T(double degreesOfFreedom, String... mods) {
         super(new TDistribution(degreesOfFreedom), mods);

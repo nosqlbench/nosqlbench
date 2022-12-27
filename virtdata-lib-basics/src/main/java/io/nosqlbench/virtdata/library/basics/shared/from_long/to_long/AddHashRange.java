@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class AddHashRange implements LongUnaryOperator {
 
     private final HashRange hashRange;

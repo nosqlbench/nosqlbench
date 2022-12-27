@@ -224,7 +224,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             try {
                 closeable.close();
             } catch (Exception e) {
-                throw new RuntimeException("Error closing " + closeable);
+                throw new RuntimeException("Error closing " + closeable + ": " + e, e);
             }
         }
         closeables.clear();

@@ -111,6 +111,8 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
             if (categoryAnnotation!=null) {
                 Category[] value = categoryAnnotation.value();
                 enumerator.onCategories(value);
+            } else {
+                messenger.printMessage(Diagnostic.Kind.ERROR,"@Categories is a required annotation", classElem);
             }
             // apply method types
 

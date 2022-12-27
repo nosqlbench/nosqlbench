@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.library.curves4.continuous.long_double;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.math4.distribution.EnumeratedRealDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class Enumerated extends LongToDoubleContinuousCurve {
 
     @Example({"Enumerated('1 2 3 4 5 6')","a fair 6-sided die"})

@@ -16,10 +16,13 @@
 
 package io.nosqlbench.virtdata.library.curves4.discrete.long_long;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.commons.statistics.distribution.HypergeometricDistribution;
 
 @ThreadSafeMapper
+@Categories({Category.distributions})
 public class Hypergeometric extends LongToLongDiscreteCurve {
     public Hypergeometric(int populationSize, int numberOfSuccesses, int sampleSize, String... modslist) {
         super(new HypergeometricDistribution(populationSize, numberOfSuccesses, sampleSize), modslist);

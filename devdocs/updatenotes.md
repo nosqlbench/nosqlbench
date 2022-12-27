@@ -9,6 +9,10 @@
 * Deprecated old drivers (conflicts, etc)
     - version conflicts (removing cql drivers 1.9.* 3.*)
 
+## New Topic
+* Advanced linearization features
+  * variable capture in results
+
 ## new Docs
 javadoc site
 developer guide

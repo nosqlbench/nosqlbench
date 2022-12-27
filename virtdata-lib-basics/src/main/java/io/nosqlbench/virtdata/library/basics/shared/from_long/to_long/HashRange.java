@@ -17,6 +17,8 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
@@ -30,6 +32,7 @@ import java.util.function.LongUnaryOperator;
  * (5,5), or as wide as the relevant data type allows.
  */
 @ThreadSafeMapper
+@Categories({Category.general})
 public class HashRange implements LongUnaryOperator {
 
     private final long minValue;

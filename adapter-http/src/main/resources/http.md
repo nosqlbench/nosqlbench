@@ -200,7 +200,7 @@ that each activity that uses the http driver shares a client instance across
 all threads by default. If you want to have a new http client per-thread,
 simply add a binding for `space: ThreadNumToInteger()` and reference it in
 an op template like `space: {space}`, OR use an inline op field in your op
-template like `space: {{ThreadNumToInteger()}}`.
+template like `space: {(ThreadNumToInteger())}`.
 
 You can use any binding function you want for the space op field. However,
 if you were to assign it something like "space: {{Identity()}}" you would

@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class FixedValue implements LongFunction<String> {
 
     private final String value;

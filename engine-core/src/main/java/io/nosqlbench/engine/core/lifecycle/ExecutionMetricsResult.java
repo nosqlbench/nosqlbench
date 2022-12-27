@@ -54,21 +54,21 @@ public class ExecutionMetricsResult extends ExecutionResult {
 
     public String getMetricsSummary() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(os);
-        ConsoleReporter.Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-            .convertDurationsTo(TimeUnit.MICROSECONDS)
-            .convertRatesTo(TimeUnit.SECONDS)
-            .filter(MetricFilter.ALL)
-            .outputTo(ps);
-        Set<MetricAttribute> disabled = new HashSet<>(INTERVAL_ONLY_METRICS);
-        if (this.getElapsedMillis()<60000) {
-            disabled.addAll(OVER_ONE_MINUTE_METRICS);
+        try (PrintStream ps = new PrintStream(os)) {
+            ConsoleReporter.Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+                .convertDurationsTo(TimeUnit.MICROSECONDS)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .filter(MetricFilter.ALL)
+                .outputTo(ps);
+            Set<MetricAttribute> disabled = new HashSet<>(INTERVAL_ONLY_METRICS);
+            if (this.getElapsedMillis()<60000) {
+                disabled.addAll(OVER_ONE_MINUTE_METRICS);
+            }
+            builder.disabledMetricAttributes(disabled);
+            ConsoleReporter consoleReporter = builder.build();
+            consoleReporter.report();
+            consoleReporter.close();
         }
-        builder.disabledMetricAttributes(disabled);
-        ConsoleReporter consoleReporter = builder.build();
-        consoleReporter.report();
-        ps.flush();
-        consoleReporter.close();
         String result = os.toString(StandardCharsets.UTF_8);
         return result;
     }

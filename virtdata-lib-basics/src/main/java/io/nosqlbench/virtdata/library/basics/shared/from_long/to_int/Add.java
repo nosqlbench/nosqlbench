@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_int;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongToIntFunction;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class Add implements LongToIntFunction {
 
     private final long addend;
