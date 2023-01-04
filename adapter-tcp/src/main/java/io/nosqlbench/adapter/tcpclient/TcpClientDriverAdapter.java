@@ -33,6 +33,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
+<<<<<<< HEAD
+=======
+import java.util.regex.Pattern;
+>>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
 
 @Service(value= DriverAdapter.class,selector = "tcpclient")
 public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpClientAdapterSpace> implements SyntheticOpTemplateProvider {
