@@ -40,9 +40,14 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-          <version>4.17.32-SNAPSHOT</version>
+            <version>4.17.32-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-stdout</artifactId>
+            <version>4.17.32-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
-
 </project>

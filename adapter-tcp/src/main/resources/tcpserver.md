@@ -9,6 +9,8 @@ The tcpserver driver listens on a configured host and port (a socket address). W
 internal queue is buffered to them as long as there is data in it. For each cycle of data in the internal buffer, one of
 the connected clients will get it in unspecified order.
 
+The driver activity will block as long as there are still messages in the queue (Max:capacity). To ensure that the queue is empties and the activity shuts down correctly, one must make sure that a client connects to the server to receive the queued messages.
+
 If the buffer is primed with data when a client is connected it will get all of the data at once. After this, data is
 added to the buffer at whatever cyclerate the activity is configured for. If you add data to the buffer faster than you
 can consume it with connected clients, you will have a number of failed operations.
@@ -49,7 +51,7 @@ Run a stdout activity named 'stdout-test', with definitions from activities/stdo
   - default: localhost
   - dynamic: false
 - **port** - this is the name of the port to listen on
-  - default: 12345
+  - default: 8080
   - dynamic: false
 - **capacity** - the size of the internal blocking queue
   - default: 10

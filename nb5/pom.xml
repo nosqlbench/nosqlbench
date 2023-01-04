@@ -102,6 +102,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-tcp</artifactId>
+            <version>4.17.32-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
             <version>4.17.32-SNAPSHOT</version>
         </dependency>
