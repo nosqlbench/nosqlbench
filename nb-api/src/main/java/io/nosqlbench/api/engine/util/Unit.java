@@ -130,7 +130,7 @@ public class Unit {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            long base = Long.valueOf(numberpart);
+            double base = Double.parseDouble(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
@@ -142,7 +142,7 @@ public class Unit {
                 double multiplier = (specifierScale / resultScale);
                 base *= multiplier;
             }
-            return Optional.of(base);
+            return Optional.of((long) base);
         } else {
             logger.error("Parsing error for specifier:'" + spec + "'");
             return Optional.empty();

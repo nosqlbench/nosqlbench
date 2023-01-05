@@ -22,8 +22,8 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -35,17 +35,17 @@ import java.util.function.Predicate;
  */
 public class ReorderingConcurrentResultBuffer implements Output, CanFilterResultValue {
 
-    private final static Logger logger = LogManager.getLogger(ReorderingConcurrentResultBuffer.class);
+    private static final Logger logger = LogManager.getLogger(ReorderingConcurrentResultBuffer.class);
 
     private final LinkedList<CycleResultsSegment> segments = new LinkedList<>();
     private final Output downstream;
     private final int threshold;
-    private int currentCount;
-    private int segmentCount;
+    private long currentCount;
+    private long segmentCount;
     private Predicate<ResultReadable> resultFilter;
 
     public ReorderingConcurrentResultBuffer(Output downstream) {
-        this(downstream,1000);
+        this(downstream, 1000);
     }
 
     public ReorderingConcurrentResultBuffer(Output downstream, int threshold) {
@@ -61,24 +61,24 @@ public class ReorderingConcurrentResultBuffer implements Output, CanFilterResult
 
     @Override
     public synchronized void onCycleResultSegment(CycleResultsSegment segment) {
-        if (resultFilter!=null) {
+        if (resultFilter != null) {
             segment = segment.filter(resultFilter);
         }
         if (!(segment instanceof CanSortCycles)) {
             segment = new CycleResultArray(segment);
         }
-        ((CanSortCycles)segment).sort();
+        ((CanSortCycles) segment).sort();
         segments.add(segment);
         segmentCount++;
-        currentCount+=segment.getCount();
-        if (currentCount>=threshold) {
-            logger.trace(() -> "Reordering threshold met: " + currentCount +"/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
+        currentCount += segment.getCount();
+        if (currentCount >= threshold) {
+            logger.trace(() -> "Reordering threshold met: " + currentCount + "/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
             Collections.sort(segments);
-            while(currentCount>=threshold) {
+            while (currentCount >= threshold) {
                 CycleResultsSegment head = segments.removeFirst();
                 downstream.onCycleResultSegment(head);
                 segmentCount--;
-                currentCount-=head.getCount();
+                currentCount -= head.getCount();
             }
         }
     }
@@ -90,7 +90,7 @@ public class ReorderingConcurrentResultBuffer implements Output, CanFilterResult
         for (CycleResultsSegment segment : segments) {
             downstream.onCycleResultSegment(segment);
             segmentCount--;
-            currentCount-=segment.getCount();
+            currentCount -= segment.getCount();
         }
         downstream.close();
 
