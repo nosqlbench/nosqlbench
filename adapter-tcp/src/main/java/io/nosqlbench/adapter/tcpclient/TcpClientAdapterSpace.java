@@ -26,10 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.SocketFactory;
-<<<<<<< HEAD
-=======
-import java.io.FileNotFoundException;
->>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -37,16 +33,9 @@ import java.net.Socket;
 
 public class TcpClientAdapterSpace {
 
-<<<<<<< HEAD
     private final static Logger logger = LogManager.getLogger(TcpClientAdapterSpace.class);
     private final NBConfiguration config;
     Writer writer;
-=======
-    private final static Logger logger = LogManager.getLogger(TcpServerAdapterSpace.class);
-    private final NBConfiguration config;
-    Writer writer;
-    private PrintWriter console;
->>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
 
     public TcpClientAdapterSpace(NBConfiguration config) {
         this.config = config;
@@ -63,11 +52,7 @@ public class TcpClientAdapterSpace {
         }
 
         String host = config.getOptional("host").orElse("localhost");
-<<<<<<< HEAD
         int port = config.getOptional(int.class, "port").orElse(12345);
-=======
-        int port = config.getOptional(int.class, "port").orElse(8080);
->>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
 
         try {
             Socket socket = socketFactory.createSocket(host, port);
@@ -91,23 +76,11 @@ public class TcpClientAdapterSpace {
             .add(SSLKsFactory.get().getConfigModel())
             .add(
                 Param.defaultTo("host","localhost")
-<<<<<<< HEAD
                     .setDescription("the host address to use")
             )
             .add(
                 Param.defaultTo("port",12345)
                     .setDescription("the designated port to connect to on the socket")
-=======
-                    .setDescription("")
-            )
-            .add(
-                Param.defaultTo("port",8080)
-                    .setDescription("")
-            )
-            .add(
-                Param.defaultTo("filename","tcpclient")
-                    .setDescription("this is the name of the output file. If 'stdout', output is sent to tcpclient, not a file.")
->>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
             )
             .add(
                 Param.defaultTo("newline",true)
@@ -116,7 +89,6 @@ public class TcpClientAdapterSpace {
             .add(
                 Param.optional("format")
                     .setRegex("csv|readout|json|inlinejson|assignments|diag")
-<<<<<<< HEAD
                     .setDescription("""
                         Which format to use.
                         If provided, the format will override any statement formats provided by the YAML.
@@ -129,18 +101,6 @@ public class TcpClientAdapterSpace {
                         "If this is 'doc', then all the document level bindings are used. If it is any other value, it is taken
                         "as a pattern (regex) to subselect a set of bindings by name. You can simply use the name of a binding
                         "here as well.""")
-=======
-                    .setDescription("Which format to use.\n" +
-                        "If provided, the format will override any statement formats provided by the YAML. " +
-                        "If 'diag' is used, a diagnostic readout will be provided for binding constructions.")
-            )
-            .add(
-                Param.defaultTo("bindings","doc")
-                    .setDescription("This is a simple way to specify a filter for the names of bindings that you want to use.\n" +
-                        "If this is 'doc', then all the document level bindings are used. If it is any other value, it is taken\n" +
-                        "as a pattern (regex) to subselect a set of bindings by name. You can simply use the name of a binding\n" +
-                        "here as well.")
->>>>>>> ef397c742 (nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d)
 
             )
             .asReadOnly();
