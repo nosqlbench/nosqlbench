@@ -139,10 +139,6 @@ public class TcpServerAdapterSpace implements AutoCloseable{
                     .setDescription("the designated port to connect to on the socket")
             )
             .add(
-                Param.defaultTo("filename","tcpserver")
-                    .setDescription("this is the name of the output file. If 'stdout', output is sent to tcpserver, not a file.")
-            )
-            .add(
                 Param.defaultTo("newline",true)
                     .setDescription("whether to automatically add a missing newline to the end of any output\n")
             )
