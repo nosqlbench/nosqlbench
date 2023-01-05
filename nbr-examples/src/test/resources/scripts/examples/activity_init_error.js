@@ -15,7 +15,7 @@
  */
 
 activitydef1 = {
-    "alias" : "erroring_activity_init",
+    "alias" : "activity_init_error",
     "driver" : "diag",
     "cycles" : "invalid",
     "threads" : "1",
@@ -24,8 +24,8 @@ activitydef1 = {
     "op" : "noop"
 };
 
-print('starting activity erroring_activity_init');
+print('starting activity activity_init_error');
 scenario.start(activitydef1);
 scenario.waitMillis(2000);
-scenario.awaitActivity("erroring_activity_init");
+scenario.awaitActivity("activity_init_error");
 print("awaited activity");

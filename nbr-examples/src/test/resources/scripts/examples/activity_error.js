@@ -15,7 +15,7 @@
  */
 
 activitydef1 = {
-    "alias" : "erroring_activity",
+    "alias" : "activity_error",
     "driver" : "diag",
     "cycles" : "0..1500000",
     "threads" : "1",
@@ -25,9 +25,9 @@ activitydef1 = {
     }
 };
 
-print('starting activity erroring_activity');
+print('starting activity activity_error');
 scenario.start(activitydef1);
 scenario.waitMillis(2000);
-activities.erroring_activity.threads="unparsable";
-scenario.awaitActivity("erroring_activity");
+activities.activity_error.threads="unparsable";
+scenario.awaitActivity("activity_error");
 print("awaited activity");
