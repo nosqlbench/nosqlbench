@@ -40,8 +40,8 @@ public class ReorderingConcurrentResultBuffer implements Output, CanFilterResult
     private final LinkedList<CycleResultsSegment> segments = new LinkedList<>();
     private final Output downstream;
     private final int threshold;
-    private int currentCount;
-    private int segmentCount;
+    private long currentCount;
+    private long segmentCount;
     private Predicate<ResultReadable> resultFilter;
 
     public ReorderingConcurrentResultBuffer(Output downstream) {
