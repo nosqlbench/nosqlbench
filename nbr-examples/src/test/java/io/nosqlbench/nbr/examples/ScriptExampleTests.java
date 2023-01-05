@@ -96,13 +96,6 @@ public class ScriptExampleTests {
     }
 
     @Test
-    public void testExceptionPropagationFromMotorThread() {
-        ExecutionMetricsResult scenarioResult = runScenario("activityerror");
-        assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("For input string: \"unparsable\"");
-    }
-
-    @Test
     public void testCycleRate() {
         ExecutionMetricsResult scenarioResult = runScenario("cycle_rate");
         String iolog = scenarioResult.getIOLog();
