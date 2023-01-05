@@ -80,33 +80,6 @@
         <module>docsys</module>
     </modules>
 
-    <profiles>
-        <profile>
-            <id>with-nb</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>nb</module>
-                <module>driver-tcp</module>
-                <module>driver-jmx</module>
-                <module>driver-jdbc</module>
-                <module>driver-cockroachdb</module>
-
-            </modules>
-        </profile>
-        <profile>
-            <id>with-mongodb</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>driver-mongodb</module>
-            </modules>
-        </profile>
-
-    </profiles>
-
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
