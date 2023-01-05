@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022 nosqlbench
+  ~ Copyright (c) 2022-2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@
         <module>engine-docker</module>
         <module>engine-docs</module>
         <module>engine-cli</module>
-        <module>engine-rest</module>
-        <module>engine-clients</module>
+<!--        <module>engine-rest</module>-->
+<!--        <module>engine-clients</module>-->
         <module>adapters-api</module>
 
         <!-- driver modules -->
