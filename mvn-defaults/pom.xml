@@ -220,7 +220,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-api</artifactId>
-                <version>${docker.java.version}</version>
+                <version>3.2.14</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -381,7 +381,7 @@
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>20.3.8</version>
+                <version>21.3.4</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
