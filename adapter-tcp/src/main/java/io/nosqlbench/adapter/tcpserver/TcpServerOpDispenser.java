@@ -17,29 +17,27 @@
 package io.nosqlbench.adapter.tcpserver;
 
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
 public class TcpServerOpDispenser extends BaseOpDispenser<TcpServerOp,TcpServerAdapterSpace> {
 
-    private final LongFunction<TcpServerAdapterSpace> ctxfunc;
+    private final LongFunction<TcpServerAdapterSpace> ctxFunction;
     private final LongFunction<String> outFunction;
 
     public TcpServerOpDispenser(TcpServerDriverAdapter adapter, ParsedOp cmd, LongFunction<TcpServerAdapterSpace> ctxfunc) {
         super(adapter,cmd);
-        this.ctxfunc = ctxfunc;
+        this.ctxFunction = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
-        LongFunction<String> stringfunc = l -> objectFunction.apply(l).toString();
-        cmd.enhanceFuncOptionally(stringfunc,"suffix",String.class,(a, b) -> a+b);
-        this.outFunction = stringfunc;
+        LongFunction<String> stringFunction = l -> objectFunction.apply(l).toString();
+        cmd.enhanceFuncOptionally(stringFunction,"suffix",String.class,(a, b) -> a+b);
+        this.outFunction = stringFunction;
     }
 
     @Override
     public TcpServerOp apply(long value) {
-        TcpServerAdapterSpace ctx = ctxfunc.apply(value);
+        TcpServerAdapterSpace ctx = ctxFunction.apply(value);
         String output = outFunction.apply(value);
         return new TcpServerOp(ctx,output);
     }

@@ -39,7 +39,7 @@ Run a stdout activity named 'stdout-test', with definitions from activities/stdo
   - default: localhost
   - dynamic: false
 - **port** - this is the name of the port to listen on
-  - default: 8080
+  - default: 12345
   - dynamic: false
 - **capacity** - the size of the internal blocking queue
   - default: 10

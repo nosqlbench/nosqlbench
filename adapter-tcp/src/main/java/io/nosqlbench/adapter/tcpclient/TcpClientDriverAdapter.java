@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 @Service(value= DriverAdapter.class,selector = "tcpclient")
 public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpClientAdapterSpace> implements SyntheticOpTemplateProvider {

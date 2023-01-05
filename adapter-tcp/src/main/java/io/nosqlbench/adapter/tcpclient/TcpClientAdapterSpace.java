@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.SocketFactory;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -34,10 +33,9 @@ import java.net.Socket;
 
 public class TcpClientAdapterSpace {
 
-    private final static Logger logger = LogManager.getLogger(TcpServerAdapterSpace.class);
+    private final static Logger logger = LogManager.getLogger(TcpClientAdapterSpace.class);
     private final NBConfiguration config;
     Writer writer;
-    private PrintWriter console;
 
     public TcpClientAdapterSpace(NBConfiguration config) {
         this.config = config;
@@ -54,7 +52,7 @@ public class TcpClientAdapterSpace {
         }
 
         String host = config.getOptional("host").orElse("localhost");
-        int port = config.getOptional(int.class, "port").orElse(8080);
+        int port = config.getOptional(int.class, "port").orElse(12345);
 
         try {
             Socket socket = socketFactory.createSocket(host, port);
@@ -78,11 +76,11 @@ public class TcpClientAdapterSpace {
             .add(SSLKsFactory.get().getConfigModel())
             .add(
                 Param.defaultTo("host","localhost")
-                    .setDescription("")
+                    .setDescription("the host address to use")
             )
             .add(
-                Param.defaultTo("port",8080)
-                    .setDescription("")
+                Param.defaultTo("port",12345)
+                    .setDescription("the designated port to connect to on the socket")
             )
             .add(
                 Param.defaultTo("filename","tcpclient")
@@ -95,16 +93,18 @@ public class TcpClientAdapterSpace {
             .add(
                 Param.optional("format")
                     .setRegex("csv|readout|json|inlinejson|assignments|diag")
-                    .setDescription("Which format to use.\n" +
-                        "If provided, the format will override any statement formats provided by the YAML. " +
-                        "If 'diag' is used, a diagnostic readout will be provided for binding constructions.")
+                    .setDescription("""
+                        Which format to use.
+                        If provided, the format will override any statement formats provided by the YAML.
+                        If 'diag' is used, a diagnostic readout will be provided for binding constructions.""")
             )
             .add(
                 Param.defaultTo("bindings","doc")
-                    .setDescription("This is a simple way to specify a filter for the names of bindings that you want to use.\n" +
-                        "If this is 'doc', then all the document level bindings are used. If it is any other value, it is taken\n" +
-                        "as a pattern (regex) to subselect a set of bindings by name. You can simply use the name of a binding\n" +
-                        "here as well.")
+                    .setDescription("""
+                        This is a simple way to specify a filter for the names of bindings that you want to use.
+                        "If this is 'doc', then all the document level bindings are used. If it is any other value, it is taken
+                        "as a pattern (regex) to subselect a set of bindings by name. You can simply use the name of a binding
+                        "here as well.""")
 
             )
             .asReadOnly();

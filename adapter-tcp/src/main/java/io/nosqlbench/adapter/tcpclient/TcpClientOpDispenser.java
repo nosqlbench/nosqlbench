@@ -23,21 +23,21 @@ import java.util.function.LongFunction;
 
 public class TcpClientOpDispenser extends BaseOpDispenser<TcpClientOp, TcpClientAdapterSpace> {
 
-    private final LongFunction<TcpClientAdapterSpace> ctxfunc;
+    private final LongFunction<TcpClientAdapterSpace> ctxFunction;
     private final LongFunction<String> outFunction;
 
     public TcpClientOpDispenser(TcpClientDriverAdapter adapter, ParsedOp cmd, LongFunction<TcpClientAdapterSpace> ctxfunc) {
         super(adapter,cmd);
-        this.ctxfunc = ctxfunc;
+        this.ctxFunction = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
-        LongFunction<String> stringfunc = l -> objectFunction.apply(l).toString();
-        cmd.enhanceFuncOptionally(stringfunc,"suffix",String.class,(a, b) -> a+b);
-        this.outFunction = stringfunc;
+        LongFunction<String> stringFunction = l -> objectFunction.apply(l).toString();
+        cmd.enhanceFuncOptionally(stringFunction,"suffix",String.class,(a, b) -> a+b);
+        this.outFunction = stringFunction;
     }
 
     @Override
     public TcpClientOp apply(long value) {
-        TcpClientAdapterSpace ctx = ctxfunc.apply(value);
+        TcpClientAdapterSpace ctx = ctxFunction.apply(value);
         String output = outFunction.apply(value);
         return new TcpClientOp(ctx,output);
     }
