@@ -86,12 +86,12 @@
 <!--            <artifactId>chromeinspector</artifactId>-->
 <!--            <scope>runtime</scope>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-clients</artifactId>
-          <version>4.17.32-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>engine-clients</artifactId>-->
+<!--          <version>4.17.32-SNAPSHOT</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
 
 
         <!-- only compile scope -->
