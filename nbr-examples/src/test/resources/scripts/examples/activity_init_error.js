@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.clients.grafana.transfer;
+activitydef1 = {
+    "alias" : "activity_init_error",
+    "driver" : "diag",
+    "cycles" : "invalid",
+    "threads" : "1",
+    "targetrate" : "500",
+    "unknown_config" : "unparsable",
+    "op" : "noop"
+};
 
-import java.util.List;
-
-public class GDashboardInfo {
-    long id;
-    String uid;
-    String title;
-    String url;
-    String type;
-    List<String> tags;
-    boolean isStarred;
-
-    // deprecated
-    String uri;
-
-}
+print('starting activity activity_init_error');
+scenario.start(activitydef1);
+scenario.waitMillis(2000);
+scenario.awaitActivity("activity_init_error");
+print("awaited activity");
