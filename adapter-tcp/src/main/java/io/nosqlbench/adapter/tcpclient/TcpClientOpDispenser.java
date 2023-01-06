@@ -31,7 +31,6 @@ public class TcpClientOpDispenser extends BaseOpDispenser<TcpClientOp, TcpClient
         this.ctxFunction = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         LongFunction<String> stringFunction = l -> objectFunction.apply(l).toString();
-        cmd.enhanceFuncOptionally(stringFunction,"suffix",String.class,(a, b) -> a+b);
         this.outFunction = stringFunction;
     }
 
