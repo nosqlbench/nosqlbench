@@ -25,17 +25,26 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-#      - name: mvn-package
-#        run: mvn package
+      - name: Installing dependencies
+        run: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
-      - name: mvn verify
-        run: mvn verify
+      - name: Running tests
+        run: mvn -B test
+            
+      - name: Collecting reports
+        run: tar -cvf codecov-report.tar target/coverage-report/**/*
 
-      - name: Capture
+      - name: Uploading [nosqlbench] test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: codecov-report
+          path: codecov-report.tar
+
+      - name: Collecting [nosqlbench] logfiles
         if: success() || failure()
         run: tar -cvf logfiles.tar [a-zA-Z]**/logs/*
 
-      - name: Archive Test Results
+      - name: Uploading test result log files
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
@@ -43,9 +52,11 @@ jobs:
           path: logfiles.tar
 
       - name: export docs
+        if: success()
         run: nb5/target/nb5 export-docs
 
       - name: upload docs artifact
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: exported-docs

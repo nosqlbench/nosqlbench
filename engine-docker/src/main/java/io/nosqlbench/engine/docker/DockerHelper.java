@@ -65,6 +65,10 @@ public class DockerHelper {
         logger.info(() -> "Starting docker with img=" + IMG + ", tag=" + tag + ", name=" + name + ", " +
                 "ports=" + ports + ", volumes=" + volumeDescList + ", env=" + envList + ", cmds=" + cmdList + ", reload=" + reload);
 
+        logger.info("Starting docker with img={}",IMG);
+
+
+
         boolean existingContainer = removeExitedContainers(name);
 
         Container containerId = searchContainer(name, reload, tag);
