@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  */
 
 activitydef1 = {
-    "alias" : "erroring_activity_init",
+    "alias" : "activity_error",
     "driver" : "diag",
-    "cycles" : "invalid",
+    "cycles" : "0..1500000",
     "threads" : "1",
-    "targetrate" : "500",
-    "unknown_config" : "unparsable",
-    "op" : "noop"
+    "targetrate" : "10",
+    "op" : {
+        "log": "type=log modulo=1"
+    }
 };
 
-print('starting activity erroring_activity_init');
+print('starting activity activity_error');
 scenario.start(activitydef1);
 scenario.waitMillis(2000);
-scenario.awaitActivity("erroring_activity_init");
+activities.activity_error.threads="unparsable";
+scenario.awaitActivity("activity_error");
 print("awaited activity");

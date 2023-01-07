@@ -309,6 +309,7 @@ public class AggregateSummaryStatistics implements StatisticalSummary,
      * @param statistics collection of SummaryStatistics to aggregate
      * @return summary statistics for the combined dataset
      */
+    // TODO - we need a unit test around this one.
     public static StatisticalSummaryValues aggregate(Collection<? extends StatisticalSummary> statistics) {
         if (statistics == null) {
             return null;
@@ -335,7 +336,7 @@ public class AggregateSummaryStatistics implements StatisticalSummary,
             }
             sum += current.getSum();
             final double oldN = n;
-            final double curN = current.getN();
+            final long curN = current.getN();
             n += curN;
             final double meanDiff = current.getMean() - mean;
             mean = sum / n;

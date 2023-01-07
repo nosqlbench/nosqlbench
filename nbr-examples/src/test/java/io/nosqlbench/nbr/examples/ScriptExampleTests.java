@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-@Execution(ExecutionMode.CONCURRENT)
+@Execution(ExecutionMode.SAME_THREAD)
 public class ScriptExampleTests {
 
     public static ExecutionMetricsResult runScenario(String scriptname, String... params) {
@@ -93,13 +93,6 @@ public class ScriptExampleTests {
         Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
             Pattern.DOTALL);
         assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
-    }
-
-    @Test
-    public void testExceptionPropagationFromMotorThread() {
-        ExecutionMetricsResult scenarioResult = runScenario("activityerror");
-        assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("For input string: \"unparsable\"");
     }
 
     @Test
@@ -234,15 +227,6 @@ public class ScriptExampleTests {
             "shutdown hooks should not run in the same IO context as the main scenario"
         );
     }
-
-    @Test
-    public void testExceptionPropagationFromActivityInit() {
-        ExecutionMetricsResult scenarioResult = runScenario("activityiniterror");
-        assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("Unable to convert end cycle from invalid");
-        assertThat(scenarioResult.getException()).isNotNull();
-    }
-
     @Test
     public void testReportedCoDelayBursty() {
         ExecutionMetricsResult scenarioResult = runScenario("cocycledelay_bursty");
@@ -272,11 +256,28 @@ public class ScriptExampleTests {
     }
 
     @Test
-    public void testExitLogic() {
+    public void testErrorPropagationFromAdapterOperation() {
         ExecutionMetricsResult scenarioResult = runScenario(
             "basicdiag",
             "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
+
+
+    @Test
+    public void testErrorPropagationFromMotorThread() {
+        ExecutionMetricsResult scenarioResult = runScenario("activity_error");
+        assertThat(scenarioResult.getException()).isNotNull();
+        assertThat(scenarioResult.getException().getMessage()).contains("For input string: \"unparsable\"");
+    }
+
+    @Test
+    public void testErrorPropagationFromActivityInitialization() {
+        ExecutionMetricsResult scenarioResult = runScenario("activity_init_error");
+        assertThat(scenarioResult.getException()).isNotNull();
+        assertThat(scenarioResult.getException().getMessage()).contains("Unable to convert end cycle from invalid");
+        assertThat(scenarioResult.getException()).isNotNull();
+    }
+
 
 }

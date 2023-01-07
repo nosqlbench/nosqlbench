@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022 nosqlbench
+  ~ Copyright (c) 2022-2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@
         <module>engine-docker</module>
         <module>engine-docs</module>
         <module>engine-cli</module>
-        <module>engine-rest</module>
-        <module>engine-clients</module>
+<!--        <module>engine-rest</module>-->
+<!--        <module>engine-clients</module>-->
         <module>adapters-api</module>
 
         <!-- driver modules -->
@@ -80,33 +80,6 @@
         <!-- Documentation -->
         <module>docsys</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>with-nb</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>nb</module>
-                <module>driver-tcp</module>
-                <module>driver-jmx</module>
-                <module>driver-jdbc</module>
-                <module>driver-cockroachdb</module>
-
-            </modules>
-        </profile>
-        <profile>
-            <id>with-mongodb</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>driver-mongodb</module>
-            </modules>
-        </profile>
-
-    </profiles>
 
     <licenses>
         <license>
