@@ -160,10 +160,16 @@ public class NBConfiguration {
         if (o==null) {
             return Optional.empty();
         }
-        if (type.isAssignableFrom(o.getClass())) {
+        if (type.isInstance(o)) {
             return Optional.of((T) o);
+        } else if (type.isAssignableFrom(o.getClass())) {
+            return Optional.of((T)type.cast(o));
+        } else if (NBTypeConverter.canConvert(o, type)) {
+            return Optional.of((T) NBTypeConverter.convert(o, type));
+        } else {
+            throw new NBConfigError("config param " + Arrays.toString(names) +" was not assignable to class '" + type.getCanonicalName() + "'");
         }
-        throw new NBConfigError("config param " + Arrays.toString(names) +" was not assignable to class '" + type.getCanonicalName() + "'");
+
     }
 
     public <T> T getOrDefault(String name, T defaultValue) {

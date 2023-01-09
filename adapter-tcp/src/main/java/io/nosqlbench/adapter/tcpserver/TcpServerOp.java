@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.tcp;
+package io.nosqlbench.adapter.tcpserver;
 
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.RunnableOp;
 
-public class TcpOpMapper implements OpMapper<Op> {
+public class TcpServerOp implements RunnableOp {
+    private final TcpServerAdapterSpace ctx;
+    private final String text;
 
-    private final TcpDriverAdapter adapter;
-
-    public TcpOpMapper(TcpDriverAdapter adapter) {
-        this.adapter = adapter;
+    public TcpServerOp(TcpServerAdapterSpace ctx, String text) {
+        this.ctx = ctx;
+        this.text = text;
     }
-
-    @Override
-    public OpDispenser<? extends Op> apply(ParsedOp op) {
-        return new TcpOpDispenser(adapter,op);
+    public void run() {
+        ctx.writeflush(text);
     }
 }

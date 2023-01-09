@@ -30,7 +30,7 @@ public class MetricsIntegrationTest {
     @Test
     public void testHistogramLogger() {
         ActivityDef ad = ActivityDef.parseActivityDef("alias=foo;driver=diag;op=noop");
-        Histogram testhistogram = ActivityMetrics.histogram(ad, "testhistogram", 4);
+        Histogram testhistogram = ActivityMetrics.histogram(ad, "testhistogram", 3);
         ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log","1s");
         testhistogram.update(400);
         testhistogram.getSnapshot();
