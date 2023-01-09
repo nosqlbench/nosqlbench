@@ -1,0 +1,183 @@
+- b8e0bcd26 (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 0eb71686a removed stale modules
+- d785fe4bb Merge pull request #893 from nosqlbench/my-nosqlbench-440
+- ea93403f4 (origin/my-nosqlbench-440) removed suffix parameter from tcp driver op dispensers (We have string templates to do that now)
+- bca21e86b codecov impl
+- 11e4c8cc4 Scan fix: cs #17, implicit narrowing
+- 6881c0790 Revert "nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d"
+- f8eecd541 Scan fix: cs #35, implicit narrowing
+- 1b2655c27 nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d
+- 376a9b04a combine build phases for main verification
+- 4c2a18148 run example tests serially for now
+- 4e418c7c7 remove engine-clients module
+- 0b7d0aaad remove engine-clients from dependencies
+- 1af40544b allow build on push for this branch
+- f4aa80f9e remove previous "nb" module, which will be replaced by the nb5 module soon
+- ccb2aefec update module versions
+- edbf25abe remove nb module profile
+- 8323c78e4 update metrics version to drop old slf4j dependency
+- 1e7d67697 deactivate rest module with old dependencies
+- ac279d364 consolidate error tests
+- 0bc4064f3 sync stale versions on inactive modules
+- 9f1c20e10 update and fill-in missing slf4j stub layer
+- 9c73c4e18 remove previous "nb" module, which will be replaced by the nb5 module soon
+- 2d16ff3b5 Revert "NB5 address high priority code scans" (#895)
+- ecfe3d633 Narrowing fixes
+- f1bb2ed06 use alternate inline binding form for zola
+- 77243f325 make anchor links zola compatible
+- b334a514f remove duplicitous doc file
+- dfe1c0775 Merge pull request #896 from nosqlbench/nosqlbench-886-noslf4j
+- 1c86fac3f (origin/nosqlbench-886-noslf4j, nosqlbench-886-noslf4j) combine build phases for main verification
+- 688a6f728 run example tests serially for now
+- c86029818 remove engine-clients module
+- 3e2802a6e remove engine-clients from dependencies
+- 50207b38f allow build on push for this branch
+- 865c0ac38 remove previous "nb" module, which will be replaced by the nb5 module soon
+- 8cb4f7b77 update module versions
+- 55c6bca95 remove nb module profile
+- f75eee5ac update metrics version to drop old slf4j dependency
+- f379ad292 deactivate rest module with old dependencies
+- f41250569 consolidate error tests
+- fb8e27d33 sync stale versions on inactive modules
+- 36fa9461d update and fill-in missing slf4j stub layer
+- f38a635d7 Modified HDR Digits to 3 to save space on MetricsIntegrationTest.
+- ffcc29414 Cleaned up "filename" configuration option from TCP. (Only available for Stdout)
+- 45d00b187 Revert "NB5 address high priority code scans" (#895)
+- 6146d186d Modified Writer Adapter Behavior for TCPServer to use poll and offer with a specified retry time (1s)
+- 89c3bb453 Merge pull request #894 from nosqlbench/jeffb/code-scans-high
+- d46ae1f12 Merge pull request #885 from nosqlbench/docfixes
+- ccc7f7ab3 Cleaned up code after review.
+- 23b79628b (origin/jeffb/code-scans-high) Narrowing fixes
+- bdf61845f nosqlbench-440 convert tcpclient driver from ActivityType to DriverAdapter e:1d
+- 0139ea0ad fix: upgrade org.eclipse.jetty:jetty-servlets from 11.0.12 to 11.0.13 (#892)
+- 277093d30 fix: upgrade org.eclipse.jetty:jetty-server from 11.0.12 to 11.0.13 (#891)
+- f5ed9b011 fix: upgrade org.eclipse.jetty:jetty-servlet from 11.0.12 to 11.0.13 (#890)
+- 9d577e669 fix: upgrade org.eclipse.jetty:jetty-rewrite from 11.0.12 to 11.0.13 (#889)
+- 3fc6b195a fix: adapter-dynamodb/pom.xml to reduce vulnerabilities (#888)
+- 19b8743f7 fix: upgrade com.github.oshi:oshi-core-java11 from 6.3.2 to 6.4.0 (#887)
+- 38088659c remove previous "nb" module, which will be replaced by the nb5 module soon
+- 7bcc7d6bf fix: upgrade joda-time:joda-time from 2.12.1 to 2.12.2 (#884)
+- e4fd27649 (origin/docfixes, docfixes) use alternate inline binding form for zola
+- 08fb6ca90 make anchor links zola compatible
+- 972a6af65 remove duplicitous doc file
+- 704e2751d Merge remote-tracking branch 'origin/main'
+- c316bed26 support alternate inline format to work around docs shortcodes
+- 52d5d10b8 Merge pull request #878 from nosqlbench/nosqlbench-875-categories
+- dd1fc35d3 Merge pull request #880 from nosqlbench/nosqlbench-797-callable
+- b6caecba4 Merge pull request #883 from nosqlbench/nosqlbench-881-fixtest
+- 6731937c9 (nosqlbench-881-fixtest) modify logger calls for computable messages via closures
+- a06cf565e enable async logging for tests
+- 1af99a9b4 make logging-sensitive tests work with async logging
+- 48055fe95 reduce logging output for integrated tests
+- fd8e871da use local logger at debug level for any test output
+- 78afbfbc5 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 10080720a (nosqlbench-797-callable) PR fixes from comments
+- f8f7ca052 Merge pull request #872 from nosqlbench/nosqlbench-797-callable
+- 54546ce9a (nosqlbench-875-categories) put required categories on all binding functions, not just one of each name
+- b528a4e29 annotation processor asserts presence of categories on binding functions
+- 74c234ddc Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 301f1e2d2 added missing category for TriangularStepFunction
+- 068c758bb Merge pull request #873 from nosqlbench/snyk-upgrade-e2924aae5a1f341565ee282682130a8f
+- 77f31d193 fix: upgrade io.swagger.core.v3:swagger-models from 2.2.6 to 2.2.7
+- 6da3798bb Update build.yml
+- 1e0b18968 Merge pull request #871 from nosqlbench/snyk-upgrade-5b9126aa6ad92dc3e050d3528eccae75
+- 6c8782842 change tests System.out calls to use logger directly
+- 4f4b4982c templatize test logging level for logger setup and root logger
+- d6c9f5153 test cleanup
+- a6ff30d36 fix: upgrade io.dropwizard.metrics:metrics-graphite from 4.2.12 to 4.2.13
+- d80632773 merge fixes for: improve concurrency patterns for activity execution
+- b9365bff7 improve concurrency patterns for activity execution
+- bf5a31b34 implement efficient concurrent thread state signaling
+- 0de80887b move log4j.xml to log4j2.xml
+- 077b41a3c misc naming, typo and formatting improvements
+- 1816381f9 make integrated tests more robust
+- 1416c71d9 internalize activity start logic
+- c076b1079 make http extension docs distinct from http adapter docs
+- 31dc3ce8f package housekeeping
+- a1cde761f fix unapplied bug in diag space
+- 3f14fefcb delegate activity instancing to dedicated loader
+- ba42bfea4 allow conversion of missing config types
+- 132192322 remove unused code paths to simplify refactoring
+- bd129c442 run activities within a dedicated executor
+- 09f776ad2 Merge pull request #870 from nosqlbench/stargate-v2-update
+- 72dd19cb2 fixing operation syntax
+- 2a62cc882 fix: upgrade com.github.docker-java:docker-java-transport-okhttp from 3.2.13 to 3.2.14 (#868)
+- 7bc4265af fix: adapter-dynamodb/pom.xml to reduce vulnerabilities (#867)
+- c4415e6c0 Merge pull request #863 from nosqlbench/my-NB5-I446
+- 8fd13fcdd (origin/my-NB5-I446) added explicit cast to explicitly narrow precision for security purposes
+- dc2174b95 fixed missing licenses
+- e18dcbc22 Merge pull request #864 from nosqlbench/nosqlbench-861-dryrun
+- fc7d72fac Merge pull request #866 from nosqlbench/nosqlbench-865-urlencode
+- 3013dc315 fixed s4j.md to be compatible with export-docs
+- 74bfbc691 Merge branch 'main' into my-NB5-I446
+- 084dddf1d nosqlbench-865 Apply urlencoder logic in http for all op field forms
+- d1d21c8e5 nosqlbench-861 Allow dry-run of op generation.
+- 39a9f5e92 further cleanup of unused comments and commands
+- b63eba35c fixed pulsar.md for export-docs after merge
+- a06e1556f merged my-NB5-I446 with main
+- f76c63b99 only launch build workflow when pushing to main branch
+- 7eeb1d288 fixed unused dependency failure
+- ad855e625 modified build workflow v2
+- 99a4c9fb4 modified build workflow
+- ec8ed024f Changed build workflow to re-add verify and run on non-release builds, removed unused dependency from nbr
+- c149684d0 moved from commonmark to inhouse MutableMarkdown for verification
+- bb28f0374 fix: mvn-defaults/pom.xml to reduce vulnerabilities (#859)
+- 3891073ff fix: upgrade io.swagger.parser.v3:swagger-parser from 2.1.7 to 2.1.9 (#858)
+- 3cd978950 fix: upgrade com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider from 2.14.0 to 2.14.1 (#857)
+- 97bb2e7b9 fix: upgrade org.openjdk.jmh:jmh-core from 1.35 to 1.36 (#852)
+- 60252ed2b fix: upgrade io.dropwizard.metrics:metrics-core from 4.2.12 to 4.2.13 (#851)
+- 8545673f7 fix: upgrade com.github.oshi:oshi-core-java11 from 6.3.1 to 6.3.2 (#850)
+- 7ba2a3de3 Moved CNAME to correct directory
+- 04153d729 simplified staging command
+- e29bfddc1 (origin/timeout_fix) avoid JVM timeout bug with lower default
+- 9f3cae591 fix: upgrade com.amazonaws:aws-java-sdk-s3 from 1.12.330 to 1.12.347 (#849)
+- 42d1403fb fix: nb-api/pom.xml to reduce vulnerabilities (#848)
+- c514a62fa fix: upgrade org.openjdk.jmh:jmh-generator-annprocess from 1.35 to 1.36 (#853)
+- 0c0156201 fix: adapter-dynamodb/pom.xml to reduce vulnerabilities (#855)
+- bca55d594 Added status command for debug
+- b1f0d590f Added hard overwrite for existing files
+- d472b071d excluded _index.md from rsync dynamic update
+- f0507cafb Merge pull request #854 from yabinmeng/main
+- 37f889359 Fix Kafka producer transaction issue and add support for subscribing from multiple topics. NB yaml files and README update
+- 3943a2945 Merge pull request #846 from nosqlbench/dependabot/maven/mvn-defaults/io.netty-netty-codec-haproxy-4.1.86.Final
+- 17e4cb323 Merge pull request #847 from yabinmeng/main
+- 1850a7c16 Add NB5 Kafka driver
+- 1adb553b3 build(deps): bump netty-codec-haproxy in /mvn-defaults
+- 2b39f3c35 Merge branch 'main' into nosqlbench-797-callable
+- 21a33aec9 final version v1
+- 5ccb06470 back to base simple case
+- ee71bdd17 added checkout action v5
+- 0c8ac02f3 added checkout action v4
+- 2c61e9c52 added checkout action v3
+- 875d0d960 Merge pull request #844 from nosqlbench/nosqlbench-843-cqlgen-mv
+- 4383ba208 added checkout action v2
+- 26e0b4cb0 added checkout action
+- 4a178fc21 added git remote command to debug remote v2
+- 43fa3e725 added git remote command to debug remote
+- c0117351f Merge pull request #845 from nosqlbench/snyk-fix-b8424b271d02d50c5baa47f9e8745c03
+- df534fd83 Merge branch 'main' into snyk-fix-b8424b271d02d50c5baa47f9e8745c03
+- 5a47fded6 corrected workflow file for debug v2
+- e09a93ea9 corrected workflow file for debug
+- 0e9dff474 testing simple case for access debug
+- f660c6272 converted to simple case for access debug
+- 35f4bb982 (nosqlbench-843-cqlgen-mv) avoid NPE when cqlgen parses materialized views
+- 21eb031da Merge pull request #837 from nosqlbench/nosqlbench-835-count-warning
+- 8240844f6 Merge pull request #838 from nosqlbench/nosqlbench-836
+- b3bcc3ce5 Merge pull request #839 from nosqlbench/nosqlbench-834-triangularstep
+- 21bc389f2 Merge pull request #842 from nosqlbench/nosqlbench-841-hashedrange
+- 8a48a020d (nosqlbench-841-hashedrange) allow zero width ranges
+- 862058d80 (nosqlbench-834-triangularstep, nosqlbench-797) make TriangularStep ctor public
+- 9d1e5c14d (nosqlbench-836) nosqlbench-836 expand default data retention in promql from 6 mo to 10 years
+- 4b04cb3aa (nosqlbench-835-count-warning) move warning to ctor
+- 457c75bc3 (nosqlbench-841-hashedrangesize) Merge pull request #832 from yabinmeng/main
+- 2f5dd1f74 clean up
+- bbbdb60dc added change directory before git command
+- b9efec960 Modified git commands in build workflow for docs
+- ae1a3af9c Corrected build workflow clone path
+- ea46cbb74 removed debug commands and corrected build workflow clone path
+- b77940715 Added debug commands for GHA
+- 10d9ce314 Disabled verify for testing
+- e7705d13d NB5-I446 Modified export-docs command to export organized driver and binding docs, also removed gendocs command (VirtDataGenDocsApp now used for generating bindings in StringBuilders to pass to the zipstream) added the export-docs build workflow job Updated build.yml to fix path to nb5 in workflow uploading/downloading docs artifacts in build workflow Attempt to correct the path to the exported docs to upload them Corrected exported-docs path Corrected yml build workflow error corrected naming of exported docs
+- c08f8b6b3 1) Add NB5 S4J example yaml files 2) Update NB5 S4J readme file 3) Minor code adjustments
+- 9a00af080 Merge branch 'nosqlbench:main' into main
+- c102b213a github actions release test
