@@ -113,7 +113,7 @@ jobs:
           PRERELEASE_BRANCH_PATTERN: "main"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
           GPG_ENABLED: "true"
           GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
           GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
@@ -171,7 +171,7 @@ jobs:
           PRERELEASE_BRANCH_PATTERN: "main"
           GIT_RELEASE_BOT_NAME: "nb-droid"
           GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
           GPG_ENABLED: "true"
           GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
           GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}

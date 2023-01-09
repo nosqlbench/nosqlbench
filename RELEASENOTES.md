@@ -1,4 +1,5 @@
-- b8e0bcd26 (HEAD -> main, origin/main) Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- a93c5acac (HEAD -> main, origin/main) checkpoint release for nb5
+- b8e0bcd26 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 0eb71686a removed stale modules
 - d785fe4bb Merge pull request #893 from nosqlbench/my-nosqlbench-440
 - ea93403f4 (origin/my-nosqlbench-440) removed suffix parameter from tcp driver op dispensers (We have string templates to do that now)
@@ -181,3 +182,4 @@
 - c08f8b6b3 1) Add NB5 S4J example yaml files 2) Update NB5 S4J readme file 3) Minor code adjustments
 - 9a00af080 Merge branch 'nosqlbench:main' into main
 - c102b213a github actions release test
+- force build
