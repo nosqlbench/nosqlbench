@@ -1,4 +1,5 @@
-- a93c5acac (HEAD -> main, origin/main) checkpoint release for nb5
+- 808399ea1 (HEAD -> main, origin/main) github actions release testing
+- a93c5acac checkpoint release for nb5
 - b8e0bcd26 Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 0eb71686a removed stale modules
 - d785fe4bb Merge pull request #893 from nosqlbench/my-nosqlbench-440
@@ -182,4 +183,3 @@
 - c08f8b6b3 1) Add NB5 S4J example yaml files 2) Update NB5 S4J readme file 3) Minor code adjustments
 - 9a00af080 Merge branch 'nosqlbench:main' into main
 - c102b213a github actions release test
-- force build
