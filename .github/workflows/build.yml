@@ -68,9 +68,6 @@ jobs:
         with:
           name: exported-docs
 
-      - name: unzip docs
-        run: unzip exported_docs.zip
-
       - run: ls -la
 
       - name: clone nosqlbench-build-docs
@@ -85,18 +82,26 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
+      - name: import zipfile
+        run: |
+          mv exported-docs.zip nosqlbench-build-docs/
+
+      - name: set CNAME
+        run: |
+          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+
+      - name: commit changes
+        run: |
+          cd nosqlbench-build-docs
+          git add -A
+
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
           set -x
-          find . -ls
-          rsync -av --delete -I --exclude '_index.md' drivers/ nosqlbench-build-docs/site/content/docs/drivers
-          rsync -av --delete -I --exclude '_index.md' bindings/ nosqlbench-build-docs/site/content/docs/bindings
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
           cd nosqlbench-build-docs
-          git add -A
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
           echo "found $CHANGES to push for doc updates"
           if (( $CHANGES > 0 ))
