@@ -51,8 +51,6 @@ jobs:
           name: exported-docs
           path: exported_docs.zip
 
-
-
   docs:
     needs: build
     runs-on: ubuntu-20.04
@@ -63,7 +61,7 @@ jobs:
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
-      - name: download exported-docs
+      - name: download exported_docs
         uses: actions/download-artifact@v3
         with:
           name: exported-docs
@@ -84,7 +82,7 @@ jobs:
 
       - name: import zipfile
         run: |
-          mv exported-docs.zip nosqlbench-build-docs/
+          mv exported_docs.zip nosqlbench-build-docs/
 
       - name: set CNAME
         run: |
