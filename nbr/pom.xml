@@ -159,7 +159,7 @@
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.00</minimum>
-                                            <maximum>0.50</maximum>
+                                            <maximum>1.00</maximum>
                                         </limit>
                                     </limits>
                                 </rule>

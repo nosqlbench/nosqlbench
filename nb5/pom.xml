@@ -88,13 +88,6 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <
-            <
-            <
-            <
-            <
-            <
-            < HEAD
             <version>4.17.33-SNAPSHOT</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
@@ -102,15 +95,6 @@
             <!--                    <groupId>org.slf4j</groupId>-->
             <!--                </exclusion>-->
             <!--            </exclusions>-->
-            =======
-            <version>4.17.32-SNAPSHOT</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
-            >>>>>>> b364307d1 (Jacoco introduced.)
         </dependency>
 
         <dependency>
@@ -122,13 +106,6 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-pulsar</artifactId>
-            <
-            <
-            <
-            <
-            <
-            <
-            < HEAD
             <version>4.17.33-SNAPSHOT</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
@@ -136,15 +113,6 @@
             <!--                    <groupId>org.slf4j</groupId>-->
             <!--                </exclusion>-->
             <!--            </exclusions>-->
-            =======
-            <version>4.17.32-SNAPSHOT</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
-            >>>>>>> b364307d1 (Jacoco introduced.)
         </dependency>
 
         <dependency>
@@ -162,13 +130,6 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
-            <
-            <
-            <
-            <
-            <
-            <
-            < HEAD
             <version>4.17.33-SNAPSHOT</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
@@ -176,15 +137,6 @@
             <!--                    <groupId>org.slf4j</groupId>-->
             <!--                </exclusion>-->
             <!--            </exclusions>-->
-            =======
-            <version>4.17.32-SNAPSHOT</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
-            >>>>>>> b364307d1 (Jacoco introduced.)
         </dependency>
 
     </dependencies>
@@ -279,7 +231,7 @@
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.00</minimum>
-                                            <maximum>0.50</maximum>
+                                            <maximum>1.00</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -343,6 +295,51 @@
             </activation>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.8</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.00</minimum>
+                                                    <maximum>1.00</maximum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+
                     <plugin>
                         <executions>
                             <execution>

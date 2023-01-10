@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 nosqlbench
+  ~ Copyright (c) 2022-2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,22 +16,31 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nosqlbench</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>4.17.32-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>adapter-mongodb</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>driver-jdbc</artifactId>
 
-    <parent>
-        <artifactId>mvn-defaults</artifactId>
-        <groupId>io.nosqlbench</groupId>
-        <version>4.17.33-SNAPSHOT</version>
-        <relativePath>../mvn-defaults</relativePath>
-    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.5</version>
+        </dependency>
 
-    <name>${project.artifactId}</name>
-    <description>
-        An nosqlbench DriverAdapter module for MongoDB
-    </description>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>4.17.32-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -77,18 +87,8 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.7.1</version>
-        </dependency>
-    </dependencies>
+
+
 
 </project>
