@@ -148,6 +148,31 @@ public class PolyglotScenarioController {
     }
 
 
+    public synchronized void forceStop(Object o) {
+        if (o instanceof Value) {
+            forceStop((Value) o);
+        } else if (o instanceof Map) {
+            controller.forceStop((Map<String, String>) o);
+        } else if (o instanceof String) {
+            controller.forceStop(o.toString());
+        } else {
+            throw new RuntimeException("unknown type " + o.getClass().getCanonicalName());
+        }
+    }
+
+    private synchronized void forceStopValue(Value spec) {
+        if (spec.isHostObject()) {
+            controller.forceStop((ActivityDef) spec.asHostObject());
+        } else if (spec.isString()) {
+            controller.forceStop(spec.asString());
+        } else if (spec.hasMembers()) {
+            controller.forceStop(spec.as(Map.class));
+        } else {
+            throw new RuntimeException("unknown base type for graal polyglot: " + spec.toString());
+        }
+    }
+
+
     public synchronized void awaitActivity(Object o) {
         this.await(o);
     }

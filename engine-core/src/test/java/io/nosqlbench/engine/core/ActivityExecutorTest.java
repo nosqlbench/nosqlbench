@@ -65,7 +65,7 @@ public class ActivityExecutorTest {
         try {
             ad.setThreads(1);
             ae.startActivity();
-            ae.stopActivity();
+            ae.stopActivity(false);
             ae.startActivity();
             ae.startActivity();
             ExecutionResult executionResult = future.get();

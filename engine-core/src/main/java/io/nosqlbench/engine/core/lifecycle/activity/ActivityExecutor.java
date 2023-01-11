@@ -82,12 +82,18 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     /**
      * Simply stop the motors
+     *
+     * @param forcing whether to force (without trying to wait) the activity to reach stopped/finished state
      */
-    public void stopActivity() {
-        logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
+    public void stopActivity(boolean forcing) {
+        logger.info(() ->
+            (forcing ? "forcing " : "") + "stopping activity in progress: " + this.getActivityDef().getAlias());
+
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
-        tally.awaitNoneOther(RunState.Stopped,RunState.Finished);
+        if (!forcing) {
+            tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
+        }
 
         shutdownExecutorService(Integer.MAX_VALUE);
         tally.awaitNoneOther(RunState.Stopped,RunState.Finished);
