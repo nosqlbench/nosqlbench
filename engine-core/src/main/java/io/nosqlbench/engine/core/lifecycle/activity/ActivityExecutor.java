@@ -82,18 +82,40 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     /**
      * Simply stop the motors
-     *
-     * @param forcing whether to force (without trying to wait) the activity to reach stopped/finished state
      */
-    public void stopActivity(boolean forcing) {
-        logger.info(() ->
-            (forcing ? "forcing " : "") + "stopping activity in progress: " + this.getActivityDef().getAlias());
+    public void stopActivity() {
+        logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
 
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
-        if (!forcing) {
-            tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
-        }
+        tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
+
+        shutdownExecutorService(Integer.MAX_VALUE);
+        tally.awaitNoneOther(RunState.Stopped,RunState.Finished);
+        activity.setRunState(RunState.Stopped);
+
+        logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
+
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .session(sessionId)
+            .interval(this.startedAt, this.stoppedAt)
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
+        );
+    }
+
+    /**
+     * Force stop the motors without trying to wait for the activity to reach stopped/finished state
+     */
+    public void forceStopActivity() {
+        logger.info(() -> "force stopping activity in progress: " + this.getActivityDef().getAlias());
+
+        activity.setRunState(RunState.Stopping);
+        motors.forEach(Motor::requestStop);
 
         shutdownExecutorService(Integer.MAX_VALUE);
         tally.awaitNoneOther(RunState.Stopped,RunState.Finished);

@@ -84,10 +84,9 @@ public class ActivityRuntimeInfo implements ProgressCapable {
         return this.activity.getRunState();
     }
 
-    public void stopActivity() { this.executor.stopActivity(false); }
-    public void forceStopActivity() {
-        this.executor.stopActivity(true);
-    }
+    public void stopActivity() { this.executor.stopActivity(); }
+
+    public void forceStopActivity() { this.executor.forceStopActivity(); }
 
     public ActivityExecutor getActivityExecutor() {
         return executor;
