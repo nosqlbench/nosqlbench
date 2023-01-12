@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,9 +84,9 @@ public class ActivityRuntimeInfo implements ProgressCapable {
         return this.activity.getRunState();
     }
 
-    public void stopActivity() {
-        this.executor.stopActivity();
-    }
+    public void stopActivity() { this.executor.stopActivity(); }
+
+    public void forceStopActivity() { this.executor.forceStopActivity(); }
 
     public ActivityExecutor getActivityExecutor() {
         return executor;

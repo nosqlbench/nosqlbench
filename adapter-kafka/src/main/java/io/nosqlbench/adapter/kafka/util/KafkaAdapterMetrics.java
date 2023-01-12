@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class KafkaAdapterMetrics implements NBNamedElement {
 
     @Override
     public String getName() {
-        return "S4JAdapterMetrics";
+        return "KafkaAdapterMetrics";
     }
 
     public void initS4JAdapterInstrumentation() {
