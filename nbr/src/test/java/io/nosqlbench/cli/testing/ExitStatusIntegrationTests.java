@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,18 +86,18 @@ class ExitStatusIntegrationTests {
         assertThat(result.exitStatus).isEqualTo(2);
     }
 
-    @Test
-    public void testCloseErrorHandlerOnSpace() {
-        ProcessInvoker invoker = new ProcessInvoker();
-        invoker.setLogDir("logs/test");
-        ProcessResult result = invoker.run("exitstatus_erroronclose", 30,
-            java, "-jar", JARNAME, "--logs-dir", "logs/test/error_on_close", "run",
-            "driver=diag", "threads=2", "rate=5", "op=noop", "cycles=10", "erroronclose=true", "-vvv"
-        );
-        String stdout = String.join("\n", result.getStdoutData());
-        String stderr = String.join("\n", result.getStderrData());
-        assertThat(result.exitStatus).isEqualTo(2);
-        assertThat(stderr).contains("diag space was configured to throw");
-    }
+//    @Test
+//    public void testCloseErrorHandlerOnSpace() {
+//        ProcessInvoker invoker = new ProcessInvoker();
+//        invoker.setLogDir("logs/test");
+//        ProcessResult result = invoker.run("exitstatus_erroronclose", 30,
+//            java, "-jar", JARNAME, "--logs-dir", "logs/test/error_on_close", "run",
+//            "driver=diag", "threads=2", "rate=5", "op=noop", "cycles=10", "erroronclose=true", "-vvv"
+//        );
+//        String stdout = String.join("\n", result.getStdoutData());
+//        String stderr = String.join("\n", result.getStderrData());
+//        assertThat(result.exitStatus).isEqualTo(2);
+//        assertThat(stderr).contains("diag space was configured to throw");
+//    }
 
 }

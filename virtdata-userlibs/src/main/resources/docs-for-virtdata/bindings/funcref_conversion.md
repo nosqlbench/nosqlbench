@@ -228,6 +228,7 @@ Convert the input value to a long.
 
 
 ## ToMD5ByteBuffer
+**[ DEPRECATED ]** no longer supported use DigestToByteBuffer with stronger digest algorithm.
 
 Converts the byte image of the input long to a MD5 digest in ByteBuffer form.
 
