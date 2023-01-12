@@ -135,6 +135,13 @@
     </profiles>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering> <!-- exclusion from defaults -->
+            </testResource>
+        </testResources>
+
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
