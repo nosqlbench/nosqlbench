@@ -61,7 +61,7 @@ public class CompatibilityFixups {
     private static final String COMPUTE = "compute_";
     private static final String INTERPOLATE = "interpolate_";
 
-    private final static Pattern oldcurve = Pattern.compile("(?<name>\\b[\\w_]+)(?<lparen>\\()(?<args>.*?)(?<rparen>\\))");
+    private final static Pattern oldcurve = Pattern.compile("\\b(?<name>[\\w_]{1,512})(?<lparen>\\()(?<args>.*?)(?<rparen>\\))");
 
     private final static CompatibilityFixups instance = new CompatibilityFixups();
 

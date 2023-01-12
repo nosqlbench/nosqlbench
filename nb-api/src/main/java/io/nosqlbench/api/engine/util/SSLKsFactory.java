@@ -45,8 +45,8 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     private static final SSLKsFactory instance = new SSLKsFactory();
 
-    private static final Pattern CERT_PATTERN = Pattern.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+([a-z0-9+/=\\r\\n]+)-+END\\s+.*CERTIFICATE[^-]*-+", 2);
-    private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", 2);
+    private static final Pattern CERT_PATTERN = Pattern.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n){1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*CERTIFICATE[^-]*-+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n){1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", Pattern.CASE_INSENSITIVE);
     public static final String SSL = "ssl";
     public static final String DEFAULT_TLSVERSION = "TLSv1.2";
 

@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 public class ExampleData {
 
     public static Pattern CTOR_PATTERN = Pattern.compile("(?<funcname>[^)]+)\\((?<args>.+)\\)");
-    public static Pattern VALS_PATTERN = Pattern.compile("\\[(?<values>-?\\d+([,-. ]+-?\\d+)*)]");
+    public static Pattern VALS_PATTERN = Pattern.compile("\\[(?<values>-?\\d+([,\\-. ]{1,2}-?\\d+)*)]");
     private final Pattern COMMA_VALS = Pattern.compile("\\[(?<vals>-?\\d+(,-?\\d+)*)]");
     private final Pattern RANGE_VALS = Pattern.compile("\\[(?<from>-?\\d+)\\.\\.(?<to>-?\\d+)( +(?<step>-?\\d+))?]");
 
