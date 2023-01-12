@@ -37,10 +37,10 @@ public class RealDistributionsConcurrencyTests {
     @Test
     public void testConcurrentBinomialHashValues() {
         testConcurrentRealHashDistValues(
-                "normal(10.0,2.0)/100 threads/1000 iterations",
+                "Normal(10.0,2.0)/100 threads/1000 iterations",
                 100,
                 1000,
-                "normal(10.0,2.0)");
+                "Normal(10.0,2.0)");
     }
 
     private void testConcurrentRealHashDistValues(
