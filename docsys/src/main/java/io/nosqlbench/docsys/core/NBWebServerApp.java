@@ -17,7 +17,6 @@
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.api.spi.BundledApp;
-import io.nosqlbench.docsys.endpoints.DocsysMarkdownEndpoint;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,28 +55,6 @@ public class NBWebServerApp implements BundledApp {
 
         logger.info(() -> "generating to directory " + dirpath);
 
-
-        DocsysMarkdownEndpoint dds = new DocsysMarkdownEndpoint();
-        String markdownList = dds.getMarkdownList(true);
-
-        Path markdownCsvPath = dirpath.resolve(Path.of("services/docs/markdown.csv"));
-        logger.info(() -> "markdown.csv located at " + markdownCsvPath);
-
-        Files.createDirectories(markdownCsvPath.getParent());
-        Files.writeString(markdownCsvPath, markdownList, OVERWRITE);
-
-        String[] markdownFileArray = markdownList.split("\n");
-
-        for (String markdownFile : markdownFileArray) {
-            Path relativePath = dirpath.resolve(Path.of("services/docs", markdownFile));
-            logger.info(() -> "Creating " + relativePath);
-
-            Path path = dds.findPath(markdownFile);
-//            String markdown = dds.getFileByPath(markdownFile);
-//            Files.writeString(relativePath, markdown, OVERWRITE);
-            Files.createDirectories(relativePath.getParent());
-            Files.write(relativePath,Files.readAllBytes(path),OVERWRITE);
-        }
     }
 
     private static void runServer(String[] serverArgs) {
