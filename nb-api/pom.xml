@@ -114,7 +114,6 @@
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
 
-        <!-- TODO: Move this down to virtdata if it is the only module group using it -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>

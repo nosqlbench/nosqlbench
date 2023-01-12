@@ -34,8 +34,6 @@
 
     <dependencies>
 
-        <!-- core dependencies -->
-
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapters-api</artifactId>
