@@ -38,7 +38,7 @@ public class KafkaAdapterMetrics implements NBNamedElement {
 
     @Override
     public String getName() {
-        return "S4JAdapterMetrics";
+        return "KafkaAdapterMetrics";
     }
 
     public void initS4JAdapterInstrumentation() {

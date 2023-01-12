@@ -36,6 +36,7 @@ public class Cmd {
         run(),
         start(),
         stop(Arg.of("alias_name")),
+        forceStop(Arg.of("alias_name")),
         script(Arg.of("script_path", s -> s)),
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
