@@ -183,7 +183,7 @@ params:
 
   # Set the timeout for the operation, from the driver's perspective,
   # in seconds. "2 seconds" is the default, but DDL statements, truncate or drop
-  # statements will generally need more. If you want millisconds, just use
+  # statements will generally need more. If you want milliseconds, just use
   # fractional seconds, like 0.500
   timeout: 2.0
 
