@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,10 @@ public class AdaptersApiVersionInfo {
             String currentField = current_components[i];
             if (minField.matches("\\d+")) {
                 if (currentField.matches("\\d+")) {
+                    if ((Integer.parseInt(currentField) > Integer.parseInt(minField))) {
+                        // We're in a completely newer version
+                        break;
+                    }
                     if (Integer.parseInt(currentField)<Integer.parseInt(minField)) {
                         throw new OpConfigError("This workload can only be loaded by a NoSQLBench runtime version " + min_version + " or higher." +
                             " You are running version " + getVersion());

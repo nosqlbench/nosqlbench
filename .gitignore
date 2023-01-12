@@ -17,4 +17,5 @@ bin/**
 **/generated
 **/.DS_Store
 **/generated/**
+**/.flattened-pom.xml
 /deptree.txt
