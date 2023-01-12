@@ -33,19 +33,17 @@ bindings:
   # convert a ByteBuffer to a hex-encoded string with lower case
   bb_to_hex_lc: ByteBufferSizedHashed(20); ToHexString(false);
 
-  # generate a byte buffer of 1000 bytes, and then compute a MD5
+  # generate a byte buffer of 1000 bytes, and then compute a SHA-256
   # digest into another byte buffer
-  digest_bb: ByteBufferSizedHashed(1000); DigestToByteBuffer('MD5'); ToHexString();
+  digest_bb: ByteBufferSizedHashed(1000); DigestToByteBuffer('SHA-256'); ToHexString();
 
-  # Md5 digest as above, but using a long as input, short-circuiting
+  # SHA-256 digest as above, but using a long as input, short-circuiting
   # the byte buffer construction spelled out above. This is easier
   # to use and faster to generate, although any digest will be
   # more intensive to calculate as test data, so only use digests
   # where you have specific testing requirements for them.
-  digest_bb_direct: DigestToByteBuffer('MD5');
+  digest_bb_direct: DigestToByteBuffer('SHA-256');
 
-  # A canned version of the above
-  long_md5_bb: ToMD5ByteBuffer(); ToHexString();
 
   # The example below show various type-specialized ByteBuffer
   # functions which are automatically selected depending on the
