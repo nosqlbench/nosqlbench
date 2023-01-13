@@ -14,15 +14,14 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>5.17.0-SNAPSHOT</version>
+        <version>5.17.0</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -41,7 +40,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -57,37 +56,37 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-tcp</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-mongodb</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-dynamodb</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -99,13 +98,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-pulsar</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -117,13 +116,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-s4j</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
-            <version>5.17.0-SNAPSHOT</version>
+            <version>5.17.0</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -246,7 +245,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>adapter-mongodb</artifactId>
-                    <version>5.17.0-SNAPSHOT</version>
+                    <version>5.17.0</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -345,7 +344,7 @@
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <configuration>
                             <rules>
-                                <dependencyConvergence/>
+                                <dependencyConvergence />
                             </rules>
                         </configuration>
                     </plugin>
