@@ -31,6 +31,8 @@ jobs:
       - name: Installing dependencies
         run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
+      - name: Running tests
+        run: mvn -B test
 
       - name: Uploading [nosqlbench] test coverage
         uses: actions/upload-artifact@v3
