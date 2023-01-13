@@ -112,12 +112,15 @@ public class ActivityExecutorTest {
     }
 
     @Test
-    public synchronized void testNewActivityExecutor() {
+    void testNewActivityExecutor() {
+
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=100;initdelay=5000;");
-        Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
+        new ActivityTypeLoader().load(ad);
+        logger.info("Thread id: " + Thread.currentThread().getId());
+
         Input longSupplier = new AtomicInput(ad);
         MotorDispenser<?> cmf = getActivityMotorFactory(
-            ad, motorActionDelay(999), longSupplier
+                ad, motorActionDelay(999), longSupplier
         );
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
@@ -140,6 +143,7 @@ public class ActivityExecutorTest {
             ad.setThreads(threadTarget);
             try {
                 Thread.sleep(threadTime);
+                logger.info("Thread Id: " + Thread.currentThread().getState() + " State: " + Thread.currentThread().getState());
             } catch (InterruptedException ignored) {
             }
         }
