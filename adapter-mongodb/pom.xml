@@ -31,6 +31,21 @@
     <description>
         An nosqlbench DriverAdapter module for MongoDB
     </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>engine-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.8.1</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -77,18 +92,4 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.7.1</version>
-        </dependency>
-    </dependencies>
-
 </project>

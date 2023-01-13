@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-ext-yaml-front-matter</artifactId>
-            <version>0.62.2</version>
+            <version>0.64.0</version>
         </dependency>
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
@@ -51,6 +51,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+          <version>2.10.1</version>
         </dependency>
         <!-- perf testing -->
 
