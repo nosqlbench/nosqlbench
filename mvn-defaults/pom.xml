@@ -64,6 +64,12 @@
         <dependencies>
 
             <dependency>
+                <groupId>org.snakeyaml</groupId>
+                <artifactId>snakeyaml-engine</artifactId>
+                <version>2.5</version>
+            </dependency>
+
+            <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>4.7.0</version>
@@ -129,11 +135,6 @@
                 <version>1.36</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.33</version>
-            </dependency>
             <dependency>
                 <groupId>com.mitchtalmadge</groupId>
                 <artifactId>ascii-data</artifactId>

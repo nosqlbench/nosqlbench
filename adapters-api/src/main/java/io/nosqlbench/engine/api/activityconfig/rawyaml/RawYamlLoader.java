@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.templating.StrInterpolator;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.engine.api.templating.StrInterpolator;
 import org.apache.logging.log4j.Logger;
-import org.yaml.snakeyaml.Yaml;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.util.*;
 import java.util.function.Function;
@@ -73,8 +74,8 @@ public class RawYamlLoader {
     }
 
     private List<Map<String,Object>> parseYaml(Logger logger, String data) {
-        Yaml yaml = new Yaml();
-        Iterable<Object> objects = yaml.loadAll(data);
+        Load yaml = new Load(LoadSettings.builder().build());
+        Iterable<Object> objects = yaml.loadAllFromString(data);
         List<RawStmtsDoc> newDocList = new ArrayList<>();
 
         List<Map<String,Object>> maps = new ArrayList<>();

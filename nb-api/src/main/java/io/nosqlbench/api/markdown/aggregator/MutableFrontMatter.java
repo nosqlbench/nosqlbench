@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package io.nosqlbench.api.markdown.aggregator;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,9 +58,9 @@ public class MutableFrontMatter extends LinkedHashMap<String,List<String>> {
     }
 
     public String asYaml() {
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Yaml yaml = new Yaml(options);
-        return yaml.dump(Map.of(TITLE,getTitle(),WEIGHT,getWeight()));
+        DumpSettings settings = DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build();
+        Dump dump = new Dump(settings);
+        return dump.dumpToString(Map.of(TITLE,getTitle(),WEIGHT,getWeight()));
+
     }
 }
