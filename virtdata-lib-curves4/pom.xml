@@ -20,7 +20,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>5.17.0</version>
+        <version>5.17.1-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -38,13 +38,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-api</artifactId>
-            <version>5.17.0</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-basics</artifactId>
-            <version>5.17.0</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
