@@ -1,4 +1,6 @@
-- ff188d486 (HEAD -> main, origin/main) actions-for-docs (#919)
+- e04eef814 (HEAD -> main) temporary work-around for release plugin incompatibility
+- 2ce8a0e6a (origin/main) release candidate
+- ff188d486 actions-for-docs (#919)
 - 97e992bce version updates and pom structure improvements (#918)
 - 4f6bea91d switch over to snakeyaml-engine
 - d06e01c22 (origin/nosqlbench-916-snakeyaml, nosqlbench-916-snakeyaml) Merge pull request #915 from nosqlbench/my-cql-astra-example
