@@ -114,7 +114,7 @@ public class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() throws InterruptedException {
 
-        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=100;initdelay=5000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(ad);
         logger.info("Thread id: " + Thread.currentThread().getId());
 
@@ -134,23 +134,23 @@ public class ActivityExecutorTest {
         ActivityExecutor ae = new ActivityExecutor(a, "test-new-executor");
         ad.setThreads(5);
         ae.startActivity();
+        // Used for slowing the roll due to state transitions in test.
         Thread.sleep(2000L);
 
         int[] speeds = new int[]{1, 2000, 5, 2000, 2, 2000};
         for (int offset = 0; offset < speeds.length; offset += 2) {
             int threadTarget = speeds[offset];
             int threadTime = speeds[offset + 1];
-            logger.info(() -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
+            logger.debug(() -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
             ad.setThreads(threadTarget);
             try {
                 Thread.sleep(threadTime);
-                logger.info("Thread Id: " + Thread.currentThread().getState() + " State: " + Thread.currentThread().getState());
             } catch (InterruptedException ignored) {
             }
         }
         ad.setThreads(0);
 
-        // Slow the roll ...
+        // Used for slowing the roll due to state transitions in test.
         Thread.sleep(2000L);
     }
 
