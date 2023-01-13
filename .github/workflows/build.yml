@@ -101,7 +101,7 @@ jobs:
       - name: commit changes
         run: |
           cd nosqlbench-build-docs
-          git add -A
+          git add exported_docs.zip
 
       - name: push changes
         env:
