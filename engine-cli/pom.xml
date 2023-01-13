@@ -20,7 +20,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>${revision}</version>
+        <version>5.17.0-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -39,13 +39,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
-            <version>${revision}</version>
+            <version>5.17.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-docker</artifactId>
-            <version>${revision}</version>
+            <version>5.17.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

@@ -20,7 +20,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-    <version>${revision}</version>
+    <version>5.17.0-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
-        <version>${revision}</version>
+        <version>5.17.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

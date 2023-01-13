@@ -20,7 +20,7 @@
 
     <groupId>io.nosqlbench</groupId>
     <artifactId>mvn-defaults</artifactId>
-    <version>${revision}</version>
+    <version>5.17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
