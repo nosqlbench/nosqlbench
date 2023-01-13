@@ -112,20 +112,20 @@ public class ActivityExecutorTest {
     }
 
     @Test
-    void testNewActivityExecutor() {
+    synchronized void testNewActivityExecutor() throws InterruptedException {
 
         ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=100;initdelay=5000;");
         new ActivityTypeLoader().load(ad);
         logger.info("Thread id: " + Thread.currentThread().getId());
 
         Input longSupplier = new AtomicInput(ad);
-        MotorDispenser<?> cmf = getActivityMotorFactory(
-                ad, motorActionDelay(999), longSupplier
-        );
+        getActivityMotorFactory(ad, motorActionDelay(999), longSupplier);
+
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
         OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
+
         MotorDispenser<?> mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
@@ -134,6 +134,7 @@ public class ActivityExecutorTest {
         ActivityExecutor ae = new ActivityExecutor(a, "test-new-executor");
         ad.setThreads(5);
         ae.startActivity();
+        Thread.sleep(2000L);
 
         int[] speeds = new int[]{1, 2000, 5, 2000, 2, 2000};
         for (int offset = 0; offset < speeds.length; offset += 2) {
@@ -149,6 +150,8 @@ public class ActivityExecutorTest {
         }
         ad.setThreads(0);
 
+        // Slow the roll ...
+        Thread.sleep(2000L);
     }
 
     private MotorDispenser<?> getActivityMotorFactory(final ActivityDef ad, Action lc, final Input ls) {
