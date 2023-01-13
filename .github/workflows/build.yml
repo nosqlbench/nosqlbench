@@ -108,7 +108,7 @@ jobs:
 
       - name: set CNAME
         run: |
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+          echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
 
       - name: commit changes
         run: |
