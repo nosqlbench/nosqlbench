@@ -64,6 +64,13 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
+      - name: capture versions
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          RELEASE_VERSION=${CURRENT_VERSION%%-SNAPSHOT}
+          echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
+
       - name: set git username
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
 
@@ -92,6 +99,11 @@ jobs:
       - name: import zipfile
         run: |
           mv exported_docs.zip nosqlbench-build-docs/
+
+      - name: save versions
+        run: |
+          echo "${{ env.CURRENT_VERSION }}" > nosqlbench-build-docs/.current_version
+          echo "${{ env.RELEASE_VERSION }}" > nosqlbench-build-docs/.release_version
 
       - name: set CNAME
         run: |
