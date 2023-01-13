@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityimpl.uniform;
+package io.nosqlbench.api.apps;
 
 import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
 import io.nosqlbench.api.docsapi.Docs;
 import io.nosqlbench.api.docsapi.DocsBinder;
-import io.nosqlbench.api.docsapi.DocsNameSpace;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.api.spi.SimpleServiceLoader;
 
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-@Service(value = BundledMarkdownManifest.class, selector = "drivers")
-public class BundledDriverAdapterDocs implements BundledMarkdownManifest {
+@Service(value = BundledMarkdownManifest.class, selector = "apps")
+public class BundledAppDocs implements BundledMarkdownManifest {
     @Override
     public DocsBinder getDocs() {
         DocsBinder docs = new Docs();
-        SimpleServiceLoader<DriverAdapter> loader = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
-        List<SimpleServiceLoader.Component<? extends DriverAdapter>> namedProviders = loader.getNamedProviders();
-        for (SimpleServiceLoader.Component<? extends DriverAdapter> namedProvider : namedProviders) {
-            DriverAdapter driverAdapter = namedProvider.provider.get();
-            DocsBinder bundledDocs = driverAdapter.getBundledDocs();
+        SimpleServiceLoader<BundledApp> loader = new SimpleServiceLoader<>(BundledApp.class, Maturity.Any);
+        List<SimpleServiceLoader.Component<? extends BundledApp>> namedProviders = loader.getNamedProviders();
+        for (SimpleServiceLoader.Component<? extends BundledApp> namedProvider : namedProviders) {
+            BundledApp app = namedProvider.provider.get();
+            DocsBinder bundledDocs = app.getBundledDocs();
             docs = docs.merge(bundledDocs);
         }
         return docs;

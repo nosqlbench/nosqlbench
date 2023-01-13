@@ -64,6 +64,7 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
+
       - name: set git username
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
 
@@ -95,12 +96,12 @@ jobs:
 
       - name: set CNAME
         run: |
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+          echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
 
       - name: commit changes
         run: |
           cd nosqlbench-build-docs
-          git add -A
+          git add exported_docs.zip
 
       - name: push changes
         env:

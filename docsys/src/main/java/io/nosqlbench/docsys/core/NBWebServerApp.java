@@ -16,7 +16,7 @@
 
 package io.nosqlbench.docsys.core;
 
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

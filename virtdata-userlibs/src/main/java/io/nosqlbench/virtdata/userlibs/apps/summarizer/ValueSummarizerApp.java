@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.userlibs.apps.summarizer;
 
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;

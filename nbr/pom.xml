@@ -73,6 +73,10 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <includes>
+                    <include>version.properties</include>
+                    <include>nb_version_info.md</include>
+                </includes>
                 <filtering>true</filtering>
             </resource>
         </resources>

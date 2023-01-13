@@ -1,4 +1,4 @@
-# Driver: tcpserver
+# tcpserver
 
 **tcpserver acts like a _server push_ version of stdout over TCP**
 

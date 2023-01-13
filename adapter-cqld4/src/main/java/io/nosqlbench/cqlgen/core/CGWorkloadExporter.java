@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;
 import io.nosqlbench.cqlgen.api.BindingsLibrary;

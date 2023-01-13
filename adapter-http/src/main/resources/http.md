@@ -1,4 +1,4 @@
-# HTTP driver
+# http
 
 This driver allows you to make http requests using the native HTTP client
 that is bundled with the JVM. It supports free-form construction of
@@ -23,8 +23,8 @@ Or, you can have a list:
 ```yaml
 # A list of statements
 ops:
-    - http://google.com/
-    - http://amazon.com/
+ - http://google.com/
+ - http://amazon.com/
 ```
 
 Or you can template the values used in the URI, and even add ratios:
