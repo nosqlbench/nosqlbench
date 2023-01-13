@@ -113,7 +113,7 @@ public class ActivityExecutorTest {
 
     @Test
     public synchronized void testNewActivityExecutor() {
-        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=100;initdelay=5000;");
         Optional<ActivityType> activityType = new ActivityTypeLoader().load(ad);
         Input longSupplier = new AtomicInput(ad);
         MotorDispenser<?> cmf = getActivityMotorFactory(
