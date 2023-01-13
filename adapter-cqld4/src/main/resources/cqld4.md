@@ -1,6 +1,6 @@
-# cqld4 driver
+# cqld4
 
-This is the newly revamped (beta) driver for CQL which uses the DataStax OSS Driver version 4. As
+This is the newly revamped driver for CQL which uses the DataStax OSS Driver version 4. As
 there was a significant restructuring of the APIs between CQL driver 4.x and previous versions, this
 driver is a clean and separate implementation which aims to use the features of version 4.x of the
 native driver directly as well as new internal NoSQLBench APIs.
@@ -38,20 +38,20 @@ mixing in JSON or remote URLs.
 
 Configure directly from a config file, or classpath resource:
 
-    # If this isn't found in the file system, the classpath will also be checked.
-    driverconfig=myconfig.json
+```shell
+# If this isn't found in the file system, the classpath will also be checked.
+nb5 ... driverconfig=myconfig.json
+```
 
 Configure directly from JSON:
-
-    driverconfig='{basic.request.timeout:"2 seconds"}'
+```shell
+nb5 ... driverconfig='{basic.request.timeout:"2 seconds"}'
+```
 
 Configure directly form a remote URL:
-
-    driverconfig='http://gist.github.com...'
-
-Configure from multiple sources:
-
-    driverconfig=myconfig.json
+```shell
+nb5 ... driverconfig='http://gist.github.com...'
+```
 
 ### Basic Cqld4 driver options
 
@@ -109,48 +109,50 @@ classic form have not changed.
 
 ## CQLd4 Op Template Examples
 
-    ops:
+```yaml
+ops:
 
-      # prepared statement
-      # allows for parameterization via bindings, and uses prepared statements internally
-      example-prepared-cql-stmt:
-        prepared: |
-         select one, two from buckle.myshoe where ...
+  # prepared statement
+  # allows for parameterization via bindings, and uses prepared statements internally
+  example-prepared-cql-stmt:
+    prepared: |
+     select one, two from buckle.myshoe where ...
 
-      # prepared statement (verbose form)
-      example-prepared-cql-stmt-verbose:
-        type: prepared
-        stmt: |
-          select one, two from buckle.myshoe where ...
+  # prepared statement (verbose form)
+  example-prepared-cql-stmt-verbose:
+    type: prepared
+    stmt: |
+      select one, two from buckle.myshoe where ...
 
-      # simple statement
-      # allows for parameterization via bindings, but does not use prepared statements internally
-      example-simple-cql-stmt:
-        simple: |
-         select three, four from knock.onthedoor where ...
+  # simple statement
+  # allows for parameterization via bindings, but does not use prepared statements internally
+  example-simple-cql-stmt:
+    simple: |
+     select three, four from knock.onthedoor where ...
 
-      # raw statement
-      # pre-renders the statement into a string, with no driver-supervised parameterization
-      # useful for testing variant DDL where some fields are not parameterizable
-      # NOTE: the raw form does its best to quote non-literals where needed, but you may
-      # have to inject single or double quotes in special cases.
-      example-raw-cql-stmt:
-        raw: |
-         create table if not exist {ksname}.{tblname} ...
+  # raw statement
+  # pre-renders the statement into a string, with no driver-supervised parameterization
+  # useful for testing variant DDL where some fields are not parameterizable
+  # NOTE: the raw form does its best to quote non-literals where needed, but you may
+  # have to inject single or double quotes in special cases.
+  example-raw-cql-stmt:
+    raw: |
+     create table if not exist {ksname}.{tblname} ...
 
-      # gremlin statement using the fluent API, as it would be written in a client application
-      example-fluent-graph-stmt:
-        fluent: >-
-          g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
-        # if imports are not specified, the following is auto imported.
-        # if imports are specified, you must also provide the __ class if needed
-        imports:
-         - org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__
+  # gremlin statement using the fluent API, as it would be written in a client application
+  example-fluent-graph-stmt:
+    fluent: >-
+      g.V().hasLabel("device").has("deviceid", UUID.fromString({deviceid}))
+    # if imports are not specified, the following is auto imported.
+    # if imports are specified, you must also provide the __ class if needed
+    imports:
+     - org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__
 
-      # gremlin statement using string API (not recommended)
-      example-raw-gremlin-stmt:
-        gremlin: >-
-          g.V().hasLabel("device").has("deviceid", UUID.fromString('{deviceid})')
+  # gremlin statement using string API (not recommended)
+  example-raw-gremlin-stmt:
+    gremlin: >-
+      g.V().hasLabel("device").has("deviceid", UUID.fromString('{deviceid})')
+```
 
 ## CQL Op Template - Optional Fields
 

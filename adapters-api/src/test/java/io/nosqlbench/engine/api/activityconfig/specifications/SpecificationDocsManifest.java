@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.spi;
+package io.nosqlbench.engine.api.activityconfig.specifications;
 
-import java.util.function.ToIntFunction;
+import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.api.docsapi.Docs;
+import io.nosqlbench.api.docsapi.DocsBinder;
 
-public interface BundledApp extends ToIntFunction<String[]> {
+public class SpecificationDocsManifest implements BundledMarkdownManifest {
+    @Override
+    public DocsBinder getDocs() {
+        Docs docs = new Docs();
 
+        return docs;
+    }
 }

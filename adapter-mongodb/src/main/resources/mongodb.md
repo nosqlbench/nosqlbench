@@ -1,4 +1,4 @@
-# MongoDB Driver
+# MongoDB
 
 This is a driver for MongoDB. It supports the `db.runCommand` API described in [here](https://docs.mongodb.com/manual/reference/command/).
 
@@ -10,7 +10,9 @@ for details on command structure.
 
 Run a mongodb activity with definitions from activities/mongodb-basic.yaml
 
-    ... driver=mongodb yaml=activities/mongo-basic.yaml
+```shell
+nb5 driver=mongodb yaml=activities/mongo-basic.yaml
+```
 
 ### MongoDB ActivityType Parameters
 

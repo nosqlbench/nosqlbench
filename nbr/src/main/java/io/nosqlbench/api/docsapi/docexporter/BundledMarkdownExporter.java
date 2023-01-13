@@ -16,7 +16,7 @@
 
 package io.nosqlbench.api.docsapi.docexporter;
 
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;

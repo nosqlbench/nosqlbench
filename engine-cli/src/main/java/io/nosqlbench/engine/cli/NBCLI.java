@@ -25,7 +25,7 @@ import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
 import io.nosqlbench.api.metadata.SessionNamer;
 import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;

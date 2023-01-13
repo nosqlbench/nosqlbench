@@ -1,4 +1,6 @@
-# cqlgen - A default CQL workload generator
+# cqlgen
+
+cqlgen is a default CQL workload generator
 
 With NB5, the cqld4 driver comes with a workload generator that can be used to generate a
 workload yaml from a CQL schema file.

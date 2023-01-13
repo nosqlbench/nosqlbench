@@ -1,4 +1,4 @@
-# Driver: tcpclient
+# tcpclient
 
 **tcpclient acts like a _client push_ version of stdout over TCP**
 
