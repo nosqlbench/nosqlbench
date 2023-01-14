@@ -1,3 +1,4 @@
+exported_docs.zip
 .nosqlbench/**
 .run/**
 workspaces/**
@@ -17,4 +18,5 @@ bin/**
 **/generated
 **/.DS_Store
 **/generated/**
+**/.flattened-pom.xml
 /deptree.txt

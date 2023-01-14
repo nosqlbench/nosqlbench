@@ -44,14 +44,14 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testChainedTypeResolutionForLong() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("longchain", "compose CycleRange(123456789) ; Div(3); Mod(7) -> long");
+        bt.addFieldBinding("longchain", "CycleRange(123456789) ; Div(3); Mod(7) -> long");
         Bindings bindings = bt.resolveBindings();
     }
 
     @Test
     public void testChainedTypeResolutionForWithInternalLong() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("longchain", "compose HashRange(1234,6789) -> long; Mod(3) -> int;");
+        bt.addFieldBinding("longchain", "HashRange(1234,6789) -> long; Mod(3) -> int;");
         Bindings bindings = bt.resolveBindings();
         Object n1 = bindings.getAll(123)[0];
         assertThat(n1).isOfAnyClassIn(Integer.class);
@@ -60,21 +60,21 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testChainedTypeResolutionForInt() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("intchain", "compose ToInt() ; CycleRange(123456789) ; Div(3) ; Mod(7) -> int");
+        bt.addFieldBinding("intchain", "ToInt() ; CycleRange(123456789) ; Div(3) ; Mod(7) -> int");
         Bindings bindings = bt.resolveBindings();
     }
 
     @Test
     public void testStringConversion() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("phone","compose HashRange(1000000000,9999999999L); ToString() -> String");
+        bt.addFieldBinding("phone","HashRange(1000000000,9999999999L); ToString() -> String");
         Bindings bindings = bt.resolveBindings();
     }
 
     @Test
     public void testPrefixSuffix() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("solr_query","compose HashRange(1000000000,9999999999L); ToString(); Prefix('before'); Suffix('after') -> String");
+        bt.addFieldBinding("solr_query","HashRange(1000000000,9999999999L); ToString(); Prefix('before'); Suffix('after') -> String");
         Bindings bindings = bt.resolveBindings();
     }
 
@@ -83,7 +83,7 @@ public class IntegratedComposerLibraryTest {
     @Disabled
     public void testTypeCoercionWhenNeeded() {
         BindingsTemplate bt = new BindingsTemplate();
-        bt.addFieldBinding("mod_to_string", "compose Mod(3) ; Suffix('0000000000') -> String");
+        bt.addFieldBinding("mod_to_string", "Mod(3) ; Suffix('0000000000') -> String");
         Bindings bindings = bt.resolveBindings();
         Object[] all = bindings.getAll(5);
         assertThat(all).isNotNull();
@@ -105,7 +105,7 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testUUIDChain() {
         Optional<DataMapper<Object>> dm =
-                VirtData.getOptionalMapper("compose Mod(1000); ToHashedUUID() -> java.util.UUID");
+                VirtData.getOptionalMapper("Mod(1000); ToHashedUUID() -> java.util.UUID");
         assertThat(dm).isPresent();
         Object o = dm.get().get(5L);
         assertThat(o).isEqualTo(UUID.fromString("3df498b1-9568-4584-96fd-76f6081da01a"));
@@ -114,14 +114,14 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testNormalDoubleAdd() {
         Optional<DataMapper<String>> dm =
-                VirtData.getOptionalMapper("compose Normal(0.0,5.0); Add(5.0) -> double");
+                VirtData.getOptionalMapper("Normal(0.0,5.0); Add(5.0) -> double");
         assertThat(dm).isPresent();
     }
 
     @Test
     public void testDistInCompose() {
         Optional<DataMapper<String>> dm =
-                VirtData.getOptionalMapper("compose Hash(); Uniform(0,100); ToString() -> String");
+                VirtData.getOptionalMapper("Hash(); Uniform(0,100); ToString() -> String");
         assertThat(dm).isPresent();
         String s = dm.get().get(5L);
         assertThat(s).isNotEmpty();
@@ -131,14 +131,14 @@ public class IntegratedComposerLibraryTest {
     @Test
     public void testComposeSingleFuncTypeCoercion() {
         Optional<DataMapper<Object>> longMapper =
-                VirtData.getOptionalMapper("compose Uniform(1,10) -> long");
+                VirtData.getOptionalMapper("Uniform(1,10) -> long");
         assertThat(longMapper).isPresent();
         Object l = longMapper.get().get(23L);
         assertThat(l).isNotNull();
         assertThat(l.getClass()).isEqualTo(Long.class);
 
         Optional<DataMapper<Object>> intMapper =
-                VirtData.getOptionalMapper("compose Uniform(1,123) -> int");
+                VirtData.getOptionalMapper("Uniform(1,123) -> int");
         assertThat(intMapper).isPresent();
         Object i = intMapper.get().get(23L);
         assertThat(i).isNotNull();
@@ -166,13 +166,13 @@ public class IntegratedComposerLibraryTest {
         final int intermediateCycle = 52;
         final int finalCycle = 81;
 
-        Object intermediateValue = assertMapper("compose HashRange(0,100) -> int", 0);
+        Object intermediateValue = assertMapper("HashRange(0,100) -> int", 0);
         assertThat(intermediateValue).isEqualTo(52);
 
-        Object finalValue = assertMapper("compose HashRange(0,100) -> int", intermediateCycle);
+        Object finalValue = assertMapper("HashRange(0,100) -> int", intermediateCycle);
         assertThat(finalValue).isEqualTo(16);
 
-        Object finalChainedValue = assertMapper("compose HashRange(0,100); HashRange(0,100) -> int", initialCycle);
+        Object finalChainedValue = assertMapper("HashRange(0,100); HashRange(0,100) -> int", initialCycle);
         assertThat(finalChainedValue).isEqualTo(16);
     }
 
@@ -182,10 +182,10 @@ public class IntegratedComposerLibraryTest {
         final int initialCycle = 0;
         final int finalCycle = 160;
 
-        Object o1 = assertMapper("compose HashRange(0,1000); HashRange(0,1000) -> int", initialCycle);
+        Object o1 = assertMapper("HashRange(0,1000); HashRange(0,1000) -> int", initialCycle);
         assertInteger(o1, finalCycle);
 
-        Object o2 = assertMapper("compose Identity(); HashRange(0,1000); HashRange(0,1000) -> int", initialCycle);
+        Object o2 = assertMapper("Identity(); HashRange(0,1000); HashRange(0,1000) -> int", initialCycle);
         assertInteger(o2, finalCycle);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class Cmd {
         run(),
         start(),
         stop(Arg.of("alias_name")),
+        forceStop(Arg.of("alias_name")),
         script(Arg.of("script_path", s -> s)),
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),

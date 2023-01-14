@@ -24,6 +24,7 @@ import io.nosqlbench.nb.spectest.api.STBuilderFacets;
 import io.nosqlbench.nb.spectest.api.STPathLoader;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +85,15 @@ public class SpecTest implements Runnable {
             pathLoaders.forEach(p -> STDebug.applyDebugging(debug,p));
             validators.forEach(p -> STDebug.applyDebugging(debug,p));
         }
+    }
+
+    public List<Path> matchingSpecFiles() {
+        List<Path> paths = new ArrayList<>();
+        for (Path path : paths) {
+            List<Path> matchingPaths = STFileScanner.findMatching(".*\\.md", paths.toArray(new Path[0]));
+            paths.addAll(matchingPaths);
+        }
+        return paths;
     }
 
     @Override

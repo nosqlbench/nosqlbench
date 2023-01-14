@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,11 @@ public class InterpolatingLongDoubleSampler implements LongToDoubleFunction {
     private final double clampMin;
     private final double clampMax;
     private final double scaleToLong;
+
+    /**
+     * If finite, then remove any infinite values from either end of the LUT due to long-tail approximation effects
+     */
+    private final boolean finite;
     private ThreadSafeHash hash;
 
     public InterpolatingLongDoubleSampler(DoubleUnaryOperator icdSource, int resolution, boolean hash, boolean clamp, double clampMin, double clampMax, boolean finite) {
@@ -54,17 +59,10 @@ public class InterpolatingLongDoubleSampler implements LongToDoubleFunction {
             this.hash = new ThreadSafeHash();
         }
         this.clamp=clamp;
+        this.finite = finite;
         this.clampMin=clampMin;
         this.clampMax=clampMax;
         double[] computed = precompute(resolution);
-        if (finite) {
-            while (computed.length>0 && Double.isInfinite(computed[0])) {
-                computed = Arrays.copyOfRange(computed,1,computed.length-1);
-            }
-            while (computed.length>0 && Double.isInfinite(computed[computed.length-1])) {
-                computed = Arrays.copyOfRange(computed,0,computed.length-2);
-            }
-        }
         double[] padded = new double[computed.length+1];
         System.arraycopy(computed,0,padded,0,computed.length);
         this.scaleToLong = (1.0d / (double) Long.MAX_VALUE) * (padded.length-2);
@@ -79,6 +77,15 @@ public class InterpolatingLongDoubleSampler implements LongToDoubleFunction {
             sampleValue = clamp ? Double.max(clampMin,Double.min(clampMax,sampleValue)) : sampleValue ;
             precomputed[s] =  sampleValue;
         }
+        int start = 0;
+        int end = precomputed.length;
+        while (finite && Double.isInfinite(precomputed[start])) {
+            start++;
+        }
+        while (finite && Double.isInfinite(precomputed[end-1])) {
+            end--;
+        }
+        precomputed = Arrays.copyOfRange(precomputed,start,end);
         return precomputed;
     }
 

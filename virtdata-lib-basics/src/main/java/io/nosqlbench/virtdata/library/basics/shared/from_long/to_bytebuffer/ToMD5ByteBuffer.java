@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,48 +22,41 @@ import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.function.LongFunction;
 
 /**
  * Converts the byte image of the input long to a MD5 digest in ByteBuffer form.
+ * Deprecated usage due to unsafe MD5 digest.
+ * Replaced with DigestToByteBuffer with MD5 when absolutely needed for existing NB tests.
+ * However, stronger encryption algorithms (e.g. SHA-256) are recommended due to MD5's limitations.
  */
-@Categories({Category.conversion,Category.premade})
+@Categories({Category.conversion, Category.premade})
 @ThreadSafeMapper
+@Deprecated(since = "NB5", forRemoval = true)
 public class ToMD5ByteBuffer implements LongFunction<ByteBuffer> {
 
-    private final MessageDigest md5;
-    private transient static final ThreadLocal<TLState> tl_state = ThreadLocal.withInitial(TLState::new);
 
-    @Example({"MD5ByteBuffer()","convert the a input to an md5 digest of its bytes"})
+    /**
+     * Deprecated usage due to unsafe MD5 digest.
+     * Use the DigestToByteBuffer with alternatives other than MD5.
+     */
+    @Example({"MD5ByteBuffer()", "convert the a input to an md5 digest of its bytes"})
+    @Deprecated
     public ToMD5ByteBuffer() {
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        throw new RuntimeException("No longer available.  Please use the DigestToByteBuffer with " +
+                "alternatives other than MD5");
     }
 
+    /**
+     * Deprecated usage due to unsafe MD5 digest used in this class.
+     * Use the DigestToByteBuffer with alternatives other than MD5.
+     */
     @Override
+    @Deprecated
     public ByteBuffer apply(long value) {
-        TLState state = tl_state.get();
-        state.md5.reset();
-        state.bytes.putLong(0,value);
-        byte[] digest = md5.digest(state.bytes.array());
-        return ByteBuffer.wrap(digest);
+        throw new RuntimeException("No longer available.  Please use the DigestToByteBuffer with " +
+                "alternatives other than MD5");
     }
 
-    private final static class TLState {
-        public final ByteBuffer bytes = ByteBuffer.allocate(160);
-        public final MessageDigest md5;
-        public TLState() {
-            try {
-                md5 = MessageDigest.getInstance("MD5");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
 
-    }
 }

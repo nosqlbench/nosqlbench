@@ -25,17 +25,24 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-#      - name: mvn-package
-#        run: mvn package
-
       - name: mvn verify
         run: mvn verify
 
-      - name: Capture
+      - name: Installing dependencies
+        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+
+      - name: Uploading [nosqlbench] test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: codecov-report
+          path: codecov-report.tar
+
+      - name: Collecting [nosqlbench] logfiles
         if: success() || failure()
         run: tar -cvf logfiles.tar [a-zA-Z]**/logs/*
 
-      - name: Archive Test Results
+      - name: Uploading test result log files
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
@@ -43,33 +50,31 @@ jobs:
           path: logfiles.tar
 
       - name: export docs
+        if: success()
         run: nb5/target/nb5 export-docs
 
       - name: upload docs artifact
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: exported-docs
           path: exported_docs.zip
 
-
-
   docs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
+
       - name: set git username
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
 
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
-      - name: download exported-docs
+      - name: download exported_docs
         uses: actions/download-artifact@v3
         with:
           name: exported-docs
-
-      - name: unzip docs
-        run: unzip exported_docs.zip
 
       - run: ls -la
 
@@ -85,18 +90,26 @@ jobs:
           git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
           git remote -v
 
+      - name: import zipfile
+        run: |
+          mv exported_docs.zip nosqlbench-build-docs/
+
+      - name: set CNAME
+        run: |
+          echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+
+      - name: commit changes
+        run: |
+          cd nosqlbench-build-docs
+          git add exported_docs.zip
+
       - name: push changes
         env:
           NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
           NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
         run: |
           set -x
-          find . -ls
-          rsync -av --delete -I --exclude '_index.md' drivers/ nosqlbench-build-docs/site/content/docs/drivers
-          rsync -av --delete -I --exclude '_index.md' bindings/ nosqlbench-build-docs/site/content/docs/bindings
-          echo "previewdocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
           cd nosqlbench-build-docs
-          git add -A
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
           echo "found $CHANGES to push for doc updates"
           if (( $CHANGES > 0 ))

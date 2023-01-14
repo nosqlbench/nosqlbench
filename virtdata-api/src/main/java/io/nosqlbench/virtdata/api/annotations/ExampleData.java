@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 public class ExampleData {
 
     public static Pattern CTOR_PATTERN = Pattern.compile("(?<funcname>[^)]+)\\((?<args>.+)\\)");
-    public static Pattern VALS_PATTERN = Pattern.compile("\\[(?<values>-?\\d+([,-. ]+-?\\d+)*)]");
+    public static Pattern VALS_PATTERN = Pattern.compile("\\[(?<values>-?\\d+([,\\-. ]{1,2}-?\\d+)*)]");
     private final Pattern COMMA_VALS = Pattern.compile("\\[(?<vals>-?\\d+(,-?\\d+)*)]");
     private final Pattern RANGE_VALS = Pattern.compile("\\[(?<from>-?\\d+)\\.\\.(?<to>-?\\d+)( +(?<step>-?\\d+))?]");
 

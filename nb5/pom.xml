@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.33-SNAPSHOT</version>
+        <version>5.17.1-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -40,13 +40,14 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>slf4j-api</artifactId>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+            <version>5.17.1-SNAPSHOT</version>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>slf4j-api</artifactId>-->
+            <!--                    <groupId>org.slf4j</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
+
         </dependency>
 
         <!-- Everything below this line is in common between nb and nb5 -->
@@ -55,85 +56,79 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-tcp</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-mongodb</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-dynamodb</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>slf4j-api</artifactId>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+            <version>5.17.1-SNAPSHOT</version>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>slf4j-api</artifactId>-->
+            <!--                    <groupId>org.slf4j</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-pulsar</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>slf4j-api</artifactId>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+            <version>5.17.1-SNAPSHOT</version>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>slf4j-api</artifactId>-->
+            <!--                    <groupId>org.slf4j</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-s4j</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-tcp</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>slf4j-api</artifactId>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+            <version>5.17.1-SNAPSHOT</version>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>slf4j-api</artifactId>-->
+            <!--                    <groupId>org.slf4j</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -201,6 +196,48 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.00</minimum>
+                                            <maximum>1.00</maximum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -214,7 +251,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>adapter-mongodb</artifactId>
-                    <version>4.17.33-SNAPSHOT</version>
+                    <version>5.17.1-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -256,6 +293,51 @@
             </activation>
             <build>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.8</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>INSTRUCTION</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.00</minimum>
+                                                    <maximum>1.00</maximum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+
                     <plugin>
                         <executions>
                             <execution>
@@ -275,9 +357,5 @@
                 </plugins>
             </build>
         </profile>
-
-
     </profiles>
-
-
 </project>

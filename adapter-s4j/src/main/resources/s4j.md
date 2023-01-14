@@ -1,18 +1,7 @@
 ---
 weight: 0
-title: S4J Adapter
+title: S4J
 ---
-# S4J Adapter
-- [1. Overview](#1-overview)
-- [2. Execute NB S4J Workload](#2-execute-nb-s4j-workload)
-- [3. NB S4J Driver Configuration Parameter File](#3-nb-s4j-driver-configuration-parameter-file)
-- [4. NB S4J Scenario Definition File](#4-nb-s4j-scenario-definition-file)
-    - [4.1. Document Level Parameters](#4-1-document-level-parameters)
-    - [4.2. NB S4J Workload Types](#4-2-nb-s4j-workload-types)
-        - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#4-2-1-publish-messages-to-a-jms-destination-queue-or-topic)
-        - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#4-2-2-receiving-messages-from-a-jms-destination-queue-or-topic)
-
-
 # 1. Overview
 
 This driver is similar to [NB Pulsar driver](../../../../driver-pulsar/src/main/resources/pulsar.md) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
@@ -23,7 +12,7 @@ However, the major difference is instead of simulating native Pulsar client work
 
 The following is an example of executing a NB S4J workload (defined as *pulsar_s4j.yaml*)
 
-```
+```shell
 $ <nb_cmd> run driver=s4j cycles=10000 threads=4 num_conn=2 num_session=2 session_mode="client_ack" strict_msg_error_handling="false" web_url=http://localhost:8080 service_url=pulsar://localhost:6650 config=/path/to/nb_s4j_config.properties yaml=/path/to/pulsar_s4j.yaml -vv --logs-dir=s4j_log
 ```
 
@@ -153,7 +142,7 @@ The NB S4J statement block for publishing messages to a JMS destination (either 
 * The default message type (**msg_type**) is "byte". But optionally, you can specify other message types such as "text", "map", etc.
 * The message payload (**msg_body**) is the only mandatory field.
 
-```
+```yaml
 blocks:
   msg-produce-block:
     ops:
@@ -196,7 +185,8 @@ The generic NB S4J statement block for receiving messages to a JMS destination (
 * negative ack/ack timeout/deadletter topic related settings
     * The settings here (as the scenario specific settings) will be merged with the
     *    global settings in *s4j_config.properties* file
-```
+
+```yaml
 blocks:
   msg-produce-block:
     ops:

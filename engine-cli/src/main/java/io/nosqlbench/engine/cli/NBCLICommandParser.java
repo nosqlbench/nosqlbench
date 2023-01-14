@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class NBCLICommandParser {
     private static final String RUN = "run";
     private static final String AWAIT = "await";
     private static final String STOP = "stop";
+    private static final String FORCE_STOP = "forceStop";
     private static final String ACTIVITY = "activity";
     private static final String SCENARIO = "scenario";
     private static final String WAIT_MILLIS = "waitmillis";
@@ -42,7 +43,7 @@ public class NBCLICommandParser {
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
                 Arrays.asList(
-                        FRAGMENT, SCRIPT, START, RUN, AWAIT, STOP, ACTIVITY, SCENARIO, WAIT_MILLIS
+                        FRAGMENT, SCRIPT, START, RUN, AWAIT, STOP, FORCE_STOP, ACTIVITY, SCENARIO, WAIT_MILLIS
                 )
         );
     }};
@@ -63,6 +64,7 @@ public class NBCLICommandParser {
                 case RUN:
                 case AWAIT:
                 case STOP:
+                case FORCE_STOP:
                 case WAIT_MILLIS:
                     cmd = Cmd.parseArg(arglist, canonicalizer);
                     cmdList.add(cmd);

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022 nosqlbench
+  ~ Copyright (c) 2022-2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>4.17.33-SNAPSHOT</version>
+        <version>5.17.1-SNAPSHOT</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -58,7 +57,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-annotations</artifactId>
-            <version>4.17.33-SNAPSHOT</version>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -71,12 +70,6 @@
             <artifactId>flexmark-html2md-converter</artifactId>
             <version>0.64.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-
 
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
@@ -97,7 +90,6 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.364</version>
         </dependency>
 
         <dependency>
@@ -116,7 +108,6 @@
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
 
-        <!-- TODO: Move this down to virtdata if it is the only module group using it -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
@@ -146,18 +137,65 @@
             <artifactId>ascii-data</artifactId>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.graalvm.sdk</groupId>
             <artifactId>graal-sdk</artifactId>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.snakeyaml</groupId>
+            <artifactId>snakeyaml-engine</artifactId>
+        </dependency>
 
     </dependencies>
 
     <build>
+
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.00</minimum>
+                                            <maximum>1.00</maximum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

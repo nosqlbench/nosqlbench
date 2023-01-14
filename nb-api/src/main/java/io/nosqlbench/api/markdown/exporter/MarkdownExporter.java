@@ -19,7 +19,7 @@ package io.nosqlbench.api.markdown.exporter;
 import io.nosqlbench.api.markdown.aggregator.MarkdownDocs;
 import io.nosqlbench.api.markdown.types.DocScope;
 import io.nosqlbench.api.markdown.types.MarkdownInfo;
-import io.nosqlbench.api.spi.BundledApp;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import joptsimple.*;
 

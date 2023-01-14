@@ -47,7 +47,7 @@ public class IntegratedComposerLogicTest {
     @Test
     public void testSignatureMapping() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(
-                "compose HashRange(1000000000,9999999999L); ToString() -> String"
+                "HashRange(1000000000,9999999999L); ToString() -> String"
         );
         assertThat(dataMapper).isNotNull();
         assertThat(dataMapper).isPresent();
@@ -58,7 +58,7 @@ public class IntegratedComposerLogicTest {
     @Test
     public void  testIntegratedComposer() {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(
-                "binomial(8,0.5); ToDate() -> java.util.Date"
+                "Binomial(8,0.5); ToDate() -> java.util.Date"
         );
         assertThat(dataMapper).isNotNull();
         assertThat(dataMapper).isPresent();
@@ -89,7 +89,7 @@ public class IntegratedComposerLogicTest {
         Optional<DataMapper<Object>> dataMapper = VirtData.getOptionalMapper(" ModuloLineToString('data/variable_words.txt') -> String");
         assertThat(dataMapper).isPresent();
         assertThat(dataMapper.get().get(1)).isEqualTo("completion_count");
-        dataMapper = VirtData.getOptionalMapper("compose ModuloLineToString('variable_words.txt') -> String");
+        dataMapper = VirtData.getOptionalMapper("ModuloLineToString('variable_words.txt') -> String");
         assertThat(dataMapper).isPresent();
         assertThat(dataMapper.get().get(1)).isEqualTo("completion_count");
     }

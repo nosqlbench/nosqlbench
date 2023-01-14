@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package io.nosqlbench.engine.api.activityapi.sysperf;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.yaml.snakeyaml.Yaml;
+import org.apache.logging.log4j.Logger;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,8 +114,8 @@ public class SysPerf {
             bytes = Files.readAllBytes(cache.toPath());
             String perfdata = new String(bytes, CHARSET);
 
-            Yaml yaml = new Yaml();
-            SysPerfData perfinfo = yaml.load(perfdata);
+            Load yaml = new Load(LoadSettings.builder().build());
+            SysPerfData perfinfo = (SysPerfData) yaml.loadFromString(perfdata);
             cachedData = perfinfo;
             logger.info("Loaded previously cached system timing data from " + cache.getCanonicalPath());
             return cachedData;
@@ -135,11 +138,11 @@ public class SysPerf {
         try {
             if (!cache.exists() || forceSave) {
                 Files.createDirectories(cache.toPath().getParent());
-                Yaml yaml = new Yaml();
+                Dump dump = new Dump(DumpSettings.builder().build());
                 if (cache.exists()) {
                     cache.delete();
                 }
-                String filedata = yaml.dump(cachedData);
+                String filedata = dump.dumpToString(cachedData);
                 Files.write(cache.toPath(), filedata.getBytes(CHARSET), StandardOpenOption.CREATE_NEW);
                 logger.info("Wrote system timing data to cachefile " + cache.getCanonicalPath());
             }

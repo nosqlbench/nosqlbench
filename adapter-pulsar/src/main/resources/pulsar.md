@@ -1,15 +1,4 @@
-# Table of contents
-- [1. Overview](#1-overview)
-    - [1.1. Issues Tracker](#1-1-issues-tracker)
-- [2. Execute the NB Pulsar Driver Workload](#2-execute-the-nb-pulsar-driver-workload)
-    - [2.1. NB Pulsar Driver Yaml File High Level Structure](#2-1-nb-pulsar-driver-yaml-file-high-level-structure)
-    - [2.2. NB Pulsar Driver Configuration Parameters](#2-2-nb-pulsar-driver-configuration-parameters)
-        - [2.2.1. Global Level Parameters](#2-2-1-global-level-parameters)
-        - [2.2.2. Document Level Parameters](#2-2-2-document-level-parameters)
-- [3. NB Pulsar Driver OpTemplates](#3-nb-pulsar-driver-optemplates)
-- [4. Message Generation and Schema Support](#4-message-generation-and-schema-support)
-    - [4.1. Message Generation](#4-1-message-generation)
-    - [4.2. Schema Support](#4-2-schema-support)
+# pulsar
 
 # 1. Overview
 

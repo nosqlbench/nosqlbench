@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,31 @@ public class PolyglotScenarioController {
             controller.stop(spec.asString());
         } else if (spec.hasMembers()) {
             controller.stop(spec.as(Map.class));
+        } else {
+            throw new RuntimeException("unknown base type for graal polyglot: " + spec);
+        }
+    }
+
+
+    public synchronized void forceStop(Object o) {
+        if (o instanceof Value) {
+            forceStop(o);
+        } else if (o instanceof Map) {
+            controller.forceStop((Map<String, String>) o);
+        } else if (o instanceof String) {
+            controller.forceStop(o.toString());
+        } else {
+            throw new RuntimeException("unknown type " + o.getClass().getCanonicalName());
+        }
+    }
+
+    private synchronized void forceStopValue(Value spec) {
+        if (spec.isHostObject()) {
+            controller.forceStop((ActivityDef) spec.asHostObject());
+        } else if (spec.isString()) {
+            controller.forceStop(spec.asString());
+        } else if (spec.hasMembers()) {
+            controller.forceStop(spec.as(Map.class));
         } else {
             throw new RuntimeException("unknown base type for graal polyglot: " + spec);
         }

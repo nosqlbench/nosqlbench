@@ -9,6 +9,12 @@
 * Deprecated old drivers (conflicts, etc)
     - version conflicts (removing cql drivers 1.9.* 3.*)
 
+# Performance
+* dryrun capability
+* slightly improved rate limiter performance
+* improved concurrency tracking for activities
+  * and a bug fix for threads=1 and uncaught errors
+
 ## New Topic
 * Advanced linearization features
   * variable capture in results
@@ -238,3 +244,31 @@ review:
 - 394580d66c107127cc68f88cdc64a59e9c481d43
 - 0330c18a7ba0904b3b3420b94416b04ee73dd7fb
 - 11dd8f62daf3d1603b75cdd85fbb872dbfaac111
+
+* For developers
+  * New APIs
+    * DriverAdapter
+    * SpaceCache
+    * ParsedOp
+    * OpMapper
+    * OpDispenser
+
+* Removal of Phases loop
+* Some support for console colors
+* Logging subsystem improvements
+
+* Discovery Options
+
+* Project Improvements
+* Testing and Documentation Methods
+  * Literate test examples as documentation
+* Integrated test logs are artifacts
+* Auto-generated reference docs are not auto-imported
+* Major releases are gated by static analysis audits
+* We're adding code coverage
+* We've added more developers to the project
+* Testing Improvements - stability and low-core build systems (gh actions)
+
+* config
+  * options can be mutually exclusive, like the thread-local rate and the per-activity rate
+
