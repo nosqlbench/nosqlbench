@@ -75,7 +75,7 @@ public class ActivityDef implements NBNamedElement {
         ActivityDef activityDef = new ActivityDef(activityParameterMap.orElseThrow(
                 () -> new RuntimeException("Unable to parse:" + namedActivitySpec)
         ));
-        logger.debug("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
+        logger.info("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
 
         return activityDef;
     }
