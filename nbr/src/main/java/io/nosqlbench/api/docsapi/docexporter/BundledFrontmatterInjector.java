@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,28 +22,55 @@ import java.util.Locale;
 
 public class BundledFrontmatterInjector implements BundledMarkdownProcessor {
 
+    private final long floorWeight;
+    private final long readmeWeight;
+
+    public BundledFrontmatterInjector(int floorWeight, int readmeWeight) {
+        this.floorWeight = floorWeight;
+        this.readmeWeight = readmeWeight;
+    }
+
     @Override
     public MutableMarkdown apply(MutableMarkdown parsedMarkdown) {
-        if (parsedMarkdown.getFrontmatter().getWeight()<0) {
+        if (parsedMarkdown.getFrontmatter().getWeight()<=0) {
             String title = parsedMarkdown.getFrontmatter().getTitle();
-            parsedMarkdown.getFrontmatter().setWeight(alphaWeightOf(title));
+            if (parsedMarkdown.getPath()!=null && parsedMarkdown.getPath().endsWith("README.md")) {
+                parsedMarkdown.getFrontmatter().setWeight(readmeWeight);
+            } else {
+                parsedMarkdown.getFrontmatter().setWeight(floorWeight +alphaWeightOf(title));
+            }
         }
         return parsedMarkdown;
     }
 
-    private int alphaWeightOf(String name) {
+    private long alphaWeightOf(String name) {
         name=name.toLowerCase(Locale.ROOT);
-        int sum=0;
-        int pow=26;
+        long sum=0;
+        long pow=26;
         for (int i = 0; i < 6; i++) {
             if (name.length()>i) {
-                int ord = name.charAt(i) - 'a';
-                double addend = Math.pow(pow, i) * ord;
-                sum += (int)addend;
+                int ord=name.charAt(i);
+
+                if (48 <= ord && ord <= 57) {
+                    ord-=48;
+                } else if (65 <= ord && ord <= 90) {
+                    ord-=65;
+                } else if (97 <= ord && ord <= 122) {
+                    ord-=97;
+                } else {
+                    ord=1;
+                }
+                double addendDouble = Math.pow(pow, i) * ord;
+                long addend = (long)addendDouble;
+                if (addend>(Long.MAX_VALUE-sum)) {
+                    throw new RuntimeException("overflow on doc weight with value of " + addend + " with sum of " + sum + " for '" + name+"'");
+                }
+                sum += addend;
             } else {
                 break;
             }
         }
+        sum = sum>0 ? sum : 1;
         return sum;
     }
 }
