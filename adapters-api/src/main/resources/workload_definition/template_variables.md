@@ -14,7 +14,8 @@ desc: <<mydesc:mydescription>>
 ```
 
 *json:*
-```json5
+```json
+
 {
     "name": "thedefault",
     "desc": "mydescription"
@@ -22,7 +23,8 @@ desc: <<mydesc:mydescription>>
 ```
 
 *ops:*
-```json5
+```json
+
 []
 ```
 
@@ -36,14 +38,16 @@ name: TEMPLATE(myname,thedefault)
 ```
 
 *json:*
-```json5
+```json
+
 {
     "name": "thedefault"
 }
 ```
 
 *ops:*
-```json5
+```json
+
 []
 ```
 
@@ -55,14 +59,16 @@ name: TEMPLATE(myname)
 ```
 
 *json:*
-```json5
+```json
+
 {
     "name": "UNSET:myname"
 }
 ```
 
 *ops:*
-```json5
+```json
+
 []
 ```
 
@@ -74,13 +80,15 @@ name: TEMPLATE(myname,)
 ```
 
 *json:*
-```json5
+```json
+
 {
     "name": null
 }
 ```
 
 *ops:*
-```json5
+```json
+
 []
 ```

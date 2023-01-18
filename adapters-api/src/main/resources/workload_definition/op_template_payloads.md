@@ -25,7 +25,8 @@ ops: "cycle number '{{NumberNameToString}}'"
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": "cycle number '{{NumberNameToString}}'"
 }
@@ -33,7 +34,8 @@ ops: "cycle number '{{NumberNameToString}}'"
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -63,7 +65,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": [
     "even cycle '{{NumberNameToString}}'",
@@ -74,7 +77,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -114,7 +118,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "myop1": "even cycle '{{NumberNameToString}}'",
@@ -125,7 +130,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -168,7 +174,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -181,7 +188,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -217,7 +225,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": [
@@ -230,7 +239,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -268,7 +278,8 @@ ops:
 ```
 
 *json:*
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -287,7 +298,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -333,7 +345,8 @@ ops:
 ```
 
 *json:*
-```json5
+```json
+
 {
   "bindings": {
     "user_index": "Mod(1000L); ToString();"
@@ -355,7 +368,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "bindings": {
