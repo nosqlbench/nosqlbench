@@ -17,7 +17,6 @@
 package io.nosqlbench.virtdata.userlibs.apps.summarizer;
 
 import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.Level;
@@ -29,7 +28,10 @@ import picocli.CommandLine.Option;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -40,7 +42,7 @@ import java.util.function.Supplier;
     helpCommand = true,
     showDefaultValues = true
 )
-@Service(value = BundledApp.class, selector = "summarize-values")
+//@Service(value = BundledApp.class, selector = "summarize-values")
 public class ValueSummarizerApp implements BundledApp, Callable<Integer> {
 
     private final static Logger logger = LogManager.getLogger(ValueSummarizerApp.class);

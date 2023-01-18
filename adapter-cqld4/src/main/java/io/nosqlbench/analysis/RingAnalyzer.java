@@ -17,12 +17,11 @@
 package io.nosqlbench.analysis;
 
 import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
-@Service(value=BundledApp.class, selector = "cql-ring-analyzer")
+//@Service(value=BundledApp.class, selector = "cql-ring-analyzer")
 public class RingAnalyzer implements BundledApp {
     private final static Logger logger = LogManager.getLogger(RingAnalyzer.class);
 
