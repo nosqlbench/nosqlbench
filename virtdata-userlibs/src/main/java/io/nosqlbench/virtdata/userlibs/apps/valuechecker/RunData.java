@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ public class RunData {
     public long min;
     public long max;
     public int buffersize;
-    public boolean isolated;
     public double totalGenTimeMs;
     public double totalCmpTimeMs;
 
@@ -35,7 +34,6 @@ public class RunData {
         this.min = min;
         this.max = max;
         this.buffersize = buffersize;
-        this.isolated = isolated;
         this.totalGenTimeMs = totalGenTimeMs;
         this.totalCmpTimeMs = totalCmpTimeMs;
     }
@@ -49,12 +47,11 @@ public class RunData {
                 "              max = " + max + "\n" +
                 "          [count] = " + (max - min) + "\n" +
                 "       buffersize = " + buffersize + "\n" +
-                "         isolated = " + isolated + "\n" +
                 " [totalGenTimeMs] = " + totalGenTimeMs + "\n" +
                 " [totalCmpTimeMs] = " + totalCmpTimeMs + "\n" +
-                String.format("      [genPerMs] = %.3f\n", ((double) threads * (double) (max - min)) / totalGenTimeMs) +
-                String.format("      [cmpPerMs] = %.3f\n", ((double) threads * (double) (max - min)) / totalCmpTimeMs) +
-                String.format("      [genPerS] = %.3f\n", 1000.0d * ((double) threads * (double) (max-min)) / totalGenTimeMs) +
-                String.format("      [cmpPerS] = %.3f\n", 1000.0d * ((double) threads * (double) (max-min)) / totalCmpTimeMs);
+                String.format("       [genPerMs] = %.3f\n", ((double) threads * (double) (max - min)) / totalGenTimeMs) +
+                String.format("       [cmpPerMs] = %.3f\n", ((double) threads * (double) (max - min)) / totalCmpTimeMs) +
+                String.format("        [genPerS] = %.3f\n", 1000.0d * ((double) threads * (double) (max-min)) / totalGenTimeMs) +
+                String.format("        [cmpPerS] = %.3f\n", 1000.0d * ((double) threads * (double) (max-min)) / totalCmpTimeMs);
     }
 }

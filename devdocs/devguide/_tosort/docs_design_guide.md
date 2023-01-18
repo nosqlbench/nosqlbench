@@ -75,7 +75,8 @@ All fenced code is expected to be annotated with a language specifier as above.
 
 For example, consider this JSON data:
 
-```json5
+```json
+
 {
   "description": "This is a block of json, and it might be syntax highlighted."
 }

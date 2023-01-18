@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class ValuesCheckerRunnable implements Runnable {
     private final int threadNum;
     private final ConcurrentLinkedQueue<Integer> readyQueue;
     private final int bufsize;
+    private final boolean printValues;
 
     public ValuesCheckerRunnable(
             long start,
@@ -51,7 +52,8 @@ public class ValuesCheckerRunnable implements Runnable {
             ConcurrentLinkedQueue<Integer> readyQueue,
             Condition goTime,
             Lock lock,
-            List<Object> expected
+            List<Object> expected,
+            boolean printValues
     ) {
         this.start = start;
         this.end = end;
@@ -61,6 +63,7 @@ public class ValuesCheckerRunnable implements Runnable {
         this.expected = expected;
         this.goTime = goTime;
         this.lock = lock;
+        this.printValues = printValues;
 
         this.mapper = (dataMapper != null) ? dataMapper : VirtData.getOptionalMapper(mapperSpec)
                 .orElseThrow(
@@ -78,19 +81,19 @@ public class ValuesCheckerRunnable implements Runnable {
             String rangeInfo = "t:" + threadNum + " [" + rangeStart + ".." + (rangeStart+bufsize) + ")";
 
             synchronizeFor("generation start " + rangeInfo);
-//            logger.debug(() -> "generating for " + "range: " + rangeStart + ".." + (rangeStart + bufsize));
+            logger.debug("generating for " + "range: " + rangeStart + ".." + (rangeStart + bufsize));
             for (int i = 0; i < output.length; i++) {
                 output[i] = mapper.get(i + rangeStart);
-//                if (i==0) {
-//                    logger.debug(() -> "gen i:" + i + ", cycle: " + (i + rangeStart) + ": " + output[i]);
-//                }
+                if (i==0) {
+                    logger.debug("gen i:" + i + ", cycle: " + (i + rangeStart) + ": " + output[i]);
+                }
 
             }
             if (this.threadNum==0) {
                 logger.trace(() -> "Thread " + threadNum + " putting values into comparable array before acking");
                 expected.clear();
                 expected.addAll(Arrays.asList(output));
-                if (System.getProperties().containsKey("PRINTVALUES")) {
+                if (printValues) {
                     for (int i=0; i<output.length; i++) {
                         System.out.println(start+i + "->" + output[i]);
                     }
@@ -99,7 +102,7 @@ public class ValuesCheckerRunnable implements Runnable {
             synchronizeFor("generation complete " + rangeInfo);
 
             synchronizeFor("verification " + rangeInfo);
-//            logger.debug(() -> "checker " + this.threadNum + " verifying range [" + start + ".." + (start + end) + ")");
+            logger.debug(() -> "checker " + this.threadNum + " verifying range [" + start + ".." + (start + end) + ")");
             for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
                 if (!expected.get(bufidx).equals(output[bufidx])) {
                     String errmsg = "Value differs: " +
@@ -108,16 +111,12 @@ public class ValuesCheckerRunnable implements Runnable {
 
                     throw new RuntimeException(errmsg);
                 }
-//                else
-//                {
-//                    System.out.println("Equal " + expected[bufidx] + " == " + output[bufidx]);
-//                }
             }
             synchronizeFor("verification complete" + rangeInfo);
 
-//            logger.info(() -> "verified values for thread " + Thread.currentThread().getLibname() + " in range " +
-//                    rangeStart + ".." + (rangeStart + bufsize)
-//            );
+            logger.debug("verified values for thread " + Thread.currentThread() + " in range " +
+                    rangeStart + ".." + (rangeStart + bufsize)
+            );
         }
 
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ValuesCheckerCoordinator implements Callable<RunData> {
     private static final Logger logger =
-            LogManager.getLogger(ValuesCheckerCoordinator.class);
+        LogManager.getLogger(ValuesCheckerCoordinator.class);
 
     private final String specifier;
     private final int threads;
     private final int bufsize;
     private final long end;
     private final long start;
-    private final boolean isolated;
+    private final boolean printValues;
     private final ReentrantLock lock;
     private final Condition goTime;
     private final ConcurrentLinkedDeque<Throwable> errors = new ConcurrentLinkedDeque<>();
@@ -47,18 +47,18 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
     private long cmpTimeAccumulator = 0L;
 
     public ValuesCheckerCoordinator(
-            String specifier,
-            int threads,
-            int bufsize,
-            long start,
-            long end,
-            boolean isolated) {
+        String specifier,
+        int threads,
+        int bufsize,
+        long start,
+        long end,
+        boolean printValues) {
         this.specifier = specifier;
         this.threads = threads;
         this.bufsize = bufsize;
         this.start = start;
         this.end = end;
-        this.isolated = isolated;
+        this.printValues = printValues;
         this.lock = new ReentrantLock();
         this.goTime = lock.newCondition();
     }
@@ -76,53 +76,41 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
 
 
     private void testConcurrentValues(
-            int threads,
-            long start,
-            long end,
-            String mapperSpec) {
+        int threads,
+        long start,
+        long end,
+        String mapperSpec) {
 
         // Generate reference values in single-threaded mode.
         DataMapper<Object> mapper =
-                VirtData.getOptionalMapper(specifier).orElseThrow(
-                        () -> new RuntimeException("Unable to map function for specifier: " + specifier)
-                );
+            VirtData.getOptionalMapper(specifier).orElseThrow(
+                () -> new RuntimeException("Unable to map function for specifier: " + specifier)
+            );
 
         final List<Object> reference = new CopyOnWriteArrayList<>();
 
         // Setup concurrent generator pool
         ValuesCheckerExceptionHandler valuesCheckerExceptionHandler =
-                new ValuesCheckerExceptionHandler(this);
+            new ValuesCheckerExceptionHandler(this);
         IndexedThreadFactory tf =
-                new IndexedThreadFactory("values-checker", valuesCheckerExceptionHandler);
+            new IndexedThreadFactory("values-checker", valuesCheckerExceptionHandler);
         pool =
-                Executors.newFixedThreadPool(threads, tf);
+            Executors.newFixedThreadPool(threads, tf);
 
         logger.info("Checking [{}..{}) in chunks of {}", start, end, bufsize);
 
-        if (!isolated) {
-            logger.debug(() ->
-                "Sharing data mapper, only expect success for " +
-                            "explicitly thread-safe generators.");
-        }
 
         for (int t = 0; t < threads; t++) {
             ValuesCheckerRunnable runnable;
 
-            if (isolated) {
-                runnable = new ValuesCheckerRunnable(
-                        start, end, bufsize, t, mapperSpec, null,
-                        readyQueue, goTime, lock, reference
+            DataMapper<?> threadMapper = VirtData.getOptionalMapper(mapperSpec)
+                .orElseThrow(
+                    () -> new RuntimeException("Unable to map function for specifier: " + specifier)
                 );
-            } else {
-                DataMapper<?> threadMapper = VirtData.getOptionalMapper(mapperSpec)
-                        .orElseThrow(
-                                () -> new RuntimeException("Unable to map function for specifier: " + specifier)
-                        );
-                runnable = new ValuesCheckerRunnable(
-                        start, end, bufsize, t,null, threadMapper,
-                        readyQueue, goTime, lock, reference
-                );
-            }
+            runnable = new ValuesCheckerRunnable(
+                start, end, bufsize, t, null, threadMapper,
+                readyQueue, goTime, lock, reference, printValues
+            );
             pool.execute(runnable);
         }
 
@@ -182,7 +170,7 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
 
     synchronized void handleException(Thread t, Throwable e) {
         this.errors.add(e);
-        if (pool!=null) {
+        if (pool != null) {
             pool.shutdownNow();
         }
 
@@ -215,14 +203,14 @@ public class ValuesCheckerCoordinator implements Callable<RunData> {
     public RunData call() throws Exception {
         run();
         return new RunData(
-                this.specifier,
-                this.threads,
-                this.start,
-                this.end,
-                this.bufsize,
-                this.isolated,
-                ((double) genTimeAccumulator / 1000000.0D),
-                ((double) cmpTimeAccumulator / 1000000.0D)
+            this.specifier,
+            this.threads,
+            this.start,
+            this.end,
+            this.bufsize,
+            this.printValues,
+            ((double) genTimeAccumulator / 1000000.0D),
+            ((double) cmpTimeAccumulator / 1000000.0D)
         );
     }
 }

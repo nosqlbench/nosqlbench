@@ -17,7 +17,6 @@
 package io.nosqlbench.docsys.core;
 
 import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-@Service(value=NBWebServerApp.class,selector="appserver")
+//@Service(value=NBWebServerApp.class,selector="appserver")
 public class NBWebServerApp implements BundledApp {
     private static final Logger logger = LogManager.getLogger(NBWebServerApp.class);
 

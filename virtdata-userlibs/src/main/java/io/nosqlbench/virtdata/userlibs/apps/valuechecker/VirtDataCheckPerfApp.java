@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,56 @@ import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+
 public class VirtDataCheckPerfApp {
 
     private final static Logger logger  = LogManager.getLogger(VirtDataCheckPerfApp.class);
 
     public static void main(String[] args) {
-        if (args.length==1) {
-            checkperf(new String[]{args[0],"1","1","1","1"});
-        } else if (args.length==5) {
-            checkperf(args);
-        } else {
-            System.out.println(" ARGS: checkperf 'specifier' threads bufsize start end");
-            System.out.println(" example: 'timeuuid()' 100 1000 0 10000");
-            System.out.println("  specifier: A VirtData function specifier.");
-            System.out.println("  threads: The number of concurrent threads to run.");
-            System.out.println("  bufsize: The number of cycles to give each thread at a time.");
-            System.out.println("  start: The start cycle for the test, inclusive.");
-            System.out.println("  end: The end cycle for the test, exclusive.");
-            System.out.println(" OR");
-            System.out.println(" ARGS: diagnose 'specifier'");
+        String spec="Identity()";
+        int threads=1;
+        int bufsize=1;
+        long startCycle=0;
+        long endCycle=1;
+        boolean printValues=false;
+
+        if ((args.length>0) && args[args.length-1].equals("-p")) {
+            printValues=true;
+            args= Arrays.copyOfRange(args,0,args.length-1);
         }
+
+        switch (args.length) {
+            case 5:
+                endCycle=Integer.parseInt(args[4]);
+            case 4:
+                startCycle=Integer.parseInt(args[3]);
+            case 3:
+                bufsize=Integer.parseInt(args[2]);
+            case 2:
+                threads = Integer.parseInt(args[1]);
+            case 1:
+                spec = args[0];
+                break;
+            case 0:
+                System.out.println(" ARGS: virtdata testmapper 'specifier' threads bufsize start end");
+                System.out.println(" example: 'timeuuid()' 100 1000 0 10000");
+                System.out.println("  specifier: A VirtData function specifier.");
+                System.out.println("  threads: The number of concurrent threads to run.");
+                System.out.println("  bufsize: The number of cycles to give each thread at a time.");
+                System.out.println("  start: The start cycle for the test, inclusive.");
+                System.out.println("  end: The end cycle for the test, exclusive.");
+                System.out.println("  [-p]: print the values as a sanity check. (must appear last)");
+                break;
+            default:
+                throw new RuntimeException("Error parsing args for " + String.join(" ",args));
+        }
+
+        checkperf(spec,threads,bufsize,startCycle,endCycle,printValues);
     }
 
-    private static void checkperf(String[] args) {
-        String spec = args[0];
-        int threads = Integer.parseInt(args[1]);
-        int bufsize = Integer.parseInt(args[2]);
-        long start = Long.parseLong(args[3]);
-        long end = Long.parseLong(args[4]);
-
-        boolean isolated = false;
-
-        ValuesCheckerCoordinator checker = new ValuesCheckerCoordinator(spec, threads, bufsize, start, end, isolated);
+    private static void checkperf(String spec, int threads, int bufsize, long start, long end, boolean printValues) {
+        ValuesCheckerCoordinator checker = new ValuesCheckerCoordinator(spec, threads, bufsize, start, end, printValues);
 
         RunData runData;
         try {
