@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.api.engine.util.Tagged;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,6 +100,19 @@ public class TagFilter {
     private Conjugate conjugate = Conjugate.all;
 
     private final static Pattern conjugateForm = Pattern.compile("^(?<conjugate>\\w+)\\((?<filter>.+)\\)$",Pattern.DOTALL|Pattern.MULTILINE);
+
+    public <T extends Tagged> List<T> filter(List<T> tagged) {
+        return tagged.stream()
+            .filter(this::matchesTagged)
+            .collect(Collectors.toList());
+    }
+
+    public <T extends Tagged> List<String> filterLog(List<T> tagged) {
+        return tagged.stream()
+            .map(this::matchesTaggedResult)
+            .map(Result::getLog)
+            .collect(Collectors.toList());
+    }
 
     private enum Conjugate {
         any((i,j) -> (j>0)),
@@ -199,10 +215,6 @@ public class TagFilter {
         }
         boolean matched = conjugate.matchfunc.apply(filter.size(),totalKeyMatches);
         return new Result(matched, log);
-    }
-
-    public Result matchesMap(Map<String, String> tags) {
-        return matches(tags);
     }
 
     public Result matchesTaggedResult(Tagged item) {
