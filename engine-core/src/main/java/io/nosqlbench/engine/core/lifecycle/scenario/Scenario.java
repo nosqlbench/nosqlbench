@@ -278,6 +278,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
 
         Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
         scenarioShutdownHook.run();
+        scenarioShutdownHook = null;
     }
 
     public void notifyException(Thread t, Throwable e) {
@@ -339,7 +340,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         }
     }
 
-    public void finish() {
+    public synchronized void finish() {
         logger.debug("finishing scenario");
         endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
         if (this.state == State.Running) {
@@ -351,6 +352,8 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
             // that the scenario was ended before the hook was uninstalled normally.
             this.state = State.Interrupted;
             logger.warn("Scenario was interrupted by process exit, shutting down");
+        } else {
+            logger.info("Scenario completed successfully, with " + scenarioController.getActivityExecutorMap().size() + " logical activities.");
         }
 
         logger.info(() -> "scenario state: " + this.state);
