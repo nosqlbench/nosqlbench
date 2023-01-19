@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,6 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         this.rawStmtsDocList = rawStmtsDocList;
     }
 
-    public List<StmtsDoc> getStmtDocs(String tagFilter) {
-        TagFilter tf = new TagFilter(tagFilter);
-        return getStmtDocs().stream()
-            .filter(tf::matchesTagged)
-            .collect(Collectors.toList());
-    }
-
     public List<StmtsDoc> getStmtDocs() {
         return rawStmtsDocList.getStmtsDocs().stream()
             .map(StmtsDoc::new)
@@ -65,15 +58,17 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      */
     public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
-        List<OpTemplate> opTemplates = new ArrayList<>();
 
-
-        getStmtDocs().stream()
+        List<OpTemplate> allOpTemplates = getStmtDocs().stream()
             .flatMap(d -> d.getStmts().stream())
-            .filter(ts::matchesTagged)
-            .forEach(opTemplates::add);
+            .collect(Collectors.toList());
 
-        return opTemplates;
+        List<OpTemplate> filteredOpTemplates = ts.filter(allOpTemplates);
+        for (String log : ts.filterLog(allOpTemplates)) {
+            logger.debug(log);
+        }
+
+        return filteredOpTemplates;
     }
 
 
