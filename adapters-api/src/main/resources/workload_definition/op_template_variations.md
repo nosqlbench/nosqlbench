@@ -24,7 +24,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -37,7 +38,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--special-op-name",
@@ -71,7 +73,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -86,7 +89,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--op1",
@@ -117,7 +121,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -130,7 +135,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--op1",
@@ -161,7 +167,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -177,7 +184,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--op1",
@@ -211,7 +219,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -227,7 +236,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--op1",
@@ -264,7 +274,8 @@ ops:
 
 *json:*
 
-```json5
+```json
+
 {
   "ops": {
     "op1": {
@@ -282,7 +293,8 @@ ops:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "name": "block0--op1",
@@ -313,7 +325,8 @@ ops: "my test op"
 
 *json:*
 
-```json5
+```json
+
 {
   "params": {
     "pname": "pvalue"
@@ -324,7 +337,8 @@ ops: "my test op"
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "params": {
@@ -356,7 +370,8 @@ blocks:
 
 *json:*
 
-```json5
+```json
+
 {
   "blocks": {
     "block1": {
@@ -371,7 +386,8 @@ blocks:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "params": {
@@ -406,7 +422,8 @@ blocks:
 
 *json:*
 
-```json5
+```json
+
 {
   "blocks": {
     "block1": {
@@ -425,7 +442,8 @@ blocks:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "params": {
@@ -466,7 +484,8 @@ blocks:
 
 *json:*
 
-```json5
+```json
+
 {
   "blocks": {
     "block1": {
@@ -487,7 +506,8 @@ blocks:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {
@@ -526,7 +546,8 @@ blocks:
 
 *json:*
 
-```json5
+```json
+
 {
   "blocks": {
     "block1": {
@@ -547,7 +568,8 @@ blocks:
 
 *ops:*
 
-```json5
+```json
+
 [
   {
     "tags": {

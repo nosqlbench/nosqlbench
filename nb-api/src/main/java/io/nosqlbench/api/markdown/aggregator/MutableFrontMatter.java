@@ -47,7 +47,7 @@ public class MutableFrontMatter extends LinkedHashMap<String,List<String>> {
         put(TITLE,List.of(title));
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(long weight) {
         put(WEIGHT,List.of(String.valueOf(weight)));
     }
 

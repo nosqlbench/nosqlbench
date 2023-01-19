@@ -1,21 +1,9 @@
 [comment]: < ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg) >
 
 
-# NoSQLBench
+# NoSQLBench v5
 
 **The Open Source, Pluggable, NoSQL Benchmarking Suite**
-
-# BRANCH STATUS
-
-The main branch of NoSQLBench is the active development branch for the upcoming NoSQLBench 5.
-It requires Java 17 to build, and has a limited set of drivers available as the previous drivers are
-updated to the newer APIs (and features).
-
-If you want to build or modify the current stable release, that is on nb4-maintenance, and requires
-Java 14 or lower to build. Stable releases contain all of the prior drivers.
-
-To distinguish between versions, the binary and jar artifacts for nb5 (main) builds are named `nb5`.
-
 
 [Get it Here](DOWNLOADS.md)
 
@@ -92,17 +80,17 @@ agree to license all of your constributions under this license.
 This is a Linux targeted tool, as most cloud/nosql testing is done on Linux instances. Some support for other systems is
 available, but more work is needed to support them fully. Here is what is supported for each:
 
-1. on Linux, all features are supported, for both `nb.jar` as well as the appimage binary `nb`
-2. on Mac, all features are supported, with `nb.jar`.
-3. On Windows, with `nb.jar` all features are supported, except `--docker-metrics`.
+1. on Linux, all features are supported, for both `nb5.jar` as well as the appimage binary `nb`
+2. on Mac, all features are supported, with `nb5.jar`.
+3. On Windows, with `nb5.jar` all features are supported, except `--docker-metrics`.
 
 ## Thanks
 
 <table cellspacing="1" cellpadding="1" style="border: 0px" align="left">
   <tr>
     <td width="20%"><a href="https://datastax.com" target="_blank"><img src="https://www.datastax.com/sites/default/files/2020-12/datastax-logotype-positive.png" alt="DataStax" width="250"/></a></td>
-     <td>This project is sponsored by <a href="https://www.datastax.com">DataStax</a> -- The Open, 
-       Multi-Cloud Stack for Modern Data Apps built on Apache Cassandra™, Kubernetes *Based*, Developer *Ready* & 
+     <td>This project is sponsored by <a href="https://www.datastax.com">DataStax</a> -- The Open,
+       Multi-Cloud Stack for Modern Data Apps built on Apache Cassandra™, Kubernetes *Based*, Developer *Ready* &
        Cloud *Delivered* and designed from the ground up to run anywhere, on any cloud, in any datacenter, and in
        every possible combination. DataStax delivers the ultimate hybrid and multi-cloud database.
     </td>

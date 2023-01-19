@@ -16,12 +16,13 @@
 
 package io.nosqlbench.api.markdown.exporter;
 
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.markdown.aggregator.MarkdownDocs;
 import io.nosqlbench.api.markdown.types.DocScope;
 import io.nosqlbench.api.markdown.types.MarkdownInfo;
-import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.nb.annotations.Service;
-import joptsimple.*;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service(value = BundledApp.class, selector = "markdown-exporter")
+//@Service(value = BundledApp.class, selector = "markdown-exporter")
 public class MarkdownExporter implements BundledApp, Runnable {
 
     public static final String APP_NAME = "exporter";

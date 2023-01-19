@@ -51,7 +51,8 @@ template of `select * from users where userid={userid}`.
 Once an op template is parsed into a *parsed command*, it has the state shown in the data structure
 schematic below:
 
-```json5
+```json
+
 {
     "name": "some-map-name",
     "statics": {
@@ -71,7 +72,8 @@ schematic below:
 
 If either an **op** or **stmt** field is provided, then the same structure as above is used:
 
-```json5
+```json
+
 {
     "name": "some-string-op",
     "statics": {
@@ -194,7 +196,8 @@ provide. There should be one way to access all of these in a consistent and unam
 
 Here is an example data structure which illustrates all the possible elements of a parsed command:
 
-```json5
+```json
+
 {
     "statics": {
         "prepared": "true",
