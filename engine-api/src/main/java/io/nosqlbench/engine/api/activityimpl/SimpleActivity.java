@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
@@ -551,7 +552,6 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
         StmtsDocList stmtsDocList = loadStmtsDocList();
 
-
         List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
         List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
 
@@ -652,7 +652,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected StmtsDocList loadStmtsDocList() {
 
         try {
-            StmtsDocList stmtsDocList = null;
+            StmtsDocList stmtsDocList = new StmtsDocList(new RawStmtsDocList(List.of()));
 
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
@@ -663,7 +663,6 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
                 workloadSource = "yaml:" + op_yaml_loc.get();
             }
-
             return stmtsDocList;
 
         } catch (Exception e) {
