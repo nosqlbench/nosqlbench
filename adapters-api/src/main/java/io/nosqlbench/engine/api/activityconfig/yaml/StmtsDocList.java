@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         this.rawStmtsDocList = rawStmtsDocList;
     }
 
+    public static StmtsDocList none() {
+        return new StmtsDocList(RawStmtsDocList.none());
+    }
+
     public List<StmtsDoc> getStmtDocs(String tagFilter) {
         TagFilter tf = new TagFilter(tagFilter);
         return getStmtDocs().stream()
@@ -66,7 +70,6 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
         List<OpTemplate> opTemplates = new ArrayList<>();
-
 
         getStmtDocs().stream()
             .flatMap(d -> d.getStmts().stream())

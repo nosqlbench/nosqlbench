@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -652,19 +652,17 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected StmtsDocList loadStmtsDocList() {
 
         try {
-            StmtsDocList stmtsDocList = null;
-
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
-                stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
                 workloadSource = "commandline:" + stmt.get();
+                return StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
             } else if (op_yaml_loc.isPresent()) {
-                stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
                 workloadSource = "yaml:" + op_yaml_loc.get();
+                return StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
 
-            return stmtsDocList;
+            return StmtsDocList.none();
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);

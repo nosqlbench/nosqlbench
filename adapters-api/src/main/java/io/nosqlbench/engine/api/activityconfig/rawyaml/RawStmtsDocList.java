@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,10 @@ public class RawStmtsDocList {
     public static RawStmtsDocList forSingleStatement(String statement) {
         RawStmtsDoc rawStmtsDoc = RawStmtsDoc.forSingleStatement(statement);
         return new RawStmtsDocList(List.of(rawStmtsDoc));
+    }
+
+    public static RawStmtsDocList none() {
+        return new RawStmtsDocList(List.of());
     }
 
     public List<RawStmtsDoc> getStmtsDocs() {
