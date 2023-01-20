@@ -193,7 +193,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public String toString() {
-        return getAlias()+":"+getRunState()+":"+getRunStateTally().toString();
+        return getAlias() + ":" + getRunState() + ":" + getRunStateTally().toString();
     }
 
     @Override
@@ -486,7 +486,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-            int dryrunCount=0;
+            int dryrunCount = 0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
@@ -510,7 +510,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
-            if (dryrunCount>0) {
+            if (dryrunCount > 0) {
                 logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
             }
 
@@ -547,22 +547,33 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter> defaultDriverAdapter) {
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-//        StrInterpolator interp = new StrInterpolator(activityDef);
 
         StmtsDocList stmtsDocList = loadStmtsDocList();
-
 
         List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
         List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
 
         if (filteredOps.size() == 0) {
-            if (unfilteredOps.size() > 0) {
+            if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
                 throw new BasicError("There were no active statements with tag filter '"
                     + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             } else {
+                // There were no ops, and it *wasn't* because they were all filtered out.
+
+                // In this case, let's try to synthesize the ops as long as at least a default driver was provided
                 if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                     filteredOps = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
                     Objects.requireNonNull(filteredOps);
+                    if (filteredOps.size() == 0) {
+                        throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
+                            " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
+                    }
+                } else { // But if there were no ops, and there was no default driver provided, we can't continue
+                    throw new BasicError("""
+                        No op templates were provided. You must provide one of these activity parameters:
+                        1) workload=some.yaml
+                        2) op='inline template
+                        3) driver=stdout (or any other drive that can synthesize ops)""");
                 }
             }
             if (filteredOps.size() == 0) {
