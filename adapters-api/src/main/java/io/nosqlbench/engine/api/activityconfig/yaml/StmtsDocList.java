@@ -41,6 +41,17 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         this.rawStmtsDocList = rawStmtsDocList;
     }
 
+    public static StmtsDocList none() {
+        return new StmtsDocList(RawStmtsDocList.none());
+    }
+
+    public List<StmtsDoc> getStmtDocs(String tagFilter) {
+        TagFilter tf = new TagFilter(tagFilter);
+        return getStmtDocs().stream()
+            .filter(tf::matchesTagged)
+            .collect(Collectors.toList());
+    }
+
     public List<StmtsDoc> getStmtDocs() {
         return rawStmtsDocList.getStmtsDocs().stream()
             .map(StmtsDoc::new)
@@ -58,17 +69,14 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      */
     public List<OpTemplate> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
+        List<OpTemplate> opTemplates = new ArrayList<>();
 
-        List<OpTemplate> allOpTemplates = getStmtDocs().stream()
+        getStmtDocs().stream()
             .flatMap(d -> d.getStmts().stream())
-            .collect(Collectors.toList());
+            .filter(ts::matchesTagged)
+            .forEach(opTemplates::add);
 
-        List<OpTemplate> filteredOpTemplates = ts.filter(allOpTemplates);
-        for (String log : ts.filterLog(allOpTemplates)) {
-            logger.debug(log);
-        }
-
-        return filteredOpTemplates;
+        return opTemplates;
     }
 
 

@@ -25,9 +25,6 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: mvn verify
-        run: mvn verify
-
       - name: Installing dependencies
         run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
@@ -37,21 +34,21 @@ jobs:
       - name: Collecting reports
         run: tar -cvf codecov-report.tar target/coverage-report/**/*
 
-      - name: Uploading [nosqlbench] test coverage
+      - name: Uploading test coverage
         uses: actions/upload-artifact@v3
         with:
           name: codecov-report
           path: codecov-report.tar
 
-      - name: Collecting [nosqlbench] logfiles
+      - name: Collecting logfiles
         if: success() || failure()
         run: tar -cvf logfiles.tar [a-zA-Z]**/logs/*
 
-      - name: Uploading test result log files
+      - name: Uploading log files
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results
+          name: nb-logs
           path: logfiles.tar
 
       - name: export docs

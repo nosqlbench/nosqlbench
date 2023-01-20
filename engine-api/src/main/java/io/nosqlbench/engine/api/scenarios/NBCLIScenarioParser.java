@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.api.config.params.Synonyms;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
@@ -94,7 +93,6 @@ public class NBCLIScenarioParser {
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=", 2);
-            arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userProvidedParams.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
             }
@@ -236,7 +234,6 @@ public class NBCLIScenarioParser {
                 throw new BasicError("Unable to recognize scenario cmd spec in '" + commandFragment + "'");
             }
             String commandName = matcher.group("name");
-            commandName = Synonyms.canonicalize(commandName, logger);
             String assignmentOp = matcher.group("oper");
             String assignedValue = matcher.group("val");
             parsedStep.put(commandName, new CmdArg(commandName, assignmentOp, assignedValue));
