@@ -23,33 +23,32 @@ jobs:
           java-package: jdk
           architecture: x64
 
-      - name: avoid release loop
-        run: scripts/avoid-release-loop.sh
-        env:
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-
-      - name: capture tty for gpg
-        run: |
-          echo "TTY="$(tty) >> $GITHUB_ENV
-          echo "GPG_TTY="$(tty) >> $GITHUB_ENV
-          # echo "::set-env name=TTY::"$(tty)
-          # echo "::set-env name=GPG_TTY::"$(tty)
-
-      - name: initialize gpg
-        run: |
-          set -x
-          echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
-          gpg --import --batch ./private.key
-          rm ./private.key
-          echo "gnupg files:"
-          ls -l ~/.gnupg/
-
+#      - name: avoid release loop
+#        run: scripts/avoid-release-loop.sh
+#        env:
+#          GIT_RELEASE_BOT_NAME: "nb-droid"
+#
+#      - name: capture tty for gpg
+#        run: |
+#          echo "TTY="$(tty) >> $GITHUB_ENV
+#          echo "GPG_TTY="$(tty) >> $GITHUB_ENV
+#          # echo "::set-env name=TTY::"$(tty)
+#          # echo "::set-env name=GPG_TTY::"$(tty)
+#
+#      - name: initialize gpg
+#        run: |
+#          set -x
+#          echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
+#          gpg --import --batch ./private.key
+#          rm ./private.key
+#          echo "gnupg files:"
+#          ls -l ~/.gnupg/
+#
       - name: set git username
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
 
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-
 
       - name: free disk space
         run: |
@@ -69,20 +68,12 @@ jobs:
       - name: read versions
         run: |
           set -x
-          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          RELEASE_VERSION=${CURRENT_VERSION%%-SNAPSHOT}
-          BASE_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f1-2)
-          MINOR_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f3)
-          NEXT_MINOR_VERSION=$(( MINOR_VERSION+1))
-          NEXT_SNAPSHOT="${BASE_VERSION}.${NEXT_MINOR_VERSION}-SNAPSHOT"
-          RELEASE_TAGNAME="nosqlbench-${RELEASE_VERSION}"
-          echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
-          echo "NEXT_SNAPSHOT=${NEXT_SNAPSHOT}" >> $GITHUB_ENV
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
-          echo "RELEASE_TAGNAME=${RELEASE_TAGNAME}" >> $GITHUB_ENV
-          # echo "::set-env name=NEXT_SNAPSHOT::${NEXT_SNAPSHOT}"
-          # echo "::set-env name=RELEASE_VERSION::${RELEASE_VERSION}"
-          # echo "::set-env name=RELEASE_TAGNAME::${RELEASE_TAGNAME}"
+          PRERELEASE_REVISION=$(scripts/get-prerelease-revision.sh)
+          echo "PRERELEASE_REVISION=${{PRERELEASE_REVISION}}" >> $GITHUB_ENV
+
+      - name: tag prerelease
+        run: |
+          git tag ${{ env.PRERELEASE_REVISION }}
 
       - name: prepare release summary
         id: prepare_summary
@@ -96,32 +87,12 @@ jobs:
 
       - name: select release type from branch name
         run: |
-          current_branch=$(git rev-parse --abbrev-ref HEAD)
-          if [[ ${current_branch} == *"nb4-maintenance"* ]]
-           then
-            echo "PRERELEASE=false" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest,nosqlbench/nosqlbench:4x,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
-           else
             echo "PRERELEASE=true" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:nb5preview,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
-          fi
+            echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}-prerelease" >> $GITHUB_ENV
 
-      - name: prepare Maven release
-        run: scripts/release-prepare.sh
-        env:
-          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "main"
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-          GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-          GPG_ENABLED: "true"
-          GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
-          GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
-          GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          MAVEN_REPO_SERVER_ID: ${{ secrets.MAVEN_REPO_SERVER_ID }}
-          MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
-          MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+      - name: build prerelease revision
+        run: |
+          mvn package -Drevision="${{ env.PRERELEASE_REVISION }}"
 
       - name: generate javadoc
         run: mvn javadoc:aggregate-jar
@@ -163,24 +134,6 @@ jobs:
 #          name: itlogs
 #          path: itlogs
 
-      - name: perform Maven release
-        run: scripts/release-perform.sh
-        continue-on-error: true
-        env:
-          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "main"
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-          GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-          GPG_ENABLED: "true"
-          GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
-          GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
-          GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          MAVEN_REPO_SERVER_ID: ${{ secrets.MAVEN_REPO_SERVER_ID }}
-          MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
-          MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
-
       - name: bundle artifacts
         run: |
           pwd
@@ -212,26 +165,16 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_TAGS }}
 
-#      - name: bundle guidebook
-#        run: mkdir guidebook && cp -R nb/target/guidebook guidebook
-#
-#      - name: upload guidebook
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: guidebook
-#          path: guidebook
-#
-
       - name: create github release
         id: create_github_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.RELEASE_TAGNAME }}
-          release_name: Release ${{ env.RELEASE_TAGNAME }}
+          tag_name: ${{ env.PRERELEASE_REVISION }}
+          release_name: Release ${{ env.PRERELEASE_REVISION }}
           draft: false
-          prerelease: ${{ env.PRERELEASE }}
+          prerelease: true
           body: ${{ steps.prepare_summary.outputs.release_summary }}
 
       - name: upload nb.jar to github release
