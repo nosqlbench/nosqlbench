@@ -1,4 +1,5 @@
-- 430bee3eb (HEAD -> prerelease-testing, origin/prerelease-testing) fix version reference
+- 801ed23ce (HEAD -> prerelease-testing, origin/prerelease-testing) fix revision var
+- 430bee3eb fix version reference
 - 1f5b133f9 version fixes
 - 1793eb22f fixed script name
 - 320173997 prerelease testing
