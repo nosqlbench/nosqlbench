@@ -68,7 +68,7 @@ jobs:
       - name: read versions
         run: |
           set -x
-          PRERELEASE_REVISION=$(scripts/get-prerelease-revision.sh)
+          PRERELEASE_REVISION=$(scripts/get-prerelease-version.sh)
           echo "PRERELEASE_REVISION=${PRERELEASE_REVISION}" >> $GITHUB_ENV
           echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${PRERELEASE_VERSION}-prerelease" >> $GITHUB_ENV
 
