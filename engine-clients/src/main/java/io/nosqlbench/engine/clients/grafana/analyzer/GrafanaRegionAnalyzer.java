@@ -22,6 +22,8 @@ import io.nosqlbench.engine.clients.grafana.GStitcher;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -36,16 +38,16 @@ import java.util.stream.Collectors;
 
 public class GrafanaRegionAnalyzer implements Runnable {
 
+    private final Logger logger = LogManager.getLogger(GrafanaRegionAnalyzer.class);
+
     private String baseUrl = "";
     //    private String dashboardId = "";
     private GrafanaClient gclient;
 
     public static void main(String[] args) {
         GrafanaRegionAnalyzer analyzer = new GrafanaRegionAnalyzer();
-        analyzer.setBaseUrl("http://44.242.139.57:3000/");
-//
-//
-//        analyzer.setDashboardId("aIIX1f6Wz");
+        analyzer.setBaseUrl("http://<host>:<port>/");
+//        analyzer.setDashboardId("<<dashboard_id>>");
         analyzer.run();
     }
 
@@ -129,21 +131,21 @@ public class GrafanaRegionAnalyzer implements Runnable {
             Map<String, Object> fieldConfig = mainpanel.getFieldConfig();
             Map<String, String> options = mainpanel.getOptions();
             List<GPanelDef.GTarget> targets = mainpanel.getTargets();
-            System.out.println("targets:\n" + targets);
+            logger.info("targets:\n" + targets);
 
             for (GPanelDef.GTarget target : targets) {
                 String expr = target.getExpr();
                 expr = stitcher.stitchRegex(expr);
 //                expr = GStitcher.resolve(expr,tplValues,GStitcher.Regex);
-                System.out.println("expr now:" + expr);
+                logger.info("expr now:" + expr);
                 GRangeResult result = getClient().doRangeQuery(mainpanel.getDatasource(), expr, db.getTime().getFrom(), db.getTime().getTo());
 //                GQueryResult gqr = getClient().doProxyQuery(mainpanel.getDatasource(), expr, new TypeToken<GQueryResult>() {});
-                System.out.println(result);
+                logger.info(result);
             }
 
-            //System.out.println(mainpanel);
+            //logger.info(mainpanel);
         }
-        System.out.println(mainpanels.size() + " graphs...");
+        logger.info(mainpanels.size() + " graphs...");
 
         //http://44.242.139.57:3000/api/datasources/proxy/1/
         // api/v1/query_range?query= result{
@@ -175,7 +177,7 @@ public class GrafanaRegionAnalyzer implements Runnable {
 //
 //
 //        for (GAnnotation anno : mainActivityAnno) {
-//            System.out.println("creating data snapshot for " + anno);
+//            logger.info("creating data snapshot for " + anno);
 //            long start = anno.getTime();
 //            long end = anno.getTimeEnd();
 //            String snapshotKey = "ss-" + dashboardId + "-" + anno.getId();
@@ -185,7 +187,7 @@ public class GrafanaRegionAnalyzer implements Runnable {
 //                GSnapshot newsnapshot = client.findSnapshotBykey(info.getKey());
 //            }
 //        }
-        System.out.println("end");
+        logger.info("end");
     }
 
     public GDashboard getDashboard(String dbUid) {

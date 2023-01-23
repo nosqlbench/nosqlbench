@@ -720,7 +720,7 @@ public class GrafanaClient {
                 "query=" + URLEncoder.encode(expr) + "&start=" + start + "&end=" + end + "&step=300",
                 new TypeToken<PromQueryResult<PMatrixData>>() {
                 });
-            System.out.println(vectorData);
+            logger.info(vectorData);
             return null;
         } else {
             throw new RuntimeException("data source " + datasource + " is not yet supported.");

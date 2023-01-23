@@ -17,12 +17,16 @@
 package io.nosqlbench.engine.clients.grafana;
 
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 public class GrafanaClientTest {
+    private final static Logger logger = LogManager.getLogger(GrafanaClientTest.class);
+
     private static final String testurl = "http://localhost:3000/";
 
     @Test
@@ -34,7 +38,7 @@ public class GrafanaClientTest {
         a.setDashboardId(2);
         a.setText("testingAnnotation");
         GAnnotation created = client.createAnnotation(a);
-        System.out.println(created);
+        logger.info(created);
     }
 
     @Test
@@ -43,7 +47,7 @@ public class GrafanaClientTest {
         GrafanaClient client = new GrafanaClient(testurl);
         client.getConfig().basicAuth("admin", "admin");
         List<GAnnotation> annotations = client.findAnnotations(By.id(1));
-        System.out.println(annotations);
+        logger.info(annotations);
     }
 
     @Test
@@ -52,6 +56,6 @@ public class GrafanaClientTest {
         GrafanaClient client = new GrafanaClient(testurl);
         client.getConfig().basicAuth("admin", "admin");
         ApiToken token = client.createApiToken("nosqlbench", "Admin", Long.MAX_VALUE);
-        System.out.println(token);
+        logger.info(token);
     }
 }
