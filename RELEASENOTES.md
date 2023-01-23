@@ -1,4 +1,5 @@
-- 1793eb22f (HEAD -> prerelease-testing, origin/prerelease-testing) fixed script name
+- 1f5b133f9 (HEAD -> prerelease-testing, origin/prerelease-testing) version fixes
+- 1793eb22f fixed script name
 - 320173997 prerelease testing
 - f31ea802d prerelease testing
 - 0de184e42 fixed typo
