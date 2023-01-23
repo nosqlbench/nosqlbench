@@ -1,5 +1,6 @@
-- adb40cec4 (HEAD -> prerelease-testing) version fixes
-- 1adb4e4af (origin/prerelease-testing) fix version, again
+- 6a118d289 (HEAD -> prerelease-testing, origin/prerelease-testing) naming fixes
+- adb40cec4 version fixes
+- 1adb4e4af fix version, again
 - 801ed23ce fix revision var
 - 430bee3eb fix version reference
 - 1f5b133f9 version fixes
