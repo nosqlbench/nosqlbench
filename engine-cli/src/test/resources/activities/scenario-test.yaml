@@ -2,11 +2,11 @@ min_version: "4.17.15"
 
 scenarios:
   default:
-    schema: run driver==stdout yaml===scenario-test tags=block:schema
-    rampup: run driver=stdout yaml===scenario-test tags=block:rampup cycles=TEMPLATE(cycles1,10)
-    main: run driver=stdout yaml===scenario-test tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
+    schema: run driver==stdout workload===scenario-test tags=block:schema
+    rampup: run driver=stdout workload===scenario-test tags=block:rampup cycles=TEMPLATE(cycles1,10)
+    main: run driver=stdout workload===scenario-test tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
   schema-only:
-    - "run driver=stdout yaml=scenario-test tags=phase:schema doundef==undef"
+    - "run driver=stdout workload=scenario-test tags=phase:schema doundef==undef"
   template-test:
     with-template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
 
