@@ -70,25 +70,8 @@ jobs:
           set -x
           PRERELEASE_REVISION=$(scripts/get-prerelease-revision.sh)
           echo "PRERELEASE_REVISION=${{PRERELEASE_REVISION}}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}-prerelease" >> $GITHUB_ENV
 
-      - name: tag prerelease
-        run: |
-          git tag ${{ env.PRERELEASE_REVISION }}
-
-      - name: prepare release summary
-        id: prepare_summary
-        run: |
-          #summary=$(scripts/release-notes.sh)
-          summary=$(cat RELEASENOTES.md)
-          summary="${summary//'%'/'%25'}"
-          summary="${summary//$'\n'/'%0A'}"
-          summary="${summary//$'\r'/'%0D'}"
-          echo "::set-output name=release_summary::$summary"
-
-      - name: select release type from branch name
-        run: |
-            echo "PRERELEASE=true" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}-prerelease" >> $GITHUB_ENV
 
       - name: build prerelease revision
         run: |
@@ -154,6 +137,20 @@ jobs:
         with:
           name: javadoc
           path: target/nosqlbench-*-javadoc.jar
+
+      - name: prepare release summary
+        id: prepare_summary
+        run: |
+          #summary=$(scripts/release-notes.sh)
+          summary=$(cat RELEASENOTES.md)
+          summary="${summary//'%'/'%25'}"
+          summary="${summary//$'\n'/'%0A'}"
+          summary="${summary//$'\r'/'%0D'}"
+          echo "::set-output name=release_summary::$summary"
+
+      - name: tag prerelease
+        run: |
+          git tag ${{ env.PRERELEASE_REVISION }}
 
       - name: docker push to hub
         uses: docker/build-push-action@v2
