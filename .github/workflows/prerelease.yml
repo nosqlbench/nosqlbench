@@ -151,6 +151,7 @@ jobs:
       - name: tag prerelease
         run: |
           git tag ${{ env.PRERELEASE_REVISION }}
+          git push --tags
 
       - name: docker push to hub
         uses: docker/build-push-action@v2

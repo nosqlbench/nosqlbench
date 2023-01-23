@@ -70,7 +70,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-clients</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
     </dependencies>
