@@ -70,7 +70,7 @@ jobs:
           set -x
           PRERELEASE_REVISION=$(scripts/get-prerelease-version.sh)
           echo "PRERELEASE_REVISION=${PRERELEASE_REVISION}" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PRERELEASE_REVISION}-prerelease,nosqlbench/nosqlbench:prerelease" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PRERELEASE_REVISION},nosqlbench/nosqlbench:prerelease" >> $GITHUB_ENV
 
       - name: build prerelease revision
         run: |
@@ -101,7 +101,7 @@ jobs:
 
       - name: sanity check docker image
         run: |
-          docker run --rm nosqlbench/nosqlbench:${{ env.PRERELEASE_REVISION }}-prerelease --version
+          docker run --rm nosqlbench/nosqlbench:${{ env.PRERELEASE_REVISION }} --version
 
 #      - name: bundle integration test logs
 #        run: |
