@@ -16,12 +16,12 @@
 
 package io.nosqlbench.engine.clients.grafana.analyzer;
 
+import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.engine.clients.grafana.GRangeResult;
 import io.nosqlbench.engine.clients.grafana.GStitcher;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.*;
-import io.nosqlbench.api.metadata.SystemId;
 
 import java.nio.file.Path;
 import java.time.Instant;

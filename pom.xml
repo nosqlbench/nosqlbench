@@ -36,19 +36,22 @@
     <properties>
         <!-- CORE MODULES -->
         <module.mvn-defaults>mvn-defaults</module.mvn-defaults>
-        <module.nb5>nb5</module.nb5>
-        <module.nbr>nbr</module.nbr>
-        <module.nbr-examples>nbr-examples</module.nbr-examples>
         <module.nb-api>nb-api</module.nb-api>
         <module.nb-annotations>nb-annotations</module.nb-annotations>
-        <module.nb-spectest>nb-spectest</module.nb-spectest>
+        <module.adapters-api>adapters-api</module.adapters-api>
         <module.engine-api>engine-api</module.engine-api>
+
         <module.engine-core>engine-core</module.engine-core>
         <module.engine-extensions>engine-extensions</module.engine-extensions>
         <module.engine-docker>engine-docker</module.engine-docker>
-        <module.engine-docs>engine-docs</module.engine-docs>
         <module.engine-cli>engine-cli</module.engine-cli>
-        <module.adapters-api>adapters-api</module.adapters-api>
+        <module.engine-docs>engine-docs</module.engine-docs>
+
+        <module.nb5>nb5</module.nb5>
+        <module.nbr>nbr</module.nbr>
+
+        <module.nb-spectest>nb-spectest</module.nb-spectest>
+        <module.nbr-examples>nbr-examples</module.nbr-examples>
 
         <!-- driver modules -->
         <module.adapter-diag>adapter-diag</module.adapter-diag>
@@ -88,6 +91,7 @@
         <module>engine-extensions</module>
         <module>engine-docker</module>
         <module>engine-docs</module>
+        <module>engine-clients</module>
         <module>engine-cli</module>
         <module>adapters-api</module>
 
