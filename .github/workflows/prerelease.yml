@@ -1,4 +1,4 @@
-name: release
+name: prerelease
 
 on:
   push:
@@ -69,8 +69,8 @@ jobs:
         run: |
           set -x
           PRERELEASE_REVISION=$(scripts/get-prerelease-revision.sh)
-          echo "PRERELEASE_REVISION=${{PRERELEASE_REVISION}}" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}-prerelease" >> $GITHUB_ENV
+          echo "PRERELEASE_REVISION=${PRERELEASE_REVISION}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest-prerelease,nosqlbench/nosqlbench:${PRERELEASE_VERSION}-prerelease" >> $GITHUB_ENV
 
 
       - name: build prerelease revision

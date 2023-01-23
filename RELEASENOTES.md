@@ -1,5 +1,6 @@
-- 0de184e42 (HEAD -> prerelease-testing) fixed typo
-- b40aec8a7 (origin/prerelease-testing) prerelease testing
+- f31ea802d (HEAD -> prerelease-testing, origin/prerelease-testing) prerelease testing
+- 0de184e42 fixed typo
+- b40aec8a7 prerelease testing
 - 4eb07e046 do not run build when prerelease is already selected
 - 961f420de defer prerelease tagging until staging is complete
 - 08040f9ad actions testing
