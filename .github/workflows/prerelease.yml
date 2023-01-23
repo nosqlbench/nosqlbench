@@ -72,7 +72,6 @@ jobs:
           echo "PRERELEASE_REVISION=${PRERELEASE_REVISION}" >> $GITHUB_ENV
           echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PRERELEASE_REVISION}-prerelease,nosqlbench/nosqlbench:prerelease" >> $GITHUB_ENV
 
-
       - name: build prerelease revision
         run: |
           mvn package -Drevision="${{ env.PRERELEASE_REVISION }}"

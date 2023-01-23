@@ -19,4 +19,4 @@ set -e
 
 export REVISION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 export PRERELEASE_REVISION=$(echo "${REVISION}" | cut -d'-' -f1)
-printf "%s\n" "${PRERELEASE_REVISION}"
+printf "%s-prerelease\n" "${PRERELEASE_REVISION}"
