@@ -102,7 +102,7 @@ jobs:
 
       - name: sanity check docker image
         run: |
-          docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }} --version
+          docker run --rm nosqlbench/nosqlbench:${{ env.PRERELEASE_REVISION }} --version
 
 #      - name: bundle integration test logs
 #        run: |

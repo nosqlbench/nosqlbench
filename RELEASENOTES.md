@@ -1,4 +1,5 @@
-- 1f5b133f9 (HEAD -> prerelease-testing, origin/prerelease-testing) version fixes
+- 430bee3eb (HEAD -> prerelease-testing, origin/prerelease-testing) fix version reference
+- 1f5b133f9 version fixes
 - 1793eb22f fixed script name
 - 320173997 prerelease testing
 - f31ea802d prerelease testing
