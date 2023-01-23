@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
+    paths:
+      - "!RELEASENOTES.md"
   pull_request:
-  paths:
-    - "!RELEASENOTES.md"
 
 jobs:
   build:
