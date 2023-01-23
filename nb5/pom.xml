@@ -21,7 +21,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>5.17.1-SNAPSHOT</version>
+        <version>${revision}</version>
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -56,37 +56,37 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-tcp</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-mongodb</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-diag</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-dynamodb</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -98,13 +98,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-http</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-pulsar</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -116,13 +116,13 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-s4j</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
-            <version>5.17.1-SNAPSHOT</version>
+            <version>${revision}</version>
             <!--            <exclusions>-->
             <!--                <exclusion>-->
             <!--                    <artifactId>slf4j-api</artifactId>-->
@@ -245,7 +245,7 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>adapter-mongodb</artifactId>
-                    <version>5.17.1-SNAPSHOT</version>
+                    <version>${revision}</version>
                 </dependency>
             </dependencies>
         </profile>

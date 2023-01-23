@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Optional;
  * An Op Template Supplier can provide its own source of op templates instead
  * of relying on the built-in mechanism. By default, the built-in mechanism
  * will read op definitions from parameters first, then any ops (statements)
- * from yaml files provided in the workload= or yaml= activity parameters.
+ * from yaml files provided in the workload= activity parameters.
  */
 public interface OpTemplateSupplier extends DriverAdapterDecorators {
 

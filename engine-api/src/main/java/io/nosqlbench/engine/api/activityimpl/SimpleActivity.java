@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
@@ -193,7 +194,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public String toString() {
-        return getAlias()+":"+getRunState()+":"+getRunStateTally().toString();
+        return getAlias() + ":" + getRunState() + ":" + getRunStateTally().toString();
     }
 
     @Override
@@ -486,7 +487,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-            int dryrunCount=0;
+            int dryrunCount = 0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
@@ -510,7 +511,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
-            if (dryrunCount>0) {
+            if (dryrunCount > 0) {
                 logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
             }
 
@@ -547,22 +548,33 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter> defaultDriverAdapter) {
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-//        StrInterpolator interp = new StrInterpolator(activityDef);
 
         StmtsDocList stmtsDocList = loadStmtsDocList();
-
 
         List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
         List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
 
         if (filteredOps.size() == 0) {
-            if (unfilteredOps.size() > 0) {
+            if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
                 throw new BasicError("There were no active statements with tag filter '"
                     + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             } else {
+                // There were no ops, and it *wasn't* because they were all filtered out.
+
+                // In this case, let's try to synthesize the ops as long as at least a default driver was provided
                 if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                     filteredOps = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
                     Objects.requireNonNull(filteredOps);
+                    if (filteredOps.size() == 0) {
+                        throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
+                            " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
+                    }
+                } else { // But if there were no ops, and there was no default driver provided, we can't continue
+                    throw new BasicError("""
+                        No op templates were provided. You must provide one of these activity parameters:
+                        1) workload=some.yaml
+                        2) op='inline template
+                        3) driver=stdout (or any other drive that can synthesize ops)""");
                 }
             }
             if (filteredOps.size() == 0) {
@@ -652,19 +664,17 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected StmtsDocList loadStmtsDocList() {
 
         try {
-            StmtsDocList stmtsDocList = null;
-
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
-                stmtsDocList = StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
                 workloadSource = "commandline:" + stmt.get();
+                return StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
             } else if (op_yaml_loc.isPresent()) {
-                stmtsDocList = StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
                 workloadSource = "yaml:" + op_yaml_loc.get();
+                return StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
 
-            return stmtsDocList;
+            return StmtsDocList.none();
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);

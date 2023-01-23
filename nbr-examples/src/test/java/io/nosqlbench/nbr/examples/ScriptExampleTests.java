@@ -275,7 +275,7 @@ public class ScriptExampleTests {
     public void testErrorPropagationFromActivityInitialization() {
         ExecutionMetricsResult scenarioResult = runScenario("activity_init_error");
         assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("Unable to convert end cycle from invalid");
+        assertThat(scenarioResult.getException().getMessage()).contains("Unknown config parameter 'unknown_config'");
         assertThat(scenarioResult.getException()).isNotNull();
     }
 

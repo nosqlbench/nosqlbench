@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,16 +255,6 @@ public class ParamsParser {
             throw new RuntimeException("Unable to parse input:" + input);
         }
 
-        if (canonicalize) {
-            List<String> keys = new ArrayList<>(parms.keySet());
-            for (String key : keys) {
-                String properkey = Synonyms.canonicalize(key, logger);
-                if (!key.equals(properkey)) {
-                    parms.put(properkey, parms.get(key));
-                    parms.remove(key);
-                }
-            }
-        }
         return parms;
     }
 
