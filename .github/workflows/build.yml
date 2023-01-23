@@ -3,6 +3,8 @@ name: build
 on:
   push:
   pull_request:
+  paths:
+    - "!RELEASENOTES.md"
 
 jobs:
   build:
