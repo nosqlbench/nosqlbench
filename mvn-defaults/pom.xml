@@ -24,7 +24,7 @@
 
     <properties>
 
-        <revision>5.17.2-SNAPSHOT</revision>
+        <revision>5.17.1-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
