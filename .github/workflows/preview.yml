@@ -121,6 +121,10 @@ jobs:
           git tag ${{ env.PREVIEW_VERSION }}
           git push --tags
 
+      - name: bump minor version
+        run: |
+          scripts/bump-minor-version
+
       - name: docker push to hub
         uses: docker/build-push-action@v2
         with:
