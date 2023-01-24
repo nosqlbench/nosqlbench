@@ -1,5 +1,10 @@
 name: prerelease
 
+# This workflow should run for any push which is a preview build.
+# Preview builds are indicated with changes to PREVIEW_NOTES.md.
+# In order to effect this, you can do the following:
+#  scripts/release-notes.sh > PREVIEW_NOTES.md
+
 on:
   push:
     branches:

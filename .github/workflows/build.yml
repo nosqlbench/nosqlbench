@@ -1,10 +1,13 @@
 name: build
 
+# This workflow should run for any push or pull request which is neither
+# a preview build nor a release build.
+
 on:
   push:
     paths:
-      - "!RELEASENOTES.md"
-      - "!PRERELEASE_NOTES.md"
+      - "!RELEASE_NOTES.md"
+      - "!PREVIEW_NOTES.md"
   pull_request:
 
 jobs:
