@@ -96,9 +96,6 @@ jobs:
           name: binaries
           path: staging
 
-      - run: ls -la target
-
-
 #      - name: generate javadoc
 #        run: mvn javadoc:aggregate-jar
 #        continue-on-error: false

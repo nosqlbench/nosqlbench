@@ -1,4 +1,6 @@
-- 6a118d289 (HEAD -> prerelease-testing, origin/prerelease-testing) naming fixes
+- fcdddf307 (HEAD -> prerelease-testing) simplify version
+- ac7f5762c (origin/prerelease-testing) actions cleanup
+- 6a118d289 naming fixes
 - adb40cec4 version fixes
 - 1adb4e4af fix version, again
 - 801ed23ce fix revision var
