@@ -1,4 +1,4 @@
-name: prerelease
+name: preview
 
 # This workflow should run for any push which is a preview build.
 # Preview builds are indicated with changes to PREVIEW_NOTES.md.
@@ -11,7 +11,7 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+-preview"
 
 jobs:
-  release:
+  preview-build:
     runs-on: ubuntu-20.04
     steps:
 
