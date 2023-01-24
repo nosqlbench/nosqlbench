@@ -7,10 +7,10 @@ name: release
 
 on:
   push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-release"
     branches:
       - main
-    paths:
-      - RELEASE_NOTES.**
 
 jobs:
   release:

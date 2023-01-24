@@ -1,14 +1,17 @@
 #!/bin/bash
 set -e
-#RELEASE_NOTES_FILE=${RELEASE_NOTES_FILE:?RELEASE_NOTES_FILE must be provided}
-
 git log --oneline --decorate --max-count=1000 > /tmp/gitlog.txt
 
 readarray lines < /tmp/gitlog.txt
 for line in "${lines[@]}"
 do
- if [[ $line =~ \(tag:\ nosqlbench-[0-9]+\.[0-9]+\.[0-9]+\).+ ]]
+ printf "line: %s\n" "${line}"
+ if [[ $line =~ \(tag:\ ([a-zA-z0-9]+-)?[0-9]+\.[0-9]+\.[0-9]+\)-preview.+ ]]
  then
+  echo "PREVIEW"
+ elif [[ $line =~ \(tag:\ ([a-zA-Z0-9]+-)?[0-9]+\.[0-9]+\.[0-9]+\).+ ]]
+ then
+  echo "RELEASE"
 #  printf "no more lines after $line" 1>&2
   break
  elif [[ $line =~ \[maven-release-plugin\] ]]

@@ -18,5 +18,37 @@
 set -e
 
 export REVISION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
-export PRERELEASE_REVISION=$(echo "${REVISION}" | cut -d'-' -f1)
-printf "%s\n" "${PRERELEASE_REVISION}"
+if [[ $REVISION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT$ ]]
+then
+ printf "The revision matches the format, continuing\n" 1>&2
+ set -- "${BASH_REMATCH[@]}"
+ VERSION_STRING="${@:2:3}"
+else
+ printf "The revision format for '${REVISION}' does not match #.#.#-SNAPSHOT form. bailing out\n"
+ exit 3
+fi
+
+export TAG=$(git describe --exact-match --tags)
+if [[ $TAG =~ ([0-9]+)\.([0-9]+)\.([0-9]+)(-release)? ]]
+then
+ printf "The tag format matches the version, continuing\n" 1>&2
+ set -- "${BASH_REMATCH[@]}"
+ TAG_STRING="${@:2:3}"
+else
+ printf "The tag format for '${TAG}' does not match #.#.#-release form. bailing out\n" 1>&2
+ exit 4
+fi
+
+printf "version(${VERSION_STRING}) tag(${TAG_STRING})\n" 1>&2
+
+if [ "${VERSION_STRING}" == "${TAG_STRING}" ]
+then
+ printf "version and tag match, continuing\n" 1>&2
+else
+ printf "version and tag do not match: bailing out\n" 1>&2
+ exit 5
+fi
+
+printf "%s.%s.%s-release\n" "${@:2:3}"
+
+
