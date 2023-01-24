@@ -1,9 +1,9 @@
-name: prerelease
+name: release
 
 on:
   push:
     branches:
-      - prerelease-testing
+      - main
     paths:
       - RELEASENOTES.**
 
@@ -48,13 +48,13 @@ jobs:
       - name: read versions
         run: |
           set -x
-          PRERELEASE_REVISION=$(scripts/get-prerelease-version.sh)
-          echo "PRERELEASE_REVISION=${PRERELEASE_REVISION}" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PRERELEASE_REVISION},nosqlbench/nosqlbench:prerelease" >> $GITHUB_ENV
+          RELEASE_REVISION=$(scripts/get-release-version.sh)
+          echo "RELEASE_REVISION=${RELEASE_REVISION}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${RELEASE_REVISION},nosqlbench/nosqlbench:latest" >> $GITHUB_ENV
 
-      - name: build prerelease revision
+      - name: build release revision
         run: |
-          mvn clean package -Drevision="${{ env.PRERELEASE_REVISION }}"
+          mvn clean package -Drevision="${{ env.RELEASE_REVISION }}"
 
       - name: Setup docker buildx
         uses: docker/setup-buildx-action@v1
@@ -81,7 +81,7 @@ jobs:
 
       - name: sanity check docker image
         run: |
-          docker run --rm nosqlbench/nosqlbench:${{ env.PRERELEASE_REVISION }} --version
+          docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_REVISION }} --version
 
       - name: bundle artifacts
         run: |
@@ -116,9 +116,9 @@ jobs:
           summary="${summary//$'\r'/'%0D'}"
           echo "release_summary=$summary" >> $GITHUB_STATE
 
-      - name: tag prerelease
+      - name: tag release
         run: |
-          git tag ${{ env.PRERELEASE_REVISION }}
+          git tag ${{ env.RELEASE_REVISION }}
           git push --tags
 
       - name: docker push to hub
@@ -138,8 +138,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           node-version: '16'
-          tag_name: ${{ env.PRERELEASE_REVISION }}
-          release_name: Release ${{ env.PRERELEASE_REVISION }}
+          tag_name: ${{ env.RELEASE_REVISION }}
+          release_name: Release ${{ env.RELEASE_REVISION }}
           draft: false
           prerelease: true
           body: ${{ steps.prepare_summary.outputs.release_summary }}

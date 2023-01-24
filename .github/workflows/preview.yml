@@ -1,0 +1,253 @@
+name: prerelease
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - PREVIEW_NOTES.md
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v3
+
+      - name: setup java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          java-package: jdk
+          architecture: x64
+
+      - name: set git username
+        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+
+      - name: set git email
+        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+
+      - name: free disk space
+        run: |
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          docker rmi $(docker image ls -aq)
+          df -h
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          node-version: '16'
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: read versions
+        run: |
+          set -x
+          PREVIEW_VERSION=$(scripts/get-preview-version.sh)
+          echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
+
+      - name: build preview revision
+        run: |
+          mvn clean package -Drevision="${{ env.PREVIEW_VERSION }}"
+
+      - name: Setup docker buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+           node-version: '16'
+
+      - name: docker hub login
+        uses: docker/login-action@v1
+        with:
+          node-version: '16'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: docker test build
+        uses: docker/build-push-action@v2
+        with:
+          node-version: '16'
+          context: .
+          file: Dockerfile
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.DOCKER_TAGS }}
+
+      - name: sanity check docker image
+        run: |
+          docker run --rm nosqlbench/nosqlbench:${{ env.PREVIEW_VERSION }} --version
+
+      - name: bundle artifacts
+        run: |
+          pwd
+          ls -l
+          mkdir staging
+          cp nb5/target/nb5.jar nb5/target/nb5 staging
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: binaries
+          path: staging
+
+#      - name: generate javadoc
+#        run: mvn javadoc:aggregate-jar
+#        continue-on-error: false
+#
+#      - name: upload javadoc
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: javadoc
+#          path: target/nosqlbench-*-javadoc.jar
+
+      - name: prepare release summary
+        id: prepare_summary
+        run: |
+          #summary=$(scripts/release-notes.sh)
+          summary=$(cat RELEASENOTES.md)
+          summary="${summary//'%'/'%25'}"
+          summary="${summary//$'\n'/'%0A'}"
+          summary="${summary//$'\r'/'%0D'}"
+          echo "release_summary=$summary" >> $GITHUB_STATE
+
+      - name: tag preview version
+        run: |
+          git tag ${{ env.PREVIEW_VERSION }}
+          git push --tags
+
+      - name: docker push to hub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          file: Dockerfile
+          pull: true
+          push: true
+          tags: ${{ env.DOCKER_TAGS }}
+
+      - name: create github release
+        id: create_github_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          node-version: '16'
+          tag_name: ${{ env.PREVIEW_VERSION }}
+          release_name: Release ${{ env.PREVIEW_VERSION }}
+          draft: false
+          prerelease: true
+          body: ${{ steps.prepare_summary.outputs.release_summary }}
+
+      - name: upload nb.jar to github release
+        id: upload-nb-jar
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          node-version: '16'
+          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+          asset_path: nb5/target/nb5.jar
+          asset_name: nb5.jar
+          asset_content_type: application/octet-stream
+
+      - name: upload nb binary to github release
+        id: upload-nb-binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+          asset_path: nb5/target/nb5
+          asset_name: nb5
+          asset_content_type: application/octet-stream
+
+      - name: Archive Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            [a-zA-Z]**/logs/*
+
+#  javadocs:
+#    needs: release
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - name: set git username
+#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+#      - name: set git email
+#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+#      - name: download javadocs
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: javadoc
+#      - run: ls -la
+#      - name: unpackage javadoc
+#        run: unzip nosqlbench-*-javadoc.jar
+#      - run: ls -la
+#      - name: Push javadocs
+#        uses: ad-m/github-push-action@master
+#        with:
+#          repository: nosqlbench/nosqlbench-javadoc
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: main
+#
+#
+#  docs:
+#    needs: release
+#    runs-on: ubuntu-20.04
+#    steps:
+#
+#      - name: set git username
+#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+#
+#      - name: set git email
+#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+#
+#      - name: download guidebook
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: guidebook
+#          path: guidebook
+#
+#      - run: ls -la
+#
+#      - name: clone nosqlbench-docs
+#        env:
+#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+#        run: |
+#          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
+#          cd nosqlbench-docs
+#          echo "files listing"
+#          find .
+#          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
+#          git remote -v
+#
+#      Disabling this because it will be replaced soon.
+#      - name: push changes
+#        env:
+#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+#        run: |
+#          rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
+#          echo "docs.nosqlbench.io" > nosqlbench-docs/docs/CNAME
+#          cd nosqlbench-docs
+#          git add docs
+#          git add -u
+#          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+#          echo "found $CHANGES to push for doc updates"
+#          if (( $CHANGES > 0 ))
+#          then
+#            git commit -m"docs update for $GITHUB_REF"
+#            git push
+#          fi
+
+
+

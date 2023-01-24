@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "!RELEASENOTES.md"
+      - "!PRERELEASE_NOTES.md"
   pull_request:
 
 jobs:
