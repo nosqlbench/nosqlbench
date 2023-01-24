@@ -19,10 +19,13 @@ jobs:
 
       - name: checkout repo
         uses: actions/checkout@v3
+        with:
+          node-version: '16'
 
       - name: setup java
         uses: actions/setup-java@v3
         with:
+          node-version: '16'
           distribution: 'temurin'
           java-version: '17'
           java-package: jdk
@@ -98,6 +101,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v1
         with:
+          node-version: '16'
           name: binaries
           path: staging
 
@@ -123,7 +127,8 @@ jobs:
 
       - name: tag preview version
         run: |
-          git tag ${{ env.PREVIEW_VERSION }}
+          git tag nb5-${{ env.PREVIEW_VERSION }}
+          git tag -f nb5-preview
           git push --tags
 
       - name: bump minor version
@@ -133,6 +138,7 @@ jobs:
       - name: docker push to hub
         uses: docker/build-push-action@v2
         with:
+          node-version: '16'
           context: .
           platforms: linux/amd64,linux/arm64
           file: Dockerfile
@@ -171,6 +177,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          node-version: '16'
           upload_url: ${{ steps.create_github_release.outputs.upload_url }}
           asset_path: nb5/target/nb5
           asset_name: nb5
@@ -180,6 +187,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
+          node-version: '16'
           name: test-results
           path: |
             [a-zA-Z]**/logs/*
