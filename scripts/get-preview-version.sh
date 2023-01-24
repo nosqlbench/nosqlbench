@@ -17,6 +17,16 @@
 
 set -e
 
+export branch=$(git status --branch --porcelain | cut -d' ' -f2)
+
+if [[ $branch =~ main ]]
+then
+ printf "On branch main, continuing\n" 1>&2
+else
+ printf "Not branch main, bailing out\n" 1>&2
+ exit 2
+fi
+
 export REVISION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 if [[ $REVISION =~ ([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT ]]
 then
