@@ -1,4 +1,6 @@
-- c19b2388e (HEAD -> main, origin/prerelease-testing, prerelease-testing) standardize on main/preview/release naming
+- e4e94f9e8 (HEAD -> main) support version bumping
+- 8a2c696eb allow bumping versions
+- c19b2388e (origin/prerelease-testing, origin/main, prerelease-testing) standardize on main/preview/release naming
 - 5facaddfe (tag: 5.17.1-prerelease) actions testing
 - 33c55809d actions testing
 - fcdddf307 simplify version
@@ -19,7 +21,7 @@
 - 08040f9ad actions testing
 - 4b416ccf6 use revision instead of version for module dependency
 - e7959e5bb Merge branch 'main' of github.com:nosqlbench/nosqlbench
-- 362e3c6cd (origin/main) Merge pull request #942 from nosqlbench/nosqlbench-937
+- 362e3c6cd Merge pull request #942 from nosqlbench/nosqlbench-937
 - 839e4d16b Merge pull request #943 from nosqlbench/nosqlbench-941-annotators
 - 0c833f99c (origin/nosqlbench-941-annotators, nosqlbench-941-annotators) PR fixes from comments
 - 696576a31 Merge branch 'main' of github.com:nosqlbench/nosqlbench
