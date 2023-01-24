@@ -1,4 +1,5 @@
-- 5facaddfe (HEAD -> prerelease-testing, origin/prerelease-testing) actions testing
+- c19b2388e (HEAD -> main, origin/prerelease-testing, prerelease-testing) standardize on main/preview/release naming
+- 5facaddfe (tag: 5.17.1-prerelease) actions testing
 - 33c55809d actions testing
 - fcdddf307 simplify version
 - ac7f5762c actions cleanup
@@ -16,7 +17,7 @@
 - 4eb07e046 do not run build when prerelease is already selected
 - 961f420de defer prerelease tagging until staging is complete
 - 08040f9ad actions testing
-- 4b416ccf6 (main) use revision instead of version for module dependency
+- 4b416ccf6 use revision instead of version for module dependency
 - e7959e5bb Merge branch 'main' of github.com:nosqlbench/nosqlbench
 - 362e3c6cd (origin/main) Merge pull request #942 from nosqlbench/nosqlbench-937
 - 839e4d16b Merge pull request #943 from nosqlbench/nosqlbench-941-annotators
