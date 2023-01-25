@@ -80,6 +80,7 @@
         <!-- TODO - consider using properties in the module defs. -->
         <!-- CORE MODULES -->
         <module>mvn-defaults</module>
+        <module>nb5-proof</module>
         <module>nb5</module>
         <module>nbr</module>
         <module>nbr-examples</module>
