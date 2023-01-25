@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import java.nio.file.Path;
 
-public enum TemplateFormat {
+public enum OpTemplateFormat {
     yaml("yaml","yml"),
     json("json","json5"),
     jsonnet("jsonnet","jsonnet5"),
@@ -26,15 +26,15 @@ public enum TemplateFormat {
 
     private final String[] pathExtensions;
 
-    TemplateFormat(String... pathExtensions) {
+    OpTemplateFormat(String... pathExtensions) {
         this.pathExtensions = pathExtensions;
     }
 
-    public static TemplateFormat valueOfPath(Path path) {
+    public static OpTemplateFormat valueOfPath(Path path) {
         var fullName = path.toString();
         String extension = fullName.substring(fullName.lastIndexOf('.')).toLowerCase();
 
-        for (TemplateFormat value : values()) {
+        for (OpTemplateFormat value : values()) {
             for (String pathExtension : value.pathExtensions) {
                 if (pathExtension.equals(extension)) {
                     return value;

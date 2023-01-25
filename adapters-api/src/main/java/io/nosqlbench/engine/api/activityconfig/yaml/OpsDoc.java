@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsBlock;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDoc;
 import io.nosqlbench.api.engine.util.Tagged;
 
 import java.util.ArrayList;
@@ -30,26 +30,26 @@ import java.util.stream.Collectors;
  * StmtsDoc creates a logical view of a statements doc that includes
  * all inherited and overridden values for bindings, tags, and params.
  */
-public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
+public class OpsDoc implements Tagged, Iterable<OpsBlock> {
 
-    private final RawStmtsDoc rawStmtsDoc;
+    private final RawOpsDoc rawOpsDoc;
 
-    public StmtsDoc(RawStmtsDoc rawStmtsDoc) {
-        this.rawStmtsDoc = rawStmtsDoc;
+    public OpsDoc(RawOpsDoc rawOpsDoc) {
+        this.rawOpsDoc = rawOpsDoc;
     }
 
     /**
      * @return a usable list of blocks, including inherited bindings, params, and tags
      * from the parent doc
      */
-    public List<StmtsBlock> getBlocks() {
-        List<StmtsBlock> blocks = new ArrayList<>();
+    public List<OpsBlock> getBlocks() {
+        List<OpsBlock> blocks = new ArrayList<>();
 
         int blockIdx = 0;
-        for (RawStmtsBlock rawStmtsBlock : rawStmtsDoc.getBlocks()) {
-            String compositeName = rawStmtsDoc.getName() +
-                    (rawStmtsBlock.getName().isEmpty() ? "" : "-" + rawStmtsBlock.getName());
-            StmtsBlock compositeBlock = new StmtsBlock(rawStmtsBlock, this, ++blockIdx);
+        for (RawOpsBlock rawOpsBlock : rawOpsDoc.getBlocks()) {
+            String compositeName = rawOpsDoc.getName() +
+                    (rawOpsBlock.getName().isEmpty() ? "" : "-" + rawOpsBlock.getName());
+            OpsBlock compositeBlock = new OpsBlock(rawOpsBlock, this, ++blockIdx);
             blocks.add(compositeBlock);
         }
 
@@ -61,28 +61,28 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
      */
     @Override
     public Map<String, String> getTags() {
-        return rawStmtsDoc.getTags();
+        return rawOpsDoc.getTags();
     }
 
     /**
      * @return a usable map of parameters, including those inherited from the parent doc
      */
     public Map<String, Object> getParams() {
-        return rawStmtsDoc.getParams();
+        return rawOpsDoc.getParams();
     }
 
     /**
      * @return a usable map of bindings, including those inherited from the parent doc
      */
     public Map<String, String> getBindings() {
-        return rawStmtsDoc.getBindings();
+        return rawOpsDoc.getBindings();
     }
 
     /**
      * @return the name of this block
      */
     public String getName() {
-        return rawStmtsDoc.getName();
+        return rawOpsDoc.getName();
     }
 
     /**
@@ -95,19 +95,19 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
 
     /**
      * Allow StmtsDoc to be used in iterable loops.
-     * @return An iterator of {@link StmtsBlock}
+     * @return An iterator of {@link OpsBlock}
      */
     @Override
-    public Iterator<StmtsBlock> iterator() {
+    public Iterator<OpsBlock> iterator() {
         return getBlocks().iterator();
     }
 
 
     public Scenarios getScenarios() {
-        return new Scenarios(rawStmtsDoc.getRawScenarios());
+        return new Scenarios(rawOpsDoc.getRawScenarios());
     }
 
     public String getDescription() {
-        return rawStmtsDoc.getDesc();
+        return rawOpsDoc.getDesc();
     }
 }

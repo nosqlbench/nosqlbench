@@ -19,9 +19,9 @@ package io.nosqlbench.engine.api.activityconfig;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDocList;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,34 +29,34 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 import java.util.Optional;
 
-public class StatementsLoader {
+public class OpsLoader {
 
-    private final static Logger logger = LogManager.getLogger(StatementsLoader.class);
+    private final static Logger logger = LogManager.getLogger(OpsLoader.class);
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml", "json", "jsonnet"};
 
-    public static StmtsDocList loadContent(Content<?> content, Map<String,String> params) {
+    public static OpsDocList loadContent(Content<?> content, Map<String,String> params) {
         return loadString(content.get().toString(),params);
     }
 
-    public static StmtsDocList loadPath(String path, Map<String,?> params, String... searchPaths) {
-        RawStmtsDocList list = null;
+    public static OpsDocList loadPath(String path, Map<String,?> params, String... searchPaths) {
+        RawOpsDocList list = null;
         Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
         String content = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
         return loadString(content,params);
     }
-    public static StmtsDocList loadPath(
+    public static OpsDocList loadPath(
             String path,
             String... searchPaths) {
         return loadPath(path, Map.of(), searchPaths);
     }
 
-    public static StmtsDocList loadString(String yamlContent, Map<String,?> params) {
+    public static OpsDocList loadString(String yamlContent, Map<String,?> params) {
 
         StrInterpolator transformer = new StrInterpolator(params);
-        RawStmtsLoader loader = new RawStmtsLoader(transformer);
-        RawStmtsDocList rawDocList = loader.loadString(yamlContent);
-        StmtsDocList layered = new StmtsDocList(rawDocList);
+        RawOpsLoader loader = new RawOpsLoader(transformer);
+        RawOpsDocList rawDocList = loader.loadString(yamlContent);
+        OpsDocList layered = new OpsDocList(rawDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
             params.remove(k);
@@ -64,11 +64,11 @@ public class StatementsLoader {
         return layered;
     }
 
-    public static StmtsDocList loadStmt(String statement, Map<String,?> params) {
+    public static OpsDocList loadStmt(String statement, Map<String,?> params) {
         StrInterpolator transformer = new StrInterpolator(params);
         statement = transformer.apply(statement);
-        RawStmtsDocList rawStmtsDocList = RawStmtsDocList.forSingleStatement(statement);
-        StmtsDocList layered = new StmtsDocList(rawStmtsDocList);
+        RawOpsDocList rawOpsDocList = RawOpsDocList.forSingleStatement(statement);
+        OpsDocList layered = new OpsDocList(rawOpsDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
             params.remove(k);

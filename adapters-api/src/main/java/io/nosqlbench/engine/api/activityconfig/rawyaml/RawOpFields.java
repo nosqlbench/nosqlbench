@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RawStmtFields extends Tags {
-    private final static Logger logger = LogManager.getLogger(RawStmtFields.class);
+public class RawOpFields extends Tags {
+    private final static Logger logger = LogManager.getLogger(RawOpFields.class);
 
     private String name = "";
     private String desc = "";
     private final Map<String, String> bindings = new LinkedHashMap<>();
     private final Map<String, Object> params = new LinkedHashMap<>();
 
-    public RawStmtFields() {
+    public RawOpFields() {
     }
 
     public String getDesc() {
@@ -80,7 +80,7 @@ public class RawStmtFields extends Tags {
         this.params.putAll(config);
     }
 
-    public void applyBlockParams(RawStmtFields other) {
+    public void applyBlockParams(RawOpFields other) {
         setName(other.getName());
         setBindings(other.getBindings());
         setTags(other.getTags());

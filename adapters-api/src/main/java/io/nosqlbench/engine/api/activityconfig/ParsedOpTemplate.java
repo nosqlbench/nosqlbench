@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class ParsedStmtOp {
+public class ParsedOpTemplate {
 
     private final OpTemplate optpl;
     private final ParsedStringTemplate parsed;
@@ -37,13 +37,13 @@ public class ParsedStmtOp {
      *
      * @param optpl An existing statement def as read from the YAML API.
      */
-    public ParsedStmtOp(OpTemplate optpl) {
+    public ParsedOpTemplate(OpTemplate optpl) {
         this.optpl = optpl;
         String transformed = getStmt();
         parsed = new ParsedStringTemplate(transformed, optpl.getBindings());
     }
 
-    public ParsedStmtOp orError() {
+    public ParsedOpTemplate orError() {
         if (hasError()) {
             throw new RuntimeException("Unable to parse statement: " + this);
         }

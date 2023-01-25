@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import io.nosqlbench.api.errors.BasicError;
 
 import java.util.*;
 
-public class StatementsOwner extends RawStmtFields {
+public class OpsOwner extends RawOpFields {
 
     private final static List<String> stmtsFieldNames = List.of("op","ops","operation","statement","statements");
 
-    private List<RawStmtDef> rawStmtDefs = new ArrayList<>();
+    private List<RawOpDef> rawOpDefs = new ArrayList<>();
 
-    public StatementsOwner() {
+    public OpsOwner() {
     }
 
-    public List<RawStmtDef> getRawStmtDefs() {
-        return rawStmtDefs;
+    public List<RawOpDef> getRawStmtDefs() {
+        return rawOpDefs;
     }
 
-    public void setRawStmtDefs(List<RawStmtDef> rawStmtDefs) {
-        this.rawStmtDefs = rawStmtDefs;
+    public void setRawStmtDefs(List<RawOpDef> rawOpDefs) {
+        this.rawOpDefs = rawOpDefs;
     }
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
@@ -63,14 +63,14 @@ public class StatementsOwner extends RawStmtFields {
     public void setStatementsFieldByType(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
-            List<RawStmtDef> defs = new ArrayList<>(stmtList.size());
+            List<RawOpDef> defs = new ArrayList<>(stmtList.size());
             for (int i = 0; i < stmtList.size(); i++) {
                 String defaultName = "stmt" + (i + 1);
                 Object o = stmtList.get(i);
                 if (o instanceof String) {
-                    defs.add(new RawStmtDef(defaultName, (String) o));
+                    defs.add(new RawOpDef(defaultName, (String) o));
                 } else if (o instanceof Map) {
-                    RawStmtDef def = new RawStmtDef(defaultName, (Map<String, Object>) o);
+                    RawOpDef def = new RawOpDef(defaultName, (Map<String, Object>) o);
                     defs.add(def);
                 } else {
                     throw new RuntimeException("Can not construct stmt def from object type:" + o.getClass());

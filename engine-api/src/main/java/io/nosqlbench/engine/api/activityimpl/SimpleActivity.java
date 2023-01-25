@@ -37,9 +37,9 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DryRunOpDispenserWrapper;
@@ -548,10 +548,10 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 
-        StmtsDocList stmtsDocList = loadStmtsDocList();
+        OpsDocList opsDocList = loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
-        List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> unfilteredOps = opsDocList.getStmts();
+        List<OpTemplate> filteredOps = opsDocList.getStmts(tagfilter);
 
         if (filteredOps.size() == 0) {
             if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
@@ -562,7 +562,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
                 // In this case, let's try to synthesize the ops as long as at least a default driver was provided
                 if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
-                    filteredOps = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
+                    filteredOps = sotp.getSyntheticOpTemplates(opsDocList, getActivityDef().getParams());
                     Objects.requireNonNull(filteredOps);
                     if (filteredOps.size() == 0) {
                         throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
@@ -660,20 +660,20 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         return planner.resolve();
     }
 
-    protected StmtsDocList loadStmtsDocList() {
+    protected OpsDocList loadStmtsDocList() {
 
         try {
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
                 workloadSource = "commandline:" + stmt.get();
-                return StatementsLoader.loadStmt(stmt.get(), activityDef.getParams());
+                return OpsLoader.loadStmt(stmt.get(), activityDef.getParams());
             } else if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();
-                return StatementsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
+                return OpsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
 
-            return StmtsDocList.none();
+            return OpsDocList.none();
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);

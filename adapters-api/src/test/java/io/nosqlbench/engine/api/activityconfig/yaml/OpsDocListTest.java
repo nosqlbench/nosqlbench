@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import org.assertj.core.data.MapEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
@@ -29,10 +29,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StmtsDocListTest {
+public class OpsDocListTest {
 
-    private static final Logger logger = LogManager.getLogger(StmtsDocListTest.class);
-    private static StmtsDocList doclist;
+    private static final Logger logger = LogManager.getLogger(OpsDocListTest.class);
+    private static OpsDocList doclist;
 
     private final LinkedHashMap<String, String> doc0bindings = new LinkedHashMap<String, String>() {{
         put("b2", "b2d");
@@ -50,17 +50,17 @@ public class StmtsDocListTest {
 
     @BeforeAll
     public static void testLoadYaml() {
-        doclist = StatementsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
+        doclist = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
     }
 
     @Test
     public void testBlocksInheritDocData() {
         assertThat(doclist).isNotNull();
         assertThat(doclist.getStmtDocs()).hasSize(2);
-        StmtsDoc doc1 = doclist.getStmtDocs().get(0);
+        OpsDoc doc1 = doclist.getStmtDocs().get(0);
 
         assertThat(doc1.getBlocks()).hasSize(1);
-        StmtsBlock doc1block0 = doc1.getBlocks().get(0);
+        OpsBlock doc1block0 = doc1.getBlocks().get(0);
 
         assertThat(doc1.getTags()).isEqualTo(doc0tags);
         assertThat(doc1.getBindings()).isEqualTo(doc0bindings);
@@ -75,11 +75,11 @@ public class StmtsDocListTest {
 
     @Test
     public void testStmtInheritsBlockData() {
-        StmtsDoc doc0 = doclist.getStmtDocs().get(0);
+        OpsDoc doc0 = doclist.getStmtDocs().get(0);
         List<OpTemplate> stmts1 = doc0.getBlocks().get(0).getOps();
         assertThat(stmts1).hasSize(2);
 
-        StmtsBlock block0 = doc0.getBlocks().get(0);
+        OpsBlock block0 = doc0.getBlocks().get(0);
         assertThat(block0.getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(block0.getParams()).containsExactly(MapEntry.entry("param1","value1"));
         assertThat(block0.getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"));
@@ -96,8 +96,8 @@ public class StmtsDocListTest {
 
     @Test
     public void testBlockLayersDocData() {
-        StmtsDoc doc1 = doclist.getStmtDocs().get(1);
-        StmtsBlock block0 = doc1.getBlocks().get(0);
+        OpsDoc doc1 = doclist.getStmtDocs().get(1);
+        OpsBlock block0 = doc1.getBlocks().get(0);
 
         Map<String, String> doc1block0tags = block0.getTags();
         Map<String, String> doc1block0params = block0.getParamsAsText();
@@ -119,7 +119,7 @@ public class StmtsDocListTest {
 
     @Test
     public void testStmtsGetter() {
-        StmtsDoc doc1 = doclist.getStmtDocs().get(1);
+        OpsDoc doc1 = doclist.getStmtDocs().get(1);
         List<OpTemplate> stmts = doc1.getStmts();
         assertThat(stmts).hasSize(4);
     }

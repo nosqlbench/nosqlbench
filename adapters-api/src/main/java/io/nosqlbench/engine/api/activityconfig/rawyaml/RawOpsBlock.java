@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.util.Map;
 
 /**
  * A StmtsDef contains a list of rawStmts, as well as all of the optional
- * block parameters that can be assigned to {@link RawStmtFields}, which includes
+ * block parameters that can be assigned to {@link RawOpFields}, which includes
  * a name, config values, data bindings, and filtering tags.
  */
-public class RawStmtsBlock extends StatementsOwner {
+public class RawOpsBlock extends OpsOwner {
 
-    public RawStmtsBlock() {}
+    public RawOpsBlock() {}
 
     public void setFieldsByReflection(Map<String, Object> propsmap) {
         super.setFieldsByReflection(propsmap);

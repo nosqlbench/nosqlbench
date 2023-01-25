@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDoc;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.engine.api.util.TagFilter;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -31,30 +31,30 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class StmtsDocList implements Iterable<StmtsDoc> {
-    private final static Logger logger = LogManager.getLogger(StmtsDocList.class);
+public class OpsDocList implements Iterable<OpsDoc> {
+    private final static Logger logger = LogManager.getLogger(OpsDocList.class);
 
-    private final RawStmtsDocList rawStmtsDocList;
+    private final RawOpsDocList rawOpsDocList;
     private final Map<String, String> templateVariables = new LinkedHashMap<>();
 
-    public StmtsDocList(RawStmtsDocList rawStmtsDocList) {
-        this.rawStmtsDocList = rawStmtsDocList;
+    public OpsDocList(RawOpsDocList rawOpsDocList) {
+        this.rawOpsDocList = rawOpsDocList;
     }
 
-    public static StmtsDocList none() {
-        return new StmtsDocList(RawStmtsDocList.none());
+    public static OpsDocList none() {
+        return new OpsDocList(RawOpsDocList.none());
     }
 
-    public List<StmtsDoc> getStmtDocs(String tagFilter) {
+    public List<OpsDoc> getStmtDocs(String tagFilter) {
         TagFilter tf = new TagFilter(tagFilter);
         return getStmtDocs().stream()
             .filter(tf::matchesTagged)
             .collect(Collectors.toList());
     }
 
-    public List<StmtsDoc> getStmtDocs() {
-        return rawStmtsDocList.getStmtsDocs().stream()
-            .map(StmtsDoc::new)
+    public List<OpsDoc> getStmtDocs() {
+        return rawOpsDocList.getStmtsDocs().stream()
+            .map(OpsDoc::new)
             .collect(Collectors.toList());
     }
 
@@ -81,7 +81,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
 
 
     @Override
-    public Iterator<StmtsDoc> iterator() {
+    public Iterator<OpsDoc> iterator() {
         return getStmtDocs().iterator();
     }
 
@@ -94,7 +94,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     public Map<String, String> getDocBindings() {
         LinkedHashMap<String, String> docBindings = new LinkedHashMap<>();
         getStmtDocs().stream()
-            .map(StmtsDoc::getBindings)
+            .map(OpsDoc::getBindings)
             .forEach(docBindings::putAll);
         return docBindings;
     }
@@ -130,7 +130,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     }
 
     public NBConfigModel getConfigModel() {
-        ConfigModel cfgmodel = ConfigModel.of(StmtsDocList.class);
+        ConfigModel cfgmodel = ConfigModel.of(OpsDocList.class);
         getTemplateVariables().forEach((k, v) -> {
             cfgmodel.add(Param.defaultTo(k, v, "template parameter found in the yaml workload"));
         });
@@ -144,9 +144,9 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         int blockscount = 0;
         int opscount = 0;
 
-        for (StmtsDoc stmtDoc : this.getStmtDocs()) {
+        for (OpsDoc stmtDoc : this.getStmtDocs()) {
             docscount++;
-            for (StmtsBlock block : stmtDoc.getBlocks()) {
+            for (OpsBlock block : stmtDoc.getBlocks()) {
                 blockscount++;
                 for (OpTemplate op : block.getOps()) {
                     opscount++;
@@ -161,12 +161,12 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     }
 
     public static NBConfigModelExpander TEMPLATE_VAR_EXPANDER = workload -> {
-        StmtsDocList loaded = StatementsLoader.loadPath((String) workload, "activities");
+        OpsDocList loaded = OpsLoader.loadPath((String) workload, "activities");
         return loaded.getConfigModel();
     };
 
     public Pattern getVersionRegex() {
-        List<RawStmtsDoc> stmtDocs = rawStmtsDocList.getStmtsDocs();
+        List<RawOpsDoc> stmtDocs = rawOpsDocList.getStmtsDocs();
         return Pattern.compile(stmtDocs.size()>0 ? stmtDocs.get(0).getVersionRegex() : ".*");
     }
 }

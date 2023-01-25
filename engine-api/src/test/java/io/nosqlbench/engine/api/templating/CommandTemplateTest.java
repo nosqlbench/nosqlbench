@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package io.nosqlbench.engine.api.templating;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class CommandTemplateTest {
 
     @Test
     public void testCommandTemplate() {
-        StmtsDocList stmtsDocs = StatementsLoader.loadString("" +
+        OpsDocList stmtsDocs = OpsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: test1=foo test2=bar",
             Map.of());
@@ -46,7 +46,7 @@ public class CommandTemplateTest {
     @Test
     public void testCommandTemplateFormat() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        StmtsDocList stmtsDocs = StatementsLoader.loadString("" +
+        OpsDocList stmtsDocs = OpsLoader.loadString("" +
             "statements:\n" +
             " - s1: test1=foo test2={bar}\n" +
             "   bindings:\n" +

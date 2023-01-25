@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package io.nosqlbench.cqlgen.core;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 
@@ -42,7 +42,7 @@ public class CGDefaultCqlBindings implements BindingsLibrary {
             .map(Content::asString)
             .or(() -> loadLocal(DEFAULT_BINDINGS_FILE))
             .orElseThrow(() -> new RuntimeException("Unable to load " + DEFAULT_BINDINGS_FILE + ", from local dir or internally as cqlgen/" + DEFAULT_BINDINGS_FILE));
-        StmtsDocList stmtsDocs = StatementsLoader.loadString(yamlContent, Map.of());
+        OpsDocList stmtsDocs = OpsLoader.loadString(yamlContent, Map.of());
         this.bindings = stmtsDocs.getDocBindings();
     }
 

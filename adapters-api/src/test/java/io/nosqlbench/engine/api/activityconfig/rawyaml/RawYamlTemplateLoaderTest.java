@@ -25,15 +25,15 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RawYamlStatementLoaderTest {
-    private final static Logger logger = LogManager.getLogger(RawYamlStatementLoaderTest.class);
+public class RawYamlTemplateLoaderTest {
+    private final static Logger logger = LogManager.getLogger(RawYamlTemplateLoaderTest.class);
 
     @Test
     public void testLoadPropertiesBlock() {
-        RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList rawBlockDocs = ysl.loadPath("testdocs/rawblock.yaml");
+        RawOpsLoader ysl = new RawOpsLoader();
+        RawOpsDocList rawBlockDocs = ysl.loadPath("testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
-        RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
+        RawOpsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getRawStmtDefs()).hasSize(1);
         assertThat(rawBlockDoc.getBindings()).hasSize(1);
         assertThat(rawBlockDoc.getName()).isEqualTo("name");
@@ -43,30 +43,30 @@ public class RawYamlStatementLoaderTest {
 
     @Test
     public void testLoadFullFormat() {
-        RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
-        List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
-        assertThat(rawStmtsDocs).hasSize(2);
-        RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
-        List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
-        assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
+        RawOpsLoader ysl = new RawOpsLoader();
+        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
+        List<RawOpsDoc> rawOpsDocs = erthing.getStmtsDocs();
+        assertThat(rawOpsDocs).hasSize(2);
+        RawOpsDoc rawOpsDoc = rawOpsDocs.get(0);
+        List<RawOpsBlock> blocks = rawOpsDoc.getBlocks();
+        assertThat(rawOpsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
-        RawStmtsBlock rawStmtsBlock = blocks.get(0);
-        assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
+        RawOpsBlock rawOpsBlock = blocks.get(0);
+        assertThat(rawOpsBlock.getName()).isEqualTo("block0");
     }
 
     @Test
     public void testLoadScenarios() {
-        RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
-        List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
-        assertThat(rawStmtsDocs).hasSize(2);
-        RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
-        List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
-        assertThat(rawStmtsDoc.getDesc()).isEqualTo(
+        RawOpsLoader ysl = new RawOpsLoader();
+        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
+        List<RawOpsDoc> rawOpsDocs = erthing.getStmtsDocs();
+        assertThat(rawOpsDocs).hasSize(2);
+        RawOpsDoc rawOpsDoc = rawOpsDocs.get(0);
+        List<RawOpsBlock> blocks = rawOpsDoc.getBlocks();
+        assertThat(rawOpsDoc.getDesc()).isEqualTo(
             "a quintessential description - this is superseded by dedicated specification tests and will be removed");
 
-        RawScenarios rawScenarios = rawStmtsDoc.getRawScenarios();
+        RawScenarios rawScenarios = rawOpsDoc.getRawScenarios();
         assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
         Map<String, String> defaultScenario = rawScenarios.getNamedScenario("default");
         assertThat(defaultScenario.keySet())
@@ -79,16 +79,16 @@ public class RawYamlStatementLoaderTest {
         assertThat(schemaOnlyScenario.values())
             .containsExactly("run driver=blah tags=phase:schema");
 
-        assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
+        assertThat(rawOpsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
-        RawStmtsBlock rawStmtsBlock = blocks.get(0);
-        assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
+        RawOpsBlock rawOpsBlock = blocks.get(0);
+        assertThat(rawOpsBlock.getName()).isEqualTo("block0");
     }
 
     @Test
     public void testErrorMsg() {
-        RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath("testdocs/badyamlfile.yaml");
+        RawOpsLoader ysl = new RawOpsLoader();
+        RawOpsDocList erthing = ysl.loadPath("testdocs/badyamlfile.yaml");
     }
 
 }

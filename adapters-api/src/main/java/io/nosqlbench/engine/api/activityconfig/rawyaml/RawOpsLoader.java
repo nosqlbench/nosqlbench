@@ -29,18 +29,18 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import java.util.*;
 import java.util.function.Function;
 
-public class RawStmtsLoader {
-    private final static Logger logger = LogManager.getLogger(RawStmtsLoader.class);
+public class RawOpsLoader {
+    private final static Logger logger = LogManager.getLogger(RawOpsLoader.class);
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml"};
 
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
-    public RawStmtsLoader(Function<String,String> transformer) {
+    public RawOpsLoader(Function<String,String> transformer) {
         addTransformer(transformer);
     }
 
-    public RawStmtsLoader() {
+    public RawOpsLoader() {
         addTransformer(new StrInterpolator());
     }
 
@@ -48,7 +48,7 @@ public class RawStmtsLoader {
         Collections.addAll(this.transformers, newTransformer);
     }
 
-    public RawStmtsDocList loadString(final String originalData) {
+    public RawOpsDocList loadString(final String originalData) {
         logger.trace(() -> "Applying string transformer to yaml data:" + originalData);
         String data = originalData;
         try {
@@ -63,7 +63,7 @@ public class RawStmtsLoader {
         return parseYaml(data);
     }
 
-    public RawStmtsDocList loadPath(
+    public RawOpsDocList loadPath(
             String path,
             String... searchPaths) {
 
@@ -78,15 +78,15 @@ public class RawStmtsLoader {
 
     }
 
-    private RawStmtsDocList parseYaml(String data) {
+    private RawOpsDocList parseYaml(String data) {
         LoadSettings loadSettings = LoadSettings.builder().build();
         Load yaml = new Load(loadSettings);
         Iterable<Object> objects = yaml.loadAllFromString(data);
-        List<RawStmtsDoc> newDocList = new ArrayList<>();
+        List<RawOpsDoc> newDocList = new ArrayList<>();
 
         for (Object object : objects) {
             if (object instanceof Map) {
-                RawStmtsDoc doc = new RawStmtsDoc();
+                RawOpsDoc doc = new RawOpsDoc();
                 Map<String, Object> docfields = (Map<String, Object>) object;
                 doc.setFieldsByReflection(docfields);
                 if (docfields.size()>0) {
@@ -98,8 +98,8 @@ public class RawStmtsLoader {
                 throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());
             }
         }
-        RawStmtsDocList rawStmtsDocList = new RawStmtsDocList(newDocList);
-        return rawStmtsDocList;
+        RawOpsDocList rawOpsDocList = new RawOpsDocList(newDocList);
+        return rawOpsDocList;
     }
 
 }

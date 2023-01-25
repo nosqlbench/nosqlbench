@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -33,12 +33,12 @@ public class NBCLIScenarioParserTemplateVarTest {
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        StmtsDocList workload1 = StatementsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
         OpTemplate optpl1 = workload1.getStmts().get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} replaced replaced\n");
 
-        StmtsDocList workload2 = StatementsLoader.loadPath(cmds.get(1).getArg("workload"),cmds.get(1).getParams());
+        OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArg("workload"),cmds.get(1).getParams());
         OpTemplate optpl2 = workload2.getStmts().get(0);
         System.out.println("op from cmd2:"+optpl2);
         assertThat(optpl2.getStmt()).contains("cycle {cycle} def1 def1\n");
@@ -50,7 +50,7 @@ public class NBCLIScenarioParserTemplateVarTest {
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        StmtsDocList workload1 = StatementsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
         OpTemplate optpl1 = workload1.getStmts().get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} overridden overridden\n");

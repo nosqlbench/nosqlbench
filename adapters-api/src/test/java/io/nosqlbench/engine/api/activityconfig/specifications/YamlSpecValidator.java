@@ -18,10 +18,10 @@ package io.nosqlbench.engine.api.activityconfig.specifications;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawYamlLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.nb.spectest.api.STAssemblyValidator;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
 import io.nosqlbench.nb.spectest.loaders.STDefaultLoader;
@@ -107,7 +107,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
-                StmtsDocList stmtsDocs = StatementsLoader.loadString(yaml, Map.of());
+                OpsDocList stmtsDocs = OpsLoader.loadString(yaml, Map.of());
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
@@ -174,10 +174,9 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 throw new RuntimeException("unknown type in comparator: " + json);
             }
         } catch (Exception e) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("error while verifying model:\n");
-            sb.append(" path: ").append(testset.getPath().toString()).append("\n");
-            sb.append(" line: ").append(testset.getLineNumber()).append("\n");
+            String sb = "error while verifying model:\n" +
+                " path: " + testset.getPath().toString() + "\n" +
+                " line: " + testset.getLineNumber() + "\n";
 
             logger.error(sb + ": " + e.getMessage(), e);
             throw new RuntimeException(e);

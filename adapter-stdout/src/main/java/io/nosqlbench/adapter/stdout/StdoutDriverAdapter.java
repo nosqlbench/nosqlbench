@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.stdout;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -59,8 +59,8 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String, Object> cfg) {
-        Set<String> activeBindingNames = new LinkedHashSet<>(stmtsDocList.getDocBindings().keySet());
+    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
+        Set<String> activeBindingNames = new LinkedHashSet<>(opsDocList.getDocBindings().keySet());
 
         if (activeBindingNames.size()==0) {
             logger.warn("Unable to synthesize op for driver=" + this.getAdapterName() + " with zero bindings.");
@@ -88,7 +88,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
             return List.of();
         }
 
-        OpData op = new OpData("synthetic", "synthetic", Map.of(), stmtsDocList.getDocBindings(), cfg,
+        OpData op = new OpData("synthetic", "synthetic", Map.of(), opsDocList.getDocBindings(), cfg,
             Map.of("stmt", genStatementTemplate(filteredBindingNames, cfg)));
 
         return List.of(op);

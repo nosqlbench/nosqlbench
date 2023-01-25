@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpDef;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,15 +27,15 @@ import java.util.*;
 public class OpDef extends OpTemplate {
     private final static Logger logger = LogManager.getLogger(OpDef.class);
 
-    private final RawStmtDef rawStmtDef;
-    private final StmtsBlock block;
+    private final RawOpDef rawOpDef;
+    private final OpsBlock block;
     private final LinkedHashMap<String, Object> params;
     private final LinkedHashMap<String, String> bindings;
     private final LinkedHashMap<String, String> tags;
 
-    public OpDef(StmtsBlock block, RawStmtDef rawStmtDef) {
+    public OpDef(OpsBlock block, RawOpDef rawOpDef) {
         this.block = block;
-        this.rawStmtDef = rawStmtDef;
+        this.rawOpDef = rawOpDef;
         this.params = composeParams();
         this.bindings = composeBindings();
         this.tags = composeTags();
@@ -43,12 +43,12 @@ public class OpDef extends OpTemplate {
 
     @Override
     public String getName() {
-        return block.getName() + "--" + rawStmtDef.getName();
+        return block.getName() + "--" + rawOpDef.getName();
     }
 
     @Override
     public Optional<Map<String, Object>> getOp() {
-        Object op = rawStmtDef.getOp();
+        Object op = rawOpDef.getOp();
         if (op == null) {
             return Optional.empty();
         }
@@ -75,7 +75,7 @@ public class OpDef extends OpTemplate {
     }
 
     private LinkedHashMap<String, String> composeBindings() {
-        MultiMapLookup<String> lookup = new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
+        MultiMapLookup<String> lookup = new MultiMapLookup<>(rawOpDef.getBindings(), block.getBindings());
         return new LinkedHashMap<>(lookup);
     }
 
@@ -85,7 +85,7 @@ public class OpDef extends OpTemplate {
     }
 
     private LinkedHashMap<String, Object> composeParams() {
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtDef.getParams(), block.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawOpDef.getParams(), block.getParams());
         LinkedHashMap<String, Object> params = new LinkedHashMap<>(lookup);
         return params;
     }
@@ -98,7 +98,7 @@ public class OpDef extends OpTemplate {
     }
 
     private LinkedHashMap<String, String> composeTags() {
-        LinkedHashMap<String, String> tagsWithName = new LinkedHashMap<>(new MultiMapLookup<>(rawStmtDef.getTags(), block.getTags()));
+        LinkedHashMap<String, String> tagsWithName = new LinkedHashMap<>(new MultiMapLookup<>(rawOpDef.getTags(), block.getTags()));
         tagsWithName.put("name",getName());
         tagsWithName.put("block",block.getName());
         return tagsWithName;
@@ -111,7 +111,7 @@ public class OpDef extends OpTemplate {
 
     @Override
     public String getDesc() {
-        return rawStmtDef.getDesc();
+        return rawOpDef.getDesc();
     }
 
 }

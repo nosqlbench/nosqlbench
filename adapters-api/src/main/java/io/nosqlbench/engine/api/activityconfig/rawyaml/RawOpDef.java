@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,22 @@ import java.util.*;
 /**
  * See specification for what this should do in UniformWorkloadSpecificationTest
  */
-public class RawStmtDef extends RawStmtFields {
+public class RawOpDef extends RawOpFields {
 
     private Object op;
 
     private final static List<String> opFieldSynonyms = List.of("stmt", "statement", "op", "operation");
 
-    public RawStmtDef() {
+    public RawOpDef() {
     }
 
-    public RawStmtDef(String name, String op) {
+    public RawOpDef(String name, String op) {
         setName(name);
         this.op = op;
     }
 
     @SuppressWarnings("unchecked")
-    public RawStmtDef(String defaultName, Map<String, Object> map) {
+    public RawOpDef(String defaultName, Map<String, Object> map) {
         setFieldsByReflection(map);
         if (this.getName() == null || this.getName().isEmpty()) {
             this.setName(defaultName);
