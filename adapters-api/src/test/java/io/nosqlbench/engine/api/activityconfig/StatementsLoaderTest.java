@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class StatementsLoaderTest {
 
     @Test
     public void testTemplateVarSubstitution() {
-        StmtsDocList stmtsDocs = StatementsLoader.loadPath(null, "activities/template_vars", "src/test/resources");
+        StmtsDocList stmtsDocs = StatementsLoader.loadPath("activities/template_vars", "src/test/resources");
         assertThat(stmtsDocs).isNotNull();
         List<StmtsDoc> docs = stmtsDocs.getStmtDocs();
         assertThat(docs).hasSize(1);
@@ -46,7 +46,7 @@ public class StatementsLoaderTest {
     public void testInvalidYamlProperties() {
         Exception caught = null;
         try {
-            StatementsLoader.loadPath(null, "activities/invalid_prop", "src/test/resources");
+            StatementsLoader.loadPath("activities/invalid_prop", "src/test/resources");
         } catch (Exception e) {
             caught = e;
         }

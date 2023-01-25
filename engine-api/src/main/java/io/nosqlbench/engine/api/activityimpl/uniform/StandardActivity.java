@@ -58,7 +58,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
             Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-            StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
+            StmtsDocList workload = StatementsLoader.loadPath(yaml_loc.get(), disposable, "activities");
             yamlmodel = workload.getConfigModel();
         } else {
             yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();

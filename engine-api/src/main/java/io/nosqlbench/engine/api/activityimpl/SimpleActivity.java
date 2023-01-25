@@ -38,7 +38,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
@@ -668,10 +667,10 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
                 workloadSource = "commandline:" + stmt.get();
-                return StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
+                return StatementsLoader.loadStmt(stmt.get(), activityDef.getParams());
             } else if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();
-                return StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                return StatementsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
 
             return StmtsDocList.none();

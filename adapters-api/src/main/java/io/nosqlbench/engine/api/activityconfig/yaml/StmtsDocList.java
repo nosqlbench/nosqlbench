@@ -161,7 +161,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     }
 
     public static NBConfigModelExpander TEMPLATE_VAR_EXPANDER = workload -> {
-        StmtsDocList loaded = StatementsLoader.loadPath(logger, (String) workload, "activities");
+        StmtsDocList loaded = StatementsLoader.loadPath((String) workload, "activities");
         return loaded.getConfigModel();
     };
 

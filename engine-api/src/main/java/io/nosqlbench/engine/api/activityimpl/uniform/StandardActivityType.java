@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
                 Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
                 if (op_yaml_loc.isPresent()) {
                     Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-                    StmtsDocList workload = StatementsLoader.loadPath(logger, op_yaml_loc.get(), disposable, "activities");
+                    StmtsDocList workload = StatementsLoader.loadPath(op_yaml_loc.get(), disposable, "activities");
                     cfgModel=cfgModel.add(workload.getConfigModel());
                 }
                 NBConfiguration cfg = cfgModel.apply(activityDef.getParams());

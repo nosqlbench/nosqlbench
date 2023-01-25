@@ -114,7 +114,7 @@ public class NBCLIScenarioParser {
                 .extension(RawStmtsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
-            StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
+            StmtsDocList scenariosYaml = StatementsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             String[] nameparts = scenarioName.split("\\.",2);
@@ -319,7 +319,7 @@ public class NBCLIScenarioParser {
 
                 StmtsDocList stmts = null;
                 try {
-                    stmts = StatementsLoader.loadContent(logger, content, Map.of());
+                    stmts = StatementsLoader.loadContent(content, Map.of());
                     if (stmts.getStmtDocs().size() == 0) {
                         logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                         continue;

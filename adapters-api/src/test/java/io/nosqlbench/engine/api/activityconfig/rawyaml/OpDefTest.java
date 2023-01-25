@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class OpDefTest {
     @Test
     public void testLayering() {
 
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
@@ -64,7 +64,7 @@ public class OpDefTest {
 
     @Test
     public void testStatementRendering() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
@@ -79,7 +79,7 @@ public class OpDefTest {
 
     @Test
     public void testConsumableMapState() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
         List<StmtsDoc> docs = all.getStmtDocs();
         StmtsDoc block1 = docs.get(1);
         List<OpTemplate> stmts = block1.getStmts();
@@ -94,7 +94,7 @@ public class OpDefTest {
 
     @Test
     public void testMapOfMaps() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/statement_variants.yaml");
         List<StmtsDoc> docs = all.getStmtDocs();
         StmtsDoc doc0 = docs.get(0);
         assertThat(doc0.getName()).isEqualTo("map-of-maps");
@@ -115,7 +115,7 @@ public class OpDefTest {
 
     @Test
     public void testBasicStringStmt() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/statement_variants.yaml");
         List<StmtsDoc> docs = all.getStmtDocs();
         StmtsDoc doc1 = docs.get(1);
         assertThat(doc1.getName()).isEqualTo("string-statement");
@@ -130,7 +130,7 @@ public class OpDefTest {
 
     @Test
     public void testListOfNamedMap() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/statement_variants.yaml");
         List<StmtsDoc> docs = all.getStmtDocs();
         StmtsDoc doc2 = docs.get(2);
         assertThat(doc2.getName()).isEqualTo("list-of-named-map");

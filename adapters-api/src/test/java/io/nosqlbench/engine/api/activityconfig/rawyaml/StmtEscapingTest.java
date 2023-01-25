@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class StmtEscapingTest {
     @BeforeAll
     public static void testLayering() {
 
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/escaped_stmts.yaml");
+        StmtsDocList all = StatementsLoader.loadPath("testdocs/escaped_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(1);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
