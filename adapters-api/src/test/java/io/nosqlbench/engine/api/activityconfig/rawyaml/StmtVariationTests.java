@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ public class StmtVariationTests {
     @Test
     public void testListStmtsOnly() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList docs = ysl.loadString(logger,
-                "statements:\n" +
+        RawStmtsDocList docs = ysl.loadString(
+            "statements:\n" +
                         " - first statement\n" +
                         " - second statement\n"
         );
@@ -52,8 +52,8 @@ public class StmtVariationTests {
     @Test
     public void testSingleEntryMapStmtsOnly() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList docs = ysl.loadString(logger,
-                "statements:\n" +
+        RawStmtsDocList docs = ysl.loadString(
+            "statements:\n" +
                         " - s1: statement one\n" +
                         " - s2: statement two\n"
         );
@@ -72,8 +72,8 @@ public class StmtVariationTests {
     @Test
     public void testMapStmtsOnly() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList docs = ysl.loadString(logger,
-                "statements:\n" +
+        RawStmtsDocList docs = ysl.loadString(
+            "statements:\n" +
                         " - name: s1\n" +
                         "   stmt: statement one\n" +
                         " - name: s2\n" +
@@ -94,8 +94,8 @@ public class StmtVariationTests {
     @Test
     public void testMixedForms() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList docs = ysl.loadString(logger,
-                "statement:\n" +
+        RawStmtsDocList docs = ysl.loadString(
+            "statement:\n" +
                         " - name: s1\n" +
                         "   stmt: statement one\n" +
                         " - statement two\n" +

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,11 @@ public class StatementsLoader {
 
         StrInterpolator transformer = new StrInterpolator(params);
         RawStmtsLoader loader = new RawStmtsLoader(transformer);
-        RawStmtsDocList rawDocList = loader.loadString(logger, yamlContent);
+        RawStmtsDocList rawDocList = loader.loadString(yamlContent);
         StmtsDocList layered = new StmtsDocList(rawDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            if (params.containsKey(k)) {
-                params.remove(k);
-            }
+            params.remove(k);
         });
         return layered;
     }
@@ -61,9 +59,7 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawStmtsDocList);
         transformer.checkpointAccesses().forEach((k,v) -> {
             layered.addTemplateVariable(k,v);
-            if (params.containsKey(k)) {
-                params.remove(k);
-            }
+            params.remove(k);
         });
         return layered;
     }

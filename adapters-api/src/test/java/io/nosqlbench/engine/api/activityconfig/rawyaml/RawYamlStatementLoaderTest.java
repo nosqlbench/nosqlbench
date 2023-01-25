@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class RawYamlStatementLoaderTest {
     @Test
     public void testLoadPropertiesBlock() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList rawBlockDocs = ysl.loadPath(logger, "testdocs/rawblock.yaml");
+        RawStmtsDocList rawBlockDocs = ysl.loadPath("testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
         RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getRawStmtDefs()).hasSize(1);
@@ -44,7 +44,7 @@ public class RawYamlStatementLoaderTest {
     @Test
     public void testLoadFullFormat() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
@@ -58,7 +58,7 @@ public class RawYamlStatementLoaderTest {
     @Test
     public void testLoadScenarios() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        RawStmtsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
@@ -88,7 +88,7 @@ public class RawYamlStatementLoaderTest {
     @Test
     public void testErrorMsg() {
         RawStmtsLoader ysl = new RawStmtsLoader();
-        RawStmtsDocList erthing = ysl.loadPath(logger, "testdocs/badyamlfile.yaml");
+        RawStmtsDocList erthing = ysl.loadPath("testdocs/badyamlfile.yaml");
     }
 
 }
