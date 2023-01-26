@@ -133,9 +133,7 @@ jobs:
         uses: johnwbyrd/update-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files:
-            - nb5/target/nb5
-            - nb5/target/nb5.jar
+          files: nb5/target/nb5 nb5/target/nb5.jar
           release: Preview Release ${{ env.PREVIEW_VERSION }}
           tag: ${{ env.PREVIEW_VERSION }}
           message: preview release ${{ env.PREVIEW_VERSION }}
