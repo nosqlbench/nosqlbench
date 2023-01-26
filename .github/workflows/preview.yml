@@ -1,9 +1,12 @@
 name: preview
 
 # This workflow should run for any push which is a preview build.
-# Preview builds are indicated with changes to PREVIEW_NOTES.md.
+# Preview builds are indicated with a tag that ends in -preview
 # In order to effect this, you can do the following:
-#  scripts/release-notes.sh > PREVIEW_NOTES.md
+#  scripts/tag-preview-build
+# If you want to replace a build, you can use -f and then
+# push the update to the tag like push -f origin <tag>,
+# although this should never be done!
 
 on:
   push:
@@ -138,7 +141,7 @@ jobs:
           draft: false
           prerelease: true
           generate_release_notes: true
-          name: Release ${{ env.PREVIEW_VERSION }}
+          name: Preview ${{ env.PREVIEW_VERSION }}
           fail_on_unmatched_files: true
           tag_name: ${{ env.PREVIEW_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}

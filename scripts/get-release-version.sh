@@ -15,6 +15,12 @@
 # limitations under the License.
 #
 
+if [ "$1" == "-n" ]
+then numeric=true
+elif [ "$1" == "-s" ]
+then short=true
+fi
+
 set -e
 
 export REVISION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
@@ -49,6 +55,14 @@ else
  exit 5
 fi
 
-printf "%s.%s.%s-release\n" "${@:2:3}"
+if [ "$numeric" == "true" ]
+then
+ printf "%s.%s.%s\n" "${@:2:3}"
+elif [ "$short" == "true" ]
+then
+ printf "%s.%s\n" "${@:2:2}"
+else
+ printf "%s.%s.%s-release\n" "${@:2:3}"
+fi
 
 
