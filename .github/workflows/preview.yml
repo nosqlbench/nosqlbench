@@ -128,40 +128,53 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_TAGS }}
 
-      - name: create github release
-        id: create_github_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: update github release
+        id: update_github_release
+        uses: johnwbyrd/update-release@v1
         with:
-          tag_name: ${{ env.PREVIEW_VERSION }}
-          release_name: Release ${{ env.PREVIEW_VERSION }}
-          draft: false
-          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files:
+            - nb5/target/nb5
+            - nb5/target/nb5.jar
+          release: Preview Release ${{ env.PREVIEW_VERSION }}
+          tag: ${{ env.PREVIEW_VERSION }}
+          message: preview release ${{ env.PREVIEW_VERSION }}
           body: ${{ steps.prepare_summary.outputs.release_summary }}
 
-      - name: upload nb.jar to github release
-        id: upload-nb-jar
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5.jar
-          asset_name: nb5.jar
-          asset_content_type: application/octet-stream
-
-      - name: upload nb binary to github release
-        id: upload-nb-binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5
-          asset_name: nb5
-          asset_content_type: application/octet-stream
-
+#      - name: create github release
+#        id: create_github_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ env.PREVIEW_VERSION }}
+#          release_name: Release ${{ env.PREVIEW_VERSION }}
+#          draft: false
+#          prerelease: true
+#          body: ${{ steps.prepare_summary.outputs.release_summary }}
+#
+#      - name: upload nb.jar to github release
+#        id: upload-nb-jar
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+#          asset_path: nb5/target/nb5.jar
+#          asset_name: nb5.jar
+#          asset_content_type: application/octet-stream
+#
+#      - name: upload nb binary to github release
+#        id: upload-nb-binary
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+#          asset_path: nb5/target/nb5
+#          asset_name: nb5
+#          asset_content_type: application/octet-stream
+#
       - name: Archive Test Results
         if: always()
         uses: actions/upload-artifact@v3
