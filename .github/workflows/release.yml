@@ -117,7 +117,7 @@ jobs:
         id: prepare_summary
         run: |
           #summary=$(scripts/release-notes.sh)
-          summary=$(cat RELEASENOTES.md)
+          summary=$(cat RELEASE_NOTES.md)
           summary="${summary//'%'/'%25'}"
           summary="${summary//$'\n'/'%0A'}"
           summary="${summary//$'\r'/'%0D'}"
