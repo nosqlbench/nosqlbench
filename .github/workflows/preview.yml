@@ -135,7 +135,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: nb5/target/nb5 nb5/target/nb5.jar
           release: Preview Release ${{ env.PREVIEW_VERSION }}
-          tag: ${{ env.PREVIEW_VERSION }}
+          tag: nb5-${{ env.PREVIEW_VERSION }}
           message: preview release ${{ env.PREVIEW_VERSION }}
           body: ${{ steps.prepare_summary.outputs.release_summary }}
 
