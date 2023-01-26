@@ -1,7 +1,33 @@
-- e4e94f9e8 (HEAD -> main) support version bumping
+- 2b85c1cce (HEAD -> main, tag: 5.17.1-preview) versions and release action update
+- 2d3263cfb make release tag distinct
+- 639dbf2d6 update action version
+- 1b2a773ce update files paths
+- 1986b8cdb replace release action
+- 7047f4486 (origin/main) remove second tagging
+- 910e871a8 remove extra node version parameters
+- 6b0633d4a (tag: nb5-preview, tag: nb5-5.17.1-preview) update notes filenames
+- be65f812e allow forcing preview tag update
+- 2a43dd077 Merge branch 'main' of github.com:nosqlbench/nosqlbench
+- 6a2132669 actions testing
+- 4bd0513f9 Merge pull request #950 from nosqlbench/nosqlbench-949-sigint
+- 086451794 preview build testing
+- 32486b3d6 unbreak the break signal
+- 6d07acb8c (origin/nosqlbench-949-sigint, nosqlbench-949-sigint) unbreak the break signal
+- c6aa66f50 Update DOWNLOADS.md
+- 5b90831a9 Update DOWNLOADS.md
+- 3e3427fca update job names
+- 3f0417c96 fix preview trigger
+- 29ed32d91 update revision
+- 24657248f use tags only for preview and release triggers
+- e254eafa8 check for main branch on preview and release
+- 0ae3bd085 make preview and release tag based
+- 027fc4a89 version, tagging updates
+- 402154e4c docs and scripts
+- ee2bda24e preview testing
+- e4e94f9e8 support version bumping
 - 8a2c696eb allow bumping versions
-- c19b2388e (origin/prerelease-testing, origin/main, prerelease-testing) standardize on main/preview/release naming
-- 5facaddfe (tag: 5.17.1-prerelease) actions testing
+- c19b2388e (origin/prerelease-testing, prerelease-testing) standardize on main/preview/release naming
+- 5facaddfe actions testing
 - 33c55809d actions testing
 - fcdddf307 simplify version
 - ac7f5762c actions cleanup
