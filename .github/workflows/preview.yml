@@ -114,12 +114,6 @@ jobs:
           summary="${summary//$'\r'/'%0D'}"
           echo "release_summary=$summary" >> $GITHUB_STATE
 
-      - name: tag preview version
-        run: |
-          git tag nb5-${{ env.PREVIEW_VERSION }}
-          git tag -f nb5-preview
-          git push --tags
-
       - name: bump minor version
         run: |
           scripts/bump-minor-version
