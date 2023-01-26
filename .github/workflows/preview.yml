@@ -130,7 +130,7 @@ jobs:
 
       - name: update github release
         id: update_github_release
-        uses: johnwbyrd/update-release@v1
+        uses: johnwbyrd/update-release@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: nb5/target/nb5 nb5/target/nb5.jar
