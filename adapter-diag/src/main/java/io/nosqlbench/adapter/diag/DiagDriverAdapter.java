@@ -103,6 +103,6 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
 
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> params) {
-        return OpsLoader.loadString("ops: 'log:level=INFO'", OpTemplateFormat.inline, params,null).getStmts();
+        return OpsLoader.loadString("log:level=INFO", OpTemplateFormat.inline, params,null).getStmts();
     }
 }

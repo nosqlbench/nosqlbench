@@ -65,7 +65,7 @@ public class OpsLoader {
         StrInterpolator transformer = new StrInterpolator(params);
         String data = transformer.apply(sourceData);
         if (srcuri!=null) {
-            logger.info("Loading workload template from '" + srcuri + "'");
+            logger.info("workload URI: '" + srcuri + "'");
         }
 
         RawOpsLoader loader = new RawOpsLoader(transformer);
