@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,6 @@ import org.apache.commons.statistics.distribution.BinomialDistribution;
 @Categories({Category.distributions})
 public class Binomial extends IntToIntDiscreteCurve {
     public Binomial(int trials, double p, String... modslist) {
-        super(new BinomialDistribution(trials, p), modslist);
+        super(BinomialDistribution.of(trials, p), modslist);
     }
 }

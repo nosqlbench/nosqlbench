@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,6 @@ import org.apache.commons.statistics.distribution.ParetoDistribution;
 @Categories({Category.distributions})
 public class Pareto extends IntToDoubleContinuousCurve {
     public Pareto(double scale, double shape, String... mods) {
-        super(new ParetoDistribution(scale, shape), mods);
+        super(ParetoDistribution.of(scale, shape), mods);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ import org.apache.commons.statistics.distribution.TriangularDistribution;
 @Categories({Category.distributions})
 public class Triangular extends LongToDoubleContinuousCurve {
     public Triangular(double a, double c, double b, String... mods) {
-        super(new TriangularDistribution(a,c,b), mods);
+        super(TriangularDistribution.of(a,c,b), mods);
     }
 }

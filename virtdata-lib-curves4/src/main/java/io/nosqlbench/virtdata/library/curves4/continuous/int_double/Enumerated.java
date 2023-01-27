@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import org.apache.commons.math4.distribution.EnumeratedRealDistribution;
+import org.apache.commons.math4.legacy.distribution.EnumeratedRealDistribution;
 
 /**
  * Creates a probability density given the values and optional weights provided, in "value:weight value:weight ..." form.
