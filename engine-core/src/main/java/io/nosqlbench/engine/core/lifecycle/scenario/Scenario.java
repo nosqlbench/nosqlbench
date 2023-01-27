@@ -340,7 +340,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         }
     }
 
-    public synchronized void finish() {
+    public void finish() {
         logger.debug("finishing scenario");
         endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
         if (this.state == State.Running) {
