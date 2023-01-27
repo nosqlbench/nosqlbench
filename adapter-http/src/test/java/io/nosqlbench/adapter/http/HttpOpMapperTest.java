@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.http.core.HttpSpace;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -51,7 +52,7 @@ public class HttpOpMapperTest {
     }
 
     private static ParsedOp parsedOpFor(String yaml) {
-        OpsDocList docs = OpsLoader.loadString(yaml, Map.of());
+        OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         OpTemplate stmtDef = docs.getStmts().get(0);
         ParsedOp parsedOp = new ParsedOp(stmtDef, cfg, List.of(adapter.getPreprocessor()));
         return parsedOp;

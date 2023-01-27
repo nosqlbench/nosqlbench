@@ -16,66 +16,115 @@
 
 package io.nosqlbench.engine.api.activityconfig;
 
+import com.amazonaws.util.StringInputStream;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.Option;
+import sjsonnet.DefaultParseCache;
+import sjsonnet.SjsonnetMain;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class OpsLoader {
 
     private final static Logger logger = LogManager.getLogger(OpsLoader.class);
 
-    public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml", "json", "jsonnet"};
+    public static String[] YAML_EXTENSIONS = new String[]{"yaml", "yml"};
 
-    public static OpsDocList loadContent(Content<?> content, Map<String,String> params) {
-        return loadString(content.get().toString(),params);
+    public static OpsDocList loadContent(Content<?> content, Map<String, String> params) {
+        OpTemplateFormat fmt = OpTemplateFormat.valueOfURI(content.getURI());
+        return loadString(content.get().toString(), fmt, params, content.getURI());
     }
 
-    public static OpsDocList loadPath(String path, Map<String,?> params, String... searchPaths) {
-        RawOpsDocList list = null;
-        Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
-        String content = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
-        return loadString(content,params);
-    }
-    public static OpsDocList loadPath(
-            String path,
-            String... searchPaths) {
-        return loadPath(path, Map.of(), searchPaths);
+    public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
+        String[] extensions = path.indexOf('.')>-1 ? new String[]{} : YAML_EXTENSIONS;
+
+        Content<?> foundPath = NBIO.all().prefix(searchPaths).name(path).extension(extensions).first()
+            .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
+        OpTemplateFormat fmt = OpTemplateFormat.valueOfURI(foundPath.getURI());
+        return loadString(foundPath.asString(), fmt, params, foundPath.getURI());
     }
 
-    public static OpsDocList loadString(String yamlContent, Map<String,?> params) {
+    public static OpsDocList loadString(final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
 
+        logger.trace(() -> "Applying string transformer to data:" + sourceData);
         StrInterpolator transformer = new StrInterpolator(params);
+        String data = transformer.apply(sourceData);
+        if (srcuri!=null) {
+            logger.info("Loading workload template from '" + srcuri + "'");
+        }
+
         RawOpsLoader loader = new RawOpsLoader(transformer);
-        RawOpsDocList rawDocList = loader.loadString(yamlContent);
-        OpsDocList layered = new OpsDocList(rawDocList);
-        transformer.checkpointAccesses().forEach((k,v) -> {
-            layered.addTemplateVariable(k,v);
-            params.remove(k);
-        });
-        return layered;
-    }
+        RawOpsDocList rawOpsDocList = switch (fmt) {
+            case jsonnet -> loader.loadString(evaluateJsonnet(srcuri, params));
+            case yaml, json -> loader.loadString(data);
+            case inline, stmt -> RawOpsDocList.forSingleStatement(data);
+        };
+        // TODO: itemize inline to support ParamParser
 
-    public static OpsDocList loadStmt(String statement, Map<String,?> params) {
-        StrInterpolator transformer = new StrInterpolator(params);
-        statement = transformer.apply(statement);
-        RawOpsDocList rawOpsDocList = RawOpsDocList.forSingleStatement(statement);
         OpsDocList layered = new OpsDocList(rawOpsDocList);
-        transformer.checkpointAccesses().forEach((k,v) -> {
-            layered.addTemplateVariable(k,v);
+
+        transformer.checkpointAccesses().forEach((k, v) -> {
+            layered.addTemplateVariable(k, v);
             params.remove(k);
         });
+
         return layered;
     }
 
+    private static String evaluateJsonnet(URI uri, Map<String, ?> params) {
+        List<String> injected = new LinkedList<>(List.of(Path.of(uri).toString()));
+        params.forEach((k,v) -> {
+            if (v instanceof CharSequence cs) {
+                injected.addAll(List.of("--ext-str",k+"="+cs));
+            }
+        });
 
+        var stdoutBuffer = new ByteArrayOutputStream();
+        var stderrBuffer = new ByteArrayOutputStream();
+        var stdoutStream = new PrintStream(stdoutBuffer);
+        var stderrStream = new PrintStream(stderrBuffer);
+        StringInputStream inputStream;
+        try {
+            inputStream = new StringInputStream("");
+        } catch (Exception e) {
+            throw new RuntimeException("Error building input stream for jsonnet:" + e, e);
+        }
+
+        int resultStatus = SjsonnetMain.main0(
+            injected.toArray(new String[0]),
+            new DefaultParseCache(),
+            inputStream,
+            stdoutStream,
+            stderrStream,
+            new os.Path(Path.of(System.getProperty("user.dir"))),
+            Option.empty(),
+            Option.empty()
+        );
+
+        String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
+        String stderrOutput = stderrBuffer.toString(StandardCharsets.UTF_8);
+        if (!stderrOutput.isEmpty()) {
+            logger.error("stderr output from jsonnet preprocessing: " + stderrOutput);
+        }
+        logger.info("jsonnet processing read '" + uri +"', rendered " + stdoutOutput.split("\n").length + " lines.");
+        logger.trace("jsonnet result:\n" + stdoutOutput);
+
+        return stdoutOutput;
+    }
 
 }

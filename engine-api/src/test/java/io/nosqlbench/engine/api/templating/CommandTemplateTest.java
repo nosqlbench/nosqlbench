@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ public class CommandTemplateTest {
         OpsDocList stmtsDocs = OpsLoader.loadString("" +
                 "statements:\n" +
                 " - s1: test1=foo test2=bar",
-            Map.of());
+            OpTemplateFormat.yaml, Map.of(), null);
         OpTemplate optpl = stmtsDocs.getStmts().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);
         assertThat(ct.isStatic()).isTrue();
@@ -51,7 +52,7 @@ public class CommandTemplateTest {
             " - s1: test1=foo test2={bar}\n" +
             "   bindings:\n" +
             "    bar: NumberNameToString();\n",
-            Map.of()
+            OpTemplateFormat.yaml, Map.of(), null
         );
         OpTemplate optpl = stmtsDocs.getStmts().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);

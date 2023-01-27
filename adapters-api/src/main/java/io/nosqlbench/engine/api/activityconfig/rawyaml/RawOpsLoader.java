@@ -78,7 +78,7 @@ public class RawOpsLoader {
 
     }
 
-    private RawOpsDocList parseYaml(String data) {
+    public RawOpsDocList parseYaml(String data) {
         LoadSettings loadSettings = LoadSettings.builder().build();
         Load yaml = new Load(loadSettings);
         Iterable<Object> objects = yaml.loadAllFromString(data);

@@ -161,7 +161,7 @@ public class OpsDocList implements Iterable<OpsDoc> {
     }
 
     public static NBConfigModelExpander TEMPLATE_VAR_EXPANDER = workload -> {
-        OpsDocList loaded = OpsLoader.loadPath((String) workload, "activities");
+        OpsDocList loaded = OpsLoader.loadPath((String) workload, Map.of(), "activities");
         return loaded.getConfigModel();
     };
 

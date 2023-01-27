@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
@@ -102,6 +103,6 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
 
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> params) {
-        return OpsLoader.loadString("ops: 'log:level=INFO'", params).getStmts();
+        return OpsLoader.loadString("ops: 'log:level=INFO'", OpTemplateFormat.inline, params,null).getStmts();
     }
 }

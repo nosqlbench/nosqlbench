@@ -21,6 +21,7 @@ import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawYamlLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.nb.spectest.api.STAssemblyValidator;
 import io.nosqlbench.nb.spectest.core.STNodeAssembly;
@@ -107,7 +108,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
-                OpsDocList stmtsDocs = OpsLoader.loadString(yaml, Map.of());
+                OpsDocList stmtsDocs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
                 List<OpTemplate> stmts = stmtsDocs.getStmts();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 

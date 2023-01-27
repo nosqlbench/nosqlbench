@@ -23,6 +23,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedOpTemplateTest {
@@ -31,7 +33,7 @@ public class ParsedOpTemplateTest {
 
     @BeforeAll
     public static void testLoadYaml() {
-        doclist = OpsLoader.loadPath("testdocs/bindings.yaml");
+        doclist = OpsLoader.loadPath("testdocs/bindings.yaml", Map.of());
     }
 
     @Test

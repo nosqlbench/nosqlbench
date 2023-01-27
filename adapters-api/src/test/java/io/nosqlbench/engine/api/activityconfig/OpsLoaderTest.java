@@ -29,7 +29,7 @@ public class OpsLoaderTest {
 
     @Test
     public void testTemplateVarSubstitution() {
-        OpsDocList stmtsDocs = OpsLoader.loadPath("activities/template_vars", "src/test/resources");
+        OpsDocList stmtsDocs = OpsLoader.loadPath("activities/template_vars", Map.of(),"src/test/resources");
         assertThat(stmtsDocs).isNotNull();
         List<OpsDoc> docs = stmtsDocs.getStmtDocs();
         assertThat(docs).hasSize(1);
@@ -46,7 +46,7 @@ public class OpsLoaderTest {
     public void testInvalidYamlProperties() {
         Exception caught = null;
         try {
-            OpsLoader.loadPath("activities/invalid_prop", "src/test/resources");
+            OpsLoader.loadPath("activities/invalid_prop", Map.of(),"src/test/resources");
         } catch (Exception e) {
             caught = e;
         }

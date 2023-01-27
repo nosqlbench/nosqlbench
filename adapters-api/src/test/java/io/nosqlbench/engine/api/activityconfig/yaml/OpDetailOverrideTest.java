@@ -32,7 +32,7 @@ public class OpDetailOverrideTest {
     @Test
     public void testStmtOverrides() {
 
-        OpsDocList doclist = OpsLoader.loadPath("testdocs/stmt_details.yaml");
+        OpsDocList doclist = OpsLoader.loadPath("testdocs/stmt_details.yaml", Map.of());
 
         assertThat(doclist).isNotNull();
 

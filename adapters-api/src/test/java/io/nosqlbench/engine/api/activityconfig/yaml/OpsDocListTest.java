@@ -50,7 +50,7 @@ public class OpsDocListTest {
 
     @BeforeAll
     public static void testLoadYaml() {
-        doclist = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml");
+        doclist = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
     }
 
     @Test
