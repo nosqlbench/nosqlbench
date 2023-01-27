@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <kafka.version>3.3.1</kafka.version>
+        <kafka.version>3.3.2</kafka.version>
     </properties>
     <build>
         <plugins>
