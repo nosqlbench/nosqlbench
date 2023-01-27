@@ -14,7 +14,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nosqlbench</groupId>
@@ -484,7 +486,113 @@
                 <version>1.7.1</version>
             </extension>
         </extensions>
+
         <plugins>
+
+<!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <version>0.8.8</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>prepare-agent</id>-->
+<!--                        <phase>process-test-classes</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <destFile>${build.directory}/jacoco-data.exec</destFile>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>report</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>report</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <dataFile>${build.directory}/jacoco-data.exec</dataFile>-->
+<!--                            <outputDirectory>${build.directory}/jacoco-reports</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>jacoco-check</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <rules>-->
+<!--                                <rule>-->
+<!--                                    <element>BUNDLE</element>-->
+<!--                                    <limits>-->
+<!--                                        <limit>-->
+<!--                                            <counter>INSTRUCTION</counter>-->
+<!--                                            <value>COVEREDRATIO</value>-->
+<!--                                            <minimum>0.00</minimum>-->
+<!--                                            <maximum>1.00</maximum>-->
+<!--                                        </limit>-->
+<!--                                    </limits>-->
+<!--                                </rule>-->
+<!--                            </rules>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-antrun-plugin</artifactId>-->
+<!--                <version>1.6</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>post-integration-test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <echo message="Generating NB Test Coverage Reports"/>-->
+<!--                                <taskdef name="report" classname="org.jacoco.ant.ReportTask">-->
+<!--                                    <classpath-->
+<!--                                        path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar"/>-->
+<!--                                </taskdef>-->
+<!--                                <mkdir dir="${basedir}/target/coverage-report"/>-->
+<!--                                <report>-->
+<!--                                    <fileset dir="${project.basedir}/target">-->
+<!--                                        <include name="jacoco.exec"/>-->
+<!--                                    </fileset>-->
+<!--                                    <structure name="NB Coverage">-->
+<!--                                        <group name="jacoco-nb-all-modules">-->
+<!--                                            <classfiles>-->
+<!--                                                <fileset dir="${project.basedir}/target/classes">-->
+<!--                                                    <include name="io/nosqlbench/**/*.class"/>-->
+<!--                                                </fileset>-->
+<!--                                            </classfiles>-->
+<!--                                            <sourcefiles encoding="UTF-8">-->
+<!--                                                <fileset dir="${project.basedir}/src/main/java"/>-->
+<!--                                            </sourcefiles>-->
+<!--                                        </group>-->
+<!--                                    </structure>-->
+<!--                                    <html destdir="${project.basedir}/target/coverage-report/html"/>-->
+<!--                                    <xml destfile="${project.basedir}/target/coverage-report/nb-coverage-report.xml"/>-->
+<!--                                    <csv destfile="${project.basedir}/target/coverage-report/nb-coverage-report.csv"/>-->
+<!--                                </report>-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.jacoco</groupId>-->
+<!--                        <artifactId>org.jacoco.ant</artifactId>-->
+<!--                        <version>${jacoco.version}</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
+
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -541,7 +649,8 @@
                 <version>3.0.0-M6</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <Log4jContextSelector>org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+                        <Log4jContextSelector>
+                            org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
                         </Log4jContextSelector>
                     </systemPropertyVariables>
                     <parallel>methods</parallel>
