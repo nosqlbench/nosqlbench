@@ -154,6 +154,11 @@
                 <artifactId>commons-math4-legacy-exception</artifactId>
                 <version>4.0-beta1</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-statistics-distribution</artifactId>
+                <version>1.0</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>

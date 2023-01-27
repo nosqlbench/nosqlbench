@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ import org.apache.commons.statistics.distribution.LaplaceDistribution;
 @Categories({Category.distributions})
 public class Laplace extends LongToDoubleContinuousCurve {
     public Laplace(double mu, double beta, String... mods) {
-        super(new LaplaceDistribution(mu, beta), mods);
+        super(LaplaceDistribution.of(mu, beta), mods);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ import org.apache.commons.statistics.distribution.HypergeometricDistribution;
 @Categories({Category.distributions})
 public class Hypergeometric extends IntToLongDiscreteCurve {
     public Hypergeometric(int populationSize, int numberOfSuccesses, int sampleSize, String... modslist) {
-        super(new HypergeometricDistribution(populationSize, numberOfSuccesses, sampleSize), modslist);
+        super(HypergeometricDistribution.of(populationSize, numberOfSuccesses, sampleSize), modslist);
     }
 }

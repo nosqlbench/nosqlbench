@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package io.nosqlbench.cqlgen.transformers;
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 import io.nosqlbench.cqlgen.core.CGSchemaStats;
 import io.nosqlbench.cqlgen.core.CGTableStats;
-import org.apache.commons.math4.util.Pair;
+import org.apache.commons.math4.legacy.core.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;

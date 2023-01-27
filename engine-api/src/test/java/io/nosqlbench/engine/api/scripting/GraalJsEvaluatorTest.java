@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraalJsEvaluatorTest {
 
+    // TODO:
+
+    /**
+     * This evaluator may benefit from being compiled. Presently it give a warning:
+     * <pre>{@code
+     * [To redirect Truffle log output to a file use one of the following options:
+     * * '--log.file=<path>' if the option is passed using a guest language launcher.
+     * * '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+     * * Configure logging using the polyglot embedding API.]
+     * [engine] WARNING: The polyglot context is using an implementation that does not support runtime compilation.
+     * The guest application code will therefore be executed in interpreted mode only.
+     * Execution only in interpreted mode will strongly impact the guest application performance.
+     * For more information on using GraalVM see https://www.graalvm.org/java/quickstart/.
+     * To disable this warning the '--engine.WarnInterpreterOnly=false' option or use the '-Dpolyglot.engine.WarnInterpreterOnly=false' system property.
+     * }</pre>
+     */
     @Test
     public void testBasicOperations() {
         GraalJsEvaluator<Long> ne = new GraalJsEvaluator<>(Long.class);
