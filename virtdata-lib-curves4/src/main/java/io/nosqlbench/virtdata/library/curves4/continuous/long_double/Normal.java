@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ import org.apache.commons.statistics.distribution.NormalDistribution;
 @Categories({Category.distributions})
 public class Normal extends LongToDoubleContinuousCurve {
     public Normal(double mean, double sd, String... mods) {
-        super(new NormalDistribution(mean, sd), mods);
+        super(NormalDistribution.of(mean, sd), mods);
     }
 }
