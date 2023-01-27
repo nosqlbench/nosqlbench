@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ import org.apache.commons.statistics.distribution.FDistribution;
 @Categories({Category.distributions})
 public class F extends LongToDoubleContinuousCurve {
     public F(double numeratorDegreesOfFreedom, double denominatorDegreesOfFreedom, String... mods) {
-        super(new FDistribution(numeratorDegreesOfFreedom, denominatorDegreesOfFreedom), mods);
+        super(FDistribution.of(numeratorDegreesOfFreedom, denominatorDegreesOfFreedom), mods);
     }
 }

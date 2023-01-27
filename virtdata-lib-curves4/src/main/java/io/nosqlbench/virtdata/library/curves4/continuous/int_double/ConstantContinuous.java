@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package io.nosqlbench.virtdata.library.curves4.continuous.int_double;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import org.apache.commons.statistics.distribution.ConstantContinuousDistribution;
+import org.apache.commons.math4.legacy.distribution.EmpiricalDistribution;
 
 /**
  * Always yields the same value.
@@ -32,6 +32,6 @@ import org.apache.commons.statistics.distribution.ConstantContinuousDistribution
 @Categories({Category.distributions})
 public class ConstantContinuous extends IntToDoubleContinuousCurve {
     public ConstantContinuous(double value, String... mods) {
-        super(new ConstantContinuousDistribution(value), mods);
+        super(EmpiricalDistribution.from(1, new double[]{value}), mods);
     }
 }
