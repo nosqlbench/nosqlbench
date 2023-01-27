@@ -1,4 +1,4 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 description: |
   A workload with only text keys and text values which range in size from 50K to 150K.
@@ -83,5 +83,4 @@ blocks:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     statements:
       main-insert: |
-        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
-        (key, value) values ({rw_key}, {rw_value});
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (key, value) values ({rw_key}, {rw_value});

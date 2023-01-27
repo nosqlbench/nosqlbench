@@ -1,6 +1,6 @@
 name: alternate-format-test
 scenarios:
   default:
-    schema: run driver=cql protocol_version=v4 tags=block:schema threads==1 cycles=UNDEF
+    schema: run driver=cql protocol_version=v4 tags=block:'schema.*' threads==1 cycles=UNDEF
     rampup: run driver=cql protocol_version=v4 tags=block:rampup cycles=10000
     main: run driver=cql protocol_version=v4 tags=block:main_mixed cycles=10000

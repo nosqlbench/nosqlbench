@@ -1,4 +1,4 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 # eb sequences concat
 # yields A B B C C C D D D D A B B C C C D D D D

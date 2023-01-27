@@ -1,4 +1,3 @@
-# nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
 description: |
   put workload descript here
 scenarios:
