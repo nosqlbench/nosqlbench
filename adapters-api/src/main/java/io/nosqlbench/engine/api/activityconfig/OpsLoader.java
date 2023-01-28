@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityconfig;
 import com.amazonaws.util.StringInputStream;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
@@ -120,8 +121,25 @@ public class OpsLoader {
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
         String stderrOutput = stderrBuffer.toString(StandardCharsets.UTF_8);
+        if ("jsonnet".equals(String.valueOf(params.get("dryrun")))) {
+            logger.info("dryrun=jsonnet, dumping result to stdout and stderr:");
+            System.out.println(stdoutOutput);
+            System.err.println(stderrOutput);
+            if (resultStatus==0 && stderrOutput.isEmpty()) {
+                logger.info("no errors detected during jsonnet evaluation.");
+                System.exit(0);
+            } else {
+                logger.error("ERRORS detected during jsonnet evaluation:\n" + stderrOutput);
+                System.exit(2);
+            }
+        }
         if (!stderrOutput.isEmpty()) {
-            logger.error("stderr output from jsonnet preprocessing: " + stderrOutput);
+            BasicError error = new BasicError("stderr output from jsonnet preprocessing: " + stderrOutput);
+            if (resultStatus!=0) {
+                throw error;
+            } else {
+                logger.warn(error.toString(),error);
+            }
         }
         logger.info("jsonnet processing read '" + uri +"', rendered " + stdoutOutput.split("\n").length + " lines.");
         logger.trace("jsonnet result:\n" + stdoutOutput);

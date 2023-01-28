@@ -573,7 +573,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                     throw new BasicError("""
                         No op templates were provided. You must provide one of these activity parameters:
                         1) workload=some.yaml
-                        2) op='inline template
+                        2) op='inline template'
                         3) driver=stdout (or any other drive that can synthesize ops)""");
                 }
             }
