@@ -28,15 +28,15 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StmtEscapingTest {
+public class OpEscapingTest {
 
-    private final static Logger logger = LogManager.getLogger(StmtEscapingTest.class);
+    private final static Logger logger = LogManager.getLogger(OpEscapingTest.class);
     private static List<OpTemplate> defs;
 
     @BeforeAll
     public static void testLayering() {
 
-        OpsDocList all = OpsLoader.loadPath("testdocs/escaped_stmts.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/escaped_ops.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(1);
         OpsDoc doc1 = all.getStmtDocs().get(0);

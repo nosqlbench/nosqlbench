@@ -551,12 +551,12 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
         OpsDocList opsDocList = loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = opsDocList.getStmts();
-        List<OpTemplate> filteredOps = opsDocList.getStmts(tagfilter);
+        List<OpTemplate> unfilteredOps = opsDocList.getOps();
+        List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
         if (filteredOps.size() == 0) {
             if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
-                throw new BasicError("There were no active statements with tag filter '"
+                throw new BasicError("There were no active op templates with tag filter '"
                     + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             } else {
                 // There were no ops, and it *wasn't* because they were all filtered out.
@@ -578,7 +578,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                 }
             }
             if (filteredOps.size() == 0) {
-                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + "'");
             }
         }
 
@@ -613,8 +613,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      * taken as the only provided statement.</LI>
      * <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
      * are taken with their ratios </LI>
-     * <LI>Any provided tags filter is used to select only the statements which have matching
-     * tags. If no tags are provided, then all the found statements are included.</LI>
+     * <LI>Any provided tags filter is used to select only the op templates which have matching
+     * tags. If no tags are provided, then all the found op templates are included.</LI>
      * <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
      * where the sequence length is the sum of the ratios.</LI>
      * </OL>

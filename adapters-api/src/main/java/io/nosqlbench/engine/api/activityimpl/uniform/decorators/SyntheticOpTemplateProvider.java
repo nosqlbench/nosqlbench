@@ -24,22 +24,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * In the case that no statements are provided for an activity, but a workload
- * description is provided, and the result for no found statements is not
- * simply a matter of tag filtering, an activity may provide its own
- * synthetic ops. This is here primarily to support the classic behavior of stdout
- * until it's functionality is subsumed by standard diagnostic features.
- *
- * Note that this is only valid while an activity uses a single driver, which will
- * change with upcoming API updates.
+ * It is possible for a DriverAdapter to create op templates using partial information.
+ * For example, the stdout driver can use only bindings to create CSV or JSON style data renderings.
+ * This mechanism is only triggered when:
+ * <OL>
+ * <LI>No op templates were provided.</LI>
+ * <LI>The default driver for an activity implements this method.</LI>
+ * </OL>
+ * <p>
+ * This excludes cases where a workload was provided with op templates, but they were all filtered out. In that case,
+ * the user should be informed of an error.
  */
 public interface SyntheticOpTemplateProvider extends DriverAdapterDecorators {
 
     /**
      * If a driver adapter supports creating example op templates from bindings,
      * it must implement this method to do so.
-     * @param opsDocList The existing doc structure, which should contain no fully defined op templates, but may contain other elements like bindings
+     *
+     * @param opsDocList
+     *     The existing doc structure, which should contain no fully defined op templates, but may contain other
+     *     elements like bindings
      * @return A list of op templates, size zero or more
      */
-    List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String,Object> params);
+    List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> params);
 }

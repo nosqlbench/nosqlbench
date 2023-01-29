@@ -22,14 +22,14 @@ import java.util.*;
 
 public class OpsOwner extends RawOpFields {
 
-    private final static List<String> stmtsFieldNames = List.of("op","ops","operation","statement","statements");
+    private final static List<String> opsFieldNames = List.of("op","ops","operation","statement","statements");
 
     private List<RawOpDef> rawOpDefs = new ArrayList<>();
 
     public OpsOwner() {
     }
 
-    public List<RawOpDef> getRawStmtDefs() {
+    public List<RawOpDef> getRawOpDefs() {
         return rawOpDefs;
     }
 
@@ -43,7 +43,7 @@ public class OpsOwner extends RawOpFields {
         super.setFieldsByReflection(propsmap);
 
         HashSet<String> found = new HashSet<>();
-        for (String fname : stmtsFieldNames) {
+        for (String fname : opsFieldNames) {
             if (propsmap.containsKey(fname)) {
                 found.add(fname);
             }
@@ -52,15 +52,15 @@ public class OpsOwner extends RawOpFields {
             throw new BasicError("You used " + found + " as an op name, but only one of these is allowed.");
         }
         if (found.size()==1) {
-            Object stmtsFieldValue = propsmap.remove(found.iterator().next());
-            setStatementsFieldByType(stmtsFieldValue);
+            Object opsFieldValue = propsmap.remove(found.iterator().next());
+            setOpsFieldByType(opsFieldValue);
         }
 
         super.setFieldsByReflection(propsmap);
     }
 
     @SuppressWarnings("unchecked")
-    public void setStatementsFieldByType(Object object) {
+    public void setOpsFieldByType(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;
             List<RawOpDef> defs = new ArrayList<>(stmtList.size());
@@ -105,9 +105,9 @@ public class OpsOwner extends RawOpFields {
                     entries.getValue().getClass() + "', only maps and strings are recognized.");
                 }
             }
-            setStatementsFieldByType(itemizedMaps);
+            setOpsFieldByType(itemizedMaps);
         } else if (object instanceof String) {
-            setStatementsFieldByType(Map.of("stmt1", (String) object));
+            setOpsFieldByType(Map.of("stmt1", (String) object));
         } else {
             throw new RuntimeException("Unknown object type: " + object.getClass());
         }

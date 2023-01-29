@@ -37,7 +37,7 @@ public class OpDefTest {
     @Test
     public void testLayering() {
 
-        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_ops.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         OpsDoc doc1 = all.getStmtDocs().get(0);
@@ -64,7 +64,7 @@ public class OpDefTest {
 
     @Test
     public void testStatementRendering() {
-        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_ops.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         OpsDoc doc1 = all.getStmtDocs().get(0);
@@ -79,10 +79,10 @@ public class OpDefTest {
 
     @Test
     public void testConsumableMapState() {
-        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_ops.yaml", Map.of());
         List<OpsDoc> docs = all.getStmtDocs();
         OpsDoc block1 = docs.get(1);
-        List<OpTemplate> stmts = block1.getStmts();
+        List<OpTemplate> stmts = block1.getOpTemplates();
         OpTemplate stmt0 = stmts.get(0);
         OpTemplate stmt1 = stmts.get(1);
         assertThat(stmt0.getParams()).containsAllEntriesOf(Map.of("timeout", 23423, "foobar", "baz"));
@@ -94,7 +94,7 @@ public class OpDefTest {
 
     @Test
     public void testMapOfMaps() {
-        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/op_variants.yaml", Map.of());
         List<OpsDoc> docs = all.getStmtDocs();
         OpsDoc doc0 = docs.get(0);
         assertThat(doc0.getName()).isEqualTo("map-of-maps");
@@ -115,7 +115,7 @@ public class OpDefTest {
 
     @Test
     public void testBasicStringStmt() {
-        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/op_variants.yaml", Map.of());
         List<OpsDoc> docs = all.getStmtDocs();
         OpsDoc doc1 = docs.get(1);
         assertThat(doc1.getName()).isEqualTo("string-statement");
@@ -130,7 +130,7 @@ public class OpDefTest {
 
     @Test
     public void testListOfNamedMap() {
-        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        OpsDocList all = OpsLoader.loadPath("testdocs/op_variants.yaml", Map.of());
         List<OpsDoc> docs = all.getStmtDocs();
         OpsDoc doc2 = docs.get(2);
         assertThat(doc2.getName()).isEqualTo("list-of-named-map");

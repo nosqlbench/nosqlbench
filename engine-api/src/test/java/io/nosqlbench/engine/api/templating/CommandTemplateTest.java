@@ -35,11 +35,11 @@ public class CommandTemplateTest {
 
     @Test
     public void testCommandTemplate() {
-        OpsDocList stmtsDocs = OpsLoader.loadString("" +
-                "statements:\n" +
+        OpsDocList opsDocs = OpsLoader.loadString("" +
+                "ops:\n" +
                 " - s1: test1=foo test2=bar",
             OpTemplateFormat.yaml, Map.of(), null);
-        OpTemplate optpl = stmtsDocs.getStmts().get(0);
+        OpTemplate optpl = opsDocs.getOps().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);
         assertThat(ct.isStatic()).isTrue();
     }
@@ -48,13 +48,13 @@ public class CommandTemplateTest {
     public void testCommandTemplateFormat() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         OpsDocList stmtsDocs = OpsLoader.loadString("" +
-            "statements:\n" +
+            "ops:\n" +
             " - s1: test1=foo test2={bar}\n" +
             "   bindings:\n" +
             "    bar: NumberNameToString();\n",
             OpTemplateFormat.yaml, Map.of(), null
         );
-        OpTemplate optpl = stmtsDocs.getStmts().get(0);
+        OpTemplate optpl = stmtsDocs.getOps().get(0);
         CommandTemplate ct = new CommandTemplate(optpl);
         String format = gson.toJson(ct);
         logger.debug(format);

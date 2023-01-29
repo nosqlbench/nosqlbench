@@ -95,7 +95,7 @@ public class RawOpsLoader {
 
                 newDocList.add(doc);
             } else {
-                throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());
+                throw new RuntimeException("Unable to coerce a non-map type to a workload structure: " + object.getClass().getCanonicalName());
             }
         }
         RawOpsDocList rawOpsDocList = new RawOpsDocList(newDocList);

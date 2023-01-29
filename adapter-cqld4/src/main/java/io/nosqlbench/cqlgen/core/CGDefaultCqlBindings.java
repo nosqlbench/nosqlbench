@@ -45,8 +45,8 @@ public class CGDefaultCqlBindings implements BindingsLibrary {
                     ", from local dir or internally as cqlgen" + DEFAULT_BINDINGS_FILE)
             );
 
-        OpsDocList stmtsDocs = OpsLoader.loadContent(content, Map.of());
-        this.bindings = stmtsDocs.getDocBindings();
+        OpsDocList opsDocList = OpsLoader.loadContent(content, Map.of());
+        this.bindings = opsDocList.getDocBindings();
     }
 
     private Optional<String> loadLocal(String path) {
