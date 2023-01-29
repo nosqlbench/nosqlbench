@@ -76,7 +76,7 @@ public class RawYamlLoader {
     private List<Map<String,Object>> parseYaml(Logger logger, String data) {
         Load yaml = new Load(LoadSettings.builder().build());
         Iterable<Object> objects = yaml.loadAllFromString(data);
-        List<RawStmtsDoc> newDocList = new ArrayList<>();
+        List<RawOpsDoc> newDocList = new ArrayList<>();
 
         List<Map<String,Object>> maps = new ArrayList<>();
 

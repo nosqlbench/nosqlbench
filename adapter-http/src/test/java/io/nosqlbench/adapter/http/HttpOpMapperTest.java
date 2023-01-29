@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package io.nosqlbench.adapter.http;
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
 import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +52,7 @@ public class HttpOpMapperTest {
     }
 
     private static ParsedOp parsedOpFor(String yaml) {
-        StmtsDocList docs = StatementsLoader.loadString(yaml, Map.of());
+        OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         OpTemplate stmtDef = docs.getStmts().get(0);
         ParsedOp parsedOp = new ParsedOp(stmtDef, cfg, List.of(adapter.getPreprocessor()));
         return parsedOp;

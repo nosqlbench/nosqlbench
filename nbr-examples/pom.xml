@@ -57,6 +57,14 @@
                 <directory>src/test/resources</directory>
                 <filtering>false</filtering> <!-- exclusion from defaults -->
             </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/log4j2-test.xml</include>
+                    <include>**/log4j2.xml</include>
+                </includes>
+            </testResource>
         </testResources>
 
         <plugins>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,35 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParsedStmtOpTest {
-    private static final Logger logger = LogManager.getLogger(ParsedStmtOpTest.class);
-    private static StmtsDocList doclist;
+public class ParsedOpTemplateTest {
+    private static final Logger logger = LogManager.getLogger(ParsedOpTemplateTest.class);
+    private static OpsDocList doclist;
 
     @BeforeAll
     public static void testLoadYaml() {
-        doclist = StatementsLoader.loadPath(logger, "testdocs/bindings.yaml");
+        doclist = OpsLoader.loadPath("testdocs/bindings.yaml", Map.of());
     }
 
     @Test
     public void testBasicParser() {
-        StmtsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
+        OpsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         OpTemplate stmtDef0 = block0.getOps().get(0);
         ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
         assertThat(parsed0.getMissing()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
-        StmtsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
+        OpsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
         OpTemplate stmtDef1 = block1.getOps().get(0);
         ParsedStringTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
         assertThat(parsed1.getMissing()).containsExactly();
@@ -51,7 +53,7 @@ public class ParsedStmtOpTest {
 
     @Test
     public void testMultipleBindingUsage() {
-        StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
+        OpsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
         OpTemplate stmtDef0 = block2.getOps().get(0);
         ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();

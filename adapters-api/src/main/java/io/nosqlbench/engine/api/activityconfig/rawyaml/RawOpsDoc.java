@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,26 +25,26 @@ import java.util.Map;
 /**
  * A statements doc can have both a list of statement blocks and/or a
  * list of statements. It can also have all the block parameters
- * assignable to {@link RawStmtFields}.
+ * assignable to {@link RawOpFields}.
  * <p>
  * The reason for having support both statements or statement blocks
  * is merely convenience. If you do not need or want to deal with the
  * full blocks format, the extra structure gets in the way.
  */
-public class RawStmtsDoc extends StatementsOwner {
+public class RawOpsDoc extends OpsOwner {
 
     private RawScenarios scenarios = new RawScenarios();
-    private final List<RawStmtsBlock> blocks = new ArrayList<>();
+    private final List<RawOpsBlock> blocks = new ArrayList<>();
     private String versionRegex = ".+";
 
     // no-args ctor is required
-    public RawStmtsDoc() {
+    public RawOpsDoc() {
     }
 
-    public static RawStmtsDoc forSingleStatement(String statement) {
-        RawStmtsDoc rawStmtsDoc = new RawStmtsDoc();
-        rawStmtsDoc.setStatementsFieldByType(statement);
-        return rawStmtsDoc;
+    public static RawOpsDoc forSingleStatement(String statement) {
+        RawOpsDoc rawOpsDoc = new RawOpsDoc();
+        rawOpsDoc.setStatementsFieldByType(statement);
+        return rawOpsDoc;
     }
 
     public void setFieldsByReflection(Map<String, Object> properties) {
@@ -63,9 +63,9 @@ public class RawStmtsDoc extends StatementsOwner {
             for (Object blockData : blockList) {
                 if (blockData instanceof Map) {
                     Map<String, Object> blockDataMap = (Map<String, Object>) blockData;
-                    RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
-                    rawStmtsBlock.setFieldsByReflection(blockDataMap);
-                    blocks.add(rawStmtsBlock);
+                    RawOpsBlock rawOpsBlock = new RawOpsBlock();
+                    rawOpsBlock.setFieldsByReflection(blockDataMap);
+                    blocks.add(rawOpsBlock);
                 } else {
                     throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
                 }
@@ -77,10 +77,10 @@ public class RawStmtsDoc extends StatementsOwner {
                 Object blockData = entry.getValue();
                 if (blockData instanceof Map) {
                     Map<String, Object> blockDataMap = (Map<String, Object>) blockData;
-                    RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
-                    rawStmtsBlock.setName(blockName);
-                    rawStmtsBlock.setFieldsByReflection(blockDataMap);
-                    blocks.add(rawStmtsBlock);
+                    RawOpsBlock rawOpsBlock = new RawOpsBlock();
+                    rawOpsBlock.setName(blockName);
+                    rawOpsBlock.setFieldsByReflection(blockDataMap);
+                    blocks.add(rawOpsBlock);
                 } else {
                     throw new RuntimeException("Invalid object type for block data: " + blockData.getClass().getCanonicalName());
                 }
@@ -107,19 +107,19 @@ public class RawStmtsDoc extends StatementsOwner {
      *
      * @return all logical statement blocks containing statements
      */
-    public List<RawStmtsBlock> getBlocks() {
-        List<RawStmtsBlock> stmtBlocks = new ArrayList<>();
+    public List<RawOpsBlock> getBlocks() {
+        List<RawOpsBlock> stmtBlocks = new ArrayList<>();
         if (!getRawStmtDefs().isEmpty()) {
-            RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
-            rawStmtsBlock.setName("block0");
-            rawStmtsBlock.setRawStmtDefs(getRawStmtDefs());
-            stmtBlocks.add(rawStmtsBlock);
+            RawOpsBlock rawOpsBlock = new RawOpsBlock();
+            rawOpsBlock.setName("block0");
+            rawOpsBlock.setRawStmtDefs(getRawStmtDefs());
+            stmtBlocks.add(rawOpsBlock);
         }
         stmtBlocks.addAll(this.blocks);
         return stmtBlocks;
     }
 
-    public void setBlocks(List<RawStmtsBlock> blocks) {
+    public void setBlocks(List<RawOpsBlock> blocks) {
         this.blocks.clear();
         this.blocks.addAll(blocks);
     }

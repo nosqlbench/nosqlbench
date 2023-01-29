@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform.decorators;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.templating.DriverAdapterDecorators;
 
 import java.util.List;
@@ -38,8 +38,8 @@ public interface SyntheticOpTemplateProvider extends DriverAdapterDecorators {
     /**
      * If a driver adapter supports creating example op templates from bindings,
      * it must implement this method to do so.
-     * @param stmtsDocList The existing doc structure, which should contain no fully defined op templates, but may contain other elements like bindings
+     * @param opsDocList The existing doc structure, which should contain no fully defined op templates, but may contain other elements like bindings
      * @return A list of op templates, size zero or more
      */
-    List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> params);
+    List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String,Object> params);
 }

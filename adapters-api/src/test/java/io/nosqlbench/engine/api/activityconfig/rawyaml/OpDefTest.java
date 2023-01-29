@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsBlock;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDoc;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsBlock;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDoc;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -37,22 +37,22 @@ public class OpDefTest {
     @Test
     public void testLayering() {
 
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
-        StmtsDoc doc1 = all.getStmtDocs().get(0);
+        OpsDoc doc1 = all.getStmtDocs().get(0);
         assertThat(doc1.getName()).isEqualTo("doc1");
         assertThat(doc1.getBlocks()).hasSize(1);
-        StmtsDoc doc2 = all.getStmtDocs().get(1);
+        OpsDoc doc2 = all.getStmtDocs().get(1);
         assertThat(doc2.getBlocks()).hasSize(2);
 
-        StmtsBlock block1 = doc1.getBlocks().get(0);
+        OpsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getBindings()).hasSize(2);
         assertThat(block1.getName()).isEqualTo("doc1--block0");
         assertThat(block1.getTags()).hasSize(1);
 
-        StmtsBlock block21 = doc2.getBlocks().get(0);
-        StmtsBlock block22 = doc2.getBlocks().get(1);
+        OpsBlock block21 = doc2.getBlocks().get(0);
+        OpsBlock block22 = doc2.getBlocks().get(1);
 
         assertThat(block21.getName()).isEqualTo("doc2--block1");
         assertThat(block21.getTags()).hasSize(3);
@@ -64,11 +64,11 @@ public class OpDefTest {
 
     @Test
     public void testStatementRendering() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
-        StmtsDoc doc1 = all.getStmtDocs().get(0);
-        StmtsBlock block1 = doc1.getBlocks().get(0);
+        OpsDoc doc1 = all.getStmtDocs().get(0);
+        OpsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getName()).isEqualTo("doc1--block0");
         List<OpTemplate> ops = block1.getOps();
         assertThat(ops).hasSize(2);
@@ -79,9 +79,9 @@ public class OpDefTest {
 
     @Test
     public void testConsumableMapState() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/docs_blocks_stmts.yaml");
-        List<StmtsDoc> docs = all.getStmtDocs();
-        StmtsDoc block1 = docs.get(1);
+        OpsDocList all = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
+        List<OpsDoc> docs = all.getStmtDocs();
+        OpsDoc block1 = docs.get(1);
         List<OpTemplate> stmts = block1.getStmts();
         OpTemplate stmt0 = stmts.get(0);
         OpTemplate stmt1 = stmts.get(1);
@@ -94,12 +94,12 @@ public class OpDefTest {
 
     @Test
     public void testMapOfMaps() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
-        List<StmtsDoc> docs = all.getStmtDocs();
-        StmtsDoc doc0 = docs.get(0);
+        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        List<OpsDoc> docs = all.getStmtDocs();
+        OpsDoc doc0 = docs.get(0);
         assertThat(doc0.getName()).isEqualTo("map-of-maps");
         assertThat(doc0.getBlocks()).hasSize(1);
-        StmtsBlock block1 = doc0.getBlocks().get(0);
+        OpsBlock block1 = doc0.getBlocks().get(0);
         assertThat(block1.getName()).isEqualTo("map-of-maps--block0");
         assertThat(block1.getOps()).hasSize(2);
         OpTemplate op0 = block1.getOps().get(0);
@@ -115,12 +115,12 @@ public class OpDefTest {
 
     @Test
     public void testBasicStringStmt() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
-        List<StmtsDoc> docs = all.getStmtDocs();
-        StmtsDoc doc1 = docs.get(1);
+        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        List<OpsDoc> docs = all.getStmtDocs();
+        OpsDoc doc1 = docs.get(1);
         assertThat(doc1.getName()).isEqualTo("string-statement");
         assertThat(doc1.getBlocks()).hasSize(1);
-        StmtsBlock block1 = doc1.getBlocks().get(0);
+        OpsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getName()).isEqualTo("string-statement--block0");
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
@@ -130,12 +130,12 @@ public class OpDefTest {
 
     @Test
     public void testListOfNamedMap() {
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/statement_variants.yaml");
-        List<StmtsDoc> docs = all.getStmtDocs();
-        StmtsDoc doc2 = docs.get(2);
+        OpsDocList all = OpsLoader.loadPath("testdocs/statement_variants.yaml", Map.of());
+        List<OpsDoc> docs = all.getStmtDocs();
+        OpsDoc doc2 = docs.get(2);
         assertThat(doc2.getName()).isEqualTo("list-of-named-map");
         assertThat(doc2.getBlocks()).hasSize(1);
-        StmtsBlock block1 = doc2.getBlocks().get(0);
+        OpsBlock block1 = doc2.getBlocks().get(0);
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
         System.out.println(op0.getParams());

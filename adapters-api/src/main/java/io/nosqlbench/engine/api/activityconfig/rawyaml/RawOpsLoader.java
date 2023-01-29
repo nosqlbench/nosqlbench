@@ -21,6 +21,7 @@ import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
@@ -28,18 +29,18 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import java.util.*;
 import java.util.function.Function;
 
-public class RawStmtsLoader {
+public class RawOpsLoader {
+    private final static Logger logger = LogManager.getLogger(RawOpsLoader.class);
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml"};
 
-    List<Function<String, String>> stringTransformers = new ArrayList<>();
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
-    public RawStmtsLoader(Function<String,String> transformer) {
+    public RawOpsLoader(Function<String,String> transformer) {
         addTransformer(transformer);
     }
 
-    public RawStmtsLoader() {
+    public RawOpsLoader() {
         addTransformer(new StrInterpolator());
     }
 
@@ -47,11 +48,10 @@ public class RawStmtsLoader {
         Collections.addAll(this.transformers, newTransformer);
     }
 
-    public RawStmtsDocList loadString(Logger logger, final String originalData) {
+    public RawOpsDocList loadString(final String originalData) {
+        logger.trace(() -> "Applying string transformer to yaml data:" + originalData);
         String data = originalData;
-
         try {
-            if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + originalData);
             for (Function<String, String> transformer : transformers) {
                 data = transformer.apply(data);
             }
@@ -60,11 +60,10 @@ public class RawStmtsLoader {
             throw t;
         }
 
-        return parseYaml(logger, data);
+        return parseYaml(data);
     }
 
-    public RawStmtsDocList loadPath(
-            Logger logger,
+    public RawOpsDocList loadPath(
             String path,
             String... searchPaths) {
 
@@ -72,22 +71,22 @@ public class RawStmtsLoader {
         try {
             Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
             data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
-            return loadString(logger, data);
+            return loadString(data);
         } catch (Exception e) {
             throw new RuntimeException("error while reading file " + path, e);
         }
 
     }
 
-    private RawStmtsDocList parseYaml(Logger logger, String data) {
+    public RawOpsDocList parseYaml(String data) {
         LoadSettings loadSettings = LoadSettings.builder().build();
         Load yaml = new Load(loadSettings);
         Iterable<Object> objects = yaml.loadAllFromString(data);
-        List<RawStmtsDoc> newDocList = new ArrayList<>();
+        List<RawOpsDoc> newDocList = new ArrayList<>();
 
         for (Object object : objects) {
             if (object instanceof Map) {
-                RawStmtsDoc doc = new RawStmtsDoc();
+                RawOpsDoc doc = new RawOpsDoc();
                 Map<String, Object> docfields = (Map<String, Object>) object;
                 doc.setFieldsByReflection(docfields);
                 if (docfields.size()>0) {
@@ -99,21 +98,8 @@ public class RawStmtsLoader {
                 throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());
             }
         }
-        RawStmtsDocList rawStmtsDocList = new RawStmtsDocList(newDocList);
-        return rawStmtsDocList;
-    }
-
-    protected String applyTransforms(Logger logger, String data) {
-        for (Function<String, String> xform : stringTransformers) {
-            try {
-                if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + xform);
-                data = xform.apply(data);
-            } catch (Exception e) {
-                RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
-                throw t;
-            }
-        }
-        return data;
+        RawOpsDocList rawOpsDocList = new RawOpsDocList(newDocList);
+        return rawOpsDocList;
     }
 
 }

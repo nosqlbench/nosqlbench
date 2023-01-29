@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,30 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.MultiMapLookup;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtDef;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsBlock;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpDef;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsBlock;
 import io.nosqlbench.api.engine.util.Tagged;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
+public class OpsBlock implements Tagged, Iterable<OpTemplate> {
 
-    private final RawStmtsBlock rawStmtsBlock;
-    private final StmtsDoc rawStmtsDoc;
+    private final RawOpsBlock rawOpsBlock;
+    private final OpsDoc rawOpsDoc;
     private final int blockIdx;
 
 
-    public StmtsBlock(RawStmtsBlock rawStmtsBlock, StmtsDoc rawStmtsDoc, int blockIdx) {
-        this.rawStmtsBlock = rawStmtsBlock;
-        this.rawStmtsDoc = rawStmtsDoc;
+    public OpsBlock(RawOpsBlock rawOpsBlock, OpsDoc rawOpsDoc, int blockIdx) {
+        this.rawOpsBlock = rawOpsBlock;
+        this.rawOpsDoc = rawOpsDoc;
         this.blockIdx = blockIdx;
     }
 
     public List<OpTemplate> getOps() {
 
         List<OpTemplate> rawOpTemplates = new ArrayList<>();
-        List<RawStmtDef> statements = rawStmtsBlock.getRawStmtDefs();
+        List<RawOpDef> statements = rawOpsBlock.getRawStmtDefs();
 
         for (int i = 0; i < statements.size(); i++) {
             rawOpTemplates.add(
@@ -52,11 +52,11 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
 
     public String getName() {
         StringBuilder sb = new StringBuilder();
-        if (!rawStmtsDoc.getName().isEmpty()) {
-            sb.append(rawStmtsDoc.getName()).append("--");
+        if (!rawOpsDoc.getName().isEmpty()) {
+            sb.append(rawOpsDoc.getName()).append("--");
         }
-        if (!rawStmtsBlock.getName().isEmpty()) {
-            sb.append(rawStmtsBlock.getName());
+        if (!rawOpsBlock.getName().isEmpty()) {
+            sb.append(rawOpsBlock.getName());
         } else {
             sb.append("block").append(blockIdx);
         }
@@ -64,15 +64,15 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
     }
 
     public Map<String, String> getTags() {
-        return new MultiMapLookup<>(rawStmtsBlock.getTags(), rawStmtsDoc.getTags());
+        return new MultiMapLookup<>(rawOpsBlock.getTags(), rawOpsDoc.getTags());
     }
 
     public Map<String, Object> getParams() {
-        return new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        return new MultiMapLookup<>(rawOpsBlock.getParams(), rawOpsDoc.getParams());
     }
 
     public Map<String, String> getParamsAsText() {
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawOpsBlock.getParams(), rawOpsDoc.getParams());
         LinkedHashMap<String, String> stringmap = new LinkedHashMap<>();
         lookup.forEach((k, v) -> stringmap.put(k, v.toString()));
         return stringmap;
@@ -81,7 +81,7 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
     @SuppressWarnings("unchecked")
     public <V> V getParamOrDefault(String name, V defaultValue) {
         Objects.requireNonNull(defaultValue);
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawOpsBlock.getParams(), rawOpsDoc.getParams());
         if (!lookup.containsKey(name)) {
             return defaultValue;
         }
@@ -90,14 +90,14 @@ public class StmtsBlock implements Tagged, Iterable<OpTemplate> {
     }
 
     public <V> V getParam(String name, Class<? extends V> type) {
-        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
+        MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawOpsBlock.getParams(), rawOpsDoc.getParams());
         Object object = lookup.get(name);
         V value = type.cast(object);
         return value;
     }
 
     public Map<String, String> getBindings() {
-        return new MultiMapLookup<>(rawStmtsBlock.getBindings(), rawStmtsDoc.getBindings());
+        return new MultiMapLookup<>(rawOpsBlock.getBindings(), rawOpsDoc.getBindings());
     }
 
     @Override

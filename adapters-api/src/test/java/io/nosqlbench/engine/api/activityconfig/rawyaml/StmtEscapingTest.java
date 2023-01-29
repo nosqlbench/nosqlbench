@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityconfig.rawyaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,15 +36,15 @@ public class StmtEscapingTest {
     @BeforeAll
     public static void testLayering() {
 
-        StmtsDocList all = StatementsLoader.loadPath(logger, "testdocs/escaped_stmts.yaml");
+        OpsDocList all = OpsLoader.loadPath("testdocs/escaped_stmts.yaml", Map.of());
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(1);
-        StmtsDoc doc1 = all.getStmtDocs().get(0);
+        OpsDoc doc1 = all.getStmtDocs().get(0);
 
 //        assertThat(doc1.getName()).isEqualTo("doc1");
         assertThat(doc1.getBlocks()).hasSize(1);
 
-        StmtsBlock block1 = doc1.getBlocks().get(0);
+        OpsBlock block1 = doc1.getBlocks().get(0);
         assertThat(block1.getBindings()).hasSize(0);
         assertThat(block1.getTags()).hasSize(0);
         assertThat(block1.getOps()).hasSize(3);

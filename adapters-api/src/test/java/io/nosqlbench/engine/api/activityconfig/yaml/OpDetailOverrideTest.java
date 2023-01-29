@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -26,21 +26,21 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StmtDetailOverrideTest {
-    private static final Logger logger = LogManager.getLogger(StmtDetailOverrideTest.class);
+public class OpDetailOverrideTest {
+    private static final Logger logger = LogManager.getLogger(OpDetailOverrideTest.class);
 
     @Test
     public void testStmtOverrides() {
 
-        StmtsDocList doclist = StatementsLoader.loadPath(logger, "testdocs/stmt_details.yaml");
+        OpsDocList doclist = OpsLoader.loadPath("testdocs/stmt_details.yaml", Map.of());
 
         assertThat(doclist).isNotNull();
 
         assertThat(doclist.getStmtDocs()).hasSize(1);
-        StmtsDoc doc1 = doclist.getStmtDocs().get(0);
+        OpsDoc doc1 = doclist.getStmtDocs().get(0);
 
         assertThat(doc1.getBlocks()).hasSize(2);
-        StmtsBlock doc1block0 = doc1.getBlocks().get(0);
+        OpsBlock doc1block0 = doc1.getBlocks().get(0);
         assertThat(doc1block0.getOps().size()).isEqualTo(1);
         OpTemplate s = doc1block0.getOps().get(0);
         assertThat(s.getName()).isEqualTo("block0--stmt1");
@@ -49,7 +49,7 @@ public class StmtDetailOverrideTest {
         assertThat(s.getParams()).hasSize(1);
         assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0--stmt1"));
 
-        StmtsBlock doc1block1 = doc1.getBlocks().get(1);
+        OpsBlock doc1block1 = doc1.getBlocks().get(1);
         List<OpTemplate> stmts = doc1block1.getOps();
         assertThat(stmts).hasSize(4);
 

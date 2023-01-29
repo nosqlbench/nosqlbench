@@ -20,9 +20,9 @@ import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
@@ -54,11 +54,12 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
     public StandardActivity(ActivityDef activityDef) {
         super(activityDef);
+        OpsDocList workload;
 
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
             Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-            StmtsDocList workload = StatementsLoader.loadPath(logger, yaml_loc.get(), disposable, "activities");
+            workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
             yamlmodel = workload.getConfigModel();
         } else {
             yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
@@ -163,11 +164,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String, Object> cfg) {
+    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
         List<OpTemplate> opTemplates = new ArrayList<>();
         for (DriverAdapter adapter : adapters.values()) {
             if (adapter instanceof SyntheticOpTemplateProvider sotp) {
-                List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(stmtsDocList, cfg);
+                List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(opsDocList, cfg);
                 opTemplates.addAll(newTemplates);
             }
         }
