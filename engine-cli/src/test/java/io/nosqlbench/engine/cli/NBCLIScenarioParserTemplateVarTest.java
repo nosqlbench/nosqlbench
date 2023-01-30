@@ -34,12 +34,12 @@ public class NBCLIScenarioParserTemplateVarTest {
         cmds.forEach(System.out::println);
 
         OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
-        OpTemplate optpl1 = workload1.getStmts().get(0);
+        OpTemplate optpl1 = workload1.getOps().get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} replaced replaced\n");
 
         OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArg("workload"),cmds.get(1).getParams());
-        OpTemplate optpl2 = workload2.getStmts().get(0);
+        OpTemplate optpl2 = workload2.getOps().get(0);
         System.out.println("op from cmd2:"+optpl2);
         assertThat(optpl2.getStmt()).contains("cycle {cycle} def1 def1\n");
     }
@@ -51,7 +51,7 @@ public class NBCLIScenarioParserTemplateVarTest {
         cmds.forEach(System.out::println);
 
         OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
-        OpTemplate optpl1 = workload1.getStmts().get(0);
+        OpTemplate optpl1 = workload1.getOps().get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} overridden overridden\n");
     }

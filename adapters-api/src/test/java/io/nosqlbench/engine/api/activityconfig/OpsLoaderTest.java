@@ -29,12 +29,12 @@ public class OpsLoaderTest {
 
     @Test
     public void testTemplateVarSubstitution() {
-        OpsDocList stmtsDocs = OpsLoader.loadPath("activities/template_vars", Map.of(),"src/test/resources");
-        assertThat(stmtsDocs).isNotNull();
-        List<OpsDoc> docs = stmtsDocs.getStmtDocs();
+        OpsDocList opsDocs = OpsLoader.loadPath("activities/template_vars", Map.of(),"src/test/resources");
+        assertThat(opsDocs).isNotNull();
+        List<OpsDoc> docs = opsDocs.getStmtDocs();
         assertThat(docs).hasSize(1);
-        OpsDoc stmtsBlocks = docs.get(0);
-        Map<String, String> bindings = stmtsBlocks.getBindings();
+        OpsDoc opsDoc = docs.get(0);
+        Map<String, String> bindings = opsDoc.getBindings();
         assertThat(bindings).isEqualTo(Map.of(
             "b1a","Prefix(\"prefix\")",
             "b1b","Prefix(\"prefix\")",

@@ -84,7 +84,7 @@ public class RawYamlLoader {
             if (object instanceof Map) {
                 maps.add(new LinkedHashMap<>((Map<String,Object>)object));
             } else {
-                throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());
+                throw new RuntimeException("Unable to coerce a non-map type to a workload structure: " + object.getClass().getCanonicalName());
             }
         }
         return maps;

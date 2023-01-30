@@ -24,89 +24,93 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StmtVariationTests {
+public class OpVariationTests {
 
-    private final static Logger logger = LogManager.getLogger(StmtVariationTests.class);
+    private final static Logger logger = LogManager.getLogger(OpVariationTests.class);
 
     @Test
-    public void testListStmtsOnly() {
+    public void testListOpsOnly() {
         RawOpsLoader ysl = new RawOpsLoader();
         RawOpsDocList docs = ysl.loadString(
-            "statements:\n" +
-                        " - first statement\n" +
-                        " - second statement\n"
+            "ops:\n" +
+                " - first op\n" +
+                " - second op\n"
         );
 
-        assertThat(docs.getStmtsDocs()).hasSize(1);
-        RawOpsDoc doc = docs.getStmtsDocs().get(0);
-        assertThat(doc.getRawStmtDefs()).hasSize(2);
-        List<RawOpDef> stmts = doc.getRawStmtDefs();
-        RawOpDef s0 = stmts.get(0);
+        assertThat(docs.getOpsDocs()).hasSize(1);
+        RawOpsDoc doc = docs.getOpsDocs().get(0);
+        assertThat(doc.getRawOpDefs()).hasSize(2);
+        List<RawOpDef> ops = doc.getRawOpDefs();
+        RawOpDef s0 = ops.get(0);
         assertThat(s0.getName()).isEqualTo("stmt1");
-        assertThat(s0.getStmt()).isEqualTo("first statement");
-        RawOpDef s1 = stmts.get(1);
+        assertThat(s0.getStmt()).isEqualTo("first op");
+        RawOpDef s1 = ops.get(1);
         assertThat(s1.getName()).isEqualTo("stmt2");
-        assertThat(s1.getStmt()).isEqualTo("second statement");
+        assertThat(s1.getStmt()).isEqualTo("second op");
     }
 
     @Test
     public void testSingleEntryMapStmtsOnly() {
         RawOpsLoader ysl = new RawOpsLoader();
         RawOpsDocList docs = ysl.loadString(
-            "statements:\n" +
-                        " - s1: statement one\n" +
-                        " - s2: statement two\n"
+            "ops:\n" +
+                " - s1: op one\n" +
+                " - s2: op two\n"
         );
-        assertThat(docs.getStmtsDocs()).hasSize(1);
-        RawOpsDoc doc = docs.getStmtsDocs().get(0);
-        assertThat(doc.getRawStmtDefs()).hasSize(2);
-        List<RawOpDef> stmts = doc.getRawStmtDefs();
-        assertThat(stmts.get(0)).isOfAnyClassIn(RawOpDef.class);
-        assertThat(stmts.get(0).getName()).isEqualTo("s1");
-        assertThat(stmts.get(0).getStmt()).isEqualTo("statement one");
-        assertThat(stmts.get(1)).isOfAnyClassIn(RawOpDef.class);
-        assertThat(stmts.get(1).getName()).isEqualTo("s2");
-        assertThat(stmts.get(1).getStmt()).isEqualTo("statement two");
+        assertThat(docs.getOpsDocs()).hasSize(1);
+        RawOpsDoc doc = docs.getOpsDocs().get(0);
+        assertThat(doc.getRawOpDefs()).hasSize(2);
+        List<RawOpDef> ops = doc.getRawOpDefs();
+        assertThat(ops.get(0)).isOfAnyClassIn(RawOpDef.class);
+        assertThat(ops.get(0).getName()).isEqualTo("s1");
+        assertThat(ops.get(0).getStmt()).isEqualTo("op one");
+        assertThat(ops.get(1)).isOfAnyClassIn(RawOpDef.class);
+        assertThat(ops.get(1).getName()).isEqualTo("s2");
+        assertThat(ops.get(1).getStmt()).isEqualTo("op two");
     }
 
     @Test
     public void testMapStmtsOnly() {
         RawOpsLoader ysl = new RawOpsLoader();
         RawOpsDocList docs = ysl.loadString(
-            "statements:\n" +
-                        " - name: s1\n" +
-                        "   stmt: statement one\n" +
-                        " - name: s2\n" +
-                        "   stmt: statement two\n"
+            "ops:\n" +
+                " - name: s1\n" +
+                "   stmt: op one\n" +
+                " - name: s2\n" +
+                "   stmt: op two\n"
         );
-        assertThat(docs.getStmtsDocs()).hasSize(1);
-        RawOpsDoc doc = docs.getStmtsDocs().get(0);
-        assertThat(doc.getRawStmtDefs()).hasSize(2);
-        List<RawOpDef> stmts = doc.getRawStmtDefs();
+        assertThat(docs.getOpsDocs()).hasSize(1);
+        RawOpsDoc doc = docs.getOpsDocs().get(0);
+        assertThat(doc.getRawOpDefs()).hasSize(2);
+        List<RawOpDef> stmts = doc.getRawOpDefs();
         assertThat(stmts.get(0)).isOfAnyClassIn(RawOpDef.class);
         assertThat(stmts.get(0).getName()).isEqualTo("s1");
-        assertThat(stmts.get(0).getStmt()).isEqualTo("statement one");
+        assertThat(stmts.get(0).getStmt()).isEqualTo("op one");
         assertThat(stmts.get(1)).isOfAnyClassIn(RawOpDef.class);
         assertThat(stmts.get(1).getName()).isEqualTo("s2");
-        assertThat(stmts.get(1).getStmt()).isEqualTo("statement two");
+        assertThat(stmts.get(1).getStmt()).isEqualTo("op two");
     }
 
+    /**
+     * This test uses the compatible names for the sake of demonstration. Users should know that they can use op and
+     * statement terms interchangeably in op templates.
+     */
     @Test
     public void testMixedForms() {
         RawOpsLoader ysl = new RawOpsLoader();
         RawOpsDocList docs = ysl.loadString(
             "statement:\n" +
-                        " - name: s1\n" +
-                        "   stmt: statement one\n" +
-                        " - statement two\n" +
-                        " - s3: statement three\n" +
-                        " - ST4: statement four\n" +
-                        "   type: organic\n"
+                " - name: s1\n" +
+                "   stmt: statement one\n" +
+                " - statement two\n" +
+                " - s3: statement three\n" +
+                " - ST4: statement four\n" +
+                "   type: organic\n"
         );
-        assertThat(docs.getStmtsDocs()).hasSize(1);
-        RawOpsDoc doc = docs.getStmtsDocs().get(0);
-        assertThat(doc.getRawStmtDefs()).hasSize(4);
-        List<RawOpDef> stmts = doc.getRawStmtDefs();
+        assertThat(docs.getOpsDocs()).hasSize(1);
+        RawOpsDoc doc = docs.getOpsDocs().get(0);
+        assertThat(doc.getRawOpDefs()).hasSize(4);
+        List<RawOpDef> stmts = doc.getRawOpDefs();
         assertThat(stmts.get(0)).isOfAnyClassIn(RawOpDef.class);
         assertThat(stmts.get(0).getName()).isEqualTo("s1");
         assertThat(stmts.get(0).getStmt()).isEqualTo("statement one");

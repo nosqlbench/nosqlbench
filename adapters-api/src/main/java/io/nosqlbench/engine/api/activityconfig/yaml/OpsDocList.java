@@ -53,26 +53,26 @@ public class OpsDocList implements Iterable<OpsDoc> {
     }
 
     public List<OpsDoc> getStmtDocs() {
-        return rawOpsDocList.getStmtsDocs().stream()
+        return rawOpsDocList.getOpsDocs().stream()
             .map(OpsDoc::new)
             .collect(Collectors.toList());
     }
 
-    public List<OpTemplate> getStmts() {
-        return getStmts("");
+    public List<OpTemplate> getOps() {
+        return getOps("");
     }
 
     /**
      * @param tagFilterSpec a comma-separated tag filter spec
-     * @return The list of all included statements for all included blocks of  in this document,
-     * including the inherited and overridden values from the this doc and the parent block.
+     * @return The list of all included op templates for all included blocks of  in this document,
+     * including the inherited and overridden values from this doc and the parent block.
      */
-    public List<OpTemplate> getStmts(String tagFilterSpec) {
+    public List<OpTemplate> getOps(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
         List<OpTemplate> opTemplates = new ArrayList<>();
 
         getStmtDocs().stream()
-            .flatMap(d -> d.getStmts().stream())
+            .flatMap(d -> d.getOpTemplates().stream())
             .filter(ts::matchesTagged)
             .forEach(opTemplates::add);
 
@@ -155,8 +155,6 @@ public class OpsDocList implements Iterable<OpsDoc> {
         }
 
         sb.append("docs: " + docscount + " blocks:" + blockscount + " ops:" + opscount);
-//        String names = this.rawStmtsDocList.getStmtsDocs().stream().flatMap(sd -> sd.getRawStmtDefs().stream()).map(d->d.getName()).collect(Collectors.joining(","));
-//        sb.append(", names:").append(names);
         return sb.toString();
     }
 
@@ -166,7 +164,7 @@ public class OpsDocList implements Iterable<OpsDoc> {
     };
 
     public Pattern getVersionRegex() {
-        List<RawOpsDoc> stmtDocs = rawOpsDocList.getStmtsDocs();
+        List<RawOpsDoc> stmtDocs = rawOpsDocList.getOpsDocs();
         return Pattern.compile(stmtDocs.size()>0 ? stmtDocs.get(0).getVersionRegex() : ".*");
     }
 }

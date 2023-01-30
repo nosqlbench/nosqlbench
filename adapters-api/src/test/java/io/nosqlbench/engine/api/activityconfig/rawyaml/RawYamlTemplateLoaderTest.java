@@ -32,9 +32,9 @@ public class RawYamlTemplateLoaderTest {
     public void testLoadPropertiesBlock() {
         RawOpsLoader ysl = new RawOpsLoader();
         RawOpsDocList rawBlockDocs = ysl.loadPath("testdocs/rawblock.yaml");
-        assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
-        RawOpsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
-        assertThat(rawBlockDoc.getRawStmtDefs()).hasSize(1);
+        assertThat(rawBlockDocs.getOpsDocs()).hasSize(1);
+        RawOpsDoc rawBlockDoc = rawBlockDocs.getOpsDocs().get(0);
+        assertThat(rawBlockDoc.getRawOpDefs()).hasSize(1);
         assertThat(rawBlockDoc.getBindings()).hasSize(1);
         assertThat(rawBlockDoc.getName()).isEqualTo("name");
         assertThat(rawBlockDoc.getTags()).hasSize(1);
@@ -44,8 +44,8 @@ public class RawYamlTemplateLoaderTest {
     @Test
     public void testLoadFullFormat() {
         RawOpsLoader ysl = new RawOpsLoader();
-        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
-        List<RawOpsDoc> rawOpsDocs = erthing.getStmtsDocs();
+        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_ops.yaml");
+        List<RawOpsDoc> rawOpsDocs = erthing.getOpsDocs();
         assertThat(rawOpsDocs).hasSize(2);
         RawOpsDoc rawOpsDoc = rawOpsDocs.get(0);
         List<RawOpsBlock> blocks = rawOpsDoc.getBlocks();
@@ -58,8 +58,8 @@ public class RawYamlTemplateLoaderTest {
     @Test
     public void testLoadScenarios() {
         RawOpsLoader ysl = new RawOpsLoader();
-        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_stmts.yaml");
-        List<RawOpsDoc> rawOpsDocs = erthing.getStmtsDocs();
+        RawOpsDocList erthing = ysl.loadPath("testdocs/docs_blocks_ops.yaml");
+        List<RawOpsDoc> rawOpsDocs = erthing.getOpsDocs();
         assertThat(rawOpsDocs).hasSize(2);
         RawOpsDoc rawOpsDoc = rawOpsDocs.get(0);
         List<RawOpsBlock> blocks = rawOpsDoc.getBlocks();

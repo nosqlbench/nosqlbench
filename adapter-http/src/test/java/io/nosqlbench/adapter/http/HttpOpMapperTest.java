@@ -53,8 +53,8 @@ public class HttpOpMapperTest {
 
     private static ParsedOp parsedOpFor(String yaml) {
         OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
-        OpTemplate stmtDef = docs.getStmts().get(0);
-        ParsedOp parsedOp = new ParsedOp(stmtDef, cfg, List.of(adapter.getPreprocessor()));
+        OpTemplate opTemplate = docs.getOps().get(0);
+        ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()));
         return parsedOp;
     }
 
@@ -102,7 +102,7 @@ public class HttpOpMapperTest {
     @Test
     public void testRFCFormBody() {
         ParsedOp pop = parsedOpFor("""
-                statements:
+                ops:
                  - s1: |
                     get http://localhost/
 
@@ -118,7 +118,7 @@ public class HttpOpMapperTest {
         // This can not be fully resolved in the unit testing context, but it could be
         // in the integrated testing context. It is sufficient to verify parsing here.
         ParsedOp pop = parsedOpFor("""
-                statements:
+                ops:
                  - s1: |
                     {method} {scheme}://{host}/{path}?{query} {version}
                     Header1: {header1val}

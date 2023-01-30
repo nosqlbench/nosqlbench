@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * StmtsDoc creates a logical view of a statements doc that includes
+ * OpsDoc creates a logical view of a RawOpsDoc doc that includes
  * all inherited and overridden values for bindings, tags, and params.
  */
 public class OpsDoc implements Tagged, Iterable<OpsBlock> {
@@ -86,10 +86,10 @@ public class OpsDoc implements Tagged, Iterable<OpsBlock> {
     }
 
     /**
-     * @return The list of all included statements for all included block in this document,
-     * including the inherited and overridden values from the this doc and the parent block.
+     * @return The list of all included op templates for all included block in this document,
+     * including the inherited and overridden values from this doc and the parent block.
      */
-    public List<OpTemplate> getStmts() {
+    public List<OpTemplate> getOpTemplates() {
         return getBlocks().stream().flatMap(b -> b.getOps().stream()).collect(Collectors.toList());
     }
 

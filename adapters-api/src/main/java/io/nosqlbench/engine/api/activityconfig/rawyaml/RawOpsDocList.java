@@ -35,14 +35,14 @@ public class RawOpsDocList {
         return new RawOpsDocList(List.of());
     }
 
-    public List<RawOpsDoc> getStmtsDocs() {
+    public List<RawOpsDoc> getOpsDocs() {
         return rawOpsDocList;
     }
 
     public String toString() {
         int docs = rawOpsDocList.size();
         int blocks = rawOpsDocList.stream().map(RawOpsDoc::getBlocks).mapToInt(List::size).sum();
-        long optemplates = rawOpsDocList.stream().flatMap(d -> d.getBlocks().stream()).flatMap(s -> s.getRawStmtDefs().stream()).count();
+        long optemplates = rawOpsDocList.stream().flatMap(d -> d.getBlocks().stream()).flatMap(s -> s.getRawOpDefs().stream()).count();
         return "docs:" + docs + " blocks:" + blocks + " optemplates:" + optemplates;
     }
 }
