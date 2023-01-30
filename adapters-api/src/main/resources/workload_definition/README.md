@@ -36,7 +36,7 @@ format which can be loaded as such can be a valid source of workload definitions
 - [SpecTest Formatting](spectest_formatting.md) - A primer on the example formats used here
 - [Workload Structure](workload_structure.md) - Overall workload structure, keywords, nesting
   features
-- [Op Template Basics](op_template_basics.md) - Basic Details of op templating
+- [Op Template Basics](op-template-basics.md) - Basic Details of op templating
 - [Op Template Variations](op_template_variations.md) - Additional op template variants
   and corner cases
 - [Template Variables](template_variables.md) - Textual macros and default values
