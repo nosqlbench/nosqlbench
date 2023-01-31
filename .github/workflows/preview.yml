@@ -191,16 +191,14 @@ jobs:
           path: |
             [a-zA-Z]**/logs/*
 
+# This triggers a preview build by cascading the tag to the builddocs repo.
+# The builddocs repo then pushes to preview or release depending on the tag.
+
   preview-docs:
-    # This triggers a preview build by cascading the tag to the builddocs repo.
-    # The builddocs repo then pushes to preview or release depending on the tag.
     needs: preview-build
     runs-on: ubuntu-latest
     steps:
     - name: clone nosqlbench-build-docs
-#      env:
-#        NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-#        NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
       run: |
         git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
         cd nosqlbench-build-docs
@@ -232,13 +230,6 @@ jobs:
         cd nosqlbench-build-docs
         CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
         git push --tags
-#
-#        echo "found $CHANGES to push for doc updates"
-#        if (( $CHANGES > 0 ))
-#        then
-#          git commit -m"docs update for $GITHUB_REF"
-#          git push --tags
-#        fi
         echo "push completed"
 
 
