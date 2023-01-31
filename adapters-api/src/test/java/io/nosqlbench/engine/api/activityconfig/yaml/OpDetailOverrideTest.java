@@ -32,7 +32,7 @@ public class OpDetailOverrideTest {
     @Test
     public void testStmtOverrides() {
 
-        OpsDocList doclist = OpsLoader.loadPath("testdocs/stmt_details.yaml", Map.of());
+        OpsDocList doclist = OpsLoader.loadPath("testdocs/op_details.yaml", Map.of());
 
         assertThat(doclist).isNotNull();
 
@@ -50,24 +50,24 @@ public class OpDetailOverrideTest {
         assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0--stmt1"));
 
         OpsBlock doc1block1 = doc1.getBlocks().get(1);
-        List<OpTemplate> stmts = doc1block1.getOps();
-        assertThat(stmts).hasSize(4);
+        List<OpTemplate> ops = doc1block1.getOps();
+        assertThat(ops).hasSize(4);
 
-        s = stmts.get(0);
+        s = ops.get(0);
         assertThat(s.getName()).isEqualTo("testblock1--stmt1");
         assertThat(s.getStmt()).contains("astatement1");
         assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--stmt1"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
-        s = stmts.get(1);
+        s = ops.get(1);
         assertThat(s.getName()).isEqualTo("testblock1--s2name");
         assertThat(s.getStmt()).contains("s2statement data");
         assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--s2name"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
-        s = stmts.get(2);
+        s = ops.get(2);
         assertThat(s.getName()).isEqualTo("testblock1--s3");
         assertThat(s.getStmt()).contains("statement three");
         assertThat(s.getTags()).containsEntry("tname1", "tval1");
@@ -75,7 +75,7 @@ public class OpDetailOverrideTest {
         assertThat(s.getBindings()).hasSize(3);
         assertThat(s.getParams()).hasSize(2);
 
-        s = stmts.get(3);
+        s = ops.get(3);
         assertThat(s.getName()).isEqualTo("testblock1--s4");
         assertThat(s.getStmt()).contains("statement 4");
         assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--s4"));

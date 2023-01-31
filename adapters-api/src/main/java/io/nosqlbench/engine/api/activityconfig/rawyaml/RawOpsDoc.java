@@ -22,15 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A statements doc can have both a list of statement blocks and/or a
- * list of statements. It can also have all the block parameters
- * assignable to {@link RawOpFields}.
- * <p>
- * The reason for having support both statements or statement blocks
- * is merely convenience. If you do not need or want to deal with the
- * full blocks format, the extra structure gets in the way.
- */
 public class RawOpsDoc extends OpsOwner {
 
     private RawScenarios scenarios = new RawScenarios();
@@ -43,7 +34,7 @@ public class RawOpsDoc extends OpsOwner {
 
     public static RawOpsDoc forSingleStatement(String statement) {
         RawOpsDoc rawOpsDoc = new RawOpsDoc();
-        rawOpsDoc.setStatementsFieldByType(statement);
+        rawOpsDoc.setOpsFieldByType(statement);
         return rawOpsDoc;
     }
 
@@ -100,19 +91,17 @@ public class RawOpsDoc extends OpsOwner {
     }
 
     /**
-     * Return the list of statement blocks in this RawStmtsDoc.
-     * If raw statements are defined on this RawStmtsDoc, then a single
-     * StmtBlock containing those statements is prepended to the block list.
-     * Otherwise, the list of StmtBlocks is returned as-is.
+     * If raw ops are defined on this RawOpsDoc, then a single RawOpsBlock containing those op templates is prepended to
+     * the block list. Otherwise, the list of RawOpsBlocks is returned as-is.
      *
-     * @return all logical statement blocks containing statements
+     * @return all logical ops blocks
      */
     public List<RawOpsBlock> getBlocks() {
         List<RawOpsBlock> stmtBlocks = new ArrayList<>();
-        if (!getRawStmtDefs().isEmpty()) {
+        if (!getRawOpDefs().isEmpty()) {
             RawOpsBlock rawOpsBlock = new RawOpsBlock();
             rawOpsBlock.setName("block0");
-            rawOpsBlock.setRawStmtDefs(getRawStmtDefs());
+            rawOpsBlock.setRawStmtDefs(getRawOpDefs());
             stmtBlocks.add(rawOpsBlock);
         }
         stmtBlocks.addAll(this.blocks);

@@ -109,7 +109,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
                 OpsDocList stmtsDocs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
-                List<OpTemplate> stmts = stmtsDocs.getStmts();
+                List<OpTemplate> stmts = stmtsDocs.getOps();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
                 try {
@@ -142,8 +142,6 @@ public class YamlSpecValidator implements STAssemblyValidator {
      */
     private void validateYamlWithJson(String desc, String yaml, String json, STNodeReference testset, boolean debug) {
         System.out.format("%-40s", "- checking yaml->json");
-
-//        StmtsDocList stmts = StatementsLoader.loadString(yaml);
 
         try {
             List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);

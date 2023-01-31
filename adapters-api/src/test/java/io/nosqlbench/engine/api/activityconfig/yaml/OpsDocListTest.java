@@ -50,7 +50,7 @@ public class OpsDocListTest {
 
     @BeforeAll
     public static void testLoadYaml() {
-        doclist = OpsLoader.loadPath("testdocs/docs_blocks_stmts.yaml", Map.of());
+        doclist = OpsLoader.loadPath("testdocs/docs_blocks_ops.yaml", Map.of());
     }
 
     @Test
@@ -76,21 +76,21 @@ public class OpsDocListTest {
     @Test
     public void testStmtInheritsBlockData() {
         OpsDoc doc0 = doclist.getStmtDocs().get(0);
-        List<OpTemplate> stmts1 = doc0.getBlocks().get(0).getOps();
-        assertThat(stmts1).hasSize(2);
+        List<OpTemplate> ops1 = doc0.getBlocks().get(0).getOps();
+        assertThat(ops1).hasSize(2);
 
         OpsBlock block0 = doc0.getBlocks().get(0);
         assertThat(block0.getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(block0.getParams()).containsExactly(MapEntry.entry("param1","value1"));
         assertThat(block0.getTags()).containsExactly(MapEntry.entry("atagname","atagvalue"));
 
-        assertThat(stmts1.get(0).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
-        assertThat(stmts1.get(0).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(stmts1.get(0).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt1","block","doc1--block0"));
+        assertThat(ops1.get(0).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
+        assertThat(ops1.get(0).getParams()).containsExactly(MapEntry.entry("param1","value1"));
+        assertThat(ops1.get(0).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt1","block","doc1--block0"));
 
-        assertThat(stmts1.get(1).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
-        assertThat(stmts1.get(1).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(stmts1.get(1).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt2","block","doc1--block0"));
+        assertThat(ops1.get(1).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
+        assertThat(ops1.get(1).getParams()).containsExactly(MapEntry.entry("param1","value1"));
+        assertThat(ops1.get(1).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt2","block","doc1--block0"));
 
     }
 
@@ -120,15 +120,15 @@ public class OpsDocListTest {
     @Test
     public void testStmtsGetter() {
         OpsDoc doc1 = doclist.getStmtDocs().get(1);
-        List<OpTemplate> stmts = doc1.getStmts();
+        List<OpTemplate> stmts = doc1.getOpTemplates();
         assertThat(stmts).hasSize(4);
     }
 
     @Test
     public void testFilteredStmts() {
-        List<OpTemplate> stmts = doclist.getStmts("");
+        List<OpTemplate> stmts = doclist.getOps("");
         assertThat(stmts).hasSize(6);
-        stmts = doclist.getStmts("root1:value23");
+        stmts = doclist.getOps("root1:value23");
         assertThat(stmts).hasSize(2);
     }
 

@@ -40,11 +40,11 @@ public class OpsBlock implements Tagged, Iterable<OpTemplate> {
     public List<OpTemplate> getOps() {
 
         List<OpTemplate> rawOpTemplates = new ArrayList<>();
-        List<RawOpDef> statements = rawOpsBlock.getRawStmtDefs();
+        List<RawOpDef> opDefs = rawOpsBlock.getRawOpDefs();
 
-        for (int i = 0; i < statements.size(); i++) {
+        for (int i = 0; i < opDefs.size(); i++) {
             rawOpTemplates.add(
-                new OpDef(this, statements.get(i))
+                new OpDef(this, opDefs.get(i))
             );
         }
         return rawOpTemplates;
