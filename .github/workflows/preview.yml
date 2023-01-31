@@ -15,7 +15,7 @@ on:
 
 jobs:
   preview-build:
-    runs-on: runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04
     steps:
 
       - name: checkout repo
@@ -196,7 +196,7 @@ jobs:
 
   preview-docs:
     needs: preview-build
-    runs-on: runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04
     steps:
     - name: clone nosqlbench-build-docs
       run: |
