@@ -16,6 +16,9 @@ on:
 jobs:
   preview-build:
     runs-on: ubuntu-20.04
+    outputs:
+      preview_version: ${{ steps.versions.outputs.PREVIEW_VERSION }}
+      docker_tags: ${{ steps.versions.outputs.DOCKER_TAGS }}
     steps:
 
       - name: checkout repo
@@ -51,11 +54,14 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: read versions
+        id: versions
         run: |
           set -x
           PREVIEW_VERSION=$(scripts/get-preview-version.sh)
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_ENV
+          echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_OUTPUT
           echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
 
       - name: build preview revision
         run: |
@@ -198,6 +204,10 @@ jobs:
     needs: preview-build
     runs-on: ubuntu-20.04
     steps:
+    - name: import env vars
+      run: |
+        echo "PREVIEW_VERSION=${{ needs.preview-build.outputs.preview_version }}" >> $GITHUB_ENV
+        echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
     - name: clone nosqlbench-build-docs
       run: |
         git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
