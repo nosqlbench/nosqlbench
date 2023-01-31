@@ -15,7 +15,7 @@ on:
 
 jobs:
   preview-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
 
       - name: checkout repo
@@ -190,6 +190,57 @@ jobs:
           name: test-results
           path: |
             [a-zA-Z]**/logs/*
+
+  preview-docs:
+    # This triggers a preview build by cascading the tag to the builddocs repo.
+    # The builddocs repo then pushes to preview or release depending on the tag.
+    needs: preview-build
+    runs-on: ubuntu-latest
+    steps:
+    - name: clone nosqlbench-build-docs
+#      env:
+#        NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+#        NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+      run: |
+        git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
+        cd nosqlbench-build-docs
+        echo "files listing"
+        find .
+        git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
+        git remote -v
+
+    - name: set CNAME
+      run: |
+        echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+
+    - name: commit changes
+      run: |
+        cd nosqlbench-build-docs
+        git add exported_docs.zip
+
+    - name: tag-preview-build
+      run: |
+        cd nosqlbench-build-docs
+        git tag -f ${{ PREVIEW_VERSION }}
+
+    - name: push changes
+      env:
+        NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+        NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+      run: |
+        set -x
+        cd nosqlbench-build-docs
+        CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+        git push --tags
+#
+#        echo "found $CHANGES to push for doc updates"
+#        if (( $CHANGES > 0 ))
+#        then
+#          git commit -m"docs update for $GITHUB_REF"
+#          git push --tags
+#        fi
+        echo "push completed"
+
 
 #  javadocs:
 #    needs: release

@@ -76,7 +76,7 @@ jobs:
           name: exported-docs
           path: exported_docs.zip
 
-  docs:
+  builddocs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
