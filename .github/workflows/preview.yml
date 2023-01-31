@@ -219,7 +219,7 @@ jobs:
     - name: tag-preview-build
       run: |
         cd nosqlbench-build-docs
-        git tag -f ${{ PREVIEW_VERSION }}
+        git tag -f ${{ env.PREVIEW_VERSION }}
 
     - name: push changes
       env:
