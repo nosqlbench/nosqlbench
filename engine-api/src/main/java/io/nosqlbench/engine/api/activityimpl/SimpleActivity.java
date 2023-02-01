@@ -109,7 +109,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     @Override
-    public void initActivity() {
+    public synchronized void initActivity() {
         initOrUpdateRateLimiters(this.activityDef);
     }
 
@@ -353,7 +353,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      *
      * @param seq - The {@link OpSequence} to derive the defaults from
      */
-    public void setDefaultsFromOpSequence(OpSequence<?> seq) {
+    public synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);

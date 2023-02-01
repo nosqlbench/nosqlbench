@@ -417,7 +417,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
     }
 
-    public void startActivity() {
+    public synchronized void startActivity() {
         // we need an executor service to run motor threads on
         startMotorExecutorService();
         startRunningActivityThreads();
