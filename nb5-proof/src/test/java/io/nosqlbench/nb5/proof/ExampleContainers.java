@@ -23,25 +23,43 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ExampleContainers {
 
+    private final String java = Optional.ofNullable(System.getenv(
+        "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
+
+    private final static String JARNAME = "../nb5/target/nb5.jar";
 //    private static GenericContainer cass= new CassandraContainer("cassandra").withExposedPorts(9042);
 
-    public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:3.0.6"))
+    public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:latest"))
         .withExposedPorts(6379);
     @BeforeAll
     public static void initContainer() {
-      redis.start();
+        redis.start();
+
     }
 
     @BeforeEach
     public void setUp() {
-        System.out.println("foo");
+        System.out.println("setup");
     }
 
     @Test
     public void testSimplePutAndGet() {
-        System.out.println("foo");
+        ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
+        ProcessResult result = invoker.run("test-workloads", 30,
+            "java", "-jar", JARNAME, "--list-workloads"
+        );
+        assertThat(result.exception).isNull();
+        String stdout = String.join("\n", result.getStdoutData());
+        System.out.println(stdout);
+        System.out.println("end");
     }
 
 }
