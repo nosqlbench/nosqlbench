@@ -165,7 +165,11 @@ public class NBCLI implements Function<String[], Integer> {
 
         logger = LogManager.getLogger("NBCLI");
         loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
-        logger.info(() -> "Configured scenario log at " + loggerConfig.getLogfileLocation());
+        if (logger.isInfoEnabled()) {
+            logger.info(() -> "Configured scenario log at " + loggerConfig.getLogfileLocation());
+        } else {
+            System.err.println("Configured scenario log at " + loggerConfig.getLogfileLocation());
+        }
         logger.debug("Scenario log started");
 
         // Global only processing
